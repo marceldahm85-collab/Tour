@@ -1190,7 +1190,7 @@ body.dark .season-grid select {
 
             <div class="form-group">
                 <label>Gehzeit:</label>
-                <input type="text" inputmode="numeric" maxlength="5" id="plan-zeit">
+                <input type="text" inputmode="numeric" maxlength="5" id="plan-zeit" name="plan-zeit">
             </div>
 
             <button type="button" class="save-btn" id="plan-save-btn">Planen</button>
@@ -1300,9 +1300,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-const zeitInput = document.getElementById('zeit', 'plan-zeit');
+const zeitInput = document.getElementById('zeit');
 
 zeitInput.addEventListener('input', (e) => {
+    let v = e.target.value;
+
+    // Alles außer Ziffern entfernen
+    v = v.replace(/\D/g, '');
+
+    // Maximal 4 Ziffern (hhmm)
+    v = v.slice(0, 4);
+
+    // Nach 2 Ziffern automatisch Doppelpunkt einfügen
+    if (v.length >= 3) {
+        v = v.slice(0, 2) + ':' + v.slice(2);
+    }
+
+    e.target.value = v;
+});
+
+const planZeitInput = document.getElementById('plan-zeit');
+
+planZeitInput.addEventListener('input', (e) => {
     let v = e.target.value;
 
     // Alles außer Ziffern entfernen
@@ -2974,4 +2993,5 @@ loadData();
 </script>
 </body>
 </html>
+
 
