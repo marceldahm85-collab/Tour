@@ -1001,13 +1001,13 @@ body.dark .slope-toggle[aria-pressed="true"] {
 .gradient-flag {
     display: inline-block;
     margin-left: 4px;
-    font-size: 0.85em;
-    color: #2e4036;
+    font-size: 1.00em;
+    color: #04bf57;
     vertical-align: middle;
 }
 
 body.dark .gradient-flag {
-    color: #f9d77e;
+    color: #04bf57;
 }
 
 </style>
@@ -1077,10 +1077,10 @@ body.dark .gradient-flag {
             <div class="form-group"><label for="aufstieg">Aufstieg (Hm):</label><input type="number" inputmode="numeric" step="1" min="0" id="aufstieg" name="aufstieg"></div>
 <div class="form-group">
   <label class="slope-toggle-label">
-      <button type="button" id="slope-toggle" class="slope-toggle" aria-pressed="false" title="Steigung mit ganzer Strecke berechnen">
-          ⛰
+      <button type="button" id="slope-toggle" class="slope-toggle" aria-pressed="false" title="Nur Aufstieg">
+          ⛰️
       </button>
-      <span>Steigung mit voller Strecke berechnen</span>
+      <span>Nur Aufstieg</span>
   </label>
 </div>
             <div class="form-group"><label for="ausgangspunkt">Ausgangspunkt:</label><input type="text" id="ausgangspunkt" name="ausgangspunkt"></div>
@@ -3725,4 +3725,5 @@ loadData();
 </script>
 </body>
 </html>
+
 
