@@ -3163,6 +3163,8 @@ function drawPeaksDiagram() {
     const height = peaksCanvas.height - padding - paddingTop;
     const barWidth = width / 12 - 10;
     const maxValue = Math.max(...monthSums, 1);
+    const maxPeakRatio = 0.5; // max. zusätzliche Höhe über Bar
+    const maxBarHeight = height * (1 - maxPeakRatio);
 
     const barColor = document.body.classList.contains('dark') ? '#7a0d0d' : '#f9d77e';
     const textColor = document.body.classList.contains('dark') ? '#d6e1f0' : '#2e4036';
@@ -3170,7 +3172,7 @@ function drawPeaksDiagram() {
     monthSums.forEach((value, i) => {
             const intensity = value / maxValue;
         const x = padding + i * (barWidth + 10);
-        const barHeight = (value / maxValue) * height;
+        const barHeight = (value / maxValue) * maxBarHeight;
         const y = peaksCanvas.height - padding - barHeight;
 
 let gradient = ctx.createLinearGradient(
