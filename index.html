@@ -3385,7 +3385,7 @@ function drawToursDiagram(){
 }
 
 function drawSmartBarLabel(ctx, text, x, y, barWidth, barHeight, textColor, intensity = 0) {
-    const shortBarThreshold = 20;
+    const shortBarThreshold = 10;
 
     ctx.save();
     ctx.fillStyle = textColor;
@@ -3403,7 +3403,7 @@ function drawSmartBarLabel(ctx, text, x, y, barWidth, barHeight, textColor, inte
         const peakRise = peakHeight * (0.5 + steepness);
 
         const labelX = x + barWidth / 2;
-        const labelY = y - peakRise - 1;
+        const labelY = y - peakRise - 0;
 
         ctx.translate(labelX, labelY);
         ctx.rotate(-Math.PI / 2);
