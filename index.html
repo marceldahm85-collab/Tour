@@ -2691,7 +2691,7 @@ function positionViews(activeIndex, animate = true, dragPercent = 0) {
         const view = viewMap[name];
         if (!view) return;
 
-        const viewGapPercent = 4;
+        const viewGapPercent = 16;
         const offset = (index - activeIndex) * (100 + viewGapPercent) + dragPercent;
 
         if (!animate) {
