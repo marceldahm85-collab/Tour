@@ -3385,18 +3385,17 @@ function drawToursDiagram(){
 }
 
 function drawSmartBarLabel(ctx, text, x, y, barWidth, barHeight, textColor, intensity = 0) {
-    const shortBarThreshold = 62;
+    const shortBarThreshold = 52;
 
     ctx.save();
     ctx.fillStyle = textColor;
     ctx.font = '12px Inter, sans-serif';
-    ctx.textAlign = 'center';
 
     if (barHeight < shortBarThreshold) {
         /*
            Kurzer Balken:
-           Der Balken ist eine Bergform und ragt über y hinaus.
-           Deshalb muss das Label über der tatsächlichen Bergspitze stehen.
+           Wert steht oberhalb der Bergspitze,
+           aber ebenfalls hochkant.
         */
 
         const steepness = 0.3 + intensity * 0.7;
@@ -3404,15 +3403,32 @@ function drawSmartBarLabel(ctx, text, x, y, barWidth, barHeight, textColor, inte
         const peakRise = peakHeight * (0.5 + steepness);
 
         const labelX = x + barWidth / 2;
-        const labelY = y - peakRise - 8;
+        const labelY = y - peakRise - 4;
 
-        ctx.textBaseline = 'bottom';
-        ctx.fillText(text, labelX, labelY);
+        ctx.translate(labelX, labelY);
+        ctx.rotate(-Math.PI / 2);
+
+        /*
+           textAlign = 'left':
+           Der Text startet direkt oberhalb des Balkens
+           und läuft nach oben weg.
+        */
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+
+        ctx.fillText(text, 0, 0);
+
     } else {
-        // Langer Balken: Wert hochkant im Balken
+        /*
+           Langer Balken:
+           Wert bleibt hochkant im Balken.
+        */
         ctx.translate(x + barWidth / 2, y + barHeight / 2);
         ctx.rotate(-Math.PI / 2);
+
+        ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
+
         ctx.fillText(text, 0, 0);
     }
 
