@@ -1273,6 +1273,51 @@ body.dark .chart-tooltip {
     color: #000;
 }
 
+/* =========================
+   Mobile: Scrollbar ausblenden,
+   Scrollen aber erlauben
+   ========================= */
+
+html,
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+
+    /* Firefox */
+    scrollbar-width: none;
+
+    /* Internet Explorer / altes Edge */
+    -ms-overflow-style: none;
+}
+
+/* Chrome, Safari, Edge */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+}
+
+/* Falls einzelne Views/Container scrollbar erzeugen */
+.view-container,
+.view,
+#app-view,
+#chart-view,
+#tour-view {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.view-container::-webkit-scrollbar,
+.view::-webkit-scrollbar,
+#app-view::-webkit-scrollbar,
+#chart-view::-webkit-scrollbar,
+#tour-view::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+}
+    
 </style>
 </head>
 <body>
