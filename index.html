@@ -1607,6 +1607,137 @@ body.dark .checklist-item input[type="checkbox"]:checked {
     border-color: #f9d77e;
 }
 
+/* =========================
+   MOBILE POLISH PACK
+   ========================= */
+
+@media (max-width: 768px) {
+
+    .box {
+        border-radius: 20px;
+        background: rgba(255,255,255,0.18);
+        border: 1px solid rgba(255,255,255,0.22);
+        box-shadow: none !important;
+    }
+
+    body.dark .box {
+        background: rgba(18,26,36,0.72);
+        border: 1px solid rgba(255,255,255,0.08);
+        box-shadow: none !important;
+    }
+
+    .box-header {
+        padding: 20px 22px;
+        min-height: 72px;
+        border-radius: 20px;
+        font-size: 15px;
+        letter-spacing: 0.1px;
+    }
+
+    .box.active {
+        border-color: rgba(249,215,126,0.42);
+    }
+
+    body.dark .box.active {
+        border-color: rgba(249,215,126,0.25);
+    }
+
+    .toggle-btn {
+        width: 42px;
+        height: 42px;
+        background: rgba(255,255,255,0.18);
+        border: 1px solid rgba(255,255,255,0.24);
+        box-shadow: none !important;
+        backdrop-filter: blur(10px);
+    }
+
+    body.dark .toggle-btn {
+        background: rgba(255,255,255,0.07);
+        border-color: rgba(255,255,255,0.1);
+        box-shadow: none !important;
+    }
+
+    #overview-table tr,
+    #planned-table tr {
+        padding: 12px;
+        border-radius: 18px;
+        margin-bottom: 14px;
+        background: rgba(255,255,255,0.18);
+        border: 1px solid rgba(255,255,255,0.22);
+        box-shadow: none !important;
+    }
+
+    body.dark #overview-table tr,
+    body.dark #planned-table tr {
+        background: rgba(18,26,36,0.72);
+        border: 1px solid rgba(255,255,255,0.08);
+        box-shadow: none !important;
+    }
+
+    #overview-table td,
+    #planned-table td {
+        background: transparent !important;
+        border: none;
+        padding: 7px 4px;
+    }
+
+    #overview-table td::before,
+    #planned-table td::before {
+        opacity: 0.65;
+        font-size: 12px;
+    }
+
+    #overview-table td[data-label="Tour"],
+    #planned-table td[data-label="Tour"] {
+        font-size: 16px;
+        font-weight: 700;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    #overview-table td[data-label="Strecke"] .value,
+    #overview-table td[data-label="Aufstieg"] .value,
+    #overview-table td[data-label="Zeit"] .value,
+    #planned-table td[data-label="Strecke"] .value,
+    #planned-table td[data-label="Aufstieg"] .value,
+    #planned-table td[data-label="Zeit"] .value {
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.16);
+        font-weight: 700;
+    }
+
+    body.dark #overview-table td[data-label="Strecke"] .value,
+    body.dark #overview-table td[data-label="Aufstieg"] .value,
+    body.dark #overview-table td[data-label="Zeit"] .value,
+    body.dark #planned-table td[data-label="Strecke"] .value,
+    body.dark #planned-table td[data-label="Aufstieg"] .value,
+    body.dark #planned-table td[data-label="Zeit"] .value {
+        background: rgba(255,255,255,0.08);
+    }
+
+    #planned-tours-list .tour-list li,
+    #saved-tours-list .tour-list li {
+        border-radius: 14px;
+        padding: 11px 12px;
+        margin-bottom: 8px;
+        background: rgba(255,255,255,0.16);
+        border: 1px solid rgba(255,255,255,0.18);
+    }
+
+    body.dark #planned-tours-list .tour-list li,
+    body.dark #saved-tours-list .tour-list li {
+        background: rgba(255,255,255,0.055);
+        border-color: rgba(255,255,255,0.08);
+    }
+
+    .box-header:active,
+    .tour-list li:active,
+    .checklist-item:active {
+        transform: scale(0.985);
+    }
+}
+    
 </style>
 </head>
 <body>
