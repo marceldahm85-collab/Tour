@@ -2977,7 +2977,7 @@ function escapeHtmlAttribute(value) {
 // ---------------- Tabelle laden ----------------
 function loadData() {
     const data = getFilteredData();
-    data.sort((a, b) => new Date(a.date) - new Date(b.date));
+
     const tableBody = document.querySelector('#overview-table tbody');
     tableBody.innerHTML = '';
 
