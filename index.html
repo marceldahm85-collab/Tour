@@ -6065,10 +6065,35 @@ function fvReadUIToState() {
 }
 
 function fvReset() {
-  fvState = { ...fvDefault };
-  saveFvState();
-  fvApplyStateToUI();
-  loadData(); // re-render
+    // Hauptfilter zurücksetzen
+    fvState = { ...fvDefault };
+    saveFvState();
+    fvApplyStateToUI();
+
+    // Diagrammfilter zurücksetzen
+    if (typeof diagramFilterState !== 'undefined') {
+        diagramFilterState = {
+            year: 'all',
+            month: 'all',
+            hasPeak: false
+        };
+
+        saveDiagramFilterState();
+        applyDiagramFilterStateToUI();
+    }
+
+    // Tabelle, Statistik, Listen usw. neu laden
+    loadData();
+
+    // DOM-Balken aktualisieren, falls noch verwendet
+    if (typeof updateCharts === 'function') {
+        updateCharts();
+    }
+
+    // Canvas-Diagramme neu zeichnen
+    if (typeof redrawAllCanvases === 'function') {
+        requestAnimationFrame(redrawAllCanvases);
+    }
 }
 
 function fvLoadPresets() {
