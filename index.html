@@ -1948,6 +1948,21 @@ body.dark #fv-count {
     justify-content: center;
 }
 
+    @media (max-width: 768px) {
+    #filter-view .range-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    #filter-view .range-row input {
+        width: 100%;
+        max-width: none;
+        justify-self: center;
+        padding: 9px 10px;
+        font-size: 14px;
+    }
+}
+
 </style>
 </head>
 <body>
