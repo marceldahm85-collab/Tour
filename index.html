@@ -1963,6 +1963,44 @@ body.dark #fv-count {
     }
 }
 
+/* =========================
+   MOBILE: Zeitraum & Saison
+   Von/Bis links, Saison/Jahr rechts
+   ========================= */
+@media (max-width: 768px) {
+    #filter-range-box .stats-filters {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+            "from season"
+            "to   year";
+        gap: 12px;
+        align-items: end;
+    }
+
+    #filter-range-box .stats-filters .form-group:nth-child(1) {
+        grid-area: from;
+    }
+
+    #filter-range-box .stats-filters .form-group:nth-child(2) {
+        grid-area: to;
+    }
+
+    #filter-range-box .stats-filters .form-group:nth-child(3) {
+        grid-area: season;
+    }
+
+    #filter-range-box .stats-filters .form-group:nth-child(4) {
+        grid-area: year;
+    }
+
+    #filter-range-box input,
+    #filter-range-box select {
+        width: 100%;
+        min-width: 0;
+    }
+}    
+
 </style>
 </head>
 <body>
