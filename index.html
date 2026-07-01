@@ -4,7 +4,7 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0b0f14">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Bergtouren Tracker</title>
 <style>
 * { box-sizing:border-box; margin:0; padding:0; }
@@ -2276,6 +2276,28 @@ body.dark .chart-tab:not(.active){
         margin-bottom: 16px;
     }
 }
+
+/* Modal: keine Zoom-/Doppel-Tap-Spielereien */
+.modal,
+.modal-card,
+.modal-header,
+.modal-actions,
+.modal-actions .save-btn,
+#td-close {
+    touch-action: manipulation;
+}
+
+@media (max-width: 768px) {
+    .modal-card {
+        overscroll-behavior: contain;
+    }
+
+    .modal-header {
+        touch-action: none; /* wichtig für Swipe-Down */
+        user-select: none;
+        -webkit-user-select: none;
+    }
+}    
 
 </style>
 </head>
