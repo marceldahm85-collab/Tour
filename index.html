@@ -2346,6 +2346,40 @@ body.dark .chart-tab:not(.active){
     }
 }
 
+button,
+.chart-tab,
+.toggle-btn,
+#theme-toggle,
+.save-btn,
+.edit-btn,
+.delete-btn,
+.load-btn {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+button:focus,
+.chart-tab:focus,
+.toggle-btn:focus,
+#theme-toggle:focus,
+.save-btn:focus,
+.edit-btn:focus,
+.delete-btn:focus,
+.load-btn:focus {
+  outline: none;
+}
+
+button:focus:not(:focus-visible),
+.chart-tab:focus:not(:focus-visible),
+.toggle-btn:focus:not(:focus-visible),
+#theme-toggle:focus:not(:focus-visible),
+.save-btn:focus:not(:focus-visible),
+.edit-btn:focus:not(:focus-visible),
+.delete-btn:focus:not(:focus-visible),
+.load-btn:focus:not(:focus-visible) {
+  box-shadow: none;
+}
+
 </style>
 </head>
 <body>
