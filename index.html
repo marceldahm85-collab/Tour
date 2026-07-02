@@ -4070,7 +4070,7 @@ bodyEl.innerHTML = `
         </div>
 
         <div style="padding:10px 12px; border-radius:12px; background:rgba(255,255,255,0.10);">
-            <strong>Schwierigkeit:</strong> ${escapeHtml(entry.difficulty || '–')}
+            <strong>Art der Tour:</strong> ${escapeHtml(entry.difficulty || '–')}
         </div>
 
         <div style="padding:10px 12px; border-radius:12px; background:rgba(255,255,255,0.10);">
@@ -7347,7 +7347,7 @@ if (fvState.year && fvState.year !== 'all') {
     data = data.filter(e => String(e.region || '') === fvState.region);
   }
 
-  // Schwierigkeit
+  // Art der Tour
   if (fvState.difficulty && fvState.difficulty !== 'all') {
     data = data.filter(e => String(e.difficulty || '') === fvState.difficulty);
   }
@@ -7671,7 +7671,7 @@ function syncFilterDropdownsFromSaveForm() {
     }
 
     if (saveDifficulty && filterDifficulty) {
-        filterDifficulty.innerHTML = '<option value="all">Alle Schwierigkeiten</option>';
+        filterDifficulty.innerHTML = '<option value="all">Alle Touren</option>';
 
         Array.from(saveDifficulty.options).forEach(opt => {
             if (!opt.value) return; // Platzhalter aus dem Formular überspringen
