@@ -9894,9 +9894,9 @@ function runPeriodComparison() {
 
             <div class="compare-row">
                 <div class="compare-label">Gesamtzeit</div>
-                <div>${statsA.totalTimeText}</div>
-                <div>${statsB.totalTimeText}</div>
-                <div>${formatTimeDelta(statsA.totalMinutes, statsB.totalMinutes)}</div>
+                <div>${statsA.totalTimeText} h</div>
+                <div>${statsB.totalTimeText} h</div>
+                <div>${formatTimeDelta(statsA.totalMinutes, statsB.totalMinutes, ' h')}</div>
             </div>
 
             <div class="compare-row">
