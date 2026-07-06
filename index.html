@@ -9754,6 +9754,25 @@ function formatDelta(a, b, decimals = 0, suffix = '') {
     return `<span class="compare-delta ${cls}">${sign}${diff.toFixed(decimals).replace('.', ',')}${suffix}</span>`;
 }
 
+function formatTimeDelta(minutesA, minutesB) {
+    const diff = Math.round(minutesB - minutesA);
+
+    if (diff === 0) {
+        return `<span class="compare-delta neutral">±0:00</span>`;
+    }
+
+    const cls  = diff > 0 ? 'positive' : 'negative';
+    const sign = diff > 0 ? '+' : '-';
+
+    const absDiff = Math.abs(diff);
+    const h = Math.floor(absDiff / 60);
+    const m = absDiff % 60;
+
+    const timeStr = `${h}:${String(m).padStart(2, '0')}`;
+
+    return `<span class="compare-delta ${cls}">${sign}${timeStr}</span>`;
+}    
+
 function renderCompareList(items) {
     if (!items || items.length === 0) {
         return `<div class="compare-chip">Keine Daten</div>`;
@@ -9877,7 +9896,7 @@ function runPeriodComparison() {
                 <div class="compare-label">Gesamtzeit</div>
                 <div>${statsA.totalTimeText}</div>
                 <div>${statsB.totalTimeText}</div>
-                <div>${formatDelta(statsA.totalMinutes, statsB.totalMinutes, 0, ' min')}</div>
+                <div>${formatTimeDelta(statsA.totalMinutes, statsB.totalMinutes)}</div>
             </div>
 
             <div class="compare-row">
