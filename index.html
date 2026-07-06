@@ -5565,24 +5565,34 @@ bodyEl.innerHTML = `
         </div>
 
 ${(() => {
-    const strecke = parseFloat(entry.strecke);
-    const aufstieg = parseFloat(entry.aufstieg);
-    const zeitH = parseZeitToHours(entry.zeit);
+    const strecke = parseFloat(String(entry.strecke || '').replace(',', '.'));
+    const zeitH   = parseZeitToHours(entry.zeit);
+
+    // Exakt dieselbe Logik wie in den Highlights
+    const ascAdj  = getAdjustedAscent(entry);
+    const distAdj = getAdjustedDistance(entry);
+    const timeAdj = getAdjustedTimeHours(entry);
 
     const hasStrecke = strecke > 0;
-    const hasAufstieg = aufstieg > 0;
-    const hasZeit = zeitH && zeitH > 0;
+    const hasZeit    = zeitH && zeitH > 0;
+    const hasAscAdj  = ascAdj > 0;
+    const hasDistAdj = distAdj > 0;
+    const hasTimeAdj = timeAdj > 0;
 
+    // Geschwindigkeit: volle Strecke / volle Zeit
+    // (kürzt sich raus → gleich ob Rundtour oder nicht)
     const geschwindigkeit = (hasStrecke && hasZeit)
         ? (strecke / zeitH).toFixed(1)
         : null;
 
-    const steigung = (hasAufstieg && hasStrecke)
-        ? Math.round(aufstieg / strecke)
+    // Steigung: angepasster Aufstieg / angepasste Strecke
+    const steigung = (hasAscAdj && hasDistAdj)
+        ? Math.round(ascAdj / distAdj)
         : null;
 
-    const aufstiegProH = (hasAufstieg && hasZeit)
-        ? Math.round(aufstieg / zeitH)
+    // Aufstieg/h: angepasster Aufstieg / angepasste Zeit
+    const aufstiegProH = (hasAscAdj && hasTimeAdj)
+        ? Math.round(ascAdj / timeAdj)
         : null;
 
     if (!geschwindigkeit && !steigung && !aufstiegProH) return '';
