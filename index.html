@@ -2091,7 +2091,7 @@ body.dark #fv-count {
     }
 
     .modal:not(.hidden) .modal-card:not(.is-dragging) {
-        animation: modalSlideUp 1.2s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+        animation: modalSlideUp 500ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
     }
 }
 
@@ -7536,8 +7536,13 @@ function attachModalSwipeDown(modal, closeFn) {
     modal.dataset.swipeInit = '1';
 
     let dragging = false, startY = 0, currentY = 0;
-    const CLOSE_THRESHOLD = 110;
-    const MAX_DRAG = 260;
+    const CLOSE_THRESHOLD = 
+        card.offsetHeight * 0.22;
+    if (deltaY > MAX_DRAG) {
+        deltaY =
+            MAX_DRAG +
+            (deltaY - MAX_DRAG) * 0.18;
+    }
 
     function resetSwipeStyles() {
         dragging = false; startY = 0; currentY = 0;
@@ -7554,7 +7559,10 @@ function attachModalSwipeDown(modal, closeFn) {
         currentY = e.clientY;
         card.classList.add('is-dragging');
         card.style.transform = `translateY(${deltaY}px)`;
-        backdrop.style.opacity = String(Math.max(0.08, 0.45 - deltaY / 320));
+
+        const progress = deltaY / MAX_DRAG;
+        
+        backdrop.style.opacity = (0.45 * (1 - progress)).toFixed(2);
     }
 
     function onPointerUp() {
