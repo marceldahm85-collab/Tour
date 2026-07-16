@@ -7558,7 +7558,7 @@ function attachModalSwipeDown(modal, closeFn) {
         if (deltaY > MAX_DRAG) deltaY = MAX_DRAG;
         currentY = e.clientY;
         card.classList.add('is-dragging');
-        card.style.transform = `translateY(${deltaY}px)`;
+        card.style.transform = `translateY(${deltaY * 0.82}px)`;
 
         const progress = deltaY / MAX_DRAG;
         
