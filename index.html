@@ -7536,13 +7536,8 @@ function attachModalSwipeDown(modal, closeFn) {
     modal.dataset.swipeInit = '1';
 
     let dragging = false, startY = 0, currentY = 0;
-    const CLOSE_THRESHOLD = 
-        card.offsetHeight * 0.22;
-    if (deltaY > MAX_DRAG) {
-        deltaY =
-            MAX_DRAG +
-            (deltaY - MAX_DRAG) * 0.18;
-    }
+    const CLOSE_THRESHOLD = 110;
+    const MAX_DRAG = 260;
 
     function resetSwipeStyles() {
         dragging = false; startY = 0; currentY = 0;
@@ -7555,7 +7550,11 @@ function attachModalSwipeDown(modal, closeFn) {
         if (!dragging || window.innerWidth > 768 || modal.classList.contains('hidden')) return;
         let deltaY = e.clientY - startY;
         if (deltaY <= 0) return;
-        if (deltaY > MAX_DRAG) deltaY = MAX_DRAG;
+        if (deltaY > MAX_DRAG) {
+            deltaY =
+                MAX_DRAG +
+                (deltaY - MAX_DRAG) * 0.18;
+        }
         currentY = e.clientY;
         card.classList.add('is-dragging');
         card.style.transform = `translateY(${deltaY * 0.82}px)`;
