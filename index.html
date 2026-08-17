@@ -6677,6 +6677,45 @@ body.green .yc-metric-arrow-btn:hover {
     }
 }
 
+.tour-multiday-toggle .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.tour-form-row-multiday {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+.tour-form-row-multiday .form-group {
+    flex: 1 1 140px;
+}
+.tour-form-row-multiday .form-group-small {
+    flex: 0 1 80px;
+}
+.tour-group-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.12);
+    margin-left: 6px;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+body:not(.dark):not(.green) .tour-group-badge {
+    background: rgba(0,0,0,0.08);
+}
+.tour-group-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
 </style>
 </head>
 <body>
@@ -6794,6 +6833,22 @@ body.green .yc-metric-arrow-btn:hover {
         </select>
     </div>
 </div>
+
+            <div class="tour-form-row-multiday" id="multiday-fields" style="display:none;">
+                <div class="form-group">
+                    <label for="tour-group">Tourgruppe:</label>
+                    <input type="text" id="tour-group" list="tour-group-suggestions" placeholder="z.B. Osttirol 360">
+                    <datalist id="tour-group-suggestions"></datalist>
+                </div>
+                <div class="form-group form-group-small">
+                    <label for="tour-day">Etappe:</label>
+                    <input type="number" id="tour-day" inputmode="numeric" min="1" step="1">
+                </div>
+                <div class="form-group form-group-small">
+                    <label for="tour-day-count">von:</label>
+                    <input type="number" id="tour-day-count" inputmode="numeric" min="1" step="1">
+                </div>
+            </div>
 
             <div class="form-group">
                 <label for="gipfel">Gipfel:</label>
@@ -7172,6 +7227,23 @@ body.green .yc-metric-arrow-btn:hover {
                 <option value="Hike & Climb">Hike & Climb</option>
                 <option value="mehrtägig">mehrtägig</option>
             </select>
+        </div>
+    </div>
+
+
+    <div class="tour-form-row-multiday" id="plan-multiday-fields" style="display:none;">
+        <div class="form-group">
+            <label for="plan-tour-group">Tourgruppe:</label>
+            <input type="text" id="plan-tour-group" list="plan-tour-group-suggestions" placeholder="z.B. Osttirol 360">
+            <datalist id="plan-tour-group-suggestions"></datalist>
+        </div>
+        <div class="form-group form-group-small">
+            <label for="plan-tour-day">Etappe:</label>
+            <input type="number" id="plan-tour-day" inputmode="numeric" min="1" step="1">
+        </div>
+        <div class="form-group form-group-small">
+            <label for="plan-tour-day-count">von:</label>
+            <input type="number" id="plan-tour-day-count" inputmode="numeric" min="1" step="1">
         </div>
     </div>
 
@@ -9060,6 +9132,21 @@ gipfelSelect.addEventListener('change', ()=>{
     requestAnimationFrame(() => updateBoxHeight(box));
 });
 
+document.getElementById('difficulty')?.addEventListener('change', (e) => {
+    const fields = document.getElementById('multiday-fields');
+    const isMultiday = e.target.value.toLowerCase() === 'mehrtägig';
+    if (fields) fields.style.display = isMultiday ? 'flex' : 'none';
+    const saveBox = form.closest('.box');
+    requestAnimationFrame(() => updateBoxHeight(saveBox));
+});
+
+document.getElementById('plan-difficulty')?.addEventListener('change', (e) => {
+    const fields = document.getElementById('plan-multiday-fields');
+    const isMultiday = e.target.value.toLowerCase() === 'mehrtägig';
+    if (fields) fields.style.display = isMultiday ? 'flex' : 'none';
+    requestAnimationFrame(() => updateBoxHeight(planBox));
+});
+
 //-------------Hilfsfunktion Gipfelhöhe--------------
 
 function parsePeakHeight(value) {
@@ -9119,6 +9206,9 @@ function normalizeSavedTourForCompare(entry) {
         zeit: String(entry.zeit || ''),
         imageData: String(entry.imageData || ''),
         useFullDistanceForGradient: Boolean(entry.useFullDistanceForGradient),
+        tourGroup: String(entry.tourGroup || ''),
+        tourDay: String(entry.tourDay || ''),
+        tourDayCount: String(entry.tourDayCount || ''),
         gipfelDetails: (entry.gipfelDetails || []).map(g => ({
             name: String(g.name || ''),
             hoehe: String(g.hoehe || '')
@@ -9250,6 +9340,13 @@ function fillSaveFormFromEntry(entry) {
     regionEl.value = entry.region || '';
     difficultyEl.value = entry.difficulty || '';
     notesEl.value = entry.notes || '';
+
+    const isMultidayEntry = String(entry.difficulty || '').toLowerCase() === 'mehrtägig';
+    const multidayFieldsEl = document.getElementById('multiday-fields');
+    if (multidayFieldsEl) multidayFieldsEl.style.display = isMultidayEntry ? 'flex' : 'none';
+    document.getElementById('tour-group').value = entry.tourGroup || '';
+    document.getElementById('tour-day').value = entry.tourDay || '';
+    document.getElementById('tour-day-count').value = entry.tourDayCount || '';
 
     pendingTourImageData = entry.imageData || '';
     updateTourImagePreview(pendingTourImageData);
@@ -9386,6 +9483,13 @@ bodyEl.innerHTML = `
                 <div class="modal-detail-value">${escapeHtml(getEffectiveDifficulty(entry) || '–')}</div>
             </div>
         </div>
+
+        ${entry.tourGroup ? `
+        <div class="modal-detail-item tour-group-info">
+            <strong>🔗 Mehrtägige Tour:</strong> ${escapeHtml(entry.tourGroup)} · Etappe ${entry.tourDay || '?'}/${entry.tourDayCount || '?'}
+            <button type="button" class="save-btn" id="td-view-group" style="margin-top:8px;padding:6px 12px;font-size:13px;">Alle Etappen anzeigen</button>
+        </div>
+        ` : ''}
 
         <div class="tour-stats-row">
             <div class="tour-stat-item">
@@ -9567,6 +9671,13 @@ function openPlannedTourDetail(entry) {
                     <div class="modal-detail-value">${escapeHtml(getEffectiveDifficulty(entry) || '–')}</div>
                 </div>
             </div>
+
+            ${entry.tourGroup ? `
+            <div class="modal-detail-item tour-group-info">
+                <strong>🔗 Mehrtägige Tour:</strong> ${escapeHtml(entry.tourGroup)} · Etappe ${entry.tourDay || '?'}/${entry.tourDayCount || '?'}
+                <button type="button" class="save-btn" id="td-view-group" style="margin-top:8px;padding:6px 12px;font-size:13px;">Alle Etappen anzeigen</button>
+            </div>
+            ` : ''}
 
         </div>
 
@@ -9975,9 +10086,15 @@ function initTourDetailModal() {
 
     bodyEl?.addEventListener('click', (e) => {
         const img = e.target.closest('.tour-detail-image');
-        if (!img) return;
+        if (img) {
+            openImageLightbox(img.currentSrc || img.src, img.alt || 'Tourbild');
+            return;
+        }
 
-        openImageLightbox(img.currentSrc || img.src, img.alt || 'Tourbild');
+        const groupBtn = e.target.closest('#td-view-group');
+        if (groupBtn && currentDetailEntry?.tourGroup) {
+            openTourGroupModal(currentDetailEntry.tourGroup, currentDetailType);
+        }
     });
 
     editBtn?.addEventListener('click', () => {
@@ -10118,7 +10235,8 @@ function loadData() {
     mobileTourPage = 1;
     mobilePeakPage = 1;
     const data = getFilteredData();
-    const visible = data.slice(0, tablePage * PAGE_SIZE);
+    const displayData = sortEntries(groupEntriesForDisplay(data, 'saved'));
+    const visible = displayData.slice(0, tablePage * PAGE_SIZE);
     const mobile = isMobileLayout();
 
     const tableBody = document.querySelector('#overview-table tbody');
@@ -10131,6 +10249,7 @@ function loadData() {
     if (!mobile && tableBody) {
         visible.forEach((entry, index) => {
             const row = document.createElement('tr');
+            const isGroup = !!entry._isMultidaySummary;
 
             const key = [
                 entry.date,
@@ -10141,11 +10260,12 @@ function loadData() {
             ].join('|');
 
             row.dataset.key = key;
+            if (isGroup) row.classList.add('is-multiday-row');
 
             row.innerHTML = `
                 <td data-label="Nr."><span class="value">${index + 1}</span></td>
                 <td data-label="Datum"><span class="value">${entry.date}</span></td>
-                <td data-label="Tour"><span class="value">${entry.tourname}</span></td>
+                <td data-label="Tour"><span class="value">${entry.tourname}${multidaySummaryBadge(entry)}</span></td>
                 <td data-label="Gipfel" class="gipfel-count" style="cursor:pointer; font-weight:600;"><span class="value">${entry.gipfel}</span></td>
                 <td data-label="Strecke">
                     ${entry.useFullDistanceForGradient ? '<span class="gradient-flag" title="Steigung mit voller Strecke berechnet">↗</span>' : ''}
@@ -10155,8 +10275,10 @@ function loadData() {
                 <td data-label="Startpunkt"><span class="value">${entry.ausgangspunkt}</span></td>
                 <td data-label="Zeit"><span class="value">${entry.zeit}</span></td>
                 <td data-label="Aktion">
+                    ${isGroup ? '' : `
                     <button class="edit-btn" title="Tour bearbeiten">✎</button>
                     <button class="delete-btn" title="Tour löschen">✕</button>
+                    `}
                 </td>
             `;
 
@@ -10183,88 +10305,94 @@ function loadData() {
                 });
             }
 
-            // Klick auf Zeile -> Tour-Detail öffnen
+            // Klick auf Zeile -> Tour-Detail öffnen (oder Etappen-Modal bei Mehrtagestour)
             row.addEventListener('click', (e) => {
                 if (e.target.closest('button')) return;
                 if (e.target.closest('.gipfel-count')) return;
-                openTourDetail(entry);
-            });
-
-            // Edit-Button
-            row.querySelector('.edit-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
-
-                const entryToEdit = JSON.parse(JSON.stringify(entry));
-
-                fillSaveFormFromEntry(entryToEdit);
-                removeSavedTourFromStorage(entryToEdit);
-
-                tablePage = 1;
-                loadData();
-
-                if (typeof goToView === 'function') {
-                    goToView('app', true);
+                if (isGroup) {
+                    openTourGroupModal(entry._tourGroupName, 'saved');
                 } else {
-                    appView.classList.add('visible');
-                    chartView.classList.remove('visible');
-                    tourView.classList.remove('visible');
-                    currentView = 'app';
+                    openTourDetail(entry);
                 }
-
-                const saveBox = form.closest('.box');
-
-                openBoxIfNeeded(saveBox, () => {
-                    form.tourname.focus();
-
-                    saveBox.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                });
             });
 
-            // Delete-Button
-            row.querySelector('.delete-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
+            if (!isGroup) {
+                // Edit-Button
+                row.querySelector('.edit-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
 
-                const allData = appStorage.get('touren') || [];
-                const key = row.dataset.key;
+                    const entryToEdit = JSON.parse(JSON.stringify(entry));
 
-                const originalIndex = allData.findIndex(e => {
-                    const entryKey = [
-                        e.date,
-                        e.tourname,
-                        e.strecke,
-                        e.aufstieg,
-                        e.zeit
-                    ].join('|');
-                    return entryKey === key;
-                });
+                    fillSaveFormFromEntry(entryToEdit);
+                    removeSavedTourFromStorage(entryToEdit);
 
-                if (originalIndex > -1) {
-                    const deletedEntry = JSON.parse(JSON.stringify(allData[originalIndex]));
-                    const deletedIndex  = originalIndex;
-
-                    allData.splice(originalIndex, 1);
-                    appStorage.set('touren', allData);
                     tablePage = 1;
                     loadData();
 
-                    showToast(`„${deletedEntry.tourname || 'Tour'}" gelöscht`, {
-                        type: 'undo',
-                        duration: 5000,
-                        undoCallback: () => {
-                            const current = appStorage.get('touren') || [];
-                            current.splice(deletedIndex, 0, deletedEntry);
-                            appStorage.set('touren', current);
-                            loadData();
-                            showToast('Tour wiederhergestellt.', { type: 'success', duration: 2000 });
-                        }
+                    if (typeof goToView === 'function') {
+                        goToView('app', true);
+                    } else {
+                        appView.classList.add('visible');
+                        chartView.classList.remove('visible');
+                        tourView.classList.remove('visible');
+                        currentView = 'app';
+                    }
+
+                    const saveBox = form.closest('.box');
+
+                    openBoxIfNeeded(saveBox, () => {
+                        form.tourname.focus();
+
+                        saveBox.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    });
+                });
+
+                // Delete-Button
+                row.querySelector('.delete-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+
+                    const allData = appStorage.get('touren') || [];
+                    const key = row.dataset.key;
+
+                    const originalIndex = allData.findIndex(e => {
+                        const entryKey = [
+                            e.date,
+                            e.tourname,
+                            e.strecke,
+                            e.aufstieg,
+                            e.zeit
+                        ].join('|');
+                        return entryKey === key;
                     });
 
-                    autoSaveDataFileIfLinked();
-                }
-            });
+                    if (originalIndex > -1) {
+                        const deletedEntry = JSON.parse(JSON.stringify(allData[originalIndex]));
+                        const deletedIndex  = originalIndex;
+
+                        allData.splice(originalIndex, 1);
+                        appStorage.set('touren', allData);
+                        tablePage = 1;
+                        loadData();
+
+                        showToast(`„${deletedEntry.tourname || 'Tour'}" gelöscht`, {
+                            type: 'undo',
+                            duration: 5000,
+                            undoCallback: () => {
+                                const current = appStorage.get('touren') || [];
+                                current.splice(deletedIndex, 0, deletedEntry);
+                                appStorage.set('touren', current);
+                                loadData();
+                                showToast('Tour wiederhergestellt.', { type: 'success', duration: 2000 });
+                            }
+                        });
+
+                        autoSaveDataFileIfLinked();
+                    }
+                });
+            }
         });
     }
 
@@ -10311,7 +10439,7 @@ if (typeof populateCompareOptions === 'function') {
     populateCompareOptions();
 }
 
-    updateLoadMoreButtons(data.length);
+    updateLoadMoreButtons(displayData.length);
     renderDashboard();
 }
 
@@ -10326,7 +10454,7 @@ function syncMobileTourListFromTable() {
 
     list.innerHTML = '';
 
-    const allTours = getFilteredData();
+    const allTours = sortEntries(groupEntriesForDisplay(getFilteredData(), 'saved'));
     const totalPages = Math.max(1, Math.ceil(allTours.length / PAGE_SIZE));
 
     // Seite eingrenzen
@@ -10347,11 +10475,17 @@ function syncMobileTourListFromTable() {
                 <span class="tour-date">${entry.date || '–'}</span>
                 <span class="tour-name">
                     ${entry.tourname || 'Unbekannt'}
-                    ${entry.useFullDistanceForGradient ? '<span class="gradient-flag" title="Steigung mit voller Strecke berechnet">↗</span>' : ''}
+                    ${entry.useFullDistanceForGradient ? '<span class="gradient-flag" title="Steigung mit voller Strecke berechnet">↗</span>' : ''}${multidaySummaryBadge(entry)}
                 </span>
             `;
 
-            li.addEventListener('click', () => openTourDetail(entry));
+            li.addEventListener('click', () => {
+                if (entry._isMultidaySummary) {
+                    openTourGroupModal(entry._tourGroupName, 'saved');
+                } else {
+                    openTourDetail(entry);
+                }
+            });
             list.appendChild(li);
         });
     }
@@ -10462,12 +10596,267 @@ function migrateLegacyDifficultyValues() {
     }
 }
 
+// ── Mehrtägige Touren: Gruppen-Helfer ───────────────────────────────────────
+
+function isBigTour(entry) {
+    if (entry.tourGroup) {
+        const combined = [
+            ...(appStorage.get('touren') || []),
+            ...(appStorage.get('plannedTours') || [])
+        ];
+        let dist = 0, asc = 0;
+        combined
+            .filter(e => String(e.tourGroup || '') === entry.tourGroup)
+            .forEach(e => {
+                dist += parseFloat(String(e.strecke  || '').replace(',', '.')) || 0;
+                asc  += parseFloat(String(e.aufstieg || '').replace(',', '.')) || 0;
+            });
+        return dist >= 10 && asc >= 1000;
+    }
+    const dist = parseFloat(String(entry.strecke  || '').replace(',', '.')) || 0;
+    const asc  = parseFloat(String(entry.aufstieg || '').replace(',', '.')) || 0;
+    return dist >= 10 && asc >= 1000;
+}
+
+function isFirstEtappeInList(entry, list) {
+    if (!entry.tourGroup) return true;
+    let minDate = null;
+    list.forEach(e => {
+        if (e.tourGroup !== entry.tourGroup || !e.date) return;
+        const t = new Date(e.date).getTime();
+        if (!isNaN(t) && (minDate === null || t < minDate)) minDate = t;
+    });
+    if (minDate === null) return true;
+    const thisDate = new Date(entry.date).getTime();
+    return thisDate === minDate;
+}
+
+function isBigTourCountable(entry, list) {
+    return isBigTour(entry) && isFirstEtappeInList(entry, list);
+}
+
+function countDistinctTours(entries) {
+    const seenGroups = new Set();
+    let count = 0;
+    entries.forEach(e => {
+        if (e.tourGroup) {
+            if (seenGroups.has(e.tourGroup)) return;
+            seenGroups.add(e.tourGroup);
+        }
+        count++;
+    });
+    return count;
+}
+
+function tourGroupBadge(entry) {
+    if (!entry.tourGroup) return '';
+    const day = entry.tourDay || '?';
+    const count = entry.tourDayCount || '?';
+    return ` <span class="tour-group-badge" title="${escapeHtmlAttribute(entry.tourGroup)}">🔗 ${day}/${count}</span>`;
+}
+
+function getTourGroupStages(groupName, sourceList) {
+    return sourceList.filter(e => String(e.tourGroup || '') === groupName);
+}
+
+function buildMultidaySummaryEntry(groupName, stages) {
+    const sorted = [...stages].sort((a, b) => (parseInt(a.tourDay) || 0) - (parseInt(b.tourDay) || 0));
+    const firstStage = sorted[0] || {};
+
+    let sumDist = 0, sumAsc = 0, sumMin = 0, sumPeaks = 0;
+    let allGipfelDetails = [];
+
+    stages.forEach(e => {
+        sumDist  += parseFloat(String(e.strecke  || '').replace(',', '.')) || 0;
+        sumAsc   += parseFloat(String(e.aufstieg || '').replace(',', '.')) || 0;
+        sumPeaks += parseInt(e.gipfel) || 0;
+        if (e.zeit && e.zeit.includes(':')) {
+            const [h, m] = e.zeit.split(':').map(Number);
+            if (!isNaN(h) && !isNaN(m)) sumMin += h * 60 + m;
+        }
+        if (e.gipfelDetails) allGipfelDetails = allGipfelDetails.concat(e.gipfelDetails);
+    });
+
+    const sumH = Math.floor(sumMin / 60);
+    const sumM = Math.round(sumMin % 60);
+
+    return {
+        ...firstStage,
+        date: firstStage.date,
+        tourname: groupName,
+        strecke: sumDist ? sumDist.toFixed(1).replace('.', ',') : '',
+        aufstieg: sumAsc ? String(Math.round(sumAsc)) : '',
+        zeit: sumMin ? `${sumH}:${String(sumM).padStart(2, '0')}` : '',
+        gipfel: sumPeaks,
+        gipfelDetails: allGipfelDetails,
+        _isMultidaySummary: true,
+        _tourGroupName: groupName,
+        _stageCount: stages.length
+    };
+}
+
+function groupEntriesForDisplay(entries, sourceType = 'saved') {
+    const fullList = sourceType === 'planned'
+        ? (appStorage.get('plannedTours') || [])
+        : (appStorage.get('touren') || []);
+
+    const seen = new Set();
+    const result = [];
+
+    entries.forEach(entry => {
+        if (entry.tourGroup) {
+            if (seen.has(entry.tourGroup)) return;
+            seen.add(entry.tourGroup);
+
+            const stages = getTourGroupStages(entry.tourGroup, fullList);
+            result.push(buildMultidaySummaryEntry(entry.tourGroup, stages.length ? stages : [entry]));
+        } else {
+            result.push(entry);
+        }
+    });
+
+    return result;
+}
+
+function multidaySummaryBadge(entry) {
+    if (!entry._isMultidaySummary) return '';
+    return ` <span class="tour-group-badge" title="${escapeHtmlAttribute(entry._tourGroupName)}">🔗 ${entry._stageCount} Etappen</span>`;
+}
+
+function populateTourGroupSuggestions() {
+    const allEntries = [
+        ...(appStorage.get('touren') || []),
+        ...(appStorage.get('plannedTours') || [])
+    ];
+    const groups = new Set();
+    allEntries.forEach(e => {
+        if (e.tourGroup) groups.add(e.tourGroup);
+    });
+    const sorted = Array.from(groups).sort((a, b) => a.localeCompare(b, 'de'));
+
+    ['tour-group-suggestions', 'plan-tour-group-suggestions'].forEach(id => {
+        const dl = document.getElementById(id);
+        if (!dl) return;
+        dl.innerHTML = sorted.map(g => `<option value="${escapeHtmlAttribute(g)}"></option>`).join('');
+    });
+}
+
+function formatStageValueForType(e, type) {
+    switch (type) {
+        case 'aufstieg':
+            return e.aufstieg ? e.aufstieg + ' hm' : '–';
+        case 'gehzeit':
+            return e.zeit ? e.zeit + ' h' : '–';
+        case 'speed': {
+            const d = parseFloat(String(e.strecke || '').replace(',', '.')) || 0;
+            if (!e.zeit || !e.zeit.includes(':')) return '–';
+            const [h, m] = e.zeit.split(':').map(Number);
+            const t = (h * 60 + m) / 60;
+            return t > 0 ? (d / t).toFixed(1).replace('.', ',') + ' km/h' : '–';
+        }
+        case 'steigung': {
+            const asc  = getAdjustedAscent(e);
+            const dist = getAdjustedDistance(e);
+            return asc > 0 && dist > 0 ? Math.round(asc / dist) + ' hm/km' : '–';
+        }
+        case 'anstieg': {
+            const asc  = getAdjustedAscent(e);
+            const time = getAdjustedTimeHours(e);
+            return asc > 0 && time > 0 ? Math.round(asc / time) + ' hm/h' : '–';
+        }
+        case 'gipfel':
+            return (e.gipfelDetails?.length || parseInt(e.gipfel) || 0) + ' Gipfel';
+        default:
+            return e.strecke ? e.strecke + ' km' : '–';
+    }
+}
+
+function openTourGroupModal(groupName, sourceType = 'saved', valueType = 'strecke') {
+    if (!groupName) return;
+    const sourceKey = sourceType === 'planned' ? 'plannedTours' : 'touren';
+    const allEntries = appStorage.get(sourceKey) || [];
+    const etappen = allEntries
+        .filter(e => String(e.tourGroup || '') === groupName)
+        .sort((a, b) => (parseInt(a.tourDay) || 0) - (parseInt(b.tourDay) || 0));
+
+    const tlTitle = document.getElementById('tl-title');
+    const tlBody  = document.getElementById('tl-body');
+    if (!tlTitle || !tlBody) return;
+
+    let sumDist = 0, sumAsc = 0, sumMin = 0, sumPeaks = 0;
+    etappen.forEach(e => {
+        sumDist  += parseFloat(String(e.strecke  || '').replace(',', '.')) || 0;
+        sumAsc   += parseFloat(String(e.aufstieg || '').replace(',', '.')) || 0;
+        sumPeaks += parseInt(e.gipfel) || 0;
+        if (e.zeit && e.zeit.includes(':')) {
+            const [h, m] = e.zeit.split(':').map(Number);
+            if (!isNaN(h) && !isNaN(m)) sumMin += h * 60 + m;
+        }
+    });
+    const sumH = Math.floor(sumMin / 60);
+    const sumM = Math.round(sumMin % 60);
+
+    tlTitle.textContent = `🔗 ${groupName}`;
+
+    const summaryHtml = `
+        <div class="tour-stats-row" style="margin-bottom:14px;">
+            <div class="tour-stat-item">
+                <span class="tour-stat-label">Gesamtstrecke</span>
+                <span class="tour-stat-value">${sumDist.toFixed(1).replace('.', ',')} km</span>
+            </div>
+            <div class="tour-stat-item">
+                <span class="tour-stat-label">Gesamtaufstieg</span>
+                <span class="tour-stat-value">${Math.round(sumAsc)} hm</span>
+            </div>
+            <div class="tour-stat-item">
+                <span class="tour-stat-label">Gesamtzeit</span>
+                <span class="tour-stat-value">${sumH}:${String(sumM).padStart(2, '0')}</span>
+            </div>
+            <div class="tour-stat-item">
+                <span class="tour-stat-label">Gipfel</span>
+                <span class="tour-stat-value">${sumPeaks}</span>
+            </div>
+        </div>
+    `;
+
+    const listHtml = etappen.length === 0
+        ? '<ul class="stats-list"><li><span class="stats-label">Keine Etappen gefunden</span></li></ul>'
+        : `<ul class="stats-list">${etappen.map((e, i) => `
+            <li class="highlight-clickable" data-etappe-idx="${i}">
+                <span class="stats-label">Etappe ${e.tourDay || (i + 1)} · ${escapeHtml(e.tourname || 'Unbekannt')}${sourceType === 'saved' ? ' · ' + (e.date || '–') : ''}</span>
+                <span class="stats-value">${formatStageValueForType(e, valueType)}</span>
+            </li>`).join('')}</ul>`;
+
+    tlBody.innerHTML = summaryHtml + listHtml;
+
+    tlBody.querySelectorAll('[data-etappe-idx]').forEach(el => {
+        const idx = parseInt(el.dataset.etappeIdx);
+        const entry = etappen[idx];
+        if (!entry) return;
+        el.addEventListener('click', () => {
+            closeTourListModal();
+            if (sourceType === 'planned') {
+                openPlannedTourDetail(entry);
+            } else {
+                openTourDetail(entry);
+            }
+        });
+    });
+
+    const tourListModal = document.getElementById('tour-list-modal');
+    if (tourListModal) {
+        attachModalSwipeDown(tourListModal, closeTourListModal);
+        tourListModal.classList.remove('hidden');
+        document.body.classList.add('modal-open');
+    }
+}
+
 function computeTourDifficulty(entry) {
     const distRaw = parseFloat(String(entry.strecke  || '').replace(',', '.')) || 0;
     const ascRaw  = parseFloat(String(entry.aufstieg || '').replace(',', '.')) || 0;
 
-    // Big Tour → immer schwer
-    if (distRaw >= 10 && ascRaw >= 1000) {
+    // Big Tour → immer schwer (bei Mehrtages-Touren: Summe der ganzen Tour)
+    if (isBigTour(entry)) {
         return 'schwer';
     }
 
@@ -10534,7 +10923,7 @@ function updateStats(){
         totalDistance += dist;
         totalAscent += asc;
 
-        if (dist >= 10 && asc >= 1000) bigTours++;
+        if (isBigTourCountable(entry, data)) bigTours++;
 
         if (entry.zeit && entry.zeit.includes(':')) {
             const [h, m] = entry.zeit.split(':').map(Number);
@@ -10603,7 +10992,7 @@ const avgAscentPerHour = ascentRateWeight > 0 ? ascentRateSum / ascentRateWeight
 
     const totalBigToursEl = document.getElementById('total-big-tours');
 
-    animateValue(totalToursEl, parseInt(totalToursEl.textContent)||0, data.length);
+    animateValue(totalToursEl, parseInt(totalToursEl.textContent)||0, countDistinctTours(data));
     if (totalBigToursEl) animateValue(totalBigToursEl, parseInt(totalBigToursEl.textContent)||0, bigTours);
     animateValue(totalPeaksEl, parseInt(totalPeaksEl.textContent)||0, totalPeaks);
     animateValue(peaks2000El, parseInt(peaks2000El.textContent) || 0, peaks2000);
@@ -10750,6 +11139,40 @@ function openTopListModal(title, items, formatFn, labelFn) {
         el.addEventListener('click', () => {
             closeTourListModal();
             openTourDetail(item.entry);
+        });
+    });
+
+    const tourListModal = document.getElementById('tour-list-modal');
+    if (tourListModal) {
+        attachModalSwipeDown(tourListModal, closeTourListModal);
+        tourListModal.classList.remove('hidden');
+        document.body.classList.add('modal-open');
+    }
+}
+
+function openMultidayTopListModal(groups) {
+    const tlTitle = document.getElementById('tl-title');
+    const tlBody  = document.getElementById('tl-body');
+    if (!tlTitle || !tlBody) return;
+
+    const top10 = [...groups].sort((a, b) => b.totalDist - a.totalDist).slice(0, 10);
+
+    tlTitle.textContent = '🏔️ Top 10 – Längste Mehrtagestouren';
+    tlBody.innerHTML = top10.length === 0
+        ? '<ul class="stats-list"><li><span class="stats-label">Keine Daten</span></li></ul>'
+        : `<ul class="stats-list">${top10.map((g, i) => `
+            <li class="highlight-clickable" data-mtop-idx="${i}">
+                <span class="stats-label">${i + 1}. ${escapeHtml(g.name)} · ${g.stageCount} Etappen</span>
+                <span class="stats-value">${g.totalDist.toFixed(1).replace('.', ',')} km</span>
+            </li>`).join('')}</ul>`;
+
+    tlBody.querySelectorAll('[data-mtop-idx]').forEach(el => {
+        const idx = parseInt(el.dataset.mtopIdx);
+        const g = top10[idx];
+        if (!g) return;
+        el.addEventListener('click', () => {
+            closeTourListModal();
+            openTourGroupModal(g.name, 'saved');
         });
     });
 
@@ -11133,11 +11556,7 @@ function getMapFilteredTours() {
     }
 
     if (mapQuickFilters.has('bigTours')) {
-        data = data.filter(e => {
-            const dist = parseFloat(String(e.strecke  || '').replace(',', '.')) || 0;
-            const asc  = parseFloat(String(e.aufstieg || '').replace(',', '.')) || 0;
-            return dist >= 10 && asc >= 1000;
-        });
+        data = data.filter(e => isBigTourCountable(e, data));
     }
 
     return data;
@@ -11872,6 +12291,21 @@ function updateHighlights() {
         return `${h}:${String(m).padStart(2, '0')} Std.`;
     };
 
+    const multidayGroups = {};
+    data.forEach(entry => {
+        if (!entry.tourGroup) return;
+        if (!multidayGroups[entry.tourGroup]) {
+            multidayGroups[entry.tourGroup] = { name: entry.tourGroup, totalDist: 0, stageCount: 0 };
+        }
+        const dist = entry.strecke ? parseFloat(String(entry.strecke).replace(',', '.')) : 0;
+        if (!isNaN(dist)) multidayGroups[entry.tourGroup].totalDist += dist;
+        multidayGroups[entry.tourGroup].stageCount++;
+    });
+    const multidayGroupList = Object.values(multidayGroups);
+    const longestMultiday = multidayGroupList.length > 0
+        ? multidayGroupList.reduce((max, g) => (g.totalDist > max.totalDist ? g : max))
+        : null;
+
     const highlights = [
         {
             label: 'Längste Strecke',
@@ -11963,6 +12397,14 @@ function updateHighlights() {
                 v => `${v.toFixed(0)} Hm/h`,
                 defaultLabel
             ) : null
+        },
+        {
+            label: 'Längste Mehrtagestour',
+            value: longestMultiday
+                ? `${longestMultiday.name} – ${longestMultiday.totalDist.toFixed(1).replace('.', ',')} km`
+                : msg,
+            entry: null,
+            onClick: multidayGroupList.length > 0 ? () => openMultidayTopListModal(multidayGroupList) : null
         },
         {
             label: 'Häufigste Region',
@@ -12123,7 +12565,13 @@ saveBtn.addEventListener('click', ()=>{
     const difficulty = difficultyEl?.value || '';
     const notes = notesEl?.value.trim() || '';
 
+    const isMultiday = difficulty.toLowerCase() === 'mehrtägig';
+    const tourGroupVal = document.getElementById('tour-group')?.value.trim() || '';
+    const tourDayVal = document.getElementById('tour-day')?.value.trim() || '';
+    const tourDayCountVal = document.getElementById('tour-day-count')?.value.trim() || '';
+
     if(!datum){ showToast('Bitte ein Datum auswählen.', { type: 'error' }); return; }
+    if(isMultiday && !tourGroupVal){ showToast('Bitte einen Namen für die Tourgruppe angeben.', { type: 'error' }); return; }
 
     const numberRegex = /^\d+([.,]\d+)?$/;
     if(strecke && !numberRegex.test(strecke)){ showToast('Strecke: Bitte eine Zahl eingeben (z.B. 12,5).', { type: 'error' }); return; }
@@ -12174,7 +12622,10 @@ const entry = {
         name: g.name || '',
         hoehe: parseInt(String(g.hoehe).replace(/[^\d]/g, '')) || 0
     })),
-    useFullDistanceForGradient
+    useFullDistanceForGradient,
+    tourGroup: isMultiday ? tourGroupVal : '',
+    tourDay: isMultiday && tourDayVal ? parseInt(tourDayVal) : null,
+    tourDayCount: isMultiday && tourDayCountVal ? parseInt(tourDayCountVal) : null
 };
 
     const data = appStorage.get('touren') || [];
@@ -12218,6 +12669,8 @@ const entry = {
     form.reset();
     gipfelDetailsContainer.style.display='none';
     resetPendingTourImage();
+    document.getElementById('multiday-fields')?.style.setProperty('display', 'none');
+    populateTourGroupSuggestions();
 
     // Mobile Custom Selects sync nach reset()
     form.querySelectorAll('select').forEach(sel => {
@@ -13405,11 +13858,7 @@ function updateChartStatTiles() {
     const data = getDiagramFilteredTours();
     const count = data.length;
 
-    const bigTours = data.filter(e => {
-        const dist = parseFloat(String(e.strecke  || '').replace(',', '.')) || 0;
-        const asc  = parseFloat(String(e.aufstieg || '').replace(',', '.')) || 0;
-        return dist >= 10 && asc >= 1000;
-    }).length;
+    const bigTours = data.filter(e => isBigTourCountable(e, data)).length;
 
     const totalDist = data.reduce((sum, e) =>
         sum + (parseFloat(String(e.strecke || '').replace(',', '.')) || 0), 0);
@@ -13450,9 +13899,7 @@ function drawBigToursDiagram() {
         if (!entry.date) return;
         const d = new Date(entry.date);
         if (isNaN(d.getTime())) return;
-        const dist = parseFloat(String(entry.strecke  || '').replace(',', '.')) || 0;
-        const asc  = parseFloat(String(entry.aufstieg || '').replace(',', '.')) || 0;
-        if (dist >= 10 && asc >= 1000) monthCounts[d.getMonth()]++;
+        if (isBigTourCountable(entry, allData)) monthCounts[d.getMonth()]++;
     });
 
     const total = monthCounts.reduce((a, b) => a + b, 0);
@@ -14548,7 +14995,7 @@ function quickStats(tours) {
             dist  += d;
             asc   += a;
             peaks += parseInt(e.gipfel) || 0;
-            if (d >= 10 && a >= 1000) big++;
+            if (isBigTourCountable(e, tours)) big++;
             if (e.zeit && e.zeit.includes(':')) {
                 const [h, m] = e.zeit.split(':').map(Number);
                 if (!isNaN(h) && !isNaN(m)) mins += h * 60 + m;
@@ -14563,7 +15010,7 @@ function quickStats(tours) {
         const avgSpeed    = totalH            > 0 ? dist / totalH                      : 0;
         const avgGradient = gradWeight        > 0 ? gradSum / gradWeight               : 0;
         const avgAscentH  = ascentRateWeight  > 0 ? ascentRateSum / ascentRateWeight   : 0;
-        return { count: tours.length, dist, asc, mins, peaks, big, avgSpeed, avgGradient, avgAscentH };
+        return { count: countDistinctTours(tours), dist, asc, mins, peaks, big, avgSpeed, avgGradient, avgAscentH };
     }
 
     const stats = quickStats(filteredForYear);
@@ -14619,7 +15066,7 @@ function quickStats(tours) {
                 <li class="dash-recent-item" data-i="${i}">
                     <span class="tour-nr">${i + 1}.</span>
                     <span class="tour-date">${e.date || '–'}</span>
-                    <span class="tour-name">${escapeHtml(e.tourname || 'Unbekannt')}${e.useFullDistanceForGradient ? ' <span class="gradient-flag">↗</span>' : ''}</span>
+                    <span class="tour-name">${escapeHtml(e.tourname || 'Unbekannt')}${e.useFullDistanceForGradient ? ' <span class="gradient-flag">↗</span>' : ''}${tourGroupBadge(e)}</span>
                 </li>
             `).join('');
 
@@ -15233,12 +15680,22 @@ planSaveBtn.addEventListener('click', () => {
 const region     = planRegion?.value || '';
 const difficulty = planDifficulty?.value || '';
 
+    const isMultiday = difficulty.toLowerCase() === 'mehrtägig';
+    const tourGroupVal = document.getElementById('plan-tour-group')?.value.trim() || '';
+    const tourDayVal = document.getElementById('plan-tour-day')?.value.trim() || '';
+    const tourDayCountVal = document.getElementById('plan-tour-day-count')?.value.trim() || '';
+
     const monatVon = monatVonSelect.value;
     const monatBis = monatBisSelect.value;
 
     // Pflichtfeld prüfen
     if (!tourname) {
         showToast('Bitte einen Tournamen eingeben.', { type: 'error' });
+        return;
+    }
+
+    if (isMultiday && !tourGroupVal) {
+        showToast('Bitte einen Namen für die Tourgruppe angeben.', { type: 'error' });
         return;
     }
 
@@ -15271,7 +15728,10 @@ const difficulty = planDifficulty?.value || '';
         difficulty,
         zeit,
         gipfel,
-        gipfelDetails
+        gipfelDetails,
+        tourGroup: isMultiday ? tourGroupVal : '',
+        tourDay: isMultiday && tourDayVal ? parseInt(tourDayVal) : null,
+        tourDayCount: isMultiday && tourDayCountVal ? parseInt(tourDayCountVal) : null
     };
 
     // ✅ Speicher 1:1 wie Save-Button – nur eigener Key
@@ -15291,6 +15751,9 @@ const difficulty = planDifficulty?.value || '';
 
     // Mobile Custom-Select-Anzeige synchronisieren (reset() triggert keinen Setter/Change)
     planForm.querySelectorAll('select').forEach(mobSelSyncDisplay);
+
+    document.getElementById('plan-multiday-fields')?.style.setProperty('display', 'none');
+    populateTourGroupSuggestions();
 
     // Box einklappen wie Save-Button
     const box = planForm.closest('.box');
@@ -15312,6 +15775,9 @@ function normalizePlannedTourForCompare(entry) {
         difficulty: String(entry.difficulty || ''),
         zeit: String(entry.zeit || ''),
         gipfel: String(entry.gipfel || 0),
+        tourGroup: String(entry.tourGroup || ''),
+        tourDay: String(entry.tourDay || ''),
+        tourDayCount: String(entry.tourDayCount || ''),
         gipfelDetails: (entry.gipfelDetails || []).map(g => ({
             name: String(g.name || ''),
             hoehe: String(g.hoehe || '')
@@ -15347,6 +15813,13 @@ function fillPlanFormFromEntry(entry) {
 
 if (planRegion)     planRegion.value     = entry.region     || '';
 if (planDifficulty) planDifficulty.value = entry.difficulty || '';
+
+    const isMultidayPlanEntry = String(entry.difficulty || '').toLowerCase() === 'mehrtägig';
+    const planMultidayFieldsEl = document.getElementById('plan-multiday-fields');
+    if (planMultidayFieldsEl) planMultidayFieldsEl.style.display = isMultidayPlanEntry ? 'flex' : 'none';
+    document.getElementById('plan-tour-group').value = entry.tourGroup || '';
+    document.getElementById('plan-tour-day').value = entry.tourDay || '';
+    document.getElementById('plan-tour-day-count').value = entry.tourDayCount || '';
 
     planStrecke.value = (entry.strecke ?? '').toString().replace(',', '.');
     planAufstieg.value = entry.aufstieg || '';
@@ -15411,6 +15884,13 @@ function transferPlannedTourToSavedForm(entry) {
 if (regionEl)     regionEl.value     = entry.region     || '';
 if (difficultyEl) difficultyEl.value = entry.difficulty || '';
     if (notesEl) notesEl.value = '';
+
+    const isMultidayTransfer = String(entry.difficulty || '').toLowerCase() === 'mehrtägig';
+    const transferMultidayFieldsEl = document.getElementById('multiday-fields');
+    if (transferMultidayFieldsEl) transferMultidayFieldsEl.style.display = isMultidayTransfer ? 'flex' : 'none';
+    document.getElementById('tour-group').value = entry.tourGroup || '';
+    document.getElementById('tour-day').value = entry.tourDay || '';
+    document.getElementById('tour-day-count').value = entry.tourDayCount || '';
 
     // Steigungsmodus zurücksetzen
     useFullDistanceForGradient = false;
@@ -15484,17 +15964,20 @@ function loadPlannedTours() {
     // Tabelle leeren
     plannedTableBody.innerHTML = '';
 
-    // Nach Saison sortieren
-    plannedTours
-            .sort((a, b) => {
-        const ma = parseInt(a.monatVon) || 99;
-        const mb = parseInt(b.monatVon) || 99;
+    // Mehrtägige Touren zu einer Sammel-Zeile gruppieren, dann nach Saison sortieren
+    const displayData = groupEntriesForDisplay(plannedTours, 'planned')
+        .sort((a, b) => {
+            const ma = parseInt(a.monatVon) || 99;
+            const mb = parseInt(b.monatVon) || 99;
 
-        if (ma !== mb) return ma - mb;
+            if (ma !== mb) return ma - mb;
 
-        return a.tourname.localeCompare(b.tourname);
-    })
-        .forEach((t, i) => {
+            return (a.tourname || '').localeCompare(b.tourname || '');
+        });
+
+    displayData.forEach((t, i) => {
+
+            const isGroup = !!t._isMultidaySummary;
 
             // 🔑 eindeutiger Schlüssel für diese geplante Tour
             const key = [
@@ -15508,20 +15991,24 @@ function loadPlannedTours() {
             // Zeile erstellen
             const tr = document.createElement('tr');
             tr.dataset.key = key;
+            if (isGroup) tr.classList.add('is-multiday-row');
 
             tr.innerHTML = `
                 <td data-label="Nr.">${i + 1}</td>
                 <td data-label="Saison">${formatSaison(t.monatVon, t.monatBis)}</td>
-                <td data-label="Tour">${t.tourname}</td>
+                <td data-label="Tour">${t.tourname}${multidaySummaryBadge(t)}</td>
                 <td data-label="Gipfel" class="gipfel-toggle" style="cursor:pointer;font-weight:600;">${t.gipfel}</td>
                 <td data-label="Strecke"><span class="value">${t.strecke}</span></td>
                 <td data-label="Aufstieg"><span class="value">${t.aufstieg}</span></td>
                 <td data-label="Startpunkt">${t.ausgangspunkt}</td>
                 <td data-label="Zeit"><span class="value">${t.zeit}</span></td>
                 <td data-label="Aktion">
+                    ${isGroup ? '' : `
                     <button class="edit-btn" title="Geplante Tour bearbeiten">✎</button>
                     <button class="load-btn" title="Ins Formular übernehmen">⏳</button>
-                    <button class="delete-btn">✕</button></td>
+                    <button class="delete-btn">✕</button>
+                    `}
+                </td>
             `;
             plannedTableBody.appendChild(tr);
 
@@ -15538,11 +16025,21 @@ function loadPlannedTours() {
                 plannedTableBody.appendChild(acc);
 
                 // Klick auf Gipfelzahl öffnet Accordion
-                tr.querySelector('.gipfel-toggle').addEventListener('click', () => {
+                tr.querySelector('.gipfel-toggle').addEventListener('click', (e) => {
+                    e.stopPropagation();
                     const el = acc.querySelector('.gipfel-accordion');
                     el.style.display = el.style.display === 'block' ? 'none' : 'block';
                     requestAnimationFrame(() => updateBoxHeight(plannedBox));
                 });
+            }
+
+            // Klick auf Sammel-Zeile -> Etappen-Modal öffnen (kein Edit/Load/Delete für Gruppen)
+            if (isGroup) {
+                tr.addEventListener('click', (e) => {
+                    if (e.target.closest('.gipfel-toggle')) return;
+                    openTourGroupModal(t._tourGroupName, 'planned');
+                });
+                return;
             }
 
             // Delete-Button
@@ -15608,7 +16105,6 @@ function loadPlannedTours() {
 });
 
             // Neuer Load-Button
-// Neuer Load-Button
 tr.querySelector('.load-btn').addEventListener('click', (e) => {
     e.stopPropagation();
     transferPlannedTourToSavedForm(t);
@@ -15653,25 +16149,30 @@ function syncMobilePlanTourListFromTable() {
         return;
     }
 
-    const sortedTours = [...plannedTours].sort((a, b) => {
+    const sortedTours = groupEntriesForDisplay(plannedTours, 'planned').sort((a, b) => {
         const ma = parseInt(a.monatVon) || 99;
         const mb = parseInt(b.monatVon) || 99;
 
         if (ma !== mb) return ma - mb;
-        return a.tourname.localeCompare(b.tourname);
+        return (a.tourname || '').localeCompare(b.tourname || '');
     });
 
     sortedTours.forEach((entry, index) => {
         const li = document.createElement('li');
+        const isGroup = !!entry._isMultidaySummary;
 
         li.innerHTML = `
             <span class="tour-nr">${index + 1}.</span>
             <span class="tour-date">${formatSaison(entry.monatVon, entry.monatBis) || '–'}</span>
-            <span class="tour-name">${entry.tourname || 'Unbekannt'}</span>
+            <span class="tour-name">${entry.tourname || 'Unbekannt'}${multidaySummaryBadge(entry)}</span>
         `;
 
         li.addEventListener('click', () => {
-            openPlannedTourDetail(entry);
+            if (isGroup) {
+                openTourGroupModal(entry._tourGroupName, 'planned');
+            } else {
+                openPlannedTourDetail(entry);
+            }
         });
 
         list.appendChild(li);
@@ -16196,11 +16697,7 @@ if (fvState.year && fvState.year !== 'all') {
   }
 
 if (fvState.quick === 'bigTours') {
-    data = data.filter(e => {
-        const dist = parseFloat(String(e.strecke  || '').replace(',', '.')) || 0;
-        const asc  = parseFloat(String(e.aufstieg || '').replace(',', '.')) || 0;
-        return dist >= 10 && asc >= 1000;
-    });
+    data = data.filter(e => isBigTourCountable(e, data));
   }
 
   if (fvState.quick === 'alleine') {
@@ -16729,7 +17226,7 @@ function computeStatsSummary(entries) {
         totalAscent += asc;
         totalPeaks += parseInt(entry.gipfel) || 0;
 
-        if (dist >= 10 && asc >= 1000) bigTours++;
+        if (isBigTourCountable(entry, entries)) bigTours++;
 
         if (entry.zeit && entry.zeit.includes(':')) {
             const [h, m] = entry.zeit.split(':').map(Number);
@@ -17281,11 +17778,11 @@ function openDashStatModal(type, tours) {
             const sorted = [...tours].sort((a, b) => new Date(b.date) - new Date(a.date));
             specialEntries = sorted;
             bodyHtml = `
-                <ul class="stats-list">${row('Anzahl Touren', n)}</ul>
+                <ul class="stats-list">${row('Anzahl Touren', countDistinctTours(tours))}</ul>
                 ${sectionTitle('NACH MONAT')}
                 <ul class="stats-list">
                     ${monthRows(
-                        () => 1,
+                        e => (e.tourGroup ? (isFirstEtappeInList(e, tours) ? 1 : 0) : 1),
                         v => v + (v === 1 ? ' Tour' : ' Touren')
                     )}
                 </ul>`;
@@ -17336,11 +17833,7 @@ function openDashStatModal(type, tours) {
         case 'bigTours': {
             title = '💪🏼 Big Tours';
             const big = [...tours]
-                .filter(e => {
-                    const d = parseFloat(String(e.strecke  || '').replace(',', '.')) || 0;
-                    const a = parseFloat(String(e.aufstieg || '').replace(',', '.')) || 0;
-                    return d >= 10 && a >= 1000;
-                })
+                .filter(e => isBigTourCountable(e, tours))
                 .sort((a, b) => new Date(b.date) - new Date(a.date));
             specialEntries = big;
             bodyHtml = `
@@ -17348,11 +17841,7 @@ function openDashStatModal(type, tours) {
                 ${sectionTitle('NACH MONAT')}
                 <ul class="stats-list">
                     ${monthRows(
-                        e => {
-                            const d = parseFloat(String(e.strecke  || '').replace(',', '.')) || 0;
-                            const a = parseFloat(String(e.aufstieg || '').replace(',', '.')) || 0;
-                            return (d >= 10 && a >= 1000) ? 1 : 0;
-                        },
+                        e => isBigTourCountable(e, tours) ? 1 : 0,
                         v => v + (v === 1 ? ' Tour' : ' Touren')
                     )}
                 </ul>`;
@@ -17597,14 +18086,21 @@ function showDashMonthTours(type, mi, allTours, backTitle) {
         return;
     }
 
+    const seenGroupsForMonth = new Set();
     const monthTours = allTours
         .filter(e => { try { return e.date && new Date(e.date).getMonth() === mi; } catch { return false; } })
         .filter(e => {
-            if (type !== 'bigTours') return true;
-            const d = parseFloat(String(e.strecke  || '').replace(',', '.')) || 0;
-            const a = parseFloat(String(e.aufstieg || '').replace(',', '.')) || 0;
-            return d >= 10 && a >= 1000;
+            if (type === 'bigTours') return isBigTourCountable(e, allTours);
+            if (type === 'touren') return e.tourGroup ? isFirstEtappeInList(e, allTours) : true;
+            return true;
         })
+        .filter(e => {
+            if (!e.tourGroup) return true;
+            if (seenGroupsForMonth.has(e.tourGroup)) return false;
+            seenGroupsForMonth.add(e.tourGroup);
+            return true;
+        })
+        .map(e => e.tourGroup ? buildMultidaySummaryEntry(e.tourGroup, getTourGroupStages(e.tourGroup, allTours)) : e)
         .sort((a, b) => new Date(a.date) - new Date(b.date));
 
     function tourValue(e) {
@@ -17641,7 +18137,7 @@ function showDashMonthTours(type, mi, allTours, backTitle) {
                 ? '<li><span class="stats-label">Keine Touren</span><span class="stats-value">–</span></li>'
                 : monthTours.map((e, i) => `
                     <li class="highlight-clickable" data-msentry="${i}">
-                        <span class="stats-label">${e.date || '–'} · ${escapeHtml(e.tourname || 'Unbekannt')}</span>
+                        <span class="stats-label">${e.date || '–'} · ${escapeHtml(e.tourname || 'Unbekannt')}${multidaySummaryBadge(e)}</span>
                         <span class="stats-value">${tourValue(e)}</span>
                     </li>`).join('')}
         </ul>`;
@@ -17657,7 +18153,11 @@ function showDashMonthTours(type, mi, allTours, backTitle) {
         el.style.cursor = 'pointer';
         el.addEventListener('click', () => {
             closeDashStatModal();
-            openTourDetail(entry);
+            if (entry._isMultidaySummary) {
+                openTourGroupModal(entry._tourGroupName, 'saved', type);
+            } else {
+                openTourDetail(entry);
+            }
         });
     });
 }
