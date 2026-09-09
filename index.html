@@ -14008,6 +14008,97 @@ select {
 }
 
 
+/* Sicherungsstatus: kompakte, informative Übersicht */
+.backup-status-panel {
+    margin-bottom: 12px;
+    padding: 10px;
+    border-radius: 11px;
+    border: 1px solid var(--ui-card-border);
+    background: var(--ui-section-bg);
+}
+
+.backup-status-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.backup-status-ready {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text-soft);
+}
+
+.backup-status-ready i {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 7px;
+    border-radius: 999px;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-soft);
+}
+
+.backup-status-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+}
+
+.backup-status-item {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 9px;
+    border-radius: 9px;
+    border: 1px solid var(--ui-card-border);
+    background: var(--ui-card-bg);
+}
+
+.backup-status-item span {
+    font-size: 9px;
+    line-height: 1.15;
+    color: var(--text-soft);
+}
+
+.backup-status-item strong {
+    min-width: 0;
+    font-size: 11px;
+    line-height: 1.2;
+    font-weight: 800;
+    color: var(--text-main);
+    overflow-wrap: anywhere;
+}
+
+.backup-info-card {
+    margin-top: 13px;
+    padding: 10px 11px;
+    border-radius: 10px;
+    border: 1px solid var(--ui-card-border);
+    background: var(--ui-card-bg);
+}
+
+.backup-info-title {
+    margin-bottom: 4px;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.backup-info-text {
+    font-size: 9.5px;
+    line-height: 1.45;
+    color: var(--text-soft);
+}
+
 .backup-actions-grid {
     display: grid;
 
@@ -14139,9 +14230,12 @@ body.summit
 
 @media (max-width: 768px) {
 
-    .filter-simple-inner,
-    .backup-view-inner {
+    .filter-simple-inner {
         gap: 8px;
+    }
+
+    .backup-view-inner {
+        gap: 14px;
     }
 
 
@@ -14203,7 +14297,7 @@ body.summit
 .backup-card {
     width: 100%;
 
-    padding: 12px;
+    padding: 14px;
 
     box-sizing: border-box;
 }
@@ -14213,20 +14307,20 @@ body.summit
     grid-template-columns:
         repeat(2, minmax(0, 1fr));
 
-    gap: 8px;
+    gap: 10px;
 }
 
 #data-file-box
 .save-btn {
     width: 100%;
 
-    min-height: 46px;
+    min-height: 54px;
 
     margin: 0;
 
-    padding: 7px 8px;
+    padding: 10px 12px;
 
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.15;
 
     white-space: normal;
@@ -14238,27 +14332,59 @@ body.summit
 
     box-sizing: border-box;
 
-    margin-top: 9px;
+    margin-top: 11px;
 
-    padding: 8px 10px;
+    padding: 10px 11px;
 }
 
 #data-file-box
 .backup-disconnect-btn {
-    min-height: 36px;
+    min-height: 42px;
 
-    margin-top: 7px;
+    margin-top: 9px;
 }
 
 #data-file-box
 .backup-divider {
     margin:
-        12px 0 9px;
+        16px 0 12px;
 }
 
 #data-file-box
 .backup-section-title {
-    margin-bottom: 7px;
+    margin-bottom: 9px;
+}
+
+#data-file-box .backup-status-panel {
+    margin-bottom: 14px;
+    padding: 11px;
+}
+
+#data-file-box .backup-status-grid {
+    gap: 9px;
+}
+
+#data-file-box .backup-status-item {
+    min-height: 54px;
+    padding: 9px 10px;
+    justify-content: center;
+}
+
+#data-file-box .backup-status-item strong {
+    font-size: 12px;
+}
+
+#data-file-box .backup-info-card {
+    margin-top: 16px;
+    padding: 12px;
+}
+
+#data-file-box .backup-info-title {
+    font-size: 11px;
+}
+
+#data-file-box .backup-info-text {
+    font-size: 10.5px;
 }
 }
 
@@ -20315,6 +20441,31 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
                 💾 Datensicherung
             </div>
 
+            <div class="backup-status-panel" aria-label="Sicherungsstatus">
+                <div class="backup-status-head">
+                    <span>📊 Sicherungsstatus</span>
+                    <span class="backup-status-ready"><i></i>Bereit</span>
+                </div>
+
+                <div class="backup-status-grid">
+                    <div class="backup-status-item">
+                        <span>Gespeicherte Touren</span>
+                        <strong id="backup-status-saved">0</strong>
+                    </div>
+                    <div class="backup-status-item">
+                        <span>Geplante Touren</span>
+                        <strong id="backup-status-planned">0</strong>
+                    </div>
+                    <div class="backup-status-item">
+                        <span>Letzte Sicherung</span>
+                        <strong id="backup-status-last">Noch keine</strong>
+                    </div>
+                    <div class="backup-status-item">
+                        <span>Sicherungsdatei</span>
+                        <strong id="backup-status-file">Nicht verbunden</strong>
+                    </div>
+                </div>
+            </div>
 
             <div class="backup-actions-grid">
 
@@ -20411,6 +20562,13 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
             </div>
 
 
+            <div class="backup-info-card">
+                <div class="backup-info-title">ℹ️ Was wird gesichert?</div>
+                <div class="backup-info-text">
+                    Gespeicherte Touren, geplante Touren und das aktive Theme werden gemeinsam in der JSON-Sicherung gespeichert.
+                </div>
+            </div>
+
             <input
                 type="file"
                 id="simple-import-input"
@@ -20506,6 +20664,7 @@ initConsistentDrilldownNavigation();
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+        markBackupSavedNow();
 
         showToast('Datei heruntergeladen ✓', { type: 'success', duration: 2000 });
     });
@@ -20533,6 +20692,7 @@ initConsistentDrilldownNavigation();
         e.target.value = '';
     });
 
+    updateBackupStatusSummary();
     restoreLinkedFileHandleOnStartup();
 
     // Geocoding: Ausgangspunkt → Koordinaten
@@ -22521,6 +22681,41 @@ function initHeaderScrollShadow(){
 // --------------Datei speichern-----------
 
 let linkedFileHandle = null;
+const BACKUP_LAST_SAVED_KEY = 'backupLastSavedAt_v1';
+
+function formatBackupStatusDate(value) {
+    const date = new Date(value);
+    if (!Number.isFinite(date.getTime())) return 'Noch keine';
+
+    return date.toLocaleString('de-AT', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    }).replace(',', ' ·');
+}
+
+function updateBackupStatusSummary() {
+    const savedEl = document.getElementById('backup-status-saved');
+    const plannedEl = document.getElementById('backup-status-planned');
+    const lastEl = document.getElementById('backup-status-last');
+    const fileEl = document.getElementById('backup-status-file');
+
+    const savedTours = appStorage.get('touren') || [];
+    const plannedTours = appStorage.get('plannedTours') || [];
+    const lastSavedAt = appStorage.get(BACKUP_LAST_SAVED_KEY);
+
+    if (savedEl) savedEl.textContent = String(Array.isArray(savedTours) ? savedTours.length : 0);
+    if (plannedEl) plannedEl.textContent = String(Array.isArray(plannedTours) ? plannedTours.length : 0);
+    if (lastEl) lastEl.textContent = formatBackupStatusDate(lastSavedAt);
+    if (fileEl) fileEl.textContent = linkedFileHandle?.name || 'Nicht verbunden';
+}
+
+function markBackupSavedNow() {
+    appStorage.set(BACKUP_LAST_SAVED_KEY, new Date().toISOString());
+    updateBackupStatusSummary();
+}
 
 function buildAppDataPayload() {
     return {
@@ -22623,11 +22818,13 @@ function applyAppDataPayload(payload) {
     loadData();
     loadPlannedTours();
     updatePlannedPeaks();
+    updateBackupStatusSummary();
 }
 
 function updateFileStatus(text) {
     const statusEl = document.getElementById('file-status');
     if (statusEl) statusEl.textContent = text;
+    updateBackupStatusSummary();
 }
 
 async function createNewDataFile() {
@@ -22760,6 +22957,7 @@ async function saveDataToLinkedFile(silent = false) {
         await writable.close();
 
         updateFileStatus(`Gespeichert: ${linkedFileHandle.name} (${new Date().toLocaleTimeString('de-DE')})`);
+        markBackupSavedNow();
         return true;
     } catch (err) {
         console.error(err);
@@ -33830,6 +34028,10 @@ function goToView(targetView, animate = true) {
         loadPlannedTours();
         updatePlannedPeaks();
         markDerivedViewClean('tour');
+    }
+
+    if (targetView === 'backup') {
+        updateBackupStatusSummary();
     }
 
     if (isViewChange && animate) {
