@@ -18299,6 +18299,95 @@ button.activity-summary-card.active {
     }
 }
 
+
+
+/* =========================================================
+   Update 39 – Jahressteuerungen an die vier Themes angleichen
+   Dashboard / Stats / Karte: nur Optik, keine Größenänderung
+   ========================================================= */
+
+:root {
+    --year-control-bg: rgba(255,248,229,0.18);
+    --year-control-bg-hover: rgba(255,248,229,0.27);
+    --year-control-border: rgba(245,224,170,0.34);
+    --year-control-shadow: 0 3px 10px rgba(67,55,30,0.06), inset 0 1px 0 rgba(255,255,255,0.18);
+    --year-option-bg: #f5eedb;
+    --year-option-text: #2e4036;
+}
+
+body.dark {
+    --year-control-bg: rgba(38,58,80,0.22);
+    --year-control-bg-hover: rgba(50,73,99,0.30);
+    --year-control-border: rgba(145,176,208,0.16);
+    --year-control-shadow: 0 3px 11px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.035);
+    --year-option-bg: #172637;
+    --year-option-text: #d6e1f0;
+}
+
+body.green {
+    --year-control-bg: rgba(8,42,24,0.38);
+    --year-control-bg-hover: rgba(12,58,33,0.48);
+    --year-control-border: rgba(82,183,136,0.24);
+    --year-control-shadow: 0 3px 12px rgba(0,8,4,0.28), inset 0 1px 0 rgba(82,183,136,0.045);
+    --year-option-bg: #071f12;
+    --year-option-text: #f2faf5;
+}
+
+body.summit {
+    --year-control-bg: rgba(180,205,218,0.11);
+    --year-control-bg-hover: rgba(190,220,235,0.17);
+    --year-control-border: rgba(195,220,235,0.20);
+    --year-control-shadow: 0 3px 11px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.055);
+    --year-option-bg: #29343a;
+    --year-option-text: #f4f8f5;
+}
+
+/*
+ * Die drei Views verwenden dieselbe Jahressteuerung. Native Selects,
+ * mobile Select-Trigger und Pfeilbuttons bekommen exakt dieselbe
+ * Theme-Fläche wie die übrigen UI-Kacheln. Höhe/Breite bleiben unangetastet.
+ */
+body .dash-year-filter-wrap select,
+body .dash-year-filter-wrap .mob-sel-btn,
+body .dash-year-filter-wrap .dash-year-arrow-btn {
+    background: var(--year-control-bg) !important;
+    border-color: var(--year-control-border) !important;
+    color: var(--text-main) !important;
+    box-shadow: var(--year-control-shadow) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+body .dash-year-filter-wrap select option {
+    background: var(--year-option-bg) !important;
+    color: var(--year-option-text) !important;
+}
+
+/* Fokus bleibt erkennbar, ohne die Steuerung farblich herauszureißen. */
+body .dash-year-filter-wrap select:focus,
+body .dash-year-filter-wrap .mob-sel-btn:focus-visible,
+body .dash-year-filter-wrap .dash-year-arrow-btn:focus-visible {
+    border-color: color-mix(in srgb, var(--accent) 56%, var(--year-control-border)) !important;
+    box-shadow:
+        var(--year-control-shadow),
+        0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent) !important;
+}
+
+/* Hover nur auf Geräten mit echter Hover-Unterstützung – kein Sticky Hover auf Touch. */
+@media (hover: hover) and (pointer: fine) {
+    body .dash-year-filter-wrap .mob-sel-btn:hover,
+    body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):hover {
+        background: var(--year-control-bg-hover) !important;
+        border-color: color-mix(in srgb, var(--accent) 32%, var(--year-control-border)) !important;
+    }
+}
+
+/* Kurzer Druckzustand auf Touch/Maus, danach automatisch wieder Grundfläche. */
+body .dash-year-filter-wrap .mob-sel-btn:active,
+body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
+    background: var(--year-control-bg-hover) !important;
+}
+
 </style>
 </head>
 <body>
