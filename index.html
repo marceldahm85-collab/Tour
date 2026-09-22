@@ -26471,14 +26471,14 @@ function loadData() {
             row.innerHTML = `
                 <td data-label="Nr."><span class="value">${index + 1}</span></td>
                 <td data-label="Datum"><span class="value">${entry.date}</span></td>
-                <td data-label="Tour"><span class="value">${entry.tourname}${multidaySummaryBadge(entry)}</span></td>
+                <td data-label="Tour"><span class="value">${escapeHtml(entry.tourname || 'Unbekannt')}${multidaySummaryBadge(entry)}</span></td>
                 <td data-label="Gipfel" class="gipfel-count" style="cursor:pointer; font-weight:600;"><span class="value">${entry.gipfel}</span></td>
                 <td data-label="Strecke">
                     ${entry.useFullDistanceForGradient ? '<span class="gradient-flag" title="Steigung mit voller Strecke berechnet">↗</span>' : ''}
                     <span class="value">${formatDecimalAT(entry.strecke)}</span>
                 </td>
                 <td data-label="Aufstieg"><span class="value">${entry.aufstieg}</span></td>
-                <td data-label="Startpunkt"><span class="value">${entry.ausgangspunkt}</span></td>
+                <td data-label="Startpunkt"><span class="value">${escapeHtml(entry.ausgangspunkt || '–')}</span></td>
                 <td data-label="Zeit"><span class="value">${entry.zeit}</span></td>
                 <td data-label="Aktion">
                     ${isGroup ? '' : `
@@ -26495,7 +26495,7 @@ function loadData() {
                 detailRow.innerHTML = `
                     <td colspan="9">
                         <div class="gipfel-accordion">
-                            ${entry.gipfelDetails.map(g => `⛰ ${g.name} – ${g.hoehe} m`).join('<br>')}
+                            ${entry.gipfelDetails.map(g => `⛰ ${escapeHtml(g.name || 'Unbekannt')} – ${escapeHtml(g.hoehe || '–')} m`).join('<br>')}
                         </div>
                     </td>
                 `;
@@ -26617,7 +26617,7 @@ function syncMobileTourListFromTable() {
                 <span class="tour-nr">${start + index + 1}.</span>
                 <span class="tour-date">${entry.date || '–'}</span>
                 <span class="tour-name">
-                    ${entry.tourname || 'Unbekannt'}
+                    ${escapeHtml(entry.tourname || 'Unbekannt')}
                     ${entry.useFullDistanceForGradient ? '<span class="gradient-flag" title="Steigung mit voller Strecke berechnet">↗</span>' : ''}${multidaySummaryBadge(entry)}
                 </span>
             `;
@@ -30771,7 +30771,7 @@ const borderColor =
 
         // Popup
         const peakStr = entry.gipfelDetails?.length
-            ? entry.gipfelDetails.map(g => `⛰ ${g.name || ''} ${g.hoehe ? g.hoehe + ' m' : ''}`).join('<br>')
+            ? entry.gipfelDetails.map(g => `⛰ ${escapeHtml(g.name || '')} ${g.hoehe ? escapeHtml(g.hoehe) + ' m' : ''}`).join('<br>')
             : '';
 
         const tourIndex = _mapTourCache.length;
@@ -38030,7 +38030,7 @@ function openTourListModal(title, tours) {
             li.innerHTML = `
                 <span class="tour-nr">${index + 1}.</span>
                 <span class="tour-date">${entry.date || '–'}</span>
-                <span class="tour-name">${entry.tourname || 'Unbekannt'}</span>
+                <span class="tour-name">${escapeHtml(entry.tourname || 'Unbekannt')}</span>
             `;
             li.style.cursor = 'pointer';
             li.addEventListener('click', () => {
@@ -42110,11 +42110,6 @@ if (ferrataZeitInput) {
         entry.ferrataZeit || '';
 }
 
-// Geplante Touren enthalten keine Klettersteig-Teilwerte
-if (ferrataStreckeInput) ferrataStreckeInput.value = '';
-if (ferrataHmInput) ferrataHmInput.value = '';
-if (ferrataZeitInput) ferrataZeitInput.value = '';
-
 if (regionEl) {
     regionEl.value = entry.region || '';
 }
@@ -42127,8 +42122,6 @@ if (ferrataFields) {
 }
 
 updateActivityFieldsVisibility();
-
-    if (notesEl) notesEl.value = '';
 
     const isMultidayTransfer = String(entry.difficulty || '').toLowerCase() === 'mehrtägig';
     const transferMultidayFieldsEl = document.getElementById('multiday-fields');
@@ -42350,11 +42343,11 @@ function loadPlannedTours() {
         tr.innerHTML = `
             <td data-label="Nr.">${i + 1}</td>
             <td data-label="Saison">${formatSaison(t.monatVon, t.monatBis)}</td>
-            <td data-label="Tour">${t.tourname}${multidaySummaryBadge(t)}</td>
+            <td data-label="Tour">${escapeHtml(t.tourname || 'Unbekannt')}${multidaySummaryBadge(t)}</td>
             <td data-label="Gipfel" class="gipfel-toggle" style="cursor:pointer;font-weight:600;">${t.gipfel}</td>
             <td data-label="Strecke"><span class="value">${formatDecimalAT(t.strecke)}</span></td>
             <td data-label="Aufstieg"><span class="value">${t.aufstieg}</span></td>
-            <td data-label="Startpunkt">${t.ausgangspunkt}</td>
+            <td data-label="Startpunkt">${escapeHtml(t.ausgangspunkt || '–')}</td>
             <td data-label="Zeit"><span class="value">${t.zeit}</span></td>
             <td data-label="Aktion">
                 ${isGroup ? '' : `
@@ -42372,7 +42365,7 @@ function loadPlannedTours() {
             acc.innerHTML = `
                 <td colspan="9">
                     <div class="gipfel-accordion" style="display:none;">
-                        ${t.gipfelDetails.map(g => `⛰ ${g.name} – ${g.hoehe} m`).join('<br>')}
+                        ${t.gipfelDetails.map(g => `⛰ ${escapeHtml(g.name || 'Unbekannt')} – ${escapeHtml(g.hoehe || '–')} m`).join('<br>')}
                     </div>
                 </td>
             `;
