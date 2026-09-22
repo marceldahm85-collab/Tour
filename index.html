@@ -15242,6 +15242,14 @@ li::before {
 }
 
 
+#tour-view
+#planned-peaks-container
+.peak-tour-list
+li::after {
+    content: none !important;
+}
+
+
 /* Rangnummer */
 #tour-view
 #planned-peaks-container
@@ -19122,7 +19130,7 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
 
   <button class="chart-tab" data-chart="speed">
     <span class="chart-tab-icon">💨</span>
-    <span class="chart-tab-label">Ø Speed</span>
+    <span class="chart-tab-label">Ø Geschwindigkeit</span>
   </button>
 
   <button class="chart-tab" data-chart="gradient">
@@ -21300,8 +21308,9 @@ function getPerformanceValues(entry) {
      * Bei Hike & Climb enthalten diese Werte
      * bereits die Gesamtleistung der Tour.
      *
-     * Bei Bike & Hike stellen diese Werte
-     * ausschließlich den Wanderanteil dar.
+     * Bei Bike & Hike enthalten diese Werte
+     * ebenfalls die Gesamtwerte der Tour; die separaten
+     * bike...-Felder beschreiben nur den darin enthaltenen Radanteil.
      */
     let distance =
         numberValue(entry.strecke);
@@ -22353,76 +22362,72 @@ function calculateEntrySteps(entry) {
         .trim()
         .toLowerCase();
 
-    /*
-     * Radtouren liefern ausdrücklich keine Schritte.
-     */
+    /* Reine Radtouren liefern ausdrücklich keine Schritte. */
     if (difficulty === 'radtour') {
         return 0;
     }
 
-    let totalSteps = 0;
+    const totalDistance = parseFerrataNumber(entry.strecke);
+    const totalAscent = parseFerrataNumber(entry.aufstieg);
+    const totalMinutes = parseFerrataTimeToMinutes(entry.zeit);
+    const useFullDistanceForGradient = Boolean(entry.useFullDistanceForGradient);
 
     /*
-     * Normale Strecke:
-     *
-     * - Wandern
-     * - Mehrtägig
-     * - Klettersteig nicht als normale Aktivität
-     * - Hike & Climb: nur Hike-Anteil
-     * - Bike & Hike: nur Hike-Anteil
+     * Die Hauptwerte Strecke/Aufstieg/Zeit sind Gesamtwerte.
+     * Bei gemischten Touren wird daher der separat gespeicherte
+     * Bike-/Klettersteiganteil abgezogen, bevor Wanderschritte
+     * berechnet werden. Teilwerte werden niemals zusätzlich auf
+     * die Gesamtwerte aufgeschlagen.
      */
-    const usesNormalActivity =
-        difficulty !== 'klettersteig';
+    if (difficulty === 'hike & climb') {
+        const ferrata = getFerrataValues(entry);
 
-    if (usesNormalActivity) {
-        const normalDistance =
-            parseFerrataNumber(entry.strecke);
+        const hikingDistance = Math.max(0, totalDistance - ferrata.distance);
+        const hikingAscent = Math.max(0, totalAscent - ferrata.ascent);
+        const hikingMinutes = Math.max(0, totalMinutes - ferrata.minutes);
 
-        const normalAscent =
-            parseFerrataNumber(entry.aufstieg);
+        return (
+            calculateNormalActivitySteps({
+                distanceKm: hikingDistance,
+                ascentHm: hikingAscent,
+                timeMinutes: hikingMinutes,
+                useFullDistanceForGradient
+            }) +
+            calculateFerrataSteps({
+                distanceKm: ferrata.distance,
+                ascentHm: ferrata.ascent,
+                timeMinutes: ferrata.minutes,
+                useFullDistanceForGradient
+            })
+        );
+    }
 
-        const normalTime =
-            parseFerrataTimeToMinutes(entry.zeit);
+    if (difficulty === 'bike & hike') {
+        const bike = getBikeValues(entry);
 
-        totalSteps += calculateNormalActivitySteps({
-            distanceKm: normalDistance,
-            ascentHm: normalAscent,
-            timeMinutes: normalTime,
-            useFullDistanceForGradient:
-                Boolean(entry.useFullDistanceForGradient)
+        return calculateNormalActivitySteps({
+            distanceKm: Math.max(0, totalDistance - bike.distance),
+            ascentHm: Math.max(0, totalAscent - bike.ascent),
+            timeMinutes: Math.max(0, totalMinutes - bike.minutes),
+            useFullDistanceForGradient
         });
     }
 
-    /*
-     * Reiner Klettersteig:
-     * Gesamtwerte werden als Klettersteigwerte verwendet.
-     *
-     * Hike & Climb:
-     * Nur die separaten ferrata...-Werte werden verwendet.
-     */
-    if (
-        difficulty === 'klettersteig' ||
-        difficulty === 'hike & climb'
-    ) {
-        const ferrata =
-            getFerrataValues(entry);
-
-        totalSteps += calculateFerrataSteps({
-            distanceKm: ferrata.distance,
-            ascentHm: ferrata.ascent,
-            timeMinutes: ferrata.minutes,
-            useFullDistanceForGradient:
-                Boolean(entry.useFullDistanceForGradient)
+    if (difficulty === 'klettersteig') {
+        return calculateFerrataSteps({
+            distanceKm: totalDistance,
+            ascentHm: totalAscent,
+            timeMinutes: totalMinutes,
+            useFullDistanceForGradient
         });
     }
 
-    /*
-     * Bike & Hike:
-     * Der normale Teil wurde oben berechnet.
-     * bikeStrecke, bikeHm und bikeZeit werden ignoriert.
-     */
-
-    return totalSteps;
+    return calculateNormalActivitySteps({
+        distanceKm: totalDistance,
+        ascentHm: totalAscent,
+        timeMinutes: totalMinutes,
+        useFullDistanceForGradient
+    });
 }
 
 // ─── Mobile Custom Select ────────────────────────────────────────────────────
@@ -24116,7 +24121,7 @@ if (mainTimeField) {
         isBikeTour ? 'none' : '';
 }
 
-    // Beschriftungen für Bike & Hike anpassen
+    // Hauptfelder sind bei gemischten Touren immer die Gesamtwerte
     const distanceLabel =
         document.querySelector('label[for="strecke"]');
 
@@ -24127,24 +24132,15 @@ if (mainTimeField) {
         document.querySelector('label[for="zeit"]');
 
     if (distanceLabel) {
-        distanceLabel.textContent =
-            isBikeAndHike
-                ? 'Hike-Strecke (km):'
-                : 'Strecke (km):';
+        distanceLabel.textContent = 'Strecke (km):';
     }
 
     if (ascentLabel) {
-        ascentLabel.textContent =
-            isBikeAndHike
-                ? 'Hike-Aufstieg (Hm):'
-                : 'Aufstieg (Hm):';
+        ascentLabel.textContent = 'Aufstieg (Hm):';
     }
 
     if (timeLabel) {
-        timeLabel.textContent =
-            isBikeAndHike
-                ? 'Hike-Zeit (hh:mm):'
-                : 'Gehzeit (hh:mm):';
+        timeLabel.textContent = 'Gehzeit (hh:mm):';
     }
 
     const saveBox = form?.closest('.box');
@@ -24335,17 +24331,11 @@ if (planMainTimeField) {
         document.querySelector('label[for="plan-aufstieg"]');
 
     if (planDistanceLabel) {
-        planDistanceLabel.textContent =
-            isBikeAndHike
-                ? 'Hike-Strecke (km):'
-                : 'Strecke (km):';
+        planDistanceLabel.textContent = 'Strecke (km):';
     }
 
     if (planAscentLabel) {
-        planAscentLabel.textContent =
-            isBikeAndHike
-                ? 'Hike-Aufstieg (Hm):'
-                : 'Aufstieg (Hm):';
+        planAscentLabel.textContent = 'Aufstieg (Hm):';
     }
 
     updatePlannedLivePreview();
@@ -26758,41 +26748,76 @@ function migrateLegacyDifficultyValues() {
 
 // ── Mehrtägige Touren: Gruppen-Helfer ───────────────────────────────────────
 
-function isBigTour(entry) {
+function getBigTourSourceList(entry, list = null) {
+    if (Array.isArray(list)) return list;
+
+    const saved = appStorage.get('touren') || [];
+    const planned = appStorage.get('plannedTours') || [];
+
+    const entryId = String(entry?.id || '');
+    const isSameEntry = candidate =>
+        candidate === entry ||
+        (entryId && String(candidate?.id || '') === entryId);
+
+    if (planned.some(isSameEntry) && !saved.some(isSameEntry)) {
+        return planned;
+    }
+
+    return saved;
+}
+
+function isBigTour(entry, list = null) {
+    if (!entry) return false;
+
+    const source = getBigTourSourceList(entry, list);
+
     if (entry.tourGroup) {
-        const combined = [
-            ...(appStorage.get('touren') || []),
-            ...(appStorage.get('plannedTours') || [])
-        ];
-        let dist = 0, asc = 0;
-        combined
-            .filter(e => String(e.tourGroup || '') === entry.tourGroup)
+        let dist = 0;
+        let asc = 0;
+
+        source
+            .filter(e => String(e.tourGroup || '') === String(entry.tourGroup || ''))
             .forEach(e => {
-                dist += parseFloat(String(e.strecke  || '').replace(',', '.')) || 0;
-                asc  += parseFloat(String(e.aufstieg || '').replace(',', '.')) || 0;
+                dist += parseFloat(String(e.strecke || '').replace(',', '.')) || 0;
+                asc += parseFloat(String(e.aufstieg || '').replace(',', '.')) || 0;
             });
+
         return dist >= 10 && asc >= 1000;
     }
-    const dist = parseFloat(String(entry.strecke  || '').replace(',', '.')) || 0;
-    const asc  = parseFloat(String(entry.aufstieg || '').replace(',', '.')) || 0;
+
+    const dist = parseFloat(String(entry.strecke || '').replace(',', '.')) || 0;
+    const asc = parseFloat(String(entry.aufstieg || '').replace(',', '.')) || 0;
     return dist >= 10 && asc >= 1000;
 }
 
 function isFirstEtappeInList(entry, list) {
-    if (!entry.tourGroup) return true;
-    let minDate = null;
-    list.forEach(e => {
-        if (e.tourGroup !== entry.tourGroup || !e.date) return;
-        const t = new Date(e.date).getTime();
-        if (!isNaN(t) && (minDate === null || t < minDate)) minDate = t;
-    });
-    if (minDate === null) return true;
-    const thisDate = new Date(entry.date).getTime();
-    return thisDate === minDate;
+    if (!entry?.tourGroup) return true;
+
+    const source = Array.isArray(list) ? list : getBigTourSourceList(entry);
+    const groupName = String(entry.tourGroup || '');
+    const groupEntries = source
+        .map((item, index) => ({ item, index }))
+        .filter(({ item }) => String(item?.tourGroup || '') === groupName)
+        .sort((a, b) => {
+            const aTime = a.item?.date ? new Date(a.item.date).getTime() : Number.POSITIVE_INFINITY;
+            const bTime = b.item?.date ? new Date(b.item.date).getTime() : Number.POSITIVE_INFINITY;
+            const safeA = Number.isFinite(aTime) ? aTime : Number.POSITIVE_INFINITY;
+            const safeB = Number.isFinite(bTime) ? bTime : Number.POSITIVE_INFINITY;
+            return safeA - safeB || a.index - b.index;
+        });
+
+    if (!groupEntries.length) return true;
+
+    const first = groupEntries[0].item;
+    if (first === entry) return true;
+
+    const entryId = String(entry?.id || '');
+    return Boolean(entryId && String(first?.id || '') === entryId);
 }
 
 function isBigTourCountable(entry, list) {
-    return isBigTour(entry) && isFirstEtappeInList(entry, list);
+    const source = Array.isArray(list) ? list : getBigTourSourceList(entry);
+    return isBigTour(entry, source) && isFirstEtappeInList(entry, source);
 }
 
 function isBigTourStage(entry) {
@@ -26845,12 +26870,7 @@ function getBigTourIndex(entry, list = null, options = {}) {
      * ausschließlich die einzelne Etappe bewerten.
      */
     else if (entry.tourGroup && aggregateMultiday) {
-        const source = Array.isArray(list)
-            ? list
-            : [
-                ...(appStorage.get('touren') || []),
-                ...(appStorage.get('plannedTours') || [])
-            ];
+        const source = getBigTourSourceList(entry, list);
 
         const stages = source.filter(e =>
             String(e.tourGroup || '') === String(entry.tourGroup || '')
@@ -27961,9 +27981,9 @@ function getStructureActivityComponents(entries) {
         if (type === 'bike & hike') {
             const bike = getBikeValues(entry);
 
-            totals.hiking.distance += mainDistance;
-            totals.hiking.ascent += mainAscent;
-            totals.hiking.minutes += mainMinutes;
+            totals.hiking.distance += Math.max(0, mainDistance - (bike.distance || 0));
+            totals.hiking.ascent += Math.max(0, mainAscent - (bike.ascent || 0));
+            totals.hiking.minutes += Math.max(0, mainMinutes - (bike.minutes || 0));
 
             totals.cycling.distance += Math.max(0, bike.distance || 0);
             totals.cycling.ascent += Math.max(0, bike.ascent || 0);
@@ -28353,8 +28373,9 @@ function getStructureTypeComparison(tours) {
             const distances = [];
             const ascents = [];
             const times = [];
-            const speeds = [];
             const gradients = [];
+            let speedDistance = 0;
+            let speedHours = 0;
             const ascentRates = [];
 
             items.forEach(entry => {
@@ -28373,7 +28394,8 @@ function getStructureTypeComparison(tours) {
                 if (hasTime) times.push(minutes);
 
                 if (hasDistance && hasTime) {
-                    speeds.push(distance / hours);
+                    speedDistance += distance;
+                    speedHours += hours;
                 }
 
                 if (hasDistance && hasAscent) {
@@ -28398,7 +28420,7 @@ function getStructureTypeComparison(tours) {
                 time: average(times),
                 gradient: average(gradients),
                 ascentRate: average(ascentRates),
-                speed: average(speeds)
+                speed: speedHours > 0 ? speedDistance / speedHours : null
             };
         })
         .sort((a, b) =>
@@ -34381,9 +34403,9 @@ if (
          * Optionales kurzes Feedback.
          */
         const themeNames = {
-            light: 'Light',
-            dark: 'Dark',
-            green: 'Green',
+            light: 'Hell',
+            dark: 'Dunkel',
+            green: 'Grün',
             summit: 'Summit'
         };
 
@@ -36257,8 +36279,11 @@ allData.forEach(entry => {
         return monthTime[i] > 0 ? d / (monthTime[i]/60) : 0;
     });
 
-    const validSpeeds = values.filter(v => v > 0);
-    const avgSpeed = getBoundedAverage(validSpeeds) || 0;
+    const totalDistance = monthDist.reduce((sum, value) => sum + value, 0);
+    const totalMinutes = monthTime.reduce((sum, value) => sum + value, 0);
+    const avgSpeed = totalMinutes > 0
+        ? totalDistance / (totalMinutes / 60)
+        : 0;
     drawChartTitleWithTotal(
     ctx,
     speedCanvas,
@@ -36806,7 +36831,8 @@ const MONTH_NAMES_FULL = [
 ];
 
 function getMonthStats(monthIndex) {
-    const data = getDiagramFilteredTours().filter(entry => {
+    const sourceData = getDiagramFilteredTours();
+    const data = sourceData.filter(entry => {
         if (!entry.date) return false;
         const d = new Date(entry.date);
         return !isNaN(d.getTime()) && d.getMonth() === monthIndex;
@@ -36840,7 +36866,7 @@ function getMonthStats(monthIndex) {
             if (!isNaN(h) && !isNaN(m)) totalMinutes += h * 60 + m;
         }
 
-        if (dist >= 10 && asc >= 1000) bigTours++;
+        if (isBigTourCountable(entry, sourceData)) bigTours++;
 
         if (entry.gipfelDetails && Array.isArray(entry.gipfelDetails)) {
             entry.gipfelDetails.forEach(g => {
@@ -38431,6 +38457,8 @@ function drawYearCompareDiagram() {
      */
     const yearData = {};
 const yearDataCount = {};
+const yearSpeedDistance = {};
+const yearSpeedHours = {};
 
 /*
  * Mehrtagestouren bei "Anzahl Touren"
@@ -38441,6 +38469,8 @@ const countedTourGroups = new Set();
     years.forEach(year => {
         yearData[year] = Array(12).fill(0);
         yearDataCount[year] = Array(12).fill(0);
+        yearSpeedDistance[year] = Array(12).fill(0);
+        yearSpeedHours[year] = Array(12).fill(0);
     });
 
     /*
@@ -38601,9 +38631,9 @@ const countedTourGroups = new Set();
                 break;
 
             case 'speed':
-                if (speed > 0) {
-                    yearData[year][month] += speed;
-                    yearDataCount[year][month]++;
+                if (distance > 0 && timeHours > 0) {
+                    yearSpeedDistance[year][month] += distance;
+                    yearSpeedHours[year][month] += timeHours;
                 }
                 break;
 
@@ -38633,10 +38663,7 @@ const countedTourGroups = new Set();
                 break;
 
             case 'bigTours':
-                if (
-                    distance >= 10 &&
-                    ascent >= 1000
-                ) {
+                if (isBigTourCountable(entry, allData)) {
                     yearData[year][month] += 1;
                 }
                 break;
@@ -38678,7 +38705,6 @@ const countedTourGroups = new Set();
         'avgAscent',
         'avgTime',
         'performance',
-        'speed',
         'gradient',
         'ascentRate',
         'avgSteps'
@@ -38693,6 +38719,17 @@ const countedTourGroups = new Set();
                     count > 0
                         ? yearData[year][month] / count
                         : 0;
+            }
+        });
+    }
+
+    if (yearCompareMetric === 'speed') {
+        years.forEach(year => {
+            for (let month = 0; month < 12; month++) {
+                const hours = yearSpeedHours[year][month];
+                yearData[year][month] = hours > 0
+                    ? yearSpeedDistance[year][month] / hours
+                    : 0;
             }
         });
     }
@@ -39482,7 +39519,7 @@ function getMonthlyTrendData(tours, months = 6) {
         bucket.asc   += asc;
         bucket.count += 1;
         bucket.peaks += parseInt(e.gipfel) || 0;
-        if (dist >= 10 && asc >= 1000) bucket.big++;
+        if (isBigTourCountable(e, tours)) bucket.big++;
         if (e.zeit && e.zeit.includes(':')) {
             const [h, m] = e.zeit.split(':').map(Number);
             if (!isNaN(h) && !isNaN(m)) bucket.mins += h * 60 + m;
@@ -39655,11 +39692,11 @@ function quickStats(tours) {
     value: stats.avgSpeed > 0
         ? formatDecimalAT(stats.avgSpeed) + ' km/h'
         : '–',
-    label: 'Ø Speed',
+    label: 'Ø Geschwindigkeit',
     type: 'speed'
 },
             { icon: '📐', value: stats.avgGradient > 0 ? Math.round(stats.avgGradient)                + ' hm/km' : '–',  label: 'Ø Steigung', type: 'steigung' },
-            { icon: '⬆️', value: stats.avgAscentH  > 0 ? Math.round(stats.avgAscentH)                 + ' hm/h'  : '–',  label: 'Ø Anstieg',  type: 'anstieg'  },
+            { icon: '⬆️', value: stats.avgAscentH  > 0 ? Math.round(stats.avgAscentH)                 + ' hm/h'  : '–',  label: 'Ø Anstieg / h', type: 'anstieg'  },
         ];
         const yearFilterWrap =
             document.querySelector('.dash-year-filter-wrap');
@@ -41616,13 +41653,7 @@ if (monatVonSelect && monatBisSelect) {
 
 }
 
-// Box-Höhe korrekt anpassen (wie bei Alle Touren)
-function updateBoxHeight(box){
-    const content = box.querySelector('.box-content');
-    if(box.classList.contains('active')){
-        content.style.maxHeight = content.scrollHeight + 'px';
-    }
-}
+// Box-Höhe wird zentral durch updateBoxHeight() weiter oben gesteuert.
 
 const monthShort = ['Jän','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 
