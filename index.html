@@ -18647,6 +18647,41 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         min-width: 0;
     }
 
+    /*
+       Theme-Sicherheit im Querformat:
+       Keine festen Ersatzfarben verwenden. Navigation und
+       Mehr-Menü übernehmen die bereits vorhandenen Theme-Variablen.
+    */
+    .accordion-header,
+    .header-actions,
+    .top-main-nav {
+        color: var(--text-main);
+    }
+
+    .top-main-nav {
+        background: var(--glass-bg);
+        border-color: var(--glass-border);
+        box-shadow:
+            0 6px 20px rgba(25,40,35,0.12),
+            inset 0 1px 1px rgba(255,255,255,0.14);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+    }
+
+    .top-nav-btn {
+        color: var(--text-main);
+    }
+
+    .top-nav-btn.view-active,
+    .top-nav-btn.more-view-active {
+        background: var(--accent-soft);
+    }
+
+    .top-nav-save {
+        background: var(--accent-gradient);
+        color: var(--text-main);
+    }
+
     /* Mehr öffnet seitlich statt nach unten */
     .more-menu {
         top: 50%;
@@ -18661,6 +18696,28 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         max-height: calc(100dvh - 16px);
         overflow-y: auto;
         overscroll-behavior: contain;
+
+        /* Auch das seitliche Menü folgt exakt dem aktiven Theme. */
+        background: var(--glass-bg);
+        border-color: var(--glass-border);
+        color: var(--text-main);
+        box-shadow:
+            0 18px 48px rgba(20,30,25,0.24),
+            inset 0 1px 1px rgba(255,255,255,0.16);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+    }
+
+    .more-menu-item {
+        color: var(--text-main);
+    }
+
+    .more-menu-item:active {
+        background: var(--ui-card-bg-interactive);
+    }
+
+    .more-menu-divider {
+        background: var(--glass-border);
     }
 
     /* Die Views bekommen die Fläche rechts neben der Navigation. */
