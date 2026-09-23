@@ -11407,6 +11407,14 @@ select {
 
 #tour-view
 .plan-page-box
+#plan-zeit[readonly] {
+    cursor: default;
+    font-weight: 750;
+    color: var(--accent);
+}
+
+#tour-view
+.plan-page-box
 .tour-form
 .form-group {
     gap: 3px;
@@ -19441,8 +19449,14 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
             <input type="number" inputmode="numeric" step="1" min="0" id="plan-aufstieg">
         </div>
             <div class="form-group" id="plan-main-time-field">
-    <label for="plan-zeit">Gehzeit:</label>
-    <input type="text" inputmode="numeric" maxlength="5" id="plan-zeit" name="plan-zeit">
+    <label for="plan-zeit">Geschätzte Gehzeit:</label>
+    <input
+        type="text"
+        id="plan-zeit"
+        name="plan-zeit"
+        readonly
+        aria-readonly="true"
+        placeholder="automatisch">
 </div>
 
 <div id="plan-ferrata-fields" style="display:none; flex-direction:column; gap:10px;">
@@ -19531,7 +19545,7 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         <small>persönliche Einordnung</small>
     </div>
     <div id="plan-live-preview-content" class="plan-live-preview-content">
-        Strecke, Aufstieg und Zeit eingeben, um die Tour live einzuordnen.
+        Strecke und Aufstieg eingeben, um die Tour live einzuordnen.
     </div>
 </div>
 
@@ -20629,6 +20643,7 @@ initStatisticsClickHandlers();
 // Geplante Touren
 loadPlannedTours();
     updatePlannedPeaks();
+    initPlannedEstimatedWalkingTime();
     initPlannedLivePreview();
 
     // Neue unabhängige Tourensuche initialisieren
@@ -20806,23 +20821,6 @@ zeitInput.addEventListener('input', (e) => {
 
 
 const planZeitInput = document.getElementById('plan-zeit');
-
-planZeitInput.addEventListener('input', (e) => {
-    let v = e.target.value;
-
-    // Alles außer Ziffern entfernen
-    v = v.replace(/\D/g, '');
-
-    // Maximal 4 Ziffern (hhmm)
-    v = v.slice(0, 4);
-
-    // Nach 2 Ziffern automatisch Doppelpunkt einfügen
-    if (v.length >= 3) {
-        v = v.slice(0, 2) + ':' + v.slice(2);
-    }
-
-    e.target.value = v;
-});
 
 function scrollBoxHeaderToTopMobile(header) {
     if (!header) return;
@@ -24153,6 +24151,100 @@ if (mainTimeField) {
 updateActivityFieldsVisibility();
 
 
+/* =========================================================
+   Tour planen – automatische Gehzeitschätzung nach Alpenverein
+
+   Berechnungsbasis:
+   - 4 km Strecke = 1 h
+   - 300 Hm Aufstieg = 1 h
+   - kleinerer Zeitwert wird halbiert und zum größeren addiert
+   - bei Gleichstand wird ebenfalls einer der beiden Werte halbiert
+   - Ausgabe auf 15 Minuten gerundet
+   ========================================================= */
+function calculatePlannedEstimatedWalkingMinutes(distanceValue, ascentValue) {
+    const distance = parseFloat(
+        String(distanceValue ?? '').trim().replace(',', '.')
+    );
+
+    const ascent = parseFloat(
+        String(ascentValue ?? '').trim().replace(',', '.')
+    );
+
+    const distanceHours =
+        Number.isFinite(distance) && distance > 0
+            ? distance / 4
+            : 0;
+
+    const ascentHours =
+        Number.isFinite(ascent) && ascent > 0
+            ? ascent / 300
+            : 0;
+
+    if (distanceHours <= 0 && ascentHours <= 0) {
+        return 0;
+    }
+
+    const largerHours = Math.max(distanceHours, ascentHours);
+    const smallerHours = Math.min(distanceHours, ascentHours);
+
+    const rawMinutes =
+        (largerHours + smallerHours * 0.5) * 60;
+
+    return Math.max(
+        0,
+        Math.round(rawMinutes / 15) * 15
+    );
+}
+
+function updatePlannedEstimatedWalkingTime() {
+    const timeInput = document.getElementById('plan-zeit');
+    const distanceInput = document.getElementById('plan-strecke');
+    const ascentInput = document.getElementById('plan-aufstieg');
+    const difficultyInput = document.getElementById('plan-difficulty');
+
+    if (!timeInput) return '';
+
+    const difficulty = String(difficultyInput?.value || '')
+        .trim()
+        .toLowerCase();
+
+    // Reine Radtouren besitzen weiterhin nur die separate Fahrzeit.
+    if (difficulty === 'radtour') {
+        timeInput.value = '';
+        return '';
+    }
+
+    const minutes = calculatePlannedEstimatedWalkingMinutes(
+        distanceInput?.value,
+        ascentInput?.value
+    );
+
+    timeInput.value = minutes > 0
+        ? formatFerrataMinutes(minutes)
+        : '';
+
+    return timeInput.value;
+}
+
+function initPlannedEstimatedWalkingTime() {
+    [
+        'plan-strecke',
+        'plan-aufstieg'
+    ].forEach(id => {
+        const control = document.getElementById(id);
+
+        control?.addEventListener('input', () => {
+            updatePlannedEstimatedWalkingTime();
+        });
+
+        control?.addEventListener('change', () => {
+            updatePlannedEstimatedWalkingTime();
+        });
+    });
+
+    updatePlannedEstimatedWalkingTime();
+}
+
 function buildPlannedLivePreviewEntry() {
     const difficulty = String(planDifficulty?.value || '').trim();
     const lower = difficulty.toLowerCase();
@@ -24198,7 +24290,7 @@ function updatePlannedLivePreview() {
     ) {
         content.classList.add('is-empty');
         content.innerHTML = `
-            <span class="plan-live-preview-empty">Strecke, Aufstieg und Zeit eingeben, um Steigung, Anstieg und Tourprofil live zu sehen.</span>
+            <span class="plan-live-preview-empty">Strecke und Aufstieg eingeben, um Steigung, Anstieg und Tourprofil live zu sehen.</span>
         `;
         return;
     }
@@ -24338,6 +24430,7 @@ if (planMainTimeField) {
         planAscentLabel.textContent = 'Aufstieg (Hm):';
     }
 
+    updatePlannedEstimatedWalkingTime();
     updatePlannedLivePreview();
 
     requestAnimationFrame(() => {
@@ -41702,6 +41795,9 @@ planGipfelCount.addEventListener('change', () => {
 // ---------- Speichern ----------
 planSaveBtn.addEventListener('click', () => {
 
+    // Gehzeit unmittelbar vor dem Speichern aus Strecke/Aufstieg aktualisieren.
+    updatePlannedEstimatedWalkingTime();
+
     // Tour-Daten aus Formular
     const tourname = planTourname.value.trim();
     const strecke  = planStrecke.value.trim().replace(',', '.');
@@ -41852,6 +41948,7 @@ ferrataZeit: planFerrataZeit,
 
     // Formular zurücksetzen wie Save-Button
     planForm.reset();
+    updatePlannedEstimatedWalkingTime();
     planGipfelDetails.innerHTML = '';
 
 if (planBikeStreckeInput) planBikeStreckeInput.value = '';
@@ -41974,7 +42071,10 @@ updatePlanActivityFieldsVisibility();
     planStrecke.value = (entry.strecke ?? '').toString().replace(',', '.');
     planAufstieg.value = entry.aufstieg || '';
     planAusgangspunkt.value = entry.ausgangspunkt || '';
-    planZeit.value = entry.zeit || '';
+
+    // Bestehende Planungen werden beim Bearbeiten auf die automatische
+    // Alpenverein-Schätzung umgestellt; alte manuelle Werte werden nicht übernommen.
+    updatePlannedEstimatedWalkingTime();
 
     if (planNotes) {
         planNotes.value = entry.notes || '';
