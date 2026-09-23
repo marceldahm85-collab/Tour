@@ -18536,7 +18536,7 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
    MOBILE QUERFORMAT – gemeinsame S23-Grundstruktur
    Portrait und Desktop bleiben unverändert.
    ========================================================= */
-@media (orientation: landscape) and (pointer: coarse) and (max-height: 600px) {
+@media (orientation: landscape) and (max-height: 700px) and (max-width: 1000px) {
 
     html,
     body {
@@ -20830,6 +20830,10 @@ const slopeToggleBtn = document.getElementById('slope-toggle');
 let useFullDistanceForGradient = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // Theme sofort initialisieren. Eine verzögerte IndexedDB-Initialisierung
+    // darf die Theme-Wiederherstellung auf mobilen Geräten nicht blockieren.
+    initTheme();
+
     await initStorage();
     migrateLegacyDifficultyValues();
     migrateStoredEntryIds();
@@ -20839,7 +20843,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     diagramFilterState = { selectedYears: savedDiagramState.selectedYears || [] };
     activeChartType = appStorage.get(CHART_TAB_KEY) || 'steps';
 
-initTheme();
 initStatsPeakDrilldown();
 initTourDetailModal();
 initImageLightbox();
