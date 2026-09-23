@@ -41766,6 +41766,16 @@ function initTheme() {
             'theme',
             theme
         );
+
+        // Sofortige synchrone Sicherung für mobile Browser/PWA.
+        // IndexedDB wird weiterhin als Hauptspeicher verwendet, aber
+        // localStorage verhindert, dass das Theme bei einem frühen
+        // Reload/Orientation-Wechsel verloren geht.
+        try {
+            localStorage.setItem('tourtracker-theme', theme);
+        } catch (error) {
+            console.warn('[Theme] localStorage-Sicherung fehlgeschlagen:', error);
+        }
     }
 
     const saved =
