@@ -1,7 +1,7 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Version bei jeder inhaltlichen Änderung erhöhen (v1 -> v2 -> ...),
 // damit alte Caches automatisch ersetzt werden.
-const CACHE_NAME = 'bergtouren-cache-v3';
+const CACHE_NAME = 'bergtouren-cache-v4';
 
 const APP_SHELL = [
   './',
