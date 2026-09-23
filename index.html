@@ -51074,7 +51074,37 @@ if (APP_PERF_ENABLED) {
         }, 160);
     };
 
-    window.addEventListener('orientationchange', refresh, { passive: true });
+    function restoreThemeAfterOrientation() {
+        const validThemes = ['light', 'dark', 'green', 'summit'];
+        let theme = null;
+
+        try {
+            theme = localStorage.getItem('tourtracker-theme');
+        } catch (error) {}
+
+        if (!validThemes.includes(theme)) {
+            try {
+                theme = sessionStorage.getItem('tourtracker-theme');
+            } catch (error) {}
+        }
+
+        if (!validThemes.includes(theme)) {
+            theme = appStorage.get('theme');
+        }
+
+        if (!validThemes.includes(theme)) return;
+
+        document.body.classList.remove('dark', 'green', 'summit');
+
+        if (theme === 'dark') document.body.classList.add('dark');
+        if (theme === 'green') document.body.classList.add('green');
+        if (theme === 'summit') document.body.classList.add('summit');
+    }
+
+    window.addEventListener('orientationchange', () => {
+        restoreThemeAfterOrientation();
+        refresh();
+    }, { passive: true });
     window.addEventListener('resize', () => {
         if (window.matchMedia('(orientation: landscape) and (pointer: coarse)').matches) {
             refresh();
