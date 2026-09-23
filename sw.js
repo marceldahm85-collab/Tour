@@ -1,7 +1,7 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Version bei jeder inhaltlichen Änderung erhöhen (v1 -> v2 -> ...),
 // damit alte Caches automatisch ersetzt werden.
-const CACHE_NAME = 'bergtouren-cache-v2';
+const CACHE_NAME = 'bergtouren-cache-v3';
 
 const APP_SHELL = [
   './',
@@ -52,25 +52,50 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// --- Fetch-Strategie: Stale-While-Revalidate ---
-// Sofort aus dem Cache liefern (schnell, offline-fähig),
-// im Hintergrund aktualisieren für den nächsten Aufruf.
+// --- Fetch-Strategie ---
+// HTML/Navigationsanfragen werden zuerst aus dem Netz geladen.
+// So wird nach App-Updates auf mobilen Geräten nicht dauerhaft
+// eine alte index.html aus dem Service-Worker ausgeliefert.
+// Bei Offline-Betrieb fällt die Navigation auf den Cache zurück.
+// Statische Ressourcen bleiben cache-first.
+
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const networkFetch = fetch(event.request)
+  const isNavigation =
+    event.request.mode === 'navigate' ||
+    event.request.destination === 'document';
+
+  if (isNavigation) {
+    event.respondWith(
+      fetch(event.request)
         .then((networkRes) => {
-          if (networkRes && (networkRes.ok || networkRes.type === 'opaque')) {
+          if (networkRes && networkRes.ok) {
             const resClone = networkRes.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, resClone));
+            caches.open(CACHE_NAME).then((cache) =>
+              cache.put(event.request, resClone)
+            );
           }
           return networkRes;
         })
-        .catch(() => cached); // Offline & nichts im Cache -> Fehler durchreichen
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
 
-      return cached || networkFetch;
+  event.respondWith(
+    caches.match(event.request).then((cached) => {
+      if (cached) return cached;
+
+      return fetch(event.request).then((networkRes) => {
+        if (networkRes && (networkRes.ok || networkRes.type === 'opaque')) {
+          const resClone = networkRes.clone();
+          caches.open(CACHE_NAME).then((cache) =>
+            cache.put(event.request, resClone)
+          );
+        }
+        return networkRes;
+      });
     })
   );
 });
