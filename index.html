@@ -18752,6 +18752,36 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
 </head>
 <body>
 
+<script>
+/* Sofortige Theme-Wiederherstellung für mobile/PWA-Reloads.
+   Dieser Code läuft noch vor DOMContentLoaded und vor IndexedDB. */
+(function () {
+    const validThemes = ['light', 'dark', 'green', 'summit'];
+    let saved = null;
+
+    try {
+        saved = localStorage.getItem('tourtracker-theme');
+    } catch (error) {
+        console.warn('[Theme Bootstrap] localStorage-Lesen fehlgeschlagen:', error);
+    }
+
+    if (!validThemes.includes(saved)) {
+        try {
+            saved = sessionStorage.getItem('tourtracker-theme');
+        } catch (error) {
+            console.warn('[Theme Bootstrap] sessionStorage-Lesen fehlgeschlagen:', error);
+        }
+    }
+
+    if (!validThemes.includes(saved)) return;
+
+    document.body.classList.remove('dark', 'green', 'summit');
+    if (saved === 'dark') document.body.classList.add('dark');
+    if (saved === 'green') document.body.classList.add('green');
+    if (saved === 'summit') document.body.classList.add('summit');
+})();
+</script>
+
 
 <div class="sun"></div>
 <div class="time-tint" id="time-tint"></div>
@@ -41776,15 +41806,32 @@ function initTheme() {
         } catch (error) {
             console.warn('[Theme] localStorage-Sicherung fehlgeschlagen:', error);
         }
+
+        try {
+            sessionStorage.setItem('tourtracker-theme', theme);
+        } catch (error) {
+            console.warn('[Theme] sessionStorage-Sicherung fehlgeschlagen:', error);
+        }
     }
 
+    // Das Theme wird bewusst zuerst aus dem synchronen Speicher gelesen.
+    // IndexedDB kann einen älteren Stand enthalten und darf Dark/Green/Summit
+    // beim mobilen Reload oder Orientierungswechsel nicht zurücksetzen.
     const saved =
-        appStorage.get('theme') ||
         (() => {
             try {
                 return localStorage.getItem('tourtracker-theme');
             } catch (error) {
                 console.warn('[Theme] localStorage-Lesen fehlgeschlagen:', error);
+                return null;
+            }
+        })() ||
+        appStorage.get('theme') ||
+        (() => {
+            try {
+                return sessionStorage.getItem('tourtracker-theme');
+            } catch (error) {
+                console.warn('[Theme] sessionStorage-Lesen fehlgeschlagen:', error);
                 return null;
             }
         })() ||
