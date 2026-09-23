@@ -23021,10 +23021,23 @@ function applyAppDataPayload(payload) {
         document.body.classList.add('summit');
     }
 
-    appStorage.set(
-        'theme',
-        theme
-    );
+    appStorage.set('theme', theme);
+
+
+
+    try {
+
+
+        localStorage.setItem('tourtracker-theme', theme);
+
+
+    } catch (error) {
+
+
+        console.warn('[Theme] localStorage-Sicherung fehlgeschlagen:', error);
+
+
+    }
 
     const themeToggle =
         document.getElementById('theme-toggle');
@@ -41753,14 +41766,31 @@ function initTheme() {
     }
 
     const saved =
-        appStorage.get('theme') || 'light';
+        appStorage.get('theme') ||
+        (() => {
+            try {
+                return localStorage.getItem('tourtracker-theme');
+            } catch (error) {
+                console.warn('[Theme] localStorage-Lesen fehlgeschlagen:', error);
+                return null;
+            }
+        })() ||
+        'light';
 
     applyTheme(saved);
 
     function cycleTheme() {
 
     const current =
-        appStorage.get('theme') || 'light';
+        appStorage.get('theme') ||
+        (() => {
+            try {
+                return localStorage.getItem('tourtracker-theme');
+            } catch {
+                return null;
+            }
+        })() ||
+        'light';
 
     const currentIndex =
         THEMES.indexOf(current);
