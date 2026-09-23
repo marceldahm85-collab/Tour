@@ -47884,9 +47884,27 @@ if (document.readyState === 'loading') {
 
 // ── Startup: DB öffnen, migrieren, Cache befüllen ───────
 async function initStorage() {
+    // Werte, die bereits vor dem asynchronen Storage-Load gesetzt wurden,
+    // müssen Vorrang behalten. Das ist besonders für das Theme wichtig:
+    // initTheme() läuft bewusst sehr früh, damit mobile Orientierungwechsel
+    // nicht auf die IndexedDB warten müssen.
+    const preloadedTheme = _cache.theme;
+
     await migrateToIDB();
+
     const all = await _idbGetAll();
-    all.forEach(({ key, value }) => { _cache[key] = value; });
+    all.forEach(({ key, value }) => {
+        // Bereits synchron vorab geladene Werte nicht mit einem älteren
+        // IndexedDB-Stand überschreiben.
+        if (!(key in _cache)) {
+            _cache[key] = value;
+        }
+    });
+
+    if (preloadedTheme != null) {
+        _cache.theme = preloadedTheme;
+    }
+
     console.log(`[Storage] Bereit — ${all.length} Einträge geladen.`);
 }
 
