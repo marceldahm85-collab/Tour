@@ -18536,7 +18536,7 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
    MOBILE QUERFORMAT – gemeinsame S23-Grundstruktur
    Portrait und Desktop bleiben unverändert.
    ========================================================= */
-@media (orientation: landscape) and (max-height: 700px) and (max-width: 1000px) {
+@media (orientation: landscape) and (pointer: coarse) {
 
     html,
     body {
@@ -18683,6 +18683,10 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
     }
 
     /* Mehr öffnet seitlich statt nach unten */
+    .more-menu.hidden {
+        display: none !important;
+    }
+
     .more-menu {
         top: 50%;
         right: auto;
@@ -18747,6 +18751,36 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         padding-bottom: 18px;
     }
 }
+
+    .top-main-nav > .top-nav-btn,
+    .top-main-nav .top-nav-btn {
+        appearance: none;
+        -webkit-appearance: none;
+        border: 0;
+        outline: 0;
+        color: var(--text-main) !important;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .top-main-nav .top-nav-btn.view-active,
+    .top-main-nav .top-nav-btn.more-view-active {
+        background: var(--accent-soft) !important;
+    }
+
+    .top-main-nav .top-nav-save {
+        background: var(--accent-gradient) !important;
+        color: var(--text-main) !important;
+    }
+
+    .more-menu:not(.hidden) {
+        display: block;
+    }
+
+    .view-container,
+    .view {
+        box-sizing: border-box;
+    }
 
 </style>
 </head>
