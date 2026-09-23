@@ -23321,6 +23321,65 @@ async function restoreLinkedFileHandleOnStartup() {
 
         if (hasReadPermission === 'granted') {
             updateFileStatus(`Verbunden: ${handle.name}`);
+
+            // Theme zusätzlich aus der verknüpften Datendatei wiederherstellen.
+            // Die Tourdaten selbst werden dabei NICHT automatisch geladen.
+            try {
+                const file = await handle.getFile();
+                const payload = JSON.parse(await file.text());
+                const fileTheme = payload?.meta?.theme;
+                const validThemes = ['light', 'dark', 'green', 'summit'];
+
+                if (validThemes.includes(fileTheme)) {
+                    document.body.classList.remove('dark', 'green', 'summit');
+
+                    if (fileTheme === 'dark') {
+                        document.body.classList.add('dark');
+                    } else if (fileTheme === 'green') {
+                        document.body.classList.add('green');
+                    } else if (fileTheme === 'summit') {
+                        document.body.classList.add('summit');
+                    }
+
+                    appStorage.set('theme', fileTheme);
+
+                    try {
+                        localStorage.setItem('tourtracker-theme', fileTheme);
+                    } catch (error) {
+                        console.warn('[Theme] lokale Sicherung aus Datendatei fehlgeschlagen:', error);
+                    }
+
+                    try {
+                        sessionStorage.setItem('tourtracker-theme', fileTheme);
+                    } catch (error) {
+                        console.warn('[Theme] Session-Sicherung aus Datendatei fehlgeschlagen:', error);
+                    }
+
+                    const icons = {
+                        light: '☀️',
+                        dark: '🌙',
+                        green: '🌿',
+                        summit: '⛰️'
+                    };
+                    const themeToggle = document.getElementById('theme-toggle');
+
+                    if (themeToggle) {
+                        themeToggle.textContent = icons[fileTheme];
+                    }
+
+                    document.querySelectorAll('[data-theme-choice]').forEach(option => {
+                        const active = option.dataset.themeChoice === fileTheme;
+                        option.classList.toggle('active', active);
+                        option.setAttribute('aria-pressed', active ? 'true' : 'false');
+                    });
+
+                    if (typeof refreshThemeDependentUi === 'function') {
+                        refreshThemeDependentUi();
+                    }
+                }
+            } catch (error) {
+                console.warn('[Theme] Theme aus verknüpfter Datendatei konnte nicht gelesen werden:', error);
+            }
         } else {
             updateFileStatus(`Gemerkte Datei: ${handle.name} (Zugriff bei Bedarf bestätigen)`);
         }
