@@ -18533,11 +18533,12 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
 
 
 /* =========================================================
-   MOBILE QUERFORMAT – gleiche App-Struktur wie Portrait,
-   nur auf die größere Breite des Smartphones angepasst.
-   Keine seitliche Navigation, keine eigene Theme-Oberfläche.
+   MOBILE QUERFORMAT
+   Das Querformat verwendet exakt dieselbe App-Struktur wie
+   das mobile Hochformat. Die verfügbare Breite wird lediglich
+   größer; Navigation und Theme werden nicht neu interpretiert.
    ========================================================= */
-@media (orientation: landscape) and (max-width: 1000px) and (max-height: 700px) {
+@media (orientation: landscape) and (pointer: coarse) {
 
     html,
     body {
@@ -18548,8 +18549,7 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
     }
 
     body {
-        padding-top: max(8px, env(safe-area-inset-top));
-        padding-bottom: 0;
+        padding: 24px 0 0;
         display: flex;
         justify-content: center;
     }
@@ -18558,65 +18558,67 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         width: 100%;
         height: 100%;
         max-width: none;
-        max-height: 100%;
+        min-height: 0;
         display: flex;
         flex-direction: column;
         overflow: hidden;
     }
 
-    /* Hauptnavigation bleibt exakt horizontal wie im Portrait. */
     .accordion-header {
-        flex: 0 0 auto;
         width: 100%;
-        max-width: none;
-        margin-top: 8px;
+        max-width: 700px;
+        flex: 0 0 auto;
+        margin-top: 24px;
         margin-bottom: 16px;
+        padding: 0 16px;
+        position: relative;
         top: 0;
-        padding-left: 16px;
-        padding-right: 16px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+        box-sizing: border-box;
     }
 
     .header-actions {
+        position: relative;
         width: 100%;
+        display: block;
     }
 
     .top-main-nav {
+        position: relative;
         width: 100%;
-        max-width: none;
-
         display: grid;
         grid-template-columns: repeat(5, minmax(0, 1fr));
         align-items: center;
-
         gap: 4px;
         padding: 5px;
-
-        /* Nur Theme-Variablen – keine festen Landscape-Farben. */
-        background: var(--glass-bg);
-        border-color: var(--glass-border);
-        color: var(--text-main);
-
-        box-shadow:
-            var(--shadow-soft),
-            inset 0 1px 1px rgba(255,255,255,0.16);
+        box-sizing: border-box;
     }
 
-    .top-nav-btn {
+    .top-nav-btn,
+    .top-nav-save {
         width: 100%;
+        min-width: 0;
         height: 50px;
         min-height: 50px;
         padding: 4px 2px;
-        color: var(--text-main);
+        box-sizing: border-box;
     }
 
-    .top-nav-save {
-        height: 50px;
-        min-height: 50px;
-        background: var(--accent-gradient);
-        color: var(--text-main);
+    .top-nav-icon {
+        font-size: 20.5px;
     }
 
-    /* Das Mehr-Menü bleibt ein normales Dropdown unter "Mehr". */
+    .top-nav-label {
+        font-size: 10px;
+    }
+
+    .top-nav-plus {
+        font-size: 27px;
+    }
+
     .top-nav-more-wrap {
         position: relative;
         min-width: 0;
@@ -18627,59 +18629,62 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         right: 0;
         left: auto;
         bottom: auto;
-        transform: none;
-
         width: 210px;
         max-width: min(210px, calc(100vw - 24px));
-        max-height: calc(100dvh - 90px);
+        max-height: calc(100dvh - 100px);
         overflow-y: auto;
-
-        background: var(--glass-bg);
-        border-color: var(--glass-border);
-        color: var(--text-main);
+        overscroll-behavior: contain;
+        box-sizing: border-box;
     }
 
     .more-menu.hidden {
-        display: none !important;
+        display: none;
     }
 
-    .more-menu-item {
-        color: var(--text-main);
-    }
-
-    .more-menu-divider {
-        background: var(--glass-border);
-    }
-
-    /* Der eigentliche View-Bereich bleibt identisch zur Portrait-Struktur. */
     .view-container {
         flex: 1 1 auto;
-        min-height: 0;
-        height: auto;
         width: 100%;
-        margin: 0;
+        height: auto;
+        min-height: 0;
         position: relative;
+        margin-left: 0;
         overflow: hidden;
+        box-sizing: border-box;
     }
 
     .view {
         position: absolute;
         inset: 0;
-
         width: 100%;
         height: 100%;
         min-height: 0;
-
         overflow-y: auto;
         overflow-x: hidden;
-
         -webkit-overflow-scrolling: touch;
-
         padding: 0 20px 28px;
         box-sizing: border-box;
     }
-}
 
+    .view > .accordion {
+        width: 100%;
+        padding-bottom: 28px;
+    }
+
+    #chart-view {
+        height: 100%;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-bottom: 28px;
+    }
+
+    #tour-view {
+        height: 100%;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+}
 </style>
 </head>
 <body>
@@ -50959,7 +50964,6 @@ if (APP_PERF_ENABLED) {
 
     const refresh = () => {
         clearTimeout(landscapeRefreshTimer);
-
         landscapeRefreshTimer = setTimeout(() => {
             requestAnimationFrame(() => {
                 if (typeof tourMap !== 'undefined' && tourMap) {
@@ -50973,10 +50977,16 @@ if (APP_PERF_ENABLED) {
         }, 160);
     };
 
+    /*
+     * Das Theme wird beim Drehen nicht mehr neu gesetzt.
+     * Der aktive Theme-Zustand bleibt dadurch unverändert.
+     * Bei einem echten Reload greift weiterhin der Theme-Bootstrap
+     * am Anfang des Dokuments.
+     */
     window.addEventListener('orientationchange', refresh, { passive: true });
 
     window.addEventListener('resize', () => {
-        if (window.matchMedia('(orientation: landscape) and (max-width: 1000px)').matches) {
+        if (window.matchMedia('(orientation: landscape) and (pointer: coarse)').matches) {
             refresh();
         }
     }, { passive: true });
