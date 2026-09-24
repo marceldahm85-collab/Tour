@@ -19126,27 +19126,6 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         overflow: hidden !important;
     }
 
-    /*
-     * Ein gemeinsamer Hintergrund verhindert, dass Jahresfilter
-     * und die fünf Schalter wie getrennte Bereiche wirken.
-     * Alle Farben kommen aus dem bestehenden Theme-System.
-     */
-    #chart-view::before {
-        content: "";
-        position: absolute;
-        left: 12px;
-        top: 8px;
-        bottom: 10px;
-        width: 148px;
-        border-radius: 14px;
-        background: var(--glass-bg);
-        border: 1px solid var(--glass-border);
-        box-shadow: var(--shadow-soft);
-        pointer-events: none;
-        z-index: 0;
-        box-sizing: border-box;
-    }
-
     #chart-view .stats-year-filter-wrap,
     #chart-view .stats-section-switch,
     #chart-view .stats-section-page.active {
@@ -35977,7 +35956,7 @@ allData.forEach(entry => {
 });
 
     const paddingTop = 10;
-    const padding = 40;
+    const padding = getChartHorizontalPadding();
     const width = getCanvasLogicalWidth(distanceCanvas) - padding*2;
     const height = getCanvasLogicalHeight(distanceCanvas) - padding - paddingTop;
     const barWidth = width/12 - 10;
@@ -36084,7 +36063,7 @@ allData.forEach(entry => {
 
     // Layout
     const paddingTop = 10;  
-    const padding = 40;
+    const padding = getChartHorizontalPadding();
     const width = getCanvasLogicalWidth(diagramCanvas) - padding * 2;
     const height = getCanvasLogicalHeight(diagramCanvas) - padding - paddingTop;
     const barWidth = width / 12 - 10;
@@ -36186,7 +36165,7 @@ allData.forEach(entry => {
 });
 
     const paddingTop = 10;
-    const padding = 40;
+    const padding = getChartHorizontalPadding();
     const width = getCanvasLogicalWidth(timeCanvas) - padding*2;
     const height = getCanvasLogicalHeight(timeCanvas) - padding - paddingTop;
     const barWidth = width/12 - 10;
@@ -36800,7 +36779,7 @@ function drawPerformanceIndexDiagram() {
      * feste Skala von 0 bis 100.
      */
     const paddingTop = 10;
-    const padding = 40;
+    const padding = getChartHorizontalPadding();
 
     const width =
         getCanvasLogicalWidth(canvas) -
@@ -37199,7 +37178,7 @@ allData.forEach(entry => {
 
     // Layout
     const paddingTop = 10;
-    const padding = 40;
+    const padding = getChartHorizontalPadding();
     const width = getCanvasLogicalWidth(peaksCanvas) - padding * 2;
     const height = getCanvasLogicalHeight(peaksCanvas) - padding - paddingTop;
     const barWidth = width / 12 - 10;
@@ -37486,6 +37465,16 @@ function drawSmartBarLabel(ctx, text, x, y, barWidth, barHeight, textColor, inte
     ctx.restore();
 }
 
+function getChartHorizontalPadding() {
+    return (
+        window.matchMedia(
+            '(max-width: 1024px) and (orientation: landscape) and (pointer: coarse)'
+        ).matches
+            ? 24
+            : 40
+    );
+}
+
 function drawChartTitleWithTotal(ctx, canvas, title, totalText) {
     const color = getChartTheme().textColor;
 
@@ -37500,7 +37489,7 @@ function drawChartTitleWithTotal(ctx, canvas, title, totalText) {
 
     ctx.fillText(
         title,
-        40,
+        getChartHorizontalPadding(),
         24
     );
 
@@ -37513,7 +37502,7 @@ function drawChartTitleWithTotal(ctx, canvas, title, totalText) {
 
     ctx.fillText(
         totalText,
-        getCanvasLogicalWidth(canvas) - 40,
+        getCanvasLogicalWidth(canvas) - getChartHorizontalPadding(),
         24
     );
 }
@@ -37521,7 +37510,7 @@ function drawChartTitleWithTotal(ctx, canvas, title, totalText) {
 function drawBars(canvas, ctx, values, unit, decimals){
 
     const paddingTop = 10;
-    const padding = 40;
+    const padding = getChartHorizontalPadding();
     const width = getCanvasLogicalWidth(canvas) - padding*2;
     const height = getCanvasLogicalHeight(canvas) - padding - paddingTop;
     const barWidth = width/12 - 10;
@@ -37795,7 +37784,7 @@ function drawAvgTimeDiagram() {
     drawChartTitleWithTotal(ctx, avgTimeCanvas, 'Ø Gehzeit', `Ø ${avgH}:${String(avgM).padStart(2, '0')} h`);
 
     const paddingTop  = 10;
-    const padding     = 40;
+    const padding = getChartHorizontalPadding();
     const barWidth    = (getCanvasLogicalWidth(avgTimeCanvas) - padding * 2) / 12 - 10;
     const maxValue    = Math.max(...values, 1);
     const maxBarHeight = (getCanvasLogicalHeight(avgTimeCanvas) - padding - paddingTop) * (1 - 0.5);
@@ -38979,7 +38968,7 @@ function initCanvasBarClicks() {
             const x =
                 (e.clientX - rect.left) * scaleX;
 
-            const padding = 40;
+            const padding = getChartHorizontalPadding();
 
             const barStep =
                 (getCanvasLogicalWidth(canvas) - padding * 2) / 12;
