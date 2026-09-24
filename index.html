@@ -18533,12 +18533,11 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
 
 
 /* =========================================================
-   MOBILE QUERFORMAT – kompakte Seiten-Navigation
-   Nur auf Touch-Geräten im Querformat.
-   Wichtig: bewusst OHNE max-width, da manche Android-Browser
-   im Querformat eine größere CSS-Viewportbreite melden.
+   MOBILE QUERFORMAT
+   Portrait-Layout 1:1 beibehalten – im Querformat nur
+   die zusätzliche Bildschirmbreite nutzen.
    ========================================================= */
-@media (orientation: landscape) and (max-width: 1100px) and (max-height: 800px) {
+@media (orientation: landscape) and (pointer: coarse) {
 
     html,
     body {
@@ -18549,32 +18548,35 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
     }
 
     body {
-        padding: 0;
-        justify-content: flex-start;
+        padding: 8px 0 0;
+        display: flex;
+        justify-content: center;
     }
 
     .app-wrapper {
         width: 100%;
-        height: 100dvh;
-        min-height: 0;
         max-width: none;
+        height: 100%;
+        max-height: 100%;
+        min-height: 0;
         margin: 0;
 
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
 
         overflow: hidden;
     }
 
-    /* Seitliche Hauptnavigation */
-    .accordion-header {
-        flex: 0 0 72px;
-        width: 72px;
-        max-width: 72px;
-        height: 100dvh;
+    /* ===== Kopf / Hauptnavigation ===== */
 
-        margin: 0;
-        padding: 6px 5px;
+    .accordion-header {
+        flex: 0 0 auto;
+
+        width: 100%;
+        max-width: none;
+
+        margin: 0 0 10px;
+        padding: 0 16px;
 
         position: relative;
         top: 0;
@@ -18584,51 +18586,36 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         justify-content: center;
 
         box-sizing: border-box;
-        z-index: 10000;
+        z-index: 10;
     }
 
     .header-actions {
         width: 100%;
-        height: 100%;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        max-width: none;
     }
 
     .top-main-nav {
-        width: 62px;
-        max-height: calc(100dvh - 12px);
+        width: 100%;
 
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-        justify-content: center;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        align-items: center;
 
         gap: 4px;
         padding: 5px;
 
         box-sizing: border-box;
-        border-radius: 18px;
-
-        background: var(--glass-bg);
-        border-color: var(--glass-border);
-        color: var(--text-main);
     }
 
     .top-nav-btn,
     .top-nav-save {
-        flex: 0 0 auto;
         width: 100%;
         height: 50px;
         min-height: 50px;
         margin: 0;
-        padding: 3px 1px;
+        padding: 4px 2px;
 
-        border-radius: 13px;
-        gap: 2px;
-
-        color: var(--text-main);
+        box-sizing: border-box;
     }
 
     .top-nav-icon {
@@ -18636,59 +18623,46 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
     }
 
     .top-nav-label {
-        font-size: 8px;
+        font-size: 9px;
         line-height: 1;
-        max-width: 100%;
     }
 
     .top-nav-save {
-        height: 52px;
-        min-height: 52px;
-        border-radius: 14px;
-        background: var(--accent-gradient);
-    }
-
-    .top-nav-plus {
-        font-size: 25px;
-        line-height: 1;
+        height: 50px;
+        min-height: 50px;
     }
 
     .top-nav-more-wrap {
+        position: relative;
         width: 100%;
         min-width: 0;
-        position: relative;
     }
 
-    .top-nav-btn.view-active,
-    .top-nav-btn.more-view-active {
-        background: var(--accent-soft);
-    }
+    /* ===== Mehr-Menü =====
+       Die vorhandene .hidden-Regel und die vorhandene
+       JavaScript-Toggle-Logik bleiben vollständig erhalten. */
 
-    /* Mehr-Menü: vorhandene hidden-Steuerung unverändert lassen */
     .more-menu {
-        top: 50%;
-        right: auto;
-        left: calc(100% + 8px);
+        top: calc(100% + 10px);
+        right: 0;
+        left: auto;
         bottom: auto;
 
-        transform: translateY(-50%);
-
         width: 210px;
-        max-width: calc(100vw - 90px);
-        max-height: calc(100dvh - 16px);
+        max-width: min(210px, calc(100vw - 32px));
+        max-height: calc(100dvh - 90px);
+
+        transform: none;
 
         overflow-y: auto;
         overscroll-behavior: contain;
+
         box-sizing: border-box;
-        z-index: 11000;
+        z-index: 1000;
 
         color: var(--text-main);
         background: var(--glass-bg);
         border-color: var(--glass-border);
-    }
-
-    .more-menu.hidden {
-        display: none;
     }
 
     .more-menu-item {
@@ -18699,17 +18673,20 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         background: var(--glass-border);
     }
 
-    /* Inhaltsbereich rechts neben der Navigation */
+    /* ===== Inhalt =====
+       Die bestehende View-Slide-Logik bleibt unverändert. */
+
     .view-container {
+        position: relative;
+
         flex: 1 1 auto;
 
-        width: auto;
-        height: 100dvh;
+        width: 100%;
+        height: auto;
         min-width: 0;
         min-height: 0;
 
         margin: 0;
-        position: relative;
 
         overflow: hidden;
         box-sizing: border-box;
@@ -18726,7 +18703,8 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         overflow-y: auto;
         overflow-x: hidden;
 
-        padding: 8px 14px 18px;
+        padding: 0 20px 28px;
+
         box-sizing: border-box;
 
         -webkit-overflow-scrolling: touch;
@@ -18734,7 +18712,7 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
 
     .view > .accordion {
         width: 100%;
-        padding-bottom: 18px;
+        padding-bottom: 28px;
     }
 
     #chart-view,
