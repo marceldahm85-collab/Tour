@@ -18748,6 +18748,217 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
     }
 }
 
+
+/* =========================================================
+   MOBILE QUERFORMAT – kompakte Seiten-Navigation
+   Nur für Touch-Geräte im Querformat.
+   Portrait und Desktop bleiben unverändert.
+   ========================================================= */
+@media (max-width: 900px) and (orientation: landscape) and (pointer: coarse) {
+
+    html,
+    body {
+        width: 100%;
+        height: 100dvh;
+        min-height: 100dvh;
+        overflow: hidden;
+    }
+
+    body {
+        padding: 0;
+        justify-content: flex-start;
+    }
+
+    .app-wrapper {
+        width: 100%;
+        height: 100dvh;
+        min-height: 0;
+        max-width: none;
+        margin: 0;
+
+        display: flex;
+        flex-direction: row;
+
+        overflow: hidden;
+    }
+
+    /* -----------------------------------------------------
+       Seitliche Hauptnavigation
+       ----------------------------------------------------- */
+    .accordion-header {
+        flex: 0 0 72px;
+        width: 72px;
+        max-width: 72px;
+        height: 100dvh;
+
+        margin: 0;
+        padding: 6px 5px;
+
+        position: relative;
+        top: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        box-sizing: border-box;
+        z-index: 10000;
+    }
+
+    .header-actions {
+        width: 100%;
+        height: 100%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .top-main-nav {
+        width: 62px;
+        max-height: calc(100dvh - 12px);
+
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: center;
+
+        gap: 4px;
+        padding: 5px;
+
+        box-sizing: border-box;
+        border-radius: 18px;
+    }
+
+    .top-nav-btn,
+    .top-nav-save {
+        flex: 0 0 auto;
+
+        width: 100%;
+        height: 50px;
+        min-height: 50px;
+
+        margin: 0;
+        padding: 3px 1px;
+
+        border-radius: 13px;
+        gap: 2px;
+    }
+
+    .top-nav-icon {
+        font-size: 19px;
+    }
+
+    .top-nav-label {
+        font-size: 8px;
+        line-height: 1;
+        max-width: 100%;
+    }
+
+    .top-nav-save {
+        height: 52px;
+        min-height: 52px;
+        border-radius: 14px;
+    }
+
+    .top-nav-plus {
+        font-size: 25px;
+        line-height: 1;
+    }
+
+    .top-nav-more-wrap {
+        width: 100%;
+        min-width: 0;
+        position: relative;
+    }
+
+    /* -----------------------------------------------------
+       "Mehr"-Menü: nur bei Entfernen von .hidden sichtbar.
+       Die vorhandene JS-Steuerung bleibt unverändert.
+       ----------------------------------------------------- */
+    .more-menu {
+        top: 50%;
+        right: auto;
+        left: calc(100% + 8px);
+        bottom: auto;
+
+        width: 210px;
+        max-width: calc(100vw - 90px);
+        max-height: calc(100dvh - 16px);
+
+        overflow-y: auto;
+        overscroll-behavior: contain;
+
+        transform: translateY(-50%);
+        box-sizing: border-box;
+        z-index: 11000;
+
+        color: var(--text-main);
+        background: var(--glass-bg);
+        border-color: var(--glass-border);
+    }
+
+    .more-menu.hidden {
+        display: none;
+    }
+
+    .more-menu-item {
+        color: var(--text-main);
+    }
+
+    .more-menu-divider {
+        background: var(--glass-border);
+    }
+
+    /* -----------------------------------------------------
+       Inhaltsbereich
+       ----------------------------------------------------- */
+    .view-container {
+        flex: 1 1 auto;
+
+        width: auto;
+        height: 100dvh;
+        min-width: 0;
+        min-height: 0;
+
+        margin: 0;
+        position: relative;
+
+        overflow: hidden;
+        box-sizing: border-box;
+    }
+
+    .view {
+        position: absolute;
+        inset: 0;
+
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        padding: 8px 14px 18px;
+        box-sizing: border-box;
+
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .view > .accordion {
+        width: 100%;
+        padding-bottom: 18px;
+    }
+
+    #chart-view,
+    #tour-view {
+        height: 100%;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+}
+
 </style>
 </head>
 <body>
