@@ -19097,53 +19097,6 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
     }
 }
 
-
-/* =========================================================
-   MOBILE QUERFORMAT – DASHBOARD FINAL
-   Dashboard im Querformat scrollbar; Portrait unverändert.
-   ========================================================= */
-@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
-
-    #dashboard-view {
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior-y: contain;
-        touch-action: pan-y;
-        height: 100%;
-        min-height: 0;
-        padding: 8px 12px 16px !important;
-    }
-
-    #dashboard-view .dashboard-inner {
-        height: auto !important;
-        min-height: 100%;
-        width: 100%;
-        overflow: visible !important;
-        padding-bottom: 8px;
-        box-sizing: border-box;
-    }
-
-    #dashboard-view #dash-recent-section,
-    #dashboard-view #dash-milestones-section {
-        overflow: visible !important;
-    }
-
-    #dashboard-view #dash-milestones-section {
-        height: auto !important;
-        min-height: 0;
-    }
-
-    #dashboard-view #dash-milestones-section .dash-section-body {
-        height: auto !important;
-        overflow: visible !important;
-    }
-
-    #dashboard-view .dash-ms-grid {
-        height: auto !important;
-    }
-}
-
 </style>
 </head>
 <body>
