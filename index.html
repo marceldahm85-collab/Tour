@@ -19061,6 +19061,42 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
     }
 }
 
+/* =========================================================
+   Dashboard: Touren-Kachel + Abstände exakt an Kachelraster
+   Nur die beiden gewünschten Korrekturen.
+   ========================================================= */
+
+/* Hochformat:
+   Der Abstand zwischen rechter Jahres-Pfeiltaste und
+   Touren-Kachel entspricht exakt dem Kachel-Gap darunter. */
+@media (max-width: 768px) and (orientation: portrait) {
+    #dashboard-view .dash-year-filter-wrap {
+        gap: 8px;
+    }
+
+    #dashboard-view .dash-year-filter-wrap
+        > .dash-stat-tile[data-tile-type="touren"] {
+        flex-basis: calc((100% - 16px) / 3);
+        width: calc((100% - 16px) / 3);
+    }
+}
+
+/* Querformat:
+   Das Dashboard-Kachelraster verwendet 6px Abstand.
+   Die Touren-Kachel erhält deshalb exakt die Breite
+   einer der drei normalen Stat-Kacheln. */
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    #dashboard-view .dash-year-filter-wrap {
+        gap: 6px;
+    }
+
+    #dashboard-view .dash-year-filter-wrap
+        > .dash-stat-tile[data-tile-type="touren"] {
+        flex-basis: calc((100% - 12px) / 3);
+        width: calc((100% - 12px) / 3);
+    }
+}
+
 </style>
 </head>
 <body>
