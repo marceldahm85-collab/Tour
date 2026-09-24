@@ -18775,6 +18775,39 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
     }
 }
 
+
+/* =========================================================
+   MOBILE LANDSCAPE – DASHBOARD
+   Der Dashboard-View bekommt im Querformat einen eigenen
+   vertikalen Scrollbereich. Portrait bleibt unverändert.
+   ========================================================= */
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+
+    #dashboard-view {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: contain;
+        touch-action: pan-y;
+        padding-bottom: 12px !important;
+        box-sizing: border-box;
+    }
+
+    #dashboard-view .dashboard-inner {
+        width: 100%;
+        min-height: max-content;
+        height: auto;
+        padding-bottom: 12px;
+        gap: 6px;
+        box-sizing: border-box;
+    }
+
+    #dashboard-view .dash-stat-grid,
+    #dashboard-view .dash-section {
+        flex: 0 0 auto;
+    }
+}
+
 </style>
 </head>
 <body>
