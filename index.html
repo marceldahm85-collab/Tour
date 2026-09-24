@@ -51823,8 +51823,7 @@ if ('serviceWorker' in navigator) {
     #chart-view {
         display: grid !important;
         grid-template-columns: minmax(0, 1fr) 118px;
-        grid-template-rows: minmax(0, 1fr);
-        grid-template-areas: "stats-content stats-controls";
+        grid-template-rows: minmax(0, auto) minmax(0, 1fr);
         column-gap: 8px;
         align-items: stretch;
         width: 100%;
@@ -51837,7 +51836,8 @@ if ('serviceWorker' in navigator) {
 
     /* Rechte Bedienleiste */
     #chart-view > .stats-year-filter-wrap {
-        grid-area: stats-controls;
+        grid-column: 2;
+        grid-row: 1;
         position: static !important;
         width: 100% !important;
         max-width: none !important;
@@ -51884,13 +51884,14 @@ if ('serviceWorker' in navigator) {
 
     /* Unter-Navigation direkt darunter – gleiche Breite */
     #chart-view > .stats-section-switch {
-        grid-area: stats-controls;
+        grid-column: 2;
+        grid-row: 2;
         align-self: start;
         justify-self: stretch;
 
         width: 100% !important;
         max-width: none !important;
-        margin: 79px 0 0 !important;
+        margin: 0 !important;
         padding: 0 !important;
 
         display: flex !important;
@@ -51925,7 +51926,8 @@ if ('serviceWorker' in navigator) {
 
     /* Aktiver Stats-Inhalt links */
     #chart-view > .stats-section-page.active {
-        grid-area: stats-content;
+        grid-column: 1;
+        grid-row: 1 / -1;
         width: 100% !important;
         min-width: 0;
         max-width: none;
