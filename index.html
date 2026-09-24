@@ -18829,7 +18829,7 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         box-sizing: border-box;
 
         display: grid;
-        grid-template-columns: minmax(0, 1.55fr) minmax(260px, 0.95fr);
+        grid-template-columns: minmax(0, 1.40fr) minmax(300px, 1fr);
         grid-template-rows: auto auto minmax(0, 1fr);
         grid-template-areas:
             "year  milestones"
@@ -18882,6 +18882,8 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
     #dashboard-view #dash-recent-section {
         grid-area: recent;
         min-height: 0;
+        height: fit-content;
+        align-self: start;
         overflow: hidden;
     }
 
