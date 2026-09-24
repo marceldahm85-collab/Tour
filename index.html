@@ -52144,6 +52144,23 @@ if ('serviceWorker' in navigator) {
     #stats-statistics-page .stats-structure-type-values {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
+    /* Statistik im Querformat: kompakte Reihenfolge für kürzeren Scrollweg. */
+    #stats-statistics-page #stats-structure-content > :nth-child(1) {
+        order: 1;
+    }
+
+    #stats-statistics-page #stats-structure-content > :nth-child(4) {
+        order: 2;
+    }
+
+    #stats-statistics-page #stats-structure-content > :nth-child(2) {
+        order: 3;
+    }
+
+    #stats-statistics-page #stats-structure-content > :nth-child(3) {
+        order: 4;
+    }
 }
 
 
