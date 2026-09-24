@@ -18997,6 +18997,63 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
     }
 }
 
+
+
+/* =========================================================
+   MOBILE QUERFORMAT – DASHBOARD JAHRESSTEUERUNG
+   Letzte, gezielte Überschreibung:
+   Jahresdropdown, Pfeile und Stat-Kacheln exakt gleiche Höhe.
+   Zusätzlich etwas oberer Innenabstand, damit nichts angeschnitten
+   wird. Gilt ausschließlich für das mobile Querformat.
+   ========================================================= */
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+
+    #dashboard-view {
+        padding-top: 12px !important;
+        padding-bottom: 10px !important;
+        box-sizing: border-box;
+    }
+
+    #dashboard-view .dashboard-inner {
+        box-sizing: border-box;
+    }
+
+    #dashboard-view .dash-year-filter-wrap {
+        height: 42px !important;
+        min-height: 42px !important;
+        align-items: stretch;
+        box-sizing: border-box;
+    }
+
+    #dashboard-view .dash-year-filter-wrap > select,
+    #dashboard-view .dash-year-filter-wrap > .mob-sel-wrap,
+    #dashboard-view .dash-year-filter-wrap > .mob-sel-wrap .mob-sel-btn,
+    #dashboard-view .dash-year-filter-wrap .mob-sel-btn {
+        height: 42px !important;
+        min-height: 42px !important;
+        box-sizing: border-box;
+    }
+
+    #dashboard-view .dash-year-filter-wrap > select {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        line-height: 1.2;
+    }
+
+    #dashboard-view .dash-year-filter-wrap > .dash-year-arrow-btn {
+        width: 42px !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        box-sizing: border-box;
+    }
+
+    #dashboard-view .dash-stat-grid > .dash-stat-tile {
+        height: 42px !important;
+        min-height: 42px !important;
+        box-sizing: border-box;
+    }
+}
+
 </style>
 </head>
 <body>
