@@ -19100,124 +19100,225 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
 
 /* =========================================================
    MOBILE QUERFORMAT – STATS
-   Zweispaltige Darstellung ausschließlich im Querformat:
-   links das aktive Diagramm, rechts die Diagrammauswahl.
-   Portrait bleibt vollständig unverändert.
+   Links: Jahressteuerung + 5 Stats-Bereiche
+   Rechts: der jeweils aktive Inhalt
    ========================================================= */
 @media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
 
     #chart-view {
+        display: grid !important;
+        grid-template-columns: 148px minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr);
+        grid-template-areas: "stats-controls stats-content";
+        column-gap: 10px;
+        align-items: stretch;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        padding: 8px 12px 10px !important;
         box-sizing: border-box;
         overflow: hidden !important;
-        padding: 8px 12px 10px !important;
     }
 
-    /* Jahresfilter und Bereichsnavigation bleiben oben */
     #chart-view .stats-year-filter-wrap {
-        flex: 0 0 auto;
-        margin-bottom: 6px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 148px;
+        height: auto;
+        margin: 0;
+        z-index: 5;
+    }
+
+    #chart-view .stats-year-filter-wrap > select,
+    #chart-view .stats-year-filter-wrap > .mob-sel-wrap,
+    #chart-view .stats-year-filter-wrap .mob-sel-btn {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    #chart-view .stats-year-filter-wrap > .dash-year-arrow-btn {
+        flex: 0 0 34px;
+        width: 34px;
+        height: 34px;
+        min-height: 34px;
+        box-sizing: border-box;
     }
 
     #chart-view .stats-section-switch {
-        flex: 0 0 auto;
-        margin-bottom: 6px;
+        grid-area: stats-controls;
+        align-self: start;
+        width: 148px;
+        max-width: 148px;
+        margin: 42px 0 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        box-sizing: border-box;
     }
 
-    /* Diagrammseite: zwei echte Spalten */
+    #chart-view .stats-section-btn {
+        width: 100%;
+        min-height: 34px;
+        height: 34px;
+        padding: 5px 7px;
+        border-radius: 9px;
+        font-size: 10px;
+        line-height: 1;
+        box-sizing: border-box;
+    }
+
+    #chart-view .stats-section-page.active {
+        grid-area: stats-content;
+        width: 100%;
+        min-width: 0;
+        height: 100%;
+        min-height: 0;
+        max-width: none;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
     #chart-view .stats-diagrams-page.active {
         display: grid;
-        grid-template-columns: minmax(0, 1.55fr) minmax(190px, 0.85fr);
+        grid-template-columns: minmax(0, 1.25fr) minmax(235px, 0.75fr);
         grid-template-rows: minmax(0, 1fr);
         grid-template-areas: "chart tabs";
-        gap: 10px;
+        gap: 8px;
         width: 100%;
-        min-height: 0;
         height: 100%;
+        min-height: 0;
         overflow: hidden;
         align-items: stretch;
+        box-sizing: border-box;
     }
 
     #chart-view .chart-canvas-stage {
         grid-area: chart;
-
         width: 100%;
-        max-width: none;
         height: 100%;
+        min-width: 0;
         min-height: 0;
         margin: 0;
+        box-sizing: border-box;
+    }
 
+    #chart-view .chart-canvas-stage canvas {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100%;
         box-sizing: border-box;
     }
 
     #chart-view .chart-tabs {
         grid-area: tabs;
-
         width: 100%;
-        max-width: none;
         height: 100%;
+        min-width: 0;
         min-height: 0;
+        max-width: none;
         margin: 0;
         padding: 0;
-
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        grid-auto-rows: minmax(0, 1fr);
-        gap: 6px;
-
-        overflow-y: auto;
-        overflow-x: hidden;
-        align-content: stretch;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-rows: repeat(4, minmax(0, 1fr));
+        gap: 5px;
+        overflow: hidden;
         box-sizing: border-box;
     }
 
     #chart-view .chart-tab {
+        width: 100%;
+        min-width: 0;
         min-height: 0;
         height: auto;
-        padding: 5px 4px;
-        gap: 3px;
-        border-radius: 11px;
+        padding: 3px 2px;
+        gap: 2px;
+        border-radius: 9px;
+        box-sizing: border-box;
     }
 
     #chart-view .chart-tab-icon {
-        font-size: 16px;
+        font-size: 13px;
     }
 
     #chart-view .chart-tab-label {
-        font-size: 9px;
+        font-size: 7.5px;
         line-height: 1.05;
+        white-space: normal;
+        overflow-wrap: anywhere;
     }
 
-    /* Canvas selbst füllt ausschließlich die linke Spalte. */
-    #chart-view .chart-canvas-stage canvas {
-        width: 100%;
-        height: 100%;
-    }
-
-    /* Die übrigen Stats-Seiten bleiben funktional und bekommen
-       im Querformat zwei Spalten für ihre Karten/Blöcke. */
-    #chart-view .stats-scroll-page.active {
-        width: 100%;
-        max-width: none;
+    #stats-statistics-page.active,
+    #stats-highlights-page.active,
+    #stats-development-page.active,
+    #stats-peaks-page.active {
         overflow-y: auto;
         overflow-x: hidden;
-        padding: 0 2px 12px;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: contain;
+        padding: 0 2px 10px 0;
+        touch-action: pan-y;
+    }
+
+    #stats-statistics-page #stats-structure-content,
+    #stats-highlights-page #highlights-content,
+    #stats-development-page #stats-development-content,
+    #stats-peaks-page #stats-peaks-content {
+        width: 100%;
+        min-width: 0;
         box-sizing: border-box;
     }
 
-    #chart-view .stats-scroll-page.active > * {
-        width: 100%;
-        box-sizing: border-box;
+    #stats-statistics-page #stats-structure-content,
+    #stats-development-page #stats-development-content,
+    #stats-peaks-page #stats-peaks-content {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px;
+        align-items: start;
     }
 
-    #stats-statistics-page .stats-structure-content,
-    #stats-highlights-page .highlight-groups,
-    #stats-development-content,
-    #stats-peaks-content {
-        width: 100%;
-        box-sizing: border-box;
+    #stats-statistics-page #stats-structure-content > *,
+    #stats-development-page #stats-development-content > *,
+    #stats-peaks-page #stats-peaks-content > * {
+        min-width: 0;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-groups {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        align-items: start;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-group {
+        min-width: 0;
+    }
+
+    #stats-development-page .development-sparkline-wrap,
+    #stats-development-page .development-history-chart,
+    #stats-development-page .development-history-summary,
+    #stats-development-page .development-point-popup {
+        grid-column: 1 / -1;
+    }
+
+    #stats-development-page .development-metric-grid,
+    #stats-development-page .activity-summary-grid,
+    #stats-development-page .peak-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    #stats-statistics-page .stats-structure-typical-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    #stats-statistics-page .stats-structure-type-values {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
-
 </style>
 </head>
 <body>
