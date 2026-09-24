@@ -19105,11 +19105,17 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
    ========================================================= */
 @media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
 
+    /*
+     * STATS-QUERFORMAT:
+     * Links: eine zusammenhängende Steuerungsfläche.
+     * Oben Jahresauswahl + Pfeile, direkt darunter die fünf Bereichsschalter.
+     * Rechts: ausschließlich der aktive Stats-Inhalt.
+     */
     #chart-view {
+        position: relative;
         display: grid !important;
         grid-template-columns: 148px minmax(0, 1fr);
-        grid-template-rows: minmax(0, 1fr);
-        grid-template-areas: "stats-controls stats-content";
+        grid-template-rows: auto minmax(0, 1fr);
         column-gap: 10px;
         align-items: stretch;
         width: 100%;
@@ -19120,14 +19126,47 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         overflow: hidden !important;
     }
 
-    #chart-view .stats-year-filter-wrap {
+    /*
+     * Ein gemeinsamer Hintergrund verhindert, dass Jahresfilter
+     * und die fünf Schalter wie getrennte Bereiche wirken.
+     * Alle Farben kommen aus dem bestehenden Theme-System.
+     */
+    #chart-view::before {
+        content: "";
         position: absolute;
-        left: 0;
-        top: 0;
+        left: 12px;
+        top: 8px;
+        bottom: 10px;
         width: 148px;
-        height: auto;
+        border-radius: 14px;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--shadow-soft);
+        pointer-events: none;
+        z-index: 0;
+        box-sizing: border-box;
+    }
+
+    #chart-view .stats-year-filter-wrap,
+    #chart-view .stats-section-switch,
+    #chart-view .stats-section-page.active {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Jahresauswahl: normale erste Grid-Zeile statt absolute Position. */
+    #chart-view .stats-year-filter-wrap {
+        grid-column: 1;
+        grid-row: 1;
+        align-self: start;
+        width: 148px;
+        max-width: 148px;
+        height: 34px;
+        min-height: 34px;
         margin: 0;
-        z-index: 5;
+        padding: 0;
+        box-sizing: border-box;
+        gap: 5px;
     }
 
     #chart-view .stats-year-filter-wrap > select,
@@ -19138,6 +19177,13 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         box-sizing: border-box;
     }
 
+    #chart-view .stats-year-filter-wrap > select,
+    #chart-view .stats-year-filter-wrap > .mob-sel-wrap,
+    #chart-view .stats-year-filter-wrap > .mob-sel-wrap .mob-sel-btn {
+        height: 34px;
+        min-height: 34px;
+    }
+
     #chart-view .stats-year-filter-wrap > .dash-year-arrow-btn {
         flex: 0 0 34px;
         width: 34px;
@@ -19146,12 +19192,14 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         box-sizing: border-box;
     }
 
+    /* Die fünf Umschalter beginnen unmittelbar unter dem Jahresfilter. */
     #chart-view .stats-section-switch {
-        grid-area: stats-controls;
+        grid-column: 1;
+        grid-row: 2;
         align-self: start;
         width: 148px;
         max-width: 148px;
-        margin: 42px 0 0;
+        margin: 5px 0 0;
         padding: 0;
         display: flex;
         flex-direction: column;
@@ -19170,8 +19218,10 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         box-sizing: border-box;
     }
 
+    /* Aktiver Inhalt rechts: über beide linken Steuerungszeilen. */
     #chart-view .stats-section-page.active {
-        grid-area: stats-content;
+        grid-column: 2;
+        grid-row: 1 / span 2;
         width: 100%;
         min-width: 0;
         height: 100%;
