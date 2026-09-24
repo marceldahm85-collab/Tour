@@ -52076,7 +52076,7 @@ if ('serviceWorker' in navigator) {
 
     #chart-view {
         display: grid !important;
-        grid-template-columns: minmax(0, 1fr) 118px;
+        grid-template-columns: minmax(0, 1fr) 108px;
         grid-template-rows: minmax(0, auto) minmax(0, 1fr);
         column-gap: 8px;
         align-items: stretch;
@@ -52100,27 +52100,36 @@ if ('serviceWorker' in navigator) {
         margin: 0 !important;
         padding: 0 !important;
 
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: stretch !important;
-        justify-content: flex-start !important;
-        gap: 5px !important;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 38px 38px;
+        align-items: stretch;
+        justify-content: stretch;
+        gap: 5px;
 
         box-sizing: border-box;
     }
 
-    /* Dropdown und Pfeile exakt gleich breit */
+    /* Dropdown über die gesamte Breite, Pfeile nebeneinander */
     #chart-view > .stats-year-filter-wrap > select,
     #chart-view > .stats-year-filter-wrap > .mob-sel-wrap,
-    #chart-view > .stats-year-filter-wrap > .mob-sel-wrap .mob-sel-btn,
-    #chart-view > .stats-year-filter-wrap > .dash-year-arrow-btn,
-    #chart-view > .stats-year-filter-wrap .mob-sel-btn {
+    #chart-view > .stats-year-filter-wrap > .mob-sel-wrap .mob-sel-btn {
+        grid-column: 1 / -1;
         width: 100% !important;
         min-width: 0 !important;
         max-width: none !important;
-        flex: 0 0 32px !important;
-        height: 32px !important;
-        min-height: 32px !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        box-sizing: border-box;
+    }
+
+    #chart-view > .stats-year-filter-wrap > .dash-year-arrow-btn {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        margin: 0 !important;
         box-sizing: border-box;
     }
 
@@ -52140,7 +52149,7 @@ if ('serviceWorker' in navigator) {
     #chart-view > .stats-section-switch {
         grid-column: 2;
         grid-row: 2;
-        align-self: start;
+        align-self: center;
         justify-self: stretch;
 
         width: 100% !important;
@@ -52160,12 +52169,12 @@ if ('serviceWorker' in navigator) {
     }
 
     #chart-view > .stats-section-switch .stats-section-btn {
-        flex: 0 0 30px !important;
+        flex: 0 0 34px !important;
         width: 100% !important;
         min-width: 0 !important;
         max-width: none !important;
-        height: 30px !important;
-        min-height: 30px !important;
+        height: 34px !important;
+        min-height: 34px !important;
 
         padding: 4px 5px !important;
         border-radius: 8px;
