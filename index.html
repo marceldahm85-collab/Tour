@@ -19319,6 +19319,105 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
+
+
+/* =========================================================
+   Dashboard – mobiles Querformat
+   Jahresauswahl und 5 Meilensteine gezielt für Landscape
+   ========================================================= */
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+
+    /* Jahres-Dropdown über die komplette Breite */
+    #dashboard-view .dash-year-filter-wrap {
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        grid-template-rows: auto auto;
+        gap: 5px;
+        align-items: center;
+    }
+
+    #dashboard-view .dash-year-filter-wrap > select,
+    #dashboard-view .dash-year-filter-wrap > .mob-sel-wrap {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        width: 100%;
+        min-width: 0;
+        flex: none;
+    }
+
+    #dashboard-view .dash-year-filter-wrap > .dash-year-arrow-btn {
+        grid-row: 2;
+        width: 34px;
+        height: 30px;
+        min-height: 30px;
+        font-size: 12px;
+    }
+
+    #dashboard-view #dash-year-prev-btn {
+        grid-column: 2;
+    }
+
+    #dashboard-view #dash-year-next-btn {
+        grid-column: 3;
+    }
+
+    /* Fünf Meilensteine nebeneinander:
+       kompakte Kacheln, damit der horizontale Platz genutzt wird. */
+    #dashboard-view .dash-ms-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 5px;
+    }
+
+    #dashboard-view .dash-milestone-tile {
+        min-width: 0;
+        padding: 6px 7px;
+        border-radius: 10px;
+    }
+
+    #dashboard-view .dash-ms-top {
+        gap: 5px;
+        margin-bottom: 4px;
+        min-width: 0;
+    }
+
+    #dashboard-view .dash-ms-icon {
+        width: 18px;
+        font-size: 15px;
+    }
+
+    #dashboard-view .dash-ms-info {
+        min-width: 0;
+    }
+
+    #dashboard-view .dash-ms-label {
+        font-size: 11px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    #dashboard-view .dash-ms-count {
+        font-size: 8px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    #dashboard-view .dash-ms-progress-text {
+        display: none;
+    }
+
+    #dashboard-view .dash-ms-arrow {
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    #dashboard-view .dash-ms-progress-wrap {
+        height: 3px;
+        margin-bottom: 0;
+    }
+}
 </style>
 </head>
 <body>
