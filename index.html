@@ -18808,6 +18808,193 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
     }
 }
 
+
+/* =========================================================
+   MOBILE QUERFORMAT – DASHBOARD
+   Ziel: kompletter Dashboard-Überblick ohne Scrollen.
+   Links: Jahresfilter + Stat-Kacheln + Letzte Touren
+   Rechts: Meilensteine
+   ========================================================= */
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+
+    #dashboard-view {
+        overflow: hidden;
+        padding: 8px 12px 10px;
+    }
+
+    #dashboard-view .dashboard-inner {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        box-sizing: border-box;
+
+        display: grid;
+        grid-template-columns: minmax(0, 1.55fr) minmax(260px, 0.95fr);
+        grid-template-rows: auto auto minmax(0, 1fr);
+        grid-template-areas:
+            "year  milestones"
+            "stats milestones"
+            "recent milestones";
+
+        gap: 8px 10px;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    #dashboard-view .dash-year-filter-wrap {
+        grid-area: year;
+        min-height: 34px;
+        height: 34px;
+    }
+
+    #dashboard-view .dash-stat-grid {
+        grid-area: stats;
+        align-self: start;
+
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    #dashboard-view .dash-stat-tile {
+        height: 34px;
+        min-height: 34px;
+        padding: 3px 6px;
+        border-radius: 11px;
+        gap: 4px;
+        box-sizing: border-box;
+    }
+
+    #dashboard-view .dash-stat-icon {
+        font-size: 15px;
+    }
+
+    #dashboard-view .dash-stat-value {
+        font-size: 12px;
+        line-height: 1;
+    }
+
+    #dashboard-view .dash-stat-label {
+        font-size: 9px;
+        line-height: 1;
+    }
+
+    #dashboard-view #dash-recent-section {
+        grid-area: recent;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    #dashboard-view #dash-recent-section .dash-section-title,
+    #dashboard-view #dash-milestones-section .dash-section-title {
+        font-size: 11px;
+        padding: 6px 9px 3px;
+    }
+
+    #dashboard-view #dash-recent-section .dash-section-body {
+        padding: 0 6px 5px;
+    }
+
+    #dashboard-view .dash-tour-list li {
+        grid-template-columns: 5.5em minmax(0, 1fr);
+        column-gap: 5px;
+        padding: 4px 3px;
+        margin-bottom: 3px;
+        min-height: 24px;
+        box-sizing: border-box;
+    }
+
+    #dashboard-view .dash-tour-list .tour-name {
+        font-size: 11px;
+        line-height: 1.1;
+    }
+
+    #dashboard-view .dash-tour-list .tour-date,
+    #dashboard-view .dash-of-total {
+        font-size: 9px;
+        line-height: 1;
+    }
+
+    #dashboard-view #dash-milestones-section {
+        grid-area: milestones;
+        min-height: 0;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    #dashboard-view #dash-milestones-section .dash-section-body {
+        height: calc(100% - 29px);
+        box-sizing: border-box;
+        padding: 0 6px 5px;
+        overflow: hidden;
+    }
+
+    #dashboard-view .dash-ms-grid {
+        height: 100%;
+        display: grid;
+        grid-template-rows: repeat(5, minmax(0, 1fr));
+        gap: 5px;
+    }
+
+    #dashboard-view .dash-milestone-tile {
+        min-height: 0;
+        padding: 5px 7px;
+        border-radius: 9px;
+        box-sizing: border-box;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    #dashboard-view .dash-ms-top {
+        margin-bottom: 3px;
+        gap: 5px;
+    }
+
+    #dashboard-view .dash-ms-icon {
+        width: 17px;
+        font-size: 14px;
+    }
+
+    #dashboard-view .dash-ms-label {
+        font-size: 11px;
+        line-height: 1;
+    }
+
+    #dashboard-view .dash-ms-count {
+        font-size: 8px;
+        line-height: 1;
+    }
+
+    #dashboard-view .dash-ms-progress-text {
+        font-size: 8px;
+        line-height: 1;
+    }
+
+    #dashboard-view .dash-ms-arrow {
+        font-size: 13px;
+    }
+
+    #dashboard-view .dash-ms-progress-wrap {
+        height: 3px;
+        margin-bottom: 2px;
+    }
+
+    #dashboard-view .dash-year-filter-wrap select {
+        padding: 6px 9px;
+        font-size: 11px;
+        height: 34px;
+        box-sizing: border-box;
+    }
+
+    #dashboard-view .dash-year-filter-wrap .dash-year-arrow-btn {
+        width: 30px;
+        height: 34px;
+        font-size: 11px;
+    }
+}
+
 </style>
 </head>
 <body>
