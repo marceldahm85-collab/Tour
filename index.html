@@ -52348,3 +52348,101 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
+
+/* =========================================================
+   STATS – Mobile Querformat: zentrale Bereichssteuerung
+   ========================================================= */
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+
+    #chart-view {
+        grid-template-columns: 96px minmax(0, 1fr);
+        column-gap: 8px;
+    }
+
+    /* Linke Steuerleiste: alle Controls gemeinsam vertikal zentriert */
+    #chart-view .stats-year-filter-wrap {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+
+        width: 96px;
+        height: 34px;
+        margin: 0;
+        padding: 0;
+
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 34px 34px;
+        gap: 5px;
+
+        align-items: stretch;
+        box-sizing: border-box;
+        z-index: 5;
+    }
+
+    #chart-view .stats-year-filter-wrap > select,
+    #chart-view .stats-year-filter-wrap > .mob-sel-wrap,
+    #chart-view .stats-year-filter-wrap .mob-sel-btn {
+        grid-column: auto;
+        width: 100%;
+        height: 34px;
+        min-height: 34px;
+        margin: 0;
+        padding: 4px 8px;
+        box-sizing: border-box;
+    }
+
+    #chart-view .stats-year-filter-wrap > .dash-year-arrow-btn {
+        width: 34px;
+        height: 34px;
+        min-height: 34px;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    /*
+     * Die fünf Stats-Bereiche bilden darunter die zweite,
+     * ebenfalls vertikal zentrierte Steuergruppe.
+     * Gleiche Buttonhöhe wie Dropdown und Pfeile.
+     */
+    #chart-view .stats-section-switch {
+        position: absolute;
+        left: 0;
+        top: calc(50% + 19px);
+
+        width: 96px;
+        max-width: 96px;
+        margin: 0;
+        padding: 0;
+
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+
+        box-sizing: border-box;
+        transform: translateY(0);
+    }
+
+    #chart-view .stats-section-btn {
+        width: 96px;
+        min-width: 96px;
+        height: 34px;
+        min-height: 34px;
+        max-height: 34px;
+
+        margin: 0;
+        padding: 4px 5px;
+
+        border-radius: 8px;
+        font-size: 9.5px;
+        line-height: 1;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        box-sizing: border-box;
+    }
+}
