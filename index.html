@@ -18654,15 +18654,15 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         min-width: 0;
     }
 
-    /* Mehr-Menü: kompakt und vertikal zentriert, damit im Querformat
-       weder der obere noch der untere Menüpunkt abgeschnitten wird. */
+    /* Mehr-Menü: Im Querformat liegt die Unterkante exakt auf
+       Höhe der Unterkante der Hauptnavigation. */
     .more-menu {
-        top: 50%;
+        top: auto;
         right: auto;
         left: calc(100% + 8px);
-        bottom: auto;
+        bottom: -5px;
 
-        transform: translateY(-50%);
+        transform: none;
 
         width: 205px;
         max-width: calc(100vw - 92px);
