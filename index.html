@@ -18533,228 +18533,12 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
 
 
 /* =========================================================
-   MOBILE QUERFORMAT – gemeinsame S23-Grundstruktur
-   Portrait und Desktop bleiben unverändert.
-   ========================================================= */
-@media (orientation: landscape) and (max-height: 700px) and (max-width: 1000px) {
-
-    html,
-    body {
-        width: 100%;
-        height: 100dvh;
-        min-height: 100dvh;
-        overflow: hidden;
-    }
-
-    body {
-        padding: 0;
-        justify-content: flex-start;
-    }
-
-    .app-wrapper {
-        width: 100%;
-        height: 100dvh;
-        min-height: 0;
-        max-width: none;
-        display: block;
-        overflow: hidden;
-    }
-
-    /* Seitliche Hauptnavigation */
-    .accordion-header {
-        position: fixed;
-        left: 0;
-        top: 0;
-        bottom: 0;
-
-        width: calc(68px + env(safe-area-inset-left, 0px));
-        height: 100dvh;
-        max-width: none;
-
-        margin: 0;
-        padding:
-            max(6px, env(safe-area-inset-top, 0px))
-            5px
-            max(6px, env(safe-area-inset-bottom, 0px))
-            max(5px, env(safe-area-inset-left, 0px));
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        top: 0;
-        z-index: 10000;
-    }
-
-    .header-actions {
-        width: 100%;
-        height: 100%;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .top-main-nav {
-        width: 58px;
-        max-height: calc(100dvh - 12px);
-
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-        justify-content: center;
-
-        gap: 4px;
-        padding: 5px;
-
-        border-radius: 18px;
-    }
-
-    .top-nav-btn,
-    .top-nav-save {
-        flex: 0 0 auto;
-        width: 100%;
-        height: 52px;
-        min-height: 52px;
-
-        padding: 3px 1px;
-        border-radius: 13px;
-        gap: 2px;
-    }
-
-    .top-nav-icon {
-        font-size: 20px;
-    }
-
-    .top-nav-label {
-        font-size: 8px;
-        line-height: 1;
-        max-width: 100%;
-    }
-
-    .top-nav-save {
-        height: 54px;
-        min-height: 54px;
-        border-radius: 14px;
-    }
-
-    .top-nav-plus {
-        font-size: 26px;
-    }
-
-    .top-nav-more-wrap {
-        width: 100%;
-        min-width: 0;
-    }
-
-    /*
-       Theme-Sicherheit im Querformat:
-       Keine festen Ersatzfarben verwenden. Navigation und
-       Mehr-Menü übernehmen die bereits vorhandenen Theme-Variablen.
-    */
-    .accordion-header,
-    .header-actions,
-    .top-main-nav {
-        color: var(--text-main);
-    }
-
-    .top-main-nav {
-        background: var(--glass-bg);
-        border-color: var(--glass-border);
-        box-shadow:
-            0 6px 20px rgba(25,40,35,0.12),
-            inset 0 1px 1px rgba(255,255,255,0.14);
-        backdrop-filter: blur(18px);
-        -webkit-backdrop-filter: blur(18px);
-    }
-
-    .top-nav-btn {
-        color: var(--text-main);
-    }
-
-    .top-nav-btn.view-active,
-    .top-nav-btn.more-view-active {
-        background: var(--accent-soft);
-    }
-
-    .top-nav-save {
-        background: var(--accent-gradient);
-        color: var(--text-main);
-    }
-
-    /* Mehr öffnet seitlich statt nach unten */
-    .more-menu {
-        top: 50%;
-        right: auto;
-        left: calc(100% + 8px);
-        bottom: auto;
-
-        transform: translateY(-50%);
-
-        width: 220px;
-        max-width: calc(100vw - 86px);
-        max-height: calc(100dvh - 16px);
-        overflow-y: auto;
-        overscroll-behavior: contain;
-
-        /* Auch das seitliche Menü folgt exakt dem aktiven Theme. */
-        background: var(--glass-bg);
-        border-color: var(--glass-border);
-        color: var(--text-main);
-        box-shadow:
-            0 18px 48px rgba(20,30,25,0.24),
-            inset 0 1px 1px rgba(255,255,255,0.16);
-        backdrop-filter: blur(22px);
-        -webkit-backdrop-filter: blur(22px);
-    }
-
-    .more-menu-item {
-        color: var(--text-main);
-    }
-
-    .more-menu-item:active {
-        background: var(--ui-card-bg-interactive);
-    }
-
-    .more-menu-divider {
-        background: var(--glass-border);
-    }
-
-    /* Die Views bekommen die Fläche rechts neben der Navigation. */
-    .view-container {
-        width: calc(100% - 68px - env(safe-area-inset-left, 0px));
-        height: 100%;
-        min-height: 0;
-        margin-left: calc(68px + env(safe-area-inset-left, 0px));
-
-        flex: 1 1 auto;
-        overflow: hidden;
-    }
-
-    .view {
-        width: 100%;
-        height: 100%;
-        min-height: 0;
-
-        overflow-y: auto;
-        overflow-x: hidden;
-
-        padding: 8px 14px 18px;
-    }
-
-    .view > .accordion {
-        width: 100%;
-        padding-bottom: 18px;
-    }
-}
-
-
-/* =========================================================
    MOBILE QUERFORMAT – kompakte Seiten-Navigation
-   Nur für Touch-Geräte im Querformat.
-   Portrait und Desktop bleiben unverändert.
+   Nur auf Touch-Geräten im Querformat.
+   Wichtig: bewusst OHNE max-width, da manche Android-Browser
+   im Querformat eine größere CSS-Viewportbreite melden.
    ========================================================= */
-@media (max-width: 900px) and (orientation: landscape) and (pointer: coarse) {
+@media (orientation: landscape) and (pointer: coarse) {
 
     html,
     body {
@@ -18782,9 +18566,7 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         overflow: hidden;
     }
 
-    /* -----------------------------------------------------
-       Seitliche Hauptnavigation
-       ----------------------------------------------------- */
+    /* Seitliche Hauptnavigation */
     .accordion-header {
         flex: 0 0 72px;
         width: 72px;
@@ -18828,21 +18610,25 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
 
         box-sizing: border-box;
         border-radius: 18px;
+
+        background: var(--glass-bg);
+        border-color: var(--glass-border);
+        color: var(--text-main);
     }
 
     .top-nav-btn,
     .top-nav-save {
         flex: 0 0 auto;
-
         width: 100%;
         height: 50px;
         min-height: 50px;
-
         margin: 0;
         padding: 3px 1px;
 
         border-radius: 13px;
         gap: 2px;
+
+        color: var(--text-main);
     }
 
     .top-nav-icon {
@@ -18859,6 +18645,7 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         height: 52px;
         min-height: 52px;
         border-radius: 14px;
+        background: var(--accent-gradient);
     }
 
     .top-nav-plus {
@@ -18872,15 +18659,19 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         position: relative;
     }
 
-    /* -----------------------------------------------------
-       "Mehr"-Menü: nur bei Entfernen von .hidden sichtbar.
-       Die vorhandene JS-Steuerung bleibt unverändert.
-       ----------------------------------------------------- */
+    .top-nav-btn.view-active,
+    .top-nav-btn.more-view-active {
+        background: var(--accent-soft);
+    }
+
+    /* Mehr-Menü: vorhandene hidden-Steuerung unverändert lassen */
     .more-menu {
         top: 50%;
         right: auto;
         left: calc(100% + 8px);
         bottom: auto;
+
+        transform: translateY(-50%);
 
         width: 210px;
         max-width: calc(100vw - 90px);
@@ -18888,8 +18679,6 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
 
         overflow-y: auto;
         overscroll-behavior: contain;
-
-        transform: translateY(-50%);
         box-sizing: border-box;
         z-index: 11000;
 
@@ -18910,9 +18699,7 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         background: var(--glass-border);
     }
 
-    /* -----------------------------------------------------
-       Inhaltsbereich
-       ----------------------------------------------------- */
+    /* Inhaltsbereich rechts neben der Navigation */
     .view-container {
         flex: 1 1 auto;
 
