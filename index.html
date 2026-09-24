@@ -7253,6 +7253,12 @@ body:not(.dark):not(.green):not(.summit) .tour-group-badge {
         min-height: var(--dash-control-height);
     }
 
+    /* Touren-Kachel: gleiche tatsächliche Außenhöhe wie die Pfeil-Buttons */
+    .dash-year-filter-wrap
+        > .dash-stat-tile[data-tile-type="touren"] {
+        box-sizing: border-box;
+    }
+
     .dash-year-filter-wrap > .dash-year-arrow-btn {
         width: var(--dash-control-height);
         height: var(--dash-control-height);
