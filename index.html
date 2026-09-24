@@ -51804,5 +51804,131 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 
+
+<!-- LANDSCAPE STATS HEADER ALIGNMENT -->
+<style>
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+
+    /* ---------------------------------------------------------
+       Stats: Jahreswahl + Unter-Navigation bilden eine
+       gemeinsame Kopfzeile. Die Unter-Navigation sitzt rechts
+       und ist damit mit dem rechten Daumen erreichbar.
+       --------------------------------------------------------- */
+
+    #chart-view {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0 !important;
+    }
+
+    #chart-view > .stats-year-filter-wrap {
+        order: 1;
+        flex: 0 0 34px;
+        width: 100%;
+        max-width: none;
+        min-height: 34px;
+        height: 34px;
+        margin: 0 0 6px 0 !important;
+
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        box-sizing: border-box;
+    }
+
+    #chart-view > .stats-year-filter-wrap select {
+        flex: 1 1 auto;
+        min-width: 0;
+        width: auto;
+        height: 34px;
+        min-height: 34px;
+        box-sizing: border-box;
+    }
+
+    #chart-view > .stats-year-filter-wrap .dash-year-arrow-btn {
+        flex: 0 0 34px;
+        width: 34px;
+        height: 34px;
+        min-height: 34px;
+        box-sizing: border-box;
+    }
+
+    /* Die Stats-Unterseiten kommen zwischen Kopfzeile und
+       der am rechten Rand liegenden Navigation. */
+    #chart-view > .stats-section-page {
+        order: 3;
+        min-height: 0;
+    }
+
+    /* Unter-Navigation aus ihrer bisherigen Position lösen
+       und direkt rechts neben den Jahresfilter setzen. */
+    #chart-view > .stats-section-switch {
+        order: 2;
+
+        width: auto;
+        max-width: none;
+        flex: 0 0 auto;
+
+        margin: 0 0 6px auto !important;
+        padding: 0;
+
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 5px;
+
+        box-sizing: border-box;
+    }
+
+    #chart-view > .stats-section-switch .stats-section-btn {
+        flex: 0 0 auto;
+        width: auto;
+        min-width: 0;
+        height: 34px;
+        min-height: 34px;
+        padding: 5px 9px;
+        box-sizing: border-box;
+        white-space: nowrap;
+        font-size: 10px;
+        line-height: 1;
+    }
+
+    /* Kopfzeile tatsächlich als eine gemeinsame horizontale
+       Reihe darstellen: Jahressteuerung links, Stats-Navigation
+       rechts. */
+    #chart-view > .stats-year-filter-wrap,
+    #chart-view > .stats-section-switch {
+        align-self: stretch;
+    }
+
+    /* Die beiden Kopfbereiche werden in einer Zeile geführt. */
+    #chart-view {
+        --stats-header-height: 34px;
+    }
+
+    #chart-view > .stats-year-filter-wrap {
+        width: 44%;
+        margin-right: auto !important;
+    }
+
+    #chart-view > .stats-section-switch {
+        width: 54%;
+        margin-left: auto !important;
+        margin-top: calc(-1 * var(--stats-header-height) - 6px) !important;
+        height: var(--stats-header-height);
+        min-height: var(--stats-header-height);
+        align-self: flex-end;
+    }
+
+    /* Danach beginnt der eigentliche Stats-Inhalt sauber
+       unterhalb der gemeinsamen Kopfzeile. */
+    #chart-view > .stats-section-page {
+        margin-top: 0;
+    }
+}
+</style>
+
 </body>
 </html>
