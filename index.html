@@ -18533,8 +18533,8 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
 
 
 /* =========================================================
-   MOBILE QUERFORMAT – kompakte Seiten-Navigation
-   Nur im mobilen Querformat aktiv.
+   MOBILE QUERFORMAT – gemeinsame S23-Grundstruktur
+   Portrait und Desktop bleiben unverändert.
    ========================================================= */
 @media (orientation: landscape) and (pointer: coarse) {
 
@@ -18556,58 +18556,58 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         height: 100dvh;
         min-height: 0;
         max-width: none;
-        margin: 0;
-        display: flex;
-        flex-direction: row;
+        display: block;
         overflow: hidden;
     }
 
+    /* Seitliche Hauptnavigation */
     .accordion-header {
-        position: relative;
-        flex: 0 0 calc(68px + env(safe-area-inset-left, 0px));
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+
         width: calc(68px + env(safe-area-inset-left, 0px));
         height: 100dvh;
         max-width: none;
+
         margin: 0;
         padding:
             max(6px, env(safe-area-inset-top, 0px))
             5px
             max(6px, env(safe-area-inset-bottom, 0px))
             max(5px, env(safe-area-inset-left, 0px));
+
         display: flex;
         align-items: center;
         justify-content: center;
+
+        top: 0;
         z-index: 10000;
     }
 
     .header-actions {
-        position: relative;
         width: 100%;
         height: 100%;
+
         display: flex;
         align-items: center;
         justify-content: center;
     }
 
     .top-main-nav {
-        position: relative;
         width: 58px;
         max-height: calc(100dvh - 12px);
+
         display: flex;
         flex-direction: column;
         align-items: stretch;
         justify-content: center;
+
         gap: 4px;
         padding: 5px;
+
         border-radius: 18px;
-        color: var(--text-main);
-        background: var(--glass-bg);
-        border-color: var(--glass-border);
-        box-shadow:
-            0 6px 20px rgba(25,40,35,0.12),
-            inset 0 1px 1px rgba(255,255,255,0.14);
-        backdrop-filter: blur(18px);
-        -webkit-backdrop-filter: blur(18px);
     }
 
     .top-nav-btn,
@@ -18616,13 +18616,15 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         width: 100%;
         height: 52px;
         min-height: 52px;
+
         padding: 3px 1px;
         border-radius: 13px;
         gap: 2px;
-        color: var(--text-main);
     }
 
-    .top-nav-icon { font-size: 20px; }
+    .top-nav-icon {
+        font-size: 20px;
+    }
 
     .top-nav-label {
         font-size: 8px;
@@ -18634,36 +18636,72 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         height: 54px;
         min-height: 54px;
         border-radius: 14px;
-        background: var(--accent-gradient);
-        color: var(--text-main);
     }
 
-    .top-nav-plus { font-size: 26px; }
+    .top-nav-plus {
+        font-size: 26px;
+    }
 
     .top-nav-more-wrap {
-        position: relative;
         width: 100%;
         min-width: 0;
     }
 
-    .top-main-nav .top-nav-btn.view-active,
-    .top-main-nav .top-nav-btn.more-view-active {
+    /*
+       Theme-Sicherheit im Querformat:
+       Keine festen Ersatzfarben verwenden. Navigation und
+       Mehr-Menü übernehmen die bereits vorhandenen Theme-Variablen.
+    */
+    .accordion-header,
+    .header-actions,
+    .top-main-nav {
+        color: var(--text-main);
+    }
+
+    .top-main-nav {
+        background: var(--glass-bg);
+        border-color: var(--glass-border);
+        box-shadow:
+            0 6px 20px rgba(25,40,35,0.12),
+            inset 0 1px 1px rgba(255,255,255,0.14);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+    }
+
+    .top-nav-btn {
+        color: var(--text-main);
+    }
+
+    .top-nav-btn.view-active,
+    .top-nav-btn.more-view-active {
         background: var(--accent-soft);
     }
 
+    .top-nav-save {
+        background: var(--accent-gradient);
+        color: var(--text-main);
+    }
+
+    /* Mehr öffnet seitlich statt nach unten */
+    .more-menu.hidden {
+        display: none !important;
+    }
+
     .more-menu {
-        position: absolute;
         top: 50%;
         right: auto;
         left: calc(100% + 8px);
         bottom: auto;
+
         transform: translateY(-50%);
+
         width: 220px;
         max-width: calc(100vw - 86px);
         max-height: calc(100dvh - 16px);
         overflow-y: auto;
-        overflow-x: hidden;
         overscroll-behavior: contain;
+
+        /* Auch das seitliche Menü folgt exakt dem aktiven Theme. */
         background: var(--glass-bg);
         border-color: var(--glass-border);
         color: var(--text-main);
@@ -18674,54 +18712,75 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         -webkit-backdrop-filter: blur(22px);
     }
 
-    .more-menu.hidden { display: none; }
-
-    .more-menu-item { color: var(--text-main); }
+    .more-menu-item {
+        color: var(--text-main);
+    }
 
     .more-menu-item:active {
         background: var(--ui-card-bg-interactive);
     }
 
-    .more-menu-divider { background: var(--glass-border); }
+    .more-menu-divider {
+        background: var(--glass-border);
+    }
 
+    /* Die Views bekommen die Fläche rechts neben der Navigation. */
     .view-container {
-        position: relative;
-        flex: 1 1 auto;
-        width: auto;
-        height: 100dvh;
-        min-width: 0;
+        width: calc(100% - 68px - env(safe-area-inset-left, 0px));
+        height: 100%;
         min-height: 0;
-        margin: 0;
+        margin-left: calc(68px + env(safe-area-inset-left, 0px));
+
+        flex: 1 1 auto;
         overflow: hidden;
     }
 
     .view {
-        position: absolute;
-        inset: 0;
         width: 100%;
         height: 100%;
-        min-width: 0;
         min-height: 0;
+
         overflow-y: auto;
         overflow-x: hidden;
-        -webkit-overflow-scrolling: touch;
+
         padding: 8px 14px 18px;
-        box-sizing: border-box;
     }
 
     .view > .accordion {
         width: 100%;
         padding-bottom: 18px;
     }
-
-    #chart-view,
-    #tour-view {
-        height: 100%;
-        min-height: 0;
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
 }
+
+    .top-main-nav > .top-nav-btn,
+    .top-main-nav .top-nav-btn {
+        appearance: none;
+        -webkit-appearance: none;
+        border: 0;
+        outline: 0;
+        color: var(--text-main) !important;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .top-main-nav .top-nav-btn.view-active,
+    .top-main-nav .top-nav-btn.more-view-active {
+        background: var(--accent-soft) !important;
+    }
+
+    .top-main-nav .top-nav-save {
+        background: var(--accent-gradient) !important;
+        color: var(--text-main) !important;
+    }
+
+    .more-menu:not(.hidden) {
+        display: block;
+    }
+
+    .view-container,
+    .view {
+        box-sizing: border-box;
+    }
 
 </style>
 </head>
