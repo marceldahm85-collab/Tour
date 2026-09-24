@@ -51291,3 +51291,75 @@ if ('serviceWorker' in navigator) {
 </body>
 </html>
 
+
+
+/* =========================================================
+   MOBILE QUERFORMAT – DASHBOARD ZWEISPALTIG
+   Links: Jahresfilter, Stat-Kacheln, letzte 5 Touren
+   Rechts: Meilensteine
+   ========================================================= */
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    #dashboard-view .dashboard-inner {
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(250px, 0.9fr);
+        grid-template-areas:
+            "filter milestones"
+            "stats milestones"
+            "recent milestones";
+        column-gap: 12px;
+        row-gap: 8px;
+        align-items: start;
+        width: 100%;
+        box-sizing: border-box;
+        padding-bottom: 18px;
+    }
+
+    #dashboard-view .dash-year-filter-wrap {
+        grid-area: filter;
+        min-width: 0;
+    }
+
+    #dashboard-view .dash-stat-grid {
+        grid-area: stats;
+        min-width: 0;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    #dashboard-view #dash-recent-section {
+        grid-area: recent;
+        min-width: 0;
+    }
+
+    #dashboard-view #dash-milestones-section {
+        grid-area: milestones;
+        min-width: 0;
+        align-self: start;
+    }
+
+    #dashboard-view .dash-section {
+        min-width: 0;
+    }
+
+    #dashboard-view .dash-section-title {
+        padding: 9px 11px 5px;
+        font-size: 12px;
+    }
+
+    #dashboard-view .dash-section-body {
+        padding: 0 8px 8px;
+    }
+
+    #dashboard-view .dash-tour-list li {
+        padding: 6px 4px;
+        margin-bottom: 3px;
+    }
+
+    #dashboard-view .dash-ms-grid {
+        gap: 6px;
+    }
+
+    #dashboard-view .dash-milestone-tile {
+        padding: 8px 10px;
+    }
+}
