@@ -19107,7 +19107,7 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
 
     #chart-view {
         display: grid !important;
-        grid-template-columns: 148px minmax(0, 1fr);
+        grid-template-columns: 110px minmax(0, 1fr);
         grid-template-rows: minmax(0, 1fr);
         grid-template-areas: "stats-controls stats-content";
         column-gap: 10px;
@@ -19124,34 +19124,39 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         position: absolute;
         left: 0;
         top: 0;
-        width: 148px;
+        width: 110px;
         height: auto;
         margin: 0;
         z-index: 5;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 5px;
+        box-sizing: border-box;
     }
 
     #chart-view .stats-year-filter-wrap > select,
     #chart-view .stats-year-filter-wrap > .mob-sel-wrap,
     #chart-view .stats-year-filter-wrap .mob-sel-btn {
+        grid-column: 1 / -1;
         width: 100%;
         min-width: 0;
         box-sizing: border-box;
     }
 
     #chart-view .stats-year-filter-wrap > .dash-year-arrow-btn {
-        flex: 0 0 34px;
-        width: 34px;
+        width: 100%;
         height: 34px;
         min-height: 34px;
         box-sizing: border-box;
+        margin: 0;
     }
 
     #chart-view .stats-section-switch {
         grid-area: stats-controls;
         align-self: start;
-        width: 148px;
-        max-width: 148px;
-        margin: 42px 0 0;
+        width: 110px;
+        max-width: 110px;
+        margin: 78px 0 0;
         padding: 0;
         display: flex;
         flex-direction: column;
@@ -19161,11 +19166,11 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
 
     #chart-view .stats-section-btn {
         width: 100%;
-        min-height: 34px;
-        height: 34px;
-        padding: 5px 7px;
-        border-radius: 9px;
-        font-size: 10px;
+        min-height: 32px;
+        height: 32px;
+        padding: 4px 5px;
+        border-radius: 8px;
+        font-size: 9.5px;
         line-height: 1;
         box-sizing: border-box;
     }
