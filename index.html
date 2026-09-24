@@ -19097,6 +19097,127 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
     }
 }
 
+
+/* =========================================================
+   MOBILE QUERFORMAT – STATS
+   Zweispaltige Darstellung ausschließlich im Querformat:
+   links das aktive Diagramm, rechts die Diagrammauswahl.
+   Portrait bleibt vollständig unverändert.
+   ========================================================= */
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+
+    #chart-view {
+        box-sizing: border-box;
+        overflow: hidden !important;
+        padding: 8px 12px 10px !important;
+    }
+
+    /* Jahresfilter und Bereichsnavigation bleiben oben */
+    #chart-view .stats-year-filter-wrap {
+        flex: 0 0 auto;
+        margin-bottom: 6px;
+    }
+
+    #chart-view .stats-section-switch {
+        flex: 0 0 auto;
+        margin-bottom: 6px;
+    }
+
+    /* Diagrammseite: zwei echte Spalten */
+    #chart-view .stats-diagrams-page.active {
+        display: grid;
+        grid-template-columns: minmax(0, 1.55fr) minmax(190px, 0.85fr);
+        grid-template-rows: minmax(0, 1fr);
+        grid-template-areas: "chart tabs";
+        gap: 10px;
+        width: 100%;
+        min-height: 0;
+        height: 100%;
+        overflow: hidden;
+        align-items: stretch;
+    }
+
+    #chart-view .chart-canvas-stage {
+        grid-area: chart;
+
+        width: 100%;
+        max-width: none;
+        height: 100%;
+        min-height: 0;
+        margin: 0;
+
+        box-sizing: border-box;
+    }
+
+    #chart-view .chart-tabs {
+        grid-area: tabs;
+
+        width: 100%;
+        max-width: none;
+        height: 100%;
+        min-height: 0;
+        margin: 0;
+        padding: 0;
+
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-auto-rows: minmax(0, 1fr);
+        gap: 6px;
+
+        overflow-y: auto;
+        overflow-x: hidden;
+        align-content: stretch;
+        box-sizing: border-box;
+    }
+
+    #chart-view .chart-tab {
+        min-height: 0;
+        height: auto;
+        padding: 5px 4px;
+        gap: 3px;
+        border-radius: 11px;
+    }
+
+    #chart-view .chart-tab-icon {
+        font-size: 16px;
+    }
+
+    #chart-view .chart-tab-label {
+        font-size: 9px;
+        line-height: 1.05;
+    }
+
+    /* Canvas selbst füllt ausschließlich die linke Spalte. */
+    #chart-view .chart-canvas-stage canvas {
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Die übrigen Stats-Seiten bleiben funktional und bekommen
+       im Querformat zwei Spalten für ihre Karten/Blöcke. */
+    #chart-view .stats-scroll-page.active {
+        width: 100%;
+        max-width: none;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 0 2px 12px;
+        box-sizing: border-box;
+    }
+
+    #chart-view .stats-scroll-page.active > * {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    #stats-statistics-page .stats-structure-content,
+    #stats-highlights-page .highlight-groups,
+    #stats-development-content,
+    #stats-peaks-content {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+
 </style>
 </head>
 <body>
