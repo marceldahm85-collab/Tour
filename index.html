@@ -18654,24 +18654,78 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         min-width: 0;
     }
 
-    /* Mehr-Menü öffnet sich rechts neben der linken Navigation. */
+    /* Mehr-Menü: kompakt und vertikal zentriert, damit im Querformat
+       weder der obere noch der untere Menüpunkt abgeschnitten wird. */
     .more-menu {
-        top: auto;
+        top: 50%;
         right: auto;
         left: calc(100% + 8px);
-        bottom: 0;
+        bottom: auto;
 
-        transform: none;
+        transform: translateY(-50%);
 
-        width: 220px;
+        width: 205px;
         max-width: calc(100vw - 92px);
-        max-height: calc(100dvh - 16px);
+        max-height: calc(100dvh - 12px);
 
+        padding: 4px;
         overflow-y: auto;
         overscroll-behavior: contain;
         box-sizing: border-box;
 
         z-index: 1100;
+    }
+
+    /* Kompaktere Einträge ausschließlich im mobilen Querformat. */
+    .more-menu .more-menu-item {
+        min-height: 34px;
+        padding: 6px 9px;
+        gap: 8px;
+        font-size: 11px;
+        border-radius: 10px;
+    }
+
+    .more-menu .more-menu-item span:first-child {
+        width: 20px;
+        font-size: 15px;
+    }
+
+    .more-menu .more-menu-divider {
+        margin: 2px 6px;
+    }
+
+    .more-menu .more-theme-list {
+        gap: 2px;
+        padding: 0;
+    }
+
+    .more-menu .more-theme-option {
+        min-height: 30px;
+        padding: 5px 8px;
+        border-radius: 9px;
+        grid-template-columns: 20px minmax(0, 1fr) 16px;
+        gap: 6px;
+        font-size: 10.5px;
+    }
+
+    .more-menu .more-theme-icon {
+        font-size: 14px;
+    }
+
+    .more-menu .more-theme-check {
+        font-size: 11px;
+    }
+
+    .more-menu #theme-toggle {
+        min-height: 34px;
+        padding: 6px 9px;
+        gap: 8px;
+        font-size: 15px;
+        border-radius: 10px;
+    }
+
+    .more-menu #theme-toggle::after {
+        font-size: 11px;
     }
 
     .more-menu.hidden {
