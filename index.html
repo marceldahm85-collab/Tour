@@ -52987,7 +52987,7 @@ if ('serviceWorker' in navigator) {
 
         grid-template-columns:
             minmax(0, 1fr)
-            150px;
+            220px;
 
         grid-template-rows:
             max-content
@@ -53206,7 +53206,8 @@ if ('serviceWorker' in navigator) {
         grid-area: quick;
 
         display: grid !important;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        overflow: visible !important;
 
         align-content: start;
         align-items: start;
