@@ -52961,6 +52961,293 @@ if ('serviceWorker' in navigator) {
     }
 }
 
+/* =========================================================
+   MAPVIEW – mobiles Querformat
+   Links: Karte
+   Rechts: Jahresfilter, Ansicht, Quickfilter
+   ========================================================= */
+
+@media (max-width: 1024px)
+       and (orientation: landscape)
+       and (pointer: coarse) {
+
+    /*
+     * Die Karte erhält die linke, flexible Spalte.
+     * Die komplette Bedienung liegt rechts.
+     */
+    #map-view {
+        display: block !important;
+        overflow: hidden !important;
+        padding: 8px 10px 10px !important;
+        box-sizing: border-box;
+    }
+
+    #map-view .map-view-inner {
+        display: grid !important;
+
+        grid-template-columns:
+            minmax(0, 1fr)
+            150px;
+
+        grid-template-rows:
+            max-content
+            max-content
+            max-content
+            max-content
+            minmax(0, 1fr);
+
+        grid-template-areas:
+            "map     year"
+            "map     info"
+            "map     mode"
+            "map     legend"
+            "map     quick";
+
+        gap: 6px 8px;
+
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+
+        padding: 0 !important;
+        box-sizing: border-box;
+
+        align-items: stretch;
+        overflow: hidden;
+    }
+
+    /*
+     * Karte links über die gesamte verfügbare Höhe.
+     */
+    #map-view #tour-map {
+        grid-area: map;
+
+        width: 100%;
+        height: 100%;
+        min-width: 0;
+        min-height: 0;
+
+        border-radius: 16px;
+        box-sizing: border-box;
+    }
+
+    /*
+     * Jahresauswahl rechts oben.
+     */
+    #map-view .map-year-filter-wrap {
+        grid-area: year;
+
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 32px 32px;
+
+        width: 100% !important;
+        max-width: none !important;
+        height: auto !important;
+        min-height: 0 !important;
+
+        margin: 0 !important;
+        padding: 5px !important;
+
+        gap: 4px;
+
+        box-sizing: border-box;
+
+        border-radius: 12px 12px 0 0;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-bottom: 0;
+    }
+
+    /*
+     * Native Select oder mobiler Select-Wrapper:
+     * über die gesamte Breite.
+     */
+    #map-view .map-year-filter-wrap > select,
+    #map-view .map-year-filter-wrap > .mob-sel-wrap {
+        grid-column: 1 / -1;
+
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 32px !important;
+        min-height: 32px !important;
+
+        box-sizing: border-box;
+    }
+
+    #map-view .map-year-filter-wrap
+        > .mob-sel-wrap
+        > .mob-sel-btn {
+        width: 100% !important;
+        height: 32px !important;
+        min-height: 32px !important;
+
+        padding: 6px 8px;
+        box-sizing: border-box;
+    }
+
+    /*
+     * Pfeile unterhalb des Dropdowns.
+     */
+    #map-view .map-year-filter-wrap > .dash-year-arrow-btn {
+        width: 100% !important;
+        height: 32px !important;
+        min-height: 32px !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 8px;
+        box-sizing: border-box;
+        font-size: 10px;
+    }
+
+    #map-view .map-year-filter-wrap > select {
+        padding: 0 7px !important;
+        line-height: 1.1;
+        font-size: 10px;
+    }
+
+    /*
+     * Infozeile rechts unter dem Jahresfilter.
+     */
+    #map-view #map-info-bar {
+        grid-area: info;
+
+        width: 100%;
+        min-width: 0;
+
+        padding: 4px 5px;
+
+        font-size: 9px;
+        line-height: 1.2;
+        text-align: center;
+
+        box-sizing: border-box;
+
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /*
+     * Kartenmodus:
+     * Marker, Intensität und Leistung untereinander.
+     */
+    #map-view .map-mode-toggle {
+        grid-area: mode;
+
+        display: flex !important;
+        flex-direction: column !important;
+
+        width: 100% !important;
+        max-width: none !important;
+
+        margin: 0 !important;
+        padding: 4px !important;
+
+        gap: 4px;
+
+        box-sizing: border-box;
+        border-radius: 10px;
+    }
+
+    #map-view .map-mode-btn {
+        width: 100%;
+        min-width: 0;
+        min-height: 29px;
+        height: 29px;
+
+        padding: 4px 5px;
+
+        font-size: 9px;
+        line-height: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        box-sizing: border-box;
+    }
+
+    /*
+     * Leistungslegende rechts unterhalb der Modusauswahl.
+     */
+    #map-view #map-performance-legend {
+        grid-area: legend;
+
+        width: 100%;
+        max-width: none;
+
+        margin: 0 !important;
+        padding: 5px;
+
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 3px;
+
+        font-size: 8px;
+        box-sizing: border-box;
+    }
+
+    #map-view #map-performance-legend[hidden] {
+        display: none !important;
+    }
+
+    /*
+     * Quickfilter bilden den unteren Bereich der
+     * rechten Spalte und dürfen intern scrollen.
+     */
+    #map-view #map-quick-filters {
+        grid-area: quick;
+
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+
+        align-content: start;
+        align-items: start;
+
+        width: 100%;
+        min-width: 0;
+        min-height: 0;
+
+        gap: 4px;
+
+        padding: 4px !important;
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        box-sizing: border-box;
+        scrollbar-width: none;
+    }
+
+    #map-view #map-quick-filters::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+    }
+
+    #map-view #map-quick-filters .quick-filter-btn {
+        width: 100%;
+        min-width: 0;
+        min-height: 27px;
+
+        padding: 4px 3px;
+
+        font-size: 8px;
+        line-height: 1.05;
+        white-space: normal;
+        overflow-wrap: anywhere;
+
+        border-radius: 8px;
+        box-sizing: border-box;
+    }
+}
+
 </style>
 </body>
 </html>
