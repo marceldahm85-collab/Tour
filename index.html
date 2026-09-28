@@ -19611,6 +19611,8 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
                 class="tour-form"
                 id="tour-form">
 
+            <div class="save-form-column save-form-left">
+
             <div class="form-section-title">
     <span>Tour</span>
 </div>
@@ -19786,6 +19788,9 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
 
             </div>                
   
+           </div><!-- /.save-form-left -->
+
+        <div class="save-form-column save-form-right">
 
            <div class="form-section-title">
     <span>Weitere Angaben</span>
@@ -19895,6 +19900,8 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
     </div>
 
 </div>
+
+        </div><!-- /.save-form-right -->
 
             <button type="button" class="save-btn" id="save-btn">Speichern</button>
 
@@ -53246,6 +53253,628 @@ if ('serviceWorker' in navigator) {
 
         border-radius: 8px;
         box-sizing: border-box;
+    }
+}
+
+/* =========================================================
+   TOUR SPEICHERN – mobiles Querformat
+   Zwei unabhängige Spalten
+   ========================================================= */
+
+@media (max-width: 1024px)
+       and (orientation: landscape)
+       and (pointer: coarse) {
+
+    #app-view {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        padding: 8px 18px 14px !important;
+        box-sizing: border-box;
+    }
+
+    #app-view #tour-form {
+        display: grid !important;
+        grid-template-columns:
+            minmax(0, 1fr)
+            minmax(0, 1fr);
+
+        grid-template-rows: auto auto;
+        column-gap: 14px;
+        row-gap: 8px;
+
+        width: 100%;
+        min-width: 0;
+        align-items: start;
+    }
+
+    /*
+     * Beide Spalten besitzen ihren eigenen vertikalen Ablauf.
+     * Änderungen in einer Spalte beeinflussen die andere nicht.
+     */
+    #app-view .save-form-column {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 7px;
+
+        width: 100%;
+        min-width: 0;
+        align-self: start;
+    }
+
+    #app-view .save-form-left {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    #app-view .save-form-right {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    /*
+     * Abschnittsüberschriften innerhalb ihrer Spalte.
+     */
+    #app-view .save-form-column .form-section-title {
+        width: 100%;
+        margin: 3px 2px 1px !important;
+    }
+
+    #app-view .save-form-column .form-section-title:first-child {
+        margin-top: 0 !important;
+    }
+
+    /*
+     * Datum und Steigung links nebeneinander.
+     */
+    #app-view .save-form-left
+        .tour-form-row-date-slope {
+        display: grid !important;
+        grid-template-columns:
+            minmax(0, 1fr)
+            minmax(0, 1fr);
+
+        gap: 7px;
+        width: 100%;
+    }
+
+    /*
+     * Region und Tourart links nebeneinander.
+     */
+    #app-view .save-form-left
+        > .tour-form-row-two:not(#main-activity-fields) {
+        display: grid !important;
+        grid-template-columns:
+            minmax(0, 1fr)
+            minmax(0, 1fr);
+
+        gap: 7px;
+        width: 100%;
+    }
+
+    /*
+     * Mehrtagestour bleibt vollständig JavaScript-gesteuert.
+     * Kein display: grid !important auf dem Container.
+     */
+    #app-view #multiday-fields[style*="display: none"] {
+        display: none !important;
+    }
+
+    #app-view #multiday-fields {
+        width: 100%;
+        min-width: 0;
+    }
+
+    /*
+     * Das vorhandene Leistungs-Grid bleibt links erhalten.
+     */
+    #app-view #main-activity-fields {
+        display: grid !important;
+        grid-template-columns:
+            minmax(0, 1fr)
+            minmax(0, 1fr);
+
+        gap: 7px;
+        width: 100%;
+        min-width: 0;
+        align-items: end;
+    }
+
+    /*
+     * Klettersteig- und Radfelder niemals per CSS
+     * künstlich sichtbar machen.
+     */
+    #app-view #ferrata-fields[style*="display: none"],
+    #app-view #bike-fields[style*="display: none"] {
+        display: none !important;
+    }
+
+    /*
+     * Falls JavaScript display: contents setzt,
+     * bleiben die Felder im Leistungsgrid integriert.
+     */
+    #app-view #ferrata-fields[style*="display: contents"],
+    #app-view #bike-fields[style*="display: contents"] {
+        display: contents !important;
+    }
+
+    /*
+     * Rechte Spalte.
+     */
+    #app-view .save-form-right .form-group {
+        min-width: 0;
+    }
+
+    #app-view #gipfel-details-container {
+        width: 100%;
+        min-width: 0;
+        margin-top: 0 !important;
+    }
+
+    #app-view .save-peak-row {
+        display: grid;
+        grid-template-columns:
+            minmax(0, 1fr)
+            82px;
+
+        gap: 7px;
+        width: 100%;
+        min-width: 0;
+        align-items: end;
+    }
+
+    /*
+     * Koordinaten innerhalb der rechten Spalte.
+     */
+    #app-view .save-form-right
+        .form-details .tour-form-row-two {
+        display: grid !important;
+        grid-template-columns:
+            minmax(0, 1fr)
+            minmax(0, 1fr);
+
+        gap: 7px;
+        width: 100%;
+    }
+
+    #app-view .tour-image-file-row {
+        width: 100%;
+        min-width: 0;
+    }
+
+    #app-view .tour-image-file-info {
+        min-width: 0;
+    }
+
+    /*
+     * Speichern unter beiden Spalten.
+     */
+    #app-view #save-btn {
+        grid-column: 1 / -1;
+        grid-row: 2;
+
+        width: 100%;
+        height: 34px;
+        min-height: 34px;
+
+        margin-top: 0 !important;
+        justify-self: stretch;
+    }
+
+    /*
+     * Kompakte Querformat-Controls.
+     */
+    #app-view #tour-form .form-group {
+        min-width: 0;
+        gap: 2px;
+    }
+
+    #app-view #tour-form label {
+        font-size: 10px;
+        line-height: 1.1;
+    }
+
+    #app-view #tour-form input,
+    #app-view #tour-form select,
+    #app-view #tour-form textarea {
+        width: 100%;
+        min-width: 0;
+        height: 32px;
+        min-height: 32px;
+        padding-top: 0;
+        padding-bottom: 0;
+        font-size: 12px;
+    }
+
+    #app-view #geo-search-btn {
+        width: auto;
+        height: 32px;
+        min-height: 32px;
+        flex: 0 0 auto;
+        padding: 0 10px !important;
+    }
+
+    #app-view .slope-toggle-label {
+        height: 32px;
+        min-height: 32px;
+        gap: 5px;
+        font-size: 10px;
+    }
+
+    #app-view .slope-toggle {
+        width: 27px;
+        height: 27px;
+        min-width: 27px;
+        min-height: 27px;
+        flex: 0 0 27px;
+        font-size: 14px;
+    }
+}
+
+/* =========================================================
+   MOBILE LANDSCAPE – TOUR PLANEN
+   Links: aktiver Planungsinhalt
+   Rechts: fünf Übersichtskacheln
+           darüber die vier Navigationsbuttons
+   ========================================================= */
+
+@media (max-width: 1024px)
+       and (orientation: landscape)
+       and (pointer: coarse) {
+
+    /*
+     * Linke Spalte:
+     * aktiver Planungsinhalt
+     *
+     * Rechte Spalte:
+     * oben fünf Übersichtskacheln
+     * darunter vier Bereichsbuttons
+     */
+    #tour-view {
+        display: grid !important;
+
+        grid-template-columns:
+            minmax(0, 1fr)
+            178px;
+
+        grid-template-rows:
+            auto
+            auto;
+
+        grid-template-areas:
+            "content overview"
+            "content navigation";
+
+        column-gap: 10px;
+        row-gap: 6px;
+
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+
+        padding: 8px 12px 10px !important;
+
+        align-items: start !important;
+        overflow: hidden !important;
+
+        box-sizing: border-box;
+    }
+
+    /* ---------------------------------------------------------
+       Linke Spalte: unabhängiger Scrollbereich
+       --------------------------------------------------------- */
+
+    #tour-view > .accordion {
+        grid-area: content;
+
+        display: block !important;
+
+        width: 100%;
+        min-width: 0;
+        height: 100%;
+        min-height: 0;
+
+        margin: 0;
+        padding: 0 3px 10px 0 !important;
+
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: contain;
+        touch-action: pan-y;
+
+        scrollbar-width: none;
+        box-sizing: border-box;
+    }
+
+    #tour-view > .accordion::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+    }
+
+    /*
+     * Nur der aktive Planungsbereich wird links angezeigt.
+     * Die vorhandene JavaScript-Steuerung bleibt maßgeblich.
+     */
+    #tour-view
+    > .accordion
+    > .plan-section-panel.plan-panel-active {
+        display: block !important;
+
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+    }
+
+    /* ---------------------------------------------------------
+       Rechte Spalte oben: Kopf + fünf Kacheln
+       --------------------------------------------------------- */
+
+    #tour-view > .plan-page-header {
+        grid-area: overview;
+
+        width: 100%;
+        min-width: 0;
+        height: auto;
+        min-height: 0;
+
+        margin: 0;
+        padding: 0;
+
+        align-self: start;
+        box-sizing: border-box;
+    }
+
+    #tour-view .plan-page-heading {
+        width: 100%;
+        margin: 0 0 4px;
+    }
+
+    #tour-view .plan-page-kicker {
+        width: 100%;
+
+        font-size: 8px;
+        line-height: 1;
+        text-align: center;
+    }
+
+    /*
+     * Fünf Kacheln untereinander.
+     * Dadurch stehen sie vollständig oberhalb
+     * der vier Navigationsbuttons.
+     */
+    #tour-view .plan-overview-grid {
+        display: grid;
+
+        grid-template-columns:
+            minmax(0, 1fr);
+
+        grid-auto-rows: 31px;
+
+        gap: 4px;
+
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+    }
+
+    #tour-view .plan-overview-tile {
+        display: grid;
+
+        grid-template-columns:
+            20px minmax(0, 1fr);
+
+        grid-template-rows:
+            1fr 1fr;
+
+        column-gap: 5px;
+        row-gap: 0;
+
+        width: 100%;
+        min-width: 0;
+        min-height: 31px;
+        height: 31px;
+
+        padding: 3px 5px;
+
+        align-items: center;
+        justify-items: start;
+
+        border-radius: 8px;
+        box-sizing: border-box;
+    }
+
+    #tour-view .plan-overview-icon {
+        grid-row: 1 / span 2;
+
+        width: 20px;
+
+        font-size: 13px;
+        line-height: 1;
+        text-align: center;
+    }
+
+    #tour-view .plan-overview-value {
+        min-width: 0;
+
+        font-size: 10px;
+        line-height: 1;
+
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    #tour-view .plan-overview-value small {
+        font-size: 7px;
+    }
+
+    #tour-view .plan-overview-label {
+        min-width: 0;
+
+        font-size: 7px;
+        line-height: 1;
+
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* ---------------------------------------------------------
+       Rechte Spalte unten: vier Navigationsbuttons
+       --------------------------------------------------------- */
+
+    #tour-view > .plan-section-nav {
+        grid-area: navigation;
+
+        display: grid !important;
+
+        grid-template-columns:
+            minmax(0, 1fr);
+
+        grid-auto-rows: 31px;
+
+        gap: 4px;
+
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+        min-height: 0;
+
+        margin: 0;
+        padding: 0;
+
+        align-self: start;
+        box-sizing: border-box;
+    }
+
+    #tour-view .plan-section-btn {
+        display: flex;
+
+        align-items: center;
+        justify-content: flex-start;
+
+        gap: 5px;
+
+        width: 100%;
+        min-width: 0;
+        min-height: 31px;
+        height: 31px;
+
+        padding: 4px 6px;
+
+        border-radius: 8px;
+
+        font-size: 9px;
+        line-height: 1;
+        white-space: nowrap;
+
+        box-sizing: border-box;
+    }
+
+    #tour-view .plan-section-btn .plan-section-icon {
+        flex: 0 0 auto;
+
+        font-size: 12px;
+        line-height: 1;
+    }
+
+    #tour-view .plan-section-btn > span:last-child {
+        min-width: 0;
+
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /*
+     * Die äußere Navigation bleibt rechts.
+     * Die linke Spalte scrollt unabhängig davon.
+     */
+    #tour-view > .plan-section-nav {
+        position: relative;
+        z-index: 2;
+    }
+}
+
+/* =========================================================
+   TOUR PLANEN – Navigationstitel im mobilen Querformat
+   Erscheint nur zwischen Übersichtskacheln und Buttons
+   ========================================================= */
+
+@media (max-width: 1024px)
+       and (orientation: landscape)
+       and (pointer: coarse) {
+
+    /*
+     * Die rechte Navigation wird zu einer vertikalen Gruppe:
+     *
+     * Navigation
+     * Planen
+     * Liste
+     * Gipfel
+     * Check
+     */
+    #tour-view > .plan-section-nav {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 4px !important;
+    }
+
+    /*
+     * Überschrift zwischen Kacheln und Buttons.
+     * Optik an .plan-view-title / .form-section-title angelehnt.
+     */
+    #tour-view > .plan-section-nav::before {
+        content: "Navigation";
+
+        display: flex;
+        align-items: center;
+
+        flex: 0 0 20px;
+
+        width: 100%;
+        min-width: 0;
+
+        margin: 0 2px 1px;
+
+        color: var(--accent);
+        opacity: 1;
+
+        font-size: 8px;
+        font-weight: 800;
+        letter-spacing: 0.7px;
+        line-height: 1;
+        text-transform: uppercase;
+        white-space: nowrap;
+
+        /*
+         * Dezente Akzentlinie rechts neben der Überschrift.
+         * Die ersten ca. 70px bleiben für den Text frei.
+         */
+        background:
+            linear-gradient(
+                to right,
+                transparent 0,
+                transparent 72px,
+                var(--accent) 72px,
+                var(--accent) 100%
+            )
+            center / 100% 1px no-repeat;
+    }
+
+    /*
+     * Buttons behalten ihre bisherige kompakte Höhe.
+     */
+    #tour-view > .plan-section-nav > .plan-section-btn {
+        flex: 0 0 31px !important;
+
+        width: 100%;
+        height: 31px;
+        min-height: 31px;
     }
 }
 
