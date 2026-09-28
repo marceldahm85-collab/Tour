@@ -29468,7 +29468,7 @@ function renderStructureTypeComparison(tours) {
                         <div><span>${escapeHtml(row.metricLabels.ascent)}</span><b>${Number.isFinite(row.ascent) ? `${Math.round(row.ascent).toLocaleString('de-AT')} hm` : '–'}</b></div>
                         <div><span>Ø Anstieg / h</span><b>${Number.isFinite(row.ascentRate) ? `${Math.round(row.ascentRate).toLocaleString('de-AT')} hm/h` : '–'}</b></div>
                         <div><span>${escapeHtml(row.metricLabels.time)}</span><b>${formatStructureTime(row.time)}</b></div>
-                        <div><span>Ø Geschwindigkeit</span><b>${Number.isFinite(row.speed) ? `${formatDecimalAT(row.speed, 2)} km/h` : '–'}</b></div>
+                        <div><span>Ø Speed</span><b>${Number.isFinite(row.speed) ? `${formatDecimalAT(row.speed, 2)} km/h` : '–'}</b></div>
                     </div>
                 </div>
             `).join('')}
@@ -51401,10 +51401,12 @@ function updatePeakStatsPage() {
                         const totalCount = Number(full.count || full.entries?.length || 0);
                         const selectedCount = Number(selected.count || selected.entries?.length || 0);
 
-                        const countText =
-                            statsYearFilter === 'all'
-                                ? `${totalCount}×`
-                                : `${selectedCount}× · ${totalCount}× gesamt`;
+                        const countSelectedText = `${selectedCount}×`;
+
+const countTotalText =
+    statsYearFilter === 'all'
+        ? ''
+        : ` · ${totalCount}× gesamt`;
 
                         return `
                             <li
@@ -51417,7 +51419,14 @@ function updatePeakStatsPage() {
                                         ${escapeHtml(selected.name)}
                                         ${selected.rawHoehe > 0 ? ` · ${Math.round(selected.rawHoehe)} m` : ''}
                                     </span>
-                                    <span class="stats-peak-history-count">${countText}</span>
+                                    <span class="stats-peak-history-count">
+    <span class="peak-count-selected">
+        ${countSelectedText}
+    </span>
+    <span class="peak-count-total">
+        ${countTotalText}
+    </span>
+</span>
                                 </div>
                             </li>
                         `;
@@ -52175,6 +52184,783 @@ if ('serviceWorker' in navigator) {
         padding: 8px 12px 10px !important;
     }
 }
+
+/* =========================================================
+   Stats-Querformat:
+   Rechte Bedienleiste vertikal mittig ausrichten
+   Dropdown + Pfeile + Bereichsnavigation
+   Der Stats-Inhalt links bleibt unverändert.
+   ========================================================= */
+
+@media (max-width: 1024px)
+       and (orientation: landscape)
+       and (pointer: coarse) {
+
+    #chart-view {
+        /*
+         * Die linke Spalte enthält weiterhin ausschließlich
+         * den aktiven Stats-Inhalt.
+         *
+         * Die rechte Spalte enthält die Bedienleiste.
+         */
+        grid-template-columns: minmax(0, 1fr) 112px;
+
+        /*
+         * Oben und unten flexible Bereiche.
+         * Dazwischen liegen die beiden Teile der rechten Navigation.
+         * Dadurch wird die komplette Navigation als Gruppe
+         * vertikal zentriert.
+         */
+        grid-template-rows:
+            minmax(0, 1fr)
+            auto
+            auto
+            minmax(0, 1fr);
+
+        column-gap: 8px;
+        row-gap: 0;
+        align-items: stretch;
+    }
+
+    /*
+     * Aktiver Inhalt:
+     * bleibt links und nimmt weiterhin die gesamte Höhe ein.
+     */
+    #chart-view > .stats-section-page.active {
+        grid-column: 1;
+        grid-row: 1 / -1;
+
+        width: 100%;
+        height: 100%;
+        min-width: 0;
+        min-height: 0;
+    }
+
+    /*
+     * Oberer Teil der rechten Navigation:
+     * Dropdown + zwei Pfeilbuttons.
+     */
+    #chart-view > .stats-year-filter-wrap {
+        grid-column: 2;
+        grid-row: 2;
+
+        align-self: end;
+        justify-self: stretch;
+
+        width: 100% !important;
+        max-width: none !important;
+        height: auto !important;
+        min-height: 0 !important;
+
+        margin: 0 !important;
+        padding: 6px 6px 4px !important;
+
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 36px 36px;
+        gap: 4px;
+
+        box-sizing: border-box;
+
+        border-radius: 12px 12px 0 0;
+        border-bottom: 0;
+    }
+
+    /*
+     * Dropdown über beide Spalten.
+     */
+    #chart-view > .stats-year-filter-wrap > select,
+    #chart-view > .stats-year-filter-wrap > .mob-sel-wrap {
+        grid-column: 1 / -1;
+
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 36px !important;
+        min-height: 36px !important;
+
+        box-sizing: border-box;
+    }
+
+    /*
+     * Mobile-Custom-Select-Button.
+     */
+    #chart-view > .stats-year-filter-wrap
+        > .mob-sel-wrap
+        > .mob-sel-btn {
+        width: 100% !important;
+        height: 36px !important;
+        min-height: 36px !important;
+
+        box-sizing: border-box;
+    }
+
+    /*
+     * Vorheriges/Nächstes Jahr.
+     */
+    #chart-view > .stats-year-filter-wrap > .dash-year-arrow-btn {
+        width: 100% !important;
+        height: 36px !important;
+        min-height: 36px !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+
+        box-sizing: border-box;
+    }
+
+    /*
+     * Unterer Teil der rechten Navigation:
+     * Diagramme, Statistik, Highlights, Entwicklung, Gipfel.
+     */
+    #chart-view > .stats-section-switch {
+        grid-column: 2;
+        grid-row: 3;
+
+        align-self: start;
+        justify-self: stretch;
+
+        width: 100% !important;
+        max-width: none !important;
+        height: auto !important;
+        min-height: 0 !important;
+
+        margin: 0 !important;
+        padding: 4px 6px 6px !important;
+
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        gap: 4px !important;
+
+        box-sizing: border-box;
+
+        border-radius: 0 0 12px 12px;
+        border-top: 0;
+    }
+
+    /*
+     * Alle fünf Navigationsbuttons gleich breit und kompakt.
+     */
+    #chart-view > .stats-section-switch
+        > .stats-section-btn {
+        flex: 0 0 34px !important;
+
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 34px !important;
+        min-height: 34px !important;
+
+        padding: 4px 5px !important;
+
+        box-sizing: border-box;
+
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+/* =========================================================
+   STATS – Statistik im mobilen Querformat
+   Kompakte linke Spalte:
+   Aktivitätsmix
+   Typische Tour
+   Belastungsverteilung
+
+   Rechte Spalte:
+   Tourarten-Vergleich
+   ========================================================= */
+
+@media (max-width: 1024px)
+       and (orientation: landscape)
+       and (pointer: coarse) {
+
+    /*
+     * Die Statistik-Blöcke werden nicht mehr auf
+     * gleich hohe Grid-Zeilen gestreckt.
+     */
+    #stats-statistics-page #stats-structure-content {
+        display: grid !important;
+
+        grid-template-columns:
+            minmax(0, 1fr)
+            minmax(0, 1fr);
+
+        grid-template-rows:
+            max-content
+            max-content
+            max-content;
+
+        grid-template-areas:
+            "mix comparison"
+            "typical comparison"
+            "burden comparison";
+
+        align-items: start;
+        align-content: start;
+
+        gap: 6px 7px;
+
+        width: 100%;
+        min-height: 0;
+    }
+
+    /*
+     * 1. Aktivitätsmix – links oben
+     */
+    #stats-statistics-page
+    #stats-structure-content
+    > .stats-structure-section:nth-child(1) {
+        grid-area: mix;
+    }
+
+    /*
+     * 2. Typische Tour – links unterhalb des Aktivitätsmixes
+     */
+    #stats-statistics-page
+    #stats-structure-content
+    > .stats-structure-section:nth-child(2) {
+        grid-area: typical;
+    }
+
+    /*
+     * 3. Belastungsverteilung – links direkt unterhalb
+     *    von "Typische Tour"
+     */
+    #stats-statistics-page
+    #stats-structure-content
+    > .stats-structure-section:nth-child(3) {
+        grid-area: burden;
+    }
+
+    /*
+     * 4. Tourarten-Vergleich – rechte Spalte
+     *
+     * Der Block darf über die gesamte Höhe der linken
+     * kompakten Blockgruppe reichen, wird aber nicht
+     * künstlich auf die View-Höhe gestreckt.
+     */
+    #stats-statistics-page
+    #stats-structure-content
+    > .stats-structure-section:nth-child(4) {
+        grid-area: comparison;
+
+        align-self: start;
+    }
+
+    /*
+     * Vertikale Abstände innerhalb der Abschnitte reduzieren.
+     */
+    #stats-statistics-page
+    .stats-structure-section {
+        margin: 0 !important;
+        padding: 8px !important;
+    }
+
+    #stats-statistics-page
+    .stats-analysis-title {
+        margin-bottom: 6px;
+        font-size: 11px;
+    }
+
+    /*
+     * Weniger Abstand in den Karten und Listen.
+     */
+    #stats-statistics-page
+    .stats-structure-mix-list,
+    #stats-statistics-page
+    .stats-structure-burden-list,
+    #stats-statistics-page
+    .stats-structure-type-values {
+        gap: 3px;
+    }
+
+    #stats-statistics-page
+    .stats-structure-mix-row {
+        padding: 5px 6px;
+    }
+
+    #stats-statistics-page
+    .stats-structure-typical-card,
+    #stats-statistics-page
+    .stats-structure-type-card,
+    #stats-statistics-page
+    .stats-structure-burden-card {
+        padding: 7px !important;
+    }
+
+    /*
+     * Typische Tour: kompaktere Kartenabstände.
+     */
+    #stats-statistics-page
+    .stats-structure-typical-grid {
+        gap: 5px !important;
+    }
+
+    /*
+     * Belastungsverteilung: die drei Metriken dichter
+     * untereinander darstellen.
+     */
+    #stats-statistics-page
+    .stats-structure-burden-list {
+        gap: 4px;
+    }
+
+    #stats-statistics-page
+    .stats-structure-burden-card {
+        padding-top: 6px !important;
+        padding-bottom: 6px !important;
+    }
+
+    #stats-statistics-page
+    .stats-structure-burden-head {
+        margin-bottom: 4px;
+    }
+
+    #stats-statistics-page
+    .stats-structure-burden-legend {
+        margin-top: 4px;
+        gap: 2px;
+    }
+
+    /*
+     * Tourarten-Vergleich ebenfalls kompakt halten.
+     */
+    #stats-statistics-page
+    .stats-structure-type-grid {
+        gap: 5px;
+    }
+
+    #stats-statistics-page
+    .stats-structure-type-card {
+        padding: 7px !important;
+    }
+
+    #stats-statistics-page
+    .stats-structure-type-head {
+        margin-bottom: 5px;
+    }
+
+    #stats-statistics-page
+    .stats-structure-type-values {
+        row-gap: 3px;
+    }
+}
+
+/* =========================================================
+   STATS – Statistik im mobilen Querformat
+   Typische Tour: Median und Min–Max untereinander
+   ========================================================= */
+
+@media (max-width: 1024px)
+       and (orientation: landscape)
+       and (pointer: coarse) {
+
+    #stats-statistics-page
+    .stats-structure-typical-values-row {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 2px !important;
+    }
+
+    #stats-statistics-page
+    .stats-structure-typical-values-row
+    .stats-structure-card-value {
+        display: block;
+        width: 100%;
+        white-space: normal !important;
+        line-height: 1.15;
+    }
+
+    #stats-statistics-page
+    .stats-structure-typical-values-row
+    .stats-structure-card-meta {
+        display: block;
+        width: 100%;
+        margin-top: 0 !important;
+        text-align: left !important;
+        white-space: normal !important;
+        line-height: 1.15;
+    }
+}
+
+/* =========================================================
+   STATS – ENTWICKLUNG im mobilen Querformat
+   Linke Spalte:
+   - Formtrend
+   - Persönliche Bestform
+   - Langfristige Entwicklung
+
+   Rechte Spalte:
+   - Tourprofil
+   - Aktivität & Regelmäßigkeit
+
+   Keine künstlichen vertikalen Leerflächen.
+   ========================================================= */
+
+@media (max-width: 1024px)
+       and (orientation: landscape)
+       and (pointer: coarse) {
+
+    /*
+     * Direkte Bereiche des Entwicklungsviews gezielt
+     * auf zwei Spalten verteilen.
+     */
+    #stats-development-page
+    #stats-development-content {
+        display: grid !important;
+
+        grid-template-columns:
+            minmax(0, 1fr)
+            minmax(0, 1fr);
+
+        grid-template-rows:
+            max-content
+            max-content
+            max-content;
+
+        grid-template-areas:
+            "trend   profile"
+            "best    profile"
+            "history activity";
+
+        align-items: start;
+        align-content: start;
+
+        gap: 6px 7px;
+
+        width: 100%;
+        min-height: 0;
+    }
+
+    /*
+     * 1. Formtrend – links oben
+     */
+    #stats-development-page
+    #stats-development-content
+    > .stats-analysis-section:nth-child(1) {
+        grid-area: trend;
+    }
+
+    /*
+     * 2. Persönliche Bestform – links unterhalb
+     *    des Formtrends
+     */
+    #stats-development-page
+    #stats-development-content
+    > .stats-analysis-section:nth-child(2) {
+        grid-area: best;
+    }
+
+    /*
+     * 3. Langfristige Entwicklung – links unten
+     */
+    #stats-development-page
+    #stats-development-content
+    > .stats-analysis-section:nth-child(3) {
+        grid-area: history;
+    }
+
+    /*
+     * 4. Tourprofil – rechte Spalte oben
+     */
+    #stats-development-page
+    #stats-development-content
+    > .stats-analysis-section:nth-child(4) {
+        grid-area: profile;
+    }
+
+    /*
+     * 5. Aktivität & Regelmäßigkeit – rechts
+     *    direkt unterhalb des Tourprofils
+     */
+    #stats-development-page
+    #stats-development-content
+    > .stats-analysis-section:nth-child(5) {
+        grid-area: activity;
+    }
+
+    /*
+     * Große Standardabstände der Analyseboxen
+     * im Querformat entfernen.
+     */
+    #stats-development-page
+    .stats-analysis-section {
+        margin: 0 !important;
+        padding: 8px !important;
+    }
+
+    /*
+     * Überschriften kompakter.
+     */
+    #stats-development-page
+    .stats-analysis-title {
+        margin-bottom: 6px !important;
+        font-size: 11px;
+    }
+
+    /*
+     * Innenabstände der Karten reduzieren.
+     */
+    #stats-development-page
+    .development-metric-card,
+    #stats-development-page
+    .best-form-card,
+    #stats-development-page
+    .tour-profile-summary-card,
+    #stats-development-page
+    .activity-summary-card,
+    #stats-development-page
+    .tour-profile-feature-card,
+    #stats-development-page
+    .development-history-summary > div,
+    #stats-development-page
+    .activity-detail-stat-grid > div {
+        padding-top: 6px !important;
+        padding-bottom: 6px !important;
+    }
+
+    /*
+     * Formtrend-Kacheln und Aktivitätskacheln
+     * enger zusammenrücken.
+     */
+    #stats-development-page
+    .development-metric-grid,
+    #stats-development-page
+    .activity-summary-grid,
+    #stats-development-page
+    .best-form-grid,
+    #stats-development-page
+    .tour-profile-summary-grid {
+        gap: 5px !important;
+    }
+
+    /*
+     * Abstand innerhalb der Aktivitätsdetails reduzieren.
+     */
+    #stats-development-page
+    .activity-detail-panel {
+        margin-top: 6px;
+        padding: 6px;
+    }
+
+    /*
+     * Tourprofil kompakter halten.
+     */
+    #stats-development-page
+    .tour-profile-summary-grid {
+        margin-bottom: 4px !important;
+    }
+
+    #stats-development-page
+    .tour-profile-detail-title {
+        margin-top: 6px;
+        margin-bottom: 4px;
+    }
+
+    #stats-development-page
+    .tour-profile-feature-title {
+        margin-top: 7px;
+        margin-bottom: 4px;
+    }
+
+    /*
+     * Langfristige Entwicklung ebenfalls dichter.
+     */
+    #stats-development-page
+    .development-history-controls {
+        margin-bottom: 6px;
+    }
+
+    #stats-development-page
+    .development-history-summary {
+        margin-top: 5px;
+    }
+}
+
+/* =========================================================
+   STATS – ENTWICKLUNG im mobilen Querformat
+   Bestform und Tourprofil untereinander statt nebeneinander
+   ========================================================= */
+
+@media (max-width: 1024px)
+       and (orientation: landscape)
+       and (pointer: coarse) {
+
+    /*
+     * Persönliche Bestform:
+     *
+     * Aktuelle Form
+     * Persönliche Bestform
+     * Abstand zur Bestform
+     * Bestform-Zeitraum
+     */
+    #stats-development-page
+    .best-form-grid {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 5px !important;
+    }
+
+    #stats-development-page
+    .best-form-card {
+        width: 100%;
+        min-width: 0;
+        padding: 6px 8px !important;
+    }
+
+    /*
+     * Tourprofil:
+     *
+     * Häufigstes Profil
+     * Bester Ø Leistungsindex
+     * Leistungsvorsprung
+     */
+    #stats-development-page
+    .tour-profile-summary-grid {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 5px !important;
+    }
+
+    /*
+     * Die bestehende Regel für die dritte Karte
+     * wieder neutralisieren.
+     */
+    #stats-development-page
+    .tour-profile-summary-card:nth-child(3) {
+        grid-column: auto !important;
+    }
+
+    #stats-development-page
+    .tour-profile-summary-card {
+        width: 100%;
+        min-width: 0;
+        padding: 6px 8px !important;
+    }
+
+    /*
+     * Innenabstände nochmals reduzieren,
+     * damit die vertikale Darstellung kompakt bleibt.
+     */
+    #stats-development-page
+    .best-form-label,
+    #stats-development-page
+    .tour-profile-summary-label {
+        margin-bottom: 2px !important;
+    }
+
+    #stats-development-page
+    .best-form-meta,
+    #stats-development-page
+    .tour-profile-summary-meta {
+        margin-top: 2px !important;
+    }
+}
+
+/* =========================================================
+   STATS – GIPFEL im mobilen Querformat
+   Gipfelstatistik kompakt untereinander
+   ========================================================= */
+
+@media (max-width: 1024px)
+       and (orientation: landscape)
+       and (pointer: coarse) {
+
+    /*
+     * Alle Kennzahlen der Gipfelstatistik
+     * untereinander platzieren.
+     */
+    #stats-peaks-page
+    .peak-summary-grid {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 4px !important;
+        margin-bottom: 6px;
+    }
+
+    #stats-peaks-page
+    .peak-summary-card {
+        width: 100%;
+        min-width: 0;
+        min-height: 28px !important;
+
+        padding: 5px 8px !important;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    #stats-peaks-page
+    .peak-summary-label {
+        min-width: 0;
+        margin: 0 !important;
+
+        font-size: 9px !important;
+        line-height: 1.15;
+        text-align: left;
+    }
+
+    #stats-peaks-page
+    .peak-summary-value {
+        flex: 0 0 auto;
+        margin: 0 !important;
+
+        font-size: 11px !important;
+        line-height: 1.15;
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    /*
+     * Gipfelliste ebenfalls kompakt halten.
+     */
+    #stats-peaks-page
+    .stats-analysis-section {
+        margin: 0 !important;
+        padding: 8px !important;
+    }
+
+    #stats-peaks-page
+    .stats-analysis-title {
+        margin-bottom: 6px !important;
+        font-size: 11px;
+    }
+
+    #stats-peaks-page
+    .stats-peak-history-list {
+        gap: 4px !important;
+    }
+
+    #stats-peaks-page
+    .stats-peak-history-item {
+        padding: 6px 8px !important;
+    }
+}
+
+@media (max-width: 1024px)
+       and (orientation: landscape)
+       and (pointer: coarse) {
+
+    #stats-peaks-page
+    .peak-count-total {
+        display: none !important;
+    }
+
+    #stats-peaks-page
+    .stats-peak-history-count {
+        white-space: nowrap;
+    }
+}
+
 </style>
 </body>
 </html>
