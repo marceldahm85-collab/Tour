@@ -54708,6 +54708,37 @@ if ('serviceWorker' in navigator) {
     }
 }
 
+/* =========================================================
+   STATS – Diagramm-Buttons im Querformat
+   Leistungsindex und Regionen einzeilig halten
+   ========================================================= */
+
+@media (max-width: 1024px)
+       and (orientation: landscape)
+       and (pointer: coarse) {
+
+    #chart-view
+    #stats-diagrams-page
+    .chart-tab[data-chart="performanceIndex"]
+    .chart-tab-label,
+
+    #chart-view
+    #stats-diagrams-page
+    .chart-tab[data-chart="regions"]
+    .chart-tab-label {
+
+
+        font-size: 8.7px !important;
+        letter-spacing: -0.2px;
+
+        overflow: visible !important;
+        text-overflow: clip !important;
+
+        transform: scaleX(0.9);
+        transform-origin: center;
+    }
+}
+
 </style>
 </body>
 </html>
