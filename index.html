@@ -19876,6 +19876,646 @@ input:disabled {
     opacity: 1 !important;
 }
 
+/* =========================================================
+   LIGHT THEME – nur helle UI-Flächen blau-grün einfärben
+   Der Seitenhintergrund bleibt unverändert.
+   ========================================================= */
+
+body:not(.dark):not(.green):not(.summit) {
+    --light-surface-top: rgba(174, 220, 244, 0.94);
+    --light-surface-bottom: rgba(157, 211, 178, 0.96);
+
+    --light-surface-soft-top: rgba(191, 226, 246, 0.90);
+    --light-surface-soft-bottom: rgba(178, 220, 191, 0.92);
+
+    --light-surface-border: rgba(38, 104, 103, 0.38);
+    --light-surface-text: #12382c;
+}
+
+/* ---------------------------------------------------------
+   Große Flächen und Karten
+   --------------------------------------------------------- */
+
+body:not(.dark):not(.green):not(.summit) .box,
+body:not(.dark):not(.green):not(.summit) .dash-section,
+body:not(.dark):not(.green):not(.summit) .filter-simple-card,
+body:not(.dark):not(.green):not(.summit) .stats-analysis-section,
+body:not(.dark):not(.green):not(.summit) .stats-structure-section,
+body:not(.dark):not(.green):not(.summit) .chart-card,
+body:not(.dark):not(.green):not(.summit) .compare-box,
+body:not(.dark):not(.green):not(.summit) .compare-period-card,
+body:not(.dark):not(.green):not(.summit) .compare-list-card,
+body:not(.dark):not(.green):not(.summit) .tour-compare-pick-card,
+body:not(.dark):not(.green):not(.summit) .tour-compare-result {
+    background:
+        linear-gradient(
+            180deg,
+            var(--light-surface-top) 0%,
+            var(--light-surface-bottom) 100%
+        ) !important;
+
+    border-color: var(--light-surface-border) !important;
+}
+
+/* ---------------------------------------------------------
+   Listen und kleinere Kacheln
+   --------------------------------------------------------- */
+
+body:not(.dark):not(.green):not(.summit) .stats-list li,
+body:not(.dark):not(.green):not(.summit) .peak-tour-list li,
+body:not(.dark):not(.green):not(.summit) .tour-search-result,
+body:not(.dark):not(.green):not(.summit) .chart-stat-tile,
+body:not(.dark):not(.green):not(.summit) .dash-stat-tile,
+body:not(.dark):not(.green):not(.summit) .dash-milestone-tile,
+body:not(.dark):not(.green):not(.summit) .tour-profile-summary-card,
+body:not(.dark):not(.green):not(.summit) .development-metric-card,
+body:not(.dark):not(.green):not(.summit) .best-form-card,
+body:not(.dark):not(.green):not(.summit) .activity-summary-card,
+body:not(.dark):not(.green):not(.summit) .peak-summary-card,
+body:not(.dark):not(.green):not(.summit) .stats-structure-typical-card,
+body:not(.dark):not(.green):not(.summit) .stats-structure-type-card,
+body:not(.dark):not(.green):not(.summit) .stats-structure-burden-card {
+    background:
+        linear-gradient(
+            180deg,
+            var(--light-surface-soft-top) 0%,
+            var(--light-surface-soft-bottom) 100%
+        ) !important;
+
+    border-color: var(--light-surface-border) !important;
+}
+
+/* ---------------------------------------------------------
+   Formularfelder
+   --------------------------------------------------------- */
+
+body:not(.dark):not(.green):not(.summit)
+.tour-form input:not([type="checkbox"]),
+body:not(.dark):not(.green):not(.summit)
+.tour-form select,
+body:not(.dark):not(.green):not(.summit)
+textarea,
+body:not(.dark):not(.green):not(.summit)
+#filter-view input:not([type="checkbox"]),
+body:not(.dark):not(.green):not(.summit)
+#filter-view select,
+body:not(.dark):not(.green):not(.summit)
+.mob-sel-btn {
+    background:
+    linear-gradient(
+        180deg,
+        rgba(178, 222, 245, 0.96) 0%,
+        rgba(160, 216, 181, 0.97) 100%
+    ) !important;
+
+    color: var(--light-surface-text) !important;
+    border-color: rgba(63, 119, 110, 0.30) !important;
+}
+
+/* Platzhalter */
+body:not(.dark):not(.green):not(.summit)
+input::placeholder,
+body:not(.dark):not(.green):not(.summit)
+textarea::placeholder {
+    color: #4c6f65 !important;
+    opacity: 1 !important;
+}
+
+/* ---------------------------------------------------------
+   Navigation und Steuerflächen
+   --------------------------------------------------------- */
+
+body:not(.dark):not(.green):not(.summit) .top-main-nav,
+body:not(.dark):not(.green):not(.summit) .chart-tab,
+body:not(.dark):not(.green):not(.summit) .quick-filter-btn,
+body:not(.dark):not(.green):not(.summit) .filter-section-nav-btn,
+body:not(.dark):not(.green):not(.summit) #tour-view .plan-section-btn,
+body:not(.dark):not(.green):not(.summit) .tour-page-btn,
+body:not(.dark):not(.green):not(.summit) .dash-year-arrow-btn,
+body:not(.dark):not(.green):not(.summit) .slope-toggle {
+    background:
+    linear-gradient(
+        180deg,
+        rgba(174, 220, 244, 0.94) 0%,
+        rgba(157, 211, 178, 0.95) 100%
+    ) !important;
+
+    color: var(--light-surface-text) !important;
+    border-color: var(--light-surface-border) !important;
+}
+
+/* Jahresauswahl */
+body:not(.dark):not(.green):not(.summit)
+.dash-year-filter-wrap select,
+body:not(.dark):not(.green):not(.summit)
+.dash-year-filter-wrap .mob-sel-btn {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(232, 247, 255, 0.78) 0%,
+            rgba(225, 245, 232, 0.84) 100%
+        ) !important;
+
+    color: var(--light-surface-text) !important;
+    border-color: var(--light-surface-border) !important;
+}
+
+/* Aktive Elemente etwas kräftiger */
+body:not(.dark):not(.green):not(.summit)
+.chart-tab.active,
+body:not(.dark):not(.green):not(.summit)
+.quick-filter-btn.active,
+body:not(.dark):not(.green):not(.summit)
+.filter-section-nav-btn.active,
+body:not(.dark):not(.green):not(.summit)
+#tour-view .plan-section-btn.active,
+body:not(.dark):not(.green):not(.summit)
+.toggle-btn.view-active {
+    background:
+    linear-gradient(
+        135deg,
+        #78c7eb 0%,
+        #4fae79 100%
+    ) !important;
+
+    color: #12352b !important;
+    border-color: rgba(45, 105, 92, 0.38) !important;
+}
+
+/* ---------------------------------------------------------
+   Tabellen und mobile Karten
+   --------------------------------------------------------- */
+
+body:not(.dark):not(.green):not(.summit)
+#overview-table tr,
+body:not(.dark):not(.green):not(.summit)
+#planned-table tr,
+body:not(.dark):not(.green):not(.summit)
+#saved-tours-list .tour-list li,
+body:not(.dark):not(.green):not(.summit)
+#planned-tours-list .tour-list li {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(238, 249, 255, 0.72) 0%,
+            rgba(226, 245, 233, 0.78) 100%
+        ) !important;
+
+    border-color: var(--light-surface-border) !important;
+}
+
+/* Tabellenzellen */
+body:not(.dark):not(.green):not(.summit)
+#overview-table th,
+body:not(.dark):not(.green):not(.summit)
+#overview-table td,
+body:not(.dark):not(.green):not(.summit)
+#planned-table th,
+body:not(.dark):not(.green):not(.summit)
+#planned-table td {
+    background: transparent !important;
+    color: var(--light-surface-text) !important;
+}
+
+/* ---------------------------------------------------------
+   Mobile Select-Bottom-Sheet
+   --------------------------------------------------------- */
+
+body:not(.dark):not(.green):not(.summit)
+.mob-sel-sheet {
+    background:
+        linear-gradient(
+            180deg,
+            #eaf8ff 0%,
+            #e4f5e9 100%
+        ) !important;
+
+    border-top-color: rgba(63, 119, 110, 0.30) !important;
+}
+
+body:not(.dark):not(.green):not(.summit)
+.mob-sel-hdr {
+    border-bottom-color: rgba(63, 119, 110, 0.24) !important;
+}
+
+body:not(.dark):not(.green):not(.summit)
+.mob-sel-opt.selected {
+    background: rgba(92, 166, 151, 0.18) !important;
+    color: #17624e !important;
+}
+
+/* ---------------------------------------------------------
+   Fokus
+   --------------------------------------------------------- */
+
+body:not(.dark):not(.green):not(.summit)
+input:not([type="checkbox"]):focus,
+body:not(.dark):not(.green):not(.summit)
+select:focus,
+body:not(.dark):not(.green):not(.summit)
+textarea:focus {
+    border-color: #4e9f91 !important;
+    box-shadow:
+        0 0 0 2px rgba(78, 159, 145, 0.24),
+        0 0 12px rgba(78, 159, 145, 0.14) !important;
+}
+
+/* =========================================================
+   LIGHT THEME – Stats, Karte und Sicherung
+   Kräftigere blau-grüne Flächen
+   Seitenhintergrund bleibt unverändert
+   ========================================================= */
+
+body:not(.dark):not(.green):not(.summit) {
+
+    --light-nav-top: rgba(157, 211, 239, 0.96);
+    --light-nav-bottom: rgba(137, 198, 163, 0.97);
+
+    --light-nav-soft-top: rgba(181, 222, 244, 0.94);
+    --light-nav-soft-bottom: rgba(163, 215, 181, 0.95);
+
+    --light-nav-border: rgba(38, 104, 103, 0.38);
+    --light-nav-text: #12382c;
+}
+
+/* ---------------------------------------------------------
+   Stats: Jahressteuerung und seitliche Bereichsnavigation
+   --------------------------------------------------------- */
+
+body:not(.dark):not(.green):not(.summit)
+#chart-view .stats-year-filter-wrap,
+body:not(.dark):not(.green):not(.summit)
+#chart-view .stats-section-switch {
+    background:
+        linear-gradient(
+            180deg,
+            var(--light-nav-top) 0%,
+            var(--light-nav-bottom) 100%
+        ) !important;
+
+    border: 1px solid var(--light-nav-border) !important;
+    border-radius: 12px !important;
+    padding: 5px !important;
+}
+
+/* Falls die Navigation selbst keine eigene Fläche besitzt,
+   bekommen die einzelnen Schaltflächen trotzdem Farbe. */
+body:not(.dark):not(.green):not(.summit)
+#chart-view .stats-section-btn,
+body:not(.dark):not(.green):not(.summit)
+#chart-view .stats-year-filter-wrap select,
+body:not(.dark):not(.green):not(.summit)
+#chart-view .stats-year-filter-wrap .mob-sel-btn,
+body:not(.dark):not(.green):not(.summit)
+#chart-view .stats-year-filter-wrap .dash-year-arrow-btn {
+    background:
+        linear-gradient(
+            180deg,
+            var(--light-nav-soft-top) 0%,
+            var(--light-nav-soft-bottom) 100%
+        ) !important;
+
+    color: var(--light-nav-text) !important;
+    border-color: var(--light-nav-border) !important;
+}
+
+/* Aktive Stats-Navigation deutlich hervorheben */
+body:not(.dark):not(.green):not(.summit)
+#chart-view .stats-section-btn.active {
+    background:
+        linear-gradient(
+            135deg,
+            #79c7e8 0%,
+            #4fae79 100%
+        ) !important;
+
+    color: #10372a !important;
+    border-color: rgba(35, 101, 88, 0.52) !important;
+    box-shadow:
+        0 3px 8px rgba(45, 105, 92, 0.20) !important;
+}
+
+/* ---------------------------------------------------------
+   Karte: seitliche Steuerung
+   --------------------------------------------------------- */
+
+/* Äußere Steuerbereiche der Karte */
+body:not(.dark):not(.green):not(.summit)
+#map-view .map-view-inner,
+body:not(.dark):not(.green):not(.summit)
+#map-view .map-controls,
+body:not(.dark):not(.green):not(.summit)
+#map-view .map-control-panel,
+body:not(.dark):not(.green):not(.summit)
+#map-view .map-sidebar {
+    background:
+        linear-gradient(
+            180deg,
+            var(--light-nav-top) 0%,
+            var(--light-nav-bottom) 100%
+        ) !important;
+
+    border-color: var(--light-nav-border) !important;
+}
+
+/* Karten-Jahresauswahl */
+body:not(.dark):not(.green):not(.summit)
+#map-view .map-year-filter-wrap,
+body:not(.dark):not(.green):not(.summit)
+#map-view #map-year-select,
+body:not(.dark):not(.green):not(.summit)
+#map-view .mob-sel-btn {
+    background:
+        linear-gradient(
+            180deg,
+            var(--light-nav-soft-top) 0%,
+            var(--light-nav-soft-bottom) 100%
+        ) !important;
+
+    color: var(--light-nav-text) !important;
+    border-color: var(--light-nav-border) !important;
+}
+
+/* Kartenmodus-Schalter */
+body:not(.dark):not(.green):not(.summit)
+#map-view .map-mode-toggle {
+    background:
+        linear-gradient(
+            180deg,
+            var(--light-nav-top) 0%,
+            var(--light-nav-bottom) 100%
+        ) !important;
+
+    border-color: var(--light-nav-border) !important;
+}
+
+body:not(.dark):not(.green):not(.summit)
+#map-view .map-mode-btn {
+    background:
+        linear-gradient(
+            180deg,
+            var(--light-nav-soft-top) 0%,
+            var(--light-nav-soft-bottom) 100%
+        ) !important;
+
+    color: var(--light-nav-text) !important;
+    border-color: var(--light-nav-border) !important;
+}
+
+body:not(.dark):not(.green):not(.summit)
+#map-view .map-mode-btn.active {
+    background:
+        linear-gradient(
+            135deg,
+            #79c7e8 0%,
+            #4fae79 100%
+        ) !important;
+
+    color: #10372a !important;
+    border-color: rgba(35, 101, 88, 0.52) !important;
+}
+
+/* Karten-Schnellfilter */
+body:not(.dark):not(.green):not(.summit)
+#map-view #map-quick-filters,
+body:not(.dark):not(.green):not(.summit)
+#map-view #map-quick-filters .quick-filter-btn {
+    background:
+        linear-gradient(
+            180deg,
+            var(--light-nav-soft-top) 0%,
+            var(--light-nav-soft-bottom) 100%
+        ) !important;
+
+    color: var(--light-nav-text) !important;
+    border-color: var(--light-nav-border) !important;
+}
+
+body:not(.dark):not(.green):not(.summit)
+#map-view #map-quick-filters .quick-filter-btn.active {
+    background:
+        linear-gradient(
+            135deg,
+            #79c7e8 0%,
+            #4fae79 100%
+        ) !important;
+
+    color: #10372a !important;
+}
+
+/* Karteninfo nicht weiß erscheinen lassen */
+body:not(.dark):not(.green):not(.summit)
+#map-view #map-info-bar {
+    color: var(--light-nav-text) !important;
+    opacity: 1 !important;
+}
+
+/* ---------------------------------------------------------
+   Sicherung: sämtliche weißen Status- und Aktionsflächen
+   --------------------------------------------------------- */
+
+body:not(.dark):not(.green):not(.summit)
+#backup-view .backup-card,
+body:not(.dark):not(.green):not(.summit)
+#backup-view .backup-status-panel,
+body:not(.dark):not(.green):not(.summit)
+#backup-view .backup-status-item,
+body:not(.dark):not(.green):not(.summit)
+#backup-view .backup-info-card,
+body:not(.dark):not(.green):not(.summit)
+#backup-view .backup-file-status,
+body:not(.dark):not(.green):not(.summit)
+#backup-view .backup-view-inner {
+    background:
+        linear-gradient(
+            180deg,
+            var(--light-nav-soft-top) 0%,
+            var(--light-nav-soft-bottom) 100%
+        ) !important;
+
+    border-color: var(--light-nav-border) !important;
+    color: var(--light-nav-text) !important;
+}
+
+/* Sicherungstexte */
+body:not(.dark):not(.green):not(.summit)
+#backup-view .backup-status-head,
+body:not(.dark):not(.green):not(.summit)
+#backup-view .backup-status-item span,
+body:not(.dark):not(.green):not(.summit)
+#backup-view .backup-status-item strong,
+body:not(.dark):not(.green):not(.summit)
+#backup-view .backup-info-title,
+body:not(.dark):not(.green):not(.summit)
+#backup-view .backup-info-text,
+body:not(.dark):not(.green):not(.summit)
+#backup-view .backup-section-title,
+body:not(.dark):not(.green):not(.summit)
+#backup-view .backup-file-status {
+    color: var(--light-nav-text) !important;
+    opacity: 1 !important;
+}
+
+/* Buttons der Sicherung */
+body:not(.dark):not(.green):not(.summit)
+#backup-view .save-btn {
+    background:
+        linear-gradient(
+            135deg,
+            #79c7e8 0%,
+            #4fae79 100%
+        ) !important;
+
+    color: #10372a !important;
+    border: 1px solid rgba(35, 101, 88, 0.42) !important;
+    box-shadow:
+        0 4px 10px rgba(45, 105, 92, 0.18) !important;
+}
+
+/* Trennlinie im Sicherungsbereich */
+body:not(.dark):not(.green):not(.summit)
+#backup-view .backup-divider {
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(38, 104, 103, 0.45),
+            transparent
+        ) !important;
+}
+
+/* ---------------------------------------------------------
+   Mobile Querformat:
+   seitliche Panels etwas kompakter, aber kräftig eingefärbt
+   --------------------------------------------------------- */
+
+@media (max-width: 1024px)
+       and (orientation: landscape)
+       and (pointer: coarse) {
+
+    body:not(.dark):not(.green):not(.summit)
+    #chart-view .stats-section-switch,
+    body:not(.dark):not(.green):not(.summit)
+    #chart-view .stats-year-filter-wrap {
+        background:
+            linear-gradient(
+                180deg,
+                var(--light-nav-top) 0%,
+                var(--light-nav-bottom) 100%
+            ) !important;
+
+        border-color: var(--light-nav-border) !important;
+    }
+
+    body:not(.dark):not(.green):not(.summit)
+    #backup-view .backup-status-item,
+    body:not(.dark):not(.green):not(.summit)
+    #backup-view .backup-info-card,
+    body:not(.dark):not(.green):not(.summit)
+    #backup-view .backup-file-status {
+        background:
+            linear-gradient(
+                180deg,
+                rgba(181, 222, 244, 0.96) 0%,
+                rgba(163, 215, 181, 0.97) 100%
+            ) !important;
+    }
+}
+
+/* =========================================================
+   LIGHT THEME – Dashboard-Jahresdropdown
+   ========================================================= */
+
+body:not(.dark):not(.green):not(.summit)
+#dashboard-view .dash-year-filter-wrap > select,
+
+body:not(.dark):not(.green):not(.summit)
+#dashboard-view .dash-year-filter-wrap > .mob-sel-wrap .mob-sel-btn,
+
+body:not(.dark):not(.green):not(.summit)
+#dashboard-view .dash-year-filter-wrap .mob-sel-btn {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(157, 211, 239, 0.98) 0%,
+            rgba(137, 198, 163, 0.98) 100%
+        ) !important;
+
+    color: #12382c !important;
+    border: 1px solid rgba(38, 104, 103, 0.42) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.38),
+        0 3px 8px rgba(45,105,92,0.16) !important;
+}
+
+/* Native Dropdown-Optionen */
+body:not(.dark):not(.green):not(.summit)
+#dashboard-view .dash-year-filter-wrap > select option {
+    background: #dff2e6 !important;
+    color: #12382c !important;
+}
+
+/* Fokuszustand */
+body:not(.dark):not(.green):not(.summit)
+#dashboard-view .dash-year-filter-wrap > select:focus,
+
+body:not(.dark):not(.green):not(.summit)
+#dashboard-view .dash-year-filter-wrap .mob-sel-btn:focus-visible {
+    border-color: #347f72 !important;
+
+    box-shadow:
+        0 0 0 2px rgba(52,127,114,0.28),
+        inset 0 1px 0 rgba(255,255,255,0.38) !important;
+}
+
+/* =========================================================
+   LIGHT THEME – Dashboard-Jahresdropdown
+   ========================================================= */
+
+body:not(.dark):not(.green):not(.summit)
+#dashboard-view .dash-year-filter-wrap > select,
+
+body:not(.dark):not(.green):not(.summit)
+#dashboard-view .dash-year-filter-wrap > .mob-sel-wrap .mob-sel-btn,
+
+body:not(.dark):not(.green):not(.summit)
+#dashboard-view .dash-year-filter-wrap .mob-sel-btn {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(157, 211, 239, 0.98) 0%,
+            rgba(137, 198, 163, 0.98) 100%
+        ) !important;
+
+    color: #12382c !important;
+    border: 1px solid rgba(38, 104, 103, 0.42) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.38),
+        0 3px 8px rgba(45,105,92,0.16) !important;
+}
+
+/* Native Dropdown-Optionen */
+body:not(.dark):not(.green):not(.summit)
+#dashboard-view .dash-year-filter-wrap > select option {
+    background: #dff2e6 !important;
+    color: #12382c !important;
+}
+
+/* Fokuszustand */
+body:not(.dark):not(.green):not(.summit)
+#dashboard-view .dash-year-filter-wrap > select:focus,
+
+body:not(.dark):not(.green):not(.summit)
+#dashboard-view .dash-year-filter-wrap .mob-sel-btn:focus-visible {
+    border-color: #347f72 !important;
+
+    box-shadow:
+        0 0 0 2px rgba(52,127,114,0.28),
+        inset 0 1px 0 rgba(255,255,255,0.38) !important;
+}
+
 </style>
 
 
