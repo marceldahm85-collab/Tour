@@ -35270,6 +35270,7 @@ let isDraggingView = false;
 
 let hasHorizontalIntent = false;
 let hasVerticalThemeIntent = false;
+let hasVerticalIntent = false;
 
 const swipeThresholdPx = 70;
 const themeSwipeThresholdPx = 80;
@@ -35289,6 +35290,7 @@ touchCurrentY = touchStartY;
 isDraggingView = true;
 
 hasHorizontalIntent = false;
+hasVerticalIntent = false;
 hasVerticalThemeIntent = false;
 
     Object.values(viewMap).forEach(view => view.classList.add('no-transition'));
@@ -35311,58 +35313,58 @@ const deltaY =
 
 
 /*
- * =====================================================
- * Dashboard: vertikaler Swipe nach unten = Themewechsel
- * =====================================================
+ * Richtung eindeutig feststellen.
+ *
+ * Eine horizontale Bewegung muss deutlich stärker
+ * sein als die vertikale Bewegung. Dadurch wird
+ * normales Hoch-/Runterscrollen nicht mehr als
+ * View-Swipe erkannt.
  */
-
 if (
-    currentView === 'dashboard' &&
     !hasHorizontalIntent &&
-    !hasVerticalThemeIntent
+    !hasVerticalIntent
 ) {
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
 
-    /*
-     * Erst nach einigen Pixeln die Richtung festlegen.
-     */
-    if (
-        deltaY > 12 &&
-        Math.abs(deltaY) > Math.abs(deltaX) * 1.25
-    ) {
-        hasVerticalThemeIntent = true;
-    }
-}
-
-
-/*
- * Sobald eindeutig vertikal gewischt wird,
- * darf daraus kein horizontaler View-Swipe mehr werden.
- */
-if (hasVerticalThemeIntent) {
-
-    e.preventDefault();
-
-    return;
-}
-
-
-/*
- * =====================================================
- * Normaler horizontaler View-Swipe
- * =====================================================
- */
-
-if (!hasHorizontalIntent) {
-
-    if (
-        Math.abs(deltaX) > 10 &&
-        Math.abs(deltaX) > Math.abs(deltaY)
-    ) {
-        hasHorizontalIntent = true;
-
-    } else {
+    // Kleine Bewegungen noch nicht bewerten
+    if (absX < 16 && absY < 16) {
         return;
     }
+
+    // Eindeutig vertikale Bewegung sperrt den View-Swipe
+    if (absY > absX * 1.35) {
+        hasVerticalIntent = true;
+
+        /*
+         * Nur ein Abwärtswischen auf dem Dashboard
+         * darf weiterhin das Theme wechseln.
+         */
+        if (
+            currentView === 'dashboard' &&
+            deltaY > 0
+        ) {
+            hasVerticalThemeIntent = true;
+            e.preventDefault();
+        }
+
+        return;
+    }
+
+    // Eindeutig horizontale Bewegung aktiviert den View-Swipe
+    if (absX > absY * 1.35) {
+        hasHorizontalIntent = true;
+    } else {
+        // Diagonale Bewegung: keine Ansicht wechseln
+        return;
+    }
+}
+
+/*
+ * Vertikale Bewegung niemals horizontal weiterverarbeiten.
+ */
+if (hasVerticalIntent) {
+    return;
 }
 
     // verhindert, dass während horizontalem Swipe die Seite vertikal ruckelt
@@ -35455,22 +35457,51 @@ if (
     return;
 }
 
-    let targetIndex = currentIndex;
+    /*
+ * Bei vertikalem Scrollen niemals eine View wechseln.
+ */
+if (!hasHorizontalIntent) {
+    hasVerticalIntent = false;
+    hasVerticalThemeIntent = false;
 
-    if (Math.abs(deltaX) > swipeThresholdPx) {
-        // Finger nach links => nächste View
-        if (deltaX < 0 && currentIndex < viewOrder.length - 1) {
-            targetIndex = currentIndex + 1;
-        }
+    positionViews(
+        currentIndex,
+        false,
+        0
+    );
 
-        // Finger nach rechts => vorherige View
-        if (deltaX > 0 && currentIndex > 0) {
-            targetIndex = currentIndex - 1;
-        }
+    return;
+}
+
+let targetIndex = currentIndex;
+
+if (
+    Math.abs(deltaX) > swipeThresholdPx &&
+    Math.abs(deltaX) > Math.abs(deltaY) * 1.35
+) {
+    // Finger nach links => nächste View
+    if (
+        deltaX < 0 &&
+        currentIndex < viewOrder.length - 1
+    ) {
+        targetIndex = currentIndex + 1;
     }
 
-    const targetView = viewOrder[targetIndex];
-    goToView(targetView, true);
+    // Finger nach rechts => vorherige View
+    if (
+        deltaX > 0 &&
+        currentIndex > 0
+    ) {
+        targetIndex = currentIndex - 1;
+    }
+}
+
+hasHorizontalIntent = false;
+hasVerticalIntent = false;
+hasVerticalThemeIntent = false;
+
+const targetView = viewOrder[targetIndex];
+goToView(targetView, true);
 }, { passive: true });
 
 swipeArea.addEventListener('touchcancel', () => {
@@ -35478,7 +35509,8 @@ swipeArea.addEventListener('touchcancel', () => {
 
     isDraggingView = false;
     hasHorizontalIntent = false;
-    hasVerticalThemeIntent = false;
+hasVerticalIntent = false;
+hasVerticalThemeIntent = false;
     Object.values(viewMap).forEach(view => view.classList.remove('no-transition'));
 
     goToView(currentView, true);
@@ -51691,6 +51723,7 @@ if (APP_PERF_ENABLED) {
     }, { passive: true });
 })();
 
+
 </script>
 
 <div id="chart-tooltip" class="chart-tooltip"></div>
@@ -54728,7 +54761,7 @@ if ('serviceWorker' in navigator) {
     .chart-tab-label {
 
 
-        font-size: 9.5px !important;
+        font-size: 8.7px !important;
         letter-spacing: -0.2px;
 
         overflow: visible !important;
@@ -54736,6 +54769,41 @@ if ('serviceWorker' in navigator) {
 
         transform: scaleX(0.9);
         transform-origin: center;
+    }
+}
+
+html,
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+}
+
+@media (max-width: 1024px)
+       and (orientation: landscape)
+       and (pointer: coarse) {
+
+    /*
+     * Vertikales Scrollen erlauben,
+     * horizontales Browser-Scrolling unterbinden.
+     */
+    body {
+        touch-action: pan-y;
+        overflow-x: hidden;
+        overscroll-behavior-x: none;
+    }
+
+    /*
+     * Auch typische View-/Content-Container
+     * dürfen nicht horizontal überlaufen.
+     */
+    main,
+    .view,
+    .content,
+    .section-content {
+        max-width: 100%;
+        overflow-x: hidden;
+        overscroll-behavior-x: contain;
     }
 }
 
