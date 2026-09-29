@@ -56253,6 +56253,153 @@ body {
     }
 }
 
+/* =========================================================
+   MOBILE HOCHFORMAT – Navigation optisch vom Inhalt trennen
+   Keine Änderung an Höhe oder Layout
+   ========================================================= */
+
+@media (max-width: 768px)
+       and (orientation: portrait)
+       and (pointer: coarse) {
+
+    /* Obere Navigationszone */
+    .accordion-header {
+        position: relative;
+        z-index: 1000;
+
+        background:
+            linear-gradient(
+                180deg,
+                color-mix(in srgb, var(--accent) 10%, transparent) 0%,
+                color-mix(in srgb, var(--accent) 4%, transparent) 100%
+            );
+
+        border-bottom:
+            1px solid
+            color-mix(in srgb, var(--accent) 34%, transparent);
+
+        box-shadow:
+            0 5px 16px rgba(0,0,0,0.10);
+
+        isolation: isolate;
+    }
+
+    /*
+     * Feine zusätzliche Trennlinie am unteren Rand.
+     */
+    .accordion-header::after {
+        content: "";
+        position: absolute;
+        left: 8px;
+        right: 8px;
+        bottom: 0;
+        height: 1px;
+
+        background:
+            linear-gradient(
+                90deg,
+                transparent,
+                color-mix(in srgb, var(--accent) 62%, transparent) 18%,
+                color-mix(in srgb, var(--accent) 62%, transparent) 82%,
+                transparent
+            );
+
+        pointer-events: none;
+    }
+
+    /*
+     * Die Navigationskarte selbst hebt sich leicht
+     * vom umliegenden Bereich ab.
+     */
+    .top-main-nav {
+        border-color:
+            color-mix(in srgb, var(--accent) 32%, rgba(255,255,255,0.18));
+
+        box-shadow:
+            0 5px 16px rgba(0,0,0,0.14),
+            inset 0 1px 0 rgba(255,255,255,0.18);
+    }
+
+    /*
+     * Aktiver Bereich klarer hervorheben.
+     */
+    .top-nav-btn.view-active,
+    .top-nav-btn.more-view-active {
+        box-shadow:
+            inset 0 0 0 1px
+            color-mix(in srgb, var(--accent) 42%, transparent),
+            0 0 10px
+            color-mix(in srgb, var(--accent) 18%, transparent);
+    }
+
+    /*
+     * Primäre Speichern-Schaltfläche bleibt die
+     * stärkste Schaltfläche der Navigation.
+     */
+    .top-nav-save {
+        box-shadow:
+            0 5px 14px rgba(0,0,0,0.22),
+            inset 0 1px 0 rgba(255,255,255,0.28);
+    }
+}
+
+/* =========================================================
+   MOBILE HOCHFORMAT – Themeabhängige Navigation
+   ========================================================= */
+
+@media (max-width: 768px)
+       and (orientation: portrait)
+       and (pointer: coarse) {
+
+    /* Light */
+    body:not(.dark):not(.green):not(.summit) .accordion-header {
+        background:
+            linear-gradient(
+                180deg,
+                rgba(157,211,239,0.34),
+                rgba(137,198,163,0.22)
+            );
+
+        border-bottom-color: rgba(38,104,103,0.36);
+    }
+
+    /* Dark */
+    body.dark .accordion-header {
+        background:
+            linear-gradient(
+                180deg,
+                rgba(20,35,52,0.94),
+                rgba(12,24,37,0.94)
+            );
+
+        border-bottom-color: rgba(190,215,237,0.26);
+    }
+
+    /* Green */
+    body.green .accordion-header {
+        background:
+            linear-gradient(
+                180deg,
+                rgba(8,48,28,0.94),
+                rgba(2,20,11,0.96)
+            );
+
+        border-bottom-color: rgba(114,214,163,0.34);
+    }
+
+    /* Summit */
+    body.summit .accordion-header {
+        background:
+            linear-gradient(
+                180deg,
+                rgba(42,61,70,0.94),
+                rgba(24,35,41,0.96)
+            );
+
+        border-bottom-color: rgba(114,194,255,0.34);
+    }
+}
+
 </style>
 </body>
 </html>
