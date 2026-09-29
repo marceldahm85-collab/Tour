@@ -20516,6 +20516,115 @@ body:not(.dark):not(.green):not(.summit)
         inset 0 1px 0 rgba(255,255,255,0.38) !important;
 }
 
+/* =========================================================
+   Sicherung – Datei trennen
+   In allen Themes kontrastreich dunkelrot
+   ========================================================= */
+
+#data-file-box #file-disconnect-btn,
+#data-file-box .backup-disconnect-btn {
+    background:
+        linear-gradient(
+            135deg,
+            #9f2626 0%,
+            #650f0f 100%
+        ) !important;
+
+    color: #ffffff !important;
+
+    border: 1px solid #4f0b0b !important;
+
+    box-shadow:
+        0 4px 10px rgba(90, 15, 15, 0.28),
+        inset 0 1px 0 rgba(255,255,255,0.16) !important;
+
+    text-shadow:
+        0 1px 2px rgba(0,0,0,0.45);
+}
+
+/* Light Theme: ebenfalls dunkles Rot */
+body:not(.dark):not(.green):not(.summit)
+#data-file-box #file-disconnect-btn,
+body:not(.dark):not(.green):not(.summit)
+#data-file-box .backup-disconnect-btn {
+    background:
+        linear-gradient(
+            135deg,
+            #a52a2a 0%,
+            #700f0f 100%
+        ) !important;
+
+    color: #ffffff !important;
+}
+
+/* Green Theme */
+body.green
+#data-file-box #file-disconnect-btn,
+body.green
+#data-file-box .backup-disconnect-btn {
+    background:
+        linear-gradient(
+            135deg,
+            #a52a2a 0%,
+            #650f0f 100%
+        ) !important;
+
+    color: #ffffff !important;
+}
+
+/* Summit Theme */
+body.summit
+#data-file-box #file-disconnect-btn,
+body.summit
+#data-file-box .backup-disconnect-btn {
+    background:
+        linear-gradient(
+            135deg,
+            #a52a2a 0%,
+            #650f0f 100%
+        ) !important;
+
+    color: #ffffff !important;
+}
+
+/* Dark Theme */
+body.dark
+#data-file-box #file-disconnect-btn,
+body.dark
+#data-file-box .backup-disconnect-btn {
+    background:
+        linear-gradient(
+            135deg,
+            #a52a2a 0%,
+            #650f0f 100%
+        ) !important;
+
+    color: #ffffff !important;
+}
+
+/* Hover nur auf Geräten mit echter Maus */
+@media (hover: hover) and (pointer: fine) {
+    #data-file-box #file-disconnect-btn:hover,
+    #data-file-box .backup-disconnect-btn:hover {
+        background:
+            linear-gradient(
+                135deg,
+                #c33a3a 0%,
+                #821515 100%
+            ) !important;
+
+        color: #ffffff !important;
+        filter: brightness(1.05);
+    }
+}
+
+/* Gedrückt-Zustand */
+#data-file-box #file-disconnect-btn:active,
+#data-file-box .backup-disconnect-btn:active {
+    background: #5b0b0b !important;
+    color: #ffffff !important;
+}
+
 </style>
 
 
