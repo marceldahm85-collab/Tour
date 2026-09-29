@@ -56400,6 +56400,764 @@ body {
     }
 }
 
+/* =========================================================
+   THEME-FLÄCHEN – thematische Farbverläufe
+   Der Seitenhintergrund bleibt unverändert.
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   Farbvariablen pro Theme
+   --------------------------------------------------------- */
+
+body:not(.dark):not(.green):not(.summit) {
+    --theme-surface-top: rgba(181, 224, 246, 0.94);
+    --theme-surface-bottom: rgba(164, 216, 184, 0.96);
+    --theme-surface-soft-top: rgba(202, 234, 249, 0.90);
+    --theme-surface-soft-bottom: rgba(187, 225, 198, 0.92);
+    --theme-surface-border: rgba(38, 104, 103, 0.34);
+    --theme-surface-text: #18352b;
+}
+
+body.dark {
+    --theme-surface-top: rgba(125, 36, 46, 0.88);
+    --theme-surface-bottom: rgba(10, 20, 32, 0.96);
+    --theme-surface-soft-top: rgba(104, 39, 48, 0.72);
+    --theme-surface-soft-bottom: rgba(18, 32, 48, 0.92);
+    --theme-surface-border: rgba(212, 92, 92, 0.34);
+    --theme-surface-text: #f3f7fb;
+}
+
+body.green {
+    --theme-surface-top: rgba(38, 132, 82, 0.90);
+    --theme-surface-bottom: rgba(1, 12, 7, 0.97);
+    --theme-surface-soft-top: rgba(34, 105, 68, 0.78);
+    --theme-surface-soft-bottom: rgba(5, 29, 17, 0.94);
+    --theme-surface-border: rgba(114, 214, 163, 0.32);
+    --theme-surface-text: #f2fff7;
+}
+
+body.summit {
+    --theme-surface-top: rgba(58, 160, 255, 0.88);
+    --theme-surface-bottom: rgba(22, 29, 34, 0.97);
+    --theme-surface-soft-top: rgba(53, 120, 177, 0.74);
+    --theme-surface-soft-bottom: rgba(28, 38, 43, 0.94);
+    --theme-surface-border: rgba(114, 194, 255, 0.34);
+    --theme-surface-text: #f4faff;
+}
+
+/* ---------------------------------------------------------
+   Große Flächen
+   --------------------------------------------------------- */
+
+.box,
+.dash-section,
+.filter-simple-card,
+.stats-analysis-section,
+.stats-structure-section,
+.chart-card,
+.compare-box,
+.compare-period-card,
+.compare-list-card,
+.tour-compare-pick-card,
+.tour-compare-result,
+.backup-status-panel,
+.backup-info-card,
+.backup-file-status {
+    background:
+        linear-gradient(
+            180deg,
+            var(--theme-surface-top) 0%,
+            var(--theme-surface-bottom) 100%
+        ) !important;
+
+    border-color: var(--theme-surface-border) !important;
+    color: var(--theme-surface-text);
+}
+
+/* ---------------------------------------------------------
+   Kleinere Karten, Listen und Statistikflächen
+   --------------------------------------------------------- */
+
+.stats-list li,
+.peak-tour-list li,
+.tour-search-result,
+.chart-stat-tile,
+.dash-stat-tile,
+.dash-milestone-tile,
+.tour-profile-summary-card,
+.development-metric-card,
+.best-form-card,
+.activity-summary-card,
+.peak-summary-card,
+.stats-structure-typical-card,
+.stats-structure-type-card,
+.stats-structure-burden-card,
+.backup-status-item,
+.tour-history-summary > div,
+.activity-detail-stat-grid > div {
+    background:
+        linear-gradient(
+            180deg,
+            var(--theme-surface-soft-top) 0%,
+            var(--theme-surface-soft-bottom) 100%
+        ) !important;
+
+    border-color: var(--theme-surface-border) !important;
+    color: var(--theme-surface-text);
+}
+
+/* Texte in den eingefärbten Flächen */
+.stats-list li *,
+.peak-tour-list li *,
+.tour-search-result *,
+.chart-stat-tile *,
+.dash-stat-tile *,
+.dash-milestone-tile *,
+.backup-status-panel *,
+.backup-status-item *,
+.backup-info-card *,
+.backup-file-status {
+    color: var(--theme-surface-text);
+}
+
+/* ---------------------------------------------------------
+   Formulare und Eingabefelder
+   --------------------------------------------------------- */
+
+.tour-form input:not([type="checkbox"]),
+.tour-form select,
+.tour-form textarea,
+#filter-view input:not([type="checkbox"]),
+#filter-view select,
+#filter-view textarea,
+.mob-sel-btn,
+.dash-year-filter-wrap select,
+.dash-year-filter-wrap .mob-sel-btn,
+.dash-year-filter-wrap .dash-year-arrow-btn {
+    background:
+        linear-gradient(
+            180deg,
+            var(--theme-surface-soft-top) 0%,
+            var(--theme-surface-soft-bottom) 100%
+        ) !important;
+
+    color: var(--theme-surface-text) !important;
+    border-color: var(--theme-surface-border) !important;
+}
+
+/* ---------------------------------------------------------
+   Navigationen und Steuerflächen
+   --------------------------------------------------------- */
+
+.top-main-nav,
+.chart-tabs,
+.chart-tab,
+.stats-section-btn,
+.filter-section-nav-btn,
+.plan-section-btn,
+.map-mode-toggle,
+.map-mode-btn,
+.quick-filter-btn,
+.tour-page-btn,
+.yc-metric-btn,
+.yc-year-toggle-btn,
+.compare-mode-toggle,
+.compare-mode-btn,
+.checklist-mode-toggle,
+.checklist-mode-btn,
+.dash-year-arrow-btn {
+    background:
+        linear-gradient(
+            180deg,
+            var(--theme-surface-soft-top) 0%,
+            var(--theme-surface-soft-bottom) 100%
+        ) !important;
+
+    color: var(--theme-surface-text) !important;
+    border-color: var(--theme-surface-border) !important;
+}
+
+/* Aktive Elemente behalten den jeweiligen Akzent */
+.chart-tab.active,
+.stats-section-btn.active,
+.filter-section-nav-btn.active,
+.plan-section-btn.active,
+.map-mode-btn.active,
+.quick-filter-btn.active,
+.yc-metric-btn.active,
+.yc-year-toggle-btn.active,
+.compare-mode-btn.active,
+.checklist-mode-btn.active {
+    background: var(--accent-gradient) !important;
+    color: #ffffff !important;
+}
+
+/* ---------------------------------------------------------
+   Mobile Select-Bottom-Sheet
+   --------------------------------------------------------- */
+
+.mob-sel-sheet {
+    background:
+        linear-gradient(
+            180deg,
+            var(--theme-surface-top) 0%,
+            var(--theme-surface-bottom) 100%
+        ) !important;
+
+    border-top-color: var(--theme-surface-border) !important;
+    color: var(--theme-surface-text) !important;
+}
+
+.mob-sel-hdr {
+    border-bottom-color: var(--theme-surface-border) !important;
+}
+
+.mob-sel-opt {
+    color: var(--theme-surface-text) !important;
+}
+
+.mob-sel-opt.selected {
+    background: var(--accent-soft) !important;
+    color: var(--theme-surface-text) !important;
+}
+
+/* ---------------------------------------------------------
+   Tabellen und mobile Tourkarten
+   --------------------------------------------------------- */
+
+#overview-table tr,
+#planned-table tr,
+#saved-tours-list .tour-list li,
+#planned-tours-list .tour-list li {
+    background:
+        linear-gradient(
+            180deg,
+            var(--theme-surface-soft-top) 0%,
+            var(--theme-surface-soft-bottom) 100%
+        ) !important;
+
+    border-color: var(--theme-surface-border) !important;
+    color: var(--theme-surface-text) !important;
+}
+
+#overview-table th,
+#overview-table td,
+#planned-table th,
+#planned-table td {
+    background: transparent !important;
+    color: var(--theme-surface-text) !important;
+}
+
+/* ---------------------------------------------------------
+   Bildflächen und Zusatzbereiche
+   --------------------------------------------------------- */
+
+.tour-image-preview-wrap,
+.tour-detail-image-wrap,
+.form-details,
+.diagram-filter-checkbox,
+.checklist-section,
+.stats-chart-block,
+.plan-live-preview,
+.plan-season-card {
+    background:
+        linear-gradient(
+            180deg,
+            var(--theme-surface-soft-top) 0%,
+            var(--theme-surface-soft-bottom) 100%
+        ) !important;
+
+    border-color: var(--theme-surface-border) !important;
+    color: var(--theme-surface-text);
+}
+
+/* ---------------------------------------------------------
+   Mobile Querformat: seitliche Navigation
+   --------------------------------------------------------- */
+
+@media (max-width: 1024px)
+       and (orientation: landscape)
+       and (pointer: coarse) {
+
+    .accordion-header {
+        background:
+            linear-gradient(
+                180deg,
+                var(--theme-surface-top) 0%,
+                var(--theme-surface-bottom) 100%
+            ) !important;
+
+        border-right-color: var(--theme-surface-border) !important;
+    }
+}
+
+/* ---------------------------------------------------------
+   Mobile Hochformat: obere Navigation
+   --------------------------------------------------------- */
+
+@media (max-width: 768px)
+       and (orientation: portrait)
+       and (pointer: coarse) {
+
+    .accordion-header {
+        background:
+            linear-gradient(
+                180deg,
+                var(--theme-surface-top) 0%,
+                var(--theme-surface-bottom) 100%
+            ) !important;
+
+        border-bottom-color: var(--theme-surface-border) !important;
+    }
+}
+
+/* =========================================================
+   DARK / GREEN / SUMMIT
+   Farbverläufe auf alle UI-Flächen ausweiten
+   Seitenhintergrund bleibt unverändert
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   Theme-Farben
+   --------------------------------------------------------- */
+
+body.dark {
+    --surface-gradient-top: rgba(145, 42, 52, 0.94);
+    --surface-gradient-bottom: rgba(9, 18, 29, 0.98);
+
+    --surface-gradient-soft-top: rgba(116, 43, 53, 0.84);
+    --surface-gradient-soft-bottom: rgba(17, 31, 47, 0.96);
+
+    --surface-gradient-border: rgba(220, 112, 120, 0.34);
+    --surface-gradient-text: #f4f8fc;
+}
+
+body.green {
+    --surface-gradient-top: rgba(48, 157, 96, 0.94);
+    --surface-gradient-bottom: rgba(1, 12, 7, 0.98);
+
+    --surface-gradient-soft-top: rgba(37, 125, 76, 0.84);
+    --surface-gradient-soft-bottom: rgba(5, 30, 17, 0.96);
+
+    --surface-gradient-border: rgba(114, 214, 163, 0.36);
+    --surface-gradient-text: #f4fff8;
+}
+
+body.summit {
+    --surface-gradient-top: rgba(77, 171, 255, 0.94);
+    --surface-gradient-bottom: rgba(20, 27, 32, 0.98);
+
+    --surface-gradient-soft-top: rgba(57, 128, 190, 0.84);
+    --surface-gradient-soft-bottom: rgba(28, 39, 45, 0.96);
+
+    --surface-gradient-border: rgba(145, 211, 255, 0.36);
+    --surface-gradient-text: #f5fbff;
+}
+
+/* ---------------------------------------------------------
+   Große Karten und Bereiche
+   --------------------------------------------------------- */
+
+body.dark .box,
+body.dark .dash-section,
+body.dark .filter-simple-card,
+body.dark .stats-analysis-section,
+body.dark .stats-structure-section,
+body.dark .chart-card,
+body.dark .compare-box,
+body.dark .compare-period-card,
+body.dark .compare-list-card,
+body.dark .tour-compare-pick-card,
+body.dark .tour-compare-result,
+body.dark .backup-status-panel,
+body.dark .backup-info-card,
+body.dark .backup-file-status,
+
+body.green .box,
+body.green .dash-section,
+body.green .filter-simple-card,
+body.green .stats-analysis-section,
+body.green .stats-structure-section,
+body.green .chart-card,
+body.green .compare-box,
+body.green .compare-period-card,
+body.green .compare-list-card,
+body.green .tour-compare-pick-card,
+body.green .tour-compare-result,
+body.green .backup-status-panel,
+body.green .backup-info-card,
+body.green .backup-file-status,
+
+body.summit .box,
+body.summit .dash-section,
+body.summit .filter-simple-card,
+body.summit .stats-analysis-section,
+body.summit .stats-structure-section,
+body.summit .chart-card,
+body.summit .compare-box,
+body.summit .compare-period-card,
+body.summit .compare-list-card,
+body.summit .tour-compare-pick-card,
+body.summit .tour-compare-result,
+body.summit .backup-status-panel,
+body.summit .backup-info-card,
+body.summit .backup-file-status {
+    background:
+        linear-gradient(
+            180deg,
+            var(--surface-gradient-top) 0%,
+            var(--surface-gradient-bottom) 100%
+        ) !important;
+
+    border-color: var(--surface-gradient-border) !important;
+    color: var(--surface-gradient-text) !important;
+}
+
+/* ---------------------------------------------------------
+   Kleinere Karten, Listen und Kacheln
+   --------------------------------------------------------- */
+
+body.dark .stats-list li,
+body.dark .peak-tour-list li,
+body.dark .tour-search-result,
+body.dark .chart-stat-tile,
+body.dark .dash-stat-tile,
+body.dark .dash-milestone-tile,
+body.dark .tour-profile-summary-card,
+body.dark .development-metric-card,
+body.dark .best-form-card,
+body.dark .activity-summary-card,
+body.dark .peak-summary-card,
+body.dark .stats-structure-typical-card,
+body.dark .stats-structure-type-card,
+body.dark .stats-structure-burden-card,
+body.dark .backup-status-item,
+
+body.green .stats-list li,
+body.green .peak-tour-list li,
+body.green .tour-search-result,
+body.green .chart-stat-tile,
+body.green .dash-stat-tile,
+body.green .dash-milestone-tile,
+body.green .tour-profile-summary-card,
+body.green .development-metric-card,
+body.green .best-form-card,
+body.green .activity-summary-card,
+body.green .peak-summary-card,
+body.green .stats-structure-typical-card,
+body.green .stats-structure-type-card,
+body.green .stats-structure-burden-card,
+body.green .backup-status-item,
+
+body.summit .stats-list li,
+body.summit .peak-tour-list li,
+body.summit .tour-search-result,
+body.summit .chart-stat-tile,
+body.summit .dash-stat-tile,
+body.summit .dash-milestone-tile,
+body.summit .tour-profile-summary-card,
+body.summit .development-metric-card,
+body.summit .best-form-card,
+body.summit .activity-summary-card,
+body.summit .peak-summary-card,
+body.summit .stats-structure-typical-card,
+body.summit .stats-structure-type-card,
+body.summit .stats-structure-burden-card,
+body.summit .backup-status-item {
+    background:
+        linear-gradient(
+            180deg,
+            var(--surface-gradient-soft-top) 0%,
+            var(--surface-gradient-soft-bottom) 100%
+        ) !important;
+
+    border-color: var(--surface-gradient-border) !important;
+    color: var(--surface-gradient-text) !important;
+}
+
+/* Texte innerhalb der gefärbten Flächen */
+body.dark .stats-list li *,
+body.dark .peak-tour-list li *,
+body.dark .backup-status-panel *,
+body.dark .backup-status-item *,
+body.dark .backup-info-card *,
+
+body.green .stats-list li *,
+body.green .peak-tour-list li *,
+body.green .backup-status-panel *,
+body.green .backup-status-item *,
+body.green .backup-info-card *,
+
+body.summit .stats-list li *,
+body.summit .peak-tour-list li *,
+body.summit .backup-status-panel *,
+body.summit .backup-status-item *,
+body.summit .backup-info-card * {
+    color: var(--surface-gradient-text);
+}
+
+/* ---------------------------------------------------------
+   Formulare und Eingabefelder
+   --------------------------------------------------------- */
+
+body.dark .tour-form input:not([type="checkbox"]),
+body.dark .tour-form select,
+body.dark .tour-form textarea,
+body.dark #filter-view input:not([type="checkbox"]),
+body.dark #filter-view select,
+body.dark #filter-view textarea,
+body.dark .mob-sel-btn,
+
+body.green .tour-form input:not([type="checkbox"]),
+body.green .tour-form select,
+body.green .tour-form textarea,
+body.green #filter-view input:not([type="checkbox"]),
+body.green #filter-view select,
+body.green #filter-view textarea,
+body.green .mob-sel-btn,
+
+body.summit .tour-form input:not([type="checkbox"]),
+body.summit .tour-form select,
+body.summit .tour-form textarea,
+body.summit #filter-view input:not([type="checkbox"]),
+body.summit #filter-view select,
+body.summit #filter-view textarea,
+body.summit .mob-sel-btn {
+    background:
+        linear-gradient(
+            180deg,
+            var(--surface-gradient-soft-top) 0%,
+            var(--surface-gradient-soft-bottom) 100%
+        ) !important;
+
+    color: var(--surface-gradient-text) !important;
+    border-color: var(--surface-gradient-border) !important;
+}
+
+/* ---------------------------------------------------------
+   Navigation und Steuerflächen
+   --------------------------------------------------------- */
+
+body.dark .top-main-nav,
+body.dark .chart-tab,
+body.dark .stats-section-btn,
+body.dark .filter-section-nav-btn,
+body.dark .plan-section-btn,
+body.dark .map-mode-toggle,
+body.dark .map-mode-btn,
+body.dark .quick-filter-btn,
+body.dark .tour-page-btn,
+body.dark .yc-metric-btn,
+body.dark .yc-year-toggle-btn,
+body.dark .compare-mode-toggle,
+body.dark .compare-mode-btn,
+body.dark .checklist-mode-toggle,
+body.dark .checklist-mode-btn,
+body.dark .dash-year-arrow-btn,
+
+body.green .top-main-nav,
+body.green .chart-tab,
+body.green .stats-section-btn,
+body.green .filter-section-nav-btn,
+body.green .plan-section-btn,
+body.green .map-mode-toggle,
+body.green .map-mode-btn,
+body.green .quick-filter-btn,
+body.green .tour-page-btn,
+body.green .yc-metric-btn,
+body.green .yc-year-toggle-btn,
+body.green .compare-mode-toggle,
+body.green .compare-mode-btn,
+body.green .checklist-mode-toggle,
+body.green .checklist-mode-btn,
+body.green .dash-year-arrow-btn,
+
+body.summit .top-main-nav,
+body.summit .chart-tab,
+body.summit .stats-section-btn,
+body.summit .filter-section-nav-btn,
+body.summit .plan-section-btn,
+body.summit .map-mode-toggle,
+body.summit .map-mode-btn,
+body.summit .quick-filter-btn,
+body.summit .tour-page-btn,
+body.summit .yc-metric-btn,
+body.summit .yc-year-toggle-btn,
+body.summit .compare-mode-toggle,
+body.summit .compare-mode-btn,
+body.summit .checklist-mode-toggle,
+body.summit .checklist-mode-btn,
+body.summit .dash-year-arrow-btn {
+    background:
+        linear-gradient(
+            180deg,
+            var(--surface-gradient-soft-top) 0%,
+            var(--surface-gradient-soft-bottom) 100%
+        ) !important;
+
+    color: var(--surface-gradient-text) !important;
+    border-color: var(--surface-gradient-border) !important;
+}
+
+/* Aktive Zustände behalten den jeweiligen Theme-Akzent */
+body.dark .chart-tab.active,
+body.dark .stats-section-btn.active,
+body.dark .filter-section-nav-btn.active,
+body.dark .plan-section-btn.active,
+body.dark .map-mode-btn.active,
+body.dark .quick-filter-btn.active,
+body.dark .yc-metric-btn.active,
+body.dark .yc-year-toggle-btn.active,
+body.dark .compare-mode-btn.active,
+body.dark .checklist-mode-btn.active,
+
+body.green .chart-tab.active,
+body.green .stats-section-btn.active,
+body.green .filter-section-nav-btn.active,
+body.green .plan-section-btn.active,
+body.green .map-mode-btn.active,
+body.green .quick-filter-btn.active,
+body.green .yc-metric-btn.active,
+body.green .yc-year-toggle-btn.active,
+body.green .compare-mode-btn.active,
+body.green .checklist-mode-btn.active,
+
+body.summit .chart-tab.active,
+body.summit .stats-section-btn.active,
+body.summit .filter-section-nav-btn.active,
+body.summit .plan-section-btn.active,
+body.summit .map-mode-btn.active,
+body.summit .quick-filter-btn.active,
+body.summit .yc-metric-btn.active,
+body.summit .yc-year-toggle-btn.active,
+body.summit .compare-mode-btn.active,
+body.summit .checklist-mode-btn.active {
+    background: var(--accent-gradient) !important;
+    color: #ffffff !important;
+}
+
+/* ---------------------------------------------------------
+   Tabellen und mobile Tourkarten
+   --------------------------------------------------------- */
+
+body.dark #overview-table tr,
+body.dark #planned-table tr,
+body.dark #saved-tours-list .tour-list li,
+body.dark #planned-tours-list .tour-list li,
+
+body.green #overview-table tr,
+body.green #planned-table tr,
+body.green #saved-tours-list .tour-list li,
+body.green #planned-tours-list .tour-list li,
+
+body.summit #overview-table tr,
+body.summit #planned-table tr,
+body.summit #saved-tours-list .tour-list li,
+body.summit #planned-tours-list .tour-list li {
+    background:
+        linear-gradient(
+            180deg,
+            var(--surface-gradient-soft-top) 0%,
+            var(--surface-gradient-soft-bottom) 100%
+        ) !important;
+
+    border-color: var(--surface-gradient-border) !important;
+    color: var(--surface-gradient-text) !important;
+}
+
+body.dark #overview-table th,
+body.dark #overview-table td,
+body.dark #planned-table th,
+body.dark #planned-table td,
+body.green #overview-table th,
+body.green #overview-table td,
+body.green #planned-table th,
+body.green #planned-table td,
+body.summit #overview-table th,
+body.summit #overview-table td,
+body.summit #planned-table th,
+body.summit #planned-table td {
+    background: transparent !important;
+    color: var(--surface-gradient-text) !important;
+}
+
+/* ---------------------------------------------------------
+   Zusatzflächen, Bilder und Checklisten
+   --------------------------------------------------------- */
+
+body.dark .tour-image-preview-wrap,
+body.dark .tour-detail-image-wrap,
+body.dark .form-details,
+body.dark .diagram-filter-checkbox,
+body.dark .checklist-section,
+body.dark .stats-chart-block,
+body.dark .plan-live-preview,
+body.dark .plan-season-card,
+
+body.green .tour-image-preview-wrap,
+body.green .tour-detail-image-wrap,
+body.green .form-details,
+body.green .diagram-filter-checkbox,
+body.green .checklist-section,
+body.green .stats-chart-block,
+body.green .plan-live-preview,
+body.green .plan-season-card,
+
+body.summit .tour-image-preview-wrap,
+body.summit .tour-detail-image-wrap,
+body.summit .form-details,
+body.summit .diagram-filter-checkbox,
+body.summit .checklist-section,
+body.summit .stats-chart-block,
+body.summit .plan-live-preview,
+body.summit .plan-season-card {
+    background:
+        linear-gradient(
+            180deg,
+            var(--surface-gradient-soft-top) 0%,
+            var(--surface-gradient-soft-bottom) 100%
+        ) !important;
+
+    border-color: var(--surface-gradient-border) !important;
+    color: var(--surface-gradient-text) !important;
+}
+
+/* ---------------------------------------------------------
+   Mobile-Navigation in beiden Ausrichtungen
+   --------------------------------------------------------- */
+
+@media (max-width: 1024px)
+       and (orientation: landscape)
+       and (pointer: coarse) {
+
+    .accordion-header {
+        background:
+            linear-gradient(
+                180deg,
+                var(--surface-gradient-top) 0%,
+                var(--surface-gradient-bottom) 100%
+            ) !important;
+
+        border-right-color: var(--surface-gradient-border) !important;
+    }
+}
+
+@media (max-width: 768px)
+       and (orientation: portrait)
+       and (pointer: coarse) {
+
+    .accordion-header {
+        background:
+            linear-gradient(
+                180deg,
+                var(--surface-gradient-top) 0%,
+                var(--surface-gradient-bottom) 100%
+            ) !important;
+
+        border-bottom-color: var(--surface-gradient-border) !important;
+    }
+}
+
 </style>
 </body>
 </html>
