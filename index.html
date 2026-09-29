@@ -19348,6 +19348,534 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
+
+/* =========================================================
+   ZENTRALE KONTRAST- UND LESBARKEITSKORREKTUR
+   Ganz ans Ende des CSS setzen
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   Gemeinsame Lesbarkeitsvariablen
+   --------------------------------------------------------- */
+
+:root {
+    --text-main: #17251d;
+    --text-soft: #405248;
+
+    --accent: #a87800;
+    --accent-soft: rgba(168,120,0,0.20);
+    --accent-gradient: linear-gradient(135deg, #f4d36d, #b47b00);
+
+    --glass-bg: rgba(255,255,255,0.72);
+    --glass-border: rgba(32,55,43,0.22);
+
+    --ui-card-bg: rgba(255,255,255,0.70);
+    --ui-card-bg-interactive: rgba(255,255,255,0.88);
+    --ui-section-bg: rgba(255,255,255,0.58);
+    --ui-card-border: rgba(32,55,43,0.22);
+
+    --year-control-bg: rgba(255,255,255,0.72);
+    --year-control-bg-hover: rgba(255,255,255,0.90);
+    --year-control-border: rgba(32,55,43,0.24);
+}
+
+/* ---------------------------------------------------------
+   Light Theme
+   --------------------------------------------------------- */
+
+body:not(.dark):not(.green):not(.summit) {
+    color: #17251d;
+}
+
+body:not(.dark):not(.green):not(.summit) .box,
+body:not(.dark):not(.green):not(.summit) .dash-section,
+body:not(.dark):not(.green):not(.summit) .filter-simple-card,
+body:not(.dark):not(.green):not(.summit) .stats-analysis-section,
+body:not(.dark):not(.green):not(.summit) .stats-structure-section {
+    background: rgba(255,255,255,0.74) !important;
+    border-color: rgba(32,55,43,0.24) !important;
+}
+
+body:not(.dark):not(.green):not(.summit) .box-header,
+body:not(.dark):not(.green):not(.summit) .box-content,
+body:not(.dark):not(.green):not(.summit) .tour-form label,
+body:not(.dark):not(.green):not(.summit) .stats-label,
+body:not(.dark):not(.green):not(.summit) .stats-value,
+body:not(.dark):not(.green):not(.summit) .dash-stat-value,
+body:not(.dark):not(.green):not(.summit) .dash-stat-label,
+body:not(.dark):not(.green):not(.summit) .chart-title {
+    color: #17251d !important;
+}
+
+body:not(.dark):not(.green):not(.summit) .text-muted,
+body:not(.dark):not(.green):not(.summit) small,
+body:not(.dark):not(.green):not(.summit) .stats-analysis-subtitle,
+body:not(.dark):not(.green):not(.summit) .stats-structure-card-meta,
+body:not(.dark):not(.green):not(.summit) .development-metric-label,
+body:not(.dark):not(.green):not(.summit) .best-form-label {
+    color: #405248 !important;
+    opacity: 1 !important;
+}
+
+body:not(.dark):not(.green):not(.summit)
+.tour-form input:not([type="checkbox"]),
+body:not(.dark):not(.green):not(.summit)
+.tour-form select,
+body:not(.dark):not(.green):not(.summit)
+textarea,
+body:not(.dark):not(.green):not(.summit)
+#filter-view input:not([type="checkbox"]),
+body:not(.dark):not(.green):not(.summit)
+#filter-view select {
+    background: rgba(255,255,255,0.84) !important;
+    color: #17251d !important;
+    border-color: rgba(32,55,43,0.30) !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.55) !important;
+}
+
+body:not(.dark):not(.green):not(.summit)
+input::placeholder,
+body:not(.dark):not(.green):not(.summit)
+textarea::placeholder {
+    color: #53665b !important;
+    opacity: 1 !important;
+}
+
+body:not(.dark):not(.green):not(.summit)
+.stats-list li,
+body:not(.dark):not(.green):not(.summit)
+.peak-tour-list li,
+body:not(.dark):not(.green):not(.summit)
+.tour-search-result,
+body:not(.dark):not(.green):not(.summit)
+.chart-stat-tile,
+body:not(.dark):not(.green):not(.summit)
+.dash-stat-tile {
+    background: rgba(255,255,255,0.78) !important;
+    border-color: rgba(32,55,43,0.22) !important;
+}
+
+/* ---------------------------------------------------------
+   Dark Theme
+   --------------------------------------------------------- */
+
+body.dark {
+    --accent: #d45c5c;
+    --accent-soft: rgba(212,92,92,0.25);
+    --accent-gradient: linear-gradient(135deg, #d45c5c, #861f1f);
+
+    --text-main: #f3f7fb;
+    --text-soft: #c2cfdb;
+
+    --glass-bg: rgba(17,29,43,0.90);
+    --glass-border: rgba(211,229,245,0.24);
+
+    --ui-card-bg: rgba(24,40,58,0.86);
+    --ui-card-bg-interactive: rgba(38,59,82,0.94);
+    --ui-section-bg: rgba(18,32,48,0.88);
+    --ui-card-border: rgba(190,215,237,0.26);
+
+    --year-control-bg: rgba(24,40,58,0.90);
+    --year-control-bg-hover: rgba(42,63,87,0.96);
+    --year-control-border: rgba(190,215,237,0.28);
+}
+
+body.dark,
+body.dark .box,
+body.dark .box-header,
+body.dark .box-content,
+body.dark .modal-card,
+body.dark .chart-title,
+body.dark .stats-label,
+body.dark .stats-value,
+body.dark .dash-stat-value,
+body.dark .dash-stat-label,
+body.dark .tour-form label,
+body.dark .form-section-title {
+    color: #f3f7fb !important;
+}
+
+body.dark small,
+body.dark .text-muted,
+body.dark .stats-analysis-subtitle,
+body.dark .stats-structure-card-meta,
+body.dark .development-metric-label,
+body.dark .best-form-label,
+body.dark .tour-profile-summary-label,
+body.dark .compare-period-title {
+    color: #c2cfdb !important;
+    opacity: 1 !important;
+}
+
+body.dark .box,
+body.dark .dash-section,
+body.dark .filter-simple-card,
+body.dark .stats-analysis-section,
+body.dark .stats-structure-section,
+body.dark .modal-card {
+    background: rgba(17,29,43,0.90) !important;
+    border-color: rgba(211,229,245,0.24) !important;
+}
+
+body.dark input:not([type="checkbox"]),
+body.dark select,
+body.dark textarea,
+body.dark #filter-view input:not([type="checkbox"]),
+body.dark #filter-view select,
+body.dark .mob-sel-btn {
+    background: rgba(29,47,67,0.92) !important;
+    color: #f3f7fb !important;
+    border-color: rgba(211,229,245,0.30) !important;
+}
+
+body.dark input::placeholder,
+body.dark textarea::placeholder {
+    color: #b6c5d3 !important;
+    opacity: 1 !important;
+}
+
+body.dark .stats-list li,
+body.dark .peak-tour-list li,
+body.dark .tour-search-result,
+body.dark .chart-stat-tile,
+body.dark .dash-stat-tile,
+body.dark .compare-row,
+body.dark .compare-period-card,
+body.dark .compare-list-card,
+body.dark .compare-chip {
+    background: rgba(26,44,63,0.88) !important;
+    border-color: rgba(211,229,245,0.22) !important;
+}
+
+body.dark .stats-list li.stats-sub {
+    background: rgba(18,32,48,0.92) !important;
+}
+
+body.dark button.save-btn,
+body.dark .top-nav-save,
+body.dark .chart-stat-tile.active,
+body.dark .chart-tab.active,
+body.dark .quick-filter-btn.active,
+body.dark .map-mode-btn.active,
+body.dark .compare-mode-btn.active,
+body.dark .checklist-mode-btn.active,
+body.dark .plan-section-btn.active,
+body.dark .filter-section-nav-btn.active {
+    color: #ffffff !important;
+}
+
+/* ---------------------------------------------------------
+   Green Theme
+   --------------------------------------------------------- */
+
+body.green {
+    --accent: #72d6a3;
+    --accent-soft: rgba(114,214,163,0.25);
+    --accent-gradient: linear-gradient(135deg, #72d6a3, #238653);
+
+    --text-main: #f6fff9;
+    --text-soft: #c9e5d4;
+
+    --glass-bg: rgba(3,19,11,0.92);
+    --glass-border: rgba(114,214,163,0.34);
+
+    --ui-card-bg: rgba(8,42,24,0.86);
+    --ui-card-bg-interactive: rgba(14,66,38,0.94);
+    --ui-section-bg: rgba(5,31,18,0.90);
+    --ui-card-border: rgba(114,214,163,0.30);
+
+    --year-control-bg: rgba(8,42,24,0.90);
+    --year-control-bg-hover: rgba(14,66,38,0.96);
+    --year-control-border: rgba(114,214,163,0.34);
+}
+
+body.green,
+body.green .box,
+body.green .box-header,
+body.green .box-content,
+body.green .modal-card,
+body.green .chart-title,
+body.green .stats-label,
+body.green .stats-value,
+body.green .dash-stat-value,
+body.green .dash-stat-label,
+body.green .tour-form label,
+body.green .form-section-title {
+    color: #f6fff9 !important;
+}
+
+body.green small,
+body.green .text-muted,
+body.green .stats-analysis-subtitle,
+body.green .stats-structure-card-meta,
+body.green .development-metric-label,
+body.green .best-form-label,
+body.green .tour-profile-summary-label,
+body.green .compare-period-title {
+    color: #c9e5d4 !important;
+    opacity: 1 !important;
+}
+
+body.green .box,
+body.green .dash-section,
+body.green .filter-simple-card,
+body.green .stats-analysis-section,
+body.green .stats-structure-section,
+body.green .modal-card {
+    background: rgba(3,19,11,0.92) !important;
+    border-color: rgba(114,214,163,0.34) !important;
+}
+
+body.green input:not([type="checkbox"]),
+body.green select,
+body.green textarea,
+body.green #filter-view input:not([type="checkbox"]),
+body.green #filter-view select,
+body.green .mob-sel-btn {
+    background: rgba(11,51,29,0.92) !important;
+    color: #f6fff9 !important;
+    border-color: rgba(114,214,163,0.34) !important;
+}
+
+body.green input::placeholder,
+body.green textarea::placeholder {
+    color: #b8d8c5 !important;
+    opacity: 1 !important;
+}
+
+body.green .stats-list li,
+body.green .peak-tour-list li,
+body.green .tour-search-result,
+body.green .chart-stat-tile,
+body.green .dash-stat-tile,
+body.green .compare-row,
+body.green .compare-period-card,
+body.green .compare-list-card,
+body.green .compare-chip {
+    background: rgba(8,42,24,0.88) !important;
+    border-color: rgba(114,214,163,0.25) !important;
+}
+
+body.green button.save-btn,
+body.green .top-nav-save,
+body.green .chart-stat-tile.active,
+body.green .chart-tab.active,
+body.green .quick-filter-btn.active,
+body.green .map-mode-btn.active,
+body.green .compare-mode-btn.active,
+body.green .checklist-mode-btn.active,
+body.green .plan-section-btn.active,
+body.green .filter-section-nav-btn.active {
+    color: #03130a !important;
+    font-weight: 800;
+}
+
+/* ---------------------------------------------------------
+   Summit Theme
+   --------------------------------------------------------- */
+
+body.summit {
+    --accent: #72c2ff;
+    --accent-soft: rgba(114,194,255,0.27);
+    --accent-gradient: linear-gradient(135deg, #8bd0ff, #1974c2);
+
+    --text-main: #f7fbff;
+    --text-soft: #d0dce4;
+
+    --glass-bg: rgba(25,34,40,0.90);
+    --glass-border: rgba(210,232,245,0.30);
+
+    --ui-card-bg: rgba(36,51,59,0.88);
+    --ui-card-bg-interactive: rgba(51,72,83,0.95);
+    --ui-section-bg: rgba(29,42,49,0.90);
+    --ui-card-border: rgba(210,232,245,0.28);
+
+    --year-control-bg: rgba(36,51,59,0.90);
+    --year-control-bg-hover: rgba(51,72,83,0.96);
+    --year-control-border: rgba(210,232,245,0.30);
+}
+
+body.summit,
+body.summit .box,
+body.summit .box-header,
+body.summit .box-content,
+body.summit .modal-card,
+body.summit .chart-title,
+body.summit .stats-label,
+body.summit .stats-value,
+body.summit .dash-stat-value,
+body.summit .dash-stat-label,
+body.summit .tour-form label,
+body.summit .form-section-title {
+    color: #f7fbff !important;
+}
+
+body.summit small,
+body.summit .text-muted,
+body.summit .stats-analysis-subtitle,
+body.summit .stats-structure-card-meta,
+body.summit .development-metric-label,
+body.summit .best-form-label,
+body.summit .tour-profile-summary-label,
+body.summit .compare-period-title {
+    color: #d0dce4 !important;
+    opacity: 1 !important;
+}
+
+body.summit .box,
+body.summit .dash-section,
+body.summit .filter-simple-card,
+body.summit .stats-analysis-section,
+body.summit .stats-structure-section,
+body.summit .modal-card {
+    background: rgba(25,34,40,0.90) !important;
+    border-color: rgba(210,232,245,0.30) !important;
+}
+
+body.summit input:not([type="checkbox"]),
+body.summit select,
+body.summit textarea,
+body.summit #filter-view input:not([type="checkbox"]),
+body.summit #filter-view select,
+body.summit .mob-sel-btn {
+    background: rgba(36,51,59,0.92) !important;
+    color: #f7fbff !important;
+    border-color: rgba(210,232,245,0.32) !important;
+}
+
+body.summit input::placeholder,
+body.summit textarea::placeholder {
+    color: #c3d2dc !important;
+    opacity: 1 !important;
+}
+
+body.summit .stats-list li,
+body.summit .peak-tour-list li,
+body.summit .tour-search-result,
+body.summit .chart-stat-tile,
+body.summit .dash-stat-tile,
+body.summit .compare-row,
+body.summit .compare-period-card,
+body.summit .compare-list-card,
+body.summit .compare-chip {
+    background: rgba(36,51,59,0.88) !important;
+    border-color: rgba(210,232,245,0.26) !important;
+}
+
+body.summit button.save-btn,
+body.summit .top-nav-save,
+body.summit .chart-stat-tile.active,
+body.summit .chart-tab.active,
+body.summit .quick-filter-btn.active,
+body.summit .map-mode-btn.active,
+body.summit .compare-mode-btn.active,
+body.summit .checklist-mode-btn.active,
+body.summit .plan-section-btn.active,
+body.summit .filter-section-nav-btn.active {
+    color: #061522 !important;
+    font-weight: 800;
+}
+
+/* ---------------------------------------------------------
+   Gemeinsame Fokus- und Interaktionszustände
+   --------------------------------------------------------- */
+
+input:not([type="checkbox"]):focus,
+select:focus,
+textarea:focus,
+.mob-sel-btn:focus-visible,
+button:focus-visible {
+    outline: 2px solid var(--accent) !important;
+    outline-offset: 2px;
+}
+
+button.save-btn,
+.top-nav-save,
+.chart-stat-tile.active,
+.chart-tab.active,
+.quick-filter-btn.active,
+.map-mode-btn.active,
+.compare-mode-btn.active,
+.checklist-mode-btn.active,
+.plan-section-btn.active,
+.filter-section-nav-btn.active {
+    border-color: color-mix(
+        in srgb,
+        var(--accent) 62%,
+        rgba(255,255,255,0.30)
+    ) !important;
+}
+
+.box-header,
+.top-nav-label,
+.form-section-title,
+.stats-analysis-title,
+.dash-section-title {
+    text-shadow: none !important;
+}
+
+.chart-x-axis,
+.map-info-bar,
+#map-info-bar {
+    color: var(--text-soft) !important;
+    opacity: 1 !important;
+}
+
+/* Deutlichere Trennlinien */
+.form-section-title::after,
+#tour-view .plan-page-box .form-section-title::after,
+#tour-view .plan-view-title::after,
+#tour-view #checklist-box .checklist-section-title::after {
+    background: var(--accent) !important;
+    opacity: 0.42 !important;
+}
+
+/* Aktive Kacheln und Navigation nicht abdunkeln */
+.top-nav-btn.view-active,
+.top-nav-btn.more-view-active {
+    background: var(--accent-soft) !important;
+    color: var(--text-main) !important;
+}
+
+.top-nav-btn.view-active .top-nav-label,
+.top-nav-btn.more-view-active .top-nav-label {
+    opacity: 1 !important;
+}
+
+/* Tabellen- und Listenbeschriftungen */
+#overview-table td::before,
+#planned-table td::before,
+.peak-tour-list .tour-nr,
+.peak-tour-list .peak-height,
+.tour-list .tour-nr,
+.tour-list .tour-date {
+    color: var(--text-soft) !important;
+    opacity: 1 !important;
+}
+
+/* Deaktivierte Elemente bleiben erkennbar */
+button:disabled,
+select:disabled,
+input:disabled {
+    opacity: 0.52 !important;
+}
+
+/* Keine zusätzliche Kontrastabschwächung durch alte Opacity-Regeln */
+.stats-label,
+.stats-value,
+.chart-stat-value,
+.chart-stat-label,
+.dash-stat-value,
+.dash-stat-label,
+.tour-profile-name,
+.tour-profile-share,
+.development-metric-value,
+.best-form-value,
+.activity-summary-value,
+.peak-summary-value {
+    opacity: 1 !important;
+}
+
 </style>
 
 
