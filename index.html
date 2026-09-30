@@ -22800,9 +22800,24 @@ body.dark
                         <input type="range" id="te-intensity" min="40" max="100" step="1">
                     </div>
 
+                    <div class="form-group">
+                        <label for="te-border">Randintensität: <span id="te-border-value">34</span>%</label>
+                        <input type="range" id="te-border" min="10" max="70" step="1">
+                    </div>
+
                 </div>
 
                 <div class="theme-editor-col theme-editor-col-right">
+
+                    <div class="form-group">
+                        <label for="te-radius">Eckenradius: <span id="te-radius-value">14</span>px</label>
+                        <input type="range" id="te-radius" min="0" max="28" step="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="te-blur">Glasunschärfe: <span id="te-blur-value">10</span>px</label>
+                        <input type="range" id="te-blur" min="0" max="20" step="1">
+                    </div>
 
                     <div class="tour-form-row tour-form-row-two">
                         <div class="form-group">
@@ -22815,14 +22830,15 @@ body.dark
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="te-accent">Akzentfarbe</label>
-                        <input type="color" id="te-accent">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="te-border">Randintensität: <span id="te-border-value">34</span>%</label>
-                        <input type="range" id="te-border" min="10" max="70" step="1">
+                    <div class="tour-form-row tour-form-row-two">
+                        <div class="form-group">
+                            <label for="te-accent">Akzentfarbe</label>
+                            <input type="color" id="te-accent">
+                        </div>
+                        <div class="form-group">
+                            <label for="te-accent2">Akzentfarbe 2 (Verlauf)</label>
+                            <input type="color" id="te-accent2">
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -43848,10 +43864,10 @@ initMobileTapStateCleanup();
 const THEME_EDITOR_KEY = 'themeEditorSettings_v1';
 
 const defaultThemeEditorSettings = {
-    light:  { topColor: '#9de3f9', bottomColor: '#9ad8b6', transition: 55, intensity: 90, textMain: '#17251d', textSoft: '#405248', accent: '#0f8a6c', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#c9e8d8', shadowIntensity: 50, bgBrightness: 50 },
-    dark:   { topColor: '#912a34', bottomColor: '#0a121d', transition: 55, intensity: 88, textMain: '#f3f7fb', textSoft: '#c2cfdb', accent: '#d45c5c', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#4a1c22', shadowIntensity: 50, bgBrightness: 50 },
-    green:  { topColor: '#26a352', bottomColor: '#010c07', transition: 55, intensity: 88, textMain: '#f2fff7', textSoft: '#c9e5d4', accent: '#52b788', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#0e3d20', shadowIntensity: 50, bgBrightness: 50 },
-    summit: { topColor: '#3aa0ff', bottomColor: '#161d22', transition: 55, intensity: 88, textMain: '#f4faff', textSoft: '#d0dce4', accent: '#63b7ff', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#1f4560', shadowIntensity: 50, bgBrightness: 50 }
+    light:  { topColor: '#9de3f9', bottomColor: '#9ad8b6', transition: 55, intensity: 90, textMain: '#17251d', textSoft: '#405248', accent: '#0f8a6c', accent2: '#e0a52e', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#c9e8d8', shadowIntensity: 50, bgBrightness: 50, radius: 14, blurIntensity: 10 },
+    dark:   { topColor: '#912a34', bottomColor: '#0a121d', transition: 55, intensity: 88, textMain: '#f3f7fb', textSoft: '#c2cfdb', accent: '#d45c5c', accent2: '#4e0a0a', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#4a1c22', shadowIntensity: 50, bgBrightness: 50, radius: 14, blurIntensity: 10 },
+    green:  { topColor: '#26a352', bottomColor: '#010c07', transition: 55, intensity: 88, textMain: '#f2fff7', textSoft: '#c9e5d4', accent: '#52b788', accent2: '#2d6a4f', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#0e3d20', shadowIntensity: 50, bgBrightness: 50, radius: 14, blurIntensity: 10 },
+    summit: { topColor: '#3aa0ff', bottomColor: '#161d22', transition: 55, intensity: 88, textMain: '#f4faff', textSoft: '#d0dce4', accent: '#63b7ff', accent2: '#176fc1', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#1f4560', shadowIntensity: 50, bgBrightness: 50, radius: 14, blurIntensity: 10 }
 };
 
 let themeEditorActiveTab = 'light';
@@ -44040,6 +44056,10 @@ function buildThemeEditorLiveCss() {
         const softGradient = themeEditorBuildGradient(settings, softIntensity);
         const shadow = themeEditorBuildShadow(settings.shadowIntensity);
 
+        const radius = Math.max(0, Math.min(30, Number(settings.radius)));
+        const softRadius = Math.max(0, radius - 4);
+        const blur = Math.max(0, Math.min(24, Number(settings.blurIntensity)));
+
         const bigSelectors = THEME_EDITOR_BIG_SELECTORS
             .map(sel => `${prefix} ${sel}`)
             .join(',\n');
@@ -44048,8 +44068,8 @@ function buildThemeEditorLiveCss() {
             .map(sel => `${prefix} ${sel}`)
             .join(',\n');
 
-        css += `${bigSelectors} { background: ${bigGradient} !important; box-shadow: ${shadow} !important; }\n`;
-        css += `${softSelectors} { background: ${softGradient} !important; }\n`;
+        css += `${bigSelectors} { background: ${bigGradient} !important; box-shadow: ${shadow} !important; border-radius: ${radius}px !important; backdrop-filter: blur(${blur}px) !important; -webkit-backdrop-filter: blur(${blur}px) !important; }\n`;
+        css += `${softSelectors} { background: ${softGradient} !important; border-radius: ${softRadius}px !important; }\n`;
 
         css += `@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {\n`;
         css += `${prefix} .accordion-header { background: ${bigGradient} !important; }\n`;
@@ -44089,7 +44109,7 @@ function applyThemeEditorSettingsToDom() {
     body.style.setProperty('--text-soft', settings.textSoft);
     body.style.setProperty('--accent', settings.accent);
     body.style.setProperty('--accent-soft', accentSoft);
-    body.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${settings.topColor}, ${settings.accent})`);
+    body.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${settings.accent}, ${settings.accent2})`);
 
     [
         ['--theme-surface-top', topStrong],
@@ -44154,6 +44174,7 @@ function fillThemeEditorForm(themeKey) {
     document.getElementById('te-text-main').value = settings.textMain;
     document.getElementById('te-text-soft').value = settings.textSoft;
     document.getElementById('te-accent').value = settings.accent;
+    document.getElementById('te-accent2').value = settings.accent2;
     document.getElementById('te-border').value = settings.borderOpacity;
     document.getElementById('te-border-value').textContent = settings.borderOpacity;
 
@@ -44164,6 +44185,10 @@ function fillThemeEditorForm(themeKey) {
     document.getElementById('te-shadow-value').textContent = settings.shadowIntensity;
     document.getElementById('te-bg-brightness').value = settings.bgBrightness;
     document.getElementById('te-bg-brightness-value').textContent = settings.bgBrightness;
+    document.getElementById('te-radius').value = settings.radius;
+    document.getElementById('te-radius-value').textContent = settings.radius;
+    document.getElementById('te-blur').value = settings.blurIntensity;
+    document.getElementById('te-blur-value').textContent = settings.blurIntensity;
 
     const hint = document.getElementById('theme-editor-hint');
     if (hint) {
@@ -44184,12 +44209,15 @@ function readThemeEditorFormIntoSettings(themeKey) {
         textMain: document.getElementById('te-text-main').value,
         textSoft: document.getElementById('te-text-soft').value,
         accent: document.getElementById('te-accent').value,
+        accent2: document.getElementById('te-accent2').value,
         borderOpacity: Number(document.getElementById('te-border').value),
         gradientDirection: document.getElementById('te-direction').value,
         midEnabled: document.getElementById('te-mid-enabled').checked,
         midColor: document.getElementById('te-mid-color').value,
         shadowIntensity: Number(document.getElementById('te-shadow').value),
-        bgBrightness: Number(document.getElementById('te-bg-brightness').value)
+        bgBrightness: Number(document.getElementById('te-bg-brightness').value),
+        radius: Number(document.getElementById('te-radius').value),
+        blurIntensity: Number(document.getElementById('te-blur').value)
     };
 
     return allSettings;
@@ -44203,9 +44231,10 @@ function initThemeEditor() {
     const inputs = [
         'te-top-color', 'te-bottom-color', 'te-transition',
         'te-intensity', 'te-text-main', 'te-text-soft',
-        'te-accent', 'te-border',
+        'te-accent', 'te-accent2', 'te-border',
         'te-direction', 'te-mid-enabled', 'te-mid-color',
-        'te-shadow', 'te-bg-brightness'
+        'te-shadow', 'te-bg-brightness',
+        'te-radius', 'te-blur'
      ];
 
     function selectTab(themeKey) {
@@ -44241,6 +44270,12 @@ function initThemeEditor() {
             }
             if (id === 'te-bg-brightness') {
                 document.getElementById('te-bg-brightness-value').textContent = el.value;
+            }
+            if (id === 'te-radius') {
+                document.getElementById('te-radius-value').textContent = el.value;
+            }
+            if (id === 'te-blur') {
+                document.getElementById('te-blur-value').textContent = el.value;
             }
 
             readThemeEditorFormIntoSettings(themeEditorActiveTab);
