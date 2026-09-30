@@ -8988,10 +8988,9 @@ body:not(.touch-mode) .more-theme-option:hover{
 
     gap: 11px;
 
-    color: var(--text-main);
-
-    font-size: 17px;
-    line-height: 1;
+    font-size: 13px;
+    font-weight: 650;
+    line-height: normal;
 
     text-align: left;
 
@@ -8999,20 +8998,6 @@ body:not(.touch-mode) .more-theme-option:hover{
 }
 
 
-/* Beschriftung ergänzen, ohne dass JS sie überschreiben kann */
-#more-menu #theme-toggle::after {
-    content: "Theme wechseln";
-
-    font-size: 13px;
-    font-weight: 650;
-    line-height: 1.2;
-
-    color: var(--text-main);
-}
-
-body.dark #more-menu #theme-toggle::after {
-    color: #f1e3b0;
-} 
 
 @media (max-width: 768px), (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
     .dashboard-inner {
@@ -20807,6 +20792,14 @@ body.dark
     <span>Sicherung</span>
 </button>
 
+                <button
+                    id="theme-toggle"
+                    class="more-menu-item"
+                    type="button">
+                    <span>🎨</span>
+                    <span>Theme Editor</span>
+                </button>
+
                 <div class="more-menu-divider"></div>
 
                 <div class="more-theme-list" role="group" aria-label="Theme auswählen">
@@ -20823,15 +20816,6 @@ body.dark
                         <span class="more-theme-icon">⛰️</span><span>Summit</span><span class="more-theme-check">✓</span>
                     </button>
                 </div>
-
-                <div class="more-menu-divider"></div>
-
-                <button
-                    id="theme-toggle"
-                    class="more-menu-item"
-                    type="button">
-                    🌙
-                </button>
 
             </div>
 
@@ -22745,6 +22729,78 @@ body.dark
 
 </div>
 
+<!-- ======================================================
+     Theme Editor
+     ====================================================== -->
+
+<div id="theme-view" class="view">
+    <div class="theme-editor-inner">
+
+        <section class="filter-simple-card">
+
+            <div class="filter-simple-title">
+                🎨 Theme Editor
+            </div>
+
+            <div class="compare-mode-toggle" id="theme-editor-tabs" role="group" aria-label="Theme auswählen">
+                <button type="button" class="compare-mode-btn active" data-theme-editor-tab="light">☀️ Hell</button>
+                <button type="button" class="compare-mode-btn" data-theme-editor-tab="dark">🌙 Dunkel</button>
+                <button type="button" class="compare-mode-btn" data-theme-editor-tab="green">🌿 Grün</button>
+                <button type="button" class="compare-mode-btn" data-theme-editor-tab="summit">⛰️ Summit</button>
+            </div>
+
+            <div id="theme-editor-hint"></div>
+
+            <div class="tour-form-row tour-form-row-two">
+                <div class="form-group">
+                    <label for="te-top-color">Verlauf oben</label>
+                    <input type="color" id="te-top-color">
+                </div>
+                <div class="form-group">
+                    <label for="te-bottom-color">Verlauf unten</label>
+                    <input type="color" id="te-bottom-color">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="te-transition">Übergangspunkt: <span id="te-transition-value">55</span>%</label>
+                <input type="range" id="te-transition" min="10" max="90" step="1">
+            </div>
+
+            <div class="form-group">
+                <label for="te-intensity">Flächenintensität: <span id="te-intensity-value">88</span>%</label>
+                <input type="range" id="te-intensity" min="40" max="100" step="1">
+            </div>
+
+            <div class="tour-form-row tour-form-row-two">
+                <div class="form-group">
+                    <label for="te-text-main">Textfarbe (Haupt)</label>
+                    <input type="color" id="te-text-main">
+                </div>
+                <div class="form-group">
+                    <label for="te-text-soft">Textfarbe (Sekundär)</label>
+                    <input type="color" id="te-text-soft">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="te-accent">Akzentfarbe</label>
+                <input type="color" id="te-accent">
+            </div>
+
+            <div class="form-group">
+                <label for="te-border">Randintensität: <span id="te-border-value">34</span>%</label>
+                <input type="range" id="te-border" min="10" max="70" step="1">
+            </div>
+
+            <div class="theme-editor-actions">
+                <button type="button" class="save-btn" id="theme-editor-reset">Zurücksetzen</button>
+                <button type="button" class="save-btn" id="theme-editor-save">Speichern</button>
+            </div>
+
+        </section>
+
+    </div>
 </div>
 
 
@@ -22797,6 +22853,7 @@ initFilterSectionNav();
 initTourCompareFeature();
 initFilterViewPersistence();
 initConsistentDrilldownNavigation();
+    initThemeEditor();
 
     // Box-Höhen korrekt setzen, falls aktiv
     document.querySelectorAll('.box').forEach(box => {
@@ -24966,13 +25023,6 @@ function applyAppDataPayload(payload) {
 
     }
 
-    const themeToggle =
-        document.getElementById('theme-toggle');
-
-    if (themeToggle) {
-        themeToggle.textContent =
-            ICONS[theme] || '☀️';
-    }
 }
 
     tablePage = 1;
@@ -25255,11 +25305,7 @@ async function restoreLinkedFileHandleOnStartup() {
                         green: '🌿',
                         summit: '⛰️'
                     };
-                    const themeToggle = document.getElementById('theme-toggle');
-
-                    if (themeToggle) {
-                        themeToggle.textContent = icons[fileTheme];
-                    }
+                
 
                     document.querySelectorAll('[data-theme-choice]').forEach(option => {
                         const active = option.dataset.themeChoice === fileTheme;
@@ -36069,7 +36115,7 @@ const backupView =
     );
 const swipeArea = document.querySelector('.view-container');
 
-const viewOrder = ['dashboard', 'chart', 'map', 'app', 'tour', 'filter', 'backup'];
+const viewOrder = ['dashboard', 'chart', 'map', 'app', 'tour', 'filter', 'backup', 'theme'];
 
 const mapView = document.getElementById('map-view');
 
@@ -36081,6 +36127,7 @@ const viewMap = {
     map: mapView,
     filter: filterView,
     backup: backupView,
+          theme: document.getElementById('theme-view'),
 };
 
 let currentIndex = viewOrder.indexOf(currentView);
@@ -36165,7 +36212,8 @@ function updateMoreViewIndicator() {
     const isMoreView =
         currentView === 'tour' ||
         currentView === 'filter' ||
-        currentView === 'backup';
+        currentView === 'backup' ||
+        currentView === 'theme';
 
 
     moreButton.classList.toggle(
@@ -36248,7 +36296,7 @@ function updateViewButtons() {
     if (moreToggle) {
         moreToggle.classList.toggle(
     'view-active',
-    ['tour', 'filter', 'backup']
+    ['tour', 'filter', 'backup', 'theme']
         .includes(currentView)
 );
     }
@@ -43710,6 +43758,241 @@ function initMobileTapStateCleanup() {
 
 initMobileTapStateCleanup();
 
+/* =========================================================
+   Theme Editor
+   ========================================================= */
+
+const THEME_EDITOR_KEY = 'themeEditorSettings_v1';
+
+const defaultThemeEditorSettings = {
+    light:  { topColor: '#9de3f9', bottomColor: '#9ad8b6', transition: 55, intensity: 90, textMain: '#17251d', textSoft: '#405248', accent: '#0f8a6c', borderOpacity: 34 },
+    dark:   { topColor: '#912a34', bottomColor: '#0a121d', transition: 55, intensity: 88, textMain: '#f3f7fb', textSoft: '#c2cfdb', accent: '#d45c5c', borderOpacity: 34 },
+    green:  { topColor: '#26a352', bottomColor: '#010c07', transition: 55, intensity: 88, textMain: '#f2fff7', textSoft: '#c9e5d4', accent: '#52b788', borderOpacity: 34 },
+    summit: { topColor: '#3aa0ff', bottomColor: '#161d22', transition: 55, intensity: 88, textMain: '#f4faff', textSoft: '#d0dce4', accent: '#63b7ff', borderOpacity: 34 }
+};
+
+let themeEditorActiveTab = 'light';
+
+function getThemeEditorSettings() {
+    const saved = appStorage.get(THEME_EDITOR_KEY);
+    const merged = {};
+
+    ['light', 'dark', 'green', 'summit'].forEach(key => {
+        merged[key] = {
+            ...defaultThemeEditorSettings[key],
+            ...(saved && saved[key] ? saved[key] : {})
+        };
+    });
+
+    return merged;
+}
+
+function saveThemeEditorSettings(settings) {
+    appStorage.set(THEME_EDITOR_KEY, settings);
+}
+
+function themeEditorHexToRgba(hex, alphaPercent) {
+    const clean = String(hex || '').replace('#', '');
+
+    if (clean.length !== 6) {
+        return `rgba(0,0,0,${(alphaPercent || 100) / 100})`;
+    }
+
+    const r = parseInt(clean.substring(0, 2), 16);
+    const g = parseInt(clean.substring(2, 4), 16);
+    const b = parseInt(clean.substring(4, 6), 16);
+    const a = Math.max(0, Math.min(100, Number(alphaPercent) || 0)) / 100;
+
+    return `rgba(${r},${g},${b},${a.toFixed(2)})`;
+}
+
+function themeEditorGetActiveTheme() {
+    if (document.body.classList.contains('dark')) return 'dark';
+    if (document.body.classList.contains('green')) return 'green';
+    if (document.body.classList.contains('summit')) return 'summit';
+    return 'light';
+}
+
+function applyThemeEditorSettingsToDom() {
+    const activeTheme = themeEditorGetActiveTheme();
+    const allSettings = getThemeEditorSettings();
+    const settings = allSettings[activeTheme];
+    if (!settings) return;
+
+    const topStrong = themeEditorHexToRgba(settings.topColor, settings.intensity);
+    const bottomStrong = themeEditorHexToRgba(settings.bottomColor, settings.intensity);
+    const topSoft = themeEditorHexToRgba(settings.topColor, Math.max(20, settings.intensity - 12));
+    const bottomSoft = themeEditorHexToRgba(settings.bottomColor, Math.max(20, settings.intensity - 12));
+    const borderColor = themeEditorHexToRgba(settings.accent, settings.borderOpacity);
+    const accentSoft = themeEditorHexToRgba(settings.accent, 22);
+
+    const body = document.body;
+
+    body.style.setProperty('--text-main', settings.textMain);
+    body.style.setProperty('--text-soft', settings.textSoft);
+    body.style.setProperty('--accent', settings.accent);
+    body.style.setProperty('--accent-soft', accentSoft);
+    body.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${settings.topColor}, ${settings.accent})`);
+
+    [
+        ['--theme-surface-top', topStrong],
+        ['--theme-surface-bottom', bottomStrong],
+        ['--theme-surface-soft-top', topSoft],
+        ['--theme-surface-soft-bottom', bottomSoft],
+        ['--theme-surface-border', borderColor],
+        ['--theme-surface-text', settings.textMain],
+
+        ['--surface-gradient-top', topStrong],
+        ['--surface-gradient-bottom', bottomStrong],
+        ['--surface-gradient-soft-top', topSoft],
+        ['--surface-gradient-soft-bottom', bottomSoft],
+        ['--surface-gradient-border', borderColor],
+        ['--surface-gradient-text', settings.textMain],
+
+        ['--light-surface-top', topStrong],
+        ['--light-surface-bottom', bottomStrong],
+        ['--light-surface-soft-top', topSoft],
+        ['--light-surface-soft-bottom', bottomSoft],
+        ['--light-surface-border', borderColor],
+        ['--light-surface-text', settings.textMain],
+
+        ['--light-nav-top', topStrong],
+        ['--light-nav-bottom', bottomStrong],
+        ['--light-nav-soft-top', topSoft],
+        ['--light-nav-soft-bottom', bottomSoft],
+        ['--light-nav-border', borderColor],
+        ['--light-nav-text', settings.textMain],
+
+        ['--ui-card-bg', topSoft],
+        ['--ui-card-bg-interactive', bottomSoft],
+        ['--ui-section-bg', topSoft],
+        ['--ui-card-border', borderColor],
+
+        ['--year-control-bg', topSoft],
+        ['--year-control-bg-hover', bottomSoft],
+        ['--year-control-border', borderColor],
+        ['--year-option-bg', settings.bottomColor],
+        ['--year-option-text', settings.textMain],
+
+        ['--glass-bg', topStrong],
+        ['--glass-border', borderColor]
+    ].forEach(([prop, value]) => {
+        body.style.setProperty(prop, value);
+    });
+}
+
+function fillThemeEditorForm(themeKey) {
+    const settings = getThemeEditorSettings()[themeKey];
+    if (!settings) return;
+
+    document.getElementById('te-top-color').value = settings.topColor;
+    document.getElementById('te-bottom-color').value = settings.bottomColor;
+    document.getElementById('te-transition').value = settings.transition;
+    document.getElementById('te-transition-value').textContent = settings.transition;
+    document.getElementById('te-intensity').value = settings.intensity;
+    document.getElementById('te-intensity-value').textContent = settings.intensity;
+    document.getElementById('te-text-main').value = settings.textMain;
+    document.getElementById('te-text-soft').value = settings.textSoft;
+    document.getElementById('te-accent').value = settings.accent;
+    document.getElementById('te-border').value = settings.borderOpacity;
+    document.getElementById('te-border-value').textContent = settings.borderOpacity;
+
+    const hint = document.getElementById('theme-editor-hint');
+    if (hint) {
+        hint.textContent = themeKey === themeEditorGetActiveTheme()
+            ? 'Live-Vorschau aktiv – Änderungen werden sofort in der App angezeigt.'
+            : 'Hinweis: Dieses Theme ist gerade nicht aktiv. Wechsle über „Hell/Dunkel/Grün/Summit" im Menü, um die Live-Vorschau zu sehen.';
+    }
+}
+
+function readThemeEditorFormIntoSettings(themeKey) {
+    const allSettings = getThemeEditorSettings();
+
+    allSettings[themeKey] = {
+        topColor: document.getElementById('te-top-color').value,
+        bottomColor: document.getElementById('te-bottom-color').value,
+        transition: Number(document.getElementById('te-transition').value),
+        intensity: Number(document.getElementById('te-intensity').value),
+        textMain: document.getElementById('te-text-main').value,
+        textSoft: document.getElementById('te-text-soft').value,
+        accent: document.getElementById('te-accent').value,
+        borderOpacity: Number(document.getElementById('te-border').value)
+    };
+
+    return allSettings;
+}
+
+function initThemeEditor() {
+    const view = document.getElementById('theme-view');
+    if (!view) return;
+
+    const tabs = view.querySelectorAll('[data-theme-editor-tab]');
+    const inputs = [
+        'te-top-color', 'te-bottom-color', 'te-transition',
+        'te-intensity', 'te-text-main', 'te-text-soft',
+        'te-accent', 'te-border'
+    ];
+
+    function selectTab(themeKey) {
+        themeEditorActiveTab = themeKey;
+
+        tabs.forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.themeEditorTab === themeKey);
+        });
+
+        fillThemeEditorForm(themeKey);
+    }
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => selectTab(tab.dataset.themeEditorTab));
+    });
+
+    inputs.forEach(id => {
+        const el = document.getElementById(id);
+
+        el?.addEventListener('input', () => {
+            if (id === 'te-transition') {
+                document.getElementById('te-transition-value').textContent = el.value;
+            }
+            if (id === 'te-intensity') {
+                document.getElementById('te-intensity-value').textContent = el.value;
+            }
+            if (id === 'te-border') {
+                document.getElementById('te-border-value').textContent = el.value;
+            }
+
+            readThemeEditorFormIntoSettings(themeEditorActiveTab);
+
+            if (themeEditorActiveTab === themeEditorGetActiveTheme()) {
+                applyThemeEditorSettingsToDom();
+            }
+        });
+    });
+
+    document.getElementById('theme-editor-save')?.addEventListener('click', () => {
+        const settings = readThemeEditorFormIntoSettings(themeEditorActiveTab);
+        saveThemeEditorSettings(settings);
+        applyThemeEditorSettingsToDom();
+        showToast('Theme gespeichert ✓', { type: 'success', duration: 2000 });
+    });
+
+    document.getElementById('theme-editor-reset')?.addEventListener('click', () => {
+        const allSettings = getThemeEditorSettings();
+        allSettings[themeEditorActiveTab] = { ...defaultThemeEditorSettings[themeEditorActiveTab] };
+        saveThemeEditorSettings(allSettings);
+        fillThemeEditorForm(themeEditorActiveTab);
+
+        if (themeEditorActiveTab === themeEditorGetActiveTheme()) {
+            applyThemeEditorSettingsToDom();
+        }
+
+        showToast('Theme zurückgesetzt ✓', { type: 'info', duration: 2000 });
+    });
+
+    selectTab(themeEditorGetActiveTheme());
+    applyThemeEditorSettingsToDom();
+}
+
 function initTheme() {
     const themeToggle =
         document.getElementById('theme-toggle');
@@ -43782,8 +44065,6 @@ function initTheme() {
             document.body.classList.add('summit');
         }
 
-        themeToggle.textContent =
-            ICONS[theme] || '☀️';
 
         syncThemeOptionState(theme);
 
@@ -43806,6 +44087,10 @@ function initTheme() {
             sessionStorage.setItem('tourtracker-theme', theme);
         } catch (error) {
             console.warn('[Theme] sessionStorage-Sicherung fehlgeschlagen:', error);
+        }
+
+        if (typeof applyThemeEditorSettingsToDom === 'function') {
+            applyThemeEditorSettingsToDom();
         }
     }
 
@@ -43888,7 +44173,8 @@ themeToggle.addEventListener(
     'click',
     () => {
 
-        cycleTheme();
+        closeMoreMenu();
+        goToView('theme', true);
 
         themeToggle.blur();
     }
@@ -57156,6 +57442,58 @@ body.summit .plan-season-card {
 
         border-bottom-color: var(--surface-gradient-border) !important;
     }
+}
+
+/* =========================================================
+   Theme Editor – Basis-Layout
+   ========================================================= */
+
+#theme-view .theme-editor-inner {
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 16px 4px 40px;
+    box-sizing: border-box;
+}
+
+#theme-editor-tabs {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+#theme-editor-tabs button {
+    flex: 1 1 120px;
+}
+
+#theme-view input[type="color"] {
+    width: 100%;
+    height: 42px;
+    padding: 2px;
+    border-radius: 10px;
+    border: 1px solid var(--ui-card-border);
+    background: var(--ui-card-bg);
+    cursor: pointer;
+}
+
+#theme-view input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+}
+
+#theme-editor-hint {
+    font-size: 11px;
+    opacity: 0.85;
+    line-height: 1.4;
+    margin: 10px 2px;
+}
+
+#theme-view .theme-editor-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 14px;
 }
 
 </style>
