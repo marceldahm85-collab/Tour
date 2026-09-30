@@ -57887,15 +57887,22 @@ body.summit .plan-season-card {
     }
 
     #theme-editor-tabs {
-        gap: 5px;
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        gap: 4px;
         margin-bottom: 2px;
     }
 
     #theme-editor-tabs button {
-        flex: 1 1 80px;
-        min-height: 30px;
-        padding: 5px 4px;
-        font-size: 10px;
+        flex: 1 1 0;
+        min-width: 0;
+        min-height: 28px;
+        padding: 5px 2px;
+        font-size: 8.5px;
+        line-height: 1.05;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     #theme-editor-hint {
