@@ -22751,80 +22751,92 @@ body.dark
 
             <div id="theme-editor-hint"></div>
 
-            <div class="tour-form-row tour-form-row-two">
-                <div class="form-group">
-                    <label for="te-top-color">Verlauf oben</label>
-                    <input type="color" id="te-top-color">
+            <div class="theme-editor-columns">
+
+                <div class="theme-editor-col theme-editor-col-left">
+
+                    <div class="tour-form-row tour-form-row-two">
+                        <div class="form-group">
+                            <label for="te-top-color">Verlauf oben</label>
+                            <input type="color" id="te-top-color">
+                        </div>
+                        <div class="form-group">
+                            <label for="te-bottom-color">Verlauf unten</label>
+                            <input type="color" id="te-bottom-color">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="te-direction">Verlaufsrichtung</label>
+                        <select id="te-direction">
+                            <option value="180deg">Oben → Unten</option>
+                            <option value="90deg">Links → Rechts</option>
+                            <option value="135deg">Diagonal ↘</option>
+                            <option value="45deg">Diagonal ↗</option>
+                            <option value="radial">Radial (Lichtquelle oben links)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="te-transition">Übergangspunkt: <span id="te-transition-value">55</span>%</label>
+                        <input type="range" id="te-transition" min="10" max="90" step="1">
+                    </div>
+
+                    <div class="tour-form-row tour-form-row-two">
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="te-mid-enabled">
+                                Mittelfarbe verwenden
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="te-mid-color">Verlauf Mitte</label>
+                            <input type="color" id="te-mid-color">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="te-intensity">Flächenintensität: <span id="te-intensity-value">88</span>%</label>
+                        <input type="range" id="te-intensity" min="40" max="100" step="1">
+                    </div>
+
                 </div>
-                <div class="form-group">
-                    <label for="te-bottom-color">Verlauf unten</label>
-                    <input type="color" id="te-bottom-color">
+
+                <div class="theme-editor-col theme-editor-col-right">
+
+                    <div class="tour-form-row tour-form-row-two">
+                        <div class="form-group">
+                            <label for="te-text-main">Textfarbe (Haupt)</label>
+                            <input type="color" id="te-text-main">
+                        </div>
+                        <div class="form-group">
+                            <label for="te-text-soft">Textfarbe (Sekundär)</label>
+                            <input type="color" id="te-text-soft">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="te-accent">Akzentfarbe</label>
+                        <input type="color" id="te-accent">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="te-border">Randintensität: <span id="te-border-value">34</span>%</label>
+                        <input type="range" id="te-border" min="10" max="70" step="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="te-shadow">Schattentiefe: <span id="te-shadow-value">50</span>%</label>
+                        <input type="range" id="te-shadow" min="0" max="100" step="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="te-bg-brightness">Seitenhintergrund-Helligkeit: <span id="te-bg-brightness-value">50</span>%</label>
+                        <input type="range" id="te-bg-brightness" min="0" max="100" step="1">
+                    </div>
+
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label for="te-direction">Verlaufsrichtung</label>
-                <select id="te-direction">
-                    <option value="180deg">Oben → Unten</option>
-                    <option value="90deg">Links → Rechts</option>
-                    <option value="135deg">Diagonal ↘</option>
-                    <option value="45deg">Diagonal ↗</option>
-                    <option value="radial">Radial (Lichtquelle oben links)</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="te-transition">Übergangspunkt: <span id="te-transition-value">55</span>%</label>
-                <input type="range" id="te-transition" min="10" max="90" step="1">
-            </div>
-
-            <div class="tour-form-row tour-form-row-two">
-                <div class="form-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="te-mid-enabled">
-                        Mittelfarbe verwenden
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label for="te-mid-color">Verlauf Mitte</label>
-                    <input type="color" id="te-mid-color">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="te-intensity">Flächenintensität: <span id="te-intensity-value">88</span>%</label>
-                <input type="range" id="te-intensity" min="40" max="100" step="1">
-            </div>
-
-            <div class="tour-form-row tour-form-row-two">
-                <div class="form-group">
-                    <label for="te-text-main">Textfarbe (Haupt)</label>
-                    <input type="color" id="te-text-main">
-                </div>
-                <div class="form-group">
-                    <label for="te-text-soft">Textfarbe (Sekundär)</label>
-                    <input type="color" id="te-text-soft">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="te-accent">Akzentfarbe</label>
-                <input type="color" id="te-accent">
-            </div>
-
-            <div class="form-group">
-                <label for="te-border">Randintensität: <span id="te-border-value">34</span>%</label>
-                <input type="range" id="te-border" min="10" max="70" step="1">
-            </div>
-
-            <div class="form-group">
-                <label for="te-shadow">Schattentiefe: <span id="te-shadow-value">50</span>%</label>
-                <input type="range" id="te-shadow" min="0" max="100" step="1">
-            </div>
-
-            <div class="form-group">
-                <label for="te-bg-brightness">Seitenhintergrund-Helligkeit: <span id="te-bg-brightness-value">50</span>%</label>
-                <input type="range" id="te-bg-brightness" min="0" max="100" step="1">
             </div>
 
             <div class="theme-editor-actions">
@@ -57798,6 +57810,274 @@ body.summit .plan-season-card {
     background-color: transparent;
     opacity: 0;
     transition: opacity 0.4s ease, background-color 0.4s ease;
+}
+
+/* =========================================================
+   Theme Editor – Spalten-Grundgerüst
+   Ohne Media Query verhalten sich die beiden Spalten
+   wie normale Blöcke und stapeln sich untereinander.
+   ========================================================= */
+
+.theme-editor-columns {
+    display: block;
+    width: 100%;
+}
+
+.theme-editor-col {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+}
+
+/* =========================================================
+   Theme Editor – Hochformat kompakter
+   ========================================================= */
+
+@media (max-width: 768px)
+       and (orientation: portrait)
+       and (pointer: coarse) {
+
+    #theme-view .theme-editor-inner {
+        padding: 10px 2px 24px;
+    }
+
+    #theme-view .filter-simple-card {
+        padding: 12px 12px 14px !important;
+    }
+
+    #theme-view .filter-simple-title {
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    #theme-editor-tabs {
+        gap: 5px;
+        margin-bottom: 2px;
+    }
+
+    #theme-editor-tabs button {
+        flex: 1 1 80px;
+        min-height: 30px;
+        padding: 5px 4px;
+        font-size: 10px;
+    }
+
+    #theme-editor-hint {
+        margin: 6px 2px;
+        font-size: 10px;
+        line-height: 1.3;
+    }
+
+    #theme-view .theme-editor-columns {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+
+    #theme-view .tour-form-row.tour-form-row-two {
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+
+    #theme-view .form-group {
+        gap: 2px;
+        margin-bottom: 6px;
+    }
+
+    #theme-view .form-group label {
+        font-size: 10px;
+        line-height: 1.15;
+    }
+
+    #theme-view input[type="color"] {
+        height: 34px;
+    }
+
+    #theme-view select {
+        height: 32px;
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+
+    #theme-view input[type="range"] {
+        height: 22px;
+    }
+
+    #theme-view .checkbox-label {
+        height: 34px;
+        font-size: 11px;
+        gap: 6px;
+    }
+
+    #theme-view .theme-editor-actions {
+        margin-top: 8px;
+        gap: 6px;
+    }
+
+    #theme-view .theme-editor-actions .save-btn {
+        min-height: 32px;
+        padding: 6px 8px;
+        font-size: 12px;
+    }
+}
+
+/* =========================================================
+   Theme Editor – Querformat: Zwei unabhängige Spalten
+   Titel/Tabs/Hinweis oben, Aktionen unten – jeweils volle Breite
+   Ziel: kein Scrollen
+   ========================================================= */
+
+@media (max-width: 1024px)
+       and (orientation: landscape)
+       and (pointer: coarse) {
+
+    #theme-view {
+        display: block !important;
+        overflow: hidden !important;
+        padding: 8px 12px 10px !important;
+        box-sizing: border-box;
+    }
+
+    #theme-view .theme-editor-inner {
+        width: 100%;
+        max-width: none;
+        height: 100%;
+        min-height: 0;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    #theme-view .filter-simple-card {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+
+        display: flex;
+        flex-direction: column;
+
+        padding: 8px 10px !important;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    #theme-view .filter-simple-title {
+        flex: 0 0 auto;
+        margin-bottom: 4px;
+        font-size: 12px;
+        line-height: 1.1;
+    }
+
+    #theme-editor-tabs {
+        flex: 0 0 auto;
+        gap: 4px;
+        margin-bottom: 2px;
+    }
+
+    #theme-editor-tabs button {
+        flex: 1 1 0;
+        min-height: 24px;
+        padding: 3px 2px;
+        font-size: 8.5px;
+        line-height: 1.05;
+    }
+
+    #theme-editor-hint {
+        flex: 0 0 auto;
+        margin: 3px 1px;
+        font-size: 8px;
+        line-height: 1.2;
+    }
+
+    /* Zwei unabhängige Spalten */
+    #theme-view .theme-editor-columns {
+        flex: 1 1 auto;
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        column-gap: 12px;
+        row-gap: 0;
+        width: 100%;
+        min-height: 0;
+        align-items: start;
+    }
+
+    #theme-view .theme-editor-col {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 100%;
+        min-width: 0;
+        min-height: 0;
+        gap: 3px;
+    }
+
+    #theme-view .theme-editor-columns .tour-form-row.tour-form-row-two {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 6px;
+        margin-bottom: 0;
+        width: 100%;
+    }
+
+    #theme-view .theme-editor-columns .form-group {
+        width: 100%;
+        min-width: 0;
+        margin-bottom: 0;
+        gap: 1px;
+    }
+
+    #theme-view .theme-editor-columns .form-group label {
+        font-size: 8.5px;
+        line-height: 1.1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    #theme-view .theme-editor-columns input[type="color"] {
+        height: 24px;
+        padding: 1px;
+        border-radius: 7px;
+    }
+
+    #theme-view .theme-editor-columns select {
+        height: 24px;
+        min-height: 24px;
+        padding: 0 6px;
+        font-size: 9px;
+        border-radius: 7px;
+    }
+
+    #theme-view .theme-editor-columns input[type="range"] {
+        height: 16px;
+    }
+
+    #theme-view .theme-editor-columns .checkbox-label {
+        height: 24px;
+        gap: 4px;
+        font-size: 9px;
+    }
+
+    #theme-view .theme-editor-columns .checkbox-label input[type="checkbox"] {
+        width: 14px;
+        height: 14px;
+        flex: 0 0 14px;
+    }
+
+    /* Aktionen unten über die volle Breite */
+    #theme-view .theme-editor-actions {
+        flex: 0 0 auto;
+        margin-top: 5px;
+        gap: 6px;
+    }
+
+    #theme-view .theme-editor-actions .save-btn {
+        min-height: 26px;
+        padding: 4px 6px;
+        font-size: 10px;
+        margin-top: 0;
+    }
 }
 
 </style>
