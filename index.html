@@ -8483,8 +8483,12 @@ body.green .tour-detail-back-btn {
         width: 42px;
         height: 42px;
         font-size: 24px;
-        padding-top: 0px;
-        padding-bottom: 9px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        transform: translateY(-1px);
     }
 }
 
@@ -20610,6 +20614,25 @@ body.dark
     color: #ffffff !important;
 }
 
+/* =========================================================
+   MOBILE QUERFORMAT – Modale neben der linken Navigation
+   Die feste 76px breite Navigationsspalte darf Modale
+   nicht mehr verdecken.
+   ========================================================= */
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+
+    .modal {
+        z-index: 10000;
+    }
+
+    .modal-card {
+        left: 76px;
+        right: 0;
+        width: auto;
+        max-width: none;
+    }
+}
+
 </style>
 
 
@@ -28216,7 +28239,7 @@ function animateModalClose(modal, closeFn) {
     const backdrop = modal?.querySelector('.modal-backdrop');
 
     if (!card || !backdrop) { closeFn(); return; }
-    if (window.innerWidth > 768) { closeFn(); return; }
+    if (!isModalSwipeLayout()) { closeFn(); return; }
 
     // is-closing verhindert, dass modalSlideUp erneut feuert
     card.classList.add('is-closing');
@@ -28265,7 +28288,7 @@ function attachModalSwipeDown(modal, closeFn) {
 
     // ── touchstart ────────────────────────────────────────────────────────
     card.addEventListener('touchstart', (e) => {
-        if (window.innerWidth > 768) return;
+        if (!isModalSwipeLayout()) return;
         if (modal.classList.contains('hidden')) return;
         if (e.target.closest('button, input, select, textarea, a, [role="button"]')) return;
         if (card.scrollTop > 2) return; // Modal-Inhalt gescrollt → kein Swipe
@@ -28281,7 +28304,7 @@ function attachModalSwipeDown(modal, closeFn) {
 
     // ── touchmove — non-passive damit preventDefault() greift ─────────────
     card.addEventListener('touchmove', (e) => {
-        if (!tracking || window.innerWidth > 768 || modal.classList.contains('hidden')) return;
+        if (!tracking || !isModalSwipeLayout() || modal.classList.contains('hidden')) return;
 
         const t   = e.touches[0];
         const now = performance.now();
@@ -28760,6 +28783,15 @@ if (currentDetailType === 'planned') {
 
 function isMobileLayout() {
     return window.innerWidth <= 768;
+}
+
+function isModalSwipeLayout() {
+    if (window.innerWidth <= 768) return true;
+
+    return (
+        window.innerWidth <= 1024 &&
+        window.matchMedia('(orientation: landscape) and (pointer: coarse)').matches
+    );
 }
 
 // ---------------- Tabelle laden ----------------
@@ -36701,7 +36733,7 @@ const themeSwipeThresholdPx = 80;
 
 swipeArea.addEventListener('touchstart', (e) => {
     if (window.innerWidth > 900) return;
-    if (e.target.closest('#tour-map') || e.target.closest('#year-compare-canvas')) return;
+    if (e.target.closest('#tour-map') || e.target.closest('#year-compare-canvas') || e.target.closest('.modal')) return;
 
     const t = e.touches[0];
 
@@ -36722,7 +36754,7 @@ hasVerticalThemeIntent = false;
 
 swipeArea.addEventListener('touchmove', (e) => {
     if (!isDraggingView || window.innerWidth > 900) return;
-    if (e.target.closest('#tour-map') || e.target.closest('#year-compare-canvas')) return;
+    if (e.target.closest('#tour-map') || e.target.closest('#year-compare-canvas') || e.target.closest('.modal')) return;
 
     const t = e.touches[0];
 
@@ -36811,7 +36843,7 @@ if (hasVerticalIntent) {
 
 swipeArea.addEventListener('touchend', (e) => {
     if (!isDraggingView || window.innerWidth > 900) return;
-    if (e.target.closest('#tour-map') || e.target.closest('#year-compare-canvas')) return;
+    if (e.target.closest('#tour-map') || e.target.closest('#year-compare-canvas') || e.target.closest('.modal')) return;
 
     const endTouch =
     e.changedTouches?.[0];
