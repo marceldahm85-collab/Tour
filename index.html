@@ -22763,8 +22763,32 @@ body.dark
             </div>
 
             <div class="form-group">
+                <label for="te-direction">Verlaufsrichtung</label>
+                <select id="te-direction">
+                    <option value="180deg">Oben → Unten</option>
+                    <option value="90deg">Links → Rechts</option>
+                    <option value="135deg">Diagonal ↘</option>
+                    <option value="45deg">Diagonal ↗</option>
+                    <option value="radial">Radial (Lichtquelle oben links)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
                 <label for="te-transition">Übergangspunkt: <span id="te-transition-value">55</span>%</label>
                 <input type="range" id="te-transition" min="10" max="90" step="1">
+            </div>
+
+            <div class="tour-form-row tour-form-row-two">
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="te-mid-enabled">
+                        Mittelfarbe verwenden
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="te-mid-color">Verlauf Mitte</label>
+                    <input type="color" id="te-mid-color">
+                </div>
             </div>
 
             <div class="form-group">
@@ -22793,6 +22817,16 @@ body.dark
                 <input type="range" id="te-border" min="10" max="70" step="1">
             </div>
 
+            <div class="form-group">
+                <label for="te-shadow">Schattentiefe: <span id="te-shadow-value">50</span>%</label>
+                <input type="range" id="te-shadow" min="0" max="100" step="1">
+            </div>
+
+            <div class="form-group">
+                <label for="te-bg-brightness">Seitenhintergrund-Helligkeit: <span id="te-bg-brightness-value">50</span>%</label>
+                <input type="range" id="te-bg-brightness" min="0" max="100" step="1">
+            </div>
+
             <div class="theme-editor-actions">
                 <button type="button" class="save-btn" id="theme-editor-reset">Zurücksetzen</button>
                 <button type="button" class="save-btn" id="theme-editor-save">Speichern</button>
@@ -22817,6 +22851,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     await initStorage();
     migrateLegacyDifficultyValues();
     migrateStoredEntryIds();
+
+    // Theme Editor wurde ggf. bereits VOR dem Laden aus IndexedDB
+    // (siehe initTheme() oben) mit Standardwerten in den Draft-Cache
+    // geschrieben, weil appStorage zu diesem Zeitpunkt noch leer war.
+    // Jetzt, wo der echte Cache befüllt ist, Draft verwerfen und
+    // die tatsächlich gespeicherten Einstellungen neu anwenden.
+    if (typeof invalidateThemeEditorDraft === 'function') {
+        invalidateThemeEditorDraft();
+    }
+    if (typeof applyThemeEditorSettingsToDom === 'function') {
+        applyThemeEditorSettingsToDom();
+    }
 
     // ── Persistierte States nachladen (Cache jetzt befüllt) ──
     const savedDiagramState = appStorage.get(DIAGRAM_FILTER_KEY) || {};
@@ -24935,7 +24981,8 @@ meta: {
         ? 'green'
         : document.body.classList.contains('summit')
         ? 'summit'
-        : 'light'
+        : 'light',
+    themeEditorSettings: appStorage.get(THEME_EDITOR_KEY) || null
 }
     };
 }
@@ -24963,6 +25010,14 @@ function applyAppDataPayload(payload) {
 
     appStorage.set('touren', importedTours);
     appStorage.set('plannedTours', importedPlannedTours);
+
+    if (payload.meta?.themeEditorSettings) {
+        appStorage.set(THEME_EDITOR_KEY, payload.meta.themeEditorSettings);
+
+        if (typeof invalidateThemeEditorDraft === 'function') {
+            invalidateThemeEditorDraft();
+        }
+    }
 
     if (payload.meta?.theme) {
 
@@ -25021,6 +25076,10 @@ function applyAppDataPayload(payload) {
         console.warn('[Theme] localStorage-Sicherung fehlgeschlagen:', error);
 
 
+    }
+
+    if (typeof applyThemeEditorSettingsToDom === 'function') {
+        applyThemeEditorSettingsToDom();
     }
 
 }
@@ -25274,6 +25333,14 @@ async function restoreLinkedFileHandleOnStartup() {
                 const fileTheme = payload?.meta?.theme;
                 const validThemes = ['light', 'dark', 'green', 'summit'];
 
+                if (payload?.meta?.themeEditorSettings) {
+                    appStorage.set(THEME_EDITOR_KEY, payload.meta.themeEditorSettings);
+
+                    if (typeof invalidateThemeEditorDraft === 'function') {
+                        invalidateThemeEditorDraft();
+                    }
+                }
+
                 if (validThemes.includes(fileTheme)) {
                     document.body.classList.remove('dark', 'green', 'summit');
 
@@ -25312,6 +25379,10 @@ async function restoreLinkedFileHandleOnStartup() {
                         option.classList.toggle('active', active);
                         option.setAttribute('aria-pressed', active ? 'true' : 'false');
                     });
+
+                    if (typeof applyThemeEditorSettingsToDom === 'function') {
+                        applyThemeEditorSettingsToDom();
+                    }
 
                     if (typeof refreshThemeDependentUi === 'function') {
                         refreshThemeDependentUi();
@@ -43765,13 +43836,25 @@ initMobileTapStateCleanup();
 const THEME_EDITOR_KEY = 'themeEditorSettings_v1';
 
 const defaultThemeEditorSettings = {
-    light:  { topColor: '#9de3f9', bottomColor: '#9ad8b6', transition: 55, intensity: 90, textMain: '#17251d', textSoft: '#405248', accent: '#0f8a6c', borderOpacity: 34 },
-    dark:   { topColor: '#912a34', bottomColor: '#0a121d', transition: 55, intensity: 88, textMain: '#f3f7fb', textSoft: '#c2cfdb', accent: '#d45c5c', borderOpacity: 34 },
-    green:  { topColor: '#26a352', bottomColor: '#010c07', transition: 55, intensity: 88, textMain: '#f2fff7', textSoft: '#c9e5d4', accent: '#52b788', borderOpacity: 34 },
-    summit: { topColor: '#3aa0ff', bottomColor: '#161d22', transition: 55, intensity: 88, textMain: '#f4faff', textSoft: '#d0dce4', accent: '#63b7ff', borderOpacity: 34 }
+    light:  { topColor: '#9de3f9', bottomColor: '#9ad8b6', transition: 55, intensity: 90, textMain: '#17251d', textSoft: '#405248', accent: '#0f8a6c', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#c9e8d8', shadowIntensity: 50, bgBrightness: 50 },
+    dark:   { topColor: '#912a34', bottomColor: '#0a121d', transition: 55, intensity: 88, textMain: '#f3f7fb', textSoft: '#c2cfdb', accent: '#d45c5c', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#4a1c22', shadowIntensity: 50, bgBrightness: 50 },
+    green:  { topColor: '#26a352', bottomColor: '#010c07', transition: 55, intensity: 88, textMain: '#f2fff7', textSoft: '#c9e5d4', accent: '#52b788', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#0e3d20', shadowIntensity: 50, bgBrightness: 50 },
+    summit: { topColor: '#3aa0ff', bottomColor: '#161d22', transition: 55, intensity: 88, textMain: '#f4faff', textSoft: '#d0dce4', accent: '#63b7ff', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#1f4560', shadowIntensity: 50, bgBrightness: 50 }
 };
 
 let themeEditorActiveTab = 'light';
+let themeEditorDraftSettings = null;
+
+function getThemeEditorDraftSettings() {
+    if (!themeEditorDraftSettings) {
+        themeEditorDraftSettings = getThemeEditorSettings();
+    }
+    return themeEditorDraftSettings;
+}
+
+function invalidateThemeEditorDraft() {
+    themeEditorDraftSettings = null;
+}
 
 function getThemeEditorSettings() {
     const saved = appStorage.get(THEME_EDITOR_KEY);
@@ -43806,6 +43889,168 @@ function themeEditorHexToRgba(hex, alphaPercent) {
     return `rgba(${r},${g},${b},${a.toFixed(2)})`;
 }
 
+const THEME_EDITOR_BIG_SELECTORS = [
+    '.box', '.dash-section', '.filter-simple-card', '.stats-analysis-section',
+    '.stats-structure-section', '.chart-card', '.compare-box', '.compare-period-card',
+    '.compare-list-card', '.tour-compare-pick-card', '.tour-compare-result',
+    '.backup-status-panel', '.backup-info-card', '.backup-file-status', '.mob-sel-sheet',
+    '#chart-view .stats-year-filter-wrap', '#chart-view .stats-section-switch',
+    '#map-view .map-view-inner', '#map-view .map-year-filter-wrap', '#map-view .map-mode-toggle',
+    '#backup-view .backup-card', '#backup-view .backup-view-inner'
+];
+
+const THEME_EDITOR_SOFT_SELECTORS = [
+    '.stats-list li', '.peak-tour-list li', '.tour-search-result', '.chart-stat-tile',
+    '.dash-stat-tile', '.dash-milestone-tile', '.tour-profile-summary-card',
+    '.development-metric-card', '.best-form-card', '.activity-summary-card',
+    '.peak-summary-card', '.stats-structure-typical-card', '.stats-structure-type-card',
+    '.stats-structure-burden-card', '.backup-status-item', '.tour-history-summary > div',
+    '.activity-detail-stat-grid > div',
+    '.tour-form input:not([type="checkbox"])', '.tour-form select', '.tour-form textarea',
+    '#filter-view input:not([type="checkbox"])', '#filter-view select', '#filter-view textarea',
+    '.mob-sel-btn', '.dash-year-filter-wrap select', '.dash-year-filter-wrap .mob-sel-btn',
+    '.dash-year-filter-wrap .dash-year-arrow-btn',
+    '.top-main-nav', '.chart-tabs', '.chart-tab', '.stats-section-btn',
+    '.filter-section-nav-btn', '.plan-section-btn', '.map-mode-toggle', '.map-mode-btn',
+    '.quick-filter-btn', '.tour-page-btn', '.yc-metric-btn', '.yc-year-toggle-btn',
+    '.compare-mode-toggle', '.compare-mode-btn', '.checklist-mode-toggle', '.checklist-mode-btn',
+    '.dash-year-arrow-btn',
+    '#overview-table tr', '#planned-table tr', '#saved-tours-list .tour-list li',
+    '#planned-tours-list .tour-list li',
+    '.tour-image-preview-wrap', '.tour-detail-image-wrap', '.form-details',
+    '.diagram-filter-checkbox', '.checklist-section', '.stats-chart-block',
+    '.plan-live-preview', '.plan-season-card',
+    '#chart-view .stats-section-btn', '#chart-view .stats-year-filter-wrap select',
+    '#chart-view .stats-year-filter-wrap .mob-sel-btn', '#chart-view .stats-year-filter-wrap .dash-year-arrow-btn',
+    '#map-view .map-year-filter-wrap select', '#map-view .map-year-filter-wrap .mob-sel-btn',
+    '#map-view .map-mode-btn', '#map-view #map-quick-filters .quick-filter-btn',
+    '#backup-view .backup-status-panel', '#backup-view .backup-status-item',
+    '#backup-view .backup-info-card', '#backup-view .backup-file-status'
+];
+
+function themeEditorPrefixFor(themeKey) {
+    if (themeKey === 'dark') return 'body.dark.dark';
+    if (themeKey === 'green') return 'body.green.green';
+    if (themeKey === 'summit') return 'body.summit.summit';
+    return 'body:not(.dark):not(.green):not(.summit):not(.x-never)';
+}
+
+function themeEditorBuildGradient(settings, alphaOverride) {
+    const alpha = alphaOverride != null ? alphaOverride : settings.intensity;
+    const direction = settings.gradientDirection || '180deg';
+    const t = Math.max(0, Math.min(100, Number(settings.transition) || 55));
+    const a = Math.max(0, t - 20);
+    const b = Math.min(100, t + 20);
+
+    const top = themeEditorHexToRgba(settings.topColor, alpha);
+    const bottom = themeEditorHexToRgba(settings.bottomColor, alpha);
+
+    let stops;
+
+    if (settings.midEnabled && settings.midColor) {
+        const mid = themeEditorHexToRgba(settings.midColor, alpha);
+        stops = `${top} 0%, ${mid} ${t}%, ${bottom} 100%`;
+    } else {
+        stops = `${top} 0%, ${top} ${a}%, ${bottom} ${b}%, ${bottom} 100%`;
+    }
+
+    if (direction === 'radial') {
+        return `radial-gradient(circle at 28% 18%, ${stops})`;
+    }
+
+    return `linear-gradient(${direction}, ${stops})`;
+}
+
+function themeEditorBuildShadow(intensity) {
+    const raw = intensity != null ? Number(intensity) : 50;
+    const pct = Math.max(0, Math.min(100, raw)) / 100;
+
+    const blur1 = Math.round(4 + pct * 10);
+    const blur2 = Math.round(14 + pct * 34);
+    const spread2 = Math.round(pct * 4);
+    const opacity1 = (0.06 + pct * 0.10).toFixed(2);
+    const opacity2 = (0.08 + pct * 0.30).toFixed(2);
+    const glow = (0.08 + pct * 0.22).toFixed(2);
+
+    return `0 2px ${blur1}px rgba(0,0,0,${opacity1}), 0 ${blur2}px ${blur2 + 12}px ${spread2}px rgba(0,0,0,${opacity2}), inset 0 1px 1px rgba(255,255,255,${glow})`;
+}
+
+function createThemeEditorBrightnessLayer() {
+    let el = document.getElementById('theme-editor-brightness-layer');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'theme-editor-brightness-layer';
+        el.className = 'theme-editor-brightness-layer';
+        document.body.appendChild(el);
+    }
+    return el;
+}
+
+function applyThemeEditorBackgroundBrightness(settings) {
+    const el = createThemeEditorBrightnessLayer();
+    const value = settings.bgBrightness != null ? Number(settings.bgBrightness) : 50;
+    const diff = value - 50;
+
+    if (Math.abs(diff) < 1) {
+        el.style.opacity = '0';
+        return;
+    }
+
+    const maxOpacity = 0.38;
+    const opacity = Math.min(maxOpacity, (Math.abs(diff) / 50) * maxOpacity);
+
+    el.style.backgroundColor = diff > 0 ? '#ffffff' : '#000000';
+    el.style.opacity = String(opacity.toFixed(2));
+}
+
+function getThemeEditorStyleEl() {
+    let el = document.getElementById('theme-editor-live-style');
+    if (!el) {
+        el = document.createElement('style');
+        el.id = 'theme-editor-live-style';
+        document.head.appendChild(el);
+    }
+    return el;
+}
+
+function buildThemeEditorLiveCss() {
+    const allSettings = getThemeEditorDraftSettings();
+    let css = '';
+
+    ['light', 'dark', 'green', 'summit'].forEach(themeKey => {
+        const settings = allSettings[themeKey];
+        if (!settings) return;
+
+        const prefix = themeEditorPrefixFor(themeKey);
+        const softIntensity = Math.max(20, settings.intensity - 12);
+
+        const bigGradient = themeEditorBuildGradient(settings, settings.intensity);
+        const softGradient = themeEditorBuildGradient(settings, softIntensity);
+        const shadow = themeEditorBuildShadow(settings.shadowIntensity);
+
+        const bigSelectors = THEME_EDITOR_BIG_SELECTORS
+            .map(sel => `${prefix} ${sel}`)
+            .join(',\n');
+
+        const softSelectors = THEME_EDITOR_SOFT_SELECTORS
+            .map(sel => `${prefix} ${sel}`)
+            .join(',\n');
+
+        css += `${bigSelectors} { background: ${bigGradient} !important; box-shadow: ${shadow} !important; }\n`;
+        css += `${softSelectors} { background: ${softGradient} !important; }\n`;
+
+        css += `@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {\n`;
+        css += `${prefix} .accordion-header { background: ${bigGradient} !important; }\n`;
+        css += `}\n`;
+
+        css += `@media (max-width: 768px) and (orientation: portrait) and (pointer: coarse) {\n`;
+        css += `${prefix} .accordion-header { background: ${bigGradient} !important; }\n`;
+        css += `}\n`;
+    });
+
+    return css;
+}
+
 function themeEditorGetActiveTheme() {
     if (document.body.classList.contains('dark')) return 'dark';
     if (document.body.classList.contains('green')) return 'green';
@@ -43815,7 +44060,7 @@ function themeEditorGetActiveTheme() {
 
 function applyThemeEditorSettingsToDom() {
     const activeTheme = themeEditorGetActiveTheme();
-    const allSettings = getThemeEditorSettings();
+    const allSettings = getThemeEditorDraftSettings();
     const settings = allSettings[activeTheme];
     if (!settings) return;
 
@@ -43879,10 +44124,13 @@ function applyThemeEditorSettingsToDom() {
     ].forEach(([prop, value]) => {
         body.style.setProperty(prop, value);
     });
+
+    getThemeEditorStyleEl().textContent = buildThemeEditorLiveCss();
+    applyThemeEditorBackgroundBrightness(settings);
 }
 
 function fillThemeEditorForm(themeKey) {
-    const settings = getThemeEditorSettings()[themeKey];
+    const settings = getThemeEditorDraftSettings()[themeKey];
     if (!settings) return;
 
     document.getElementById('te-top-color').value = settings.topColor;
@@ -43897,6 +44145,14 @@ function fillThemeEditorForm(themeKey) {
     document.getElementById('te-border').value = settings.borderOpacity;
     document.getElementById('te-border-value').textContent = settings.borderOpacity;
 
+    document.getElementById('te-direction').value = settings.gradientDirection || '180deg';
+    document.getElementById('te-mid-enabled').checked = !!settings.midEnabled;
+    document.getElementById('te-mid-color').value = settings.midColor || settings.accent;
+    document.getElementById('te-shadow').value = settings.shadowIntensity;
+    document.getElementById('te-shadow-value').textContent = settings.shadowIntensity;
+    document.getElementById('te-bg-brightness').value = settings.bgBrightness;
+    document.getElementById('te-bg-brightness-value').textContent = settings.bgBrightness;
+
     const hint = document.getElementById('theme-editor-hint');
     if (hint) {
         hint.textContent = themeKey === themeEditorGetActiveTheme()
@@ -43906,7 +44162,7 @@ function fillThemeEditorForm(themeKey) {
 }
 
 function readThemeEditorFormIntoSettings(themeKey) {
-    const allSettings = getThemeEditorSettings();
+    const allSettings = getThemeEditorDraftSettings();
 
     allSettings[themeKey] = {
         topColor: document.getElementById('te-top-color').value,
@@ -43916,7 +44172,12 @@ function readThemeEditorFormIntoSettings(themeKey) {
         textMain: document.getElementById('te-text-main').value,
         textSoft: document.getElementById('te-text-soft').value,
         accent: document.getElementById('te-accent').value,
-        borderOpacity: Number(document.getElementById('te-border').value)
+        borderOpacity: Number(document.getElementById('te-border').value),
+        gradientDirection: document.getElementById('te-direction').value,
+        midEnabled: document.getElementById('te-mid-enabled').checked,
+        midColor: document.getElementById('te-mid-color').value,
+        shadowIntensity: Number(document.getElementById('te-shadow').value),
+        bgBrightness: Number(document.getElementById('te-bg-brightness').value)
     };
 
     return allSettings;
@@ -43930,8 +44191,10 @@ function initThemeEditor() {
     const inputs = [
         'te-top-color', 'te-bottom-color', 'te-transition',
         'te-intensity', 'te-text-main', 'te-text-soft',
-        'te-accent', 'te-border'
-    ];
+        'te-accent', 'te-border',
+        'te-direction', 'te-mid-enabled', 'te-mid-color',
+        'te-shadow', 'te-bg-brightness'
+     ];
 
     function selectTab(themeKey) {
         themeEditorActiveTab = themeKey;
@@ -43949,8 +44212,9 @@ function initThemeEditor() {
 
     inputs.forEach(id => {
         const el = document.getElementById(id);
+        if (!el) return;
 
-        el?.addEventListener('input', () => {
+        const handleThemeEditorInputChange = () => {
             if (id === 'te-transition') {
                 document.getElementById('te-transition-value').textContent = el.value;
             }
@@ -43960,13 +44224,22 @@ function initThemeEditor() {
             if (id === 'te-border') {
                 document.getElementById('te-border-value').textContent = el.value;
             }
+            if (id === 'te-shadow') {
+                document.getElementById('te-shadow-value').textContent = el.value;
+            }
+            if (id === 'te-bg-brightness') {
+                document.getElementById('te-bg-brightness-value').textContent = el.value;
+            }
 
             readThemeEditorFormIntoSettings(themeEditorActiveTab);
 
             if (themeEditorActiveTab === themeEditorGetActiveTheme()) {
                 applyThemeEditorSettingsToDom();
             }
-        });
+        };
+
+        el.addEventListener('input', handleThemeEditorInputChange);
+        el.addEventListener('change', handleThemeEditorInputChange);
     });
 
     document.getElementById('theme-editor-save')?.addEventListener('click', () => {
@@ -43977,7 +44250,7 @@ function initThemeEditor() {
     });
 
     document.getElementById('theme-editor-reset')?.addEventListener('click', () => {
-        const allSettings = getThemeEditorSettings();
+        const allSettings = getThemeEditorDraftSettings();
         allSettings[themeEditorActiveTab] = { ...defaultThemeEditorSettings[themeEditorActiveTab] };
         saveThemeEditorSettings(allSettings);
         fillThemeEditorForm(themeEditorActiveTab);
@@ -57494,6 +57767,37 @@ body.summit .plan-season-card {
     grid-template-columns: 1fr 1fr;
     gap: 8px;
     margin-top: 14px;
+}
+
+#theme-view select {
+    width: 100%;
+    height: 40px;
+    padding: 6px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--ui-card-border);
+    background: var(--ui-card-bg);
+    color: var(--text-main);
+}
+
+#theme-view .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    font-size: 13px;
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+.theme-editor-brightness-layer {
+    position: fixed;
+    inset: 0;
+    z-index: -3;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+    background-color: transparent;
+    opacity: 0;
+    transition: opacity 0.4s ease, background-color 0.4s ease;
 }
 
 </style>
