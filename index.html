@@ -19308,12 +19308,34 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
     #stats-highlights-page #highlights-content .highlight-groups {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-auto-rows: max-content;
         gap: 10px;
         align-items: start;
     }
 
+    /*
+     * Jede Spalte ist ein eigenständiger, unabhängiger
+     * vertikaler Stapel. Dadurch bestimmt jede Spalte
+     * ausschließlich ihre eigene Höhe – die rechte Spalte
+     * wartet nicht mehr auf die Höhe der linken.
+     */
+    #stats-highlights-page #highlights-content .highlight-col {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-width: 0;
+    }
+
     #stats-highlights-page #highlights-content .highlight-group {
         min-width: 0;
+    }
+
+    /*
+     * "Längste Mehrtagestour" läuft über beide Spalten,
+     * direkt unterhalb der beiden unabhängigen Stapel.
+     */
+    #stats-highlights-page #highlights-content .highlight-group-fullwidth {
+        grid-column: 1 / -1;
     }
 
     #stats-development-page .development-sparkline-wrap,
@@ -35139,10 +35161,148 @@ wrapper.className =
     'highlight-groups';
 
 
+/*
+ * Baut ein <li> für einen einzelnen Highlight-Eintrag.
+ * Ausgelagert, damit sowohl die normalen Gruppen als auch
+ * der separate Vollbreite-Eintrag (Längste Mehrtagestour)
+ * exakt dieselbe Darstellung und Klicklogik verwenden.
+ */
+function buildHighlightListItem(h) {
+
+    const li =
+        document.createElement('li');
+
+    const nr =
+        getTourNr(h.entry);
+
+    const nrHtml =
+        nr
+            ? ` <span class="highlight-nr">(#${nr})</span>`
+            : '';
+
+    li.innerHTML = `
+        <span class="stats-label highlight-row-label">
+
+            <span class="highlight-row-icon">
+                ${h.icon}
+            </span>
+
+            <span class="highlight-row-text">
+                ${h.label}
+            </span>
+
+        </span>
+
+        <span class="stats-value">
+            ${h.value}${nrHtml}
+        </span>
+    `;
+
+    /*
+     * Bestehende Klicklogik
+     * unverändert beibehalten.
+     */
+    if (h.entry) {
+
+        li.classList.add(
+            'highlight-clickable'
+        );
+
+        li.addEventListener(
+            'click',
+            () => {
+                openTourDetail(
+                    h.entry
+                );
+            }
+        );
+
+    } else if (h.onClick) {
+
+        li.classList.add(
+            'highlight-clickable'
+        );
+
+        li.addEventListener(
+            'click',
+            h.onClick
+        );
+    }
+
+    return li;
+}
+
+
+/*
+ * "Längste Mehrtagestour" wird NUR im mobilen Querformat
+ * aus der Gruppe "Gipfel & Touren" herausgenommen und als
+ * eigene, über die volle Breite laufende Zeile dargestellt
+ * (dort steht oft ein längerer Text, der mehr Platz braucht).
+ *
+ * Im Hochformat bleibt die Darstellung unverändert: der
+ * Eintrag erscheint weiterhin an seiner ursprünglichen Stelle
+ * innerhalb von "Gipfel & Touren".
+ */
+const isLandscapeMobileLayout =
+    window.matchMedia(
+        '(max-width: 1024px) and (orientation: landscape) and (pointer: coarse)'
+    ).matches;
+
+let fullWidthHighlight = null;
+
+/*
+ * Querformat: zwei unabhängige Spalten statt eines
+ * zeilenbasierten Grids. Dadurch "wartet" die rechte
+ * Spalte (Leistung → Häufigkeiten) nicht mehr auf die
+ * Höhe der linken Spalte (Umfang → Gipfel & Touren).
+ *
+ * Hochformat: komplett unverändert, siehe else-Zweig.
+ */
+const landscapeColumnMap = {
+    umfang: 'left',
+    leistung: 'right',
+    gipfel: 'left',
+    haeufigkeiten: 'right'
+};
+
+const landscapeColumns = {
+    left: null,
+    right: null
+};
+
+function getLandscapeColumn(side) {
+    if (landscapeColumns[side]) {
+        return landscapeColumns[side];
+    }
+
+    const col =
+        document.createElement('div');
+
+    col.className =
+        `highlight-col highlight-col-${side}`;
+
+    landscapeColumns[side] = col;
+
+    return col;
+}
+
 highlightGroups.forEach(group => {
 
-    const items =
+    let items =
         groupedHighlights[group.key];
+
+    if (isLandscapeMobileLayout && group.key === 'gipfel') {
+
+        items = items.filter(h => {
+
+            if (h.label === 'Längste Mehrtagestour') {
+                fullWidthHighlight = h;
+                return false;
+            }
+
+            return true;
+        });
+    }
 
     if (!items.length) return;
 
@@ -35172,81 +35332,64 @@ highlightGroups.forEach(group => {
 
 
     items.forEach(h => {
-
-        const li =
-            document.createElement('li');
-
-
-        const nr =
-            getTourNr(h.entry);
-
-
-        const nrHtml =
-            nr
-                ? ` <span class="highlight-nr">(#${nr})</span>`
-                : '';
-
-
-        li.innerHTML = `
-            <span class="stats-label highlight-row-label">
-
-                <span class="highlight-row-icon">
-                    ${h.icon}
-                </span>
-
-                <span class="highlight-row-text">
-                    ${h.label}
-                </span>
-
-            </span>
-
-            <span class="stats-value">
-                ${h.value}${nrHtml}
-            </span>
-        `;
-
-
-        /*
-         * Bestehende Klicklogik
-         * unverändert beibehalten.
-         */
-        if (h.entry) {
-
-            li.classList.add(
-                'highlight-clickable'
-            );
-
-            li.addEventListener(
-                'click',
-                () => {
-                    openTourDetail(
-                        h.entry
-                    );
-                }
-            );
-
-        } else if (h.onClick) {
-
-            li.classList.add(
-                'highlight-clickable'
-            );
-
-            li.addEventListener(
-                'click',
-                h.onClick
-            );
-        }
-
-
-        ul.appendChild(li);
+        ul.appendChild(
+            buildHighlightListItem(h)
+        );
     });
 
 
     section.appendChild(title);
     section.appendChild(ul);
 
-    wrapper.appendChild(section);
+
+    if (isLandscapeMobileLayout) {
+
+        const side =
+            landscapeColumnMap[group.key] || 'left';
+
+        getLandscapeColumn(side)
+            .appendChild(section);
+
+    } else {
+
+        wrapper.appendChild(section);
+    }
 });
+
+
+if (isLandscapeMobileLayout) {
+
+    if (landscapeColumns.left) {
+        wrapper.appendChild(landscapeColumns.left);
+    }
+
+    if (landscapeColumns.right) {
+        wrapper.appendChild(landscapeColumns.right);
+    }
+
+    if (fullWidthHighlight) {
+
+        const fullSection =
+            document.createElement('section');
+
+        fullSection.className =
+            'highlight-group highlight-group-fullwidth';
+
+        const fullUl =
+            document.createElement('ul');
+
+        fullUl.className =
+            'stats-list highlight-group-list';
+
+        fullUl.appendChild(
+            buildHighlightListItem(fullWidthHighlight)
+        );
+
+        fullSection.appendChild(fullUl);
+
+        wrapper.appendChild(fullSection);
+    }
+}
 
 
 container.innerHTML = '';
@@ -54124,15 +54267,39 @@ if ('serviceWorker' in navigator) {
     }
 
     #stats-highlights-page #highlights-content .highlight-groups {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-        align-items: start;
-    }
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    align-items: start;
+}
 
-    #stats-highlights-page #highlights-content .highlight-group {
-        min-width: 0;
-    }
+#stats-highlights-page #highlights-content .highlight-group {
+    min-width: 0;
+}
+
+/*
+ * "Leistung" füllt die gesamte Höhe der ersten Zeile aus
+ * (die durch "Umfang" bestimmt wird), damit "Häufigkeiten"
+ * direkt darunter bündig beginnt, ohne sichtbare Lücke.
+ */
+#stats-highlights-page #highlights-content .highlight-group-leistung {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+}
+
+#stats-highlights-page #highlights-content .highlight-group-leistung .highlight-group-list {
+    flex: 1;
+}
+
+/*
+ * "Längste Mehrtagestour" steht als eigene Zeile über die
+ * gesamte verfügbare Breite, damit auch längere Tourgruppen-
+ * Namen genügend Platz erhalten.
+ */
+#stats-highlights-page #highlights-content .highlight-group-fullwidth {
+    grid-column: 1 / -1;
+}
 
     #stats-development-page .development-sparkline-wrap,
     #stats-development-page .development-history-chart,
@@ -54670,11 +54837,14 @@ if ('serviceWorker' in navigator) {
 
     /*
      * 4. Tourprofil – rechte Spalte oben
+     * Füllt die gesamte zugewiesene Höhe (Zeile 1+2) aus,
+     * damit keine Lücke zu "Aktivität & Regelmäßigkeit" entsteht.
      */
     #stats-development-page
     #stats-development-content
     > .stats-analysis-section:nth-child(4) {
         grid-area: profile;
+        align-self: stretch;
     }
 
     /*
