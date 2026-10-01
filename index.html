@@ -22951,6 +22951,40 @@ body.dark
 
 <script>
 
+function handleAppShortcutLaunch() {
+    const params = new URLSearchParams(window.location.search);
+    const action = params.get('action');
+    if (!action) return;
+
+    switch (action) {
+        case 'new-tour':
+            goToView('app');
+            break;
+
+        case 'plan-tour':
+            goToView('tour');
+            break;
+
+        case 'map':
+            goToView('map');
+            break;
+
+        case 'highlights':
+            goToView('chart');
+            // Simuliert einen echten Klick auf den vorhandenen
+            // Highlights-Tab-Button (gleicher Codepfad wie bei
+            // normaler Bedienung, inkl. updateHighlights()-Aufruf).
+            document
+                .querySelector('#stats-section-switch [data-stats-section="highlights"]')
+                ?.click();
+            break;
+    }
+
+    // Query-Parameter aus der URL entfernen, damit ein Reload
+    // oder erneuter Fokus nicht wieder dieselbe Aktion auslöst.
+    window.history.replaceState({}, '', window.location.pathname);
+}
+
 const slopeToggleBtn = document.getElementById('slope-toggle');
 let useFullDistanceForGradient = false;
 
@@ -23133,6 +23167,41 @@ document.getElementById('dash-stat-modal')?.addEventListener('click', e => {
 
     initCanvasBarClicks();
     initMilestoneCanvasClicks();
+
+function handleAppShortcutLaunch() {
+    const params = new URLSearchParams(window.location.search);
+    const action = params.get('action');
+    if (!action) return;
+
+    switch (action) {
+        case 'new-tour':
+            goToView('app');
+            break;
+
+        case 'plan-tour':
+            goToView('tour');
+            break;
+
+        case 'map':
+            goToView('map');
+            break;
+
+        case 'highlights':
+            goToView('chart');
+            // Nutzt den vorhandenen Tab-Button statt die interne
+            // setStatsSection()-Funktion zu duplizieren.
+            document
+                .querySelector('#stats-section-switch [data-stats-section="highlights"]')
+                ?.click();
+            break;
+    }
+
+    // Query-Parameter entfernen, damit ein Reload/erneuter Fokus
+    // nicht ungewollt wieder dieselbe Aktion auslöst.
+    window.history.replaceState({}, '', window.location.pathname);
+}
+
+handleAppShortcutLaunch();
 
 }); // ← DOMContentLoaded Ende
 

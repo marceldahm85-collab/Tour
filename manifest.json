@@ -18,5 +18,43 @@
       "sizes": "512x512",
       "type": "image/png"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Neue Tour speichern",
+      "short_name": "Neue Tour",
+      "description": "Direkt eine neue Tour erfassen",
+      "url": "./?action=new-tour",
+      "icons": [
+        { "src": "icons/shortcut-new-tour.svg", "sizes": "192x192", "type": "image/svg+xml" }
+      ]
+    },
+    {
+      "name": "Highlights",
+      "short_name": "Highlights",
+      "description": "Zu den Highlights springen",
+      "url": "./?action=highlights",
+      "icons": [
+        { "src": "icons/shortcut-highlights.svg", "sizes": "192x192", "type": "image/svg+xml" }
+      ]
+    },
+    {
+      "name": "Tour planen",
+      "short_name": "Tour planen",
+      "description": "Neue Tour planen",
+      "url": "./?action=plan-tour",
+      "icons": [
+        { "src": "icons/shortcut-plan-tour.svg", "sizes": "192x192", "type": "image/svg+xml" }
+      ]
+    },
+    {
+      "name": "Karte",
+      "short_name": "Karte",
+      "description": "Zur Kartenansicht springen",
+      "url": "./?action=map",
+      "icons": [
+        { "src": "icons/shortcut-map.svg", "sizes": "192x192", "type": "image/svg+xml" }
+      ]
+    }
   ]
 }
