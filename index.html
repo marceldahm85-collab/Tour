@@ -53208,7 +53208,7 @@ function updateDevelopmentStatsPage() {
                 ? 'Vergangene Jahre'
                 : String(statsYearFilter);
 
-    container.innerHTML = `
+    const sectionTrend = `
         <section class="stats-analysis-section">
             <div class="stats-analysis-title">
                 <span>📈 Formtrend</span>
@@ -53226,7 +53226,9 @@ function updateDevelopmentStatsPage() {
                 ${buildDevelopmentSparkline(formTrendData, developmentTrendMetric)}
             </div>
         </section>
+    `;
 
+    const sectionBest = `
         <section class="stats-analysis-section">
             <div class="stats-analysis-title">
                 <span>🏆 Persönliche Bestform</span>
@@ -53234,7 +53236,9 @@ function updateDevelopmentStatsPage() {
             </div>
             ${renderPersonalBestForm(data)}
         </section>
+    `;
 
+    const sectionHistory = `
         <section class="stats-analysis-section">
             <div class="stats-analysis-title">
                 <span>📊 Langfristige Entwicklung</span>
@@ -53242,7 +53246,9 @@ function updateDevelopmentStatsPage() {
             </div>
             ${renderLongTermDevelopment(allDevelopmentData)}
         </section>
+    `;
 
+    const sectionProfile = `
         <section class="stats-analysis-section">
             <div class="stats-analysis-title">
                 <span>🧭 Tourprofil</span>
@@ -53250,7 +53256,9 @@ function updateDevelopmentStatsPage() {
             </div>
             ${renderTourProfileAnalysis(data)}
         </section>
+    `;
 
+    const sectionActivity = `
         <section class="stats-analysis-section">
             <div class="stats-analysis-title">
                 <span>🗓️ Aktivität & Regelmäßigkeit</span>
@@ -53290,6 +53298,42 @@ function updateDevelopmentStatsPage() {
             </div>
         </section>
     `;
+
+    /*
+     * Querformat: zwei unabhängige Spalten statt einer
+     * einfachen Abfolge. Dadurch bestimmt die rechte Spalte
+     * (Tourprofil → Aktivität) ausschließlich ihre eigene
+     * Höhe und wartet nicht auf die linke Spalte.
+     *
+     * Hochformat: komplett unverändert – dieselbe Reihenfolge
+     * wie bisher, ohne zusätzliche Spalten-Wrapper.
+     */
+    const isLandscapeMobileLayout =
+        window.matchMedia(
+            '(max-width: 1024px) and (orientation: landscape) and (pointer: coarse)'
+        ).matches;
+
+    if (isLandscapeMobileLayout) {
+        container.innerHTML = `
+            <div class="development-col development-col-left">
+                ${sectionTrend}
+                ${sectionBest}
+                ${sectionHistory}
+            </div>
+            <div class="development-col development-col-right">
+                ${sectionProfile}
+                ${sectionActivity}
+            </div>
+        `;
+    } else {
+        container.innerHTML = `
+            ${sectionTrend}
+            ${sectionBest}
+            ${sectionHistory}
+            ${sectionProfile}
+            ${sectionActivity}
+        `;
+    }
 
     initDevelopmentHistoryControls(container);
     initDevelopmentTrendControls(container);
@@ -54776,30 +54820,17 @@ if ('serviceWorker' in navigator) {
        and (orientation: landscape)
        and (pointer: coarse) {
 
-    /*
-     * Direkte Bereiche des Entwicklungsviews gezielt
-     * auf zwei Spalten verteilen.
+/*
+     * Zwei unabhängige Spalten statt eines zeilenbasierten
+     * Grids. Dadurch bestimmt jede Spalte ausschließlich
+     * ihre eigene Höhe – "Aktivität & Regelmäßigkeit" wartet
+     * nicht mehr auf die Höhe der linken Spalte.
      */
     #stats-development-page
     #stats-development-content {
-        display: grid !important;
-
-        grid-template-columns:
-            minmax(0, 1fr)
-            minmax(0, 1fr);
-
-        grid-template-rows:
-            max-content
-            max-content
-            max-content;
-
-        grid-template-areas:
-            "trend   profile"
-            "best    profile"
-            "history activity";
-
-        align-items: start;
-        align-content: start;
+        display: flex !important;
+        flex-direction: row;
+        align-items: flex-start;
 
         gap: 6px 7px;
 
@@ -54807,54 +54838,15 @@ if ('serviceWorker' in navigator) {
         min-height: 0;
     }
 
-    /*
-     * 1. Formtrend – links oben
-     */
     #stats-development-page
     #stats-development-content
-    > .stats-analysis-section:nth-child(1) {
-        grid-area: trend;
-    }
+    > .development-col {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
 
-    /*
-     * 2. Persönliche Bestform – links unterhalb
-     *    des Formtrends
-     */
-    #stats-development-page
-    #stats-development-content
-    > .stats-analysis-section:nth-child(2) {
-        grid-area: best;
-    }
-
-    /*
-     * 3. Langfristige Entwicklung – links unten
-     */
-    #stats-development-page
-    #stats-development-content
-    > .stats-analysis-section:nth-child(3) {
-        grid-area: history;
-    }
-
-    /*
-     * 4. Tourprofil – rechte Spalte oben
-     * Füllt die gesamte zugewiesene Höhe (Zeile 1+2) aus,
-     * damit keine Lücke zu "Aktivität & Regelmäßigkeit" entsteht.
-     */
-    #stats-development-page
-    #stats-development-content
-    > .stats-analysis-section:nth-child(4) {
-        grid-area: profile;
-        align-self: stretch;
-    }
-
-    /*
-     * 5. Aktivität & Regelmäßigkeit – rechts
-     *    direkt unterhalb des Tourprofils
-     */
-    #stats-development-page
-    #stats-development-content
-    > .stats-analysis-section:nth-child(5) {
-        grid-area: activity;
+        flex: 1 1 0;
+        min-width: 0;
     }
 
     /*
