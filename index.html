@@ -17740,6 +17740,16 @@ button.activity-summary-card:focus-visible,
     transition: transform 0.14s ease, filter 0.16s ease, background 0.16s ease;
 }
 
+.tour-detail-back-btn,
+#ds-header-back {
+    text-indent: 0;
+}
+
+.tour-detail-back-btn > *,
+#ds-header-back > * {
+    transform: translateY(-2px);
+}    
+
 body:not(.touch-mode) .tour-detail-back-btn:hover, body:not(.touch-mode) #ds-header-back:hover{
     filter: brightness(1.10) saturate(1.08);
 }
