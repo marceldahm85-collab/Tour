@@ -8482,9 +8482,12 @@ body.green .tour-detail-back-btn {
     .tour-detail-back-btn {
         width: 42px;
         height: 42px;
-        font-size: 26px;
-        padding-top: 0px;
-        padding-bottom: 16px;
+        font-size: 24px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
         transform: translateY(-1px);
     }
 }
@@ -17740,18 +17743,6 @@ button.activity-summary-card:focus-visible,
     transition: transform 0.14s ease, filter 0.16s ease, background 0.16s ease;
 }
 
-.tour-detail-back-btn,
-#ds-header-back {
-    text-indent: 0;
-}
-
-.tour-detail-back-btn > *,
-#ds-header-back > * {
-    padding-top: 0px;
-    padding-bottom: 8px;
-    transform: translateY(2px);
-}    
-
 body:not(.touch-mode) .tour-detail-back-btn:hover, body:not(.touch-mode) #ds-header-back:hover{
     filter: brightness(1.10) saturate(1.08);
 }
@@ -20639,6 +20630,44 @@ body.dark
         right: 0;
         width: auto;
         max-width: none;
+    }
+}
+
+/* =========================================================
+   Zurück-Pfeil in Modal-Headern: exakte Zentrierung
+   Der Original-Text (reiner Textknoten "←") wird unsichtbar
+   gemacht, ein Pseudo-Element übernimmt die Darstellung.
+   ========================================================= */
+
+.tour-detail-back-btn,
+#ds-header-back {
+    font-size: 0 !important;
+    line-height: 0 !important;
+    position: relative;
+}
+
+.tour-detail-back-btn::before,
+#ds-header-back::before {
+    content: "←";
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -52%);
+
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1;
+
+    color: inherit;
+    pointer-events: none;
+}
+
+@media (max-width: 768px), (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    .tour-detail-back-btn::before,
+    #ds-header-back::before {
+        font-size: 22px;
+        transform: translate(-50%, -52%);
     }
 }
 
