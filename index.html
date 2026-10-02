@@ -20693,6 +20693,133 @@ body.dark
     }
 }
 
+.wrapped-reminder-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--surface-gradient, linear-gradient(135deg, #4facfe, #43e97b));
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    animation: wrappedBannerSlideDown 0.4s ease;
+}
+
+.wrapped-reminder-banner[hidden] { display: none; }
+
+@keyframes wrappedBannerSlideDown {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+}
+
+.wrapped-reminder-icon { font-size: 22px; }
+.wrapped-reminder-text { flex: 1; font-size: 14px; font-weight: 500; }
+
+.wrapped-reminder-btn {
+    background: rgba(255,255,255,0.25);
+    border: 1px solid rgba(255,255,255,0.5);
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.wrapped-reminder-close {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    opacity: 0.8;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
+#wrapped-view {
+    flex-direction: column;
+    height: 100%;
+    background: #000;
+}
+
+
+.wrapped-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    z-index: 10;
+}
+
+.wrapped-year-select {
+    flex: 1;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 8px;
+    padding: 6px 10px;
+}
+
+.wrapped-share-btn {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-size: 13px;
+}
+
+.wrapped-progress-bar {
+    display: flex;
+    gap: 4px;
+    padding: 0 10px;
+}
+
+.wrapped-progress-segment {
+    flex: 1;
+    height: 3px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.wrapped-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: #fff;
+}
+
+.wrapped-stage {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+#wrapped-canvas {
+    max-width: 100%;
+    max-height: 100%;
+    aspect-ratio: 9 / 16;
+    border-radius: 12px;
+}
+
+.wrapped-tap-zone {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 30%;
+    z-index: 5;
+}
+
+.wrapped-tap-left { left: 0; }
+.wrapped-tap-right { right: 0; }
+
 </style>
 
 
@@ -20729,6 +20856,12 @@ body.dark
 })();
 </script>
 
+<div id="wrapped-reminder-banner" class="wrapped-reminder-banner" hidden>
+    <span class="wrapped-reminder-icon">🎁</span>
+    <span id="wrapped-reminder-text" class="wrapped-reminder-text"></span>
+    <button type="button" id="wrapped-reminder-open" class="wrapped-reminder-btn">Ansehen</button>
+    <button type="button" id="wrapped-reminder-dismiss" class="wrapped-reminder-close" aria-label="Schließen">✕</button>
+</div>
 
 <div class="sun"></div>
 <div class="time-tint" id="time-tint"></div>
@@ -20882,6 +21015,10 @@ body.dark
                     <span>🎨</span>
                     <span>Theme Editor</span>
                 </button>
+
+<button type="button" class="more-menu-item" id="wrapped-toggle">
+    🎁 Jahresrückblick
+</button>
 
                 <div class="more-menu-divider"></div>
 
@@ -22948,6 +23085,21 @@ body.dark
     </div>
 </div>
 
+<div id="wrapped-view" class="view">
+    <div class="wrapped-header">
+        <button type="button" id="wrapped-back-btn" class="back-button" aria-label="Zurück"></button>
+        <select id="wrapped-year-select" class="wrapped-year-select"></select>
+        <button type="button" id="wrapped-share-btn" class="wrapped-share-btn">⤴ Teilen</button>
+    </div>
+
+    <div class="wrapped-progress-bar" id="wrapped-progress-bar"></div>
+
+    <div class="wrapped-stage" id="wrapped-stage">
+        <canvas id="wrapped-canvas" width="1080" height="1920"></canvas>
+        <div class="wrapped-tap-zone wrapped-tap-left" id="wrapped-tap-left"></div>
+        <div class="wrapped-tap-zone wrapped-tap-right" id="wrapped-tap-right"></div>
+    </div>
+</div>
 
 <script>
 
@@ -23202,6 +23354,8 @@ function handleAppShortcutLaunch() {
 }
 
 handleAppShortcutLaunch();
+initWrappedControls();
+checkWrappedJanuaryReminder();
 
 }); // ← DOMContentLoaded Ende
 
@@ -36496,7 +36650,7 @@ const backupView =
     );
 const swipeArea = document.querySelector('.view-container');
 
-const viewOrder = ['dashboard', 'chart', 'map', 'app', 'tour', 'filter', 'backup', 'theme'];
+const viewOrder = ['dashboard', 'chart', 'map', 'app', 'tour', 'filter', 'backup', 'theme', 'wrapped'];
 
 const mapView = document.getElementById('map-view');
 
@@ -36509,6 +36663,7 @@ const viewMap = {
     filter: filterView,
     backup: backupView,
           theme: document.getElementById('theme-view'),
+          wrapped: document.getElementById('wrapped-view'),
 };
 
 let currentIndex = viewOrder.indexOf(currentView);
@@ -44593,6 +44748,227 @@ function initThemeEditor() {
 
     selectTab(themeEditorGetActiveTheme());
     applyThemeEditorSettingsToDom();
+}
+
+/* =========================================================
+   Jahresrückblick ("Wrapped")
+   ========================================================= */
+
+const WRAPPED_REMINDER_KEY = 'wrappedReminderShown_v1';
+const WRAPPED_SLIDE_DURATIONS = {
+    intro: 4500,
+    outro: 4500,
+    default: 5500,
+    heavy: 7500
+};
+
+let wrappedCurrentYear = null;
+let wrappedSlides = [];
+let wrappedSlideIndex = 0;
+let wrappedAutoAdvanceTimer = null;
+let wrappedAutoAdvanceStart = 0;
+let wrappedAutoAdvanceRemaining = 0;
+let wrappedPaused = false;
+
+function getWrappedAvailableYears() {
+    const tours = appStorage.get('touren') || [];
+    const years = new Set();
+
+    tours.forEach(entry => {
+        const date = parseStatsCalendarDate(entry?.date);
+        if (date) years.add(date.getFullYear());
+    });
+
+    return Array.from(years).sort((a, b) => b - a);
+}
+
+function getWrappedDataForYear(year) {
+    const tours = appStorage.get('touren') || [];
+    const targetYear = Number(year);
+
+    return tours.filter(entry => {
+        const date = parseStatsCalendarDate(entry?.date);
+        return date && date.getFullYear() === targetYear;
+    });
+}
+
+function getWrappedPeaksForEntries(entries) {
+    const peaks = [];
+
+    entries.forEach(entry => {
+        (entry.gipfelDetails || []).forEach(g => {
+            const height = parsePeakHeight(g?.hoehe);
+            if (height > 0) {
+                peaks.push({ name: g.name || 'Unbenannter Gipfel', height, entry });
+            }
+        });
+    });
+
+    return peaks;
+}
+
+function getWrappedMonthlyToursCount(entries) {
+    const counts = Array(12).fill(0);
+
+    entries.forEach(entry => {
+        const date = parseStatsCalendarDate(entry?.date);
+        if (date) counts[date.getMonth()]++;
+    });
+
+    return counts;
+}
+
+function getWrappedBestTour(entries) {
+    let best = null;
+
+    entries.forEach(entry => {
+        const performance = calculatePerformanceIndex(entry);
+        const score = performance && Number.isFinite(performance.score)
+            ? performance.score
+            : null;
+
+        if (score !== null && (!best || score > best.score)) {
+            best = { entry, score };
+        }
+    });
+
+    return best;
+}
+
+function getWrappedHighestPeak(entries) {
+    const peaks = getWrappedPeaksForEntries(entries);
+    if (!peaks.length) return null;
+
+    return peaks.reduce((max, peak) =>
+        peak.height > max.height ? peak : max
+    , peaks[0]);
+}
+
+function getWrappedTopRegion(entries) {
+    const counts = {};
+
+    entries.forEach(entry => {
+        const group = getHighlightRegionGroup(entry?.region);
+        if (!group) return;
+        counts[group.label] = (counts[group.label] || 0) + 1;
+    });
+
+    const ranked = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    return ranked.length ? { label: ranked[0][0], count: ranked[0][1] } : null;
+}
+
+function getWrappedTop3(entries) {
+    rebuildHighlightTop3Info(entries);
+
+    const top3Entries = [];
+    entries.forEach(entry => {
+        const info = highlightTop3Info.get(entry);
+        if (info && info.rank <= 3) {
+            top3Entries.push({ entry, info });
+        }
+    });
+
+    return top3Entries.sort((a, b) => a.info.rank - b.info.rank);
+}
+
+function getWrappedTotals(entries) {
+    let distance = 0;
+    let ascent = 0;
+    let minutes = 0;
+    let peaks = 0;
+
+    entries.forEach(entry => {
+        distance += parseFloat(String(entry.strecke || '').replace(',', '.')) || 0;
+        ascent += parseFloat(String(entry.aufstieg || '').replace(',', '.')) || 0;
+        peaks += parseInt(entry.gipfel) || 0;
+
+        if (entry.zeit && String(entry.zeit).includes(':')) {
+            const [h, m] = String(entry.zeit).split(':').map(Number);
+            if (Number.isFinite(h) && Number.isFinite(m)) {
+                minutes += h * 60 + m;
+            }
+        }
+    });
+
+    return {
+        tourCount: entries.length,   // ← korrigiert, war: countDistinctTours(entries)
+        distance,
+        ascent,
+        minutes,
+        peaks
+    };
+}
+
+function buildWrappedSlideData(year) {
+    const entries = getWrappedDataForYear(year);
+    const previousEntries = getWrappedDataForYear(year - 1);
+
+    const totals = getWrappedTotals(entries);
+    const monthlyTours = getWrappedMonthlyToursCount(entries);
+    const bestTour = getWrappedBestTour(entries);
+    const highestPeak = getWrappedHighestPeak(entries);
+    const topRegion = getWrappedTopRegion(entries);
+    const top3 = getWrappedTop3(entries);
+    const previousTotals = previousEntries.length
+        ? getWrappedTotals(previousEntries)
+        : null;
+
+    const activeMonthIndex = monthlyTours.indexOf(Math.max(...monthlyTours));
+
+    const slides = [
+        { key: 'intro', type: 'intro', duration: WRAPPED_SLIDE_DURATIONS.intro,
+          data: { year, tourCount: totals.tourCount } },
+
+        { key: 'distance', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
+          data: { distance: totals.distance } },
+
+        { key: 'ascent', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
+          data: { ascent: totals.ascent } },
+
+        { key: 'time', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
+          data: { minutes: totals.minutes } },
+
+        { key: 'activeMonth', type: 'heavy', duration: WRAPPED_SLIDE_DURATIONS.heavy,
+          data: { monthlyTours, activeMonthIndex } },
+
+        bestTour ? { key: 'bestTour', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
+          data: { entry: bestTour.entry, score: bestTour.score } } : null,
+
+        highestPeak ? { key: 'highestPeak', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
+          data: { peak: highestPeak } } : null,
+
+        topRegion ? { key: 'topRegion', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
+          data: { region: topRegion } } : null,
+
+        previousTotals ? { key: 'yearCompare', type: 'heavy', duration: WRAPPED_SLIDE_DURATIONS.heavy,
+          data: { current: totals, previous: previousTotals, previousYear: year - 1 } } : null,
+
+        top3.length ? { key: 'top3', type: 'heavy', duration: WRAPPED_SLIDE_DURATIONS.heavy,
+          data: { top3 } } : null,
+
+        { key: 'outro', type: 'outro', duration: WRAPPED_SLIDE_DURATIONS.outro,
+          data: { year, tourCount: totals.tourCount } }
+    ].filter(Boolean);
+
+    return slides;
+}
+
+function checkWrappedJanuaryReminder() {
+    const now = new Date();
+    const isJanuaryWindow = now.getMonth() === 0 && now.getDate() <= 7;
+    if (!isJanuaryWindow) return;
+
+    const previousYear = now.getFullYear() - 1;
+    const shown = appStorage.get(WRAPPED_REMINDER_KEY) || {};
+    if (shown[String(previousYear)]) return;
+
+    const hasData = getWrappedDataForYear(previousYear).length > 0;
+    if (!hasData) return;
+
+    showWrappedReminderBanner(previousYear);
+
+    shown[String(previousYear)] = true;
+    appStorage.set(WRAPPED_REMINDER_KEY, shown);
 }
 
 function initTheme() {
@@ -53932,6 +54308,506 @@ if (APP_PERF_ENABLED) {
     }, { passive: true });
 })();
 
+function showWrappedReminderBanner(year) {
+    const banner = document.getElementById('wrapped-reminder-banner');
+    const text = document.getElementById('wrapped-reminder-text');
+    const openBtn = document.getElementById('wrapped-reminder-open');
+    const closeBtn = document.getElementById('wrapped-reminder-dismiss');
+
+    text.textContent = `Dein Jahresrückblick ${year} ist bereit!`;
+    banner.hidden = false;
+
+    const hide = () => { banner.hidden = true; };
+
+    openBtn.onclick = () => {
+        hide();
+        openWrappedView(year);
+    };
+    closeBtn.onclick = hide;
+}
+
+async function shareWrappedSlideCanvas(canvas, year, slideKey) {
+    const filename = `jahresrueckblick-${year}-${slideKey}.png`;
+
+    canvas.toBlob(async (blob) => {
+        if (!blob) return;
+
+        const file = new File([blob], filename, { type: 'image/png' });
+        const canUseShare = navigator.canShare && navigator.canShare({ files: [file] });
+
+        if (canUseShare) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: `Jahresrückblick ${year}`,
+                    text: `Mein Bergtour-Jahresrückblick ${year} 🏔️`
+                });
+                return;
+            } catch (err) {
+                if (err.name === 'AbortError') return;
+                // fällt durch zum Download-Fallback
+            }
+        }
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }, 'image/png', 0.95);
+}
+
+function openWrappedView(year) {
+    wrappedCurrentYear = year;
+    wrappedSlides = buildWrappedSlideData(year);
+    wrappedSlideIndex = 0;
+    wrappedPaused = false;
+
+    populateWrappedYearSelect();
+    renderWrappedProgressBar();
+    goToView('wrapped');
+    renderWrappedSlide(0);
+    startWrappedAutoAdvance();
+}
+
+function populateWrappedYearSelect() {
+    const select = document.getElementById('wrapped-year-select');
+    const years = getWrappedAvailableYears();
+    select.innerHTML = years.map(y =>
+        `<option value="${y}" ${y === wrappedCurrentYear ? 'selected' : ''}>${y}</option>`
+    ).join('');
+}
+
+function renderWrappedProgressBar() {
+    const bar = document.getElementById('wrapped-progress-bar');
+    bar.innerHTML = wrappedSlides.map(() =>
+        '<div class="wrapped-progress-segment"><div class="wrapped-progress-fill"></div></div>'
+    ).join('');
+}
+
+function updateWrappedProgressSegments() {
+    const segments = document.querySelectorAll('.wrapped-progress-fill');
+    segments.forEach((seg, i) => {
+        seg.style.transition = 'none';
+        seg.style.width = i < wrappedSlideIndex ? '100%' : '0%';
+    });
+}
+
+function startWrappedAutoAdvance() {
+    clearWrappedAutoAdvance();
+    const slide = wrappedSlides[wrappedSlideIndex];
+    if (!slide) return;
+
+    wrappedAutoAdvanceRemaining = slide.duration;
+    wrappedAutoAdvanceStart = Date.now();
+    animateWrappedCurrentSegment(wrappedAutoAdvanceRemaining);
+
+    wrappedAutoAdvanceTimer = setTimeout(() => {
+        goToWrappedSlide(wrappedSlideIndex + 1);
+    }, wrappedAutoAdvanceRemaining);
+}
+
+function animateWrappedCurrentSegment(duration) {
+    const segments = document.querySelectorAll('.wrapped-progress-fill');
+    const current = segments[wrappedSlideIndex];
+    if (!current) return;
+
+    current.style.transition = 'none';
+    current.style.width = '0%';
+
+    requestAnimationFrame(() => {
+        current.style.transition = `width ${duration}ms linear`;
+        current.style.width = '100%';
+    });
+}
+
+function pauseWrappedAutoAdvance() {
+    if (wrappedPaused) return;
+    wrappedPaused = true;
+    clearTimeout(wrappedAutoAdvanceTimer);
+
+    const elapsed = Date.now() - wrappedAutoAdvanceStart;
+    wrappedAutoAdvanceRemaining = Math.max(0, wrappedAutoAdvanceRemaining - elapsed);
+
+    const segments = document.querySelectorAll('.wrapped-progress-fill');
+    const current = segments[wrappedSlideIndex];
+    if (current) {
+        const computedWidth = getComputedStyle(current).width;
+        current.style.transition = 'none';
+        current.style.width = computedWidth;
+    }
+}
+
+function resumeWrappedAutoAdvance() {
+    if (!wrappedPaused) return;
+    wrappedPaused = false;
+
+    wrappedAutoAdvanceStart = Date.now();
+    animateWrappedCurrentSegment(wrappedAutoAdvanceRemaining);
+
+    wrappedAutoAdvanceTimer = setTimeout(() => {
+        goToWrappedSlide(wrappedSlideIndex + 1);
+    }, wrappedAutoAdvanceRemaining);
+}
+
+function clearWrappedAutoAdvance() {
+    clearTimeout(wrappedAutoAdvanceTimer);
+    wrappedAutoAdvanceTimer = null;
+}
+
+function goToWrappedSlide(index) {
+    if (index < 0) return;
+    if (index >= wrappedSlides.length) {
+        clearWrappedAutoAdvance();
+        return; // letzte Slide: kein Loop
+    }
+
+    wrappedSlideIndex = index;
+    updateWrappedProgressSegments();
+    renderWrappedSlide(wrappedSlideIndex);
+    startWrappedAutoAdvance();
+}
+
+function initWrappedControls() {
+    const left = document.getElementById('wrapped-tap-left');
+    const right = document.getElementById('wrapped-tap-right');
+    const stage = document.getElementById('wrapped-stage');
+
+    left.addEventListener('click', () => goToWrappedSlide(wrappedSlideIndex - 1));
+    right.addEventListener('click', () => goToWrappedSlide(wrappedSlideIndex + 1));
+
+    let holdTimer = null;
+    const startHold = () => { holdTimer = setTimeout(pauseWrappedAutoAdvance, 180); };
+    const endHold = () => { clearTimeout(holdTimer); resumeWrappedAutoAdvance(); };
+
+    stage.addEventListener('pointerdown', startHold);
+    stage.addEventListener('pointerup', endHold);
+    stage.addEventListener('pointerleave', endHold);
+    stage.addEventListener('pointercancel', endHold);
+
+    let touchStartX = 0;
+    stage.addEventListener('touchstart', e => {
+        touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+
+    stage.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        if (Math.abs(dx) > 50) {
+            dx < 0 ? goToWrappedSlide(wrappedSlideIndex + 1) : goToWrappedSlide(wrappedSlideIndex - 1);
+        }
+    }, { passive: true });
+
+    document.getElementById('wrapped-back-btn').addEventListener('click', () => {
+        clearWrappedAutoAdvance();
+        goToView('dashboard');
+    });
+
+    document.getElementById('wrapped-year-select').addEventListener('change', e => {
+        openWrappedView(Number(e.target.value));
+    });
+
+    document.getElementById('wrapped-share-btn').addEventListener('click', () => {
+        const canvas = document.getElementById('wrapped-canvas');
+        const slide = wrappedSlides[wrappedSlideIndex];
+        shareWrappedSlideCanvas(canvas, wrappedCurrentYear, slide.key);
+    });
+
+    document.getElementById('wrapped-toggle').addEventListener('click', () => {
+        const years = getWrappedAvailableYears();
+        if (!years.length) return;
+        closeMoreMenu?.();
+        openWrappedView(years[0]);
+    });
+}
+
+function getWrappedThemeColors() {
+    const theme = document.body.dataset.theme || 'light';
+    const palettes = {
+        light:  { bg1: '#4facfe', bg2: '#43e97b', text: '#0b2447', accent: '#ffffff' },
+        dark:   { bg1: '#8e0e00', bg2: '#1f1c2c', text: '#ffffff', accent: '#ff6b6b' },
+        green:  { bg1: '#11998e', bg2: '#0f0f0f', text: '#ffffff', accent: '#38ef7d' },
+        summit: { bg1: '#2980b9', bg2: '#2c3e50', text: '#ffffff', accent: '#f5f5f5' }
+    };
+    return palettes[theme] || palettes.light;
+}
+
+function drawWrappedBackground(ctx, w, h) {
+    const colors = getWrappedThemeColors();
+    const gradient = ctx.createLinearGradient(0, 0, w, h);
+    gradient.addColorStop(0, colors.bg1);
+    gradient.addColorStop(1, colors.bg2);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, w, h);
+    return colors;
+}
+
+function wrapWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+    const words = String(text).split(' ');
+    let line = '';
+    let currentY = y;
+
+    words.forEach(word => {
+        const testLine = line + word + ' ';
+        if (ctx.measureText(testLine).width > maxWidth && line !== '') {
+            ctx.fillText(line.trim(), x, currentY);
+            line = word + ' ';
+            currentY += lineHeight;
+        } else {
+            line = testLine;
+        }
+    });
+
+    ctx.fillText(line.trim(), x, currentY);
+    return currentY;
+}
+
+function drawWrappedCenteredTitle(ctx, text, y, fontSize, color, w) {
+    ctx.fillStyle = color;
+    ctx.font = `bold ${fontSize}px sans-serif`;
+    ctx.textAlign = 'center';
+    wrapWrappedText(ctx, text, w / 2, y, w - 120, fontSize * 1.2);
+}
+
+function drawWrappedBigNumber(ctx, value, unit, y, color, w) {
+    ctx.fillStyle = color;
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 150px sans-serif';
+    ctx.fillText(String(value), w / 2, y);
+    ctx.font = '46px sans-serif';
+    ctx.fillText(unit, w / 2, y + 70);
+}
+
+function drawWrappedFooter(ctx, w, h, year) {
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.font = '30px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Jahresrückblick ${year}`, w / 2, h - 60);
+}
+
+function getWrappedDistanceComparison(km) {
+    const refs = [
+        { label: 'Wien → Rom', km: 765 },
+        { label: 'Wien → Berlin', km: 525 },
+        { label: 'Wien → Hamburg', km: 790 },
+        { label: 'einmal quer durch Österreich', km: 560 }
+    ];
+    const match = refs.find(r => km >= r.km * 0.5) || refs[refs.length - 1];
+    const factor = (km / match.km).toFixed(1);
+    return `Das ist wie ${factor}× ${match.label}!`;
+}
+
+function getWrappedElevationComparison(meters) {
+    const everest = 8849;
+    const grossglockner = 3798;
+    if (meters >= everest) {
+        return `Das ist wie ${(meters / everest).toFixed(1)}× auf den Mount Everest!`;
+    }
+    return `Das ist wie ${(meters / grossglockner).toFixed(1)}× auf den Großglockner!`;
+}
+
+function renderWrappedSlide(index) {
+    const canvas = document.getElementById('wrapped-canvas');
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+    const slide = wrappedSlides[index];
+    if (!slide) return;
+
+    const colors = drawWrappedBackground(ctx, w, h);
+
+    switch (slide.key) {
+        case 'intro': renderWrappedIntroSlide(ctx, w, h, colors, slide.data); break;
+        case 'distance': renderWrappedDistanceSlide(ctx, w, h, colors, slide.data); break;
+        case 'ascent': renderWrappedAscentSlide(ctx, w, h, colors, slide.data); break;
+        case 'time': renderWrappedTimeSlide(ctx, w, h, colors, slide.data); break;
+        case 'activeMonth': renderWrappedActiveMonthSlide(ctx, w, h, colors, slide.data); break;
+        case 'bestTour': renderWrappedBestTourSlide(ctx, w, h, colors, slide.data); break;
+        case 'highestPeak': renderWrappedHighestPeakSlide(ctx, w, h, colors, slide.data); break;
+        case 'topRegion': renderWrappedTopRegionSlide(ctx, w, h, colors, slide.data); break;
+        case 'yearCompare': renderWrappedYearCompareSlide(ctx, w, h, colors, slide.data); break;
+        case 'top3': renderWrappedTop3Slide(ctx, w, h, colors, slide.data); break;
+        case 'outro': renderWrappedOutroSlide(ctx, w, h, colors, slide.data); break;
+    }
+
+    drawWrappedFooter(ctx, w, h, wrappedCurrentYear);
+}
+
+function renderWrappedIntroSlide(ctx, w, h, colors, data) {
+    drawWrappedCenteredTitle(ctx, `Dein Jahr ${data.year}`, 400, 90, colors.text, w);
+    drawWrappedBigNumber(ctx, data.tourCount, 'Touren', 900, colors.text, w);
+    ctx.font = '42px sans-serif';
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    ctx.fillText('Lass uns zurückblicken! 🏔️', w / 2, 1050);
+}
+
+function renderWrappedDistanceSlide(ctx, w, h, colors, data) {
+    drawWrappedCenteredTitle(ctx, 'Deine Strecke', 350, 70, colors.text, w);
+    drawWrappedBigNumber(ctx, data.distance.toFixed(1), 'km', 800, colors.text, w);
+    ctx.font = '38px sans-serif';
+    ctx.fillStyle = colors.accent;
+    ctx.textAlign = 'center';
+    wrapWrappedText(ctx, getWrappedDistanceComparison(data.distance), w / 2, 1000, w - 160, 50);
+}
+
+function renderWrappedAscentSlide(ctx, w, h, colors, data) {
+    drawWrappedCenteredTitle(ctx, 'Deine Höhenmeter', 350, 70, colors.text, w);
+    drawWrappedBigNumber(ctx, Math.round(data.ascent).toLocaleString('de-DE'), 'Hm', 800, colors.text, w);
+    ctx.font = '38px sans-serif';
+    ctx.fillStyle = colors.accent;
+    ctx.textAlign = 'center';
+    wrapWrappedText(ctx, getWrappedElevationComparison(data.ascent), w / 2, 1000, w - 160, 50);
+}
+
+function renderWrappedTimeSlide(ctx, w, h, colors, data) {
+    const hours = Math.floor(data.minutes / 60);
+    const days = (hours / 24).toFixed(1);
+    drawWrappedCenteredTitle(ctx, 'Zeit unterwegs', 350, 70, colors.text, w);
+    drawWrappedBigNumber(ctx, hours.toLocaleString('de-DE'), 'Stunden', 800, colors.text, w);
+    ctx.font = '38px sans-serif';
+    ctx.fillStyle = colors.accent;
+    ctx.textAlign = 'center';
+    ctx.fillText(`Das sind ${days} Tage am Berg! ⏱️`, w / 2, 1000);
+}
+
+function renderWrappedActiveMonthSlide(ctx, w, h, colors, data) {
+    const monthNames = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+    drawWrappedCenteredTitle(ctx, 'Dein aktivster Monat', 300, 70, colors.text, w);
+
+    ctx.font = 'bold 100px sans-serif';
+    ctx.fillStyle = colors.accent;
+    ctx.textAlign = 'center';
+    ctx.fillText(monthNames[data.activeMonthIndex], w / 2, 500);
+
+    const chartX = 100, chartY = 650, chartW = w - 200, chartH = 500, barGap = 12;
+    const barW = (chartW - barGap * 11) / 12;
+    const maxVal = Math.max(...data.monthlyTours, 1);
+
+    data.monthlyTours.forEach((count, i) => {
+        const barH = (count / maxVal) * chartH;
+        const x = chartX + i * (barW + barGap);
+        const y = chartY + chartH - barH;
+        ctx.fillStyle = i === data.activeMonthIndex ? colors.accent : 'rgba(255,255,255,0.4)';
+        ctx.fillRect(x, y, barW, barH);
+
+        ctx.fillStyle = colors.text;
+        ctx.font = '24px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(monthNames[i], x + barW / 2, chartY + chartH + 40);
+    });
+
+    ctx.font = '42px sans-serif';
+    ctx.fillStyle = colors.text;
+    ctx.fillText(`${data.monthlyTours[data.activeMonthIndex]} Touren`, w / 2, chartY - 30);
+}
+
+function renderWrappedBestTourSlide(ctx, w, h, colors, data) {
+    drawWrappedCenteredTitle(ctx, 'Deine beste Tour', 300, 70, colors.text, w);
+    ctx.font = 'bold 54px sans-serif';
+    ctx.fillStyle = colors.accent;
+    ctx.textAlign = 'center';
+    wrapWrappedText(ctx, data.entry.tourname || data.entry.region || 'Unbenannte Tour', w / 2, 500, w - 160, 65);
+
+    ctx.font = '36px sans-serif';
+    ctx.fillStyle = colors.text;
+    ctx.fillText(data.entry.date || '', w / 2, 650);
+
+    drawWrappedBigNumber(ctx, data.score.toFixed(0), 'Leistungsindex', 1000, colors.text, w);
+}
+
+function renderWrappedHighestPeakSlide(ctx, w, h, colors, data) {
+    drawWrappedCenteredTitle(ctx, 'Dein höchster Gipfel', 350, 70, colors.text, w);
+    ctx.font = 'bold 64px sans-serif';
+    ctx.fillStyle = colors.accent;
+    ctx.textAlign = 'center';
+    wrapWrappedText(ctx, data.peak.name, w / 2, 650, w - 160, 75);
+
+    drawWrappedBigNumber(ctx, data.peak.height.toLocaleString('de-DE'), 'Meter', 1000, colors.text, w);
+}
+
+function renderWrappedTopRegionSlide(ctx, w, h, colors, data) {
+    drawWrappedCenteredTitle(ctx, 'Deine Lieblingsregion', 400, 70, colors.text, w);
+    ctx.font = 'bold 72px sans-serif';
+    ctx.fillStyle = colors.accent;
+    ctx.textAlign = 'center';
+    wrapWrappedText(ctx, data.region.label, w / 2, 700, w - 160, 85);
+
+    ctx.font = '42px sans-serif';
+    ctx.fillStyle = colors.text;
+    ctx.fillText(`${data.region.count} Touren hier! 📍`, w / 2, 900);
+}
+
+function renderWrappedYearCompareSlide(ctx, w, h, colors, data) {
+    drawWrappedCenteredTitle(ctx, `${data.previousYear} vs. ${wrappedCurrentYear}`, 280, 60, colors.text, w);
+
+    const rows = [
+        { label: 'Touren', prev: data.previous.tourCount, curr: data.current.tourCount },
+        { label: 'km', prev: data.previous.distance.toFixed(0), curr: data.current.distance.toFixed(0) },
+        { label: 'Hm', prev: Math.round(data.previous.ascent), curr: Math.round(data.current.ascent) }
+    ];
+
+    let y = 500;
+    rows.forEach(row => {
+        ctx.font = '36px sans-serif';
+        ctx.fillStyle = colors.text;
+        ctx.textAlign = 'left';
+        ctx.fillText(row.label, 100, y);
+
+        ctx.textAlign = 'right';
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.fillText(String(row.prev), w / 2 - 40, y);
+
+        ctx.textAlign = 'left';
+        ctx.fillStyle = colors.accent;
+        ctx.font = 'bold 36px sans-serif';
+        ctx.fillText(String(row.curr), w / 2 + 40, y);
+
+        y += 120;
+    });
+
+    const diff = data.current.tourCount - data.previous.tourCount;
+    ctx.font = '38px sans-serif';
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    ctx.fillText(
+        diff >= 0 ? `${diff} Touren mehr als letztes Jahr! 📈` : `${Math.abs(diff)} Touren weniger als letztes Jahr`,
+        w / 2, y + 60
+    );
+}
+
+function renderWrappedTop3Slide(ctx, w, h, colors, data) {
+    drawWrappedCenteredTitle(ctx, 'Top 3 der Saison', 280, 70, colors.text, w);
+
+    let y = 500;
+    const medals = ['🥇', '🥈', '🥉'];
+
+    data.top3.forEach((item, i) => {
+        ctx.font = '64px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(medals[i] || '', 100, y);
+
+        ctx.font = 'bold 42px sans-serif';
+        ctx.fillStyle = colors.accent;
+        wrapWrappedText(ctx, item.entry.tourname || item.entry.region || 'Tour', 220, y, w - 350, 50);
+
+        y += 180;
+    });
+}
+
+function renderWrappedOutroSlide(ctx, w, h, colors, data) {
+    drawWrappedCenteredTitle(ctx, `${data.tourCount} Touren.`, 700, 90, colors.text, w);
+    ctx.font = 'bold 90px sans-serif';
+    ctx.fillStyle = colors.accent;
+    ctx.textAlign = 'center';
+    ctx.fillText('Unzählige Momente.', w / 2, 850);
+
+    ctx.font = '48px sans-serif';
+    ctx.fillStyle = colors.text;
+    ctx.fillText('Auf ins nächste Jahr! 🏔️⛰️', w / 2, 1100);
+}
 
 </script>
 
