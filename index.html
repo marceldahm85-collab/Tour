@@ -8992,7 +8992,7 @@ body:not(.touch-mode) .more-theme-option:hover{
 
     gap: 11px;
 
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 650;
     line-height: normal;
 
@@ -18705,11 +18705,11 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
         font-size: 11px;
     }
 
-    .more-menu #theme-toggle {
+    #more-menu #theme-toggle {
         min-height: 34px;
         padding: 6px 9px;
         gap: 8px;
-        font-size: 15px;
+        font-size: 11px;
         border-radius: 10px;
     }
 
@@ -21016,8 +21016,14 @@ body.dark
                     <span>Theme Editor</span>
                 </button>
 
+<button type="button" class="more-menu-item" id="achievements-toggle">
+    <span>🏅</span>
+    <span>Achievements</span>
+</button>
+
 <button type="button" class="more-menu-item" id="wrapped-toggle">
-    🎁 Jahresrückblick
+    <span>🎁</span>
+    <span>Jahresrückblick</span>
 </button>
 
                 <div class="more-menu-divider"></div>
@@ -23085,6 +23091,24 @@ body.dark
     </div>
 </div>
 
+<div id="achievements-view" class="view">
+    <div class="achievements-inner dashboard-inner">
+
+        <div class="achievements-year-filter-wrap">
+            <select id="achievements-year-select"></select>
+        </div>
+
+        <div class="dash-section">
+            <div class="dash-section-title">🏅 Achievements</div>
+            <div class="dash-section-body">
+                <div class="achievements-summary-value" id="achievements-summary-value">0 / 0</div>
+                <div class="achievements-summary-label">freigeschaltet</div>
+            </div>
+        </div>
+        <div id="achievements-categories"></div>
+    </div>
+</div>
+
 <div id="wrapped-view" class="view">
     <div class="wrapped-header">
         <button type="button" id="wrapped-back-btn" class="back-button" aria-label="Zurück"></button>
@@ -23148,6 +23172,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     await initStorage();
     migrateLegacyDifficultyValues();
     migrateStoredEntryIds();
+
+recomputeAndSyncAchievements();
 
     // Theme Editor wurde ggf. bereits VOR dem Laden aus IndexedDB
     // (siehe initTheme() oben) mit Standardwerten in den Draft-Cache
@@ -23353,6 +23379,7 @@ function handleAppShortcutLaunch() {
     window.history.replaceState({}, '', window.location.pathname);
 }
 
+initAchievementsUI();
 handleAppShortcutLaunch();
 initWrappedControls();
 checkWrappedJanuaryReminder();
@@ -36551,6 +36578,7 @@ gipfelDetails: (gipfelDetails || []).map(g => ({
 
     const lifetimeAchCount = checkAndShowNewMilestones(milestonesBefore, computeMilestones(data), { scope: 'lifetime' });
     checkAndTriggerRecordConfetti(toursBeforeSave, entry, { scope: 'lifetime', delay: 300 });
+    recomputeAndSyncAchievements();
 
     const entryYear = getYearFromDate(entry.date);
     if (entryYear) {
@@ -36650,7 +36678,7 @@ const backupView =
     );
 const swipeArea = document.querySelector('.view-container');
 
-const viewOrder = ['dashboard', 'chart', 'map', 'app', 'tour', 'filter', 'backup', 'theme', 'wrapped'];
+const viewOrder = ['dashboard', 'chart', 'map', 'app', 'tour', 'filter', 'backup', 'theme', 'achievements', 'wrapped'];
 
 const mapView = document.getElementById('map-view');
 
@@ -36663,6 +36691,7 @@ const viewMap = {
     filter: filterView,
     backup: backupView,
           theme: document.getElementById('theme-view'),
+          achievements: document.getElementById('achievements-view'),
           wrapped: document.getElementById('wrapped-view'),
 };
 
@@ -42323,6 +42352,649 @@ totalSteps += entrySteps;
         total: totalSteps
     }
 };
+}
+
+/* =========================================================
+   Achievements / Badge-System
+   ========================================================= */
+
+const ACHIEVEMENTS_KEY = 'achievementsUnlocked_v1';
+
+const ACHIEVEMENT_SILENT_CATEGORIES = new Set([
+    'distance', 'ascent', 'time', 'peaks', 'steps',
+    'longestTour', 'dailyAscent', 'peakHeight'
+]);
+
+function buildTieredBadges(categoryId, thresholds, meta) {
+    return thresholds.map((threshold, idx) => ({
+        id: `${categoryId}_${threshold}`,
+        categoryId,
+        threshold,
+        tier: idx + 1,
+        ...meta
+    }));
+}
+
+const ACHIEVEMENT_CATEGORIES = {
+    distance: {
+        label: 'Strecke',
+        icon: '📏',
+        badges: buildTieredBadges('distance', MILESTONE_DEFS.dist, {
+            icon: '📏',
+            nameFn: t => `${t.toLocaleString('de-AT')} km`
+        })
+    },
+    ascent: {
+        label: 'Höhenmeter',
+        icon: '⛰️',
+        badges: buildTieredBadges('ascent', MILESTONE_DEFS.asc, {
+            icon: '⛰️',
+            nameFn: t => `${t.toLocaleString('de-AT')} Hm`
+        })
+    },
+    time: {
+        label: 'Gehzeit',
+        icon: '⏱️',
+        badges: buildTieredBadges('time', MILESTONE_DEFS.time, {
+            icon: '⏱️',
+            nameFn: t => `${t.toLocaleString('de-AT')} h`
+        })
+    },
+    peaks: {
+        label: 'Gipfel (gesamt)',
+        icon: '✟',
+        badges: buildTieredBadges('peaks', MILESTONE_DEFS.peaks, {
+            icon: '✟',
+            nameFn: t => `${t} Gipfel`
+        })
+    },
+    steps: {
+        label: 'Schritte',
+        icon: '👣',
+        badges: buildTieredBadges('steps', MILESTONE_DEFS.steps, {
+            icon: '👣',
+            nameFn: t => `${(t / 1000).toLocaleString('de-AT')}k Schritte`
+        })
+    },
+    tourCount: {
+        label: 'Touren gesamt',
+        icon: '🧭',
+        badges: buildTieredBadges(
+            'tourCount',
+            [1, 5, 10, 15, 20, 25, 50, 75, 100, 125, 150, 175, 200, 250, 300, 500],
+            { icon: '🧭', nameFn: t => `${t} Touren` }
+        )
+    },
+    bigTours: {
+        label: 'Big Tours',
+        icon: '🏔️',
+        badges: buildTieredBadges(
+            'bigTours',
+            [1, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 150, 200],
+            { icon: '🏔️', nameFn: t => `${t} Big Tours` }
+        )
+    },
+    uniquePeaks: {
+        label: 'Verschiedene Gipfel',
+        icon: '🗻',
+        badges: buildTieredBadges(
+            'uniquePeaks',
+            [5, 10, 15, 20, 25, 30, 40, 50, 70, 100, 150, 200, 250, 300, 400, 500],
+            { icon: '🗻', nameFn: t => `${t} versch. Gipfel` }
+        )
+    },
+    peakHeight: {
+        label: 'Gipfelhöhen',
+        icon: '🚩',
+        badges: buildTieredBadges(
+            'peakHeight',
+            [1500, 2000, 2500, 3000, 3500],
+            { icon: '🚩', nameFn: t => `Erster ${t.toLocaleString('de-AT')}er` }
+        )
+    },
+    regions: {
+        label: 'Regionen',
+        icon: '🗺️',
+        badges: buildTieredBadges(
+            'regions',
+            [1, 3, 5, 10, 14],
+            { icon: '🗺️', nameFn: t => `${t} Region${t !== 1 ? 'en' : ''}` }
+        )
+    },
+    tourTypes: {
+        label: 'Tourarten',
+        icon: '🎭',
+        badges: [
+            { id: 'tourTypes_wandern', categoryId: 'tourTypes', icon: '🥾', nameFn: () => 'Wanderer', matchValue: 'wandern' },
+            { id: 'tourTypes_klettersteig', categoryId: 'tourTypes', icon: '🧗', nameFn: () => 'Klettersteig-Geher', matchValue: 'Klettersteig' },
+            { id: 'tourTypes_radtour', categoryId: 'tourTypes', icon: '🚴', nameFn: () => 'Radler', matchValue: 'Radtour' },
+            { id: 'tourTypes_hikeclimb', categoryId: 'tourTypes', icon: '🧗‍♂️', nameFn: () => 'Hike & Climb', matchValue: 'Hike & Climb' },
+            { id: 'tourTypes_bikehike', categoryId: 'tourTypes', icon: '🚵', nameFn: () => 'Bike & Hike', matchValue: 'Bike & Hike' },
+            { id: 'tourTypes_allrounder', categoryId: 'tourTypes', icon: '🏅', nameFn: () => 'Allrounder', isAllrounder: true }
+        ]
+    },
+    consistency: {
+        label: 'Konsistenz',
+        icon: '📅',
+        badges: [
+            ...buildTieredBadges(
+                'consistencyStreak',
+                [3, 6, 12, 24],
+                { icon: '📅', nameFn: t => `${t} Monate in Folge` }
+            ),
+            { id: 'consistency_fullyear', categoryId: 'consistency', icon: '🎊', nameFn: () => 'Ganzjährig aktiv', isFullYear: true }
+        ]
+    },
+    longestTour: {
+        label: 'Längste Einzeltour',
+        icon: '🛤️',
+        badges: buildTieredBadges(
+            'longestTour',
+            [5, 10, 15, 20, 25, 30],
+            { icon: '🛤️', nameFn: t => `${t} km an einem Tag` }
+        )
+    },
+    dailyAscent: {
+        label: 'Höhenmeter pro Tag',
+        icon: '⚡',
+        badges: buildTieredBadges(
+            'dailyAscent',
+            [250, 500, 750, 1000, 1250, 1500, 1750, 2000, 2500],
+            { icon: '⚡', nameFn: t => `${t.toLocaleString('de-AT')} Hm an einem Tag` }
+        )
+    },
+    performance: {
+        label: 'Leistungsindex',
+        icon: '💪',
+        badges: [
+            ...buildTieredBadges(
+                'performanceScore',
+                [50, 60, 70, 80, 90],
+                { icon: '💪', nameFn: t => `Score ≥ ${t}` }
+            ),
+            { id: 'performance_recordBroken', categoryId: 'performance', icon: '🏆', nameFn: () => 'Persönlicher Rekord', isRecordCounter: true }
+        ]
+    }
+};
+
+function getAllAchievementBadgeDefs() {
+    return Object.values(ACHIEVEMENT_CATEGORIES).flatMap(cat => cat.badges);
+}
+
+function computeLongestMonthStreak(entries) {
+    const monthSet = new Set();
+
+    entries.forEach(entry => {
+        const date = parseStatsCalendarDate(entry?.date);
+        if (date) monthSet.add(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`);
+    });
+
+    const sortedMonths = [...monthSet].sort();
+    let longest = 0, current = 0, prevKey = null;
+
+    sortedMonths.forEach(key => {
+        const [y, m] = key.split('-').map(Number);
+        if (prevKey) {
+            const [py, pm] = prevKey.split('-').map(Number);
+            const isConsecutive = (py === y && pm === m - 1) || (y === py + 1 && pm === 12 && m === 1);
+            current = isConsecutive ? current + 1 : 1;
+        } else {
+            current = 1;
+        }
+        longest = Math.max(longest, current);
+        prevKey = key;
+    });
+
+    return longest;
+}
+
+function computeFullYearActive(entries) {
+    const yearMonths = {};
+
+    entries.forEach(entry => {
+        const date = parseStatsCalendarDate(entry?.date);
+        if (!date) return;
+        const y = date.getFullYear();
+        if (!yearMonths[y]) yearMonths[y] = new Set();
+        yearMonths[y].add(date.getMonth());
+    });
+
+    return Object.values(yearMonths).some(months => months.size === 12);
+}
+
+function computePerformanceRecordHistory(entries) {
+    const sorted = [...entries]
+        .filter(e => e.date)
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    let maxScore = -Infinity;
+    const records = [];
+
+    sorted.forEach(entry => {
+        const perf = calculatePerformanceIndex(entry);
+        const score = perf && Number.isFinite(perf.score) ? perf.score : null;
+        if (score !== null && score > maxScore) {
+            maxScore = score;
+            records.push({ date: entry.date, tourname: entry.tourname || '–', entry, score });
+        }
+    });
+
+    return { records, maxScore: maxScore === -Infinity ? 0 : maxScore };
+}
+
+function computeAllAchievements(toursInput = null) {
+    const allTours = toursInput ?? (appStorage.get('touren') || []);
+    const ms = computeMilestones(allTours);
+    const results = {};
+
+    ['dist', 'asc', 'time', 'peaks', 'steps'].forEach((msKey, i) => {
+        const catId = ['distance', 'ascent', 'time', 'peaks', 'steps'][i];
+        const msData = ms[msKey];
+        ACHIEVEMENT_CATEGORIES[catId].badges.forEach(badge => {
+            const reachedItem = msData.reached.find(r => r.milestone === badge.threshold);
+            results[badge.id] = {
+                unlocked: !!reachedItem,
+                unlockedAt: reachedItem?.date || null,
+                unlockedTour: reachedItem?.tourname || null,
+                progressCurrent: msData.total,
+                progressTarget: badge.threshold
+            };
+        });
+    });
+
+    const sortedByDate = [...allTours].filter(e => e.date).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    ACHIEVEMENT_CATEGORIES.tourCount.badges.forEach(badge => {
+        const reachedAt = sortedByDate[badge.threshold - 1];
+        results[badge.id] = {
+            unlocked: allTours.length >= badge.threshold,
+            unlockedAt: reachedAt?.date || null,
+            unlockedTour: reachedAt?.tourname || null,
+            progressCurrent: allTours.length,
+            progressTarget: badge.threshold
+        };
+    });
+
+    const bigTours = sortedByDate.filter(e => {
+        const d = parseFloat(String(e.strecke || '').replace(',', '.')) || 0;
+        const a = parseFloat(String(e.aufstieg || '').replace(',', '.')) || 0;
+        return d >= 10 && a >= 1000;
+    });
+    ACHIEVEMENT_CATEGORIES.bigTours.badges.forEach(badge => {
+        const reachedAt = bigTours[badge.threshold - 1];
+        results[badge.id] = {
+            unlocked: bigTours.length >= badge.threshold,
+            unlockedAt: reachedAt?.date || null,
+            unlockedTour: reachedAt?.tourname || null,
+            progressCurrent: bigTours.length,
+            progressTarget: badge.threshold
+        };
+    });
+
+    const peakFirstSeen = new Map();
+    sortedByDate.forEach(entry => {
+        (entry.gipfelDetails || []).forEach(g => {
+            const name = (g?.name || '').trim();
+            if (name && !peakFirstSeen.has(name)) {
+                peakFirstSeen.set(name, { date: entry.date, tourname: entry.tourname });
+            }
+        });
+    });
+    const uniquePeakEntries = [...peakFirstSeen.values()].sort((a, b) => new Date(a.date) - new Date(b.date));
+    ACHIEVEMENT_CATEGORIES.uniquePeaks.badges.forEach(badge => {
+        const reachedAt = uniquePeakEntries[badge.threshold - 1];
+        results[badge.id] = {
+            unlocked: peakFirstSeen.size >= badge.threshold,
+            unlockedAt: reachedAt?.date || null,
+            unlockedTour: reachedAt?.tourname || null,
+            progressCurrent: peakFirstSeen.size,
+            progressTarget: badge.threshold
+        };
+    });
+
+    const peakHeightEvents = [];
+    sortedByDate.forEach(entry => {
+        (entry.gipfelDetails || []).forEach(g => {
+            const height = parsePeakHeight(g?.hoehe);
+            if (height > 0) peakHeightEvents.push({ height, date: entry.date, tourname: entry.tourname });
+        });
+    });
+    ACHIEVEMENT_CATEGORIES.peakHeight.badges.forEach(badge => {
+        const match = peakHeightEvents.find(p => p.height >= badge.threshold);
+        results[badge.id] = {
+            unlocked: !!match,
+            unlockedAt: match?.date || null,
+            unlockedTour: match?.tourname || null,
+            progressCurrent: peakHeightEvents.length ? Math.max(...peakHeightEvents.map(p => p.height)) : 0,
+            progressTarget: badge.threshold
+        };
+    });
+
+    const regionFirstSeen = new Map();
+sortedByDate.forEach(entry => {
+    const rawRegion = String(entry?.region || '').trim();
+    if (rawRegion && !regionFirstSeen.has(rawRegion)) {
+        regionFirstSeen.set(rawRegion, { date: entry.date, tourname: entry.tourname });
+    }
+});
+    const regionEntries = [...regionFirstSeen.values()].sort((a, b) => new Date(a.date) - new Date(b.date));
+    ACHIEVEMENT_CATEGORIES.regions.badges.forEach(badge => {
+        const reachedAt = regionEntries[badge.threshold - 1];
+        results[badge.id] = {
+            unlocked: regionFirstSeen.size >= badge.threshold,
+            unlockedAt: reachedAt?.date || null,
+            unlockedTour: reachedAt?.tourname || null,
+            progressCurrent: regionFirstSeen.size,
+            progressTarget: badge.threshold
+        };
+    });
+
+    const typeFirstSeen = {};
+    sortedByDate.forEach(entry => {
+        const val = entry.difficulty;
+        if (val && !typeFirstSeen[val]) typeFirstSeen[val] = { date: entry.date, tourname: entry.tourname };
+    });
+
+    ACHIEVEMENT_CATEGORIES.tourTypes.badges.forEach(badge => {
+        if (badge.isAllrounder) {
+            const requiredTypes = ['wandern', 'Klettersteig', 'Radtour', 'Hike & Climb', 'Bike & Hike'];
+            const allPresent = requiredTypes.every(t => typeFirstSeen[t]);
+            const lastNeeded = allPresent
+                ? requiredTypes.map(t => typeFirstSeen[t]).sort((a, b) => new Date(b.date) - new Date(a.date))[0]
+                : null;
+            results[badge.id] = {
+                unlocked: allPresent,
+                unlockedAt: lastNeeded?.date || null,
+                unlockedTour: lastNeeded?.tourname || null,
+                progressCurrent: requiredTypes.filter(t => typeFirstSeen[t]).length,
+                progressTarget: requiredTypes.length
+            };
+        } else {
+            const match = typeFirstSeen[badge.matchValue];
+            results[badge.id] = {
+                unlocked: !!match,
+                unlockedAt: match?.date || null,
+                unlockedTour: match?.tourname || null,
+                progressCurrent: match ? 1 : 0,
+                progressTarget: 1
+            };
+        }
+    });
+
+    const longestStreak = computeLongestMonthStreak(allTours);
+    ACHIEVEMENT_CATEGORIES.consistency.badges.forEach(badge => {
+        if (badge.isFullYear) {
+            const achieved = computeFullYearActive(allTours);
+            results[badge.id] = {
+                unlocked: achieved,
+                unlockedAt: null,
+                unlockedTour: null,
+                progressCurrent: achieved ? 1 : 0,
+                progressTarget: 1
+            };
+        } else {
+            results[badge.id] = {
+                unlocked: longestStreak >= badge.threshold,
+                unlockedAt: null,
+                unlockedTour: null,
+                progressCurrent: longestStreak,
+                progressTarget: badge.threshold
+            };
+        }
+    });
+
+    const maxDistanceTour = sortedByDate.reduce((max, e) => {
+        const d = parseFloat(String(e.strecke || '').replace(',', '.')) || 0;
+        return d > (max?.val || 0) ? { val: d, date: e.date, tourname: e.tourname } : max;
+    }, null);
+    ACHIEVEMENT_CATEGORIES.longestTour.badges.forEach(badge => {
+        const reached = maxDistanceTour && maxDistanceTour.val >= badge.threshold ? maxDistanceTour : null;
+        results[badge.id] = {
+            unlocked: !!reached,
+            unlockedAt: reached?.date || null,
+            unlockedTour: reached?.tourname || null,
+            progressCurrent: maxDistanceTour?.val || 0,
+            progressTarget: badge.threshold
+        };
+    });
+
+    const maxAscentTour = sortedByDate.reduce((max, e) => {
+        const a = parseFloat(String(e.aufstieg || '').replace(',', '.')) || 0;
+        return a > (max?.val || 0) ? { val: a, date: e.date, tourname: e.tourname } : max;
+    }, null);
+    ACHIEVEMENT_CATEGORIES.dailyAscent.badges.forEach(badge => {
+        const reached = maxAscentTour && maxAscentTour.val >= badge.threshold ? maxAscentTour : null;
+        results[badge.id] = {
+            unlocked: !!reached,
+            unlockedAt: reached?.date || null,
+            unlockedTour: reached?.tourname || null,
+            progressCurrent: maxAscentTour?.val || 0,
+            progressTarget: badge.threshold
+        };
+    });
+
+    const { records: perfRecords, maxScore } = computePerformanceRecordHistory(allTours);
+    ACHIEVEMENT_CATEGORIES.performance.badges.forEach(badge => {
+        if (badge.isRecordCounter) {
+            const lastRecord = perfRecords[perfRecords.length - 1];
+            results[badge.id] = {
+                unlocked: perfRecords.length > 0,
+                unlockedAt: lastRecord?.date || null,
+                unlockedTour: lastRecord?.tourname || null,
+                recordCount: perfRecords.length,
+                isCounterType: true
+            };
+        } else {
+            const reached = perfRecords.find(r => r.score >= badge.threshold);
+            results[badge.id] = {
+                unlocked: !!reached,
+                unlockedAt: reached?.date || null,
+                unlockedTour: reached?.tourname || null,
+                progressCurrent: maxScore,
+                progressTarget: badge.threshold
+            };
+        }
+    });
+
+    return results;
+}
+
+function recomputeAndSyncAchievements({ silent = false } = {}) {
+    const freshResults = computeAllAchievements();
+    const stored = appStorage.get(ACHIEVEMENTS_KEY);
+    const isFirstRun = stored === null || stored === undefined;
+
+    const previousUnlocked = isFirstRun ? {} : stored;
+    const newlyUnlocked = [];
+    const nextStored = { ...previousUnlocked };
+
+    getAllAchievementBadgeDefs().forEach(badge => {
+        const current = freshResults[badge.id];
+        if (!current) return;
+
+        const wasUnlocked = !!previousUnlocked[badge.id]?.unlocked;
+        const isUnlocked = !!current.unlocked;
+
+        const prevCount = previousUnlocked[badge.id]?.recordCount || 0;
+        const currCount = current.recordCount || 0;
+        const counterIncreased = badge.isRecordCounter ? currCount > prevCount : false;
+
+        if (isUnlocked && (!wasUnlocked || counterIncreased)) {
+            nextStored[badge.id] = {
+                unlocked: true,
+                unlockedAt: current.unlockedAt,
+                unlockedTour: current.unlockedTour,
+                recordCount: current.recordCount || undefined
+            };
+
+            if (!isFirstRun && !silent && !ACHIEVEMENT_SILENT_CATEGORIES.has(badge.categoryId)) {
+                newlyUnlocked.push(badge);
+            }
+        } else if (isUnlocked) {
+            nextStored[badge.id] = nextStored[badge.id] || {
+                unlocked: true,
+                unlockedAt: current.unlockedAt,
+                unlockedTour: current.unlockedTour,
+                recordCount: current.recordCount || undefined
+            };
+        }
+    });
+
+    appStorage.set(ACHIEVEMENTS_KEY, nextStored);
+
+    newlyUnlocked.forEach(badge => triggerAchievementUnlockCelebration(badge));
+
+    return { freshResults, newlyUnlocked, isFirstRun };
+}
+
+function triggerAchievementUnlockCelebration(badge) {
+    const def = ACHIEVEMENT_CATEGORIES[badge.categoryId]?.badges.find(b => b.id === badge.id) || badge;
+    const name = def.nameFn ? def.nameFn(def.threshold) : (def.id || 'Achievement');
+
+    triggerConfetti();
+    showAchievementToast(`${def.icon || '🏅'} Achievement freigeschaltet: ${name}`);
+}
+
+let achievementsYearFilter = 'all';
+
+function populateAchievementsYearSelect() {
+    const select = document.getElementById('achievements-year-select');
+    if (!select) return;
+
+    const years = getWrappedAvailableYears();
+    select.innerHTML = `<option value="all">Gesamt (alle Jahre)</option>` +
+        years.map(y => `<option value="${y}">${y}</option>`).join('');
+
+    select.value = achievementsYearFilter;
+}
+
+function getAchievementsFilteredTours() {
+    return achievementsYearFilter === 'all'
+        ? (appStorage.get('touren') || [])
+        : getWrappedDataForYear(Number(achievementsYearFilter));
+}
+
+function renderAchievementsView() {
+    const container = document.getElementById('achievements-categories');
+    const summaryValue = document.getElementById('achievements-summary-value');
+    if (!container) return;
+
+    const results = computeAllAchievements(getAchievementsFilteredTours());
+    const allBadges = getAllAchievementBadgeDefs();
+    const unlockedCount = allBadges.filter(b => results[b.id]?.unlocked).length;
+
+    if (summaryValue) {
+        summaryValue.textContent = `${unlockedCount} / ${allBadges.length}`;
+    }
+
+    container.innerHTML = Object.values(ACHIEVEMENT_CATEGORIES).map(cat => {
+        const catUnlocked = cat.badges.filter(b => results[b.id]?.unlocked).length;
+
+        const badgesHtml = cat.badges.map(badge => {
+            const r = results[badge.id] || {};
+            const isUnlocked = !!r.unlocked;
+            const name = badge.nameFn ? badge.nameFn(badge.threshold) : badge.id;
+
+            return `
+                <button type="button"
+                    class="achievement-badge ${isUnlocked ? 'unlocked' : 'locked'}"
+                    data-badge-id="${badge.id}">
+                    <span class="achievement-badge-icon">${isUnlocked ? badge.icon : '🔒'}</span>
+                    <span class="achievement-badge-name">${isUnlocked ? name : '???'}</span>
+                </button>
+            `;
+        }).join('');
+
+        return `
+            <div class="dash-section" style="margin-top:10px;">
+                <div class="dash-section-title">
+                    <div class="achievement-category-header">
+                        <span class="achievement-category-icon">${cat.icon}</span>
+                        <span class="achievement-category-label">${cat.label}</span>
+                        <span class="achievement-category-count">${catUnlocked}/${cat.badges.length}</span>
+                    </div>
+                </div>
+                <div class="dash-section-body">
+                    <div class="achievement-badge-grid">
+                        ${badgesHtml}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.querySelectorAll('.achievement-badge').forEach(btn => {
+        btn.addEventListener('click', () => {
+            openAchievementDetailModal(btn.dataset.badgeId, results);
+        });
+    });
+}
+
+function openAchievementDetailModal(badgeId, resultsInput = null) {
+    const results = resultsInput || computeAllAchievements();
+    const badge = getAllAchievementBadgeDefs().find(b => b.id === badgeId);
+    if (!badge) return;
+
+    const r = results[badgeId] || {};
+    const isUnlocked = !!r.unlocked;
+    const name = badge.nameFn ? badge.nameFn(badge.threshold) : badge.id;
+    const cat = ACHIEVEMENT_CATEGORIES[badge.categoryId];
+
+    const modal = document.getElementById('achievement-detail-modal');
+    const title = document.getElementById('achievement-detail-title');
+    const body = document.getElementById('achievement-detail-body');
+    if (!modal || !title || !body) return;
+
+    title.textContent = isUnlocked ? name : 'Noch gesperrt';
+
+    let bodyHtml = '';
+
+    if (isUnlocked) {
+        bodyHtml += `<div class="achievement-detail-icon">${badge.icon}</div>`;
+        if (r.unlockedAt) {
+            const d = new Date(r.unlockedAt);
+            if (!isNaN(d.getTime())) {
+                bodyHtml += `<p>Freigeschaltet am ${d.toLocaleDateString('de-AT')}</p>`;
+            }
+        }
+        if (r.unlockedTour) {
+            bodyHtml += `<p>Tour: ${r.unlockedTour}</p>`;
+        }
+        if (r.recordCount) {
+            bodyHtml += `<p>${r.recordCount}× erreicht</p>`;
+        }
+    } else {
+        bodyHtml += `<div class="achievement-detail-icon locked">🔒</div>`;
+        bodyHtml += `<p>Dieses Achievement ist noch nicht freigeschaltet.</p>`;
+        if (r.progressTarget && !badge.isRecordCounter) {
+            bodyHtml += `<p>Fortschritt: ${Math.round(r.progressCurrent || 0).toLocaleString('de-AT')} / ${r.progressTarget.toLocaleString('de-AT')}</p>`;
+        }
+    }
+
+    body.innerHTML = bodyHtml;
+    modal.classList.remove('hidden');
+}
+
+function initAchievementsUI() {
+    document.getElementById('achievement-detail-close')?.addEventListener('click', () => {
+        document.getElementById('achievement-detail-modal')?.classList.add('hidden');
+    });
+
+    document.querySelector('#achievement-detail-modal .modal-backdrop')?.addEventListener('click', () => {
+        document.getElementById('achievement-detail-modal')?.classList.add('hidden');
+    });
+
+    document.getElementById('achievements-year-select')?.addEventListener('change', (e) => {
+        achievementsYearFilter = e.target.value;
+        renderAchievementsView();
+    });
+
+    document.getElementById('achievements-toggle')?.addEventListener('click', () => {
+        closeMoreMenu?.();
+        goToView('achievements');
+        populateAchievementsYearSelect();
+        renderAchievementsView();
+    });
 }
 
 function openMilestoneModal(type) {
@@ -54856,6 +55528,17 @@ function renderWrappedOutroSlide(ctx, w, h, colors, data) {
   </div>
 </div>
 
+<div id="achievement-detail-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card">
+        <div class="modal-header">
+            <div class="modal-title" id="achievement-detail-title">Achievement</div>
+            <button type="button" id="achievement-detail-close" aria-label="Schließen">✕</button>
+        </div>
+        <div class="modal-body" id="achievement-detail-body"></div>
+    </div>
+</div>
+
 <div id="compare-modal" class="modal hidden" role="dialog" aria-modal="true">
   <div class="modal-backdrop" data-compare-close="1"></div>
   <div class="modal-card">
@@ -59296,6 +59979,202 @@ body.summit .plan-season-card {
         padding: 4px 6px;
         font-size: 10px;
         margin-top: 0;
+    }
+}
+
+/* =========================================================
+   Achievements-View (kompakt)
+   ========================================================= */
+
+.achievements-inner .dash-section {
+    margin-top: 6px !important;
+}
+
+.achievements-inner .dash-section-title {
+    padding: 8px 10px 4px !important;
+    font-size: 12px !important;
+}
+
+.achievements-inner .dash-section-body {
+    padding: 0 8px 8px !important;
+}
+
+.achievements-summary-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1.1;
+}
+
+.achievements-summary-label {
+    font-size: 10px;
+    color: var(--text-soft);
+    opacity: 0.8;
+}
+
+.achievement-category-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.achievement-category-icon {
+    font-size: 13px;
+}
+
+.achievement-category-label {
+    flex: 1;
+    font-weight: 700;
+    font-size: 11px;
+    color: var(--text-main);
+}
+
+.achievement-category-count {
+    font-size: 9px;
+    font-weight: 700;
+    opacity: 0.7;
+    color: var(--text-soft);
+}
+
+.achievement-badge-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+    gap: 5px;
+    margin-top: 6px;
+}
+
+.achievement-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: 46px;
+    padding: 5px 3px;
+    border-radius: 9px;
+    border: 1px solid var(--ui-card-border);
+    background: var(--ui-card-bg);
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.14s ease, background 0.16s ease, border-color 0.16s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.achievement-badge:active {
+    transform: scale(0.95);
+}
+
+.achievement-badge-icon {
+    font-size: 15px;
+    line-height: 1;
+}
+
+.achievement-badge-name {
+    font-size: 7px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--text-main);
+    overflow-wrap: anywhere;
+}
+
+.achievement-badge.unlocked {
+    border-color: color-mix(in srgb, var(--accent) 55%, var(--ui-card-border));
+    background: color-mix(in srgb, var(--accent) 16%, var(--ui-card-bg));
+}
+
+.achievement-badge.locked {
+    opacity: 0.45;
+    filter: grayscale(1);
+}
+
+.achievement-badge.locked .achievement-badge-name {
+    opacity: 0.75;
+}
+
+#achievement-detail-close {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    border-radius: 50%;
+    border: 1px solid var(--ui-card-border);
+    background: var(--ui-card-bg);
+    color: var(--text-main);
+    font-size: 13px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#achievement-detail-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+    padding: 6px 0;
+    font-size: 13px;
+}
+
+.achievement-detail-icon {
+    font-size: 36px;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.achievement-detail-icon.locked {
+    opacity: 0.4;
+    filter: grayscale(1);
+}
+
+@media (max-width: 768px), (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    .achievements-inner .dash-section-title {
+        padding: 6px 8px 3px !important;
+        font-size: 11px !important;
+    }
+
+    .achievements-inner .dash-section-body {
+        padding: 0 6px 6px !important;
+    }
+
+    .achievement-badge-grid {
+        grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+        gap: 4px;
+    }
+
+    .achievement-badge {
+        min-height: 40px;
+        padding: 4px 2px;
+        border-radius: 8px;
+    }
+
+    .achievement-badge-icon {
+        font-size: 13px;
+    }
+
+    .achievement-badge-name {
+        font-size: 6.5px;
+    }
+}
+
+.achievements-year-filter-wrap {
+    width: 100%;
+    margin: 0 0 8px;
+}
+
+.achievements-year-filter-wrap select {
+    width: 100%;
+    height: 38px;
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-size: 13px;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px), (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    .achievements-year-filter-wrap select {
+        height: 34px;
+        font-size: 12px;
     }
 }
 
