@@ -1,7 +1,7 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Version bei jeder inhaltlichen Änderung erhöhen (v1 -> v2 -> ...),
 // damit alte Caches automatisch ersetzt werden.
-const CACHE_NAME = 'bergtouren-cache-v4';
+const CACHE_NAME = 'bergtouren-cache-v5';
 
 const APP_SHELL = [
   './',
@@ -9,6 +9,8 @@ const APP_SHELL = [
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512_neu.png',
+  './libs/jspdf.umd.min.js',
+  './libs/jspdf.plugin.autotable.min.js',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
   'https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js',
@@ -52,50 +54,25 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// --- Fetch-Strategie ---
-// HTML/Navigationsanfragen werden zuerst aus dem Netz geladen.
-// So wird nach App-Updates auf mobilen Geräten nicht dauerhaft
-// eine alte index.html aus dem Service-Worker ausgeliefert.
-// Bei Offline-Betrieb fällt die Navigation auf den Cache zurück.
-// Statische Ressourcen bleiben cache-first.
-
+// --- Fetch-Strategie: Stale-While-Revalidate ---
+// Sofort aus dem Cache liefern (schnell, offline-fähig),
+// im Hintergrund aktualisieren für den nächsten Aufruf.
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
-  const isNavigation =
-    event.request.mode === 'navigate' ||
-    event.request.destination === 'document';
-
-  if (isNavigation) {
-    event.respondWith(
-      fetch(event.request)
+  event.respondWith(
+    caches.match(event.request).then((cached) => {
+      const networkFetch = fetch(event.request)
         .then((networkRes) => {
-          if (networkRes && networkRes.ok) {
+          if (networkRes && (networkRes.ok || networkRes.type === 'opaque')) {
             const resClone = networkRes.clone();
-            caches.open(CACHE_NAME).then((cache) =>
-              cache.put(event.request, resClone)
-            );
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, resClone));
           }
           return networkRes;
         })
-        .catch(() => caches.match(event.request))
-    );
-    return;
-  }
+        .catch(() => cached); // Offline & nichts im Cache -> Fehler durchreichen
 
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-
-      return fetch(event.request).then((networkRes) => {
-        if (networkRes && (networkRes.ok || networkRes.type === 'opaque')) {
-          const resClone = networkRes.clone();
-          caches.open(CACHE_NAME).then((cache) =>
-            cache.put(event.request, resClone)
-          );
-        }
-        return networkRes;
-      });
+      return cached || networkFetch;
     })
   );
 });

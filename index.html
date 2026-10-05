@@ -3,6 +3,8 @@
 <head>
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="libs/jspdf.umd.min.js"></script>
+<script src="libs/jspdf.plugin.autotable.min.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
@@ -23061,6 +23063,72 @@ body.dark
 
         </section>
 
+    <section
+            id="pdf-export-card"
+            class="filter-simple-card backup-card">
+
+            <div class="filter-simple-title">
+                📖 Tourenbuch exportieren
+            </div>
+
+            <div
+                class="compare-mode-toggle"
+                role="group"
+                aria-label="Exportzeitraum">
+
+                <button
+                    type="button"
+                    class="compare-mode-btn active"
+                    data-pdf-range-mode="single">
+                    Einzeljahr
+                </button>
+
+                <button
+                    type="button"
+                    class="compare-mode-btn"
+                    data-pdf-range-mode="range">
+                    Zeitraum
+                </button>
+
+            </div>
+
+            <div id="pdf-export-single-panel" class="compare-panel">
+                <div class="form-group">
+                    <label for="pdf-export-year">Jahr</label>
+                    <select id="pdf-export-year">
+                        <option value="">Bitte wählen</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="pdf-export-range-panel" class="compare-panel is-hidden">
+                <div class="compare-grid-2">
+                    <div class="form-group">
+                        <label for="pdf-export-year-from">Von</label>
+                        <select id="pdf-export-year-from">
+                            <option value="">Bitte wählen</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pdf-export-year-to">Bis</label>
+                        <select id="pdf-export-year-to">
+                            <option value="">Bitte wählen</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button
+                type="button"
+                class="save-btn"
+                id="pdf-export-run-btn">
+
+                📄 PDF erstellen
+
+            </button>
+
+        </section>
+
     </div>
 
 </div>
@@ -23313,6 +23381,7 @@ initChartTabs();
 
 initYearCompareSwipe();
     initCompareFeature();
+    initPdfExportFeature();
     initAllModalSwipes();
 
     // Bestehende Touren
@@ -49183,6 +49252,50 @@ if (performanceScore !== null) {
     };
 }
 
+// ================== PDF-Tourenbuch: Datenfunktionen ==================
+
+function getToursInYearRange(fromYear, toYear) {
+    const from = Math.min(fromYear, toYear);
+    const to = Math.max(fromYear, toYear);
+
+    return getAllSavedTours()
+        .filter(entry => {
+            const date = parseStatsCalendarDate(entry?.date);
+            if (!date) return false;
+            const year = date.getFullYear();
+            return year >= from && year <= to;
+        })
+        .sort((a, b) => parseStatsCalendarDate(a.date) - parseStatsCalendarDate(b.date));
+}
+
+function getPdfExportAvailableYears() {
+    const years = new Set();
+    getAllSavedTours().forEach(entry => {
+        const date = parseStatsCalendarDate(entry?.date);
+        if (date) years.add(date.getFullYear());
+    });
+    return Array.from(years).sort((a, b) => b - a);
+}
+
+function buildPdfYearOverviewRows(fromYear, toYear) {
+    const rows = [];
+    for (let year = fromYear; year <= toYear; year++) {
+        const entries = getToursInYearRange(year, year);
+        if (!entries.length) continue;
+        const stats = computeStatsSummary(entries);
+        rows.push([
+            String(year),
+            String(stats.totalTours),
+            `${stats.totalDistance.toFixed(1).replace('.', ',')} km`,
+            `${Math.round(stats.totalAscent)} hm`,
+            `${stats.totalTimeText} h`,
+            Math.round(stats.totalSteps).toLocaleString('de-AT'),
+            String(stats.totalPeaks)
+        ]);
+    }
+    return rows;
+}
+
 function formatDelta(a, b, decimals = 0, suffix = '') {
     const diff = b - a;
 
@@ -49562,6 +49675,248 @@ function initCompareFeature() {
         appStorage.get(COMPARE_MODE_KEY) || 'years',
         false
     );
+}
+
+// ================== PDF-Tourenbuch: Erzeugung ==================
+
+const PDF_EXPORT_PAGE = { width: 210, height: 297, margin: 15 };
+
+function pdfExportFormatDate(dateStr) {
+    const date = parseStatsCalendarDate(dateStr);
+    if (!date) return dateStr || '–';
+    return date.toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function compressImageForPdf(dataUrl) {
+    return compressImageDataUrl(dataUrl, {
+        maxWidth: 400,
+        maxHeight: 400,
+        quality: 0.6,
+        mimeType: 'image/jpeg'
+    });
+}
+
+async function drawPdfTourCard(doc, entry, x, y, width, height) {
+    doc.setDrawColor(200, 200, 200);
+    doc.setFillColor(248, 248, 248);
+    doc.roundedRect(x, y, width, height, 3, 3, 'FD');
+
+    const hasPhoto = !!entry.imageData;
+    const photoSize = hasPhoto ? 45 : 0;
+    const textX = x + 5;
+    const textWidth = hasPhoto ? width - photoSize - 15 : width - 10;
+
+    let cursorY = y + 8;
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(30, 30, 30);
+    const headerText = `${pdfExportFormatDate(entry.date)} · ${entry.tourname || 'Unbenannte Tour'}`;
+    const headerLines = doc.splitTextToSize(headerText, textWidth);
+    doc.text(headerLines.slice(0, 2), textX, cursorY);
+    cursorY += headerLines.slice(0, 2).length * 5.5 + 2;
+
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(90, 90, 90);
+    const typeLabel = getTourCompareDifficultyLabel(entry.difficulty);
+    const regionLabel = entry.region || '–';
+    doc.text(`${typeLabel} · ${regionLabel}`, textX, cursorY);
+    cursorY += 7;
+
+    doc.setFontSize(10);
+    doc.setTextColor(40, 40, 40);
+    const statsLine = [
+        entry.strecke ? `${entry.strecke} km` : null,
+        entry.aufstieg ? `${entry.aufstieg} hm` : null,
+        entry.zeit ? `${entry.zeit} h` : null,
+        entry.gipfel ? `${entry.gipfel} Gipfel` : null
+    ].filter(Boolean).join('   ·   ');
+    doc.text(statsLine || '–', textX, cursorY);
+    cursorY += 7;
+
+    if (entry.notes) {
+        doc.setFontSize(8.5);
+        doc.setFont(undefined, 'italic');
+        doc.setTextColor(110, 110, 110);
+        const noteLines = doc.splitTextToSize(entry.notes, textWidth);
+        const maxLines = hasPhoto ? 6 : 4;
+        doc.text(noteLines.slice(0, maxLines), textX, cursorY);
+    }
+
+    if (hasPhoto) {
+        try {
+            const compressed = await compressImageForPdf(entry.imageData);
+            const photoX = x + width - photoSize - 5;
+            const photoY = y + 5;
+            doc.addImage(compressed, 'JPEG', photoX, photoY, photoSize, photoSize, undefined, 'FAST');
+        } catch (err) {
+            console.warn('PDF-Bild konnte nicht eingebettet werden:', err);
+        }
+    }
+}
+
+function pdfExportDownloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function pdfExportSaveOrShare(doc, fromYear, toYear) {
+    const filename = fromYear === toYear
+        ? `tourenbuch-${fromYear}.pdf`
+        : `tourenbuch-${fromYear}-${toYear}.pdf`;
+
+    const blob = doc.output('blob');
+    const file = new File([blob], filename, { type: 'application/pdf' });
+    const canUseShare = navigator.canShare && navigator.canShare({ files: [file] });
+
+    if (canUseShare) {
+        navigator.share({ files: [file], title: filename }).catch(err => {
+            if (err.name !== 'AbortError') pdfExportDownloadBlob(blob, filename);
+        });
+        return;
+    }
+
+    pdfExportDownloadBlob(blob, filename);
+}
+
+async function generateTourbookPdf(fromYear, toYear) {
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+        showToast('PDF-Bibliothek konnte nicht geladen werden.', { type: 'error', duration: 3000 });
+        return;
+    }
+
+    showToast('Tourenbuch wird erstellt…', { type: 'info', duration: 2500 });
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const { width: pageW, height: pageH, margin } = PDF_EXPORT_PAGE;
+    const contentW = pageW - margin * 2;
+
+    const entries = getToursInYearRange(fromYear, toYear);
+
+    doc.setFontSize(18);
+    doc.setFont(undefined, 'bold');
+    const titleText = fromYear === toYear
+        ? `Tourenbuch ${fromYear}`
+        : `Tourenbuch ${fromYear}–${toYear}`;
+    doc.text(titleText, margin, margin + 5);
+
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Erstellt am ${new Date().toLocaleDateString('de-AT')}`, margin, margin + 12);
+
+    const overviewRows = buildPdfYearOverviewRows(fromYear, toYear);
+
+    doc.autoTable({
+        startY: margin + 20,
+        head: [['Jahr', 'Touren', 'Strecke', 'Höhenmeter', 'Gehzeit', 'Schritte', 'Gipfel']],
+        body: overviewRows,
+        theme: 'grid',
+        headStyles: { fillColor: [60, 110, 90] },
+        styles: { fontSize: 9, cellPadding: 2.5 },
+        margin: { left: margin, right: margin }
+    });
+
+    if (!entries.length) {
+        doc.setFontSize(11);
+        doc.text('Keine Touren in diesem Zeitraum gefunden.', margin, doc.lastAutoTable.finalY + 15);
+        pdfExportSaveOrShare(doc, fromYear, toYear);
+        return;
+    }
+
+    doc.addPage();
+
+    const cardHeight = 125;
+    const cardGap = 8;
+    let cursorY = margin;
+
+    for (let i = 0; i < entries.length; i++) {
+        const entry = entries[i];
+
+        if (cursorY + cardHeight > pageH - margin) {
+            doc.addPage();
+            cursorY = margin;
+        }
+
+        await drawPdfTourCard(doc, entry, margin, cursorY, contentW, cardHeight);
+        cursorY += cardHeight + cardGap;
+    }
+
+    pdfExportSaveOrShare(doc, fromYear, toYear);
+}
+
+// ================== PDF-Tourenbuch: UI-Steuerung ==================
+
+let pdfExportRangeMode = 'single';
+
+function populatePdfExportYearSelects() {
+    const years = getPdfExportAvailableYears();
+    const selects = [
+        document.getElementById('pdf-export-year'),
+        document.getElementById('pdf-export-year-from'),
+        document.getElementById('pdf-export-year-to')
+    ];
+
+    selects.forEach(select => {
+        if (!select) return;
+        const current = select.value;
+        select.innerHTML = '<option value="">Bitte wählen</option>' +
+            years.map(y => `<option value="${y}">${y}</option>`).join('');
+        if (years.includes(Number(current))) select.value = current;
+        syncTourCompareMobileSelect(select);
+    });
+}
+
+function setPdfExportRangeMode(mode) {
+    pdfExportRangeMode = mode === 'range' ? 'range' : 'single';
+
+    document.querySelectorAll('[data-pdf-range-mode]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.pdfRangeMode === pdfExportRangeMode);
+    });
+
+    document.getElementById('pdf-export-single-panel')?.classList.toggle('is-hidden', pdfExportRangeMode !== 'single');
+    document.getElementById('pdf-export-range-panel')?.classList.toggle('is-hidden', pdfExportRangeMode !== 'range');
+}
+
+function initPdfExportFeature() {
+    populatePdfExportYearSelects();
+
+    document.querySelectorAll('[data-pdf-range-mode]').forEach(btn => {
+        btn.addEventListener('click', () => setPdfExportRangeMode(btn.dataset.pdfRangeMode));
+    });
+
+    document.getElementById('pdf-export-run-btn')?.addEventListener('click', () => {
+        let fromYear, toYear;
+
+        if (pdfExportRangeMode === 'single') {
+            const year = Number(document.getElementById('pdf-export-year')?.value);
+            if (!year) {
+                showToast('Bitte ein Jahr auswählen.', { type: 'error', duration: 2600 });
+                return;
+            }
+            fromYear = toYear = year;
+        } else {
+            const from = Number(document.getElementById('pdf-export-year-from')?.value);
+            const to = Number(document.getElementById('pdf-export-year-to')?.value);
+            if (!from || !to) {
+                showToast('Bitte Start- und Endjahr auswählen.', { type: 'error', duration: 2600 });
+                return;
+            }
+            fromYear = Math.min(from, to);
+            toYear = Math.max(from, to);
+        }
+
+        generateTourbookPdf(fromYear, toYear);
+    });
+
+    setPdfExportRangeMode('single');
 }
 
 document.getElementById('load-more-tours')?.addEventListener('click', () => {
