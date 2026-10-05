@@ -20820,6 +20820,96 @@ body.dark
 .wrapped-tap-left { left: 0; }
 .wrapped-tap-right { right: 0; }
 
+.wrapped-controls {
+    display: flex;
+    gap: 10px;
+    padding: 10px 14px calc(14px + env(safe-area-inset-bottom));
+    justify-content: center;
+}
+
+.wrapped-control-btn {
+    flex: 1;
+    max-width: 160px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.wrapped-control-btn:active {
+    transform: scale(0.96);
+}
+
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    #wrapped-view {
+        display: grid;
+        grid-template-columns: 100px 1fr 100px;
+        grid-template-rows: auto 1fr;
+        grid-template-areas:
+            "progress progress progress"
+            "header   stage    controls";
+    }
+
+    #wrapped-view .wrapped-progress-bar {
+        grid-area: progress;
+    }
+
+    #wrapped-view .wrapped-header {
+        grid-area: header;
+        flex-direction: column;
+        justify-content: center;
+        align-items: stretch;
+        height: 100%;
+        padding: 10px 6px;
+        gap: 14px;
+    }
+
+    #wrapped-view .wrapped-stage {
+        grid-area: stage;
+        height: 100%;
+        min-height: 0;
+        min-width: 0;
+    }
+
+    #wrapped-view .wrapped-controls {
+        grid-area: controls;
+        flex-direction: column;
+        justify-content: center;
+        align-items: stretch;
+        height: 100%;
+        padding: 10px 6px;
+        gap: 14px;
+    }
+
+    #wrapped-view .wrapped-year-select {
+        width: 100%;
+        font-size: 11px;
+        padding: 6px 4px;
+        text-align: center;
+    }
+
+    #wrapped-view .wrapped-share-btn {
+        width: 100%;
+        font-size: 11px;
+        padding: 8px 4px;
+    }
+
+    #wrapped-view .wrapped-control-btn {
+        max-width: 100%;
+        width: 100%;
+        font-size: 11px;
+        padding: 10px 4px;
+    }
+
+    #wrapped-view #wrapped-back-btn {
+        align-self: center;
+    }
+}
+
 </style>
 
 
@@ -23098,14 +23188,9 @@ body.dark
             <select id="achievements-year-select"></select>
         </div>
 
-        <div class="dash-section">
-            <div class="dash-section-title">🏅 Achievements</div>
-            <div class="dash-section-body">
-                <div class="achievements-summary-value" id="achievements-summary-value">0 / 0</div>
-                <div class="achievements-summary-label">freigeschaltet</div>
-            </div>
-        </div>
-        <div id="achievements-categories"></div>
+        <div class="achievements-overview-summary" id="achievements-summary-value">0 / 0 freigeschaltet</div>
+
+        <div class="achievement-category-grid" id="achievements-categories"></div>
     </div>
 </div>
 
@@ -23122,6 +23207,11 @@ body.dark
         <canvas id="wrapped-canvas" width="1080" height="1920"></canvas>
         <div class="wrapped-tap-zone wrapped-tap-left" id="wrapped-tap-left"></div>
         <div class="wrapped-tap-zone wrapped-tap-right" id="wrapped-tap-right"></div>
+    </div>
+
+    <div class="wrapped-controls">
+        <button type="button" id="wrapped-stop-btn" class="wrapped-control-btn">⏹ Stopp</button>
+        <button type="button" id="wrapped-pause-btn" class="wrapped-control-btn">⏸ Pause</button>
     </div>
 </div>
 
@@ -36919,6 +37009,7 @@ function goToView(targetView, animate = true) {
     const targetIndex = viewOrder.indexOf(targetView);
     if (targetIndex === -1) return;
 
+    const previousView = currentView;
     const isViewChange = targetView !== currentView;
 
     if (isViewChange) {
@@ -36978,6 +37069,34 @@ function goToView(targetView, animate = true) {
     if (targetView === 'backup') {
         updateBackupStatusSummary();
     }
+
+    if (targetView === 'achievements') {
+                    populateAchievementsYearSelect();
+                    renderAchievementsView();
+          }
+
+          if (targetView === 'wrapped' && (!wrappedCurrentYear || !wrappedSlides.length)) {
+    const years = getWrappedAvailableYears();
+    if (years.length) {
+        wrappedCurrentYear = years[0];
+        wrappedSlides = buildWrappedSlideData(wrappedCurrentYear);
+        wrappedSlideIndex = 0;
+        wrappedPaused = false;
+        populateWrappedYearSelect();
+        renderWrappedProgressBar();
+        renderWrappedSlide(0);
+        startWrappedAutoAdvance();
+
+        attachWrappedPhotos(wrappedSlides, wrappedCurrentYear).then(() => {
+            renderWrappedSlide(wrappedSlideIndex);
+        });
+    }
+    updateWrappedPauseButtonLabel();
+}
+
+if (previousView === 'wrapped' && targetView !== 'wrapped') {
+    clearWrappedAutoAdvance();
+}
 
     if (isViewChange && animate) {
         // Neue View startet leicht geblurrt und blendet dann scharf ein
@@ -42884,50 +43003,65 @@ function renderAchievementsView() {
     const unlockedCount = allBadges.filter(b => results[b.id]?.unlocked).length;
 
     if (summaryValue) {
-        summaryValue.textContent = `${unlockedCount} / ${allBadges.length}`;
+        summaryValue.textContent = `${unlockedCount} / ${allBadges.length} freigeschaltet`;
     }
 
-    container.innerHTML = Object.values(ACHIEVEMENT_CATEGORIES).map(cat => {
+    container.innerHTML = Object.entries(ACHIEVEMENT_CATEGORIES).map(([catId, cat]) => {
         const catUnlocked = cat.badges.filter(b => results[b.id]?.unlocked).length;
-
-        const badgesHtml = cat.badges.map(badge => {
-            const r = results[badge.id] || {};
-            const isUnlocked = !!r.unlocked;
-            const name = badge.nameFn ? badge.nameFn(badge.threshold) : badge.id;
-
-            return `
-                <button type="button"
-                    class="achievement-badge ${isUnlocked ? 'unlocked' : 'locked'}"
-                    data-badge-id="${badge.id}">
-                    <span class="achievement-badge-icon">${isUnlocked ? badge.icon : '🔒'}</span>
-                    <span class="achievement-badge-name">${isUnlocked ? name : '???'}</span>
-                </button>
-            `;
-        }).join('');
+        const isComplete = catUnlocked === cat.badges.length;
 
         return `
-            <div class="dash-section" style="margin-top:10px;">
-                <div class="dash-section-title">
-                    <div class="achievement-category-header">
-                        <span class="achievement-category-icon">${cat.icon}</span>
-                        <span class="achievement-category-label">${cat.label}</span>
-                        <span class="achievement-category-count">${catUnlocked}/${cat.badges.length}</span>
-                    </div>
-                </div>
-                <div class="dash-section-body">
-                    <div class="achievement-badge-grid">
-                        ${badgesHtml}
-                    </div>
-                </div>
-            </div>
+            <button type="button"
+                class="achievement-category-tile ${isComplete ? 'complete' : ''}"
+                data-category-id="${catId}">
+                <span class="achievement-category-tile-icon">${cat.icon}</span>
+                <span class="achievement-category-tile-label">${cat.label}</span>
+                <span class="achievement-category-tile-count">${catUnlocked}/${cat.badges.length}</span>
+            </button>
         `;
     }).join('');
 
-    container.querySelectorAll('.achievement-badge').forEach(btn => {
+    container.querySelectorAll('.achievement-category-tile').forEach(tile => {
+        tile.addEventListener('click', () => {
+            openAchievementCategoryModal(tile.dataset.categoryId, results);
+        });
+    });
+}
+
+function openAchievementCategoryModal(categoryId, resultsInput = null) {
+    const results = resultsInput || computeAllAchievements(getAchievementsFilteredTours());
+    const cat = ACHIEVEMENT_CATEGORIES[categoryId];
+    if (!cat) return;
+
+    const modal = document.getElementById('achievement-category-modal');
+    const title = document.getElementById('achievement-category-title');
+    const badgesContainer = document.getElementById('achievement-category-badges');
+    if (!modal || !title || !badgesContainer) return;
+
+    title.textContent = `${cat.icon} ${cat.label}`;
+
+    badgesContainer.innerHTML = cat.badges.map(badge => {
+        const r = results[badge.id] || {};
+        const isUnlocked = !!r.unlocked;
+        const name = badge.nameFn ? badge.nameFn(badge.threshold) : badge.id;
+
+        return `
+            <button type="button"
+                class="achievement-badge ${isUnlocked ? 'unlocked' : 'locked'}"
+                data-badge-id="${badge.id}">
+                <span class="achievement-badge-icon">${isUnlocked ? badge.icon : '🔒'}</span>
+                <span class="achievement-badge-name">${isUnlocked ? name : '???'}</span>
+            </button>
+        `;
+    }).join('');
+
+    badgesContainer.querySelectorAll('.achievement-badge').forEach(btn => {
         btn.addEventListener('click', () => {
             openAchievementDetailModal(btn.dataset.badgeId, results);
         });
     });
+
+    modal.classList.remove('hidden');
 }
 
 function openAchievementDetailModal(badgeId, resultsInput = null) {
@@ -42983,6 +43117,14 @@ function initAchievementsUI() {
     document.querySelector('#achievement-detail-modal .modal-backdrop')?.addEventListener('click', () => {
         document.getElementById('achievement-detail-modal')?.classList.add('hidden');
     });
+
+    document.getElementById('achievement-category-close')?.addEventListener('click', () => {
+    document.getElementById('achievement-category-modal')?.classList.add('hidden');
+});
+
+document.querySelector('#achievement-category-modal .modal-backdrop')?.addEventListener('click', () => {
+    document.getElementById('achievement-category-modal')?.classList.add('hidden');
+});
 
     document.getElementById('achievements-year-select')?.addEventListener('change', (e) => {
         achievementsYearFilter = e.target.value;
@@ -45520,27 +45662,92 @@ function getWrappedTopRegion(entries) {
     const counts = {};
 
     entries.forEach(entry => {
-        const group = getHighlightRegionGroup(entry?.region);
-        if (!group) return;
-        counts[group.label] = (counts[group.label] || 0) + 1;
+        const raw = String(entry?.region || '').trim();
+        if (!raw) return;
+        counts[raw] = (counts[raw] || 0) + 1;
     });
 
     const ranked = Object.entries(counts).sort((a, b) => b[1] - a[1]);
     return ranked.length ? { label: ranked[0][0], count: ranked[0][1] } : null;
 }
 
+let wrappedPhotoCache = new Map();
+
+function loadWrappedImage(dataUrl) {
+    if (!dataUrl) return Promise.resolve(null);
+    if (wrappedPhotoCache.has(dataUrl)) return Promise.resolve(wrappedPhotoCache.get(dataUrl));
+    return new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => { wrappedPhotoCache.set(dataUrl, img); resolve(img); };
+        img.onerror = () => resolve(null);
+        img.src = dataUrl;
+    });
+}
+
+function getWrappedYearPhotos(year) {
+    const entries = getWrappedDataForYear(year) || [];
+    return entries.filter(e => e.imageData);
+}
+
+function pickRandomWrappedPhoto(photoEntries) {
+    if (!photoEntries.length) return null;
+    return photoEntries[Math.floor(Math.random() * photoEntries.length)];
+}
+
+async function attachWrappedPhotos(slides, year) {
+    const photoEntries = getWrappedYearPhotos(year);
+    if (!photoEntries.length) {
+        slides.forEach(s => s.photoImg = null);
+        return slides;
+    }
+
+    for (const slide of slides) {
+        let photoEntry = null;
+
+        if (slide.key === 'intro' || slide.key === 'outro') {
+            photoEntry = pickRandomWrappedPhoto(photoEntries);
+        } else if (slide.key === 'bestTour') {
+            photoEntry = slide.data?.entry?.imageData ? slide.data.entry : pickRandomWrappedPhoto(photoEntries);
+        } else if (slide.key === 'highestPeak') {
+            photoEntry = pickRandomWrappedPhoto(photoEntries);
+        }
+
+        slide.photoImg = photoEntry?.imageData ? await loadWrappedImage(photoEntry.imageData) : null;
+    }
+
+    return slides;
+}
+
 function getWrappedTop3(entries) {
+    // Globalen Stats-Cache sichern, bevor wir ihn für Wrapped-Zwecke
+    // vorübergehend mit anderen (jahres-gefilterten) Daten überschreiben.
+    const savedInfo = highlightTop3Info;
+    const savedRevision = highlightTop3CacheRevision;
+    const savedYearFilter = highlightTop3CacheYearFilter;
+
     rebuildHighlightTop3Info(entries);
 
-    const top3Entries = [];
+    const items = [];
     entries.forEach(entry => {
         const info = highlightTop3Info.get(entry);
-        if (info && info.rank <= 3) {
-            top3Entries.push({ entry, info });
-        }
+        if (info) items.push({ entry, info });
     });
 
-    return top3Entries.sort((a, b) => a.info.rank - b.info.rank);
+    items.sort((a, b) =>
+        a.info.rank - b.info.rank ||
+        b.info.highlights.length - a.info.highlights.length
+    );
+
+    const top3 = items.slice(0, 3);
+
+    // Stats-Cache exakt wiederherstellen, damit die Highlights-Seite
+    // beim nächsten Öffnen korrekt neu berechnet (und nicht fälschlich
+    // als "aktuell" markiert bleibt).
+    highlightTop3Info = savedInfo;
+    highlightTop3CacheRevision = savedRevision;
+    highlightTop3CacheYearFilter = savedYearFilter;
+
+    return top3;
 }
 
 function getWrappedTotals(entries) {
@@ -45548,11 +45755,13 @@ function getWrappedTotals(entries) {
     let ascent = 0;
     let minutes = 0;
     let peaks = 0;
+    let steps = 0;
 
     entries.forEach(entry => {
         distance += parseFloat(String(entry.strecke || '').replace(',', '.')) || 0;
         ascent += parseFloat(String(entry.aufstieg || '').replace(',', '.')) || 0;
         peaks += parseInt(entry.gipfel) || 0;
+        steps += Number(calculateEntrySteps(entry)) || 0;
 
         if (entry.zeit && String(entry.zeit).includes(':')) {
             const [h, m] = String(entry.zeit).split(':').map(Number);
@@ -45562,13 +45771,7 @@ function getWrappedTotals(entries) {
         }
     });
 
-    return {
-        tourCount: entries.length,   // ← korrigiert, war: countDistinctTours(entries)
-        distance,
-        ascent,
-        minutes,
-        peaks
-    };
+    return { tourCount: entries.length, distance, ascent, minutes, peaks, steps };
 }
 
 function buildWrappedSlideData(year) {
@@ -54998,41 +55201,89 @@ function showWrappedReminderBanner(year) {
     closeBtn.onclick = hide;
 }
 
-async function shareWrappedSlideCanvas(canvas, year, slideKey) {
-    const filename = `jahresrueckblick-${year}-${slideKey}.png`;
+function renderWrappedSlideToCanvas(slide, width, height) {
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
 
-    canvas.toBlob(async (blob) => {
-        if (!blob) return;
+    const colors = drawWrappedBackground(ctx, width, height, slide.photoImg || null);
 
-        const file = new File([blob], filename, { type: 'image/png' });
-        const canUseShare = navigator.canShare && navigator.canShare({ files: [file] });
+    switch (slide.key) {
+        case 'intro': renderWrappedIntroSlide(ctx, width, height, colors, slide.data); break;
+        case 'distance': renderWrappedDistanceSlide(ctx, width, height, colors, slide.data); break;
+        case 'ascent': renderWrappedAscentSlide(ctx, width, height, colors, slide.data); break;
+        case 'time': renderWrappedTimeSlide(ctx, width, height, colors, slide.data); break;
+        case 'activeMonth': renderWrappedActiveMonthSlide(ctx, width, height, colors, slide.data); break;
+        case 'bestTour': renderWrappedBestTourSlide(ctx, width, height, colors, slide.data); break;
+        case 'highestPeak': renderWrappedHighestPeakSlide(ctx, width, height, colors, slide.data); break;
+        case 'topRegion': renderWrappedTopRegionSlide(ctx, width, height, colors, slide.data); break;
+        case 'yearCompare': renderWrappedYearCompareSlide(ctx, width, height, colors, slide.data); break;
+        case 'top3': renderWrappedTop3Slide(ctx, width, height, colors, slide.data); break;
+        case 'outro': renderWrappedOutroSlide(ctx, width, height, colors, slide.data); break;
+    }
 
-        if (canUseShare) {
-            try {
-                await navigator.share({
-                    files: [file],
-                    title: `Jahresrückblick ${year}`,
-                    text: `Mein Bergtour-Jahresrückblick ${year} 🏔️`
-                });
-                return;
-            } catch (err) {
-                if (err.name === 'AbortError') return;
-                // fällt durch zum Download-Fallback
-            }
+    drawWrappedFooter(ctx, width, height, wrappedCurrentYear);
+    return canvas;
+}
+
+function canvasToBlobAsync(canvas) {
+    return new Promise(resolve => canvas.toBlob(resolve, 'image/png', 0.95));
+}
+
+async function shareAllWrappedSlides(year) {
+    if (!wrappedSlides.length) return;
+
+    showToast?.('Bilder werden vorbereitet…', { type: 'info', duration: 2000 });
+
+    const refCanvas = document.getElementById('wrapped-canvas');
+    const width = refCanvas.width;
+    const height = refCanvas.height;
+
+    const files = [];
+
+    for (let i = 0; i < wrappedSlides.length; i++) {
+        const slide = wrappedSlides[i];
+        const canvas = renderWrappedSlideToCanvas(slide, width, height);
+        const blob = await canvasToBlobAsync(canvas);
+        if (!blob) continue;
+        const filename = `jahresrueckblick-${year}-${String(i + 1).padStart(2, '0')}-${slide.key}.png`;
+        files.push(new File([blob], filename, { type: 'image/png' }));
+    }
+
+    if (!files.length) return;
+
+    const canUseShare = navigator.canShare && navigator.canShare({ files });
+
+    if (canUseShare) {
+        try {
+            await navigator.share({
+                files,
+                title: `Jahresrückblick ${year}`,
+                text: `Mein Bergtour-Jahresrückblick ${year} 🏔️`
+            });
+            return;
+        } catch (err) {
+            if (err.name === 'AbortError') return;
         }
+    }
 
-        const url = URL.createObjectURL(blob);
+    for (const file of files) {
+        const url = URL.createObjectURL(file);
         const link = document.createElement('a');
         link.href = url;
-        link.download = filename;
+        link.download = file.name;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-    }, 'image/png', 0.95);
+        await new Promise(r => setTimeout(r, 300));
+        URL.revokeObjectURL(url);
+    }
+
+    showToast?.('Bilder wurden einzeln heruntergeladen (dein Browser unterstützt kein Teilen mehrerer Bilder auf einmal).', { type: 'info', duration: 4000 });
 }
 
-function openWrappedView(year) {
+async function openWrappedView(year) {
     wrappedCurrentYear = year;
     wrappedSlides = buildWrappedSlideData(year);
     wrappedSlideIndex = 0;
@@ -55043,6 +55294,10 @@ function openWrappedView(year) {
     goToView('wrapped');
     renderWrappedSlide(0);
     startWrappedAutoAdvance();
+    updateWrappedPauseButtonLabel();
+
+    await attachWrappedPhotos(wrappedSlides, year);
+    renderWrappedSlide(wrappedSlideIndex);
 }
 
 function populateWrappedYearSelect() {
@@ -55051,6 +55306,8 @@ function populateWrappedYearSelect() {
     select.innerHTML = years.map(y =>
         `<option value="${y}" ${y === wrappedCurrentYear ? 'selected' : ''}>${y}</option>`
     ).join('');
+
+    select.dispatchEvent(new Event('change'));   // ← neu
 }
 
 function renderWrappedProgressBar() {
@@ -55111,6 +55368,8 @@ function pauseWrappedAutoAdvance() {
         current.style.transition = 'none';
         current.style.width = computedWidth;
     }
+
+    updateWrappedPauseButtonLabel();
 }
 
 function resumeWrappedAutoAdvance() {
@@ -55123,6 +55382,14 @@ function resumeWrappedAutoAdvance() {
     wrappedAutoAdvanceTimer = setTimeout(() => {
         goToWrappedSlide(wrappedSlideIndex + 1);
     }, wrappedAutoAdvanceRemaining);
+
+    updateWrappedPauseButtonLabel();
+}
+
+function updateWrappedPauseButtonLabel() {
+    const btn = document.getElementById('wrapped-pause-btn');
+    if (!btn) return;
+    btn.textContent = wrappedPaused ? '▶ Fortsetzen' : '⏸ Pause';
 }
 
 function clearWrappedAutoAdvance() {
@@ -55172,6 +55439,23 @@ function initWrappedControls() {
         }
     }, { passive: true });
 
+    document.getElementById('wrapped-stop-btn').addEventListener('click', () => {
+    clearWrappedAutoAdvance();
+    wrappedPaused = true;
+    wrappedSlideIndex = 0;
+    updateWrappedProgressSegments();
+    renderWrappedSlide(0);
+    updateWrappedPauseButtonLabel();
+    });
+
+  document.getElementById('wrapped-pause-btn').addEventListener('click', () => {
+    if (wrappedPaused) {
+        resumeWrappedAutoAdvance();
+    } else {
+        pauseWrappedAutoAdvance();
+    }
+    });
+
     document.getElementById('wrapped-back-btn').addEventListener('click', () => {
         clearWrappedAutoAdvance();
         goToView('dashboard');
@@ -55182,9 +55466,7 @@ function initWrappedControls() {
     });
 
     document.getElementById('wrapped-share-btn').addEventListener('click', () => {
-        const canvas = document.getElementById('wrapped-canvas');
-        const slide = wrappedSlides[wrappedSlideIndex];
-        shareWrappedSlideCanvas(canvas, wrappedCurrentYear, slide.key);
+        shareAllWrappedSlides(wrappedCurrentYear);
     });
 
     document.getElementById('wrapped-toggle').addEventListener('click', () => {
@@ -55196,7 +55478,7 @@ function initWrappedControls() {
 }
 
 function getWrappedThemeColors() {
-    const theme = document.body.dataset.theme || 'light';
+    const theme = themeEditorGetActiveTheme(); // ← statt document.body.dataset.theme
     const palettes = {
         light:  { bg1: '#4facfe', bg2: '#43e97b', text: '#0b2447', accent: '#ffffff' },
         dark:   { bg1: '#8e0e00', bg2: '#1f1c2c', text: '#ffffff', accent: '#ff6b6b' },
@@ -55206,14 +55488,49 @@ function getWrappedThemeColors() {
     return palettes[theme] || palettes.light;
 }
 
-function drawWrappedBackground(ctx, w, h) {
+function drawWrappedBackground(ctx, w, h, photoImg) {
     const colors = getWrappedThemeColors();
-    const gradient = ctx.createLinearGradient(0, 0, w, h);
-    gradient.addColorStop(0, colors.bg1);
-    gradient.addColorStop(1, colors.bg2);
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, w, h);
+
+    if (photoImg) {
+        drawWrappedCoverImage(ctx, photoImg, w, h);
+
+        const overlay = ctx.createLinearGradient(0, 0, 0, h);
+        overlay.addColorStop(0, 'rgba(0,0,0,0.55)');
+        overlay.addColorStop(0.5, 'rgba(0,0,0,0.30)');
+        overlay.addColorStop(1, 'rgba(0,0,0,0.65)');
+        ctx.fillStyle = overlay;
+        ctx.fillRect(0, 0, w, h);
+    } else {
+        const gradient = ctx.createLinearGradient(0, 0, w, h);
+        gradient.addColorStop(0, colors.bg1);
+        gradient.addColorStop(1, colors.bg2);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, w, h);
+    }
+
     return colors;
+}
+
+function drawWrappedCoverImage(ctx, img, w, h) {
+    const imgRatio = img.width / img.height;
+    const boxRatio = w / h;
+    let sx, sy, sw, sh;
+
+    if (imgRatio > boxRatio) {
+        sh = img.height;
+        sw = sh * boxRatio;
+        sx = (img.width - sw) / 2;
+        sy = 0;
+    } else {
+        sw = img.width;
+        sh = sw / boxRatio;
+        sx = 0;
+        sy = (img.height - sh) / 2;
+    }
+
+    ctx.filter = 'blur(2px) brightness(0.9)';
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+    ctx.filter = 'none';
 }
 
 function wrapWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
@@ -55260,24 +55577,15 @@ function drawWrappedFooter(ctx, w, h, year) {
 }
 
 function getWrappedDistanceComparison(km) {
-    const refs = [
-        { label: 'Wien → Rom', km: 765 },
-        { label: 'Wien → Berlin', km: 525 },
-        { label: 'Wien → Hamburg', km: 790 },
-        { label: 'einmal quer durch Österreich', km: 560 }
-    ];
-    const match = refs.find(r => km >= r.km * 0.5) || refs[refs.length - 1];
-    const factor = (km / match.km).toFixed(1);
-    return `Das ist wie ${factor}× ${match.label}!`;
+    const refKm = 860;
+    const factor = (km / refKm).toFixed(1);
+    return `Das ist wie ${factor}× Lienz → Düsseldorf!`;
 }
 
 function getWrappedElevationComparison(meters) {
-    const everest = 8849;
     const grossglockner = 3798;
-    if (meters >= everest) {
-        return `Das ist wie ${(meters / everest).toFixed(1)}× auf den Mount Everest!`;
-    }
-    return `Das ist wie ${(meters / grossglockner).toFixed(1)}× auf den Großglockner!`;
+    const factor = (meters / grossglockner).toFixed(1);
+    return `Das ist wie ${factor}× auf den Großglockner!`;
 }
 
 function renderWrappedSlide(index) {
@@ -55288,7 +55596,7 @@ function renderWrappedSlide(index) {
     const slide = wrappedSlides[index];
     if (!slide) return;
 
-    const colors = drawWrappedBackground(ctx, w, h);
+    const colors = drawWrappedBackground(ctx, w, h, slide.photoImg || null);
 
     switch (slide.key) {
         case 'intro': renderWrappedIntroSlide(ctx, w, h, colors, slide.data); break;
@@ -55413,17 +55721,23 @@ function renderWrappedTopRegionSlide(ctx, w, h, colors, data) {
 }
 
 function renderWrappedYearCompareSlide(ctx, w, h, colors, data) {
-    drawWrappedCenteredTitle(ctx, `${data.previousYear} vs. ${wrappedCurrentYear}`, 280, 60, colors.text, w);
+    ctx.font = 'bold 60px sans-serif';
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    ctx.fillText(`${data.previousYear} vs. ${wrappedCurrentYear}`, w / 2, 280);
 
     const rows = [
         { label: 'Touren', prev: data.previous.tourCount, curr: data.current.tourCount },
         { label: 'km', prev: data.previous.distance.toFixed(0), curr: data.current.distance.toFixed(0) },
-        { label: 'Hm', prev: Math.round(data.previous.ascent), curr: Math.round(data.current.ascent) }
+        { label: 'Hm', prev: Math.round(data.previous.ascent), curr: Math.round(data.current.ascent) },
+        { label: 'Gehzeit (h)', prev: Math.round(data.previous.minutes / 60), curr: Math.round(data.current.minutes / 60) },
+        { label: 'Schritte', prev: Math.round(data.previous.steps).toLocaleString('de-AT'), curr: Math.round(data.current.steps).toLocaleString('de-AT') },
+        { label: 'Gipfel', prev: data.previous.peaks, curr: data.current.peaks }
     ];
 
-    let y = 500;
+    let y = 420;
     rows.forEach(row => {
-        ctx.font = '36px sans-serif';
+        ctx.font = '32px sans-serif';
         ctx.fillStyle = colors.text;
         ctx.textAlign = 'left';
         ctx.fillText(row.label, 100, y);
@@ -55434,19 +55748,19 @@ function renderWrappedYearCompareSlide(ctx, w, h, colors, data) {
 
         ctx.textAlign = 'left';
         ctx.fillStyle = colors.accent;
-        ctx.font = 'bold 36px sans-serif';
+        ctx.font = 'bold 32px sans-serif';
         ctx.fillText(String(row.curr), w / 2 + 40, y);
 
-        y += 120;
+        y += 100;
     });
 
     const diff = data.current.tourCount - data.previous.tourCount;
-    ctx.font = '38px sans-serif';
+    ctx.font = '34px sans-serif';
     ctx.fillStyle = colors.text;
     ctx.textAlign = 'center';
     ctx.fillText(
         diff >= 0 ? `${diff} Touren mehr als letztes Jahr! 📈` : `${Math.abs(diff)} Touren weniger als letztes Jahr`,
-        w / 2, y + 60
+        w / 2, y + 50
     );
 }
 
@@ -55536,6 +55850,19 @@ function renderWrappedOutroSlide(ctx, w, h, colors, data) {
             <button type="button" id="achievement-detail-close" aria-label="Schließen">✕</button>
         </div>
         <div class="modal-body" id="achievement-detail-body"></div>
+    </div>
+</div>
+
+<div id="achievement-category-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card">
+        <div class="modal-header">
+            <div class="modal-title" id="achievement-category-title">Kategorie</div>
+            <button type="button" id="achievement-category-close" aria-label="Schließen">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="achievement-badge-grid" id="achievement-category-badges"></div>
+        </div>
     </div>
 </div>
 
@@ -60106,6 +60433,21 @@ body.summit .plan-season-card {
     justify-content: center;
 }
 
+#achievement-category-close {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    border-radius: 50%;
+    border: 1px solid var(--ui-card-border);
+    background: var(--ui-card-bg);
+    color: var(--text-main);
+    font-size: 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
 #achievement-detail-body {
     display: flex;
     flex-direction: column;
@@ -60176,6 +60518,99 @@ body.summit .plan-season-card {
         height: 34px;
         font-size: 12px;
     }
+}
+
+.achievements-overview-summary {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-soft);
+    margin-bottom: 8px;
+}
+
+.achievement-category-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    .achievement-category-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+.achievement-category-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 74px;
+    padding: 10px 6px;
+    border-radius: 14px;
+    border: 1px solid var(--ui-card-border);
+    background: var(--ui-card-bg);
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.14s ease, background 0.16s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.achievement-category-tile:active {
+    transform: scale(0.95);
+}
+
+.achievement-category-tile-icon {
+    font-size: 22px;
+    line-height: 1;
+}
+
+.achievement-category-tile-label {
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--text-main);
+}
+
+.achievement-category-tile-count {
+    font-size: 9px;
+    font-weight: 800;
+    opacity: 0.75;
+    color: var(--text-soft);
+}
+
+.achievement-category-tile.complete {
+    border-color: color-mix(in srgb, var(--accent) 60%, var(--ui-card-border));
+    background: color-mix(in srgb, var(--accent) 18%, var(--ui-card-bg));
+}
+
+@media (max-width: 768px), (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    .achievement-category-grid {
+        gap: 6px;
+    }
+
+    .achievement-category-tile {
+        min-height: 62px;
+        padding: 7px 4px;
+        border-radius: 12px;
+    }
+
+    .achievement-category-tile-icon {
+        font-size: 18px;
+    }
+
+    .achievement-category-tile-label {
+        font-size: 8.5px;
+    }
+
+    .achievement-category-tile-count {
+        font-size: 7.5px;
+    }
+}
+
+#achievement-detail-modal {
+    z-index: 10050;
 }
 
 </style>
