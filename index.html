@@ -49296,22 +49296,6 @@ function buildPdfYearOverviewRows(fromYear, toYear) {
     return rows;
 }
 
-function buildPdfAverageRows(stats) {
-    return [
-        ['Ø Strecke', `${stats.avgDistance.toFixed(1).replace('.', ',')} km`],
-        ['Ø Aufstieg', `${Math.round(stats.avgAscent)} hm`],
-        ['Ø Gehzeit', `${formatMinutesToHHMM(stats.avgMinutes)} h`],
-        ['Ø Schritte', Math.round(stats.avgSteps).toLocaleString('de-AT')],
-        ['Ø Geschwindigkeit', `${stats.avgSpeed.toFixed(2).replace('.', ',')} km/h`],
-        ['Ø Steigung', `${stats.avgGradient.toFixed(0)} hm/km`],
-        ['Ø Anstieg', `${stats.avgAscentPerHour.toFixed(0)} hm/h`],
-        ['Ø Leistungsindex', Number.isFinite(stats.avgPerformanceIndex) ? `${Math.round(stats.avgPerformanceIndex)} / 100` : '–'],
-        ['Big Tours (ab 10 km & 1000 hm)', String(stats.bigTours)],
-        ['Gipfel 2000–2499 m', String(stats.peaks2000)],
-        ['Gipfel 2500–2999 m', String(stats.peaks2500)],
-        ['Gipfel ab 3000 m', String(stats.peaks3000)]
-    ];
-}
 
 function getPdfRepresentativePhoto(entries) {
     const withPhotos = entries.filter(e => e.imageData);
@@ -49971,6 +49955,121 @@ function pdfExportSaveOrShare(doc, fromYear, toYear) {
     pdfExportDownloadBlob(blob, filename);
 }
 
+// ================== PDF: Theme-Farben & Grafik-Helfer ==================
+
+function hexToRgbArray(hex) {
+    const clean = String(hex || '').replace('#', '');
+    if (clean.length !== 6) return [60, 60, 60];
+    return [
+        parseInt(clean.substring(0, 2), 16),
+        parseInt(clean.substring(2, 4), 16),
+        parseInt(clean.substring(4, 6), 16)
+    ];
+}
+
+function getPdfThemeColors() {
+    const themeKey = themeEditorGetActiveTheme();
+    const settings = getThemeEditorSettings()[themeKey] || defaultThemeEditorSettings.light;
+
+    return {
+        top: hexToRgbArray(settings.topColor),
+        bottom: hexToRgbArray(settings.bottomColor),
+        accent: hexToRgbArray(settings.accent),
+        accent2: hexToRgbArray(settings.accent2),
+        topHex: settings.topColor,
+        bottomHex: settings.bottomColor
+    };
+}
+
+function getPdfContrastTextColor(rgb) {
+    const [r, g, b] = rgb;
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.6 ? [30, 30, 30] : [255, 255, 255];
+}
+
+function createPdfGradientImage(colorStartHex, colorEndHex, widthPx, heightPx, direction = 'horizontal') {
+    const canvas = document.createElement('canvas');
+    canvas.width = widthPx;
+    canvas.height = heightPx;
+    const ctx = canvas.getContext('2d');
+
+    const gradient = direction === 'horizontal'
+        ? ctx.createLinearGradient(0, 0, widthPx, 0)
+        : ctx.createLinearGradient(0, 0, 0, heightPx);
+
+    gradient.addColorStop(0, colorStartHex);
+    gradient.addColorStop(1, colorEndHex);
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, widthPx, heightPx);
+
+    return canvas.toDataURL('image/png');
+}
+
+function drawPdfStatTile(doc, x, y, w, h, label, value, colors) {
+    doc.setDrawColor(225, 225, 225);
+    doc.setFillColor(252, 252, 252);
+    doc.roundedRect(x, y, w, h, 2.5, 2.5, 'FD');
+
+    doc.setFillColor(...colors.accent);
+    doc.roundedRect(x, y, 2, h, 1, 1, 'F');
+
+    doc.setFontSize(12.5);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(30, 30, 30);
+    doc.text(sanitizePdfText(value), x + 5, y + h / 2 - 1);
+
+    doc.setFontSize(7.5);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(120, 120, 120);
+    doc.text(sanitizePdfText(label), x + 5, y + h / 2 + 6);
+}
+
+function drawPdfMilestoneRow(doc, x, y, w, label, data, unit, colors) {
+    const reachedCount = data.reached.length;
+    const next = data.next;
+    let progress = 100;
+    let progressText = 'Alle Meilensteine erreicht';
+
+    if (next !== null) {
+        const prev = reachedCount > 0 ? data.reached[reachedCount - 1].milestone : 0;
+        progress = Math.min(100, Math.max(0, ((data.total - prev) / (next - prev)) * 100));
+        const remaining = next - data.total;
+        const fmtRemain = unit === 'km'
+            ? remaining.toFixed(1).replace('.', ',')
+            : Math.round(remaining).toLocaleString('de-AT');
+        progressText = `${fmtRemain} ${unit} bis ${next.toLocaleString('de-AT')} ${unit}`;
+    }
+
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(40, 40, 40);
+    doc.text(sanitizePdfText(label), x, y);
+
+    doc.setFontSize(7.3);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(130, 130, 130);
+    doc.text(sanitizePdfText(`${reachedCount} erreicht · ${progressText}`), x, y + 4.2);
+
+    const barY = y + 6.5;
+    const barH = 2.6;
+    doc.setFillColor(230, 230, 230);
+    doc.roundedRect(x, barY, w, barH, 1.3, 1.3, 'F');
+
+    const fillW = Math.max(2, (progress / 100) * w);
+    doc.setFillColor(...colors.accent);
+    doc.roundedRect(x, barY, fillW, barH, 1.3, 1.3, 'F');
+}
+
+function buildPdfExtraMetricsRows(stats) {
+    return [
+        ['Gipfel 2000–2499 m', String(stats.peaks2000)],
+        ['Gipfel 2500–2999 m', String(stats.peaks2500)],
+        ['Gipfel ab 3000 m', String(stats.peaks3000)],
+        ['Ø Leistungsindex', Number.isFinite(stats.avgPerformanceIndex) ? `${Math.round(stats.avgPerformanceIndex)} / 100` : '–']
+    ];
+}
+
 async function generateTourbookPdf(fromYear, toYear) {
     if (!window.jspdf || !window.jspdf.jsPDF) {
         showToast('PDF-Bibliothek konnte nicht geladen werden.', { type: 'error', duration: 3000 });
@@ -49983,52 +50082,114 @@ async function generateTourbookPdf(fromYear, toYear) {
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     const { width: pageW, height: pageH, margin } = PDF_EXPORT_PAGE;
     const contentW = pageW - margin * 2;
+    const colors = getPdfThemeColors();
 
     const entries = getToursInYearRange(fromYear, toYear);
 
-    // ---------- Seite 1: Titel + Jahresübersicht ----------
-    doc.setFontSize(18);
+    // ---------- Seite 1: Dashboard-Stil, in Theme-Farben ----------
+    const headerH = 32;
+    const headerImg = createPdfGradientImage(colors.topHex, colors.bottomHex, 200, 4, 'horizontal');
+    doc.addImage(headerImg, 'PNG', 0, 0, pageW, headerH, undefined, 'FAST');
+
+    const headerTextColor = getPdfContrastTextColor(colors.top);
+
+    doc.setFontSize(20);
     doc.setFont(undefined, 'bold');
+    doc.setTextColor(...headerTextColor);
     const titleText = fromYear === toYear ? `Tourenbuch ${fromYear}` : `Tourenbuch ${fromYear}–${toYear}`;
-    doc.text(titleText, margin, margin + 5);
+    doc.text(sanitizePdfText(titleText), margin, 16);
 
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.setFont(undefined, 'normal');
-    doc.text(`Erstellt am ${new Date().toLocaleDateString('de-AT')}`, margin, margin + 12);
-
-    doc.autoTable({
-        startY: margin + 20,
-        head: [['Jahr', 'Touren', 'Strecke', 'Höhenmeter', 'Gehzeit', 'Schritte', 'Gipfel']],
-        body: buildPdfYearOverviewRows(fromYear, toYear),
-        theme: 'grid',
-        headStyles: { fillColor: [60, 110, 90] },
-        styles: { fontSize: 9, cellPadding: 2.5 },
-        margin: { left: margin, right: margin }
-    });
+    doc.text(sanitizePdfText(`Erstellt am ${new Date().toLocaleDateString('de-AT')}`), margin, 23);
 
     if (!entries.length) {
         doc.setFontSize(11);
-        doc.text('Keine Touren in diesem Zeitraum gefunden.', margin, doc.lastAutoTable.finalY + 15);
+        doc.setTextColor(40, 40, 40);
+        doc.text('Keine Touren in diesem Zeitraum gefunden.', margin, headerH + 15);
         pdfExportSaveOrShare(doc, fromYear, toYear);
         return;
     }
 
     const overallStats = computeStatsSummary(entries);
 
+    // ---- Stat-Kacheln (wie im Dashboard) ----
+    const tiles = [
+        { label: 'Touren', value: String(overallStats.totalTours) },
+        { label: 'Schritte', value: overallStats.totalSteps > 0 ? Math.round(overallStats.totalSteps).toLocaleString('de-AT') : '–' },
+        { label: 'Gipfel', value: String(overallStats.totalPeaks) },
+        { label: 'Big Tours', value: String(overallStats.bigTours) },
+        { label: 'Strecke', value: `${overallStats.totalDistance.toFixed(0)} km` },
+        { label: 'Aufstieg', value: `${Math.round(overallStats.totalAscent)} hm` },
+        { label: 'Gehzeit', value: `${overallStats.totalTimeText} h` },
+        { label: 'Ø Geschwindigkeit', value: overallStats.avgSpeed > 0 ? `${formatDecimalAT(overallStats.avgSpeed)} km/h` : '–' },
+        { label: 'Ø Steigung', value: overallStats.avgGradient > 0 ? `${Math.round(overallStats.avgGradient)} hm/km` : '–' },
+        { label: 'Ø Anstieg/h', value: overallStats.avgAscentPerHour > 0 ? `${Math.round(overallStats.avgAscentPerHour)} hm/h` : '–' }
+    ];
+
+    const tileCols = 5;
+    const tileGap = 4;
+    const tileW = (contentW - tileGap * (tileCols - 1)) / tileCols;
+    const tileH = 22;
+    const tileStartY = headerH + 10;
+
+    tiles.forEach((tile, i) => {
+        const col = i % tileCols;
+        const row = Math.floor(i / tileCols);
+        const x = margin + col * (tileW + tileGap);
+        const y = tileStartY + row * (tileH + tileGap);
+        drawPdfStatTile(doc, x, y, tileW, tileH, tile.label, tile.value, colors);
+    });
+
+    const tileRows = Math.ceil(tiles.length / tileCols);
+    let cursorY = tileStartY + tileRows * (tileH + tileGap) + 4;
+
+    // ---- Weitere Kennzahlen ----
     doc.autoTable({
-        startY: doc.lastAutoTable.finalY + 10,
-        head: [['Durchschnittswerte & weitere Kennzahlen', '']],
-        body: buildPdfAverageRows(overallStats),
+        startY: cursorY,
+        head: [['Weitere Kennzahlen', '']],
+        body: buildPdfExtraMetricsRows(overallStats),
         theme: 'grid',
-        headStyles: { fillColor: [90, 90, 90] },
-        styles: { fontSize: 9, cellPadding: 2.5 },
+        headStyles: { fillColor: colors.accent, textColor: getPdfContrastTextColor(colors.accent) },
+        styles: { fontSize: 8.5, cellPadding: 2 },
         margin: { left: margin, right: margin }
     });
 
+    cursorY = doc.lastAutoTable.finalY + 8;
+
+    // ---- Meilensteine ----
+    const milestones = computeMilestones(entries);
+    const milestoneDefs = [
+        { key: 'dist', label: 'Strecke', unit: 'km' },
+        { key: 'asc', label: 'Aufstieg', unit: 'hm' },
+        { key: 'time', label: 'Gehzeit', unit: 'h' },
+        { key: 'peaks', label: 'Gipfel', unit: 'Gipfel' },
+        { key: 'steps', label: 'Schritte', unit: 'Schritte' }
+    ];
+
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...colors.accent);
+    doc.text('Meilensteine', margin, cursorY);
+    cursorY += 6;
+
+    const msColW = (contentW - 8) / 2;
+    milestoneDefs.forEach((def, i) => {
+        const col = i % 2;
+        const row = Math.floor(i / 2);
+        const x = margin + col * (msColW + 8);
+        const y = cursorY + row * 16;
+        drawPdfMilestoneRow(doc, x, y, msColW, def.label, milestones[def.key], def.unit, colors);
+    });
+
+    const msRows = Math.ceil(milestoneDefs.length / 2);
+    cursorY = cursorY + msRows * 16 + 6;
+
+    // ---- Titelbild ----
     const photoEntry = getPdfRepresentativePhoto(entries);
     if (photoEntry) {
         const photoW = 100, photoH = 65;
-        let photoY = doc.lastAutoTable.finalY + 10;
+        let photoY = cursorY;
 
         if (photoY + photoH + 10 > pageH - margin) {
             doc.addPage();
@@ -50054,10 +50215,26 @@ async function generateTourbookPdf(fromYear, toYear) {
         }
     }
 
+    // ---- Jahr-für-Jahr-Tabelle (nur bei Mehrjahres-Export) ----
+    if (fromYear !== toYear) {
+        doc.addPage();
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(30, 30, 30);
+        doc.text('Jahresübersicht', margin, margin + 5);
+
+        doc.autoTable({
+            startY: margin + 12,
+            head: [['Jahr', 'Touren', 'Strecke', 'Höhenmeter', 'Gehzeit', 'Schritte', 'Gipfel']],
+            body: buildPdfYearOverviewRows(fromYear, toYear),
+            theme: 'grid',
+            headStyles: { fillColor: colors.accent, textColor: getPdfContrastTextColor(colors.accent) },
+            styles: { fontSize: 9, cellPadding: 2.5 },
+            margin: { left: margin, right: margin }
+        });
+    }
+
     // ---------- Highlight-Rankings & Tourprofile NUR für den Exportzeitraum ----------
-    // Der globale Highlight-Cache (den auch die Stats-Seite der App nutzt) wird
-    // zwischengespeichert und danach unverändert wiederhergestellt, damit der
-    // PDF-Export die Highlights-Ansicht der App nicht verfälscht.
     const savedHighlightInfo = highlightTop3Info;
     const savedHighlightRevision = highlightTop3CacheRevision;
     const savedHighlightYearFilter = highlightTop3CacheYearFilter;
@@ -50069,7 +50246,7 @@ async function generateTourbookPdf(fromYear, toYear) {
     doc.addPage();
 
     const cardGap = 6;
-    let cursorY = margin;
+    let cardCursorY = margin;
 
     for (let i = 0; i < entries.length; i++) {
         const entry = entries[i];
@@ -50079,16 +50256,15 @@ async function generateTourbookPdf(fromYear, toYear) {
         const blocks = buildPdfTourCardBlocks(doc, entry, textWidth, profileAnalysis);
         const cardHeight = measurePdfTourCardHeight(blocks, hasPhoto ? 48 : 0);
 
-        if (cursorY + cardHeight > pageH - margin) {
+        if (cardCursorY + cardHeight > pageH - margin) {
             doc.addPage();
-            cursorY = margin;
+            cardCursorY = margin;
         }
 
-        await drawPdfTourCard(doc, entry, margin, cursorY, contentW, blocks, cardHeight);
-        cursorY += cardHeight + cardGap;
+        await drawPdfTourCard(doc, entry, margin, cardCursorY, contentW, blocks, cardHeight);
+        cardCursorY += cardHeight + cardGap;
     }
 
-    // Globalen Highlight-Cache wiederherstellen
     highlightTop3Info = savedHighlightInfo;
     highlightTop3CacheRevision = savedHighlightRevision;
     highlightTop3CacheYearFilter = savedHighlightYearFilter;
