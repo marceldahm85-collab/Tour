@@ -45650,12 +45650,24 @@ function getWrappedBestTour(entries) {
 }
 
 function getWrappedHighestPeak(entries) {
-    const peaks = getWrappedPeaksForEntries(entries);
-    if (!peaks.length) return null;
+    let best = null;
 
-    return peaks.reduce((max, peak) =>
-        peak.height > max.height ? peak : max
-    , peaks[0]);
+    entries.forEach(entry => {
+        const details = entry?.gipfelDetails || [];
+        details.forEach(g => {
+            const height = Number(g?.hoehe) || 0;
+            if (height <= 0) return;
+            if (!best || height > best.height) {
+                best = {
+                    name: g.name || 'Unbenannter Gipfel',
+                    height,
+                    entry
+                };
+            }
+        });
+    });
+
+    return best;
 }
 
 function getWrappedTopRegion(entries) {
@@ -45709,7 +45721,9 @@ async function attachWrappedPhotos(slides, year) {
         } else if (slide.key === 'bestTour') {
             photoEntry = slide.data?.entry?.imageData ? slide.data.entry : pickRandomWrappedPhoto(photoEntries);
         } else if (slide.key === 'highestPeak') {
-            photoEntry = pickRandomWrappedPhoto(photoEntries);
+            photoEntry = slide.data?.peak?.entry?.imageData
+                ? slide.data.peak.entry
+                : pickRandomWrappedPhoto(photoEntries);
         }
 
         slide.photoImg = photoEntry?.imageData ? await loadWrappedImage(photoEntry.imageData) : null;
