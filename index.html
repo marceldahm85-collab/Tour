@@ -20908,6 +20908,26 @@ body.dark
     #wrapped-view #wrapped-back-btn {
         align-self: center;
     }
+
+#wrapped-view .wrapped-fullscreen-btn {
+    width: 100%;
+    font-size: 16px;
+    padding: 8px 4px;
+}
+}
+
+#wrapped-view.wrapped-is-fullscreen {
+    background: #000;
+}
+
+#wrapped-view.wrapped-is-fullscreen #wrapped-canvas {
+    border-radius: 0;
+}
+
+#wrapped-view:fullscreen,
+#wrapped-view:-webkit-full-screen {
+    width: 100vw;
+    height: 100vh;
 }
 
 </style>
@@ -23199,6 +23219,7 @@ body.dark
         <button type="button" id="wrapped-back-btn" class="back-button" aria-label="Zurück"></button>
         <select id="wrapped-year-select" class="wrapped-year-select"></select>
         <button type="button" id="wrapped-share-btn" class="wrapped-share-btn">⤴ Teilen</button>
+        <button type="button" id="wrapped-fullscreen-btn" class="wrapped-share-btn" title="Vollbild">⛶</button>
     </div>
 
     <div class="wrapped-progress-bar" id="wrapped-progress-bar"></div>
@@ -37096,6 +37117,7 @@ function goToView(targetView, animate = true) {
 
 if (previousView === 'wrapped' && targetView !== 'wrapped') {
     clearWrappedAutoAdvance();
+    exitWrappedFullscreenIfActive();
 }
 
     if (isViewChange && animate) {
@@ -55471,9 +55493,10 @@ function initWrappedControls() {
     });
 
     document.getElementById('wrapped-back-btn').addEventListener('click', () => {
-        clearWrappedAutoAdvance();
-        goToView('dashboard');
-    });
+    clearWrappedAutoAdvance();
+    exitWrappedFullscreenIfActive();
+    goToView('dashboard');
+});
 
     document.getElementById('wrapped-year-select').addEventListener('change', e => {
         openWrappedView(Number(e.target.value));
@@ -55489,6 +55512,8 @@ function initWrappedControls() {
         closeMoreMenu?.();
         openWrappedView(years[0]);
     });
+
+    document.getElementById('wrapped-fullscreen-btn')?.addEventListener('click', toggleWrappedFullscreen);
 }
 
 function getWrappedThemeColors() {
@@ -55808,6 +55833,44 @@ function renderWrappedOutroSlide(ctx, w, h, colors, data) {
     ctx.fillStyle = colors.text;
     ctx.fillText('Auf ins nächste Jahr! 🏔️⛰️', w / 2, 1100);
 }
+
+function toggleWrappedFullscreen() {
+    const el = document.getElementById('wrapped-view');
+    const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
+
+    if (!isFullscreen) {
+        if (el.requestFullscreen) {
+            el.requestFullscreen().catch(() => {});
+        } else if (el.webkitRequestFullscreen) {
+            el.webkitRequestFullscreen();
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        }
+    }
+}
+
+function exitWrappedFullscreenIfActive() {
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    }
+}
+
+function updateWrappedFullscreenState() {
+    const el = document.getElementById('wrapped-view');
+    const btn = document.getElementById('wrapped-fullscreen-btn');
+    const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+
+    el.classList.toggle('wrapped-is-fullscreen', isFullscreen);
+    if (btn) btn.textContent = isFullscreen ? '✕' : '⛶';
+}
+
+document.addEventListener('fullscreenchange', updateWrappedFullscreenState);
+document.addEventListener('webkitfullscreenchange', updateWrappedFullscreenState);
 
 </script>
 
