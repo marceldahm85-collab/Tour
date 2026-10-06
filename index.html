@@ -495,8 +495,7 @@ body:not(.touch-mode) .box:hover{
 }
 
 /* Speicher-Button */
-button.save-btn { margin-top:10px; padding:10px 16px; border:none; border-radius:12px; background:#f9d77e; color:#2e4036; font-weight:600; cursor:pointer; transition:transform 0.2s ease; }
-body:not(.touch-mode) button.save-btn:hover{ transform:scale(1.05); }
+button.save-btn { margin-top:10px; padding:10px 16px; border:none; border-radius:12px; background: var(--accent-gradient); color: var(--accent-text-color, #2e4036); font-weight:600; cursor:pointer; transition:transform 0.2s ease; }body:not(.touch-mode) button.save-btn:hover{ transform:scale(1.05); }
 button.save-btn {
     background: var(--accent-gradient);
     box-shadow: 0 6px 18px rgba(0,0,0,0.2);
@@ -505,14 +504,7 @@ button.save-btn {
 button.save-btn:active {
     transform: scale(0.97);
 }
-button.save-btn {
-    background: var(--accent-gradient);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.2);
-}
 
-button.save-btn:active {
-    transform: scale(0.97);
-}
 
 /* Tabelle */
 #overview-table-wrapper { overflow: hidden; border-radius: 16px; backdrop-filter: blur(10px); background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); transform: translateY(10px); opacity: 0; transition: transform 0.5s ease, opacity 0.5s ease; }
@@ -5390,11 +5382,6 @@ body:not(.touch-mode).green .highlight-clickable:hover{ background: rgba(255,255
 
 body.green #map-info-bar { opacity: 1; color: #f2faf5; }
 
-/* Speichern-Button */
-body.green button.save-btn {
-    background: linear-gradient(135deg, #52b788, #2d6a4f);
-    color: #ffffff;
-}
 
 /* Aktive Zustände: grün auf schwarz */
 body.green .checklist-mode-btn.active,
@@ -9655,17 +9642,6 @@ body.summit:not(.touch-mode) .toggle-btn:hover{
 }
 
 
-/* Speichern / primäre Buttons */
-body.summit button.save-btn {
-    background:
-        linear-gradient(
-            135deg,
-            #63b7ff,
-            #176fc1
-        );
-
-    color: #0c1711;
-}
 
 
 /* aktive Zustände */
@@ -16783,15 +16759,6 @@ body.summit .toast-undo-btn {
     text-shadow: 0 1px 2px rgba(0,0,0,0.35);
 }
 
-/*
- * Der primäre Dark-Speichern-Button behält seinen hellen
- * Hintergrund; deshalb dort bewusst dunkle Schrift.
- */
-body.dark button.save-btn {
-    color: #2b2414;
-}
-
-
 
 /* =========================================================
    Update 20 – Interaktive Analyse / Ranking / Metallfarben
@@ -20369,21 +20336,6 @@ body:not(.dark):not(.green):not(.summit)
     opacity: 1 !important;
 }
 
-/* Buttons der Sicherung */
-body:not(.dark):not(.green):not(.summit)
-#backup-view .save-btn {
-    background:
-        linear-gradient(
-            135deg,
-            #79c7e8 0%,
-            #4fae79 100%
-        ) !important;
-
-    color: #10372a !important;
-    border: 1px solid rgba(35, 101, 88, 0.42) !important;
-    box-shadow:
-        0 4px 10px rgba(45, 105, 92, 0.18) !important;
-}
 
 /* Trennlinie im Sicherungsbereich */
 body:not(.dark):not(.green):not(.summit)
@@ -20973,6 +20925,13 @@ body.dark
     <span id="wrapped-reminder-text" class="wrapped-reminder-text"></span>
     <button type="button" id="wrapped-reminder-open" class="wrapped-reminder-btn">Ansehen</button>
     <button type="button" id="wrapped-reminder-dismiss" class="wrapped-reminder-close" aria-label="Schließen">✕</button>
+</div>
+
+<div id="achievements-weekly-banner" class="wrapped-reminder-banner" hidden>
+    <span class="wrapped-reminder-icon">🏅</span>
+    <span id="achievements-weekly-text" class="wrapped-reminder-text"></span>
+    <button type="button" id="achievements-weekly-open" class="wrapped-reminder-btn">Ansehen</button>
+    <button type="button" id="achievements-weekly-dismiss" class="wrapped-reminder-close" aria-label="Schließen">✕</button>
 </div>
 
 <div class="sun"></div>
@@ -23259,6 +23218,43 @@ body.dark
 
             </div>
 
+
+            <div class="backup-divider"></div>
+            <div class="backup-section-title">🧭 Navigationsleiste</div>
+
+            <div class="tour-form-row tour-form-row-two">
+                <div class="form-group">
+                    <label for="te-nav-top-color">Navigation oben</label>
+                    <input type="color" id="te-nav-top-color">
+                </div>
+                <div class="form-group">
+                    <label for="te-nav-bottom-color">Navigation unten</label>
+                    <input type="color" id="te-nav-bottom-color">
+                </div>
+            </div>
+
+            <div class="backup-divider"></div>
+            <div class="backup-section-title">📊 Diagrammfarben</div>
+
+            <div class="tour-form-row tour-form-row-two">
+                <div class="form-group">
+                    <label for="te-chart-color-start">Balken unten</label>
+                    <input type="color" id="te-chart-color-start">
+                </div>
+                <div class="form-group">
+                    <label for="te-chart-color-mid">Balken Mitte</label>
+                    <input type="color" id="te-chart-color-mid">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="te-chart-color-end">Balken oben (Spitze)</label>
+                <input type="color" id="te-chart-color-end">
+            </div>
+
+            <div class="backup-divider"></div>
+            <div class="backup-section-title">🔍 Kontrast-Check</div>
+            <div id="theme-editor-contrast-panel" class="theme-editor-contrast-panel"></div>
+
             <div class="theme-editor-actions">
                 <button type="button" class="save-btn" id="theme-editor-reset">Zurücksetzen</button>
                 <button type="button" class="save-btn" id="theme-editor-save">Speichern</button>
@@ -23353,6 +23349,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     migrateStoredEntryIds();
 
 recomputeAndSyncAchievements();
+checkAchievementsWeeklyBanner();
 
     // Theme Editor wurde ggf. bereits VOR dem Laden aus IndexedDB
     // (siehe initTheme() oben) mit Standardwerten in den Draft-Cache
@@ -43944,29 +43941,47 @@ function getChartTheme() {
     const isSummit =
         document.body.classList.contains('summit');
 
+    const activeThemeKey = themeEditorGetActiveTheme();
+    const settings = getThemeEditorSettings()[activeThemeKey];
 
+    const fallbackDotFill = isSummit ? '#202622'
+        : isGreen ? '#0a2010'
+        : isDark ? '#0d1b2a'
+        : '#ffffff';
+
+    if (settings && settings.chartColorStart && settings.chartColorMid && settings.chartColorEnd) {
+        return {
+            textColor: settings.textMain,
+            isDark: isDark || isGreen || isSummit,
+            dotFill: fallbackDotFill,
+            gradientStops: [
+                [0, settings.chartColorStart],
+                [0.5, settings.chartColorMid],
+                [1, settings.chartColorEnd]
+            ]
+        };
+    }
+
+    // Fallback, falls Theme-Editor-Settings ausnahmsweise nicht verfügbar sind
     if (isSummit) {
-    return {
-        textColor: '#f4f8f5',
-        isDark: true,
-        dotFill: '#202622',
-
-        gradientStops: [
-            [0.00, '#111513'],
-            [0.32, '#454e49'],
-            [0.68, '#dce5df'],
-            [1.00, '#63b7ff']
-        ]
-    };
-}
-
+        return {
+            textColor: '#f4f8f5',
+            isDark: true,
+            dotFill: '#202622',
+            gradientStops: [
+                [0.00, '#111513'],
+                [0.32, '#454e49'],
+                [0.68, '#dce5df'],
+                [1.00, '#63b7ff']
+            ]
+        };
+    }
 
     if (isGreen) {
         return {
             textColor: '#d8f3dc',
             isDark: true,
             dotFill: '#0a2010',
-
             gradientStops: [
                 [0, '#0d2418'],
                 [0.25, '#1b4332'],
@@ -43975,13 +43990,11 @@ function getChartTheme() {
         };
     }
 
-
     if (isDark) {
         return {
             textColor: '#d6e1f0',
             isDark: true,
             dotFill: '#0d1b2a',
-
             gradientStops: [
                 [0, '#000000'],
                 [0.2, '#3b0000'],
@@ -43990,12 +44003,10 @@ function getChartTheme() {
         };
     }
 
-
     return {
         textColor: '#2e4036',
         isDark: false,
         dotFill: '#ffffff',
-
         gradientStops: [
             [0, '#6fbf73'],
             [0.4, '#a8d86a'],
@@ -45206,10 +45217,10 @@ initMobileTapStateCleanup();
 const THEME_EDITOR_KEY = 'themeEditorSettings_v1';
 
 const defaultThemeEditorSettings = {
-    light:  { topColor: '#9de3f9', bottomColor: '#9ad8b6', transition: 55, intensity: 90, textMain: '#17251d', textSoft: '#405248', accent: '#0f8a6c', accent2: '#e0a52e', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#c9e8d8', shadowIntensity: 50, bgBrightness: 50, radius: 14, blurIntensity: 10 },
-    dark:   { topColor: '#912a34', bottomColor: '#0a121d', transition: 55, intensity: 88, textMain: '#f3f7fb', textSoft: '#c2cfdb', accent: '#d45c5c', accent2: '#4e0a0a', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#4a1c22', shadowIntensity: 50, bgBrightness: 50, radius: 14, blurIntensity: 10 },
-    green:  { topColor: '#26a352', bottomColor: '#010c07', transition: 55, intensity: 88, textMain: '#f2fff7', textSoft: '#c9e5d4', accent: '#52b788', accent2: '#2d6a4f', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#0e3d20', shadowIntensity: 50, bgBrightness: 50, radius: 14, blurIntensity: 10 },
-    summit: { topColor: '#3aa0ff', bottomColor: '#161d22', transition: 55, intensity: 88, textMain: '#f4faff', textSoft: '#d0dce4', accent: '#63b7ff', accent2: '#176fc1', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#1f4560', shadowIntensity: 50, bgBrightness: 50, radius: 14, blurIntensity: 10 }
+    light:  { topColor: '#9de3f9', bottomColor: '#9ad8b6', transition: 55, intensity: 90, textMain: '#17251d', textSoft: '#405248', accent: '#0f8a6c', accent2: '#e0a52e', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#c9e8d8', shadowIntensity: 50, bgBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#9de3f9', navBottomColor: '#9ad8b6', chartColorStart: '#6fbf73', chartColorMid: '#a8d86a', chartColorEnd: '#f9d77e' },
+    dark:   { topColor: '#912a34', bottomColor: '#0a121d', transition: 55, intensity: 88, textMain: '#f3f7fb', textSoft: '#c2cfdb', accent: '#d45c5c', accent2: '#4e0a0a', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#4a1c22', shadowIntensity: 50, bgBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#912a34', navBottomColor: '#0a121d', chartColorStart: '#000000', chartColorMid: '#3b0000', chartColorEnd: '#7a0d0d' },
+    green:  { topColor: '#26a352', bottomColor: '#010c07', transition: 55, intensity: 88, textMain: '#f2fff7', textSoft: '#c9e5d4', accent: '#52b788', accent2: '#2d6a4f', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#0e3d20', shadowIntensity: 50, bgBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#26a352', navBottomColor: '#010c07', chartColorStart: '#0d2418', chartColorMid: '#1b4332', chartColorEnd: '#52b788' },
+    summit: { topColor: '#3aa0ff', bottomColor: '#161d22', transition: 55, intensity: 88, textMain: '#f4faff', textSoft: '#d0dce4', accent: '#63b7ff', accent2: '#176fc1', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#1f4560', shadowIntensity: 50, bgBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#3aa0ff', navBottomColor: '#161d22', chartColorStart: '#111513', chartColorMid: '#454e49', chartColorEnd: '#63b7ff' }
 };
 
 let themeEditorActiveTab = 'light';
@@ -45242,6 +45253,11 @@ function getThemeEditorSettings() {
 
 function saveThemeEditorSettings(settings) {
     appStorage.set(THEME_EDITOR_KEY, settings);
+}
+
+function themeEditorGetAutoTextColor(hex) {
+    const luminance = themeEditorGetRelativeLuminance(hex);
+    return luminance > 0.5 ? '#1b1b1b' : '#ffffff';
 }
 
 function themeEditorHexToRgba(hex, alphaPercent) {
@@ -45413,6 +45429,13 @@ function buildThemeEditorLiveCss() {
         css += `${bigSelectors} { background: ${bigGradient} !important; box-shadow: ${shadow} !important; border-radius: ${radius}px !important; backdrop-filter: blur(${blur}px) !important; -webkit-backdrop-filter: blur(${blur}px) !important; }\n`;
         css += `${softSelectors} { background: ${softGradient} !important; border-radius: ${softRadius}px !important; }\n`;
 
+        const navGradient = themeEditorBuildGradient({
+            ...settings,
+            topColor: settings.navTopColor || settings.topColor,
+            bottomColor: settings.navBottomColor || settings.bottomColor
+        }, settings.intensity);
+        css += `${prefix} .top-main-nav { background: ${navGradient} !important; }\n`;
+
         css += `@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {\n`;
         css += `${prefix} .accordion-header { background: ${bigGradient} !important; }\n`;
         css += `}\n`;
@@ -45452,6 +45475,7 @@ function applyThemeEditorSettingsToDom() {
     body.style.setProperty('--accent', settings.accent);
     body.style.setProperty('--accent-soft', accentSoft);
     body.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${settings.accent}, ${settings.accent2})`);
+    body.style.setProperty('--accent-text-color', themeEditorGetAutoTextColor(settings.accent));
 
     [
         ['--theme-surface-top', topStrong],
@@ -45532,6 +45556,15 @@ function fillThemeEditorForm(themeKey) {
     document.getElementById('te-blur').value = settings.blurIntensity;
     document.getElementById('te-blur-value').textContent = settings.blurIntensity;
 
+    document.getElementById('te-nav-top-color').value = settings.navTopColor || settings.topColor;
+    document.getElementById('te-nav-bottom-color').value = settings.navBottomColor || settings.bottomColor;
+
+    document.getElementById('te-chart-color-start').value = settings.chartColorStart || settings.bottomColor;
+    document.getElementById('te-chart-color-mid').value = settings.chartColorMid || settings.accent;
+    document.getElementById('te-chart-color-end').value = settings.chartColorEnd || settings.topColor;
+
+    updateContrastCheckerDisplay(settings);
+
     const hint = document.getElementById('theme-editor-hint');
     if (hint) {
         hint.textContent = themeKey === themeEditorGetActiveTheme()
@@ -45559,10 +45592,80 @@ function readThemeEditorFormIntoSettings(themeKey) {
         shadowIntensity: Number(document.getElementById('te-shadow').value),
         bgBrightness: Number(document.getElementById('te-bg-brightness').value),
         radius: Number(document.getElementById('te-radius').value),
-        blurIntensity: Number(document.getElementById('te-blur').value)
+        blurIntensity: Number(document.getElementById('te-blur').value),
+        navTopColor: document.getElementById('te-nav-top-color').value,
+        navBottomColor: document.getElementById('te-nav-bottom-color').value,
+        chartColorStart: document.getElementById('te-chart-color-start').value,
+        chartColorMid: document.getElementById('te-chart-color-mid').value,
+        chartColorEnd: document.getElementById('te-chart-color-end').value
     };
 
     return allSettings;
+}
+
+// =========================================================
+// Theme Editor – Kontrast-Checker (WCAG)
+// =========================================================
+
+function themeEditorHexToRgbComponents(hex) {
+    const clean = String(hex || '').replace('#', '');
+    if (clean.length !== 6) return [0, 0, 0];
+    return [
+        parseInt(clean.substring(0, 2), 16),
+        parseInt(clean.substring(2, 4), 16),
+        parseInt(clean.substring(4, 6), 16)
+    ];
+}
+
+function themeEditorRelativeLuminanceComponent(value) {
+    const c = value / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+}
+
+function themeEditorGetRelativeLuminance(hex) {
+    const [r, g, b] = themeEditorHexToRgbComponents(hex);
+    return (
+        0.2126 * themeEditorRelativeLuminanceComponent(r) +
+        0.7152 * themeEditorRelativeLuminanceComponent(g) +
+        0.0722 * themeEditorRelativeLuminanceComponent(b)
+    );
+}
+
+function themeEditorCalculateContrastRatio(hexA, hexB) {
+    const luminanceA = themeEditorGetRelativeLuminance(hexA) + 0.05;
+    const luminanceB = themeEditorGetRelativeLuminance(hexB) + 0.05;
+    return luminanceA > luminanceB ? luminanceA / luminanceB : luminanceB / luminanceA;
+}
+
+function themeEditorGetContrastRating(ratio) {
+    if (ratio >= 7) return { icon: '✅', label: 'Sehr gut lesbar (AAA)' };
+    if (ratio >= 4.5) return { icon: '✅', label: 'Gut lesbar (AA)' };
+    if (ratio >= 3) return { icon: '⚠️', label: 'Grenzwertig' };
+    return { icon: '❌', label: 'Schlecht lesbar' };
+}
+
+function updateContrastCheckerDisplay(settings) {
+    const panel = document.getElementById('theme-editor-contrast-panel');
+    if (!panel || !settings) return;
+
+    const checks = [
+        { label: 'Haupttext auf Verlauf oben', a: settings.textMain, b: settings.topColor },
+        { label: 'Haupttext auf Verlauf unten', a: settings.textMain, b: settings.bottomColor },
+        { label: 'Nebentext auf Verlauf oben', a: settings.textSoft, b: settings.topColor },
+        { label: 'Nebentext auf Verlauf unten', a: settings.textSoft, b: settings.bottomColor },
+        { label: 'Akzentfarbe auf Verlauf oben', a: settings.accent, b: settings.topColor }
+    ];
+
+    panel.innerHTML = checks.map(check => {
+        const ratio = themeEditorCalculateContrastRatio(check.a, check.b);
+        const rating = themeEditorGetContrastRating(ratio);
+        return `
+            <div class="theme-editor-contrast-row">
+                <span class="theme-editor-contrast-label">${rating.icon} ${check.label}</span>
+                <span class="theme-editor-contrast-value">${ratio.toFixed(1)}:1 · ${rating.label}</span>
+            </div>
+        `;
+    }).join('');
 }
 
 function initThemeEditor() {
@@ -45576,7 +45679,9 @@ function initThemeEditor() {
         'te-accent', 'te-accent2', 'te-border',
         'te-direction', 'te-mid-enabled', 'te-mid-color',
         'te-shadow', 'te-bg-brightness',
-        'te-radius', 'te-blur'
+        'te-radius', 'te-blur',
+        'te-nav-top-color', 'te-nav-bottom-color',
+        'te-chart-color-start', 'te-chart-color-mid', 'te-chart-color-end'
      ];
 
     function selectTab(themeKey) {
@@ -45620,7 +45725,8 @@ function initThemeEditor() {
                 document.getElementById('te-blur-value').textContent = el.value;
             }
 
-            readThemeEditorFormIntoSettings(themeEditorActiveTab);
+            const updatedSettings = readThemeEditorFormIntoSettings(themeEditorActiveTab);
+            updateContrastCheckerDisplay(updatedSettings[themeEditorActiveTab]);
 
             if (themeEditorActiveTab === themeEditorGetActiveTheme()) {
                 applyThemeEditorSettingsToDom();
@@ -45774,6 +45880,41 @@ function getWrappedTopRegion(entries) {
     return ranked.length ? { label: ranked[0][0], count: ranked[0][1] } : null;
 }
 
+function extractWrappedTourCompanions(notes) {
+    if (!notes) return [];
+
+    // Erfasst "Mit Name" oder ", mit Name" sowie mehrere Namen,
+    // getrennt durch Komma und/oder "und" (z.B. "Mit Rene, Ingo und Christian").
+    // Die Erkennung endet automatisch beim ersten klein geschriebenen Wort.
+    const regex = /\bmit\s+([A-ZÄÖÜ][\wäöüß]*(?:\s*(?:,|und)\s*[A-ZÄÖÜ][\wäöüß]*)*)/gi;
+
+    const names = [];
+    let match;
+
+    while ((match = regex.exec(notes)) !== null) {
+        match[1]
+            .split(/\s*(?:,|und)\s*/i)
+            .map(name => name.trim())
+            .filter(Boolean)
+            .forEach(name => names.push(name));
+    }
+
+    return names;
+}
+
+function getWrappedTopCompanion(entries) {
+    const counts = {};
+
+    entries.forEach(entry => {
+        extractWrappedTourCompanions(entry.notes).forEach(name => {
+            counts[name] = (counts[name] || 0) + 1;
+        });
+    });
+
+    const ranked = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    return ranked.length ? { name: ranked[0][0], count: ranked[0][1] } : null;
+}
+
 let wrappedPhotoCache = new Map();
 
 function loadWrappedImage(dataUrl) {
@@ -45889,6 +46030,7 @@ function buildWrappedSlideData(year) {
     const highestPeak = getWrappedHighestPeak(entries);
     const topRegion = getWrappedTopRegion(entries);
     const top3 = getWrappedTop3(entries);
+    const topCompanion = getWrappedTopCompanion(entries);
     const previousTotals = previousEntries.length
         ? getWrappedTotals(previousEntries)
         : null;
@@ -45925,6 +46067,9 @@ function buildWrappedSlideData(year) {
 
         top3.length ? { key: 'top3', type: 'heavy', duration: WRAPPED_SLIDE_DURATIONS.heavy,
           data: { top3 } } : null,
+
+        topCompanion ? { key: 'topCompanion', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
+          data: { companion: topCompanion } } : null,
 
         { key: 'outro', type: 'outro', duration: WRAPPED_SLIDE_DURATIONS.outro,
           data: { year, tourCount: totals.tourCount } }
@@ -56013,6 +56158,68 @@ function showWrappedReminderBanner(year) {
     closeBtn.onclick = hide;
 }
 
+const ACHIEVEMENTS_WEEKLY_BANNER_KEY = 'achievementsWeeklyBannerShown_v1';
+
+function getCurrentMondayDateString() {
+    const now = new Date();
+    const day = now.getDay(); // 0 = Sonntag, 1 = Montag, ...
+    const diffToMonday = (day === 0 ? -6 : 1) - day;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() + diffToMonday);
+    monday.setHours(0, 0, 0, 0);
+    return monday.toISOString().slice(0, 10);
+}
+
+function getRecentlyUnlockedAchievements(days = 7) {
+    const unlocked = appStorage.get(ACHIEVEMENTS_KEY) || {};
+    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+
+    return Object.entries(unlocked)
+        .filter(([id, info]) => info?.unlockedAt && new Date(info.unlockedAt).getTime() >= cutoff)
+        .map(([id, info]) => ({ id, ...info }));
+}
+
+function showAchievementsWeeklyBanner(count) {
+    const banner = document.getElementById('achievements-weekly-banner');
+    const text = document.getElementById('achievements-weekly-text');
+    const openBtn = document.getElementById('achievements-weekly-open');
+    const closeBtn = document.getElementById('achievements-weekly-dismiss');
+
+    if (!banner || !text || !openBtn || !closeBtn) return;
+
+    text.textContent = count === 1
+        ? 'Diese Woche erreicht: 1 neues Abzeichen!'
+        : `Diese Woche erreicht: ${count} neue Abzeichen!`;
+
+    banner.hidden = false;
+
+    const hide = () => { banner.hidden = true; };
+
+    openBtn.onclick = () => {
+        hide();
+        goToView('achievements');
+    };
+    closeBtn.onclick = hide;
+}
+
+function checkAchievementsWeeklyBanner() {
+    // Falls der Wrapped-Januar-Banner gerade sichtbar ist, nicht überlagern –
+    // stattdessen einfach bis zur nächsten Woche warten.
+    const wrappedBanner = document.getElementById('wrapped-reminder-banner');
+    if (wrappedBanner && !wrappedBanner.hidden) return;
+
+    const currentMonday = getCurrentMondayDateString();
+    const lastShownMonday = appStorage.get(ACHIEVEMENTS_WEEKLY_BANNER_KEY);
+
+    if (lastShownMonday === currentMonday) return;
+
+    const recent = getRecentlyUnlockedAchievements(7);
+    if (!recent.length) return;
+
+    appStorage.set(ACHIEVEMENTS_WEEKLY_BANNER_KEY, currentMonday);
+    showAchievementsWeeklyBanner(recent.length);
+}
+
 function renderWrappedSlideToCanvas(slide, width, height) {
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -56032,6 +56239,7 @@ function renderWrappedSlideToCanvas(slide, width, height) {
         case 'topRegion': renderWrappedTopRegionSlide(ctx, width, height, colors, slide.data); break;
         case 'yearCompare': renderWrappedYearCompareSlide(ctx, width, height, colors, slide.data); break;
         case 'top3': renderWrappedTop3Slide(ctx, width, height, colors, slide.data); break;
+        case 'topCompanion': renderWrappedTopCompanionSlide(ctx, width, height, colors, slide.data); break;
         case 'outro': renderWrappedOutroSlide(ctx, width, height, colors, slide.data); break;
     }
 
@@ -56424,6 +56632,7 @@ function renderWrappedSlide(index) {
         case 'topRegion': renderWrappedTopRegionSlide(ctx, w, h, colors, slide.data); break;
         case 'yearCompare': renderWrappedYearCompareSlide(ctx, w, h, colors, slide.data); break;
         case 'top3': renderWrappedTop3Slide(ctx, w, h, colors, slide.data); break;
+        case 'topCompanion': renderWrappedTopCompanionSlide(ctx, w, h, colors, slide.data); break;
         case 'outro': renderWrappedOutroSlide(ctx, w, h, colors, slide.data); break;
     }
 
@@ -56533,6 +56742,23 @@ function renderWrappedTopRegionSlide(ctx, w, h, colors, data) {
     ctx.font = '42px sans-serif';
     ctx.fillStyle = colors.text;
     ctx.fillText(`${data.region.count} Touren hier! 📍`, w / 2, 900);
+}
+
+function renderWrappedTopCompanionSlide(ctx, w, h, colors, data) {
+    drawWrappedCenteredTitle(ctx, 'Dein Begleiter des Jahres', 400, 64, colors.text, w);
+
+    ctx.font = 'bold 72px sans-serif';
+    ctx.fillStyle = colors.accent;
+    ctx.textAlign = 'center';
+    wrapWrappedText(ctx, data.companion.name, w / 2, 700, w - 160, 85);
+
+    ctx.font = '42px sans-serif';
+    ctx.fillStyle = colors.text;
+    ctx.fillText(
+        `${data.companion.count} ${data.companion.count === 1 ? 'gemeinsame Tour' : 'gemeinsame Touren'} 🤝`,
+        w / 2,
+        900
+    );
 }
 
 function renderWrappedYearCompareSlide(ctx, w, h, colors, data) {
@@ -61464,6 +61690,33 @@ body.summit .plan-season-card {
 
 #achievement-detail-modal {
     z-index: 10050;
+}
+
+.theme-editor-contrast-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.theme-editor-contrast-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(128, 128, 128, 0.08);
+    border-radius: 8px;
+    font-size: 12.5px;
+}
+
+.theme-editor-contrast-label {
+    opacity: 0.85;
+}
+
+.theme-editor-contrast-value {
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 </style>
