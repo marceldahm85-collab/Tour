@@ -17,7 +17,7 @@
 * { box-sizing:border-box; margin:0; padding:0; }
 body {
     min-height:100vh;
-    font-family:"Inter",sans-serif;
+    font-family: var(--app-font);
     display:flex;
     justify-content:center;
     padding:50px 20px;
@@ -25,7 +25,22 @@ body {
     background: linear-gradient(180deg, hsl(200,50%,70%) 0%, hsl(180,40%,70%) 50%, #e6e3df 100%);
 }
 
+button,
+input,
+select,
+textarea,
+option {
+    font-family: var(--app-font);
+}
+
 :root {
+    /* Android-Systemschrift: normalerweise Roboto */
+    --app-font:
+        Roboto,
+        "Noto Sans",
+        system-ui,
+        sans-serif;
+
     --accent: #f9d77e;
     --accent-soft: rgba(249,215,126,0.25);
     --accent-gradient: linear-gradient(135deg, #f9d77e, #e0a52e);
@@ -4344,7 +4359,7 @@ body.dark #map-info-bar {
 
 /* Popup */
 .map-popup {
-    font-family: Inter, sans-serif;
+    font-family: var(--app-font);
     min-width: 160px;
 }
 
@@ -4392,7 +4407,7 @@ body.dark #map-info-bar {
 
 /* Leaflet Overrides */
 .leaflet-container {
-    font-family: Inter, sans-serif;
+    font-family: var(--app-font);
     background: #1a2634;
 }
 
@@ -4598,7 +4613,7 @@ body.dark .map-mode-btn.active {
     justify-content: center;
     border-radius: 50%;
     font-weight: 700;
-    font-family: "Inter", sans-serif;
+    font-family: var(--app-font);
     color: #fff;
     border: 2px solid rgba(255,255,255,0.75);
     box-shadow: 0 3px 10px rgba(0,0,0,0.3);
@@ -12913,9 +12928,7 @@ body.summit
 #stats-statistics-page
 .stats-main-list > li:not(.stats-group-title)
 .stats-value {
-    font-family:
-        "Inter",
-        sans-serif;
+    font-family: var(--app-font);
 
     font-size:
         13px !important;
@@ -20884,6 +20897,84 @@ body.dark
     height: 100vh;
 }
 
+.font-option-label {
+    cursor: default;
+}
+
+#font-family-select {
+    width: 100%;
+    min-width: 0;
+    margin-top: 5px;
+    padding: 7px 9px;
+    border-radius: 9px;
+    border: 1px solid var(--ui-card-border);
+    background: var(--ui-card-bg);
+    color: var(--text-main);
+    font-family: var(--app-font);
+    font-size: 11px;
+    line-height: 1.2;
+}
+
+#font-family-select option {
+    font-family: var(--app-font);
+    background: var(--ui-card-bg);
+    color: var(--text-main);
+}
+
+@media (max-width: 1024px)
+       and (orientation: landscape)
+       and (pointer: coarse) {
+
+    #font-family-select {
+        min-height: 30px;
+        padding: 5px 7px;
+        font-size: 10.5px;
+    }
+}
+
+/* Zusätzliche typografische Unterschiede */
+
+body[data-font="android"] {
+    letter-spacing: 0;
+}
+
+body[data-font="system"] {
+    letter-spacing: 0.01em;
+}
+
+body[data-font="rounded"] {
+    letter-spacing: 0.015em;
+}
+
+body[data-font="serif"],
+body[data-font="slab"] {
+    letter-spacing: 0.005em;
+}
+
+body[data-font="mono"] {
+    letter-spacing: -0.015em;
+}
+
+body[data-font="cursive"] {
+    letter-spacing: 0.01em;
+}
+
+body[data-font="serif"] .app-title,
+body[data-font="slab"] .app-title {
+    letter-spacing: 0;
+}
+
+body[data-font="mono"] .app-title,
+body[data-font="mono"] .top-nav-label,
+body[data-font="mono"] .form-section-title {
+    letter-spacing: 0.04em;
+}
+
+body[data-font="cursive"] .app-title {
+    font-size: 1.08em;
+    letter-spacing: 0;
+}
+
 </style>
 
 
@@ -23234,6 +23325,40 @@ body.dark
             </div>
 
             <div class="backup-divider"></div>
+<div class="backup-section-title">🔤 Schriftart</div>
+
+<div class="form-group">
+    <label for="te-font-family">App-Schriftart</label>
+
+    <select id="te-font-family">
+    <option value="android">Android – Roboto</option>
+    <option value="system">System – variabel</option>
+    <option value="rounded">Abgerundet</option>
+    <option value="serif">Noto Serif</option>
+    <option value="slab">Slab Serif</option>
+    <option value="mono">Monospace</option>
+    <option value="cursive">Handschriftlich</option>
+    <option value="fantasy">Dekorativ</option>
+</select>
+</div>
+
+<div class="form-group theme-editor-font-size-group">
+    <label for="te-font-size">
+        Globale Schriftgröße:
+        <span id="te-font-size-value">100</span>%
+    </label>
+
+    <input
+        type="range"
+        id="te-font-size"
+        min="80"
+        max="130"
+        step="1"
+        value="100"
+    >
+</div>
+
+            <div class="backup-divider"></div>
             <div class="backup-section-title">📊 Diagrammfarben</div>
 
             <div class="tour-form-row tour-form-row-two">
@@ -23399,6 +23524,11 @@ initFilterSectionNav();
 initTourCompareFeature();
 initFilterViewPersistence();
 initConsistentDrilldownNavigation();
+applyThemeEditorFont(getThemeEditorFontName(), false);
+applyThemeEditorFontSize(
+    getThemeEditorFontSizeScale(),
+    false
+);
     initThemeEditor();
 
     // Box-Höhen korrekt setzen, falls aktiv
@@ -45214,6 +45344,65 @@ initMobileTapStateCleanup();
    Theme Editor
    ========================================================= */
 
+const THEME_EDITOR_FONT_KEY = 'themeEditorFont_v1';
+const THEME_EDITOR_FONT_SIZE_KEY = 'themeEditorFontSize_v1';
+const THEME_EDITOR_DEFAULT_FONT_SIZE = 100;
+
+const THEME_EDITOR_FONT_PRESETS = {
+    /*
+     * Android-Standard. Auf den meisten Android-Geräten: Roboto.
+     */
+    android:
+        'Roboto, "Noto Sans", system-ui, sans-serif',
+
+    /*
+     * Systemabhängige serifenlose Schrift.
+     */
+    system:
+        'system-ui, sans-serif',
+
+    /*
+     * ui-rounded wird von modernen Android-Browsern teilweise
+     * als abgerundete Systemschrift interpretiert.
+     * Die weiteren Schriften sind Fallbacks.
+     */
+    rounded:
+        'ui-rounded, "Arial Rounded MT Bold", "Trebuchet MS", sans-serif',
+
+    /*
+     * Deutlich sichtbare Serifenschrift.
+     */
+    serif:
+        '"Noto Serif", "Droid Serif", Georgia, serif',
+
+    /*
+     * Etwas kräftigere, blockartige Serifenschrift.
+     * Falls Roboto Slab nicht vorhanden ist, greift Noto Serif.
+     */
+    slab:
+        '"Roboto Slab", "Noto Serif", Georgia, serif',
+
+    /*
+     * Feste Zeichenbreite.
+     */
+    mono:
+        '"Roboto Mono", "Noto Sans Mono", "Courier New", monospace',
+
+    /*
+     * Browser-/Systemschrift für handschriftliche Darstellung.
+     * Auf Android kann die konkrete Schrift je nach Gerät variieren.
+     */
+    cursive:
+        'cursive',
+
+    /*
+     * Dekorative Systemkategorie.
+     * Die konkrete Darstellung ist browserabhängig.
+     */
+    fantasy:
+        'fantasy'
+};
+
 const THEME_EDITOR_KEY = 'themeEditorSettings_v1';
 
 const defaultThemeEditorSettings = {
@@ -45222,6 +45411,243 @@ const defaultThemeEditorSettings = {
     green:  { topColor: '#26a352', bottomColor: '#010c07', transition: 55, intensity: 88, textMain: '#f2fff7', textSoft: '#c9e5d4', accent: '#52b788', accent2: '#2d6a4f', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#0e3d20', shadowIntensity: 50, bgBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#26a352', navBottomColor: '#010c07', chartColorStart: '#0d2418', chartColorMid: '#1b4332', chartColorEnd: '#52b788' },
     summit: { topColor: '#3aa0ff', bottomColor: '#161d22', transition: 55, intensity: 88, textMain: '#f4faff', textSoft: '#d0dce4', accent: '#63b7ff', accent2: '#176fc1', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#1f4560', shadowIntensity: 50, bgBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#3aa0ff', navBottomColor: '#161d22', chartColorStart: '#111513', chartColorMid: '#454e49', chartColorEnd: '#63b7ff' }
 };
+
+function getThemeEditorFontName() {
+    const savedFont = appStorage.get(THEME_EDITOR_FONT_KEY);
+
+    if (
+        typeof savedFont === 'string' &&
+        Object.prototype.hasOwnProperty.call(
+            THEME_EDITOR_FONT_PRESETS,
+            savedFont
+        )
+    ) {
+        return savedFont;
+    }
+
+    return 'android';
+}
+
+function applyThemeEditorFont(fontName, save = true) {
+    const validFontName =
+        Object.prototype.hasOwnProperty.call(
+            THEME_EDITOR_FONT_PRESETS,
+            fontName
+        )
+            ? fontName
+            : 'android';
+
+    const fontStack =
+        THEME_EDITOR_FONT_PRESETS[validFontName];
+
+    /*
+     * Die CSS-Variable wurde von dir bereits im CSS angelegt.
+     * Sie wird am documentElement gesetzt, damit sie global gilt.
+     */
+    document.documentElement.style.setProperty(
+        '--app-font',
+        fontStack
+    );
+
+    document.body.dataset.font = validFontName;
+
+    const select = document.getElementById('te-font-family');
+
+    if (select && select.value !== validFontName) {
+        select.value = validFontName;
+    }
+
+    if (save) {
+        appStorage.set(
+            THEME_EDITOR_FONT_KEY,
+            validFontName
+        );
+    }
+}
+
+function initThemeEditorFontSelector() {
+    const select = document.getElementById('te-font-family');
+
+    if (!select) return;
+
+    /*
+     * Verhindert doppelte Event-Listener, falls der Theme-Editor
+     * durch die Navigation mehrfach initialisiert wird.
+     */
+    if (select.dataset.fontInitialized === 'true') {
+        applyThemeEditorFont(getThemeEditorFontName(), false);
+        return;
+    }
+
+    select.dataset.fontInitialized = 'true';
+
+    const savedFont = getThemeEditorFontName();
+
+    applyThemeEditorFont(savedFont, false);
+
+    select.addEventListener('change', event => {
+        applyThemeEditorFont(event.target.value, true);
+    });
+}
+
+/*
+ * Speichert die ursprünglichen Inline-Schriftgrößen.
+ * Dadurch kann die Skalierung bei jeder Änderung sauber
+ * neu berechnet werden, ohne sich mehrfach aufzusummieren.
+ */
+const themeEditorOriginalInlineFontSizes = new WeakMap();
+
+function getThemeEditorFontSizeScale() {
+    const savedValue = Number(
+        appStorage.get(THEME_EDITOR_FONT_SIZE_KEY)
+    );
+
+    if (!Number.isFinite(savedValue)) {
+        return THEME_EDITOR_DEFAULT_FONT_SIZE;
+    }
+
+    return Math.max(80, Math.min(130, savedValue));
+}
+
+function rememberOriginalInlineFontSize(element) {
+    if (!themeEditorOriginalInlineFontSizes.has(element)) {
+        themeEditorOriginalInlineFontSizes.set(
+            element,
+            element.style.fontSize
+        );
+    }
+}
+
+function restoreOriginalInlineFontSize(element) {
+    if (!themeEditorOriginalInlineFontSizes.has(element)) {
+        return;
+    }
+
+    const originalValue =
+        themeEditorOriginalInlineFontSizes.get(element);
+
+    if (originalValue) {
+        element.style.fontSize = originalValue;
+    } else {
+        element.style.removeProperty('font-size');
+    }
+}
+
+function applyThemeEditorFontSize(value, save = true) {
+    const numericValue = Number(value);
+
+    const percent = Number.isFinite(numericValue)
+        ? Math.max(80, Math.min(130, numericValue))
+        : THEME_EDITOR_DEFAULT_FONT_SIZE;
+
+    /*
+     * Zuerst alle bisher gesetzten Inline-Größen entfernen.
+     * Dadurch wird nicht mehrfach skaliert.
+     */
+    const elements = Array.from(
+        document.querySelectorAll('body, body *')
+    );
+
+    elements.forEach(element => {
+        restoreOriginalInlineFontSize(element);
+    });
+
+    /*
+     * Nun die ursprüngliche berechnete Schriftgröße ermitteln
+     * und proportional skalieren.
+     */
+    elements.forEach(element => {
+        /*
+         * Canvas zeichnet Text nicht über CSS-Schriftgrößen.
+         * Das Canvas selbst muss deshalb nicht verändert werden.
+         */
+        if (
+            element.tagName === 'CANVAS' ||
+            element.tagName === 'SCRIPT' ||
+            element.tagName === 'STYLE'
+        ) {
+            return;
+        }
+
+        rememberOriginalInlineFontSize(element);
+
+        const computedStyle =
+            window.getComputedStyle(element);
+
+        const originalSize =
+            parseFloat(computedStyle.fontSize);
+
+        if (!Number.isFinite(originalSize) || originalSize <= 0) {
+            return;
+        }
+
+        const scaledSize =
+            originalSize * (percent / 100);
+
+        element.style.setProperty(
+            'font-size',
+            `${scaledSize}px`
+        );
+    });
+
+    document.documentElement.style.setProperty(
+        '--app-font-size-scale',
+        `${percent / 100}`
+    );
+
+    document.body.dataset.fontSize = String(percent);
+
+    const slider = document.getElementById('te-font-size');
+    const valueLabel =
+        document.getElementById('te-font-size-value');
+
+    if (slider && slider.value !== String(percent)) {
+        slider.value = String(percent);
+    }
+
+    if (valueLabel) {
+        valueLabel.textContent = String(percent);
+    }
+
+    if (save) {
+        appStorage.set(
+            THEME_EDITOR_FONT_SIZE_KEY,
+            percent
+        );
+    }
+}
+
+function initThemeEditorFontSizeSelector() {
+    const slider = document.getElementById('te-font-size');
+
+    if (!slider) return;
+
+    const savedValue =
+        getThemeEditorFontSizeScale();
+
+    applyThemeEditorFontSize(savedValue, false);
+
+    if (slider.dataset.fontSizeInitialized === 'true') {
+        return;
+    }
+
+    slider.dataset.fontSizeInitialized = 'true';
+
+    const handleFontSizeChange = event => {
+        const value = Number(event.target.value);
+        applyThemeEditorFontSize(value, true);
+    };
+
+    slider.addEventListener(
+        'input',
+        handleFontSizeChange
+    );
+
+    slider.addEventListener(
+        'change',
+        handleFontSizeChange
+    );
+}
 
 let themeEditorActiveTab = 'light';
 let themeEditorDraftSettings = null;
@@ -45671,6 +46097,9 @@ function updateContrastCheckerDisplay(settings) {
 function initThemeEditor() {
     const view = document.getElementById('theme-view');
     if (!view) return;
+
+    initThemeEditorFontSelector();
+    initThemeEditorFontSizeSelector();
 
     const tabs = view.querySelectorAll('[data-theme-editor-tab]');
     const inputs = [
@@ -59737,7 +60166,7 @@ if ('serviceWorker' in navigator) {
     #backup-view .backup-card {
         width: 100%;
         height: auto;
-        min-height: 0;
+        flex-shrink: 0;
 
         margin: 0;
         padding: 9px 11px !important;
@@ -61272,6 +61701,12 @@ body.summit .plan-season-card {
         overflow: hidden;
     }
 
+    #theme-view .filter-simple-card {
+        overflow-y: auto !important;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
     #theme-view .filter-simple-title {
         flex: 0 0 auto;
         margin-bottom: 4px;
@@ -61308,7 +61743,7 @@ body.summit .plan-season-card {
         column-gap: 12px;
         row-gap: 0;
         width: 100%;
-        min-height: 0;
+        flex-shrink: 0;
         align-items: start;
     }
 
@@ -61318,7 +61753,7 @@ body.summit .plan-season-card {
         justify-content: space-between;
         width: 100%;
         min-width: 0;
-        min-height: 0;
+        flex-shrink: 0;
         gap: 3px;
     }
 
