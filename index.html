@@ -62156,6 +62156,35 @@ body.summit .plan-season-card {
     white-space: nowrap;
 }
 
+    /* =========================================================
+   Dashboard – Letzte Touren:
+   Datumsspalte unabhängig von der Schriftgrößen-Skalierung
+   ========================================================= */
+
+.dash-tour-list li,
+#dashboard-view .dash-tour-list li {
+    grid-template-columns: max-content minmax(0, 1fr) !important;
+    min-width: 0;
+    width: 100%;
+}
+
+.dash-tour-list .tour-date,
+#dashboard-view .dash-tour-list .tour-date {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dash-tour-list .tour-name,
+#dashboard-view .dash-tour-list .tour-name {
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 </style>
 </body>
 </html>
