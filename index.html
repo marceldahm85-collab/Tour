@@ -37265,23 +37265,37 @@ function goToView(targetView, animate = true) {
                     renderAchievementsView();
           }
 
-          if (targetView === 'wrapped' && (!wrappedCurrentYear || !wrappedSlides.length)) {
-    const years = getWrappedAvailableYears();
+          if (
+    targetView === 'wrapped' &&
+    (!wrappedCurrentYear || !wrappedSlides.length)
+) {
+    const years =
+        getWrappedAvailableYears();
+
     if (years.length) {
         wrappedCurrentYear = years[0];
-        wrappedSlides = buildWrappedSlideData(wrappedCurrentYear);
+        wrappedSlides =
+            buildWrappedSlideData(
+                wrappedCurrentYear
+            );
+
         wrappedSlideIndex = 0;
-        wrappedPaused = false;
+        wrappedPaused = true;
+
+        clearWrappedAutoAdvance();
         populateWrappedYearSelect();
         renderWrappedProgressBar();
+        updateWrappedProgressSegments();
         renderWrappedSlide(0);
-        startWrappedAutoAdvance();
+        updateWrappedPauseButtonLabel();
 
-        attachWrappedPhotos(wrappedSlides, wrappedCurrentYear).then(() => {
+        attachWrappedPhotos(
+            wrappedSlides,
+            wrappedCurrentYear
+        ).then(() => {
             renderWrappedSlide(wrappedSlideIndex);
         });
     }
-    updateWrappedPauseButtonLabel();
 }
 
 if (previousView === 'wrapped' && targetView !== 'wrapped') {
@@ -42745,7 +42759,7 @@ const ACHIEVEMENT_CATEGORIES = {
         )
     },
     uniquePeaks: {
-        label: 'Verschiedene Gipfel',
+        label: 'Versch. Gipfel',
         icon: '🗻',
         badges: buildTieredBadges(
             'uniquePeaks',
@@ -42796,7 +42810,7 @@ const ACHIEVEMENT_CATEGORIES = {
         ]
     },
     longestTour: {
-        label: 'Längste Einzeltour',
+        label: 'Längste Tour',
         icon: '🛤️',
         badges: buildTieredBadges(
             'longestTour',
@@ -42805,7 +42819,7 @@ const ACHIEVEMENT_CATEGORIES = {
         )
     },
     dailyAscent: {
-        label: 'Höhenmeter pro Tag',
+        label: 'Hm / Tag',
         icon: '⚡',
         badges: buildTieredBadges(
             'dailyAscent',
@@ -43861,11 +43875,11 @@ function quickStats(tours) {
     value: stats.avgSpeed > 0
         ? formatDecimalAT(stats.avgSpeed) + ' km/h'
         : '–',
-    label: 'Ø Geschwindigkeit',
+    label: 'Ø Speed',
     type: 'speed'
 },
             { icon: '📐', value: stats.avgGradient > 0 ? Math.round(stats.avgGradient)                + ' hm/km' : '–',  label: 'Ø Steigung', type: 'steigung' },
-            { icon: '⬆️', value: stats.avgAscentH  > 0 ? Math.round(stats.avgAscentH)                 + ' hm/h'  : '–',  label: 'Ø Anstieg / h', type: 'anstieg'  },
+            { icon: '⬆️', value: stats.avgAscentH  > 0 ? Math.round(stats.avgAscentH)                 + ' hm/h'  : '–',  label: 'Ø Anstieg/h', type: 'anstieg'  },
         ];
         const yearFilterWrap =
             document.querySelector('.dash-year-filter-wrap');
@@ -45824,6 +45838,15 @@ originalSizes.forEach(({ element, originalSize }) => {
             percent
         );
     }
+
+    if (
+        typeof wrappedSlides !== 'undefined' &&
+        wrappedSlides.length &&
+        typeof renderWrappedSlide === 'function'
+    ) {
+        renderWrappedSlide(wrappedSlideIndex);
+    }
+
 }
 
 function initThemeEditorFontSizeSelector() {
@@ -46776,6 +46799,15 @@ function initTheme() {
         if (currentView === 'map') {
             refreshCurrentMap();
         }
+
+if (
+    typeof wrappedSlides !== 'undefined' &&
+    wrappedSlides.length &&
+    typeof renderWrappedSlide === 'function'
+) {
+    renderWrappedSlide(wrappedSlideIndex);
+}
+
     }
 
     function applyTheme(theme) {
@@ -56858,6 +56890,56 @@ function checkAchievementsWeeklyBanner() {
     showAchievementsWeeklyBanner(recent.length);
 }
 
+/* =========================================================
+   Jahresrückblick – zentrale Schriftsteuerung
+   ========================================================= */
+
+function getWrappedFontFamily() {
+    if (
+        typeof getThemeEditorFontName === 'function' &&
+        typeof THEME_EDITOR_FONT_PRESETS !== 'undefined'
+    ) {
+        const fontName = getThemeEditorFontName();
+
+        return THEME_EDITOR_FONT_PRESETS[fontName]
+            || THEME_EDITOR_FONT_PRESETS.android;
+    }
+
+    return 'Roboto, "Noto Sans", system-ui, sans-serif';
+}
+
+function getWrappedFontScale() {
+    let appScale = 1;
+
+    if (typeof getThemeEditorFontSizeScale === 'function') {
+        appScale =
+            Number(getThemeEditorFontSizeScale()) / 100;
+    }
+
+    /*
+     * Begrenzung verhindert, dass das Canvas-Layout
+     * bei sehr großen globalen Schriftgrößen zerbricht.
+     */
+    return Math.max(
+        0.86,
+        Math.min(1.18, appScale)
+    );
+}
+
+function setWrappedFont(
+    ctx,
+    size,
+    weight = 'normal',
+    style = 'normal'
+) {
+    const scaledSize = Math.round(
+        Number(size) * getWrappedFontScale()
+    );
+
+    ctx.font =
+        `${style} ${weight} ${scaledSize}px ${getWrappedFontFamily()}`;
+}
+
 function renderWrappedSlideToCanvas(slide, width, height) {
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -56945,13 +57027,17 @@ async function openWrappedView(year) {
     wrappedCurrentYear = year;
     wrappedSlides = buildWrappedSlideData(year);
     wrappedSlideIndex = 0;
-    wrappedPaused = false;
+
+    // Rückblick startet grundsätzlich pausiert.
+    wrappedPaused = true;
+    clearWrappedAutoAdvance();
 
     populateWrappedYearSelect();
     renderWrappedProgressBar();
+    updateWrappedProgressSegments();
+
     goToView('wrapped');
     renderWrappedSlide(0);
-    startWrappedAutoAdvance();
     updateWrappedPauseButtonLabel();
 
     await attachWrappedPhotos(wrappedSlides, year);
@@ -56959,13 +57045,23 @@ async function openWrappedView(year) {
 }
 
 function populateWrappedYearSelect() {
-    const select = document.getElementById('wrapped-year-select');
-    const years = getWrappedAvailableYears();
-    select.innerHTML = years.map(y =>
-        `<option value="${y}" ${y === wrappedCurrentYear ? 'selected' : ''}>${y}</option>`
+    const select =
+        document.getElementById('wrapped-year-select');
+
+    if (!select) return;
+
+    const years =
+        getWrappedAvailableYears();
+
+    select.innerHTML = years.map(year =>
+        `<option value="${year}" ${
+            year === wrappedCurrentYear
+                ? 'selected'
+                : ''
+        }>${year}</option>`
     ).join('');
 
-    select.dispatchEvent(new Event('change'));   // ← neu
+    select.value = String(wrappedCurrentYear);
 }
 
 function renderWrappedProgressBar() {
@@ -57057,15 +57153,29 @@ function clearWrappedAutoAdvance() {
 
 function goToWrappedSlide(index) {
     if (index < 0) return;
+
     if (index >= wrappedSlides.length) {
         clearWrappedAutoAdvance();
-        return; // letzte Slide: kein Loop
+        wrappedPaused = true;
+        updateWrappedPauseButtonLabel();
+        return;
     }
 
     wrappedSlideIndex = index;
+
     updateWrappedProgressSegments();
     renderWrappedSlide(wrappedSlideIndex);
-    startWrappedAutoAdvance();
+
+    /*
+     * Beim manuellen Durchblättern bleibt der Rückblick pausiert,
+     * sofern er vorher pausiert war.
+     */
+    if (!wrappedPaused) {
+        startWrappedAutoAdvance();
+    } else {
+        clearWrappedAutoAdvance();
+        updateWrappedPauseButtonLabel();
+    }
 }
 
 function initWrappedControls() {
@@ -57077,8 +57187,31 @@ function initWrappedControls() {
     right.addEventListener('click', () => goToWrappedSlide(wrappedSlideIndex + 1));
 
     let holdTimer = null;
-    const startHold = () => { holdTimer = setTimeout(pauseWrappedAutoAdvance, 180); };
-    const endHold = () => { clearTimeout(holdTimer); resumeWrappedAutoAdvance(); };
+let holdTriggered = false;
+
+const startHold = () => {
+    holdTriggered = false;
+
+    holdTimer = setTimeout(() => {
+        holdTriggered = true;
+        pauseWrappedAutoAdvance();
+    }, 180);
+};
+
+const endHold = () => {
+    clearTimeout(holdTimer);
+    holdTimer = null;
+
+    /*
+     * Nur ein echtes Gedrückthalten setzt die Wiedergabe fort.
+     * Ein normaler Klick auf das Slide startet nichts.
+     */
+    if (holdTriggered) {
+        resumeWrappedAutoAdvance();
+    }
+
+    holdTriggered = false;
+};
 
     stage.addEventListener('pointerdown', startHold);
     stage.addEventListener('pointerup', endHold);
@@ -57215,26 +57348,49 @@ function wrapWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
 }
 
 function drawWrappedCenteredTitle(ctx, text, y, fontSize, color, w) {
+    const scale = getWrappedFontScale();
+
     ctx.fillStyle = color;
-    ctx.font = `bold ${fontSize}px sans-serif`;
+    setWrappedFont(ctx, fontSize, 'bold');
     ctx.textAlign = 'center';
-    wrapWrappedText(ctx, text, w / 2, y, w - 120, fontSize * 1.2);
+
+    wrapWrappedText(
+        ctx,
+        text,
+        w / 2,
+        y,
+        w - 120,
+        fontSize * scale * 1.2
+    );
 }
 
 function drawWrappedBigNumber(ctx, value, unit, y, color, w) {
+    const scale = getWrappedFontScale();
+
     ctx.fillStyle = color;
     ctx.textAlign = 'center';
-    ctx.font = 'bold 150px sans-serif';
+
+    setWrappedFont(ctx, 150, 'bold');
     ctx.fillText(String(value), w / 2, y);
-    ctx.font = '46px sans-serif';
-    ctx.fillText(unit, w / 2, y + 70);
+
+    setWrappedFont(ctx, 46, 'normal');
+    ctx.fillText(
+        unit,
+        w / 2,
+        y + Math.round(70 * scale)
+    );
 }
 
 function drawWrappedFooter(ctx, w, h, year) {
     ctx.fillStyle = 'rgba(255,255,255,0.7)';
-    ctx.font = '30px sans-serif';
+    setWrappedFont(ctx, 30, 'normal');
     ctx.textAlign = 'center';
-    ctx.fillText(`Jahresrückblick ${year}`, w / 2, h - 60);
+
+    ctx.fillText(
+        `Jahresrückblick ${year}`,
+        w / 2,
+        h - 60
+    );
 }
 
 function getWrappedDistanceComparison(km) {
@@ -57280,16 +57436,16 @@ function renderWrappedSlide(index) {
 function renderWrappedIntroSlide(ctx, w, h, colors, data) {
     drawWrappedCenteredTitle(ctx, `Dein Jahr ${data.year}`, 400, 90, colors.text, w);
     drawWrappedBigNumber(ctx, data.tourCount, 'Touren', 900, colors.text, w);
-    ctx.font = '42px sans-serif';
+    setWrappedFont(ctx, 42);
     ctx.fillStyle = colors.text;
     ctx.textAlign = 'center';
-    ctx.fillText('Lass uns zurückblicken! 🏔️', w / 2, 1050);
+    ctx.fillText('Stolzer Blick zurück... 🏔️', w / 2, 1050);
 }
 
 function renderWrappedDistanceSlide(ctx, w, h, colors, data) {
     drawWrappedCenteredTitle(ctx, 'Deine Strecke', 350, 70, colors.text, w);
     drawWrappedBigNumber(ctx, data.distance.toFixed(1), 'km', 800, colors.text, w);
-    ctx.font = '38px sans-serif';
+    setWrappedFont(ctx, 38);
     ctx.fillStyle = colors.accent;
     ctx.textAlign = 'center';
     wrapWrappedText(ctx, getWrappedDistanceComparison(data.distance), w / 2, 1000, w - 160, 50);
@@ -57298,7 +57454,7 @@ function renderWrappedDistanceSlide(ctx, w, h, colors, data) {
 function renderWrappedAscentSlide(ctx, w, h, colors, data) {
     drawWrappedCenteredTitle(ctx, 'Deine Höhenmeter', 350, 70, colors.text, w);
     drawWrappedBigNumber(ctx, Math.round(data.ascent).toLocaleString('de-DE'), 'Hm', 800, colors.text, w);
-    ctx.font = '38px sans-serif';
+    setWrappedFont(ctx, 38);
     ctx.fillStyle = colors.accent;
     ctx.textAlign = 'center';
     wrapWrappedText(ctx, getWrappedElevationComparison(data.ascent), w / 2, 1000, w - 160, 50);
@@ -57309,7 +57465,7 @@ function renderWrappedTimeSlide(ctx, w, h, colors, data) {
     const days = (hours / 24).toFixed(1);
     drawWrappedCenteredTitle(ctx, 'Zeit unterwegs', 350, 70, colors.text, w);
     drawWrappedBigNumber(ctx, hours.toLocaleString('de-DE'), 'Stunden', 800, colors.text, w);
-    ctx.font = '38px sans-serif';
+    setWrappedFont(ctx, 38);
     ctx.fillStyle = colors.accent;
     ctx.textAlign = 'center';
     ctx.fillText(`Das sind ${days} Tage am Berg! ⏱️`, w / 2, 1000);
@@ -57319,7 +57475,7 @@ function renderWrappedActiveMonthSlide(ctx, w, h, colors, data) {
     const monthNames = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
     drawWrappedCenteredTitle(ctx, 'Dein aktivster Monat', 300, 70, colors.text, w);
 
-    ctx.font = 'bold 100px sans-serif';
+    setWrappedFont(ctx, 100, 'bold');
     ctx.fillStyle = colors.accent;
     ctx.textAlign = 'center';
     ctx.fillText(monthNames[data.activeMonthIndex], w / 2, 500);
@@ -57336,24 +57492,24 @@ function renderWrappedActiveMonthSlide(ctx, w, h, colors, data) {
         ctx.fillRect(x, y, barW, barH);
 
         ctx.fillStyle = colors.text;
-        ctx.font = '24px sans-serif';
+        setWrappedFont(ctx, 24);
         ctx.textAlign = 'center';
         ctx.fillText(monthNames[i], x + barW / 2, chartY + chartH + 40);
     });
 
-    ctx.font = '42px sans-serif';
+    setWrappedFont(ctx, 42);
     ctx.fillStyle = colors.text;
     ctx.fillText(`${data.monthlyTours[data.activeMonthIndex]} Touren`, w / 2, chartY - 30);
 }
 
 function renderWrappedBestTourSlide(ctx, w, h, colors, data) {
-    drawWrappedCenteredTitle(ctx, 'Deine beste Tour', 300, 70, colors.text, w);
-    ctx.font = 'bold 54px sans-serif';
+    drawWrappedCenteredTitle(ctx, 'Deine leistungsbeste Tour', 300, 70, colors.text, w);
+    setWrappedFont(ctx, 54, 'bold');
     ctx.fillStyle = colors.accent;
     ctx.textAlign = 'center';
     wrapWrappedText(ctx, data.entry.tourname || data.entry.region || 'Unbenannte Tour', w / 2, 500, w - 160, 65);
 
-    ctx.font = '36px sans-serif';
+    setWrappedFont(ctx, 36);
     ctx.fillStyle = colors.text;
     ctx.fillText(data.entry.date || '', w / 2, 650);
 
@@ -57362,7 +57518,7 @@ function renderWrappedBestTourSlide(ctx, w, h, colors, data) {
 
 function renderWrappedHighestPeakSlide(ctx, w, h, colors, data) {
     drawWrappedCenteredTitle(ctx, 'Dein höchster Gipfel', 350, 70, colors.text, w);
-    ctx.font = 'bold 64px sans-serif';
+    setWrappedFont(ctx, 64, 'bold');
     ctx.fillStyle = colors.accent;
     ctx.textAlign = 'center';
     wrapWrappedText(ctx, data.peak.name, w / 2, 650, w - 160, 75);
@@ -57372,25 +57528,25 @@ function renderWrappedHighestPeakSlide(ctx, w, h, colors, data) {
 
 function renderWrappedTopRegionSlide(ctx, w, h, colors, data) {
     drawWrappedCenteredTitle(ctx, 'Deine Lieblingsregion', 400, 70, colors.text, w);
-    ctx.font = 'bold 72px sans-serif';
+    setWrappedFont(ctx, 72, 'bold');
     ctx.fillStyle = colors.accent;
     ctx.textAlign = 'center';
     wrapWrappedText(ctx, data.region.label, w / 2, 700, w - 160, 85);
 
-    ctx.font = '42px sans-serif';
+    setWrappedFont(ctx, 42);
     ctx.fillStyle = colors.text;
     ctx.fillText(`${data.region.count} Touren hier! 📍`, w / 2, 900);
 }
 
 function renderWrappedTopCompanionSlide(ctx, w, h, colors, data) {
-    drawWrappedCenteredTitle(ctx, 'Dein Begleiter des Jahres', 400, 64, colors.text, w);
+    drawWrappedCenteredTitle(ctx, 'Dein Wanderbuddy des Jahres', 400, 64, colors.text, w);
 
-    ctx.font = 'bold 72px sans-serif';
+    setWrappedFont(ctx, 72, 'bold');
     ctx.fillStyle = colors.accent;
     ctx.textAlign = 'center';
     wrapWrappedText(ctx, data.companion.name, w / 2, 700, w - 160, 85);
 
-    ctx.font = '42px sans-serif';
+    setWrappedFont(ctx, 42);
     ctx.fillStyle = colors.text;
     ctx.fillText(
         `${data.companion.count} ${data.companion.count === 1 ? 'gemeinsame Tour' : 'gemeinsame Touren'} 🤝`,
@@ -57400,7 +57556,7 @@ function renderWrappedTopCompanionSlide(ctx, w, h, colors, data) {
 }
 
 function renderWrappedYearCompareSlide(ctx, w, h, colors, data) {
-    ctx.font = 'bold 60px sans-serif';
+    setWrappedFont(ctx, 60, 'bold');
     ctx.fillStyle = colors.text;
     ctx.textAlign = 'center';
     ctx.fillText(`${data.previousYear} vs. ${wrappedCurrentYear}`, w / 2, 280);
@@ -57416,7 +57572,7 @@ function renderWrappedYearCompareSlide(ctx, w, h, colors, data) {
 
     let y = 420;
     rows.forEach(row => {
-        ctx.font = '32px sans-serif';
+        setWrappedFont(ctx, 32);
         ctx.fillStyle = colors.text;
         ctx.textAlign = 'left';
         ctx.fillText(row.label, 100, y);
@@ -57427,14 +57583,14 @@ function renderWrappedYearCompareSlide(ctx, w, h, colors, data) {
 
         ctx.textAlign = 'left';
         ctx.fillStyle = colors.accent;
-        ctx.font = 'bold 32px sans-serif';
+        setWrappedFont(ctx, 32, 'bold');
         ctx.fillText(String(row.curr), w / 2 + 40, y);
 
         y += 100;
     });
 
     const diff = data.current.tourCount - data.previous.tourCount;
-    ctx.font = '34px sans-serif';
+    setWrappedFont(ctx, 34);
     ctx.fillStyle = colors.text;
     ctx.textAlign = 'center';
     ctx.fillText(
@@ -57450,11 +57606,11 @@ function renderWrappedTop3Slide(ctx, w, h, colors, data) {
     const medals = ['🥇', '🥈', '🥉'];
 
     data.top3.forEach((item, i) => {
-        ctx.font = '64px sans-serif';
+        setWrappedFont(ctx, 64);
         ctx.textAlign = 'left';
         ctx.fillText(medals[i] || '', 100, y);
 
-        ctx.font = 'bold 42px sans-serif';
+        setWrappedFont(ctx, 42, 'bold');
         ctx.fillStyle = colors.accent;
         wrapWrappedText(ctx, item.entry.tourname || item.entry.region || 'Tour', 220, y, w - 350, 50);
 
@@ -57464,14 +57620,14 @@ function renderWrappedTop3Slide(ctx, w, h, colors, data) {
 
 function renderWrappedOutroSlide(ctx, w, h, colors, data) {
     drawWrappedCenteredTitle(ctx, `${data.tourCount} Touren.`, 700, 90, colors.text, w);
-    ctx.font = 'bold 90px sans-serif';
+    setWrappedFont(ctx, 90, 'bold');
     ctx.fillStyle = colors.accent;
     ctx.textAlign = 'center';
-    ctx.fillText('Unzählige Momente.', w / 2, 850);
+    ctx.fillText('Unzählige neue Erinnerungen geschaffen', w / 2, 850);
 
-    ctx.font = '48px sans-serif';
+    setWrappedFont(ctx, 48);
     ctx.fillStyle = colors.text;
-    ctx.fillText('Auf ins nächste Jahr! 🏔️⛰️', w / 2, 1100);
+    ctx.fillText('...volle Kraft nach vorn! 🏔️⛰️', w / 2, 1100);
 }
 
 function toggleWrappedFullscreen() {
