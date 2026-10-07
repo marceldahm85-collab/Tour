@@ -1,6 +1,6 @@
 // sw.js — Service Worker für Bergtouren Tracker
-// PDF-Magazin-Layout wird über eine zusätzliche JS-Datei in index.html eingebunden.
-const CACHE_NAME = 'bergtouren-cache-v9';
+// Der PDF-Magazin-Renderer wird direkt über index.html geladen.
+const CACHE_NAME = 'bergtouren-cache-v10';
 
 const APP_SHELL = [
   './',
@@ -18,28 +18,31 @@ const APP_SHELL = [
   'https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js'
 ];
 
-// --- Installation: App-Shell + externe Libraries cachen ---
+// --- Installation: App-Shell + Libraries cachen ---
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
       await Promise.all(
         APP_SHELL.map(async (url) => {
           try {
-            const req = new Request(url, { mode: url.startsWith('http') ? 'cors' : 'same-origin' });
-            const res = await fetch(req);
-            if (res && (res.ok || res.type === 'opaque')) {
-              await cache.put(req, res);
+            const request = new Request(url, {
+              mode: url.startsWith('http') ? 'cors' : 'same-origin'
+            });
+            const response = await fetch(request);
+            if (response && (response.ok || response.type === 'opaque')) {
+              await cache.put(request, response);
             }
           } catch (err) {
             console.warn('SW: Konnte nicht cachen:', url, err);
           }
         })
       );
-    }).then(() => self.skipWaiting())
+      await self.skipWaiting();
+    })
   );
 });
 
-// --- Aktivierung: alte Caches aus früheren Versionen aufräumen ---
+// --- Aktivierung: alte Caches löschen ---
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((names) =>
@@ -52,58 +55,25 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-async function injectPdfMagazine(response) {
-  if (!response) return response;
-
-  const contentType = response.headers.get('content-type') || '';
-  if (!contentType.includes('text/html')) return response;
-
-  try {
-    const html = await response.clone().text();
-    if (html.includes('pdf-magazine.js')) return response;
-
-    const injected = html.replace(
-      /<\/body>/i,
-      '<script src="./pdf-magazine.js"></script></body>'
-    );
-
-    const headers = new Headers();
-    headers.set('content-type', 'text/html; charset=UTF-8');
-
-    return new Response(injected, {
-      status: response.status,
-      statusText: response.statusText,
-      headers
-    });
-  } catch (err) {
-    console.warn('SW: PDF-Magazin konnte nicht eingebunden werden:', err);
-    return response;
-  }
-});
-
 // --- Fetch-Strategie: Stale-While-Revalidate ---
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(event.request).then(async (cached) => {
+    caches.match(event.request).then((cached) => {
       const networkFetch = fetch(event.request)
-        .then((networkRes) => {
-          if (networkRes && (networkRes.ok || networkRes.type === 'opaque')) {
-            const resClone = networkRes.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, resClone));
+        .then((networkResponse) => {
+          if (networkResponse && (networkResponse.ok || networkResponse.type === 'opaque')) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseClone);
+            });
           }
-          return networkRes;
+          return networkResponse;
         })
         .catch(() => cached);
 
-      const response = cached || await networkFetch;
-
-      if (event.request.mode === 'navigate') {
-        return injectPdfMagazine(response);
-      }
-
-      return response;
+      return cached || networkFetch;
     })
   );
 });
