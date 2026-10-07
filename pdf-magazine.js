@@ -5,10 +5,10 @@
     if (!window.jspdf || !window.jspdf.jsPDF) return;
 
     var A4 = { w: 210, h: 297 };
-    var M = 15;
-    var CW = 180;
-    var SAFE_BOTTOM = 278;
-    var GAP = 6;
+    var M = 12;
+    var CW = 186;
+    var SAFE_BOTTOM = 282;
+    var GAP = 3;
 
     function st(v) {
         if (typeof window.sanitizePdfText === 'function') return window.sanitizePdfText(v);
@@ -157,80 +157,85 @@
     }
 
     function measure(doc, d, w, kind) {
-        var h = 10, inner = w - 10, titleSize = kind === 'feature' ? 16 : 11.7;
-        h += wrap(doc, d.title, inner, titleSize, 'bold').length * (titleSize * 0.40) + 7;
-        h += 7;
-        if (d.cs.length) h += wrap(doc, d.cs.map(function (c) { return c.name + ' · ' + c.rank; }).join('   /   '), inner, 6.7, 'italic').length * 2.8 + 3;
-        if (kind === 'feature' && d.photo) h += 62;
-        if (kind === 'split' && d.photo) h += 55;
-        if (!(kind === 'split' && d.photo)) {
-            h += Math.ceil(Math.min(d.stats.length, kind === 'feature' ? 5 : 6) / (kind === 'feature' ? 5 : 3)) * 14;
+        var h = 7, inner = w - 8, titleSize = kind === 'feature' ? 15 : 10.8;
+        h += wrap(doc, d.title, inner, titleSize, 'bold').length * (titleSize * 0.38) + 5;
+        h += 5;
+        if (d.cs.length) h += wrap(doc, d.cs.map(function (c) { return c.name + ' · ' + c.rank; }).join(' / '), inner, 6.3, 'italic').length * 2.5 + 2;
+
+        if (kind === 'feature' && d.photo) h += 50;
+        if (kind === 'split' && d.photo) h += 43;
+
+        if (kind === 'split' && d.photo) {
+            h += 23;
         } else {
-            h += 28;
+            // Kompakte Touren: Hauptkennzahlen als eine starke Zeile statt einzelner Kacheln.
+            h += wrap(doc, d.stats.map(function (s) { return s[0]; }).join('   ·   '), inner, kind === 'feature' ? 9.5 : 8.6, 'bold').length * 3.4 + 3;
         }
-        if (d.secondary.length) h += wrap(doc, d.secondary.join(' · '), inner, 6.9, 'normal').length * 2.8 + 4;
-        if (d.peaks.length) h += 5 + Math.min(d.peaks.length, kind === 'compact' ? 4 : 7) * 4.1;
-        h += d.extras.length * 8;
-        if (d.profile) h += wrap(doc, d.profile, inner, 7.4, 'normal').length * 3.1 + 7;
-        if (d.p) h += 16;
-        if (d.notes) h += wrap(doc, d.notes, inner, 7.2, 'italic').length * 3.1 + 7;
-        return Math.max(44, h);
+
+        if (d.secondary.length) h += wrap(doc, d.secondary.join(' · '), inner, 6.5, 'normal').length * 2.5 + 3;
+        if (d.peaks.length) h += 4 + Math.min(d.peaks.length, kind === 'compact' ? 4 : 6) * 3.6;
+        h += d.extras.length * 6.5;
+        if (d.profile) h += wrap(doc, d.profile, inner, 7.0, 'normal').length * 2.8 + 5;
+        if (d.p) h += 13;
+        if (d.notes) h += wrap(doc, d.notes, inner, 7.0, 'italic').length * 2.7 + 5;
+
+        return Math.max(38, h);
     }
 
     var measureDoc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
 
     function statGrid(doc, d, x, y, w, cols, colors) {
         cols = cols || 3;
-        var gap = 3, cw = (w - gap * (cols - 1)) / cols, ch = 12;
+        var gap = 2.5, cw = (w - gap * (cols - 1)) / cols, ch = 9.5;
         d.stats.slice(0, cols * 2).forEach(function (it, i) {
             var row = Math.floor(i / cols), col = i % cols;
-            var px = x + col * (cw + gap), py = y + row * (ch + 2);
+            var px = x + col * (cw + gap), py = y + row * (ch + 1.5);
             fill(doc, [248,248,244]); draw(doc, [225,225,220]); doc.setLineWidth(0.25);
             doc.roundedRect(px, py, cw, ch, 1.8, 1.8, 'FD');
-            text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(10.1); doc.text(st(it[0]), px + 3, py + 5.3);
-            text(doc, [120,120,115]); doc.setFont(undefined, 'normal'); doc.setFontSize(6.3); doc.text(st(it[1]), px + 3, py + 9.4);
+            text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(8.8); doc.text(st(it[0]), px + 2.5, py + 4.4);
+            text(doc, [120,120,115]); doc.setFont(undefined, 'normal'); doc.setFontSize(5.8); doc.text(st(it[1]), px + 2.5, py + 7.6);
         });
-        return y + Math.ceil(Math.min(d.stats.length, cols * 2) / cols) * 14;
+        return y + Math.ceil(Math.min(d.stats.length, cols * 2) / cols) * 11;
     }
 
     function peaksBlock(doc, d, x, y, max, colors) {
         if (!d.peaks.length) return y;
-        text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(7); doc.text('GIPFEL', x, y); y += 4;
+        text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(6.5); doc.text('GIPFEL', x, y); y += 4;
         var shown = d.peaks.slice(0, max);
         shown.forEach(function (p, i) {
-            text(doc, [70,70,66]); doc.setFont(undefined, 'normal'); doc.setFontSize(7.1); doc.text(st('• ' + p), x, y + i * 4.1);
+            text(doc, [70,70,66]); doc.setFont(undefined, 'normal'); doc.setFontSize(6.7); doc.text(st('• ' + p), x, y + i * 3.6);
         });
         if (d.peaks.length > shown.length) {
-            text(doc, [135,135,130]); doc.setFontSize(6.7); doc.text(st('+ ' + (d.peaks.length - shown.length) + ' weitere'), x, y + shown.length * 4.1);
-            return y + (shown.length + 1) * 4.1;
+            text(doc, [135,135,130]); doc.setFontSize(6.3); doc.text(st('+ ' + (d.peaks.length - shown.length) + ' weitere'), x, y + shown.length * 3.6);
+            return y + (shown.length + 1) * 3.6;
         }
-        return y + shown.length * 4.1;
+        return y + shown.length * 3.6;
     }
 
     function drawPerf(doc, d, x, y, w, colors) {
         if (!d.p) return y;
         text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(6.9); doc.text('LEISTUNGSINDEX', x, y);
         text(doc, [45,45,42]); doc.setFontSize(13.5); doc.text(st(d.p.score), x, y + 6);
-        text(doc, [120,120,115]); doc.setFont(undefined, 'normal'); doc.setFontSize(6.6); doc.text(st(d.pText.replace(/^\d+\s*\/\s*100\s*·\s*/, '')), x + 14, y + 5.5);
+        text(doc, [120,120,115]); doc.setFont(undefined, 'normal'); doc.setFontSize(6.3); doc.text(st(d.pText.replace(/^\d+\s*\/\s*100\s*·\s*/, '')), x + 14, y + 5.5);
         fill(doc, [232,232,228]); doc.roundedRect(x, y + 9.5, w, 2.2, 1.1, 1.1, 'F');
         fill(doc, colors.accent); doc.roundedRect(x, y + 9.5, Math.max(2, Math.min(100, n(d.p.score)) / 100 * w), 2.2, 1.1, 1.1, 'F');
         return y + 15;
     }
 
     async function drawTour(doc, d, x, y, w, kind, colors) {
-        var h = measure(measureDoc, d, w, kind), pad = 5, inner = w - 10, cursor = y + pad + 1;
+        var h = measure(measureDoc, d, w, kind), pad = 4, inner = w - 8, cursor = y + pad + 1;
         fill(doc, kind === 'feature' ? [249,248,244] : [252,251,248]);
         doc.roundedRect(x, y, w, h, 3, 3, 'F');
         rule(doc, x, y, Math.min(w, d.isBig ? 28 : 16), colors.accent, d.isBig ? 1.6 : 1);
 
-        text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(kind === 'feature' ? 16 : 11.7);
+        text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(kind === 'feature' ? 15 : 10.8);
         doc.text(st(d.title), x + pad, cursor + (kind === 'feature' ? 4 : 3.3));
-        cursor += kind === 'feature' ? 10 : 8;
-        text(doc, [112,112,108]); doc.setFont(undefined, 'normal'); doc.setFontSize(7.2);
+        cursor += kind === 'feature' ? 9 : 7;
+        text(doc, [112,112,108]); doc.setFont(undefined, 'normal'); doc.setFontSize(6.8);
         doc.text(st(d.date), x + pad, cursor);
-        doc.text(st(d.difficulty + ' · ' + d.region), x + pad + 27, cursor);
+        doc.text(st(d.difficulty + ' · ' + d.region), x + pad + 25, cursor);
         if (d.isBig) { text(doc, colors.accent2); doc.setFont(undefined, 'bold'); doc.text('BIG TOUR', x + w - pad, cursor, {align:'right'}); }
-        cursor += 4.5;
+        cursor += 4.0;
 
         if (d.fullGradient) {
             text(doc, [135,105,80]); doc.setFontSize(6.6); doc.text('Berechnung mit voller Strecke', x + pad, cursor); cursor += 3.3;
@@ -242,24 +247,39 @@
 
         if (kind === 'feature' && d.photo) {
             try {
-                doc.addImage(await crop(d.e.imageData, 1200, 740, 0.84), 'JPEG', x + pad, cursor, inner, 62, undefined, 'FAST');
-                cursor += 66;
+                doc.addImage(await crop(d.e.imageData, 1200, 740, 0.84), 'JPEG', x + pad, cursor, inner, 50, undefined, 'FAST');
+                cursor += 53;
             } catch (_) {}
         } else if (kind === 'split' && d.photo) {
-            var pw = Math.min(58, w * 0.34);
-            try { doc.addImage(await crop(d.e.imageData, 700, 700, 0.84), 'JPEG', x + pad, cursor, pw, 55, undefined, 'FAST'); } catch (_) {}
+            var pw = Math.min(50, w * 0.34);
+            try { doc.addImage(await crop(d.e.imageData, 700, 700, 0.84), 'JPEG', x + pad, cursor, pw, 43, undefined, 'FAST'); } catch (_) {}
             statGrid(doc, d, x + pw + pad * 2, cursor, w - pw - pad * 3, 2, colors);
-            cursor = Math.max(cursor + 28, cursor + 55) + 2;
+            cursor = Math.max(cursor + 23, cursor + 43) + 2;
         }
 
-        if (!(kind === 'split' && d.photo)) cursor = statGrid(doc, d, x + pad, cursor, inner, kind === 'feature' ? 5 : 3, colors) + 2;
+        if (!(kind === 'split' && d.photo)) {
+            text(doc, [42,42,39]);
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(kind === 'feature' ? 9.5 : 8.6);
+            cursor = addWrap(
+                doc,
+                d.stats.map(function (s) { return s[0]; }).join('   ·   '),
+                x + pad,
+                cursor,
+                inner,
+                kind === 'feature' ? 9.5 : 8.6,
+                'bold',
+                [42,42,39],
+                3.4
+            ) + 2;
+        }
 
         if (d.secondary.length) {
             cursor = addWrap(doc, d.secondary.join(' · '), x + pad, cursor, inner, 6.9, 'normal', [105,105,101], 2.8) + 3;
         }
 
         if (d.peaks.length) {
-            draw(doc, [224,224,219]); doc.setLineWidth(0.25); doc.line(x + pad, cursor, x + w - pad, cursor); cursor += 4;
+            draw(doc, [224,224,219]); doc.setLineWidth(0.25); doc.line(x + pad, cursor, x + w - pad, cursor); cursor += 3.2;
             cursor = peaksBlock(doc, d, x + pad, cursor, kind === 'compact' ? 4 : 7, colors) + 2;
         }
 
@@ -268,14 +288,14 @@
             d.extras.forEach(function(ex){
                 rule(doc, x + pad, cursor - 1.8, 8, colors.accent, 0.8);
                 text(doc, [90,90,86]); doc.setFont(undefined, 'bold'); doc.setFontSize(6.5); doc.text(st(ex[0].toUpperCase()), x + pad + 11, cursor);
-                cursor = addWrap(doc, ex[1], x + pad + 11, cursor + 3.3, inner - 11, 7.2, 'normal', [72,72,68], 3.1) + 2.5;
+                cursor = addWrap(doc, ex[1], x + pad + 10, cursor + 2.8, inner - 10, 6.9, 'normal', [72,72,68], 2.8) + 2.5;
             });
         }
 
         if (d.profile) {
             draw(doc, [224,224,219]); doc.setLineWidth(0.25); doc.line(x + pad, cursor, x + w - pad, cursor); cursor += 4;
-            text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(6.7); doc.text('TOURPROFIL', x + pad, cursor); cursor += 3.2;
-            cursor = addWrap(doc, d.profile, x + pad, cursor, inner, 7.4, 'normal', [72,72,68], 3.1) + 2;
+            text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(6.4); doc.text('TOURPROFIL', x + pad, cursor); cursor += 3.2;
+            cursor = addWrap(doc, d.profile, x + pad, cursor, inner, 7.0, 'normal', [72,72,68], 2.8) + 2;
         }
 
         if (d.p) {
@@ -285,7 +305,7 @@
 
         if (d.notes) {
             draw(doc, [224,224,219]); doc.setLineWidth(0.25); doc.line(x + pad, cursor, x + w - pad, cursor); cursor += 4;
-            cursor = addWrap(doc, d.notes, x + pad, cursor, inner, 7.2, 'italic', [118,118,112], 3.1);
+            cursor = addWrap(doc, d.notes, x + pad, cursor, inner, 7.0, 'italic', [118,118,112], 2.7);
         }
         return h;
     }
@@ -299,7 +319,7 @@
         } catch (_) { grad = null; }
         if (grad) doc.addImage(grad, 'PNG', 0, 0, 210, 9, undefined, 'FAST');
         text(doc, [105,105,101]); doc.setFont(undefined, 'bold'); doc.setFontSize(6.7); doc.text('BERGTOUREN TRACKER', M, 19);
-        doc.setFont(undefined, 'normal'); doc.text(st('TOURENBUCH ' + label), 195, 19, {align:'right'});
+        doc.setFont(undefined, 'normal'); doc.text(st('TOURENBUCH ' + label), 198, 19, {align:'right'});
         rule(doc, M, 22, CW, colors.accent, 0.65);
     }
 
@@ -309,7 +329,7 @@
             doc.setPage(i); text(doc, [145,145,140]); doc.setFont(undefined, 'normal'); doc.setFontSize(6.5);
             doc.text('Persönliches Bergtourenbuch', M, 288);
             doc.text(st('Tourenbuch ' + label), 105, 288, {align:'center'});
-            doc.text(st('Seite ' + i + ' / ' + total), 195, 288, {align:'right'});
+            doc.text(st('Seite ' + i + ' / ' + total), 198, 288, {align:'right'});
         }
     }
 
@@ -414,10 +434,9 @@
     }
 
     function kindFor(d,i,seed){
-        if(d.isBig || (d.photo && d.complexity>=7.5)) return 'feature';
-        var c=['compact','split','compact','feature-lite'];
-        var k=c[(i+seed)%c.length];
-        return k==='feature-lite'?'feature':k;
+        // Vollbreite nur noch für echte Highlights: Big Tours oder sehr inhaltsreiche Fototouren.
+        if(d.isBig || (d.photo && d.complexity>=12)) return 'feature';
+        return d.photo && ((i + seed) % 3 === 1) ? 'split' : 'compact';
     }
 
     async function renderTours(doc, entries, from, to, colors) {
@@ -448,17 +467,6 @@
             await drawTour(doc,d,x,y,colW,actual,colors);
             colY[col]=y+h+GAP;
 
-            if(Math.abs(colY[0]-colY[1])>80 && i<ds.length-1){
-                var next=ds[i+1];
-                if(!next.isBig&&!next.photo){
-                    var nh=measure(measureDoc,next,CW,'feature');
-                    var ny=Math.max(colY[0],colY[1]);
-                    if(ny+nh<=SAFE_BOTTOM){
-                        await drawTour(doc,next,M,ny,CW,'feature',colors);
-                        colY=[ny+nh+GAP,ny+nh+GAP]; i++;
-                    }
-                }
-            }
         }
     }
 
