@@ -4662,17 +4662,17 @@ body.dark .tour-cluster-large {
 
     #data-file-box .save-btn {
         margin-top: 0;
-        padding: 8px 14px;
-        font-size: 14px;
+        padding: 6px 10px;
+        font-size: 12px;
     }
 
     #data-file-box > .box-content > div {
-        gap: 6px;
+        gap: 4px;
     }
 
     #data-file-box #file-status {
-        font-size: 11px;
-        padding: 5px 8px;
+        font-size: 10px;
+        padding: 4px 7px;
     }
 
     /* Sektionstitel */
@@ -8660,7 +8660,7 @@ body.green .tour-detail-back-btn {
     align-items: center;
     justify-content: center;
 
-    gap: 2px;
+    gap: 1px;
 
     line-height: 1;
 }
@@ -14295,21 +14295,21 @@ body.summit
     grid-template-columns:
         repeat(2, minmax(0, 1fr));
 
-    gap: 10px;
+    gap: 6px;
 }
 
 #data-file-box
 .save-btn {
     width: 100%;
 
-    min-height: 54px;
+    min-height: 38px;
 
     margin: 0;
 
-    padding: 10px 12px;
+    padding: 7px 8px;
 
-    font-size: 12px;
-    line-height: 1.15;
+    font-size: 11px;
+    line-height: 1.1;
 
     white-space: normal;
 }
@@ -14320,27 +14320,27 @@ body.summit
 
     box-sizing: border-box;
 
-    margin-top: 11px;
+    margin-top: 7px;
 
-    padding: 10px 11px;
+    padding: 7px 8px;
 }
 
 #data-file-box
 .backup-disconnect-btn {
-    min-height: 42px;
+    min-height: 36px;
 
-    margin-top: 9px;
+    margin-top: 6px;
 }
 
 #data-file-box
 .backup-divider {
     margin:
-        16px 0 12px;
+        9px 0 7px;
 }
 
 #data-file-box
 .backup-section-title {
-    margin-bottom: 9px;
+    margin-bottom: 6px;
 }
 
 #data-file-box .backup-status-panel {
@@ -14353,9 +14353,9 @@ body.summit
 }
 
 #data-file-box .backup-status-item {
-    min-height: 54px;
-    padding: 9px 10px;
-    justify-content: center;
+    min-height: 0px;
+    padding: 7px 8px;
+    justify-content: flex-start;
 }
 
 #data-file-box .backup-status-item strong {
@@ -14363,8 +14363,8 @@ body.summit
 }
 
 #data-file-box .backup-info-card {
-    margin-top: 16px;
-    padding: 12px;
+    margin-top: 9px;
+    padding: 9px 10px;
 }
 
 #data-file-box .backup-info-title {
@@ -14372,7 +14372,7 @@ body.summit
 }
 
 #data-file-box .backup-info-text {
-    font-size: 10.5px;
+    font-size: 10px;
 }
 }
 
@@ -21131,10 +21131,16 @@ body[data-font="cursive"] .app-title {
                 aria-label="Mehr"
                 aria-expanded="false">
 
-                <span class="top-nav-icon more-dots" aria-hidden="true">
-    <span class="more-dot more-dot-left">•</span>
-    <span class="more-dot more-dot-middle">•</span>
-    <span class="more-dot more-dot-right">•</span>
+                <span
+    class="top-nav-icon more-dots"
+    aria-hidden="true">
+
+    <span class="more-dot more-dot-1">•</span>
+    <span class="more-dot more-dot-2">•</span>
+    <span class="more-dot more-dot-3">•</span>
+    <span class="more-dot more-dot-4">•</span>
+    <span class="more-dot more-dot-5">•</span>
+    <span class="more-dot more-dot-6">•</span>
 </span>
                 <span class="top-nav-label">Mehr</span>
             </button>
@@ -37043,104 +37049,65 @@ function positionViews(activeIndex, animate = true, dragPercent = 0) {
 }
 
 function updateMoreViewIndicator() {
-
     const moreButton =
-        document.getElementById(
-            'more-toggle'
-        );
+        document.getElementById('more-toggle');
 
     if (!moreButton) return;
 
-
-    const left =
-        moreButton.querySelector(
-            '.more-dot-left'
-        );
-
-    const middle =
-        moreButton.querySelector(
-            '.more-dot-middle'
-        );
-
-    const right =
-        moreButton.querySelector(
-            '.more-dot-right'
-        );
-
-
-    left?.classList.remove(
-        'is-active'
+    const dots = Array.from(
+        moreButton.querySelectorAll('.more-dot')
     );
 
-    middle?.classList.remove(
-        'is-active'
-    );
+    // Alle Punkte zunächst deaktivieren
+    dots.forEach(dot => {
+        dot.classList.remove('is-active');
+    });
 
-    right?.classList.remove(
-        'is-active'
-    );
+    const moreViewIndicatorMap = {
+        tour: 0,
+        filter: 1,
+        backup: 2,
+        theme: 3,
+        achievements: 4,
+        wrapped: 5
+    };
 
+    const activeDotIndex =
+        moreViewIndicatorMap[currentView];
+
+    if (
+        activeDotIndex !== undefined &&
+        dots[activeDotIndex]
+    ) {
+        dots[activeDotIndex].classList.add('is-active');
+    }
 
     const isMoreView =
-        currentView === 'tour' ||
-        currentView === 'filter' ||
-        currentView === 'backup' ||
-        currentView === 'theme';
-
+        Object.prototype.hasOwnProperty.call(
+            moreViewIndicatorMap,
+            currentView
+        );
 
     moreButton.classList.toggle(
         'more-view-active',
         isMoreView
     );
-
-
-    /*
-     * Links:
-     * Tour planen
-     */
-    if (currentView === 'tour') {
-
-        left?.classList.add(
-            'is-active'
-        );
-    }
-
-
-    /*
-     * Mitte:
-     * Suche & Vergleich
-     */
-    if (currentView === 'filter') {
-
-        middle?.classList.add(
-            'is-active'
-        );
-    }
-
-
-    /*
-     * Rechts:
-     * Sicherung
-     */
-    if (currentView === 'backup') {
-
-        right?.classList.add(
-            'is-active'
-        );
-    }
 }
 
 function updateViewButtons() {
 
     const viewButtonMap = {
-        dashboard: 'dashboard-toggle',
-        app: 'quick-save-tour',
-        tour:      'tour-toggle',
-        chart:     'diagram-toggle',
-        map:       'map-toggle',
-        filter:    'filter-toggle',
-        backup: 'backup-toggle',
-    };
+    dashboard: 'dashboard-toggle',
+    app: 'quick-save-tour',
+    tour: 'tour-toggle',
+    chart: 'diagram-toggle',
+    map: 'map-toggle',
+    filter: 'filter-toggle',
+    backup: 'backup-toggle',
+    theme: 'theme-toggle',
+    achievements: 'achievements-toggle',
+    wrapped: 'wrapped-toggle'
+};
 
     Object.entries(viewButtonMap)
         .forEach(([view, id]) => {
@@ -37168,8 +37135,14 @@ function updateViewButtons() {
     if (moreToggle) {
         moreToggle.classList.toggle(
     'view-active',
-    ['tour', 'filter', 'backup', 'theme']
-        .includes(currentView)
+    [
+        'tour',
+        'filter',
+        'backup',
+        'theme',
+        'achievements',
+        'wrapped'
+    ].includes(currentView)
 );
     }
 }
@@ -62156,7 +62129,7 @@ body.summit .plan-season-card {
     white-space: nowrap;
 }
 
-    /* =========================================================
+/* =========================================================
    Dashboard – Letzte Touren:
    Datumsspalte unabhängig von der Schriftgrößen-Skalierung
    ========================================================= */
