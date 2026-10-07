@@ -1,12 +1,12 @@
 // sw.js — Service Worker für Bergtouren Tracker
-// Version bei jeder inhaltlichen Änderung erhöhen (v1 -> v2 -> ...),
-// damit alte Caches automatisch ersetzt werden.
-const CACHE_NAME = 'bergtouren-cache-v5';
+// PDF-Magazin-Layout wird über eine zusätzliche JS-Datei in index.html eingebunden.
+const CACHE_NAME = 'bergtouren-cache-v6';
 
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.json',
+  './pdf-magazine.js',
   './icons/icon-192.png',
   './icons/icon-512_neu.png',
   './libs/jspdf.umd.min.js',
@@ -15,15 +15,13 @@ const APP_SHELL = [
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
   'https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js',
   'https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css',
-  'https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js'
+  'https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.js'
 ];
 
 // --- Installation: App-Shell + externe Libraries cachen ---
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
-      // Einzeln cachen statt addAll(), damit ein einzelner Fehler
-      // (z.B. CDN kurzzeitig nicht erreichbar) nicht das ganze Setup killt.
       await Promise.all(
         APP_SHELL.map(async (url) => {
           try {
@@ -54,14 +52,41 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+async function injectPdfMagazine(response) {
+  if (!response) return response;
+
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('text/html')) return response;
+
+  try {
+    const html = await response.clone().text();
+    if (html.includes('pdf-magazine.js')) return response;
+
+    const injected = html.replace(
+      /<\/body>/i,
+      '<script src="./pdf-magazine.js"></script></body>'
+    );
+
+    const headers = new Headers(response.headers);
+    headers.set('content-length', String(new TextEncoder().encode(injected).length));
+
+    return new Response(injected, {
+      status: response.status,
+      statusText: response.statusText,
+      headers
+    });
+  } catch (err) {
+    console.warn('SW: PDF-Magazin konnte nicht eingebunden werden:', err);
+    return response;
+  }
+}
+
 // --- Fetch-Strategie: Stale-While-Revalidate ---
-// Sofort aus dem Cache liefern (schnell, offline-fähig),
-// im Hintergrund aktualisieren für den nächsten Aufruf.
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(event.request).then((cached) => {
+    caches.match(event.request).then(async (cached) => {
       const networkFetch = fetch(event.request)
         .then((networkRes) => {
           if (networkRes && (networkRes.ok || networkRes.type === 'opaque')) {
@@ -70,9 +95,16 @@ self.addEventListener('fetch', (event) => {
           }
           return networkRes;
         })
-        .catch(() => cached); // Offline & nichts im Cache -> Fehler durchreichen
+        .catch(() => cached);
 
-      return cached || networkFetch;
+      const response = cached || await networkFetch;
+
+      // Nur HTML-Navigationen werden erweitert. Alle anderen Requests bleiben unverändert.
+      if (event.request.mode === 'navigate') {
+        return injectPdfMagazine(response);
+      }
+
+      return response;
     })
   );
 });
