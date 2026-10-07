@@ -43879,7 +43879,7 @@ function quickStats(tours) {
     type: 'speed'
 },
             { icon: '📐', value: stats.avgGradient > 0 ? Math.round(stats.avgGradient)                + ' hm/km' : '–',  label: 'Ø Steigung', type: 'steigung' },
-            { icon: '⬆️', value: stats.avgAscentH  > 0 ? Math.round(stats.avgAscentH)                 + ' hm/h'  : '–',  label: 'Ø Anstieg/h', type: 'anstieg'  },
+            { icon: '⬆️', value: stats.avgAscentH  > 0 ? Math.round(stats.avgAscentH)                 + ' hm/h'  : '–',  label: 'Ø Anstieg', type: 'anstieg'  },
         ];
         const yearFilterWrap =
             document.querySelector('.dash-year-filter-wrap');
@@ -57623,7 +57623,9 @@ function renderWrappedOutroSlide(ctx, w, h, colors, data) {
     setWrappedFont(ctx, 90, 'bold');
     ctx.fillStyle = colors.accent;
     ctx.textAlign = 'center';
-    ctx.fillText('Unzählige neue Erinnerungen geschaffen', w / 2, 850);
+    ctx.fillText('Unzählige neue', w / 2, 800);
+    ctx.fillText('Erinnerungen', w / 2, 900);
+    ctx.fillText('geschaffen', w / 2, 1000);
 
     setWrappedFont(ctx, 48);
     ctx.fillStyle = colors.text;
