@@ -15,7 +15,7 @@ const APP_SHELL = [
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
   'https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js',
   'https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css',
-  'https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.js'
+  'https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js'
 ];
 
 // --- Installation: App-Shell + externe Libraries cachen ---
@@ -99,7 +99,6 @@ self.addEventListener('fetch', (event) => {
 
       const response = cached || await networkFetch;
 
-      // Nur HTML-Navigationen werden erweitert. Alle anderen Requests bleiben unverändert.
       if (event.request.mode === 'navigate') {
         return injectPdfMagazine(response);
       }
