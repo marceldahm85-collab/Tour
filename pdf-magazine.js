@@ -8,7 +8,7 @@
     var M = 12;
     var CW = 186;
     var SAFE_BOTTOM = 282;
-    var GAP = 3;
+    var GAP = 2;
 
     function st(v) {
         if (typeof window.sanitizePdfText === 'function') return window.sanitizePdfText(v);
@@ -179,7 +179,8 @@
         if (d.p) h += 13;
         if (d.notes) h += wrap(doc, d.notes, inner, 7.0, 'italic').length * 2.7 + 5;
 
-        return Math.max(38, h);
+        // Kleiner Sicherheitspuffer zwischen gemessener und tatsächlich gezeichnetem Inhalt.
+        return Math.max(38, h + 2.5);
     }
 
     var measureDoc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
