@@ -168,12 +168,12 @@
         } else {
             h += 28;
         }
-        if (d.secondary.length) h += 7;
+        if (d.secondary.length) h += wrap(doc, d.secondary.join(' · '), inner, 6.9, 'normal').length * 2.8 + 4;
         if (d.peaks.length) h += 5 + Math.min(d.peaks.length, kind === 'compact' ? 4 : 7) * 4.1;
         h += d.extras.length * 8;
         if (d.profile) h += wrap(doc, d.profile, inner, 7.4, 'normal').length * 3.1 + 7;
         if (d.p) h += 16;
-        if (d.notes) h += Math.min(30, wrap(doc, d.notes, inner, 7.2, 'italic').length * 3.1) + 7;
+        if (d.notes) h += wrap(doc, d.notes, inner, 7.2, 'italic').length * 3.1 + 7;
         return Math.max(44, h);
     }
 
@@ -255,9 +255,7 @@
         if (!(kind === 'split' && d.photo)) cursor = statGrid(doc, d, x + pad, cursor, inner, kind === 'feature' ? 5 : 3, colors) + 2;
 
         if (d.secondary.length) {
-            text(doc, [105,105,101]); doc.setFont(undefined, 'normal'); doc.setFontSize(6.9);
-            d.secondary.forEach(function(line, i){ doc.text(st(line), x + pad + i * 43, cursor); });
-            cursor += 6;
+            cursor = addWrap(doc, d.secondary.join(' · '), x + pad, cursor, inner, 6.9, 'normal', [105,105,101], 2.8) + 3;
         }
 
         if (d.peaks.length) {
