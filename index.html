@@ -43185,38 +43185,135 @@ function getAchievementsFilteredTours() {
 }
 
 function renderAchievementsView() {
-    const container = document.getElementById('achievements-categories');
-    const summaryValue = document.getElementById('achievements-summary-value');
+    const container =
+        document.getElementById('achievements-categories');
+
+    const summaryValue =
+        document.getElementById('achievements-summary-value');
+
     if (!container) return;
 
-    const results = computeAllAchievements(getAchievementsFilteredTours());
-    const allBadges = getAllAchievementBadgeDefs();
-    const unlockedCount = allBadges.filter(b => results[b.id]?.unlocked).length;
+    const results =
+        computeAllAchievements(
+            getAchievementsFilteredTours()
+        );
+
+    const allBadges =
+        getAllAchievementBadgeDefs();
+
+    const unlockedCount =
+        allBadges.filter(
+            badge => results[badge.id]?.unlocked
+        ).length;
+
+    const totalCount = allBadges.length;
+
+    const totalPercent = totalCount > 0
+        ? Math.round((unlockedCount / totalCount) * 100)
+        : 0;
 
     if (summaryValue) {
-        summaryValue.textContent = `${unlockedCount} / ${allBadges.length} freigeschaltet`;
+        summaryValue.innerHTML = `
+            <div class="achievements-summary-main">
+                <strong>${unlockedCount}</strong>
+                <span>von ${totalCount} Achievements freigeschaltet</span>
+            </div>
+
+            <div class="achievements-summary-percent">
+                ${totalPercent}%
+            </div>
+
+            <div class="achievements-progress-track">
+                <span
+                    class="achievements-progress-bar"
+                    style="width:${totalPercent}%">
+                </span>
+            </div>
+        `;
     }
 
-    container.innerHTML = Object.entries(ACHIEVEMENT_CATEGORIES).map(([catId, cat]) => {
-        const catUnlocked = cat.badges.filter(b => results[b.id]?.unlocked).length;
-        const isComplete = catUnlocked === cat.badges.length;
+    container.innerHTML =
+        Object.entries(ACHIEVEMENT_CATEGORIES)
+            .map(([catId, cat]) => {
+                const categoryTotal =
+                    cat.badges.length;
 
-        return `
-            <button type="button"
-                class="achievement-category-tile ${isComplete ? 'complete' : ''}"
-                data-category-id="${catId}">
-                <span class="achievement-category-tile-icon">${cat.icon}</span>
-                <span class="achievement-category-tile-label">${cat.label}</span>
-                <span class="achievement-category-tile-count">${catUnlocked}/${cat.badges.length}</span>
-            </button>
-        `;
-    }).join('');
+                const categoryUnlocked =
+                    cat.badges.filter(
+                        badge => results[badge.id]?.unlocked
+                    ).length;
 
-    container.querySelectorAll('.achievement-category-tile').forEach(tile => {
-        tile.addEventListener('click', () => {
-            openAchievementCategoryModal(tile.dataset.categoryId, results);
+                const categoryPercent =
+                    categoryTotal > 0
+                        ? Math.round(
+                            (categoryUnlocked / categoryTotal) * 100
+                        )
+                        : 0;
+
+                const isComplete =
+                    categoryUnlocked === categoryTotal;
+
+                const isStarted =
+                    categoryUnlocked > 0;
+
+                const stateClass = isComplete
+                    ? 'complete'
+                    : isStarted
+                        ? 'started'
+                        : 'empty';
+
+                return `
+                    <button
+                        type="button"
+                        class="
+                            achievement-category-tile
+                            ${stateClass}
+                        "
+                        data-category-id="${catId}">
+
+                        <span class="achievement-category-tile-top">
+                            <span class="achievement-category-tile-icon">
+                                ${cat.icon}
+                            </span>
+
+                            <span class="achievement-category-tile-state">
+                                ${
+                                    isComplete
+                                        ? '✓'
+                                        : `${categoryPercent}%`
+                                }
+                            </span>
+                        </span>
+
+                        <span class="achievement-category-tile-label">
+                            ${cat.label}
+                        </span>
+
+                        <span class="achievement-category-tile-count">
+                            ${categoryUnlocked}/${categoryTotal}
+                        </span>
+
+                        <span class="achievement-category-progress-track">
+                            <span
+                                class="achievement-category-progress-bar"
+                                style="width:${categoryPercent}%">
+                            </span>
+                        </span>
+                    </button>
+                `;
+            })
+            .join('');
+
+    container
+        .querySelectorAll('.achievement-category-tile')
+        .forEach(tile => {
+            tile.addEventListener('click', () => {
+                openAchievementCategoryModal(
+                    tile.dataset.categoryId,
+                    results
+                );
+            });
         });
-    });
 }
 
 function openAchievementCategoryModal(categoryId, resultsInput = null) {
@@ -45525,43 +45622,51 @@ function applyThemeEditorFontSize(value, save = true) {
         restoreOriginalInlineFontSize(element);
     });
 
-    /*
-     * Nun die ursprüngliche berechnete Schriftgröße ermitteln
-     * und proportional skalieren.
-     */
-    elements.forEach(element => {
-        /*
-         * Canvas zeichnet Text nicht über CSS-Schriftgrößen.
-         * Das Canvas selbst muss deshalb nicht verändert werden.
-         */
-        if (
-            element.tagName === 'CANVAS' ||
-            element.tagName === 'SCRIPT' ||
-            element.tagName === 'STYLE'
-        ) {
-            return;
-        }
+/*
+ * Wichtig:
+ * Erst alle Originalgrößen auslesen,
+ * danach erst die neuen Größen setzen.
+ *
+ * Dadurch wird die Schriftgröße nicht innerhalb
+ * der Elementhierarchie mehrfach skaliert.
+ */
+const originalSizes = [];
 
-        rememberOriginalInlineFontSize(element);
+elements.forEach(element => {
+    if (
+        element.tagName === 'CANVAS' ||
+        element.tagName === 'SCRIPT' ||
+        element.tagName === 'STYLE'
+    ) {
+        return;
+    }
 
-        const computedStyle =
-            window.getComputedStyle(element);
+    rememberOriginalInlineFontSize(element);
 
-        const originalSize =
-            parseFloat(computedStyle.fontSize);
-
-        if (!Number.isFinite(originalSize) || originalSize <= 0) {
-            return;
-        }
-
-        const scaledSize =
-            originalSize * (percent / 100);
-
-        element.style.setProperty(
-            'font-size',
-            `${scaledSize}px`
+    const originalSize =
+        parseFloat(
+            window.getComputedStyle(element).fontSize
         );
+
+    if (!Number.isFinite(originalSize) || originalSize <= 0) {
+        return;
+    }
+
+    originalSizes.push({
+        element,
+        originalSize
     });
+});
+
+originalSizes.forEach(({ element, originalSize }) => {
+    const scaledSize =
+        originalSize * (percent / 100);
+
+    element.style.setProperty(
+        'font-size',
+        `${scaledSize}px`
+    );
+});
 
     document.documentElement.style.setProperty(
         '--app-font-size-scale',
@@ -62156,6 +62261,301 @@ body.summit .plan-season-card {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+/* =========================================================
+   Achievement-Seite – Fortschrittsübersicht
+   ========================================================= */
+
+.achievements-inner {
+    width: 100%;
+    max-width: 900px;
+    min-width: 0;
+    height: auto;
+    min-height: max-content;
+    overflow: visible;
+    padding-bottom: 24px;
+}
+
+.achievements-year-filter-wrap {
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+}
+
+#achievements-year-select {
+    width: 100%;
+}
+
+/* Gesamtübersicht */
+.achievements-overview-summary {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 4px 12px;
+
+    width: 100%;
+    padding: 16px;
+
+    border: 1px solid var(--ui-card-border);
+    border-radius: var(--ui-section-radius);
+    background: var(--ui-section-bg);
+    color: var(--text-main);
+
+    overflow: hidden;
+}
+
+.achievements-summary-main {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.achievements-summary-main strong {
+    font-size: clamp(22px, 4vw, 32px);
+    line-height: 1;
+    color: var(--accent);
+}
+
+.achievements-summary-main span {
+    font-size: 12px;
+    color: var(--text-soft);
+}
+
+.achievements-summary-percent {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-main);
+    white-space: nowrap;
+}
+
+.achievements-progress-track,
+.achievement-category-progress-track {
+    position: relative;
+    display: block;
+    flex: 0 0 7px;
+    width: 100%;
+    height: 7px;
+    min-height: 7px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(127, 127, 127, 0.18);
+}
+
+.achievements-progress-track {
+    flex: 0 0 9px;
+    height: 9px;
+    min-height: 9px;
+}
+
+.achievements-progress-bar,
+.achievement-category-progress-bar {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--accent-gradient);
+    transition: width 0.55s ease;
+}
+
+/* Kategorien */
+.achievement-category-grid {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(180px, 1fr)
+    );
+    grid-auto-rows: max-content;
+    align-items: start;
+    gap: 10px;
+    width: 100%;
+    height: auto;
+    min-height: max-content;
+    overflow: visible;
+}
+
+.achievement-category-tile {
+    appearance: none;
+    -webkit-appearance: none;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 7px;
+
+    min-width: 0;
+    width: 100%;
+    height: auto;
+    min-height: 130px;
+    padding: 13px;
+
+    overflow: visible;
+
+    border: 1px solid var(--ui-card-border);
+    border-radius: var(--ui-card-radius);
+
+    background: var(--ui-card-bg);
+    color: var(--text-main);
+
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    transition:
+        transform 0.16s ease,
+        background 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.achievement-category-tile:hover {
+    background: var(--ui-card-bg-interactive);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+}
+
+.achievement-category-tile:active {
+    transform: scale(0.98);
+}
+
+.achievement-category-tile-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.achievement-category-tile-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 38px;
+    height: 38px;
+
+    border-radius: 12px;
+    background: var(--accent-soft);
+
+    font-size: 21px;
+}
+
+.achievement-category-tile-state {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-soft);
+}
+
+.achievement-category-tile-label {
+    min-width: 0;
+
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.2;
+
+    overflow-wrap: anywhere;
+}
+
+.achievement-category-tile-count {
+    font-size: 11px;
+    color: var(--text-soft);
+}
+
+.achievement-category-tile.complete {
+    border-color: var(--accent);
+    box-shadow:
+        0 0 0 1px var(--accent-soft),
+        0 5px 16px rgba(0, 0, 0, 0.12);
+}
+
+.achievement-category-tile.complete
+.achievement-category-tile-state {
+    color: var(--accent);
+}
+
+.achievement-category-tile.empty {
+    opacity: 0.66;
+}
+
+.achievement-category-tile.empty
+.achievement-category-progress-bar {
+    background: rgba(127, 127, 127, 0.35);
+}
+
+@media (max-width: 600px) {
+    .achievement-category-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px;
+    }
+
+    .achievement-category-tile {
+    height: auto;
+    min-height: 116px;
+    padding: 10px;
+    gap: 6px;
+    overflow: visible;
+}
+
+    .achievement-category-tile-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        font-size: 18px;
+    }
+
+    .achievement-category-tile-label {
+        font-size: 12px;
+    }
+
+    .achievement-category-tile-count,
+    .achievement-category-tile-state {
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 1024px)
+       and (orientation: landscape)
+       and (pointer: coarse) {
+
+    .achievements-inner {
+        padding-bottom: 14px;
+    }
+
+    .achievement-category-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 7px;
+    }
+
+    .achievement-category-tile {
+    height: auto;
+    min-height: 108px;
+    padding: 9px;
+    overflow: visible;
+}
+
+    .achievement-category-tile-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 17px;
+    }
+
+    .achievement-category-tile-label {
+        font-size: 11px;
+    }
+}
+
+body.dark .achievement-category-tile,
+body.green .achievement-category-tile,
+body.summit .achievement-category-tile {
+    color: var(--text-main);
+}
+
+body.dark .achievement-category-tile.empty,
+body.green .achievement-category-tile.empty,
+body.summit .achievement-category-tile.empty {
+    opacity: 0.58;
 }
 
 </style>
