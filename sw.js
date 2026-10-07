@@ -1,6 +1,6 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // PDF-Magazin-Layout wird über eine zusätzliche JS-Datei in index.html eingebunden.
-const CACHE_NAME = 'bergtouren-cache-v6';
+const CACHE_NAME = 'bergtouren-cache-v7';
 
 const APP_SHELL = [
   './',
@@ -11,7 +11,7 @@ const APP_SHELL = [
   './icons/icon-512_neu.png',
   './libs/jspdf.umd.min.js',
   './libs/jspdf.plugin.autotable.min.js',
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+  'https://unpkg.com/leaflet@1.9.3/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
   'https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js',
   'https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css',
@@ -67,8 +67,8 @@ async function injectPdfMagazine(response) {
       '<script src="./pdf-magazine.js"></script></body>'
     );
 
-    const headers = new Headers(response.headers);
-    headers.set('content-length', String(new TextEncoder().encode(injected).length));
+    const headers = new Headers();
+    headers.set('content-type', 'text/html; charset=UTF-8');
 
     return new Response(injected, {
       status: response.status,
@@ -79,7 +79,7 @@ async function injectPdfMagazine(response) {
     console.warn('SW: PDF-Magazin konnte nicht eingebunden werden:', err);
     return response;
   }
-}
+});
 
 // --- Fetch-Strategie: Stale-While-Revalidate ---
 self.addEventListener('fetch', (event) => {
