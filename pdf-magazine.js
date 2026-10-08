@@ -338,7 +338,8 @@
             draw(doc, [224,224,219]); doc.setLineWidth(0.25); doc.line(x + pad, cursor, x + w - pad, cursor); cursor += 4;
             cursor = addWrap(doc, d.notes, x + pad, cursor, inner, 7.0, 'italic', [118,118,112], 2.7);
         }
-        return h;
+        // Die tatsächlich benötigte Höhe als letzte Absicherung zurückgeben.
+        return Math.max(h, cursor - y + 1);
     }
 
     function addHeader(doc, label, colors) {
@@ -483,8 +484,8 @@
             if(kind==='feature'){
                 var fh=measure(measureDoc,d,CW,'feature'), yy=Math.max(colY[0],colY[1]);
                 if(yy+fh>SAFE_BOTTOM){ page(); yy=28; }
-                await drawTour(doc,d,M,yy,CW,'feature',colors);
-                colY=[yy+fh+GAP,yy+fh+GAP];
+                var drawnFeatureH = await drawTour(doc,d,M,yy,CW,'feature',colors);
+                colY=[yy+drawnFeatureH+GAP,yy+drawnFeatureH+GAP];
                 continue;
             }
             var actual=(d.photo&&((i+seed)%2===1))?'split':'compact';
@@ -495,8 +496,8 @@
                 else { page(); col=0; }
             }
             var x=M+col*(colW+colGap), y=colY[col];
-            await drawTour(doc,d,x,y,colW,actual,colors);
-            colY[col]=y+h+GAP;
+            var drawnH = await drawTour(doc,d,x,y,colW,actual,colors);
+            colY[col]=y+drawnH+GAP;
 
         }
     }
