@@ -315,12 +315,12 @@
 
         if (kind === 'feature' && d.photo) {
             try {
-                doc.addImage(await crop(d.e.imageData, 1200, 740, 0.84), 'JPEG', x + pad, cursor, inner, 50, undefined, 'FAST');
+                doc.addImage(await crop(d.e.imageData, 1200, Math.max(1, Math.round(1200 * 50 / inner)), 0.84), 'JPEG', x + pad, cursor, inner, 50, undefined, 'FAST');
                 cursor += 53;
             } catch (_) {}
         } else if (kind === 'split' && d.photo) {
             var pw = Math.min(50, w * 0.34);
-            try { doc.addImage(await crop(d.e.imageData, 700, 700, 0.84), 'JPEG', x + pad, cursor, pw, 43, undefined, 'FAST'); } catch (_) {}
+            try { doc.addImage(await crop(d.e.imageData, 700, Math.max(1, Math.round(700 * 43 / pw)), 0.84), 'JPEG', x + pad, cursor, pw, 43, undefined, 'FAST'); } catch (_) {}
             statGrid(doc, d, x + pw + pad * 2, cursor, w - pw - pad * 3, 2, colors);
             cursor = Math.max(cursor + 23, cursor + 43) + 2;
         }
