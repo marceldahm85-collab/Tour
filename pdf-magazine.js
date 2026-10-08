@@ -27,8 +27,35 @@
         return { top: [55,75,65], bottom:[105,120,100], accent:[111,75,47], accent2:[205,160,85], topHex:'#374b41', bottomHex:'#697864' };
     }
     function crop(url, w, h, q) {
-        if (typeof window.cropImageToAspectDataUrl === 'function') return window.cropImageToAspectDataUrl(url, w, h, q || 0.82);
-        return Promise.resolve(url);
+        return new Promise(function(resolve, reject) {
+            var img = new Image();
+            img.onload = function() {
+                var canvas = document.createElement('canvas');
+                canvas.width = w;
+                canvas.height = h;
+                var ctx = canvas.getContext('2d');
+                if (!ctx) { reject(new Error('Canvas-Kontext nicht verfügbar')); return; }
+
+                ctx.fillStyle = '#f8f7f3';
+                ctx.fillRect(0, 0, w, h);
+
+                var scale = Math.min(w / img.width, h / img.height);
+                var dw = img.width * scale;
+                var dh = img.height * scale;
+                var dx = (w - dw) / 2;
+                var dy = (h - dh) / 2;
+
+                /*
+                 * Kein aggressiver Beschnitt mehr:
+                 * Das komplette Foto bleibt sichtbar und wird proportional
+                 * in die vorhandene Bildfläche eingepasst.
+                 */
+                ctx.drawImage(img, dx, dy, dw, dh);
+                resolve(canvas.toDataURL('image/jpeg', q || 0.84));
+            };
+            img.onerror = reject;
+            img.src = url;
+        });
     }
     function fill(doc, c) { doc.setFillColor(c[0], c[1], c[2]); }
     function draw(doc, c) { doc.setDrawColor(c[0], c[1], c[2]); }
