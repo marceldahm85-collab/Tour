@@ -522,10 +522,70 @@
         text(doc,[110,110,105]); doc.setFont(undefined,'normal'); doc.setFontSize(7.2); doc.text(st(extra),M,y+45);
     }
 
+    function formatMilestoneTotal(key, total) {
+        if (key === 'dist') return f1(total) + ' km';
+        if (key === 'asc') return fi(total) + ' hm';
+        if (key === 'time') {
+            var mins = Math.round(n(total) * 60);
+            var hours = Math.floor(mins / 60), rest = mins % 60;
+            return hours + ' h ' + String(rest).padStart(2, '0') + ' min';
+        }
+        if (key === 'peaks') return fi(total) + ' Gipfel';
+        if (key === 'steps') return fi(total) + ' Schritte';
+        return fi(total);
+    }
+
+    function formatMilestoneTarget(value, key) {
+        if (key === 'time') return f1(value) + ' h';
+        if (key === 'dist') return f1(value) + ' km';
+        if (key === 'asc') return fi(value) + ' hm';
+        if (key === 'peaks') return fi(value) + ' Gipfel';
+        if (key === 'steps') return fi(value) + ' Schritte';
+        return fi(value);
+    }
+
+    function buildYearHighlights(entries) {
+        var longest = null, biggestAsc = null, bestPerf = null, highestPeak = null;
+
+        entries.forEach(function (entry) {
+            var dist = parseFloat(String(entry.strecke || '').replace(',', '.')) || 0;
+            var asc = parseFloat(String(entry.aufstieg || '').replace(',', '.')) || 0;
+
+            if (dist > 0 && (!longest || dist > longest.value)) longest = { value: dist, entry: entry };
+            if (asc > 0 && (!biggestAsc || asc > biggestAsc.value)) biggestAsc = { value: asc, entry: entry };
+
+            var perf = typeof window.calculatePerformanceIndex === 'function'
+                ? window.calculatePerformanceIndex(entry)
+                : null;
+            if (perf && Number.isFinite(Number(perf.score)) &&
+                (!bestPerf || Number(perf.score) > bestPerf.value)) {
+                bestPerf = { value: Number(perf.score), entry: entry };
+            }
+
+            if (Array.isArray(entry.gipfelDetails)) {
+                entry.gipfelDetails.forEach(function (peak) {
+                    var height = typeof window.parsePeakHeight === 'function'
+                        ? window.parsePeakHeight(peak.hoehe)
+                        : parseFloat(String(peak.hoehe || '').replace(',', '.')) || 0;
+                    if (height > 0 && (!highestPeak || height > highestPeak.value)) {
+                        highestPeak = {
+                            value: height,
+                            name: peak.name || 'Gipfel',
+                            entry: entry
+                        };
+                    }
+                });
+            }
+        });
+
+        return { longest: longest, biggestAsc: biggestAsc, bestPerf: bestPerf, highestPeak: highestPeak };
+    }
+
     function summary(doc, entries, stats, label, colors) {
         addHeader(doc, label, colors);
         text(doc,[35,35,32]); doc.setFont(undefined,'bold'); doc.setFontSize(19); doc.text('Saisonbilanz',M,36);
-        text(doc,colors.accent); doc.setFontSize(8); doc.text(st(fi(stats.totalTours)+' Touren · '+fi(stats.totalDistance)+' km · '+fi(stats.totalAscent)+' hm'),M,43);
+        text(doc,colors.accent); doc.setFontSize(8); doc.text(st(fi(stats.totalTours)+' Touren · '+f1(stats.totalDistance)+' km · '+fi(stats.totalAscent)+' hm'),M,43);
+
         var items = [
             ['Gehzeit', stats.totalTimeText ? stats.totalTimeText+' h' : '–'],
             ['Schritte', stats.totalSteps > 0 ? fi(stats.totalSteps) : '–'],
@@ -534,6 +594,7 @@
             ['Ø Steigung', stats.avgGradient > 0 ? fi(stats.avgGradient)+' hm/km' : '–'],
             ['Ø Anstieg/h', stats.avgAscentPerHour > 0 ? fi(stats.avgAscentPerHour)+' hm/h' : '–']
         ];
+
         var gap=5,w=(CW-gap*2)/3;
         items.forEach(function(it,i){
             var x=M+(i%3)*(w+gap), y=51+Math.floor(i/3)*29;
@@ -541,20 +602,63 @@
             text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(15); doc.text(st(it[1]),x+5,y+11);
             text(doc,[122,122,116]); doc.setFont(undefined,'normal'); doc.setFontSize(6.7); doc.text(it[0],x+5,y+18);
         });
-        var extra = [['Gipfel 2000–2499 m',fi(stats.peaks2000)],['Gipfel 2500–2999 m',fi(stats.peaks2500)],['Gipfel ab 3000 m',fi(stats.peaks3000)],['Ø Leistungsindex',Number.isFinite(Number(stats.avgPerformanceIndex))?fi(stats.avgPerformanceIndex)+' / 100':'–']];
-        var y=117; text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(8.4); doc.text('WEITERE KENNZAHLEN',M,y); y+=6;
-        extra.forEach(function(row,i){ var x=M+(i%2)*92, yy=y+Math.floor(i/2)*12; text(doc,[90,90,86]); doc.setFont(undefined,'normal'); doc.setFontSize(7.6); doc.text(row[0],x,yy); text(doc,[38,38,35]); doc.setFont(undefined,'bold'); doc.text(row[1],x+66,yy,{align:'right'}); });
+
+        var extra = [
+            ['Gipfel 2000–2499 m',fi(stats.peaks2000)],
+            ['Gipfel 2500–2999 m',fi(stats.peaks2500)],
+            ['Gipfel ab 3000 m',fi(stats.peaks3000)],
+            ['Ø Leistungsindex',Number.isFinite(Number(stats.avgPerformanceIndex)) ? fi(stats.avgPerformanceIndex)+' / 100' : '–']
+        ];
+        var y=117;
+        text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(8.4); doc.text('WEITERE KENNZAHLEN',M,y); y+=6;
+        extra.forEach(function(row,i){
+            var x=M+(i%2)*92, yy=y+Math.floor(i/2)*12;
+            text(doc,[90,90,86]); doc.setFont(undefined,'normal'); doc.setFontSize(7.6); doc.text(row[0],x,yy);
+            text(doc,[38,38,35]); doc.setFont(undefined,'bold'); doc.text(row[1],x+66,yy,{align:'right'});
+        });
+
         if (typeof window.computeMilestones === 'function') {
-            var ms=window.computeMilestones(entries), defs=[['Strecke','dist','km'],['Aufstieg','asc','hm'],['Gehzeit','time','h'],['Gipfel','peaks','Gipfel'],['Schritte','steps','Schritte']];
-            y+=31; text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(8.4); doc.text('MEILENSTEINE',M,y); y+=7;
+            var ms=window.computeMilestones(entries);
+            var defs=[
+                ['Strecke','dist'],
+                ['Aufstieg','asc'],
+                ['Gehzeit','time'],
+                ['Gipfel','peaks'],
+                ['Schritte','steps']
+            ];
+
+            y+=31;
+            text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(8.4); doc.text('MEILENSTEINE',M,y); y+=7;
+
             defs.forEach(function(d,i){
-                var x=M+(i%2)*92, yy=y+Math.floor(i/2)*19, data=ms[d[1]], reached=data&&Array.isArray(data.reached)?data.reached.length:0, progress=1;
-                if(data&&data.next!==null){ var prev=reached?data.reached[reached-1].milestone:0; progress=Math.max(0,Math.min(1,(n(data.total)-prev)/Math.max(1,data.next-prev))); }
+                var x=M+(i%2)*92, yy=y+Math.floor(i/2)*22, data=ms[d[1]];
+                if(!data) return;
+
+                var reached=Array.isArray(data.reached)?data.reached.length:0;
+                var progress=1;
+                if(data.next!==null && Number.isFinite(Number(data.next))){
+                    var prev=reached ? Number(data.reached[reached-1].milestone) : 0;
+                    progress=Math.max(0,Math.min(1,
+                        (n(data.total)-prev) / Math.max(1,n(data.next)-prev)
+                    ));
+                }
+
                 text(doc,[65,65,60]); doc.setFont(undefined,'bold'); doc.setFontSize(7.1); doc.text(d[0],x,yy);
-                text(doc,[135,135,130]); doc.setFont(undefined,'normal'); doc.setFontSize(6.4);
-                var remain=data&&data.next!==null?(' · noch '+Math.max(0,data.next-n(data.total))+' '+d[2]):'';
-                doc.text(st(reached+' erreicht'+remain),x,yy+4);
-                fill(doc,[231,231,227]); doc.roundedRect(x,yy+7,84,2.4,1.2,1.2,'F'); fill(doc,colors.accent); doc.roundedRect(x,yy+7,Math.max(2,84*progress),2.4,1.2,1.2,'F');
+                text(doc,[38,38,35]); doc.setFont(undefined,'bold'); doc.setFontSize(10.5);
+                doc.text(formatMilestoneTotal(d[1],data.total),x,yy+6.5);
+
+                text(doc,[135,135,130]); doc.setFont(undefined,'normal'); doc.setFontSize(6.1);
+                var sub = reached + ' Meilensteine';
+                if(data.next!==null && Number.isFinite(Number(data.next))){
+                    sub += ' · noch ' + formatMilestoneTarget(Math.max(0,n(data.next)-n(data.total)), d[1]);
+                    sub += ' bis ' + formatMilestoneTarget(data.next, d[1]);
+                } else {
+                    sub += ' · alle Stufen erreicht';
+                }
+                doc.text(st(sub),x,yy+10.5);
+
+                fill(doc,[231,231,227]); doc.roundedRect(x,yy+13.5,84,2.2,1.1,1.1,'F');
+                fill(doc,colors.accent); doc.roundedRect(x,yy+13.5,Math.max(2,84*progress),2.2,1.1,1.1,'F');
             });
         }
     }
@@ -562,21 +666,49 @@
     function yearsPage(doc, from, to, colors) {
         var label=from+'–'+to;
         addHeader(doc,label,colors);
-        text(doc,[35,35,32]); doc.setFont(undefined,'bold'); doc.setFontSize(19); doc.text('Jahresübersicht',M,36);
-        var y=49;
+        text(doc,[35,35,32]); doc.setFont(undefined,'bold'); doc.setFontSize(19); doc.text('Jahresrückblick',M,36);
+        text(doc,[120,120,114]); doc.setFont(undefined,'normal'); doc.setFontSize(7.2);
+        doc.text(st('Die wichtigsten Kennzahlen und persönlichen Highlights pro Jahr'),M,43);
+
+        var years=[];
         for(var year=from;year<=to;year++){
             var es=typeof window.getToursInYearRange==='function'?window.getToursInYearRange(year,year):[];
-            if(!es.length) continue;
-            var s=window.computeStatsSummary(es), h=30;
-            fill(doc, [249,248,244]); doc.roundedRect(M,y,CW,h,3,3,'F'); rule(doc,M,y,22,colors.accent,1.2);
-            text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(15); doc.text(String(year),M+5,y+13);
-            [['Touren',fi(s.totalTours)],['Strecke',f1(s.totalDistance)+' km'],['Aufstieg',fi(s.totalAscent)+' hm'],['Gehzeit',s.totalTimeText+' h'],['Gipfel',fi(s.totalPeaks)]].forEach(function(c,j){
-                var x=M+39+j*30.3; text(doc,[115,115,110]); doc.setFont(undefined,'normal'); doc.setFontSize(6.2); doc.text(c[0],x,y+8);
-                text(doc,[42,42,39]); doc.setFont(undefined,'bold'); doc.setFontSize(8.3); doc.text(c[1],x,y+16);
-            });
-            y+=h+5;
+            if(es.length) years.push({year:year,entries:es,stats:window.computeStatsSummary(es)});
         }
+
+        var gap=6, cardW=(CW-gap)/2, cardH=53, top=49;
+        years.forEach(function(item,i){
+            var col=i%2, row=Math.floor(i/2), x=M+col*(cardW+gap), y=top+row*(cardH+gap);
+            var s=item.stats, h=buildYearHighlights(item.entries);
+
+            fill(doc,[249,248,244]); doc.roundedRect(x,y,cardW,cardH,3,3,'F');
+            rule(doc,x,y,18,colors.accent,1.2);
+
+            text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(15); doc.text(String(item.year),x+5,y+10);
+            text(doc,[45,45,42]); doc.setFont(undefined,'bold'); doc.setFontSize(7.2);
+            doc.text(st(fi(s.totalTours)+' Touren · '+f1(s.totalDistance)+' km'),x+5,y+17);
+            text(doc,[115,115,110]); doc.setFont(undefined,'normal'); doc.setFontSize(6.1);
+            doc.text(st(fi(s.totalAscent)+' hm · '+s.totalTimeText+' h Gehzeit'),x+5,y+22);
+
+            text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(6.1); doc.text('DURCHSCHNITT',x+5,y+29);
+            text(doc,[85,85,81]); doc.setFont(undefined,'normal'); doc.setFontSize(6.0);
+            var avgLine='Ø '+f1(s.avgDistance)+' km/Tour · '+fi(s.avgAscent)+' hm/Tour';
+            if(Number.isFinite(Number(s.avgPerformanceIndex))) avgLine += ' · PI '+fi(s.avgPerformanceIndex);
+            doc.text(st(avgLine),x+5,y+34);
+
+            text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(6.1); doc.text('HIGHLIGHTS',x+5,y+41);
+            text(doc,[78,78,74]); doc.setFont(undefined,'normal'); doc.setFontSize(5.9);
+
+            var lines=[];
+            if(h.longest) lines.push('Längste Tour: '+st(h.longest.entry.tourname||'–')+' · '+f1(h.longest.value)+' km');
+            if(h.highestPeak) lines.push('Höchster Gipfel: '+st(h.highestPeak.name)+' · '+fi(h.highestPeak.value)+' m');
+            if(!lines.length && h.biggestAsc) lines.push('Größter Aufstieg: '+st(h.biggestAsc.entry.tourname||'–')+' · '+fi(h.biggestAsc.value)+' hm');
+            if(lines.length===1 && h.biggestAsc && (!h.highestPeak)) lines.push('Größter Aufstieg: '+st(h.biggestAsc.entry.tourname||'–')+' · '+fi(h.biggestAsc.value)+' hm');
+            if(lines.length===0 && h.bestPerf) lines.push('Bester Leistungsindex: '+fi(h.bestPerf.value)+' / 100');
+            lines.slice(0,2).forEach(function(line,j){ doc.text(st(line),x+5,y+47+j*4); });
+        });
     }
+
 
     function kindFor(d){
         // Alle Tourkarten bleiben konsequent in zwei gleich breiten Spalten.
