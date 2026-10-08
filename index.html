@@ -46760,7 +46760,7 @@ function getWrappedTotals(entries) {
         }
     });
 
-    return { tourCount: entries.length, distance, ascent, minutes, peaks, steps };
+    return { tourCount: countDistinctTours(entries), distance, ascent, minutes, peaks, steps };
 }
 
 function buildWrappedSlideData(year) {
