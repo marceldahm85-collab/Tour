@@ -249,7 +249,8 @@
             h += 4 + wrap(doc, d.notes, inner, 7.0, 'italic').length * 2.7;
         }
 
-        return Math.max(38, h + 0.8);
+        var safety = (kind === 'feature' && d.photo) ? 2.0 : 0.8;
+        return Math.max(38, h + safety);
     }
 
     var measureDoc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
