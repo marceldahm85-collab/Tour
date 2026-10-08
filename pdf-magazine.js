@@ -160,7 +160,9 @@
         var h = 7, inner = w - 8, titleSize = kind === 'feature' ? 15 : 10.8;
         h += wrap(doc, d.title, inner, titleSize, 'bold').length * (titleSize * 0.38) + 5;
         h += 5;
-        if (d.cs.length) h += wrap(doc, d.cs.map(function (c) { return c.name + ' · ' + c.rank; }).join(' / '), inner, 6.3, 'italic').length * 2.5 + 2;
+        if (d.cs.length) {
+            h += wrap(doc, d.cs.map(function (c) { return c.name + ' · ' + c.rank; }).join(' / '), inner, 6.3, 'italic').length * 2.5 + 2;
+        }
 
         if (kind === 'feature' && d.photo) h += 50;
         if (kind === 'split' && d.photo) h += 43;
@@ -168,19 +170,47 @@
         if (kind === 'split' && d.photo) {
             h += 23;
         } else {
-            // Kompakte Touren: Hauptkennzahlen als eine starke Zeile statt einzelner Kacheln.
-            h += wrap(doc, d.stats.map(function (s) { return s[0]; }).join('   ·   '), inner, kind === 'feature' ? 9.5 : 8.6, 'bold').length * 3.4 + 3;
+            h += wrap(
+                doc,
+                d.stats.map(function (s) { return s[0]; }).join('   ·   '),
+                inner,
+                kind === 'feature' ? 9.5 : 8.6,
+                'bold'
+            ).length * 3.4 + 2;
         }
 
-        if (d.secondary.length) h += wrap(doc, d.secondary.join(' · '), inner, 6.5, 'normal').length * 2.5 + 3;
-        if (d.peaks.length) h += 4 + Math.min(d.peaks.length, kind === 'compact' ? 4 : 6) * 3.6;
-        h += d.extras.length * 6.5;
-        if (d.profile) h += wrap(doc, d.profile, inner, 7.0, 'normal').length * 2.8 + 5;
-        if (d.p) h += 13;
-        if (d.notes) h += wrap(doc, d.notes, inner, 7.0, 'italic').length * 2.7 + 5;
+        if (d.secondary.length) {
+            h += wrap(doc, d.secondary.join(' · '), inner, 6.9, 'normal').length * 2.8 + 3;
+        }
 
-        // Kleiner Sicherheitspuffer zwischen gemessener und tatsächlich gezeichnetem Inhalt.
-        return Math.max(38, h + 2.5);
+        if (d.peaks.length) {
+            // Trennlinie + Überschrift + Gipfelliste + Abschlussabstand.
+            h += 9.2 + Math.min(d.peaks.length, kind === 'compact' ? 4 : 7) * 3.6;
+        }
+
+        if (d.extras.length) {
+            // Eine Trennlinie, danach je Zusatzblock Label + Inhalt + Abstand.
+            h += 4;
+            d.extras.forEach(function (ex) {
+                h += 5.3 + wrap(doc, ex[1], inner - 10, 6.9, 'normal').length * 2.8;
+            });
+        }
+
+        if (d.profile) {
+            h += 9.2 + wrap(doc, d.profile, inner, 7.0, 'normal').length * 2.8;
+        }
+
+        if (d.p) {
+            h += 19;
+        }
+
+        if (d.notes) {
+            h += 4 + wrap(doc, d.notes, inner, 7.0, 'italic').length * 2.7;
+        }
+
+        // Minimaler Sicherheitspuffer verhindert Rundungs-/Fontabweichungen,
+        // ohne wieder unnötig viel Leerraum zu erzeugen.
+        return Math.max(38, h + 0.8);
     }
 
     var measureDoc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
