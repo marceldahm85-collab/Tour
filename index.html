@@ -23107,7 +23107,7 @@ body[data-font="cursive"] .app-title {
             <div class="backup-info-card">
                 <div class="backup-info-title">ℹ️ Was wird gesichert?</div>
                 <div class="backup-info-text">
-                    Gespeicherte Touren, geplante Touren und das aktive Theme werden gemeinsam in der JSON-Sicherung gespeichert.
+                    Gespeicherte Touren, geplante Touren sowie Theme, Schriftart und Schriftgrößen-Skalierung werden gemeinsam in der JSON-Sicherung gespeichert.
                 </div>
             </div>
 
@@ -25648,16 +25648,18 @@ function buildAppDataPayload() {
         updatedAt: new Date().toISOString(),
         touren: appStorage.get('touren') || [],
         plannedTours: appStorage.get('plannedTours') || [],
-meta: {
-    theme: document.body.classList.contains('dark')
-        ? 'dark'
-        : document.body.classList.contains('green')
-        ? 'green'
-        : document.body.classList.contains('summit')
-        ? 'summit'
-        : 'light',
-    themeEditorSettings: appStorage.get(THEME_EDITOR_KEY) || null
-}
+        meta: {
+            theme: document.body.classList.contains('dark')
+                ? 'dark'
+                : document.body.classList.contains('green')
+                ? 'green'
+                : document.body.classList.contains('summit')
+                ? 'summit'
+                : 'light',
+            themeEditorSettings: appStorage.get(THEME_EDITOR_KEY) || null,
+            font: getThemeEditorFontName(),
+            fontSize: getThemeEditorFontSizeScale()
+        }
     };
 }
 
@@ -25757,6 +25759,28 @@ function applyAppDataPayload(payload) {
     }
 
 }
+
+    const importedFont = payload.meta?.font;
+    if (
+        typeof importedFont === 'string' &&
+        Object.prototype.hasOwnProperty.call(THEME_EDITOR_FONT_PRESETS, importedFont)
+    ) {
+        appStorage.set(THEME_EDITOR_FONT_KEY, importedFont);
+        if (typeof applyThemeEditorFont === 'function') {
+            applyThemeEditorFont(importedFont, false);
+        }
+    }
+
+    const importedFontSize = Number(payload.meta?.fontSize);
+    if (Number.isFinite(importedFontSize)) {
+        appStorage.set(
+            THEME_EDITOR_FONT_SIZE_KEY,
+            Math.max(80, Math.min(130, importedFontSize))
+        );
+        if (typeof applyThemeEditorFontSize === 'function') {
+            applyThemeEditorFontSize(importedFontSize, false);
+        }
+    }
 
     tablePage = 1;
     loadData();
@@ -26012,6 +26036,28 @@ async function restoreLinkedFileHandleOnStartup() {
 
                     if (typeof invalidateThemeEditorDraft === 'function') {
                         invalidateThemeEditorDraft();
+                    }
+                }
+
+                const fileFont = payload?.meta?.font;
+                if (
+                    typeof fileFont === 'string' &&
+                    Object.prototype.hasOwnProperty.call(THEME_EDITOR_FONT_PRESETS, fileFont)
+                ) {
+                    appStorage.set(THEME_EDITOR_FONT_KEY, fileFont);
+                    if (typeof applyThemeEditorFont === 'function') {
+                        applyThemeEditorFont(fileFont, false);
+                    }
+                }
+
+                const fileFontSize = Number(payload?.meta?.fontSize);
+                if (Number.isFinite(fileFontSize)) {
+                    appStorage.set(
+                        THEME_EDITOR_FONT_SIZE_KEY,
+                        Math.max(80, Math.min(130, fileFontSize))
+                    );
+                    if (typeof applyThemeEditorFontSize === 'function') {
+                        applyThemeEditorFontSize(fileFontSize, false);
                     }
                 }
 
