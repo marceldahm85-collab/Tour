@@ -249,8 +249,9 @@
             h += 4 + wrap(doc, d.notes, inner, 7.0, 'italic').length * 2.7;
         }
 
-        var safety = (kind === 'feature' && d.photo) ? 2.0 : 0.8;
-        return Math.max(38, h + safety);
+        // Definierte untere Innenkante verhindert, dass der letzte Inhalt zu dicht am Kartenrand sitzt.
+        var bottomPad = (kind === 'feature' && d.photo) ? 3.0 : 1.2;
+        return Math.max(38, h + bottomPad);
     }
 
     var measureDoc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
