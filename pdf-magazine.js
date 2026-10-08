@@ -83,8 +83,7 @@
             e.strecke ? [f1(e.strecke) + ' km', 'Strecke'] : null,
             e.aufstieg ? [fi(e.aufstieg) + ' hm', 'Aufstieg'] : null,
             e.zeit ? [st(e.zeit) + ' h', 'Gehzeit'] : null,
-            e.gipfel ? [fi(e.gipfel), 'Gipfel'] : null,
-            m.steps ? [fi(m.steps), 'Schritte'] : null
+            m.steps ? [fi(m.steps) + ' Schritte', 'Schritte'] : null
         ].filter(Boolean);
         var secondary = [
             m.speed != null ? f1(m.speed) + ' km/h Ø Speed' : null,
@@ -113,7 +112,7 @@
                 e.bikeZeit ? st(e.bikeZeit) + ' h' : null
             ].filter(Boolean).join(' · ')
         ]);
-        if (e.ausgangspunkt) extras.push(['Ausgangspunkt', e.ausgangspunkt]);
+        var startingPoint = e.ausgangspunkt || '';
         if (e.tourGroup) extras.push([
             'Begleitung / Tourgruppe',
             e.tourGroup + (e.tourDay && e.tourDayCount ? ' · Tag ' + e.tourDay + '/' + e.tourDayCount : '')
@@ -131,7 +130,7 @@
         }
 
         var complexity = stats.length + secondary.length * 0.7 + Math.min(peaks.length, 8) * 0.9 +
-            extras.length * 0.8 + (e.notes ? 2 : 0) + (p ? 1.4 : 0) + (big(e) ? 1.5 : 0);
+            extras.length * 0.8 + (startingPoint ? 0.8 : 0) + (e.notes ? 2 : 0) + (p ? 1.4 : 0) + (big(e) ? 1.5 : 0);
 
         return {
             e: e,
@@ -142,6 +141,7 @@
             secondary: secondary,
             peaks: peaks,
             extras: extras,
+            startingPoint: startingPoint,
             pText: pText,
             complexity: complexity,
             photo: !!e.imageData,
@@ -196,12 +196,20 @@
             });
         }
 
-        if (d.profile) {
-            h += 9.2 + wrap(doc, d.profile, inner, 7.0, 'normal').length * 2.8;
+        if (d.startingPoint && d.profile) {
+            var halfInner = (inner - 6) / 2;
+            h += 8.5 +
+                Math.max(
+                    wrap(doc, d.startingPoint, halfInner, 6.9, 'normal').length,
+                    wrap(doc, d.profile, halfInner, 6.9, 'normal').length
+                ) * 2.8;
+        } else {
+            if (d.startingPoint) h += 9.2 + wrap(doc, d.startingPoint, inner, 6.9, 'normal').length * 2.8;
+            if (d.profile) h += 9.2 + wrap(doc, d.profile, inner, 7.0, 'normal').length * 2.8;
         }
 
         if (d.p) {
-            h += 19;
+            h += 14;
         }
 
         if (d.notes) {
@@ -245,12 +253,41 @@
 
     function drawPerf(doc, d, x, y, w, colors) {
         if (!d.p) return y;
-        text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(6.9); doc.text('LEISTUNGSINDEX', x, y);
-        text(doc, [45,45,42]); doc.setFontSize(13.5); doc.text(st(d.p.score), x, y + 6);
-        text(doc, [120,120,115]); doc.setFont(undefined, 'normal'); doc.setFontSize(6.3); doc.text(st(d.pText.replace(/^\d+\s*\/\s*100\s*·\s*/, '')), x + 14, y + 5.5);
-        fill(doc, [232,232,228]); doc.roundedRect(x, y + 9.5, w, 2.2, 1.1, 1.1, 'F');
-        fill(doc, colors.accent); doc.roundedRect(x, y + 9.5, Math.max(2, Math.min(100, n(d.p.score)) / 100 * w), 2.2, 1.1, 1.1, 'F');
-        return y + 15;
+
+        var barX = x + Math.min(68, w * 0.43);
+        var barW = Math.max(28, w - (barX - x));
+        var description = d.pText.replace(/^\d+\s*\/\s*100\s*·\s*/, '');
+
+        text(doc, colors.accent);
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(6.6);
+        doc.text('LEISTUNGSINDEX', x, y);
+
+        text(doc, [45,45,42]);
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(12.5);
+        doc.text(st(d.p.score), x, y + 6);
+
+        text(doc, [120,120,115]);
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(6.0);
+        doc.text(st(description), x + 14, y + 5.5);
+
+        fill(doc, [232,232,228]);
+        doc.roundedRect(barX, y + 3.1, barW, 2.2, 1.1, 1.1, 'F');
+
+        fill(doc, colors.accent);
+        doc.roundedRect(
+            barX,
+            y + 3.1,
+            Math.max(2, Math.min(100, n(d.p.score)) / 100 * barW),
+            2.2,
+            1.1,
+            1.1,
+            'F'
+        );
+
+        return y + 10;
     }
 
     async function drawTour(doc, d, x, y, w, kind, colors) {
@@ -323,10 +360,53 @@
             });
         }
 
-        if (d.profile) {
-            draw(doc, [224,224,219]); doc.setLineWidth(0.25); doc.line(x + pad, cursor, x + w - pad, cursor); cursor += 4;
-            text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(6.4); doc.text('TOURPROFIL', x + pad, cursor); cursor += 3.2;
-            cursor = addWrap(doc, d.profile, x + pad, cursor, inner, 7.0, 'normal', [72,72,68], 2.8) + 2;
+        if (d.startingPoint || d.profile) {
+            draw(doc, [224,224,219]);
+            doc.setLineWidth(0.25);
+            doc.line(x + pad, cursor, x + w - pad, cursor);
+            cursor += 3.2;
+
+            if (d.startingPoint && d.profile) {
+                var colW = (inner - 6) / 2;
+
+                text(doc, [100,100,96]);
+                doc.setFont(undefined, 'bold');
+                doc.setFontSize(6.1);
+                doc.text('AUSGANGSPUNKT', x + pad, cursor);
+
+                text(doc, colors.accent);
+                doc.setFont(undefined, 'bold');
+                doc.setFontSize(6.1);
+                doc.text('TOURPROFIL', x + pad + colW + 6, cursor);
+
+                cursor += 2.8;
+
+                var startY = cursor;
+                var leftEnd = addWrap(
+                    doc, d.startingPoint,
+                    x + pad, startY, colW, 6.9, 'normal', [72,72,68], 2.8
+                );
+                var rightEnd = addWrap(
+                    doc, d.profile,
+                    x + pad + colW + 6, startY, colW, 6.9, 'normal', [72,72,68], 2.8
+                );
+
+                cursor = Math.max(leftEnd, rightEnd) + 2;
+            } else if (d.startingPoint) {
+                text(doc, [100,100,96]);
+                doc.setFont(undefined, 'bold');
+                doc.setFontSize(6.1);
+                doc.text('AUSGANGSPUNKT', x + pad, cursor);
+                cursor += 2.8;
+                cursor = addWrap(doc, d.startingPoint, x + pad, cursor, inner, 6.9, 'normal', [72,72,68], 2.8) + 2;
+            } else {
+                text(doc, colors.accent);
+                doc.setFont(undefined, 'bold');
+                doc.setFontSize(6.4);
+                doc.text('TOURPROFIL', x + pad, cursor);
+                cursor += 3.2;
+                cursor = addWrap(doc, d.profile, x + pad, cursor, inner, 7.0, 'normal', [72,72,68], 2.8) + 2;
+            }
         }
 
         if (d.p) {
