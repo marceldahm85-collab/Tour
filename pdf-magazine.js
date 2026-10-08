@@ -498,6 +498,64 @@
         coverStats(doc, stats, 82, colors);
     }
 
+    function buildCoverHighlights(entries) {
+        var longest = null, biggestAsc = null, fastest = null, mostSteps = null;
+        var bestPerf = null, highestPeak = null;
+
+        entries.forEach(function(entry) {
+            var dist = parseFloat(String(entry.strecke || '').replace(',', '.')) || 0;
+            var asc = parseFloat(String(entry.aufstieg || '').replace(',', '.')) || 0;
+            var steps = typeof window.calculateEntrySteps === 'function'
+                ? Number(window.calculateEntrySteps(entry)) || 0
+                : 0;
+
+            if (dist > 0 && (!longest || dist > longest.value)) longest = { value: dist, entry: entry };
+            if (asc > 0 && (!biggestAsc || asc > biggestAsc.value)) biggestAsc = { value: asc, entry: entry };
+            if (steps > 0 && (!mostSteps || steps > mostSteps.value)) mostSteps = { value: steps, entry: entry };
+
+            if (dist > 0 && entry.zeit && entry.zeit.includes(':')) {
+                var parts = entry.zeit.split(':').map(Number);
+                var mins = parts[0] * 60 + parts[1];
+                if (Number.isFinite(mins) && mins > 0) {
+                    var speed = dist / (mins / 60);
+                    if (!fastest || speed > fastest.value) fastest = { value: speed, entry: entry };
+                }
+            }
+
+            if (typeof window.calculatePerformanceIndex === 'function') {
+                var perf = window.calculatePerformanceIndex(entry);
+                if (perf && Number.isFinite(Number(perf.score)) &&
+                    (!bestPerf || Number(perf.score) > bestPerf.value)) {
+                    bestPerf = { value: Number(perf.score), entry: entry };
+                }
+            }
+
+            if (Array.isArray(entry.gipfelDetails)) {
+                entry.gipfelDetails.forEach(function(peak) {
+                    var height = typeof window.parsePeakHeight === 'function'
+                        ? window.parsePeakHeight(peak.hoehe)
+                        : parseFloat(String(peak.hoehe || '').replace(',', '.')) || 0;
+                    if (height > 0 && (!highestPeak || height > highestPeak.value)) {
+                        highestPeak = {
+                            value: height,
+                            name: peak.name || 'Gipfel',
+                            entry: entry
+                        };
+                    }
+                });
+            }
+        });
+
+        return [
+            longest ? ['Längste Strecke', f1(longest.value) + ' km'] : null,
+            biggestAsc ? ['Größter Aufstieg', fi(biggestAsc.value) + ' hm'] : null,
+            highestPeak ? ['Höchster Gipfel', st(highestPeak.name) + ' · ' + fi(highestPeak.value) + ' m'] : null,
+            fastest ? ['Schnellste Tour', f1(fastest.value) + ' km/h'] : null,
+            mostSteps ? ['Meiste Schritte', fi(mostSteps.value) + ' Schritte'] : null,
+            bestPerf ? ['Bester Leistungsindex', fi(bestPerf.value) + ' / 100'] : null
+        ].filter(Boolean);
+    }
+
     function coverStats(doc, stats, y, colors) {
         var items = [
             ['Touren', fi(stats.totalTours)],
@@ -513,13 +571,20 @@
             text(doc,[35,35,32]); doc.setFont(undefined,'bold'); doc.setFontSize(13.4); doc.text(st(it[1]),x+4,y+11);
             text(doc,[125,125,120]); doc.setFont(undefined,'normal'); doc.setFontSize(6.7); doc.text(it[0],x+4,y+18);
         });
-        text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(8.1); doc.text('MEINE BERGSAISON',M,y+39);
-        var extra = [
-            stats.totalSteps > 0 ? fi(stats.totalSteps) + ' Schritte' : null,
-            stats.totalTimeText ? stats.totalTimeText + ' h Gehzeit' : null,
-            stats.bigTours ? fi(stats.bigTours) + ' Big Tours' : null
-        ].filter(Boolean).join(' · ');
-        text(doc,[110,110,105]); doc.setFont(undefined,'normal'); doc.setFontSize(7.2); doc.text(st(extra),M,y+45);
+        text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(8.1); doc.text('MEINE HIGHLIGHTS',M,y+39);
+
+        var highlights = buildCoverHighlights(window.__pdfCurrentEntries || []);
+        var gapX = 4, colCount = 3, colW = (CW - gapX * 2) / colCount;
+        highlights.slice(0, 6).forEach(function(item, i) {
+            var col = i % colCount, row = Math.floor(i / colCount);
+            var x = M + col * (colW + gapX), yy = y + 46 + row * 12;
+
+            text(doc,[95,95,90]); doc.setFont(undefined,'normal'); doc.setFontSize(5.8);
+            doc.text(st(item[0].toUpperCase()),x,yy);
+
+            text(doc,[40,40,37]); doc.setFont(undefined,'bold'); doc.setFontSize(7.0);
+            doc.text(st(item[1]),x,yy+5);
+        });
     }
 
     function formatMilestoneTotal(key, total) {
@@ -749,6 +814,7 @@
             footer(doc,label); save(doc,from,to); return;
         }
         var stats=window.computeStatsSummary(entries), rep=typeof window.getPdfRepresentativePhoto==='function'?window.getPdfRepresentativePhoto(entries):entries.find(function(e){return e.imageData;})||null;
+        window.__pdfCurrentEntries = entries;
         await cover(doc,entries,stats,label,colors,rep);
         doc.addPage(); summary(doc,entries,stats,label,colors);
         if(from!==to){ doc.addPage(); yearsPage(doc,from,to,colors); }
