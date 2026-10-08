@@ -46619,7 +46619,17 @@ async function attachWrappedPhotos(slides, year) {
                 : pickRandomWrappedPhoto(photoEntries);
         }
 
-        slide.photoImg = photoEntry?.imageData ? await loadWrappedImage(photoEntry.imageData) : null;
+        if (slide.key === 'top3') {
+            for (const item of (slide.data?.top3 || [])) {
+                item.photoImg = item.entry?.imageData
+                    ? await loadWrappedImage(item.entry.imageData)
+                    : null;
+            }
+        }
+
+        if (slide.key !== 'top3') {
+            slide.photoImg = photoEntry?.imageData ? await loadWrappedImage(photoEntry.imageData) : null;
+        }
     }
 
     return slides;
@@ -46627,7 +46637,7 @@ async function attachWrappedPhotos(slides, year) {
 
 function getWrappedTop3(entries) {
     // Globalen Stats-Cache sichern, bevor wir ihn für Wrapped-Zwecke
-    // vorübergehend mit anderen (jahres-gefilterten) Daten überschreiben.
+    // vorübergehend mit den jahresgefilterten Daten überschreiben.
     const savedInfo = highlightTop3Info;
     const savedRevision = highlightTop3CacheRevision;
     const savedYearFilter = highlightTop3CacheYearFilter;
@@ -46637,7 +46647,31 @@ function getWrappedTop3(entries) {
     const items = [];
     entries.forEach(entry => {
         const info = highlightTop3Info.get(entry);
-        if (info) items.push({ entry, info });
+        if (!info) return;
+
+        const distance = parseFloat(String(entry.strecke || '').replace(',', '.')) || 0;
+        const ascent = parseFloat(String(entry.aufstieg || '').replace(',', '.')) || 0;
+        let minutes = 0;
+
+        if (entry.zeit && String(entry.zeit).includes(':')) {
+            const parts = String(entry.zeit).split(':').map(Number);
+            if (Number.isFinite(parts[0]) && Number.isFinite(parts[1])) {
+                minutes = parts[0] * 60 + parts[1];
+            }
+        }
+
+        const steps = Number(calculateEntrySteps(entry)) || 0;
+        const peaks = parseInt(entry.gipfel, 10) || 0;
+        const performance = calculatePerformanceIndex(entry);
+        const score = performance && Number.isFinite(performance.score)
+            ? Number(performance.score)
+            : null;
+
+        items.push({
+            entry,
+            info,
+            metrics: { distance, ascent, minutes, steps, peaks, score }
+        });
     });
 
     items.sort((a, b) =>
@@ -46647,14 +46681,62 @@ function getWrappedTop3(entries) {
 
     const top3 = items.slice(0, 3);
 
-    // Stats-Cache exakt wiederherstellen, damit die Highlights-Seite
-    // beim nächsten Öffnen korrekt neu berechnet (und nicht fälschlich
-    // als "aktuell" markiert bleibt).
     highlightTop3Info = savedInfo;
     highlightTop3CacheRevision = savedRevision;
     highlightTop3CacheYearFilter = savedYearFilter;
 
     return top3;
+}
+
+function getWrappedHighlights(entries) {
+    let longest = null;
+    let biggestAscent = null;
+    let longestTime = null;
+    let mostSteps = null;
+    let fastestAscent = null;
+    let steepest = null;
+
+    entries.forEach(entry => {
+        const distance = parseFloat(String(entry.strecke || '').replace(',', '.')) || 0;
+        const ascent = parseFloat(String(entry.aufstieg || '').replace(',', '.')) || 0;
+        const steps = Number(calculateEntrySteps(entry)) || 0;
+
+        if (distance > 0 && (!longest || distance > longest.value)) longest = { value: distance, entry };
+        if (ascent > 0 && (!biggestAscent || ascent > biggestAscent.value)) biggestAscent = { value: ascent, entry };
+
+        if (entry.zeit && String(entry.zeit).includes(':')) {
+            const parts = String(entry.zeit).split(':').map(Number);
+            if (Number.isFinite(parts[0]) && Number.isFinite(parts[1])) {
+                const minutes = parts[0] * 60 + parts[1];
+                if (minutes > 0 && (!longestTime || minutes > longestTime.value)) longestTime = { value: minutes, entry };
+
+                const adjustedAscent = getAdjustedAscent(entry);
+                const adjustedHours = getAdjustedTimeHours(entry);
+                if (adjustedAscent > 0 && adjustedHours > 0) {
+                    const ascentRate = adjustedAscent / adjustedHours;
+                    if (!fastestAscent || ascentRate > fastestAscent.value) fastestAscent = { value: ascentRate, entry };
+                }
+            }
+        }
+
+        if (steps > 0 && (!mostSteps || steps > mostSteps.value)) mostSteps = { value: steps, entry };
+
+        const adjustedDistance = getAdjustedDistance(entry);
+        const adjustedAscent = getAdjustedAscent(entry);
+        if (adjustedDistance > 0 && adjustedAscent > 0) {
+            const gradient = adjustedAscent / adjustedDistance;
+            if (!steepest || gradient > steepest.value) steepest = { value: gradient, entry };
+        }
+    });
+
+    return [
+        longest ? { label: 'Längste Tour', icon: '📏', value: formatDecimalAT(longest.value) + ' km', entry: longest.entry } : null,
+        biggestAscent ? { label: 'Größter Aufstieg', icon: '⛰️', value: Math.round(biggestAscent.value).toLocaleString('de-DE') + ' hm', entry: biggestAscent.entry } : null,
+        fastestAscent ? { label: 'Schnellster Anstieg', icon: '⬆️', value: Math.round(fastestAscent.value).toLocaleString('de-DE') + ' hm/h', entry: fastestAscent.entry } : null,
+        steepest ? { label: 'Steilste Tour', icon: '📐', value: Math.round(steepest.value).toLocaleString('de-DE') + ' hm/km', entry: steepest.entry } : null,
+        longestTime ? { label: 'Längste Gehzeit', icon: '⏱️', value: formatMinutesToHHMM(longestTime.value) + ' h', entry: longestTime.entry } : null,
+        mostSteps ? { label: 'Meiste Schritte', icon: '👣', value: Math.round(mostSteps.value).toLocaleString('de-DE') + ' Schritte', entry: mostSteps.entry } : null
+    ].filter(Boolean);
 }
 
 function getWrappedTotals(entries) {
@@ -46690,6 +46772,7 @@ function buildWrappedSlideData(year) {
     const bestTour = getWrappedBestTour(entries);
     const highestPeak = getWrappedHighestPeak(entries);
     const topRegion = getWrappedTopRegion(entries);
+    const highlights = getWrappedHighlights(entries);
     const top3 = getWrappedTop3(entries);
     const topCompanion = getWrappedTopCompanion(entries);
     const previousTotals = previousEntries.length
@@ -46722,6 +46805,9 @@ function buildWrappedSlideData(year) {
 
         topRegion ? { key: 'topRegion', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
           data: { region: topRegion } } : null,
+
+        highlights.length ? { key: 'highlights', type: 'heavy', duration: WRAPPED_SLIDE_DURATIONS.heavy,
+          data: { highlights } } : null,
 
         previousTotals ? { key: 'yearCompare', type: 'heavy', duration: WRAPPED_SLIDE_DURATIONS.heavy,
           data: { current: totals, previous: previousTotals, previousYear: year - 1 } } : null,
@@ -57424,6 +57510,7 @@ function renderWrappedSlide(index) {
         case 'bestTour': renderWrappedBestTourSlide(ctx, w, h, colors, slide.data); break;
         case 'highestPeak': renderWrappedHighestPeakSlide(ctx, w, h, colors, slide.data); break;
         case 'topRegion': renderWrappedTopRegionSlide(ctx, w, h, colors, slide.data); break;
+        case 'highlights': renderWrappedHighlightsSlide(ctx, w, h, colors, slide.data); break;
         case 'yearCompare': renderWrappedYearCompareSlide(ctx, w, h, colors, slide.data); break;
         case 'top3': renderWrappedTop3Slide(ctx, w, h, colors, slide.data); break;
         case 'topCompanion': renderWrappedTopCompanionSlide(ctx, w, h, colors, slide.data); break;
@@ -57599,22 +57686,141 @@ function renderWrappedYearCompareSlide(ctx, w, h, colors, data) {
     );
 }
 
-function renderWrappedTop3Slide(ctx, w, h, colors, data) {
-    drawWrappedCenteredTitle(ctx, 'Top 3 der Saison', 280, 70, colors.text, w);
+function formatWrappedMinutes(minutes) {
+    const total = Math.max(0, Math.round(Number(minutes) || 0));
+    const hours = Math.floor(total / 60);
+    const mins = total % 60;
+    return hours + ':' + String(mins).padStart(2, '0') + ' h';
+}
 
-    let y = 500;
-    const medals = ['🥇', '🥈', '🥉'];
+function drawWrappedContainedImage(ctx, img, x, y, width, height, radius) {
+    ctx.save();
+    const r = radius || 24;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + width, y, x + width, y + height, r);
+    ctx.arcTo(x + width, y + height, x, y + height, r);
+    ctx.arcTo(x, y + height, x, y, r);
+    ctx.arcTo(x, y, x + width, y, r);
+    ctx.closePath();
+    ctx.clip();
 
-    data.top3.forEach((item, i) => {
-        setWrappedFont(ctx, 64);
-        ctx.textAlign = 'left';
-        ctx.fillText(medals[i] || '', 100, y);
+    ctx.fillStyle = 'rgba(0,0,0,0.22)';
+    ctx.fillRect(x, y, width, height);
 
-        setWrappedFont(ctx, 42, 'bold');
+    if (img) {
+        const scale = Math.min(width / img.width, height / img.height);
+        const dw = img.width * scale;
+        const dh = img.height * scale;
+        ctx.drawImage(img, x + (width - dw) / 2, y + (height - dh) / 2, dw, dh);
+    }
+
+    ctx.restore();
+}
+
+function renderWrappedHighlightsSlide(ctx, w, h, colors, data) {
+    drawWrappedCenteredTitle(ctx, 'Deine Highlights', 230, 58, colors.text, w);
+
+    const items = data.highlights || [];
+    const cardW = 450;
+    const cardH = 360;
+    const gapX = 50;
+    const gapY = 55;
+    const startX = (w - (cardW * 2 + gapX)) / 2;
+    const startY = 390;
+
+    items.slice(0, 6).forEach((item, i) => {
+        const col = i % 2;
+        const row = Math.floor(i / 2);
+        const x = startX + col * (cardW + gapX);
+        const y = startY + row * (cardH + gapY);
+
+        ctx.fillStyle = 'rgba(0,0,0,0.16)';
+        ctx.beginPath();
+        ctx.roundRect(x, y, cardW, cardH, 32);
+        ctx.fill();
+
+        setWrappedFont(ctx, 52, 'bold');
         ctx.fillStyle = colors.accent;
-        wrapWrappedText(ctx, item.entry.tourname || item.entry.region || 'Tour', 220, y, w - 350, 50);
+        ctx.textAlign = 'left';
+        ctx.fillText(item.icon, x + 28, y + 70);
 
-        y += 180;
+        setWrappedFont(ctx, 25, 'bold');
+        ctx.fillStyle = colors.text;
+        ctx.fillText(item.label, x + 28, y + 115);
+
+        setWrappedFont(ctx, 56, 'bold');
+        ctx.fillStyle = colors.accent;
+        wrapWrappedText(ctx, item.value, x + 28, y + 205, cardW - 56, 68);
+
+        setWrappedFont(ctx, 22, 'normal');
+        ctx.fillStyle = 'rgba(255,255,255,0.82)';
+        wrapWrappedText(ctx, item.entry?.tourname || item.entry?.region || 'Tour', x + 28, y + 295, cardW - 56, 30);
+    });
+}
+
+function renderWrappedTop3Slide(ctx, w, h, colors, data) {
+    drawWrappedCenteredTitle(ctx, 'Top 3 der Saison', 190, 58, colors.text, w);
+
+    const medals = ['🥇', '🥈', '🥉'];
+    const cardX = 70;
+    const cardW = w - 140;
+    const cardH = 435;
+    const gap = 38;
+    const startY = 315;
+
+    (data.top3 || []).slice(0, 3).forEach((item, i) => {
+        const y = startY + i * (cardH + gap);
+
+        ctx.fillStyle = 'rgba(0,0,0,0.20)';
+        ctx.beginPath();
+        ctx.roundRect(cardX, y, cardW, cardH, 34);
+        ctx.fill();
+
+        const imageX = cardX + 24;
+        const imageY = y + 24;
+        const imageW = 300;
+        const imageH = 300;
+        drawWrappedContainedImage(ctx, item.photoImg || null, imageX, imageY, imageW, imageH, 26);
+
+        setWrappedFont(ctx, 45, 'bold');
+        ctx.fillStyle = colors.accent;
+        ctx.textAlign = 'left';
+        ctx.fillText(medals[i], cardX + 350, y + 68);
+
+        setWrappedFont(ctx, 31, 'bold');
+        ctx.fillStyle = colors.text;
+        wrapWrappedText(ctx, item.entry?.tourname || item.entry?.region || 'Tour', cardX + 410, y + 62, cardW - 435, 38);
+
+        setWrappedFont(ctx, 21, 'normal');
+        ctx.fillStyle = 'rgba(255,255,255,0.78)';
+        const meta = [item.entry?.date || '', item.entry?.region || ''].filter(Boolean).join(' · ');
+        wrapWrappedText(ctx, meta, cardX + 350, y + 145, cardW - 385, 28);
+
+        const m = item.metrics || {};
+        setWrappedFont(ctx, 23, 'bold');
+        ctx.fillStyle = colors.text;
+        ctx.fillText(`${Number(m.distance || 0).toFixed(1).replace('.', ',')} km · ${Math.round(m.ascent || 0).toLocaleString('de-DE')} hm`, cardX + 350, y + 198);
+        ctx.fillText(`${formatWrappedMinutes(m.minutes)} · ${m.peaks || 0} Gipfel`, cardX + 350, y + 238);
+
+        if (m.steps > 0) {
+            setWrappedFont(ctx, 21, 'normal');
+            ctx.fillStyle = 'rgba(255,255,255,0.78)';
+            ctx.fillText(`${Math.round(m.steps).toLocaleString('de-DE')} Schritte`, cardX + 350, y + 275);
+        }
+
+        if (m.score !== null && m.score !== undefined) {
+            setWrappedFont(ctx, 26, 'bold');
+            ctx.fillStyle = colors.accent;
+            ctx.fillText(`Leistungsindex ${Math.round(m.score)} / 100`, cardX + 350, y + 315);
+        }
+
+        const topReasons = (item.info?.highlights || []).slice(0, 4);
+        if (topReasons.length) {
+            setWrappedFont(ctx, 17, 'normal');
+            ctx.fillStyle = colors.text;
+            wrapWrappedText(ctx, 'Top 3: ' + topReasons.map(x => x.name).join(' · '), cardX + 350, y + 370, cardW - 385, 25);
+        }
     });
 }
 
