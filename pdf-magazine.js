@@ -578,10 +578,11 @@
         }
     }
 
-    function kindFor(d,i,seed){
-        // Vollbreite nur noch für echte Highlights: Big Tours oder sehr inhaltsreiche Fototouren.
-        if(d.isBig || (d.photo && d.complexity>=12)) return 'feature';
-        return d.photo && ((i + seed) % 3 === 1) ? 'split' : 'compact';
+    function kindFor(d){
+        // Alle Tourkarten bleiben konsequent in zwei gleich breiten Spalten.
+        // Fotos werden dabei immer als Split-Karte dargestellt, damit kein
+        // Inhalt nur wegen des Layouttyps verloren geht.
+        return d.photo ? 'split' : 'compact';
     }
 
     async function renderTours(doc, entries, from, to, colors) {
@@ -593,15 +594,7 @@
             doc.addPage(); addHeader(doc,from===to?String(from):from+'–'+to,colors); colY=[28,28]; seed++;
         }
         for(var i=0;i<ds.length;i++){
-            var d=ds[i], kind=kindFor(d,i,seed);
-            if(kind==='feature'){
-                var fh=measure(measureDoc,d,CW,'feature'), yy=Math.max(colY[0],colY[1]);
-                if(yy+fh>SAFE_BOTTOM){ page(); yy=28; }
-                var drawnFeatureH = await drawTour(doc,d,M,yy,CW,'feature',colors);
-                colY=[yy+drawnFeatureH+GAP,yy+drawnFeatureH+GAP];
-                continue;
-            }
-            var actual=(d.photo&&((i+seed)%2===1))?'split':'compact';
+            var d=ds[i], actual=kindFor(d);
             var h=measure(measureDoc,d,colW,actual), col=colY[0]<=colY[1]?0:1;
             if(colY[col]+h>SAFE_BOTTOM){
                 var other=1-col;
