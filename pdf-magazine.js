@@ -184,18 +184,28 @@
     }
 
     function measure(doc, d, w, kind) {
-        var h = 7, inner = w - 8, titleSize = kind === 'feature' ? 15 : 10.8;
-        h += wrap(doc, d.title, inner, titleSize, 'bold').length * (titleSize * 0.38) + 5;
-        h += 5;
+        var inner = w - 8;
+        var h = 5;
+        h += kind === 'feature' ? 9 : 7;
+        h += 4;
+
+        if (d.fullGradient) h += 3.3;
+
         if (d.cs.length) {
-            h += wrap(doc, d.cs.map(function (c) { return c.name + ' · ' + c.rank; }).join(' / '), inner, 6.3, 'italic').length * 2.5 + 2;
+            h += wrap(
+                doc,
+                d.cs.map(function (c) { return c.name + ' · ' + c.rank; }).join(' / '),
+                inner,
+                6.7,
+                'italic'
+            ).length * 2.8 + 2;
         }
 
-        if (kind === 'feature' && d.photo) h += 50;
-        if (kind === 'split' && d.photo) h += 43;
-
-        if (kind === 'split' && d.photo) {
-            h += 23;
+        if (kind === 'feature' && d.photo) {
+            h += 53;
+        } else if (kind === 'split' && d.photo) {
+            // Foto und Statistik stehen nebeneinander.
+            h += 45;
         } else {
             h += wrap(
                 doc,
@@ -211,12 +221,10 @@
         }
 
         if (d.peaks.length) {
-            // Trennlinie + Überschrift + Gipfelliste + Abschlussabstand.
             h += 9.2 + Math.min(d.peaks.length, kind === 'compact' ? 4 : 7) * 3.6;
         }
 
         if (d.extras.length) {
-            // Eine Trennlinie, danach je Zusatzblock Label + Inhalt + Abstand.
             h += 4;
             d.extras.forEach(function (ex) {
                 h += 5.3 + wrap(doc, ex[1], inner - 10, 6.9, 'normal').length * 2.8;
@@ -225,26 +233,22 @@
 
         if (d.startingPoint && d.profile) {
             var halfInner = (inner - 6) / 2;
-            h += 8.5 +
+            h += 8 +
                 Math.max(
                     wrap(doc, d.startingPoint, halfInner, 6.9, 'normal').length,
                     wrap(doc, d.profile, halfInner, 6.9, 'normal').length
                 ) * 2.8;
         } else {
-            if (d.startingPoint) h += 9.2 + wrap(doc, d.startingPoint, inner, 6.9, 'normal').length * 2.8;
-            if (d.profile) h += 9.2 + wrap(doc, d.profile, inner, 7.0, 'normal').length * 2.8;
+            if (d.startingPoint) h += 8 + wrap(doc, d.startingPoint, inner, 6.9, 'normal').length * 2.8;
+            if (d.profile) h += 8 + wrap(doc, d.profile, inner, 7.0, 'normal').length * 2.8;
         }
 
-        if (d.p) {
-            h += 14;
-        }
+        if (d.p) h += 14;
 
         if (d.notes) {
             h += 4 + wrap(doc, d.notes, inner, 7.0, 'italic').length * 2.7;
         }
 
-        // Minimaler Sicherheitspuffer verhindert Rundungs-/Fontabweichungen,
-        // ohne wieder unnötig viel Leerraum zu erzeugen.
         return Math.max(38, h + 0.8);
     }
 
