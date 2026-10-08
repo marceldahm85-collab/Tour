@@ -488,14 +488,14 @@
                 text(doc, [34,34,32]); doc.setFontSize(23); doc.text(st('Tourenbuch ' + label), M + 15, 141);
                 text(doc, [118,118,112]); doc.setFont(undefined, 'normal'); doc.setFontSize(7.1);
                 doc.text(st(entries.length + ' gespeicherte Touren · erstellt am ' + new Date().toLocaleDateString('de-AT')), M + 15, 149);
-                coverStats(doc, stats, 164, colors);
+                coverStats(doc, stats, 164, colors, entries);
                 return;
             } catch (_) {}
         }
         rule(doc, M, 30, 7, colors.accent, 55);
         text(doc, [35,35,32]); doc.setFont(undefined, 'bold'); doc.setFontSize(25); doc.text(st('Tourenbuch ' + label), M + 13, 53);
         text(doc, [120,120,114]); doc.setFont(undefined, 'normal'); doc.setFontSize(9); doc.text('Persönliche Bergstatistik und Tourenchronik', M + 13, 62);
-        coverStats(doc, stats, 82, colors);
+        coverStats(doc, stats, 82, colors, entries);
     }
 
     function buildCoverHighlights(entries) {
@@ -556,7 +556,7 @@
         ].filter(Boolean);
     }
 
-    function coverStats(doc, stats, y, colors) {
+    function coverStats(doc, stats, y, colors, entries) {
         var items = [
             ['Touren', fi(stats.totalTours)],
             ['Strecke', fi(stats.totalDistance) + ' km'],
@@ -573,7 +573,7 @@
         });
         text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(8.1); doc.text('MEINE HIGHLIGHTS',M,y+39);
 
-        var highlights = buildCoverHighlights(window.__pdfCurrentEntries || []);
+        var highlights = buildCoverHighlights(entries || []);
         var gapX = 4, colCount = 3, colW = (CW - gapX * 2) / colCount;
         highlights.slice(0, 6).forEach(function(item, i) {
             var col = i % colCount, row = Math.floor(i / colCount);
@@ -814,7 +814,6 @@
             footer(doc,label); save(doc,from,to); return;
         }
         var stats=window.computeStatsSummary(entries), rep=typeof window.getPdfRepresentativePhoto==='function'?window.getPdfRepresentativePhoto(entries):entries.find(function(e){return e.imageData;})||null;
-        window.__pdfCurrentEntries = entries;
         await cover(doc,entries,stats,label,colors,rep);
         doc.addPage(); summary(doc,entries,stats,label,colors);
         if(from!==to){ doc.addPage(); yearsPage(doc,from,to,colors); }
