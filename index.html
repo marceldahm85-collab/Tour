@@ -46794,11 +46794,11 @@ function buildWrappedSlideData(year) {
         { key: 'time', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
           data: { minutes: totals.minutes } },
 
+        previousTotals ? { key: 'yearCompare', type: 'heavy', duration: WRAPPED_SLIDE_DURATIONS.heavy,
+          data: { current: totals, previous: previousTotals, previousYear: year - 1 } } : null,
+
         { key: 'activeMonth', type: 'heavy', duration: WRAPPED_SLIDE_DURATIONS.heavy,
           data: { monthlyTours, activeMonthIndex } },
-
-        bestTour ? { key: 'bestTour', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
-          data: { entry: bestTour.entry, score: bestTour.score } } : null,
 
         highestPeak ? { key: 'highestPeak', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
           data: { peak: highestPeak } } : null,
@@ -46809,8 +46809,8 @@ function buildWrappedSlideData(year) {
         highlights.length ? { key: 'highlights', type: 'heavy', duration: WRAPPED_SLIDE_DURATIONS.heavy,
           data: { highlights } } : null,
 
-        previousTotals ? { key: 'yearCompare', type: 'heavy', duration: WRAPPED_SLIDE_DURATIONS.heavy,
-          data: { current: totals, previous: previousTotals, previousYear: year - 1 } } : null,
+        bestTour ? { key: 'bestTour', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
+          data: { entry: bestTour.entry, score: bestTour.score } } : null,
 
         top3.length ? { key: 'top3', type: 'heavy', duration: WRAPPED_SLIDE_DURATIONS.heavy,
           data: { top3 } } : null,
@@ -57643,48 +57643,170 @@ function renderWrappedTopCompanionSlide(ctx, w, h, colors, data) {
     );
 }
 
+function formatWrappedCompareValue(kind, value) {
+    const n = Number(value) || 0;
+
+    switch (kind) {
+        case 'tourCount':
+            return Math.round(n).toLocaleString('de-DE');
+        case 'distance':
+            return n.toFixed(1).replace('.', ',') + ' km';
+        case 'ascent':
+            return Math.round(n).toLocaleString('de-DE') + ' hm';
+        case 'minutes':
+            return formatWrappedMinutes(n);
+        case 'steps':
+            return Math.round(n).toLocaleString('de-DE');
+        case 'peaks':
+            return Math.round(n).toLocaleString('de-DE');
+        default:
+            return String(value ?? '');
+    }
+}
+
+function formatWrappedCompareDelta(kind, previous, current) {
+    const prev = Number(previous) || 0;
+    const curr = Number(current) || 0;
+    const diff = curr - prev;
+    const absolute = Math.abs(diff);
+
+    let absoluteText = '';
+    switch (kind) {
+        case 'tourCount':
+            absoluteText = Math.round(absolute).toLocaleString('de-DE');
+            break;
+        case 'distance':
+            absoluteText = absolute.toFixed(1).replace('.', ',') + ' km';
+            break;
+        case 'ascent':
+            absoluteText = Math.round(absolute).toLocaleString('de-DE') + ' hm';
+            break;
+        case 'minutes':
+            absoluteText = formatWrappedMinutes(absolute);
+            break;
+        case 'steps':
+            absoluteText = Math.round(absolute).toLocaleString('de-DE');
+            break;
+        case 'peaks':
+            absoluteText = Math.round(absolute).toLocaleString('de-DE');
+            break;
+        default:
+            absoluteText = String(Math.round(absolute));
+    }
+
+    let percent = null;
+    if (prev !== 0) {
+        percent = (diff / Math.abs(prev)) * 100;
+    }
+
+    return {
+        diff,
+        percent,
+        absoluteText
+    };
+}
+
 function renderWrappedYearCompareSlide(ctx, w, h, colors, data) {
-    setWrappedFont(ctx, 60, 'bold');
-    ctx.fillStyle = colors.text;
+    drawWrappedCenteredTitle(ctx, 'Dein Jahr im Vergleich', 170, 58, colors.text, w);
+
+    setWrappedFont(ctx, 25, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.72)';
     ctx.textAlign = 'center';
-    ctx.fillText(`${data.previousYear} vs. ${wrappedCurrentYear}`, w / 2, 280);
+    ctx.fillText(String(data.previousYear) + '  →  ' + String(wrappedCurrentYear), w / 2, 245);
 
     const rows = [
-        { label: 'Touren', prev: data.previous.tourCount, curr: data.current.tourCount },
-        { label: 'km', prev: data.previous.distance.toFixed(0), curr: data.current.distance.toFixed(0) },
-        { label: 'Hm', prev: Math.round(data.previous.ascent), curr: Math.round(data.current.ascent) },
-        { label: 'Gehzeit (h)', prev: Math.round(data.previous.minutes / 60), curr: Math.round(data.current.minutes / 60) },
-        { label: 'Schritte', prev: Math.round(data.previous.steps).toLocaleString('de-AT'), curr: Math.round(data.current.steps).toLocaleString('de-AT') },
-        { label: 'Gipfel', prev: data.previous.peaks, curr: data.current.peaks }
+        { label: 'Touren', kind: 'tourCount', prev: data.previous.tourCount, curr: data.current.tourCount },
+        { label: 'Strecke', kind: 'distance', prev: data.previous.distance, curr: data.current.distance },
+        { label: 'Aufstieg', kind: 'ascent', prev: data.previous.ascent, curr: data.current.ascent },
+        { label: 'Gehzeit', kind: 'minutes', prev: data.previous.minutes, curr: data.current.minutes },
+        { label: 'Schritte', kind: 'steps', prev: data.previous.steps, curr: data.current.steps },
+        { label: 'Gipfel', kind: 'peaks', prev: data.previous.peaks, curr: data.current.peaks }
     ];
 
-    let y = 420;
-    rows.forEach(row => {
-        setWrappedFont(ctx, 32);
+    const cardW = 450;
+    const cardH = 325;
+    const gapX = 40;
+    const gapY = 38;
+    const startX = (w - (cardW * 2 + gapX)) / 2;
+    const startY = 315;
+
+    rows.forEach((row, i) => {
+        const col = i % 2;
+        const line = Math.floor(i / 2);
+        const x = startX + col * (cardW + gapX);
+        const y = startY + line * (cardH + gapY);
+        const delta = formatWrappedCompareDelta(row.kind, row.prev, row.curr);
+
+        ctx.fillStyle = 'rgba(0,0,0,0.18)';
+        ctx.beginPath();
+        ctx.roundRect(x, y, cardW, cardH, 30);
+        ctx.fill();
+
+        setWrappedFont(ctx, 24, 'bold');
         ctx.fillStyle = colors.text;
         ctx.textAlign = 'left';
-        ctx.fillText(row.label, 100, y);
+        ctx.fillText(row.label, x + 28, y + 52);
 
-        ctx.textAlign = 'right';
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
-        ctx.fillText(String(row.prev), w / 2 - 40, y);
+        setWrappedFont(ctx, 19, 'normal');
+        ctx.fillStyle = 'rgba(255,255,255,0.58)';
+        ctx.fillText(String(data.previousYear), x + 28, y + 94);
 
-        ctx.textAlign = 'left';
+        setWrappedFont(ctx, 35, 'bold');
+        ctx.fillStyle = 'rgba(255,255,255,0.70)';
+        ctx.fillText(formatWrappedCompareValue(row.kind, row.prev), x + 28, y + 137);
+
+        setWrappedFont(ctx, 19, 'normal');
+        ctx.fillStyle = 'rgba(255,255,255,0.58)';
+        ctx.fillText(String(wrappedCurrentYear), x + 28, y + 185);
+
+        setWrappedFont(ctx, 39, 'bold');
         ctx.fillStyle = colors.accent;
-        setWrappedFont(ctx, 32, 'bold');
-        ctx.fillText(String(row.curr), w / 2 + 40, y);
+        ctx.fillText(formatWrappedCompareValue(row.kind, row.curr), x + 28, y + 233);
 
-        y += 100;
+        if (delta) {
+            const positive = delta.diff >= 0;
+            const sign = delta.diff === 0 ? '±' : (positive ? '+' : '−');
+            const percentText = delta.percent === null
+                ? ''
+                : ' · ' + Math.abs(delta.percent).toFixed(0) + ' %';
+
+            const badge = sign + delta.absoluteText + percentText;
+            const badgeW = 180;
+            const badgeH = 46;
+            const bx = x + cardW - badgeW - 24;
+            const by = y + cardH - badgeH - 22;
+
+            ctx.fillStyle = positive ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.07)';
+            ctx.beginPath();
+            ctx.roundRect(bx, by, badgeW, badgeH, 23);
+            ctx.fill();
+
+            setWrappedFont(ctx, 18, 'bold');
+            ctx.fillStyle = positive ? colors.accent : 'rgba(255,255,255,0.78)';
+            ctx.textAlign = 'center';
+            ctx.fillText(badge, bx + badgeW / 2, by + 30);
+        }
     });
 
-    const diff = data.current.tourCount - data.previous.tourCount;
-    setWrappedFont(ctx, 34);
+    const tourDiff = (Number(data.current.tourCount) || 0) - (Number(data.previous.tourCount) || 0);
+    const distanceDiff = (Number(data.current.distance) || 0) - (Number(data.previous.distance) || 0);
+
+    setWrappedFont(ctx, 30, 'bold');
     ctx.fillStyle = colors.text;
     ctx.textAlign = 'center';
-    ctx.fillText(
-        diff >= 0 ? `${diff} Touren mehr als letztes Jahr! 📈` : `${Math.abs(diff)} Touren weniger als letztes Jahr`,
-        w / 2, y + 50
-    );
+
+    let summary = 'Eine andere Saison – mit neuen Schwerpunkten.';
+    if (tourDiff > 0 && distanceDiff > 0) {
+        summary = 'Mehr Touren. Mehr Strecke.';
+    } else if (tourDiff < 0 && distanceDiff < 0) {
+        summary = 'Weniger Touren. Ruhigeres Jahr.';
+    } else if (tourDiff > 0) {
+        summary = 'Mehr Touren – dein Jahr war voller Aktivitäten.';
+    } else if (distanceDiff > 0) {
+        summary = 'Mehr Strecke – du warst weiter unterwegs.';
+    }
+
+    ctx.fillText(summary, w / 2, 1575);
 }
 
 function formatWrappedMinutes(minutes) {
