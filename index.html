@@ -23433,40 +23433,6 @@ body[data-font="cursive"] .app-title {
 
 <script>
 
-function handleAppShortcutLaunch() {
-    const params = new URLSearchParams(window.location.search);
-    const action = params.get('action');
-    if (!action) return;
-
-    switch (action) {
-        case 'new-tour':
-            goToView('app');
-            break;
-
-        case 'plan-tour':
-            goToView('tour');
-            break;
-
-        case 'map':
-            goToView('map');
-            break;
-
-        case 'highlights':
-            goToView('chart');
-            // Simuliert einen echten Klick auf den vorhandenen
-            // Highlights-Tab-Button (gleicher Codepfad wie bei
-            // normaler Bedienung, inkl. updateHighlights()-Aufruf).
-            document
-                .querySelector('#stats-section-switch [data-stats-section="highlights"]')
-                ?.click();
-            break;
-    }
-
-    // Query-Parameter aus der URL entfernen, damit ein Reload
-    // oder erneuter Fokus nicht wieder dieselbe Aktion auslöst.
-    window.history.replaceState({}, '', window.location.pathname);
-}
-
 const slopeToggleBtn = document.getElementById('slope-toggle');
 let useFullDistanceForGradient = false;
 
