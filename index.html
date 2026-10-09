@@ -45824,10 +45824,30 @@ function applyThemeEditorFontSizeToSubtree(root, value) {
         ? Math.max(80, Math.min(130, numericValue))
         : THEME_EDITOR_DEFAULT_FONT_SIZE;
 
+    /*
+     * Dynamische Bereiche erben die Schriftgröße von ihren Eltern.
+     * Diese Eltern sind durch die globale Skalierung bereits mit
+     * Inline-Werten versehen. Vor dem Messen müssen ihre aktuellen
+     * Inline-Werte daher vorübergehend auf den ursprünglichen Zustand
+     * zurückgesetzt werden; andernfalls wird beim erneuten Rendern
+     * eine bereits skalierte Größe nochmals als Basis verwendet.
+     */
+    const ancestors = [];
+    let ancestor = root.parentElement;
+
+    while (ancestor) {
+        ancestors.push({
+            element: ancestor,
+            fontSize: ancestor.style.getPropertyValue('font-size'),
+            priority: ancestor.style.getPropertyPriority('font-size')
+        });
+        restoreOriginalInlineFontSize(ancestor);
+        ancestor = ancestor.parentElement;
+    }
+
     const elements = [root, ...root.querySelectorAll('*')];
 
-    // Alte Skalierung zuerst entfernen, damit dynamisch ersetzte
-    // Kindelemente immer von ihrer unveränderten CSS-Größe ausgehen.
+    // Vorhandene Größen dieses Teilbaums zuerst auf den CSS-Ausgangswert setzen.
     elements.forEach(element => {
         restoreOriginalInlineFontSize(element);
     });
@@ -45856,11 +45876,21 @@ function applyThemeEditorFontSizeToSubtree(root, value) {
         originalSizes.push({ element, originalSize });
     });
 
+    // Nur mit den unskalierten Ausgangsgrößen rechnen.
     originalSizes.forEach(({ element, originalSize }) => {
         element.style.setProperty(
             'font-size',
             `${originalSize * (percent / 100)}px`
         );
+    });
+
+    // Die vorherige globale Skalierung außerhalb des Teilbaums erhalten.
+    ancestors.forEach(({ element, fontSize, priority }) => {
+        if (fontSize) {
+            element.style.setProperty('font-size', fontSize, priority);
+        } else {
+            element.style.removeProperty('font-size');
+        }
     });
 }
 
