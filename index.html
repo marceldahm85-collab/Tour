@@ -45995,6 +45995,135 @@ originalSizes.forEach(({ element, originalSize }) => {
 
 }
 
+/*
+ * Zentrale Nachskalierung für dynamisch neu erzeugte App-Inhalte.
+ *
+ * Die globale Schriftgrößen-Einstellung wird initial auf den vorhandenen
+ * DOM angewendet. Viele Ansichten werden später über innerHTML / appendChild
+ * neu aufgebaut; deren Elemente müssen denselben Skalierungsfaktor erhalten.
+ * Die Beobachtung beschränkt sich auf DOM-Strukturänderungen (keine style-
+ * Attribute), damit das Setzen der Schriftgrößen keine Beobachtungsschleife
+ * auslöst.
+ */
+let themeEditorDynamicFontScalingObserver = null;
+
+function initThemeEditorDynamicFontScalingObserver() {
+    const installObserver = () => {
+        if (!document.body || themeEditorDynamicFontScalingObserver) return;
+
+        let scheduled = false;
+        let viewportReapplyScheduled = false;
+        const pendingRoots = new Set();
+
+        const shouldSkipFontScalingNode = element => {
+            if (!element || element.nodeType !== 1) return true;
+            if (element.matches('script, style')) return true;
+            // Rein dekorative Hintergründe werden nicht neu vermessen.
+            if (element.closest('.parallax, .layer, .sun, .cloud')) return true;
+            return false;
+        };
+
+        const schedulePendingRoots = () => {
+            if (scheduled || pendingRoots.size === 0) return;
+            scheduled = true;
+
+            requestAnimationFrame(() => {
+                scheduled = false;
+
+                const scale = getThemeEditorFontSizeScale();
+                const roots = Array.from(pendingRoots);
+                pendingRoots.clear();
+
+                // Verschachtelte Roots nur einmal verarbeiten.
+                const topLevelRoots = roots.filter(root =>
+                    root.isConnected &&
+                    !shouldSkipFontScalingNode(root) &&
+                    !roots.some(other =>
+                        other !== root &&
+                        other.isConnected &&
+                        other.contains(root)
+                    )
+                );
+
+                topLevelRoots.forEach(root => {
+                    applyThemeEditorFontSizeToSubtree(root, scale);
+                });
+            });
+        };
+
+        themeEditorDynamicFontScalingObserver = new MutationObserver(records => {
+            records.forEach(record => {
+                if (!record.addedNodes || record.addedNodes.length === 0) return;
+
+                const target = record.target?.nodeType === 1
+                    ? record.target
+                    : record.target?.parentElement;
+
+                if (
+                    target &&
+                    target !== document.body &&
+                    target !== document.documentElement &&
+                    !shouldSkipFontScalingNode(target)
+                ) {
+                    pendingRoots.add(target);
+                    return;
+                }
+
+                record.addedNodes.forEach(node => {
+                    if (
+                        node.nodeType === 1 &&
+                        !shouldSkipFontScalingNode(node)
+                    ) {
+                        pendingRoots.add(node);
+                    }
+                });
+            });
+
+            schedulePendingRoots();
+        });
+
+        themeEditorDynamicFontScalingObserver.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        // Auch Inhalte erfassen, die vor Aktivierung des Beobachters
+        // bereits nach dem ersten globalen Skalierungslauf gerendert wurden.
+        applyThemeEditorFontSizeToSubtree(
+            document.body,
+            getThemeEditorFontSizeScale()
+        );
+
+        // Bei einem Wechsel zwischen Hoch- und Querformat die nun gültigen
+        // CSS-Ausgangsgrößen neu einlesen und den gespeicherten Faktor anwenden.
+        const reapplyForViewport = () => {
+            if (viewportReapplyScheduled) return;
+            viewportReapplyScheduled = true;
+
+            requestAnimationFrame(() => {
+                viewportReapplyScheduled = false;
+                if (!document.body) return;
+
+                applyThemeEditorFontSizeToSubtree(
+                    document.body,
+                    getThemeEditorFontSizeScale()
+                );
+            });
+        };
+
+        window.addEventListener('resize', reapplyForViewport, { passive: true });
+        window.addEventListener('orientationchange', reapplyForViewport, { passive: true });
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', installObserver, { once: true });
+    } else {
+        installObserver();
+    }
+}
+
+initThemeEditorDynamicFontScalingObserver();
+
 function initThemeEditorFontSizeSelector() {
     const slider = document.getElementById('te-font-size');
 
