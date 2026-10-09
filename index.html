@@ -35170,6 +35170,17 @@ function updateHighlights() {
                 <span class="stats-value">${msg}</span></li>
             </ul>`;
 
+        // Auch neu erzeugte Leerzustände an die globale Schriftgröße anpassen.
+        if (
+            typeof applyThemeEditorFontSizeToSubtree === 'function' &&
+            typeof getThemeEditorFontSizeScale === 'function'
+        ) {
+            applyThemeEditorFontSizeToSubtree(
+                container,
+                getThemeEditorFontSizeScale()
+            );
+        }
+
         return;
     }
 
@@ -36004,7 +36015,18 @@ if (isLandscapeMobileLayout) {
 container.innerHTML = '';
 container.appendChild(wrapper);
 
-    
+// updateHighlights() erzeugt den Inhalt dynamisch neu. Die globale
+// Schriftgrößenskalierung muss daher auch auf diese neuen Zeilen greifen.
+if (
+    typeof applyThemeEditorFontSizeToSubtree === 'function' &&
+    typeof getThemeEditorFontSizeScale === 'function'
+) {
+    applyThemeEditorFontSizeToSubtree(
+        container,
+        getThemeEditorFontSizeScale()
+    );
+}
+
 }
 
 // ---------------- Diagramme -----------------
@@ -45792,6 +45814,54 @@ function restoreOriginalInlineFontSize(element) {
     } else {
         element.style.removeProperty('font-size');
     }
+}
+
+function applyThemeEditorFontSizeToSubtree(root, value) {
+    if (!root) return;
+
+    const numericValue = Number(value);
+    const percent = Number.isFinite(numericValue)
+        ? Math.max(80, Math.min(130, numericValue))
+        : THEME_EDITOR_DEFAULT_FONT_SIZE;
+
+    const elements = [root, ...root.querySelectorAll('*')];
+
+    // Alte Skalierung zuerst entfernen, damit dynamisch ersetzte
+    // Kindelemente immer von ihrer unveränderten CSS-Größe ausgehen.
+    elements.forEach(element => {
+        restoreOriginalInlineFontSize(element);
+    });
+
+    const originalSizes = [];
+
+    elements.forEach(element => {
+        if (
+            element.tagName === 'CANVAS' ||
+            element.tagName === 'SCRIPT' ||
+            element.tagName === 'STYLE'
+        ) {
+            return;
+        }
+
+        rememberOriginalInlineFontSize(element);
+
+        const originalSize = parseFloat(
+            window.getComputedStyle(element).fontSize
+        );
+
+        if (!Number.isFinite(originalSize) || originalSize <= 0) {
+            return;
+        }
+
+        originalSizes.push({ element, originalSize });
+    });
+
+    originalSizes.forEach(({ element, originalSize }) => {
+        element.style.setProperty(
+            'font-size',
+            `${originalSize * (percent / 100)}px`
+        );
+    });
 }
 
 function applyThemeEditorFontSize(value, save = true) {
