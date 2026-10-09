@@ -23785,27 +23785,7 @@ window.addEventListener('scroll', () => {
 });
 
 // ---------------- Animate Value ----------------
-function animateValue(element, start, end, duration = 1000, decimals = 0){
-    const startTime = performance.now();
 
-    const step = (currentTime) => {
-        const progress = Math.min((currentTime - startTime) / duration, 1);
-        const value = start + (end - start) * progress;
-
-        element.textContent = Number(value)
-            .toFixed(decimals)
-            .replace('.',',');
-
-        if(!element.classList.contains('stats-glow')){
-            element.classList.add('stats-glow');
-            setTimeout(()=>element.classList.remove('stats-glow'), duration);
-        }
-
-        if(progress < 1) requestAnimationFrame(step);
-    };
-
-    requestAnimationFrame(step);
-}
 
 /* =========================================================
    Einheitliche Dezimalformatierung
@@ -23901,10 +23881,7 @@ function openBoxIfNeeded(box, callback) {
 }
 
 // Hilfsfunktion: Steigung (hm/km) abhängig vom Flag
-function computeGradient(ascent, distance, useFull) {
-    if (!distance || distance <= 0) return 0;
-    return useFull ? (ascent / distance) : (ascent / (distance / 2));
-}
+
 
 // ---------IndexedDB-Hilfsfunktion--------
 
@@ -26096,8 +26073,7 @@ function saveDiagramFilterState() {
     appStorage.set(DIAGRAM_FILTER_KEY, diagramFilterState);
 }
 
-function applyDiagramFilterStateToUI() {
-}
+
 
 /* =========================================================
    Stats – gemeinsamer Jahresfilter
@@ -28992,11 +28968,7 @@ function attachModalSwipeDown(modal, closeFn) {
     card.addEventListener('touchcancel', resetState, { passive: true });
 }
 
-function animateCloseTourDetailDown() {
-    const modal = document.getElementById('tour-detail-modal');
-    if (!modal) return;
-    animateModalClose(modal, closeTourDetail);
-}
+
 
 function initModalSwipeDown() {
     const modal = document.getElementById('tour-detail-modal');
@@ -30058,12 +30030,7 @@ function countDistinctTours(entries) {
     return count;
 }
 
-function tourGroupBadge(entry) {
-    if (!entry.tourGroup) return '';
-    const day = entry.tourDay || '?';
-    const count = entry.tourDayCount || '?';
-    return ` <span class="tour-group-badge" title="${escapeHtmlAttribute(entry.tourGroup)}">🔗 ${day}/${count}</span>`;
-}
+
 
 function getTourGroupStages(groupName, sourceList) {
     return sourceList.filter(e => String(e.tourGroup || '') === groupName);
@@ -31437,25 +31404,7 @@ function getStructureComparisonMetrics(entry) {
     };
 }
 
-function getStructureComparisonPerformance(entry) {
-    if (entry?._isMultidaySummary) {
-        const stages = Array.isArray(entry._structureStages)
-            ? entry._structureStages
-            : [];
 
-        const stageScores = stages
-            .map(stage => calculatePerformanceIndex(stage)?.score)
-            .map(Number)
-            .filter(Number.isFinite);
-
-        return getBoundedAverage(stageScores);
-    }
-
-    const performance = calculatePerformanceIndex(entry);
-    return performance && Number.isFinite(performance.score)
-        ? Number(performance.score)
-        : null;
-}
 
 function getStructureComparisonMetricLabels(label) {
     if (label === 'Radtour') {
@@ -34458,79 +34407,7 @@ function openRegionRankingModal(data) {
     }
 }
 
-function openCountRankingModal(title, countObj, data, filterKey) {
-    const tlTitle = document.getElementById('tl-title');
-    const tlBody  = document.getElementById('tl-body');
-    if (!tlTitle || !tlBody) return;
 
-    const ranked = Object.entries(countObj)
-        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'de'));
-
-    function renderRankingList() {
-        tlTitle.textContent = title;
-        tlBody.innerHTML = ranked.length === 0
-            ? '<ul class="stats-list"><li><span class="stats-label">Keine Daten</span></li></ul>'
-            : `<ul class="stats-list">${ranked.map(([name], i) => `
-                <li class="highlight-clickable" data-rank-idx="${i}">
-                    <span class="stats-label">${escapeHtml(name)}</span>
-                    <span class="stats-value">${ranked[i][1]}${ranked[i][1] === 1 ? ' Tour' : ' Touren'}</span>
-                </li>`).join('')}</ul>`;
-
-        tlBody.querySelectorAll('[data-rank-idx]').forEach(el => {
-            const idx  = parseInt(el.dataset.rankIdx);
-            const name = ranked[idx][0];
-            el.addEventListener('click', () => renderTourList(name));
-        });
-    }
-
-    function renderTourList(name) {
-        const tours = data
-            .filter(e => String(e[filterKey] || '') === name)
-            .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-        tlTitle.textContent = name;
-        tlBody.innerHTML = `
-            <button class="save-btn" id="tl-back-count"
-                style="margin-bottom:12px;padding:5px 14px;font-size:13px;">← Zurück</button>
-            <ul class="stats-list">
-                ${tours.length === 0
-                    ? '<li><span class="stats-label">Keine Touren</span></li>'
-                    : tours.map((e, i) => `
-                        <li class="highlight-clickable" data-tour-idx="${i}">
-                            <span class="stats-label">${e.date || '–'} · ${escapeHtml(e.tourname || 'Unbekannt')}</span>
-                            <span class="stats-value">${e.strecke ? formatDecimalAT(e.strecke) + ' km' : '–'}</span>
-                        </li>`).join('')}
-            </ul>`;
-
-        document.getElementById('tl-back-count')
-    ?.addEventListener(
-        'click',
-        renderRankingList
-    );
-
-        tlBody.querySelectorAll('[data-tour-idx]').forEach(el => {
-            const idx   = parseInt(el.dataset.tourIdx);
-            const entry = tours[idx];
-            if (!entry) return;
-            el.addEventListener('click', () => {
-    closeTourListModal();
-
-    openTourDetail(entry, {
-        returnModalId: 'tour-list-modal'
-    });
-});
-        });
-    }
-
-    renderRankingList();
-
-    const tourListModal = document.getElementById('tour-list-modal');
-    if (tourListModal) {
-        attachModalSwipeDown(tourListModal, closeTourListModal);
-        tourListModal.classList.remove('hidden');
-        document.body.classList.add('modal-open');
-    }
-}
 
 function openDifficultyRankingModal(data) {
     const tlTitle = document.getElementById('tl-title');
@@ -35098,9 +34975,7 @@ function getHighlightTopRank(entry) {
     return highlightTop3Info.get(entry)?.rank || 0;
 }
 
-function getHighlightCategoryIcons(entry) {
-    return highlightTop3Info.get(entry)?.icons || [];
-}
+
 
 function getHighlightCategoryDetails(
     entry
@@ -36543,59 +36418,7 @@ function drawScatterTimeDistanceDiagram() {
     });
 }
 
-function getYearlyMonthlyAggregates() {
-    const allData = getDiagramFilteredTours();
 
-    const distance = Array(12).fill(0);
-    const ascent   = Array(12).fill(0);
-    const timeMin  = Array(12).fill(0);
-    const peaks    = Array(12).fill(0);
-
-    allData.forEach(entry => {
-        if (!entry.date) return;
-
-        const d = new Date(entry.date);
-        if (isNaN(d.getTime())) return;
-
-        const monthIndex = d.getMonth();
-
-        // Strecke
-        const dist = entry.strecke
-            ? parseFloat(String(entry.strecke).replace(',', '.'))
-            : 0;
-
-        if (!isNaN(dist)) {
-            distance[monthIndex] += dist;
-        }
-
-        // Aufstieg
-        const asc = entry.aufstieg
-            ? parseFloat(String(entry.aufstieg).replace(',', '.'))
-            : 0;
-
-        if (!isNaN(asc)) {
-            ascent[monthIndex] += asc;
-        }
-
-        // Zeit
-        if (entry.zeit && entry.zeit.includes(':')) {
-            const [h, m] = entry.zeit.split(':').map(Number);
-
-            if (!isNaN(h) && !isNaN(m)) {
-                timeMin[monthIndex] += h * 60 + m;
-            }
-        }
-
-        // Gipfel
-        if (entry.gipfel) {
-            peaks[monthIndex] += parseInt(entry.gipfel) || 0;
-        }
-    });
-
-    const timeH = timeMin.map(m => m / 60);
-
-    return { distance, ascent, timeH, peaks };
-}
 
 function drawAverageStepsDiagram() {
     const canvas =
@@ -36662,25 +36485,7 @@ function drawAverageStepsDiagram() {
     );
 }
 
-function renderBarChart(containerEl, values) {
-    if (!containerEl) return;
 
-    const max = Math.max(...values, 0);
-    const safeMax = max <= 0 ? 1 : max; // Division durch 0 verhindern
-
-    // Container leeren
-    containerEl.innerHTML = '';
-
-    values.forEach(v => {
-        const bar = document.createElement('div');
-        bar.classList.add('chart-bar');
-
-        const ratio = v / safeMax;
-        bar.style.transform = `scaleY(${ratio.toFixed(3)})`;
-
-        containerEl.appendChild(bar);
-    });
-}
 
 function updateCharts() {
     updateChartStatTiles();
@@ -36990,20 +36795,7 @@ updateActivityFieldsVisibility();
 
 // -------------- Canvas initialisieren ------
 
-function prepareCanvas() {
-    const canvas = document.getElementById('diagram-canvas');
 
-    const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
-
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-
-    const ctx = canvas.getContext('2d');
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    return ctx;
-}
 
 // --------------- Echte Slide-/Swipe-Logik --------------
 
@@ -38217,333 +38009,13 @@ function resizeCanvasToDisplaySize(canvas) {
     return ctx;
 }
 
-function drawRotatedLabel(ctx, text, canvasHeight, color = '#888', offsetX = 13) {
-    const centerY = canvasHeight / 2;
-    ctx.save();
-    ctx.translate(offsetX, centerY);
-    ctx.rotate(-Math.PI / 2);
-    ctx.fillStyle = color;
-    ctx.font = 'bold 11px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(text, 0, 0);
-    ctx.restore();
-}
-
-function drawDistanceDiagram() {
-const ctx = resizeCanvasToDisplaySize(distanceCanvas);
-
-
-// Aggregierte Werte nach Diagramm-Filter
-const allData = getDiagramFilteredTours();
-const monthSums = Array(12).fill(0);
-
-allData.forEach(entry => {
-    if (entry.strecke && entry.date) {
-        const date = new Date(entry.date);
-        if (isNaN(date.getTime())) return;
-
-        const month = date.getMonth();
-        const value = parseFloat(String(entry.strecke).replace(',', '.')) || 0;
-
-        monthSums[month] += value;
-    }
-});
-
-    const paddingTop = 10;
-    const padding = getChartHorizontalPadding();
-    const width = getCanvasLogicalWidth(distanceCanvas) - padding*2;
-    const height = getCanvasLogicalHeight(distanceCanvas) - padding - paddingTop;
-    const barWidth = width/12 - 10;
-    const maxValue = Math.max(...monthSums, 1);
-    const maxPeakRatio = 0.5; // max. zusätzliche Höhe über Bar
-const maxBarHeight = height * (1 - maxPeakRatio);
-
-    const { textColor } = getChartTheme();
-
-    const totalDist = monthSums.reduce((a, b) => a + b, 0);
-    drawChartTitleWithTotal(
-    ctx,
-    distanceCanvas,
-    'Strecke (km)',
-    `${formatDecimalAT(totalDist)} km`
-);
-
-    monthSums.forEach((value,i)=>{
-            const intensity = value / maxValue;
-        const x = padding + i*(barWidth+10);
-        const barHeight = (value / maxValue) * maxBarHeight;
-        const y = getCanvasLogicalHeight(distanceCanvas) - padding - barHeight;
-
-const gradient = ctx.createLinearGradient(x, y + barHeight, x, y);
-getChartTheme().gradientStops.forEach(([s,c]) => gradient.addColorStop(s, c));
-ctx.fillStyle = gradient;
-drawMountainBar(ctx, x, y, barWidth, barHeight, i, intensity);
-ctx.fill();
-
-ctx.strokeStyle =
-    getChartTheme().isDark
-        ? 'rgba(255,255,255,0.15)'
-        : 'rgba(46,64,54,0.18)';
-ctx.lineWidth = 1;
-ctx.stroke();
-
-// Gloss-Highlight (nur oberer Teil)
-const glossHeight = barHeight;
-
-let gloss = ctx.createLinearGradient(
-    x,
-    y,
-    x,
-    y + glossHeight
-);
-
-gloss.addColorStop(0, 'rgba(255,255,255,0.24)');
-gloss.addColorStop(1, 'rgba(255,255,255,0)');
-
-ctx.fillStyle = gloss;
-drawMountainBar(ctx, x, y, barWidth, glossHeight, i, intensity);
-ctx.fill();
 
 
 
-// Hochkant Wert nur wenn >0
-if (value > 0) {
-    drawSmartBarLabel(
-        ctx,
-        formatDecimalAT(value),
-        x,
-        y,
-        barWidth,
-        barHeight,
-        textColor,
-        intensity
-    );
-}
-
-        // Monatsname
-        ctx.fillStyle = textColor;
-        ctx.font = '12px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(['J','F','M','A','M','J','J','A','S','O','N','D'][i], x + barWidth/2, getCanvasLogicalHeight(distanceCanvas) - padding + 14);
-    });
-
-    // Linie unten
-    ctx.strokeStyle = getChartTheme().isDark ? '#d6e1f030' : '#2e403630';
-    ctx.beginPath();
-    ctx.moveTo(padding,getCanvasLogicalHeight(distanceCanvas) - padding);
-    ctx.lineTo(getCanvasLogicalWidth(distanceCanvas) - padding,getCanvasLogicalHeight(distanceCanvas) - padding);
-    ctx.stroke();
-}
-
-function drawDiagram() {
-    // Canvas sauber machen
-const ctx = resizeCanvasToDisplaySize(diagramCanvas);
 
 
-const allData = getDiagramFilteredTours();
-const monthSums = Array(12).fill(0);
-
-allData.forEach(entry => {
-    if (entry.aufstieg && entry.date) {
-        const date = new Date(entry.date);
-        if (isNaN(date.getTime())) return;
-
-        const month = date.getMonth();
-        const value = parseFloat(String(entry.aufstieg).replace(',', '.')) || 0;
-
-        monthSums[month] += value;
-    }
-});
-
-    // Layout
-    const paddingTop = 10;  
-    const padding = getChartHorizontalPadding();
-    const width = getCanvasLogicalWidth(diagramCanvas) - padding * 2;
-    const height = getCanvasLogicalHeight(diagramCanvas) - padding - paddingTop;
-    const barWidth = width / 12 - 10;
-    const maxValue = Math.max(...monthSums, 100); 
-    const maxPeakRatio = 0.5; // max. zusätzliche Höhe über Bar
-const maxBarHeight = height * (1 - maxPeakRatio);
-
-    // Farben
-    const { textColor } = getChartTheme();
-
-    const totalAsc = monthSums.reduce((a, b) => a + b, 0);
-    drawChartTitleWithTotal(ctx, diagramCanvas, 'Aufstieg (hm)', `${Math.round(totalAsc)} hm`);
-
-    monthSums.forEach((value, i) => {
-            const intensity = value / maxValue;
-        const x = padding + i * (barWidth + 10);
-        const barHeight = (value / maxValue) * maxBarHeight;
-        const y = getCanvasLogicalHeight(diagramCanvas) - padding - barHeight;
-
-const gradient = ctx.createLinearGradient(x, y + barHeight, x, y);
-getChartTheme().gradientStops.forEach(([s,c]) => gradient.addColorStop(s, c));
-ctx.fillStyle = gradient;
-drawMountainBar(ctx, x, y, barWidth, barHeight, i, intensity);
-ctx.fill();
-
-ctx.strokeStyle =
-    getChartTheme().isDark
-        ? 'rgba(255,255,255,0.15)'
-        : 'rgba(46,64,54,0.18)';
-ctx.lineWidth = 1;
-ctx.stroke();
-
-// Gloss-Highlight (nur oberer Teil)
-const glossHeight = barHeight;
-
-let gloss = ctx.createLinearGradient(
-    x,
-    y,
-    x,
-    y + glossHeight
-);
-
-gloss.addColorStop(0, 'rgba(255,255,255,0.24)');
-gloss.addColorStop(1, 'rgba(255,255,255,0)');
-
-ctx.fillStyle = gloss;
-drawMountainBar(ctx, x, y, barWidth, glossHeight, i, intensity);
-ctx.fill();
 
 
-    // Hochkant Wert NUR wenn >0
-if (value > 0) {
-    drawSmartBarLabel(
-        ctx,
-        String(Math.round(value)),
-        x,
-        y,
-        barWidth,
-        barHeight,
-        textColor,
-        intensity
-    );
-}
-
-        // Monatsname unten
-        ctx.fillStyle = textColor;
-        ctx.font = '12px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(['J','F','M','A','M','J','J','A','S','O','N','D'][i], x + barWidth / 2, getCanvasLogicalHeight(diagramCanvas) - padding + 14);
-    });
-
-    // Horizontale Linie unten
-    ctx.strokeStyle = getChartTheme().isDark ? '#d6e1f030' : '#2e403630';
-    ctx.beginPath();
-    ctx.moveTo(padding, getCanvasLogicalHeight(diagramCanvas) - padding);
-    ctx.lineTo(getCanvasLogicalWidth(diagramCanvas) - padding, getCanvasLogicalHeight(diagramCanvas) - padding);
-    ctx.stroke();
-}
-
-function drawTimeDiagram() {
-const ctx = resizeCanvasToDisplaySize(timeCanvas);
-
-
-const allData = getDiagramFilteredTours();
-const monthSums = Array(12).fill(0);
-
-allData.forEach(entry => {
-    if (entry.zeit && entry.date) {
-        const date = new Date(entry.date);
-        if (isNaN(date.getTime())) return;
-
-        const month = date.getMonth();
-        const [h, m] = entry.zeit.split(':').map(Number);
-
-        if (!isNaN(h) && !isNaN(m)) {
-            monthSums[month] += h * 60 + m;
-        }
-    }
-});
-
-    const paddingTop = 10;
-    const padding = getChartHorizontalPadding();
-    const width = getCanvasLogicalWidth(timeCanvas) - padding*2;
-    const height = getCanvasLogicalHeight(timeCanvas) - padding - paddingTop;
-    const barWidth = width/12 - 10;
-    const maxValue = Math.max(...monthSums, 1);
-    const maxPeakRatio = 0.5; // max. zusätzliche Höhe über Bar
-    const maxBarHeight = height * (1 - maxPeakRatio);
-
-    const { textColor } = getChartTheme();
-
-    const totalMin = monthSums.reduce((a, b) => a + b, 0);
-    const tH = Math.floor(totalMin / 60);
-    const tM = Math.round(totalMin % 60);
-    drawChartTitleWithTotal(ctx, timeCanvas, 'Gehzeit (h)', `${tH}:${String(tM).padStart(2,'0')} h`);
-
-    monthSums.forEach((value,i)=>{
-            const intensity = value / maxValue;
-        const x = padding + i*(barWidth+10);
-        const barHeight = (value / maxValue) * maxBarHeight;
-        const y = getCanvasLogicalHeight(timeCanvas) - padding - barHeight;
-
-const gradient = ctx.createLinearGradient(x, y + barHeight, x, y);
-getChartTheme().gradientStops.forEach(([s,c]) => gradient.addColorStop(s, c));
-ctx.fillStyle = gradient;
-drawMountainBar(ctx, x, y, barWidth, barHeight, i, intensity);
-ctx.fill();
-
-ctx.strokeStyle =
-    getChartTheme().isDark
-        ? 'rgba(255,255,255,0.15)'
-        : 'rgba(46,64,54,0.18)';
-ctx.lineWidth = 1;
-ctx.stroke();
-
-// Gloss-Highlight (nur oberer Teil)
-const glossHeight = barHeight;
-
-let gloss = ctx.createLinearGradient(
-    x,
-    y,
-    x,
-    y + glossHeight
-);
-
-gloss.addColorStop(0, 'rgba(255,255,255,0.24)');
-gloss.addColorStop(1, 'rgba(255,255,255,0)');
-
-ctx.fillStyle = gloss;
-drawMountainBar(ctx, x, y, barWidth, glossHeight, i, intensity);
-ctx.fill();
-
-
-// Hochkant Wert nur wenn >0
-if (value > 0) {
-    const hours = Math.floor(value / 60);
-    const minutes = Math.round(value % 60);
-    const labelText = `${hours}:${minutes.toString().padStart(2, '0')}`;
-
-    drawSmartBarLabel(
-        ctx,
-        labelText,
-        x,
-        y,
-        barWidth,
-        barHeight,
-        textColor,
-        intensity
-    );
-}
-
-        // Monatsname
-        ctx.fillStyle = textColor;
-        ctx.font = '12px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(['J','F','M','A','M','J','J','A','S','O','N','D'][i], x + barWidth/2, getCanvasLogicalHeight(timeCanvas) - padding + 14);
-    });
-
-    // Linie unten
-    ctx.strokeStyle = getChartTheme().isDark ? '#d6e1f030' : '#2e403630';
-    ctx.beginPath();
-    ctx.moveTo(padding,getCanvasLogicalHeight(timeCanvas) - padding);
-    ctx.lineTo(getCanvasLogicalWidth(timeCanvas) - padding,getCanvasLogicalHeight(timeCanvas) - padding);
-    ctx.stroke();
-}
 
 function drawCategoryBars(
     canvas,
@@ -38844,90 +38316,7 @@ function drawCategoryBars(
     }
 }
 
-function drawPeakHeightDistributionDiagram() {
-    const canvas =
-        document.getElementById('peak-height-canvas');
 
-    if (!canvas) return;
-
-    const data = getDiagramFilteredTours();
-
-    const labels = [
-        '< 2000 m',
-        '2000–2499 m',
-        '2500–2999 m',
-        '≥ 3000 m'
-    ];
-
-    const values = [0, 0, 0, 0];
-
-    data.forEach(entry => {
-        if (!Array.isArray(entry.gipfelDetails)) return;
-
-        entry.gipfelDetails.forEach(peak => {
-            const height = parsePeakHeight(peak.hoehe);
-
-            if (height <= 0) return;
-
-            if (height < 2000) {
-                values[0]++;
-            } else if (height < 2500) {
-                values[1]++;
-            } else if (height < 3000) {
-                values[2]++;
-            } else {
-                values[3]++;
-            }
-        });
-    });
-
-    const total = values.reduce(
-        (sum, value) => sum + value,
-        0
-    );
-
-    const heightRanges = [
-    {
-        min: 0,
-        max: 1999,
-        title: 'Gipfel unter 2000 m'
-    },
-    {
-        min: 2000,
-        max: 2499,
-        title: 'Gipfel 2000–2499 m'
-    },
-    {
-        min: 2500,
-        max: 2999,
-        title: 'Gipfel 2500–2999 m'
-    },
-    {
-        min: 3000,
-        max: null,
-        title: 'Gipfel ab 3000 m'
-    }
-];
-
-drawCategoryBars(
-    canvas,
-    labels,
-    values,
-    'Gipfelhöhenverteilung',
-    `${total} Gipfel`,
-    index => {
-        const range = heightRanges[index];
-
-        if (!range) return;
-
-        openPeaksListModal(
-            range.min,
-            range.max,
-            range.title
-        );
-    }
-);
-}
 
 function drawPerformanceIndexDiagram() {
 
@@ -39682,32 +39071,7 @@ if (dist > 0 && asc > 0) {
     drawBars(gradientCanvas, ctx, values, '', 0);
 }
 
-function drawToursDiagram(){
 
-const ctx = resizeCanvasToDisplaySize(toursCanvas);
-
-
-
-
-const allData = getDiagramFilteredTours();
-
-const monthCounts = Array(12).fill(0);
-
-allData.forEach(entry => {
-    if (!entry.date) return;
-
-    const d = new Date(entry.date);
-    if (isNaN(d.getTime())) return;
-
-    const m = d.getMonth();
-
-    monthCounts[m]++;
-});
-
-    const totalTours = monthCounts.reduce((a, b) => a + b, 0);
-    drawChartTitleWithTotal(ctx, toursCanvas, 'Anzahl Touren', `${totalTours}`);
-    drawBars(toursCanvas, ctx, monthCounts, '', 0);
-}
 
 function drawSmartBarLabel(ctx, text, x, y, barWidth, barHeight, textColor, intensity = 0) {
     const shortBarThreshold = 32
@@ -39997,154 +39361,11 @@ function drawBigToursDiagram() {
     drawBars(bigToursCanvas, ctx, monthCounts, '', 0);
 }
 
-function drawAvgDistanceDiagram() {
-    const ctx = resizeCanvasToDisplaySize(avgDistanceCanvas);
-    const allData = getDiagramFilteredTours();
-    const monthSum   = Array(12).fill(0);
-    const monthCount = Array(12).fill(0);
 
-    allData.forEach(entry => {
-        if (!entry.date) return;
-        const d = new Date(entry.date);
-        if (isNaN(d.getTime())) return;
-        const dist = parseFloat(String(entry.strecke || '').replace(',', '.')) || 0;
-        if (dist > 0) {
-            monthSum[d.getMonth()]   += dist;
-            monthCount[d.getMonth()]++;
-        }
-    });
 
-    const values   = monthSum.map((s, i) => monthCount[i] > 0 ? s / monthCount[i] : 0);
-    const validLen = allData.filter(e => parseFloat(String(e.strecke || '').replace(',', '.')) > 0).length;
-    const total    = validLen > 0 ? monthSum.reduce((a, b) => a + b, 0) / validLen : 0;
 
-    drawChartTitleWithTotal(
-    ctx,
-    avgDistanceCanvas,
-    'Ø Strecke (km)',
-    `Ø ${formatDecimalAT(total)} km`
-);
-    drawBars(avgDistanceCanvas, ctx, values, '', 2);
-}
 
-function drawAvgAscentDiagram() {
-    const ctx = resizeCanvasToDisplaySize(avgAscentCanvas);
-    const allData = getDiagramFilteredTours();
-    const monthSum   = Array(12).fill(0);
-    const monthCount = Array(12).fill(0);
 
-    allData.forEach(entry => {
-        if (!entry.date) return;
-        const d = new Date(entry.date);
-        if (isNaN(d.getTime())) return;
-        const asc = parseFloat(String(entry.aufstieg || '').replace(',', '.')) || 0;
-        if (asc > 0) {
-            monthSum[d.getMonth()]   += asc;
-            monthCount[d.getMonth()]++;
-        }
-    });
-
-    const values   = monthSum.map((s, i) => monthCount[i] > 0 ? s / monthCount[i] : 0);
-    const validLen = allData.filter(e => parseFloat(String(e.aufstieg || '').replace(',', '.')) > 0).length;
-    const total    = validLen > 0 ? monthSum.reduce((a, b) => a + b, 0) / validLen : 0;
-
-    drawChartTitleWithTotal(ctx, avgAscentCanvas, 'Ø Aufstieg (hm)', `Ø ${Math.round(total)} hm`);
-    drawBars(avgAscentCanvas, ctx, values, '', 0);
-}
-
-function drawAvgTimeDiagram() {
-    const ctx = resizeCanvasToDisplaySize(avgTimeCanvas);
-    const allData = getDiagramFilteredTours();
-    const monthSum   = Array(12).fill(0);
-    const monthCount = Array(12).fill(0);
-
-    allData.forEach(entry => {
-        if (!entry.date || !entry.zeit || !entry.zeit.includes(':')) return;
-        const d = new Date(entry.date);
-        if (isNaN(d.getTime())) return;
-        const [h, m] = entry.zeit.split(':').map(Number);
-        if (!isNaN(h) && !isNaN(m)) {
-            monthSum[d.getMonth()]   += h * 60 + m;
-            monthCount[d.getMonth()]++;
-        }
-    });
-
-    // Werte in Minuten (Ø pro Monat)
-    const values   = monthSum.map((s, i) => monthCount[i] > 0 ? s / monthCount[i] : 0);
-    const validLen = allData.filter(e => e.zeit && e.zeit.includes(':')).length;
-    const totalMin = validLen > 0 ? monthSum.reduce((a, b) => a + b, 0) / validLen : 0;
-    const avgH = Math.floor(totalMin / 60);
-    const avgM = Math.round(totalMin % 60);
-
-    drawChartTitleWithTotal(ctx, avgTimeCanvas, 'Ø Gehzeit', `Ø ${avgH}:${String(avgM).padStart(2, '0')} h`);
-
-    const paddingTop  = 10;
-    const padding = getChartHorizontalPadding();
-    const barWidth    = (getCanvasLogicalWidth(avgTimeCanvas) - padding * 2) / 12 - 10;
-    const maxValue    = Math.max(...values, 1);
-    const maxBarHeight = (getCanvasLogicalHeight(avgTimeCanvas) - padding - paddingTop) * (1 - 0.5);
-    const { textColor } = getChartTheme();
-
-    values.forEach((value, i) => {
-        const intensity = value / maxValue;
-        const x         = padding + i * (barWidth + 10);
-        const barHeight  = (value / maxValue) * maxBarHeight;
-        const y          = getCanvasLogicalHeight(avgTimeCanvas) - padding - barHeight;
-
-        const gradient = ctx.createLinearGradient(x, y + barHeight, x, y);
-                    getChartTheme().gradientStops.forEach(([s,c]) => gradient.addColorStop(s, c));
-                    ctx.fillStyle = gradient;
-                    drawMountainBar(ctx, x, y, barWidth, barHeight, i, intensity);
-                    ctx.fill();
-
-        ctx.strokeStyle =
-    getChartTheme().isDark
-        ? 'rgba(255,255,255,0.15)'
-        : 'rgba(46,64,54,0.18)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-
-        let gloss = ctx.createLinearGradient(x, y, x, y + barHeight);
-        gloss.addColorStop(0, 'rgba(255,255,255,0.24)');
-        gloss.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = gloss;
-        drawMountainBar(ctx, x, y, barWidth, barHeight, i, intensity);
-        ctx.fill();
-
-        if (value > 0) {
-            const h = Math.floor(value / 60);
-            const m = Math.round(value % 60);
-            drawSmartBarLabel(
-                ctx,
-                `${h}:${String(m).padStart(2, '0')}`,
-                x, y, barWidth, barHeight, textColor, intensity
-            );
-        }
-
-        ctx.fillStyle = textColor;
-
-ctx.font =
-    '11px Inter, sans-serif';
-
-ctx.textAlign =
-    'center';
-
-ctx.textBaseline =
-    'top';
-
-ctx.fillText(
-    ['J','F','M','A','M','J','J','A','S','O','N','D'][i],
-    x + barWidth / 2,
-    getCanvasLogicalHeight(avgTimeCanvas) - padding + 7
-);
-    });
-
-    ctx.strokeStyle = getChartTheme().isDark ? '#d6e1f030' : '#2e403630';
-    ctx.beginPath();
-    ctx.moveTo(padding, getCanvasLogicalHeight(avgTimeCanvas) - padding);
-    ctx.lineTo(getCanvasLogicalWidth(avgTimeCanvas) - padding, getCanvasLogicalHeight(avgTimeCanvas) - padding);
-    ctx.stroke();
-}
 
 // ─── Monatsstatistik ──────────────────────────────────────────────────────────
 
@@ -41577,24 +40798,7 @@ if (
 document.getElementById('yc-metric-prev-btn')?.addEventListener('click', () => shiftYearCompareMetric(-1));
 document.getElementById('yc-metric-next-btn')?.addEventListener('click', () => shiftYearCompareMetric(1));
 
-function drawYAxisLabels(ctx, canvas, maxVal, paddingLeft, paddingBottom, paddingTop, formatFn, integerOnly = false) {
-    if (!maxVal || maxVal <= 0) return;
-    const { textColor } = getChartTheme();
-    const h = getCanvasLogicalHeight(canvas) - paddingBottom - paddingTop;
-    ctx.save();
-    ctx.fillStyle    = textColor;
-    ctx.font         = '10px Inter, sans-serif';
-    ctx.textAlign    = 'right';
-    ctx.textBaseline = 'middle';
-    const ticks = integerOnly
-        ? [...new Set([0,1,2,3,4].map(i => Math.round(maxVal * i / 4)))]
-        : [0,1,2,3,4].map(i => maxVal * i / 4);
-    ticks.forEach(val => {
-        const y = paddingTop + h * (1 - val / maxVal);
-        ctx.fillText(formatFn(val), paddingLeft - 5, y);
-    });
-    ctx.restore();
-}
+
 
 function getYearCompareGradientStops(year, years) {
     const currentYear = new Date().getFullYear();
@@ -43755,24 +42959,7 @@ function getMonthlyTrendData(tours, months = 6) {
     }));
 }
 
-function renderSparkline(values) {
-    const w = 56, h = 18, pad = 2;
-    const max = Math.max(...values, 0.0001);
-    const min = Math.min(...values, 0);
-    const range = (max - min) || 1;
-    const stepX = (w - pad * 2) / ((values.length - 1) || 1);
-    const points = values.map((v, i) => {
-        const x = pad + i * stepX;
-        const y = h - pad - ((v - min) / range) * (h - pad * 2);
-        return `${x.toFixed(1)},${y.toFixed(1)}`;
-    }).join(' ');
-    const firstX = pad, lastX = pad + (values.length - 1) * stepX;
-    const areaPoints = `${firstX},${h - pad} ${points} ${lastX},${h - pad}`;
-    return `<svg class="dash-sparkline" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
-        <polyline points="${areaPoints}" class="dash-sparkline-area"></polyline>
-        <polyline points="${points}" class="dash-sparkline-line"></polyline>
-    </svg>`;
-}
+
 
 function renderDashboard() {
     const allTours   = appStorage.get('touren')       || [];
@@ -46705,20 +45892,7 @@ function getWrappedDataForYear(year) {
     });
 }
 
-function getWrappedPeaksForEntries(entries) {
-    const peaks = [];
 
-    entries.forEach(entry => {
-        (entry.gipfelDetails || []).forEach(g => {
-            const height = parsePeakHeight(g?.hoehe);
-            if (height > 0) {
-                peaks.push({ name: g.name || 'Unbenannter Gipfel', height, entry });
-            }
-        });
-    });
-
-    return peaks;
-}
 
 function getWrappedMonthlyToursCount(entries) {
     const counts = Array(12).fill(0);
@@ -48640,41 +47814,7 @@ if (
  * dürfen aber aus unterschiedlichen Feldern
  * stammen.
  */
-function matchesTourSearch(
-    entry,
-    query
-) {
 
-    const normalizedQuery =
-        normalizeTourSearchText(
-            query
-        );
-
-
-    if (!normalizedQuery) {
-        return true;
-    }
-
-
-    const searchTerms =
-        normalizedQuery
-            .split(' ')
-            .filter(Boolean);
-
-
-    const searchableText =
-        buildTourSearchText(
-            entry
-        );
-
-
-    return searchTerms.every(
-        term =>
-            searchableText.includes(
-                term
-            )
-    );
-}
 
 
 /*
@@ -50200,37 +49340,7 @@ function getEntriesForCompareSelection(side) {
     });
 }
 
-function getCompareLabel(side) {
-    if (compareMode === 'years') {
-        return side === 'a' ? (compareYearA?.value || '–') : (compareYearB?.value || '–');
-    }
 
-    if (compareMode === 'seasons') {
-        const season =
-            side === 'a'
-                ? compareSeasonA?.value
-                : compareSeasonB?.value;
-
-        const year =
-            side === 'a'
-                ? compareSeasonYearA?.value
-                : compareSeasonYearB?.value;
-
-        if (!season || !year) return '–';
-
-        const label =
-            COMPARE_SEASONS.find(item => item.value === season)
-                ?.label || season;
-
-        return `${label} ${year}`;
-    }
-
-    const month = side === 'a' ? compareMonthA?.value : compareMonthB?.value;
-    const year = side === 'a' ? compareMonthYearA?.value : compareMonthYearB?.value;
-
-    if (!month || !year) return '–';
-    return `${COMPARE_MONTH_NAMES[Number(month) - 1]} ${year}`;
-}
 
 function formatMinutesToHHMM(totalMinutes) {
     const mins = Math.round(totalMinutes || 0);
@@ -50239,19 +49349,7 @@ function formatMinutesToHHMM(totalMinutes) {
     return `${h}:${String(m).padStart(2, '0')}`;
 }
 
-function buildCountMap(entries, key, emptyLabel = '–') {
-    const map = new Map();
 
-    entries.forEach(entry => {
-        const raw = String(entry?.[key] || '').trim();
-        const label = raw || emptyLabel;
-        map.set(label, (map.get(label) || 0) + 1);
-    });
-
-    return Array.from(map.entries())
-        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'de'))
-        .map(([label, count]) => ({ label, count }));
-}
 
 function computeStatsSummary(entries) {
     let totalDistance = 0;
@@ -50489,15 +49587,7 @@ function formatTimeDelta(minutesA, minutesB) {
     return `<span class="compare-delta ${cls}">${sign}${timeStr} h</span>`;
 }
 
-function renderCompareList(items) {
-    if (!items || items.length === 0) {
-        return `<div class="compare-chip">Keine Daten</div>`;
-    }
 
-    return items.map(item => `
-        <div class="compare-chip">${escapeHtml(item.label)} (${item.count})</div>
-    `).join('');
-}
 
 function renderCompareInline(html) {
     if (!compareInlineResult) return;
@@ -50506,19 +49596,7 @@ function renderCompareInline(html) {
     compareInlineResult.hidden = false;
 }
 
-function openCompareModal(html, title = 'Vergleich') {
-    const compareModal = document.getElementById('compare-modal');
-    const compareModalTitle = document.getElementById('compare-modal-title');
-    const compareModalBody = document.getElementById('compare-modal-body');
 
-    if (!compareModal || !compareModalBody || !compareModalTitle) return;
-
-    compareModalTitle.textContent = title;
-    compareModalBody.innerHTML = html;
-    attachModalSwipeDown(compareModal, closeCompareModal);
-    compareModal.classList.remove('hidden');
-    document.body.classList.add('modal-open');
-}
 
 function closeCompareModal() {
     const compareModal = document.getElementById('compare-modal');
