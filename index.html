@@ -23195,25 +23195,22 @@ body[data-font="cursive"] .app-title {
 
 <div id="theme-view" class="view">
     <div class="theme-editor-inner">
+        <section class="filter-simple-card theme-editor-card">
+            <div class="filter-simple-title">🎨 Theme Editor</div>
 
-        <section class="filter-simple-card">
-
-            <div class="filter-simple-title">
-                🎨 Theme Editor
+            <div class="theme-editor-top">
+                <div class="compare-mode-toggle" id="theme-editor-tabs" role="group" aria-label="Theme auswählen">
+                    <button type="button" class="compare-mode-btn active" data-theme-editor-tab="light">☀️ Hell</button>
+                    <button type="button" class="compare-mode-btn" data-theme-editor-tab="dark">🌙 Dunkel</button>
+                    <button type="button" class="compare-mode-btn" data-theme-editor-tab="green">🌿 Grün</button>
+                    <button type="button" class="compare-mode-btn" data-theme-editor-tab="summit">⛰️ Summit</button>
+                </div>
+                <div id="theme-editor-hint"></div>
             </div>
-
-            <div class="compare-mode-toggle" id="theme-editor-tabs" role="group" aria-label="Theme auswählen">
-                <button type="button" class="compare-mode-btn active" data-theme-editor-tab="light">☀️ Hell</button>
-                <button type="button" class="compare-mode-btn" data-theme-editor-tab="dark">🌙 Dunkel</button>
-                <button type="button" class="compare-mode-btn" data-theme-editor-tab="green">🌿 Grün</button>
-                <button type="button" class="compare-mode-btn" data-theme-editor-tab="summit">⛰️ Summit</button>
-            </div>
-
-            <div id="theme-editor-hint"></div>
 
             <div class="theme-editor-columns">
-
-                <div class="theme-editor-col theme-editor-col-left">
+                <section class="theme-editor-col theme-editor-col-left">
+                    <h2 class="theme-editor-column-title">🌄 Hintergrund & Verlauf</h2>
 
                     <div class="tour-form-row tour-form-row-two">
                         <div class="form-group">
@@ -23264,10 +23261,10 @@ body[data-font="cursive"] .app-title {
                         <label for="te-border">Randintensität: <span id="te-border-value">34</span>%</label>
                         <input type="range" id="te-border" min="10" max="70" step="1">
                     </div>
+                </section>
 
-                </div>
-
-                <div class="theme-editor-col theme-editor-col-right">
+                <section class="theme-editor-col theme-editor-col-right">
+                    <h2 class="theme-editor-column-title">✨ Oberfläche & Text</h2>
 
                     <div class="form-group">
                         <label for="te-radius">Eckenradius: <span id="te-radius-value">14</span>px</label>
@@ -23310,89 +23307,74 @@ body[data-font="cursive"] .app-title {
                         <label for="te-bg-brightness">Seitenhintergrund-Helligkeit: <span id="te-bg-brightness-value">50</span>%</label>
                         <input type="range" id="te-bg-brightness" min="0" max="100" step="1">
                     </div>
-
-                </div>
-
+                </section>
             </div>
 
+            <div class="theme-editor-secondary-grid">
+                <section class="theme-editor-panel">
+                    <h2 class="theme-editor-panel-title">🧭 Navigation</h2>
+                    <div class="tour-form-row tour-form-row-two">
+                        <div class="form-group">
+                            <label for="te-nav-top-color">Navigation oben</label>
+                            <input type="color" id="te-nav-top-color">
+                        </div>
+                        <div class="form-group">
+                            <label for="te-nav-bottom-color">Navigation unten</label>
+                            <input type="color" id="te-nav-bottom-color">
+                        </div>
+                    </div>
+                </section>
 
-            <div class="backup-divider"></div>
-            <div class="backup-section-title">🧭 Navigationsleiste</div>
+                <section class="theme-editor-panel">
+                    <h2 class="theme-editor-panel-title">🔤 Schrift</h2>
+                    <div class="form-group">
+                        <label for="te-font-family">App-Schriftart</label>
+                        <select id="te-font-family">
+                            <option value="android">Android – Roboto</option>
+                            <option value="system">System – variabel</option>
+                            <option value="rounded">Abgerundet</option>
+                            <option value="serif">Noto Serif</option>
+                            <option value="slab">Slab Serif</option>
+                            <option value="mono">Monospace</option>
+                            <option value="cursive">Handschriftlich</option>
+                            <option value="fantasy">Dekorativ</option>
+                        </select>
+                    </div>
+                    <div class="form-group theme-editor-font-size-group">
+                        <label for="te-font-size">Globale Schriftgröße: <span id="te-font-size-value">100</span>%</label>
+                        <input type="range" id="te-font-size" min="80" max="130" step="1" value="100">
+                    </div>
+                </section>
 
-            <div class="tour-form-row tour-form-row-two">
-                <div class="form-group">
-                    <label for="te-nav-top-color">Navigation oben</label>
-                    <input type="color" id="te-nav-top-color">
-                </div>
-                <div class="form-group">
-                    <label for="te-nav-bottom-color">Navigation unten</label>
-                    <input type="color" id="te-nav-bottom-color">
-                </div>
+                <section class="theme-editor-panel">
+                    <h2 class="theme-editor-panel-title">📊 Diagrammfarben</h2>
+                    <div class="tour-form-row tour-form-row-two">
+                        <div class="form-group">
+                            <label for="te-chart-color-start">Balken unten</label>
+                            <input type="color" id="te-chart-color-start">
+                        </div>
+                        <div class="form-group">
+                            <label for="te-chart-color-mid">Balken Mitte</label>
+                            <input type="color" id="te-chart-color-mid">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="te-chart-color-end">Balken oben (Spitze)</label>
+                        <input type="color" id="te-chart-color-end">
+                    </div>
+                </section>
             </div>
 
-            <div class="backup-divider"></div>
-<div class="backup-section-title">🔤 Schriftart</div>
-
-<div class="form-group">
-    <label for="te-font-family">App-Schriftart</label>
-
-    <select id="te-font-family">
-    <option value="android">Android – Roboto</option>
-    <option value="system">System – variabel</option>
-    <option value="rounded">Abgerundet</option>
-    <option value="serif">Noto Serif</option>
-    <option value="slab">Slab Serif</option>
-    <option value="mono">Monospace</option>
-    <option value="cursive">Handschriftlich</option>
-    <option value="fantasy">Dekorativ</option>
-</select>
-</div>
-
-<div class="form-group theme-editor-font-size-group">
-    <label for="te-font-size">
-        Globale Schriftgröße:
-        <span id="te-font-size-value">100</span>%
-    </label>
-
-    <input
-        type="range"
-        id="te-font-size"
-        min="80"
-        max="130"
-        step="1"
-        value="100"
-    >
-</div>
-
-            <div class="backup-divider"></div>
-            <div class="backup-section-title">📊 Diagrammfarben</div>
-
-            <div class="tour-form-row tour-form-row-two">
-                <div class="form-group">
-                    <label for="te-chart-color-start">Balken unten</label>
-                    <input type="color" id="te-chart-color-start">
-                </div>
-                <div class="form-group">
-                    <label for="te-chart-color-mid">Balken Mitte</label>
-                    <input type="color" id="te-chart-color-mid">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="te-chart-color-end">Balken oben (Spitze)</label>
-                <input type="color" id="te-chart-color-end">
-            </div>
-
-            <div class="backup-divider"></div>
-            <div class="backup-section-title">🔍 Kontrast-Check</div>
-            <div id="theme-editor-contrast-panel" class="theme-editor-contrast-panel"></div>
+            <section class="theme-editor-panel theme-editor-contrast-section">
+                <h2 class="theme-editor-panel-title">🔍 Kontrast-Check</h2>
+                <div id="theme-editor-contrast-panel" class="theme-editor-contrast-panel"></div>
+            </section>
 
             <div class="theme-editor-actions">
                 <button type="button" class="save-btn" id="theme-editor-reset">Zurücksetzen</button>
                 <button type="button" class="save-btn" id="theme-editor-save">Speichern</button>
             </div>
-
         </section>
-
     </div>
 </div>
 
@@ -62567,6 +62549,409 @@ body.summit .achievement-category-tile.empty {
     .achievement-detail-tour-link {
         padding: 8px 9px;
         font-size: 12px;
+    }
+}
+
+/* =========================================================
+   Theme Editor – mobile layout refresh
+   Klare Gruppen, größere Touch-Ziele und theme-neutrale Flächen
+   ========================================================= */
+
+#theme-view .theme-editor-top {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+#theme-view .theme-editor-column-title,
+#theme-view .theme-editor-panel-title {
+    margin: 0;
+    color: var(--text-main);
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+#theme-view .theme-editor-column-title {
+    padding-bottom: 8px;
+    margin-bottom: 2px;
+    border-bottom: 1px solid var(--ui-card-border, rgba(127,127,127,0.25));
+}
+
+#theme-view .theme-editor-panel-title {
+    margin-bottom: 10px;
+}
+
+#theme-view .theme-editor-panel,
+#theme-view .theme-editor-col {
+    min-width: 0;
+    border: 1px solid var(--ui-card-border, rgba(127,127,127,0.25));
+    border-radius: 13px;
+    background: var(--ui-card-bg, rgba(127,127,127,0.06));
+    color: var(--text-main);
+}
+
+#theme-view .theme-editor-panel {
+    padding: 12px;
+}
+
+#theme-view .theme-editor-col {
+    padding: 12px;
+    gap: 8px;
+}
+
+#theme-view .theme-editor-secondary-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    min-width: 0;
+}
+
+#theme-view .theme-editor-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+#theme-view .theme-editor-card .filter-simple-title {
+    margin-bottom: 0;
+}
+
+#theme-view .theme-editor-card .form-group {
+    min-width: 0;
+    margin: 0;
+    gap: 5px;
+}
+
+#theme-view .theme-editor-card .form-group label {
+    color: var(--text-soft);
+    font-size: 11px;
+    font-weight: 650;
+    line-height: 1.25;
+}
+
+#theme-view .theme-editor-card .tour-form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+    margin: 0;
+}
+
+#theme-view .theme-editor-card select {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    height: auto;
+    padding: 8px 10px;
+    border-radius: 9px;
+    font-size: 12px;
+}
+
+#theme-view .theme-editor-card input[type="color"] {
+    width: 100%;
+    min-width: 0;
+    height: 38px;
+    padding: 3px;
+    border-radius: 9px;
+}
+
+#theme-view .theme-editor-card input[type="range"] {
+    width: 100%;
+    min-width: 0;
+    min-height: 26px;
+    margin: 0;
+}
+
+#theme-view .theme-editor-card .checkbox-label {
+    display: flex;
+    min-height: 38px;
+    height: auto;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.2;
+}
+
+#theme-view .theme-editor-card .checkbox-label input[type="checkbox"] {
+    flex: 0 0 auto;
+}
+
+#theme-view #theme-editor-tabs {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    margin: 0;
+}
+
+#theme-view #theme-editor-tabs button {
+    width: 100%;
+    min-width: 0;
+    min-height: 38px;
+    padding: 7px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.15;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+}
+
+#theme-view #theme-editor-hint {
+    margin: 2px 1px 0;
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+#theme-view .theme-editor-contrast-section {
+    padding: 10px 12px;
+}
+
+#theme-view .theme-editor-contrast-panel {
+    gap: 6px;
+    margin-top: 0;
+}
+
+#theme-view .theme-editor-contrast-row {
+    align-items: flex-start;
+    gap: 4px 8px;
+    padding: 8px 9px;
+    border: 1px solid var(--ui-card-border, rgba(127,127,127,0.16));
+    background: var(--ui-card-bg-interactive, rgba(127,127,127,0.04));
+    color: var(--text-main);
+    font-size: 11px;
+}
+
+#theme-view .theme-editor-contrast-label {
+    min-width: 0;
+    line-height: 1.3;
+}
+
+#theme-view .theme-editor-contrast-value {
+    white-space: normal;
+    line-height: 1.3;
+    color: var(--text-soft);
+}
+
+#theme-view .theme-editor-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+}
+
+#theme-view .theme-editor-actions .save-btn {
+    min-width: 0;
+    min-height: 40px;
+    margin: 0;
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+}
+
+@media (max-width: 768px) and (orientation: portrait) and (pointer: coarse) {
+    #theme-view {
+        overflow-y: auto;
+        padding-bottom: 10px;
+    }
+
+    #theme-view .theme-editor-inner {
+        width: 100%;
+        padding: 6px 2px 18px;
+    }
+
+    #theme-view .theme-editor-card {
+        gap: 10px;
+        padding: 12px;
+    }
+
+    #theme-view .theme-editor-columns {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+        width: 100%;
+    }
+
+    #theme-view .theme-editor-col {
+        gap: 9px;
+        padding: 11px;
+    }
+
+    #theme-view .theme-editor-secondary-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+    }
+
+    #theme-view .theme-editor-column-title,
+    #theme-view .theme-editor-panel-title {
+        font-size: 12px;
+    }
+
+    #theme-view .theme-editor-actions {
+        padding-top: 2px;
+    }
+}
+
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    #theme-view {
+        display: block !important;
+        overflow: hidden !important;
+        padding: 6px 10px 8px !important;
+    }
+
+    #theme-view .theme-editor-inner {
+        width: 100%;
+        max-width: none;
+        height: 100%;
+        min-height: 0;
+        margin: 0;
+        padding: 0;
+    }
+
+    #theme-view .theme-editor-card {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        padding: 8px;
+        gap: 8px;
+        overflow-y: auto !important;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #theme-view .filter-simple-title {
+        flex: 0 0 auto;
+        margin-bottom: 0;
+        font-size: 13px;
+        line-height: 1.1;
+    }
+
+    #theme-view .theme-editor-top {
+        flex: 0 0 auto;
+        gap: 3px;
+    }
+
+    #theme-view #theme-editor-tabs {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 5px;
+    }
+
+    #theme-view #theme-editor-tabs button {
+        min-height: 30px;
+        padding: 5px 3px;
+        font-size: 10px;
+    }
+
+    #theme-view #theme-editor-hint {
+        font-size: 9px;
+        line-height: 1.2;
+    }
+
+    #theme-view .theme-editor-columns {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 8px;
+        flex: 0 0 auto;
+        width: 100%;
+        min-width: 0;
+    }
+
+    #theme-view .theme-editor-col {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        gap: 5px;
+        padding: 8px;
+        min-width: 0;
+    }
+
+    #theme-view .theme-editor-column-title {
+        padding-bottom: 5px;
+        font-size: 11px;
+    }
+
+    #theme-view .theme-editor-secondary-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        flex: 0 0 auto;
+    }
+
+    #theme-view .theme-editor-panel {
+        padding: 8px;
+        border-radius: 10px;
+    }
+
+    #theme-view .theme-editor-panel-title {
+        margin-bottom: 6px;
+        font-size: 10px;
+    }
+
+    #theme-view .theme-editor-card .form-group {
+        gap: 2px;
+    }
+
+    #theme-view .theme-editor-card .form-group label {
+        font-size: 9px;
+        line-height: 1.15;
+    }
+
+    #theme-view .theme-editor-card .tour-form-row {
+        gap: 5px;
+    }
+
+    #theme-view .theme-editor-card select {
+        min-height: 28px;
+        padding: 4px 6px;
+        font-size: 10px;
+    }
+
+    #theme-view .theme-editor-card input[type="color"] {
+        height: 28px;
+        padding: 2px;
+    }
+
+    #theme-view .theme-editor-card input[type="range"] {
+        min-height: 19px;
+        height: 19px;
+    }
+
+    #theme-view .theme-editor-card .checkbox-label {
+        min-height: 26px;
+        gap: 4px;
+        font-size: 9px;
+    }
+
+    #theme-view .theme-editor-contrast-section {
+        padding: 7px 8px;
+    }
+
+    #theme-view .theme-editor-contrast-panel {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 5px;
+    }
+
+    #theme-view .theme-editor-contrast-row {
+        min-width: 0;
+        flex-direction: column;
+        gap: 3px;
+        padding: 5px 7px;
+        font-size: 9px;
+    }
+
+    #theme-view .theme-editor-actions {
+        flex: 0 0 auto;
+        gap: 7px;
+        margin-top: auto;
+        padding-top: 0;
+    }
+
+    #theme-view .theme-editor-actions .save-btn {
+        min-height: 29px;
+        padding: 4px 7px;
+        font-size: 10px;
     }
 }
 
