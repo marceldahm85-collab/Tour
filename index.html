@@ -23209,8 +23209,8 @@ body[data-font="cursive"] .app-title {
             </div>
 
             <div class="theme-editor-columns">
-                <section class="theme-editor-col theme-editor-col-left">
-                    <h2 class="theme-editor-column-title">🌄 Hintergrund & Verlauf</h2>
+                <details class="theme-editor-col theme-editor-col-left" data-theme-editor-accordion="main" data-theme-editor-default-open="true">
+                    <summary class="theme-editor-column-title">🌄 Hintergrund & Verlauf</summary>
 
                     <div class="tour-form-row tour-form-row-two">
                         <div class="form-group">
@@ -23261,10 +23261,10 @@ body[data-font="cursive"] .app-title {
                         <label for="te-border">Randintensität: <span id="te-border-value">34</span>%</label>
                         <input type="range" id="te-border" min="10" max="70" step="1">
                     </div>
-                </section>
+                </details>
 
-                <section class="theme-editor-col theme-editor-col-right">
-                    <h2 class="theme-editor-column-title">✨ Oberfläche & Text</h2>
+                <details class="theme-editor-col theme-editor-col-right" data-theme-editor-accordion="main">
+                    <summary class="theme-editor-column-title">✨ Oberfläche & Text</summary>
 
                     <div class="form-group">
                         <label for="te-radius">Eckenradius: <span id="te-radius-value">14</span>px</label>
@@ -23307,12 +23307,12 @@ body[data-font="cursive"] .app-title {
                         <label for="te-bg-brightness">Seitenhintergrund-Helligkeit: <span id="te-bg-brightness-value">50</span>%</label>
                         <input type="range" id="te-bg-brightness" min="0" max="100" step="1">
                     </div>
-                </section>
+                </details>
             </div>
 
             <div class="theme-editor-secondary-grid">
-                <section class="theme-editor-panel">
-                    <h2 class="theme-editor-panel-title">🧭 Navigation</h2>
+                <details class="theme-editor-panel" data-theme-editor-accordion="secondary">
+                    <summary class="theme-editor-panel-title">🧭 Navigation</summary>
                     <div class="tour-form-row tour-form-row-two">
                         <div class="form-group">
                             <label for="te-nav-top-color">Navigation oben</label>
@@ -23323,10 +23323,10 @@ body[data-font="cursive"] .app-title {
                             <input type="color" id="te-nav-bottom-color">
                         </div>
                     </div>
-                </section>
+                </details>
 
-                <section class="theme-editor-panel">
-                    <h2 class="theme-editor-panel-title">🔤 Schrift</h2>
+                <details class="theme-editor-panel" data-theme-editor-accordion="secondary">
+                    <summary class="theme-editor-panel-title">🔤 Schrift</summary>
                     <div class="form-group">
                         <label for="te-font-family">App-Schriftart</label>
                         <select id="te-font-family">
@@ -23344,10 +23344,10 @@ body[data-font="cursive"] .app-title {
                         <label for="te-font-size">Globale Schriftgröße: <span id="te-font-size-value">100</span>%</label>
                         <input type="range" id="te-font-size" min="80" max="130" step="1" value="100">
                     </div>
-                </section>
+                </details>
 
-                <section class="theme-editor-panel">
-                    <h2 class="theme-editor-panel-title">📊 Diagrammfarben</h2>
+                <details class="theme-editor-panel" data-theme-editor-accordion="secondary">
+                    <summary class="theme-editor-panel-title">📊 Diagrammfarben</summary>
                     <div class="tour-form-row tour-form-row-two">
                         <div class="form-group">
                             <label for="te-chart-color-start">Balken unten</label>
@@ -23362,13 +23362,13 @@ body[data-font="cursive"] .app-title {
                         <label for="te-chart-color-end">Balken oben (Spitze)</label>
                         <input type="color" id="te-chart-color-end">
                     </div>
-                </section>
+                </details>
             </div>
 
-            <section class="theme-editor-panel theme-editor-contrast-section">
-                <h2 class="theme-editor-panel-title">🔍 Kontrast-Check</h2>
+            <details class="theme-editor-panel theme-editor-contrast-section" data-theme-editor-accordion="contrast">
+                <summary class="theme-editor-panel-title">🔍 Kontrast-Check</summary>
                 <div id="theme-editor-contrast-panel" class="theme-editor-contrast-panel"></div>
-            </section>
+            </details>
 
             <div class="theme-editor-actions">
                 <button type="button" class="save-btn" id="theme-editor-reset">Zurücksetzen</button>
@@ -45736,10 +45736,56 @@ function updateContrastCheckerDisplay(settings) {
     }).join('');
 }
 
+function initThemeEditorAccordions(view) {
+    const groups = Array.from(
+        view.querySelectorAll('[data-theme-editor-accordion]')
+    );
+    if (!groups.length) return;
+
+    const portraitMode = window.matchMedia(
+        '(max-width: 768px) and (orientation: portrait) and (pointer: coarse)'
+    );
+    let portraitOpenState = null;
+
+    const setPortraitDefaults = () => {
+        groups.forEach(group => {
+            group.open = group.dataset.themeEditorDefaultOpen === 'true';
+        });
+    };
+
+    if (portraitMode.matches) {
+        setPortraitDefaults();
+    } else {
+        groups.forEach(group => { group.open = true; });
+    }
+
+    const handleLayoutChange = event => {
+        if (event.matches) {
+            if (portraitOpenState) {
+                groups.forEach((group, index) => {
+                    group.open = Boolean(portraitOpenState[index]);
+                });
+            } else {
+                setPortraitDefaults();
+            }
+        } else {
+            portraitOpenState = groups.map(group => group.open);
+            groups.forEach(group => { group.open = true; });
+        }
+    };
+
+    if (typeof portraitMode.addEventListener === 'function') {
+        portraitMode.addEventListener('change', handleLayoutChange);
+    } else if (typeof portraitMode.addListener === 'function') {
+        portraitMode.addListener(handleLayoutChange);
+    }
+}
+
 function initThemeEditor() {
     const view = document.getElementById('theme-view');
     if (!view) return;
 
+    initThemeEditorAccordions(view);
     initThemeEditorFontSelector();
     initThemeEditorFontSizeSelector();
 
@@ -62952,6 +62998,128 @@ body.summit .achievement-category-tile.empty {
         min-height: 29px;
         padding: 4px 7px;
         font-size: 10px;
+    }
+}
+
+
+/* Theme Editor – aufklappbare Gruppen und Grüntheme-Oberflächen */
+#theme-view details[data-theme-editor-accordion] > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    list-style: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#theme-view details[data-theme-editor-accordion] > summary::-webkit-details-marker {
+    display: none;
+}
+
+#theme-view details[data-theme-editor-accordion] > summary::after {
+    content: "⌄";
+    display: inline-flex;
+    flex: 0 0 24px;
+    width: 24px;
+    height: 24px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--ui-card-border);
+    border-radius: 50%;
+    color: var(--accent);
+    font-size: 15px;
+    line-height: 1;
+    transform: rotate(-90deg);
+    transition: transform 0.18s ease, background 0.18s ease;
+}
+
+#theme-view details[data-theme-editor-accordion][open] > summary::after {
+    transform: rotate(0deg);
+    background: var(--accent-soft);
+}
+
+#theme-view details.theme-editor-col > summary {
+    padding-bottom: 8px;
+    margin-bottom: 2px;
+    border-bottom: 1px solid var(--ui-card-border);
+}
+
+#theme-view details.theme-editor-panel > summary {
+    margin: 0;
+}
+
+#theme-view details.theme-editor-panel[open] > summary {
+    margin-bottom: 10px;
+}
+
+#theme-view details.theme-editor-contrast-section[open] > summary {
+    margin-bottom: 8px;
+}
+
+#theme-view details[data-theme-editor-accordion]:not([open]) {
+    align-self: start;
+}
+
+body.green #theme-view .theme-editor-col,
+body.green #theme-view .theme-editor-panel {
+    background:
+        radial-gradient(circle at 12% 0%, rgba(82,183,136,0.16), transparent 48%),
+        linear-gradient(145deg, rgba(3,25,14,0.97), rgba(7,48,27,0.95) 58%, rgba(2,16,9,0.98));
+    border-color: rgba(82,183,136,0.38);
+    box-shadow:
+        inset 0 1px 0 rgba(130,225,164,0.07),
+        0 5px 16px rgba(0,0,0,0.18);
+}
+
+body.green #theme-view details.theme-editor-col > summary,
+body.green #theme-view details.theme-editor-panel > summary {
+    color: #e6f8ed;
+}
+
+body.green #theme-view .theme-editor-column-title {
+    border-bottom-color: rgba(82,183,136,0.30);
+}
+
+body.green #theme-view .theme-editor-contrast-row {
+    background: linear-gradient(135deg, rgba(5,39,22,0.86), rgba(8,55,31,0.78));
+    border-color: rgba(82,183,136,0.24);
+}
+
+body.green #theme-view #theme-editor-tabs button {
+    background: linear-gradient(145deg, rgba(2,24,13,0.92), rgba(7,48,27,0.88));
+    border: 1px solid rgba(82,183,136,0.28);
+    color: #d7f1e1;
+}
+
+body.green #theme-view #theme-editor-tabs button.active {
+    background: linear-gradient(135deg, rgba(82,183,136,0.38), rgba(27,96,62,0.92)) !important;
+    border-color: rgba(130,225,164,0.60) !important;
+    color: #ffffff;
+    box-shadow: 0 0 0 1px rgba(82,183,136,0.12), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+@media (max-width: 768px) and (orientation: portrait) and (pointer: coarse) {
+    #theme-view details.theme-editor-col > summary {
+        min-height: 40px;
+        padding-bottom: 6px;
+        margin-bottom: 0;
+        font-size: 12px;
+    }
+
+    #theme-view details.theme-editor-panel > summary {
+        min-height: 36px;
+        font-size: 12px;
+    }
+
+    #theme-view details.theme-editor-panel[open] > summary {
+        margin-bottom: 10px;
+    }
+
+    #theme-view details[data-theme-editor-accordion] > summary::after {
+        flex-basis: 26px;
+        width: 26px;
+        height: 26px;
     }
 }
 
