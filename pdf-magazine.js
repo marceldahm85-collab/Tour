@@ -2,7 +2,66 @@
 (function () {
     'use strict';
 
-    if (!window.jspdf || !window.jspdf.jsPDF) return;
+    var pdfLibrariesPromise = null;
+
+    function loadPdfDependency(src, key) {
+        return new Promise(function(resolve, reject) {
+            var script = document.querySelector('script[data-pdf-dependency="' + key + '"]');
+
+            if (script && script.dataset.failed === 'true') {
+                script.remove();
+                script = null;
+            }
+
+            if (script) {
+                if (script.dataset.loaded === 'true') {
+                    resolve();
+                    return;
+                }
+                script.addEventListener('load', function() {
+                    script.dataset.loaded = 'true';
+                    resolve();
+                }, { once: true });
+                script.addEventListener('error', function() {
+                    script.dataset.failed = 'true';
+                    reject(new Error('PDF-Bibliothek konnte nicht geladen werden: ' + src));
+                }, { once: true });
+                return;
+            }
+
+            script = document.createElement('script');
+            script.src = src;
+            script.async = true;
+            script.dataset.pdfDependency = key;
+            script.addEventListener('load', function() {
+                script.dataset.loaded = 'true';
+                resolve();
+            }, { once: true });
+            script.addEventListener('error', function() {
+                script.dataset.failed = 'true';
+                reject(new Error('PDF-Bibliothek konnte nicht geladen werden: ' + src));
+            }, { once: true });
+            document.head.appendChild(script);
+        });
+    }
+
+    function ensurePdfLibraries() {
+        if (!pdfLibrariesPromise) {
+            pdfLibrariesPromise = (async function() {
+                if (!window.jspdf || !window.jspdf.jsPDF) {
+                    await loadPdfDependency('./libs/jspdf.umd.min.js', 'jspdf');
+                }
+                if (!window.jspdf || !window.jspdf.jsPDF) {
+                    throw new Error('jsPDF wurde nach dem Laden nicht verfügbar.');
+                }
+                await loadPdfDependency('./libs/jspdf.plugin.autotable.min.js', 'jspdf-autotable');
+            })().catch(function(error) {
+                pdfLibrariesPromise = null;
+                throw error;
+            });
+        }
+        return pdfLibrariesPromise;
+    }
 
     var A4 = { w: 210, h: 297 };
     var M = 12;
@@ -254,7 +313,17 @@
         return Math.max(38, h + bottomPad);
     }
 
-    var measureDoc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
+    var measureDoc = null;
+
+    function getMeasureDoc() {
+        if (!measureDoc) {
+            if (!window.jspdf || !window.jspdf.jsPDF) {
+                throw new Error('PDF-Bibliothek ist noch nicht geladen.');
+            }
+            measureDoc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
+        }
+        return measureDoc;
+    }
 
     function statGrid(doc, d, x, y, w, cols, colors) {
         cols = cols || 3;
@@ -324,7 +393,7 @@
     }
 
     async function drawTour(doc, d, x, y, w, kind, colors) {
-        var h = measure(measureDoc, d, w, kind), pad = 4, inner = w - 8, cursor = y + pad + 1;
+        var h = measure(getMeasureDoc(), d, w, kind), pad = 4, inner = w - 8, cursor = y + pad + 1;
         fill(doc, kind === 'feature' ? [249,248,244] : [252,251,248]);
         doc.roundedRect(x, y, w, h, 3, 3, 'F');
         rule(doc, x, y, Math.min(w, d.isBig ? 28 : 16), colors.accent, d.isBig ? 1.6 : 1);
@@ -792,7 +861,7 @@
         }
         for(var i=0;i<ds.length;i++){
             var d=ds[i], actual=kindFor(d);
-            var h=measure(measureDoc,d,colW,actual), col=colY[0]<=colY[1]?0:1;
+            var h=measure(getMeasureDoc(),d,colW,actual), col=colY[0]<=colY[1]?0:1;
             if(colY[col]+h>SAFE_BOTTOM){
                 var other=1-col;
                 if(colY[other]+h<=SAFE_BOTTOM) col=other;
@@ -806,6 +875,7 @@
     }
 
     async function generate(from,to){
+        await ensurePdfLibraries();
         var js=window.jspdf.jsPDF, doc=new js({unit:'mm',format:'a4'}), colors=tc();
         var entries=window.getToursInYearRange(from,to), label=from===to?String(from):from+'–'+to;
         if(typeof window.showToast==='function') window.showToast('Magazin-Tourenbuch wird erstellt…',{type:'info',duration:2500});
