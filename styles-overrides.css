@@ -5334,44 +5334,200 @@ body.green #theme-view .theme-editor-contrast-row {
 
 
 
-/* Theme Editor: geschlossene Gruppen im Hochformat gleich hoch */
+/* Theme Editor: geschlossene Gruppen im Hochformat tatsächlich gleich hoch.
+   Alle aufklappbaren Gruppen verwenden dieselbe Außen- und Summary-Höhe.
+   Die offenen Gruppen behalten ihre bisherige, inhaltsspezifische Höhe. */
 @media (max-width: 768px) and (orientation: portrait) and (pointer: coarse) {
-    #theme-view details.theme-editor-col:not([open]) {
-        /* Auf die gleiche Außenhöhe wie die drei kleineren Gruppen bringen. */
-        padding: 9px;
+    #theme-view details.theme-editor-col:not([open]),
+    #theme-view details.theme-editor-panel:not([open]),
+    #theme-view details.theme-editor-contrast-section:not([open]) {
+        height: 58px !important;
+        min-height: 58px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+        overflow: hidden;
+    }
+
+    #theme-view details[data-theme-editor-accordion]:not([open]) > summary {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 10px 11px !important;
+        border: 0 !important;
+        box-sizing: border-box;
+    }
+
+    #theme-view details.theme-editor-col:not([open]) > summary {
+        padding-bottom: 10px !important;
+        border-bottom: 0 !important;
     }
 }
 
-/* Achievements: Kacheln im Greentheme mit passender grüner Oberfläche */
-body.green .achievement-category-tile {
-    background:
-        radial-gradient(circle at 12% 0%, rgba(82,183,136,0.20), transparent 54%),
-        linear-gradient(145deg, rgba(7,42,25,0.99), rgba(10,66,39,0.98) 54%, rgba(3,27,16,0.99));
-    border-color: rgba(82,183,136,0.42);
-    color: #e9fff1;
+/* Achievements: abgeschlossene, begonnene und noch leere Kategorien
+   erhalten in jedem Theme eindeutig unterscheidbare Zustände. */
+:root {
+    --achievement-tile-complete-bg: linear-gradient(145deg, #d9f3e2, #effaf2);
+    --achievement-tile-complete-border: #23834a;
+    --achievement-tile-complete-text: #174d2c;
+    --achievement-tile-complete-glow: rgba(35,131,74,0.20);
+
+    --achievement-tile-started-bg: linear-gradient(145deg, #fff0c9, #fff8e8);
+    --achievement-tile-started-border: #c58b19;
+    --achievement-tile-started-text: #6b4b08;
+    --achievement-tile-started-glow: rgba(197,139,25,0.14);
+
+    --achievement-tile-empty-bg: linear-gradient(145deg, #f0f2f1, #e5e9e7);
+    --achievement-tile-empty-border: rgba(87,103,94,0.32);
+    --achievement-tile-empty-text: #647067;
+    --achievement-tile-track: rgba(96,110,101,0.16);
 }
 
-body.green .achievement-category-tile:hover {
-    background:
-        radial-gradient(circle at 12% 0%, rgba(82,183,136,0.28), transparent 54%),
-        linear-gradient(145deg, rgba(9,54,32,0.99), rgba(13,78,47,0.98) 54%, rgba(4,35,21,0.99));
-    border-color: rgba(130,225,164,0.62);
+body.dark {
+    --achievement-tile-complete-bg: linear-gradient(145deg, rgba(111,20,30,0.98), rgba(52,9,18,0.99));
+    --achievement-tile-complete-border: #e46b77;
+    --achievement-tile-complete-text: #fff0f2;
+    --achievement-tile-complete-glow: rgba(228,107,119,0.22);
+
+    --achievement-tile-started-bg: linear-gradient(145deg, rgba(86,39,39,0.96), rgba(43,27,31,0.98));
+    --achievement-tile-started-border: #a96a70;
+    --achievement-tile-started-text: #f5d9dc;
+    --achievement-tile-started-glow: rgba(169,106,112,0.16);
+
+    --achievement-tile-empty-bg: linear-gradient(145deg, rgba(39,49,62,0.90), rgba(24,31,41,0.98));
+    --achievement-tile-empty-border: rgba(164,181,200,0.25);
+    --achievement-tile-empty-text: #9ba8b8;
+    --achievement-tile-track: rgba(180,194,210,0.13);
 }
 
-body.green .achievement-category-tile.complete {
-    background:
-        radial-gradient(circle at 12% 0%, rgba(130,225,164,0.30), transparent 55%),
-        linear-gradient(145deg, rgba(13,76,46,0.99), rgba(8,57,34,0.98) 58%, rgba(3,29,17,0.99));
-    border-color: rgba(130,225,164,0.70);
+body.green {
+    --achievement-tile-complete-bg: linear-gradient(145deg, rgba(15,86,51,0.99), rgba(4,42,26,0.99));
+    --achievement-tile-complete-border: #82e1a4;
+    --achievement-tile-complete-text: #effff4;
+    --achievement-tile-complete-glow: rgba(130,225,164,0.26);
+
+    --achievement-tile-started-bg: linear-gradient(145deg, rgba(22,70,49,0.98), rgba(10,43,30,0.99));
+    --achievement-tile-started-border: #439d73;
+    --achievement-tile-started-text: #d3f1df;
+    --achievement-tile-started-glow: rgba(67,157,115,0.18);
+
+    --achievement-tile-empty-bg: linear-gradient(145deg, rgba(28,39,32,0.98), rgba(15,23,18,0.99));
+    --achievement-tile-empty-border: rgba(139,160,145,0.28);
+    --achievement-tile-empty-text: #91a297;
+    --achievement-tile-track: rgba(154,179,163,0.14);
+}
+
+body.summit {
+    --achievement-tile-complete-bg: linear-gradient(145deg, rgba(31,91,130,0.99), rgba(22,43,60,0.99));
+    --achievement-tile-complete-border: #72c2ff;
+    --achievement-tile-complete-text: #f4fbff;
+    --achievement-tile-complete-glow: rgba(114,194,255,0.24);
+
+    --achievement-tile-started-bg: linear-gradient(145deg, rgba(43,70,88,0.98), rgba(28,43,53,0.99));
+    --achievement-tile-started-border: #6796b5;
+    --achievement-tile-started-text: #d9edf9;
+    --achievement-tile-started-glow: rgba(103,150,181,0.18);
+
+    --achievement-tile-empty-bg: linear-gradient(145deg, rgba(45,55,62,0.94), rgba(28,36,42,0.99));
+    --achievement-tile-empty-border: rgba(167,187,200,0.25);
+    --achievement-tile-empty-text: #9aabb5;
+    --achievement-tile-track: rgba(179,199,210,0.13);
+}
+
+/* Statuskarten bleiben auch bei Hover im jeweiligen Status-Farbschema. */
+#achievements-view .achievement-category-tile {
+    border-width: 1px;
+    opacity: 1;
+}
+
+#achievements-view .achievement-category-tile.complete {
+    background: var(--achievement-tile-complete-bg) !important;
+    border: 2px solid var(--achievement-tile-complete-border) !important;
+    color: var(--achievement-tile-complete-text) !important;
     box-shadow:
-        0 0 0 1px rgba(82,183,136,0.24),
-        0 5px 16px rgba(0,0,0,0.20);
+        0 0 0 1px var(--achievement-tile-complete-glow),
+        0 5px 16px rgba(0,0,0,0.18);
+    opacity: 1 !important;
 }
 
-body.green .achievement-category-tile .achievement-category-tile-icon {
-    background: rgba(82,183,136,0.20);
+#achievements-view .achievement-category-tile.started {
+    background: var(--achievement-tile-started-bg) !important;
+    border: 1px solid var(--achievement-tile-started-border) !important;
+    color: var(--achievement-tile-started-text) !important;
+    box-shadow:
+        inset 0 0 0 1px var(--achievement-tile-started-glow),
+        0 3px 10px rgba(0,0,0,0.10);
+    opacity: 1 !important;
 }
 
-body.green .achievement-category-tile.empty {
-    opacity: 0.84;
+#achievements-view .achievement-category-tile.empty {
+    background: var(--achievement-tile-empty-bg) !important;
+    border: 1px dashed var(--achievement-tile-empty-border) !important;
+    color: var(--achievement-tile-empty-text) !important;
+    box-shadow: none !important;
+    opacity: 0.82 !important;
+}
+
+#achievements-view .achievement-category-tile.complete .achievement-category-tile-label,
+#achievements-view .achievement-category-tile.complete .achievement-category-tile-count,
+#achievements-view .achievement-category-tile.complete .achievement-category-tile-state {
+    color: var(--achievement-tile-complete-text) !important;
+}
+
+#achievements-view .achievement-category-tile.started .achievement-category-tile-label,
+#achievements-view .achievement-category-tile.started .achievement-category-tile-count,
+#achievements-view .achievement-category-tile.started .achievement-category-tile-state {
+    color: var(--achievement-tile-started-text) !important;
+}
+
+#achievements-view .achievement-category-tile.empty .achievement-category-tile-label,
+#achievements-view .achievement-category-tile.empty .achievement-category-tile-count,
+#achievements-view .achievement-category-tile.empty .achievement-category-tile-state {
+    color: var(--achievement-tile-empty-text) !important;
+}
+
+#achievements-view .achievement-category-tile-state {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    min-height: 23px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-weight: 850;
+    line-height: 1;
+}
+
+#achievements-view .achievement-category-tile.complete .achievement-category-tile-state {
+    background: var(--achievement-tile-complete-border);
+    color: #ffffff !important;
+}
+
+#achievements-view .achievement-category-tile.started .achievement-category-tile-state {
+    background: var(--achievement-tile-started-glow);
+    border: 1px solid var(--achievement-tile-started-border);
+}
+
+#achievements-view .achievement-category-tile.empty .achievement-category-tile-state {
+    background: transparent;
+    border: 1px dashed var(--achievement-tile-empty-border);
+}
+
+#achievements-view .achievement-category-progress-track {
+    background: var(--achievement-tile-track) !important;
+}
+
+#achievements-view .achievement-category-tile.complete .achievement-category-progress-bar {
+    background: var(--achievement-tile-complete-border) !important;
+}
+
+#achievements-view .achievement-category-tile.started .achievement-category-progress-bar {
+    background: var(--achievement-tile-started-border) !important;
+}
+
+#achievements-view .achievement-category-tile.empty .achievement-category-progress-bar {
+    background: transparent !important;
 }
