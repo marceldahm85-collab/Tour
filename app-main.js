@@ -10150,7 +10150,15 @@ function ensureMapDependencyStylesheet(href, key) {
             console.warn('[Map] Stylesheet konnte nicht geladen werden:', href);
             resolve();
         }, { once: true });
-        document.head.appendChild(link);
+
+        // Ursprüngliche CSS-Kaskade erhalten: Leaflet-Regeln stehen vor
+        // styles.css und den späteren Theme-/Override-Regeln.
+        const appStylesAnchor = document.querySelector('link[href="./styles.css"]');
+        if (appStylesAnchor) {
+            document.head.insertBefore(link, appStylesAnchor);
+        } else {
+            document.head.appendChild(link);
+        }
     });
 }
 
