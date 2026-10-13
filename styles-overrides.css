@@ -5563,3 +5563,35 @@ body.summit {
         line-height: 1.25;
     }
 }
+
+/* Finaler Normalisierer für geschlossene Theme-Editor-Gruppen.
+   Die zwei oberen Gruppen nutzen .theme-editor-col (flex), die drei unteren
+   .theme-editor-panel (block). Im geschlossenen Zustand darf diese
+   strukturelle Unterscheidung die sichtbare Karte nicht beeinflussen. */
+@media (max-width: 1024px) and (pointer: coarse) {
+    #theme-view details[data-theme-editor-accordion]:not([open]) {
+        display: block !important;
+        box-sizing: border-box !important;
+    }
+
+    #theme-view details[data-theme-editor-accordion]:not([open]) > summary {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 10px 11px !important;
+        border: 0 !important;
+        border-bottom: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        color: var(--text-main) !important;
+        font-size: 12.5px !important;
+        font-weight: 750 !important;
+        line-height: 1.25 !important;
+        box-sizing: border-box !important;
+    }
+}
+
