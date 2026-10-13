@@ -1,21 +1,24 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Der PDF-Magazin-Renderer wird direkt über index.html geladen.
-const CACHE_NAME = 'bergtouren-cache-v40';
+const CACHE_NAME = 'bergtouren-cache-v41';
 
 const APP_SHELL = [
   './',
   './index.html',
-  './app-core.js',
   './styles.css',
   './styles-landscape.css',
   './styles-overrides.css',
-  './map-view.js',
-  './stats-analysis.js',
-  './wrapped.js',
-  './backup-export.js',
   './manifest.json',
+  './pdf-magazine.js',
   './icons/icon-192.png',
-  './icons/icon-512_neu.png'
+  './icons/icon-512_neu.png',
+  './libs/jspdf.umd.min.js',
+  './libs/jspdf.plugin.autotable.min.js',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+  'https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js',
+  'https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css',
+  'https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js'
 ];
 
 // --- Installation: App-Shell + Libraries cachen ---
