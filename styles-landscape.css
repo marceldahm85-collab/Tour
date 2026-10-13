@@ -1,0 +1,344 @@
+
+/*
+ * MOBILE QUERFORMAT – STATS
+ *
+ * Ziel:
+ * - Der eigentliche Stats-Inhalt bleibt links und bekommt den verfügbaren Platz.
+ * - Jahres-Dropdown, beide Pfeile und die Stats-Unter-Navigation bilden
+ *   rechts eine feste, gemeinsame Bedienleiste.
+ * - Alle Bedienelemente dieser rechten Leiste haben exakt dieselbe Breite.
+ * - Keine Überlagerung des Diagramms und keine absolute Positionierung.
+ * - Portrait/Desktop werden hier nicht verändert.
+ */
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+
+    #chart-view {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 112px;
+        grid-template-rows: 86px minmax(196px, 1fr);
+        column-gap: 8px;
+        row-gap: 0;
+        align-content: stretch;
+        align-items: stretch;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        padding: 8px 10px 10px !important;
+        box-sizing: border-box;
+        overflow: hidden !important;
+    }
+
+    /* Rechte Bedienleiste */
+    #chart-view > .stats-year-filter-wrap {
+        grid-column: 2;
+        grid-row: 1;
+        align-self: end;
+        position: static !important;
+        width: 100% !important;
+        max-width: none !important;
+        height: auto !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 6px 6px 4px !important;
+
+        display: grid !important;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-bottom: 0;
+        border-radius: 12px 12px 0 0;
+        box-sizing: border-box;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 36px 36px;
+        align-items: stretch;
+        justify-content: stretch;
+        gap: 4px;
+
+        box-sizing: border-box;
+    }
+
+    /* Dropdown über die gesamte Breite, Pfeile nebeneinander */
+    #chart-view > .stats-year-filter-wrap > select,
+    #chart-view > .stats-year-filter-wrap > .mob-sel-wrap,
+    #chart-view > .stats-year-filter-wrap > .mob-sel-wrap .mob-sel-btn {
+        grid-column: 1 / -1;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        box-sizing: border-box;
+    }
+
+    #chart-view > .stats-year-filter-wrap > .dash-year-arrow-btn {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        margin: 0 !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+
+    #chart-view > .stats-year-filter-wrap > select {
+        padding: 0 8px !important;
+        line-height: 1.1;
+    }
+
+    #chart-view > .stats-year-filter-wrap > .dash-year-arrow-btn {
+        margin: 0 !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 11px;
+        border-radius: 8px;
+    }
+
+    /* Unter-Navigation direkt darunter – gleiche Breite */
+    #chart-view > .stats-section-switch {
+        grid-column: 2;
+        grid-row: 1 / 3;
+        align-self: center;
+        justify-self: stretch;
+
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 4px 6px 6px !important;
+
+        display: flex !important;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-top: 0;
+        border-radius: 0 0 12px 12px;
+        box-sizing: border-box;
+        flex-direction: column !important;
+        flex-wrap: nowrap !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        gap: 4px !important;
+
+        box-sizing: border-box;
+        z-index: 2;
+    }
+
+    #chart-view > .stats-section-switch .stats-section-btn {
+        flex: 0 0 34px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        height: 34px !important;
+        min-height: 34px !important;
+
+        padding: 4px 5px !important;
+        border-radius: 8px;
+        box-sizing: border-box;
+
+        font-size: 9px;
+        line-height: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Aktiver Stats-Inhalt links */
+    #chart-view > .stats-section-page.active {
+        grid-column: 1;
+        grid-row: 1 / -1;
+        width: 100% !important;
+        min-width: 0;
+        max-width: none;
+        height: 100% !important;
+        min-height: 0;
+        margin: 0 !important;
+        box-sizing: border-box;
+    }
+
+    /*
+     * Diagrammseite: Diagramm links, Diagramm-Auswahl weiterhin
+     * innerhalb des Inhalts rechts davon. Die äußere Bedienleiste
+     * bleibt davon vollständig getrennt.
+     */
+    #chart-view > .stats-diagrams-page.active {
+        display: grid !important;
+        grid-template-columns: minmax(0, 0.97fr) minmax(210px, 0.49fr);
+        grid-template-rows: minmax(0, 1fr);
+        grid-template-areas: "chart tabs";
+        gap: 8px;
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 0;
+        overflow: hidden;
+        align-items: stretch;
+        box-sizing: border-box;
+    }
+
+    #chart-view > .stats-diagrams-page.active > .chart-canvas-stage {
+        grid-area: chart;
+        width: 100%;
+        height: 100%;
+        min-width: 0;
+        min-height: 0;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    #chart-view > .stats-diagrams-page.active > .chart-canvas-stage canvas {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    #chart-view > .stats-diagrams-page.active > .chart-tabs {
+        grid-area: tabs;
+        width: 100%;
+        height: 100%;
+        min-width: 0;
+        min-height: 0;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-rows: repeat(4, minmax(0, 1fr));
+        gap: 3px;
+        overflow: hidden;
+        box-sizing: border-box;
+    }
+
+    #chart-view > .stats-diagrams-page.active .chart-tab {
+        width: 100%;
+        min-width: 0;
+        min-height: 0;
+        height: auto;
+        padding: 3px 2px;
+        gap: 2px;
+        border-radius: 9px;
+        box-sizing: border-box;
+    }
+
+    #chart-view > .stats-diagrams-page.active .chart-tab-icon {
+        font-size: 13px;
+    }
+
+    #chart-view > .stats-diagrams-page.active .chart-tab-label {
+        font-size: 7.5px;
+        line-height: 1.05;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    /* Die übrigen Stats-Seiten bleiben im verfügbaren Bereich scrollbar. */
+    #stats-statistics-page.active,
+    #stats-highlights-page.active,
+    #stats-development-page.active,
+    #stats-peaks-page.active {
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: contain;
+        padding: 0 2px 10px 0;
+        touch-action: pan-y;
+    }
+
+    #stats-statistics-page #stats-structure-content,
+    #stats-highlights-page #highlights-content,
+    #stats-development-page #stats-development-content,
+    #stats-peaks-page #stats-peaks-content {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    #stats-statistics-page #stats-structure-content,
+    #stats-development-page #stats-development-content,
+    #stats-peaks-page #stats-peaks-content {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px;
+        align-items: start;
+    }
+
+    #stats-statistics-page #stats-structure-content > *,
+    #stats-development-page #stats-development-content > *,
+    #stats-peaks-page #stats-peaks-content > * {
+        min-width: 0;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-groups {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    align-items: start;
+}
+
+#stats-highlights-page #highlights-content .highlight-group {
+    min-width: 0;
+}
+
+/*
+ * "Leistung" füllt die gesamte Höhe der ersten Zeile aus
+ * (die durch "Umfang" bestimmt wird), damit "Häufigkeiten"
+ * direkt darunter bündig beginnt, ohne sichtbare Lücke.
+ */
+#stats-highlights-page #highlights-content .highlight-group-leistung {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+}
+
+#stats-highlights-page #highlights-content .highlight-group-leistung .highlight-group-list {
+    flex: 1;
+}
+
+/*
+ * "Längste Mehrtagestour" steht als eigene Zeile über die
+ * gesamte verfügbare Breite, damit auch längere Tourgruppen-
+ * Namen genügend Platz erhalten.
+ */
+#stats-highlights-page #highlights-content .highlight-group-fullwidth {
+    grid-column: 1 / -1;
+}
+
+    #stats-development-page .development-sparkline-wrap,
+    #stats-development-page .development-history-chart,
+    #stats-development-page .development-history-summary,
+    #stats-development-page .development-point-popup {
+        grid-column: 1 / -1;
+    }
+
+    #stats-development-page .development-metric-grid,
+    #stats-development-page .activity-summary-grid,
+    #stats-development-page .peak-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    #stats-statistics-page .stats-structure-typical-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    #stats-statistics-page .stats-structure-type-values {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* Statistik im Querformat: kompakte Reihenfolge für kürzeren Scrollweg. */
+    #stats-statistics-page #stats-structure-content > :nth-child(1) {
+        order: 1;
+    }
+
+    #stats-statistics-page #stats-structure-content > :nth-child(4) {
+        order: 2;
+    }
+
+    #stats-statistics-page #stats-structure-content > :nth-child(2) {
+        order: 3;
+    }
+
+    #stats-statistics-page #stats-structure-content > :nth-child(3) {
+        order: 4;
+    }
+}
