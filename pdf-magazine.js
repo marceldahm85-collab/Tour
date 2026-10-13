@@ -54,7 +54,12 @@
                 if (!window.jspdf || !window.jspdf.jsPDF) {
                     throw new Error('jsPDF wurde nach dem Laden nicht verfügbar.');
                 }
-                await loadPdfDependency('./libs/jspdf.plugin.autotable.min.js', 'jspdf-autotable');
+                if (
+                    !window.jspdf.jsPDF.API ||
+                    typeof window.jspdf.jsPDF.API.autoTable !== 'function'
+                ) {
+                    await loadPdfDependency('./libs/jspdf.plugin.autotable.min.js', 'jspdf-autotable');
+                }
             })().catch(function(error) {
                 pdfLibrariesPromise = null;
                 throw error;
