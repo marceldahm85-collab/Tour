@@ -27,6 +27,11 @@ checkAchievementsWeeklyBanner();
         applyThemeEditorSettingsToDom();
     }
 
+    // Erst nach dem Aufbau des synchronen appStorage-Caches starten.
+    // Bei defer-Skripten kann der Body schon bereit sein, obwohl die
+    // weiter unten definierte const appStorage noch nicht initialisiert ist.
+    initThemeEditorDynamicFontScalingObserver();
+
     // ── Persistierte States nachladen (Cache jetzt befüllt) ──
     const savedDiagramState = appStorage.get(DIAGRAM_FILTER_KEY) || {};
     diagramFilterState = { selectedYears: savedDiagramState.selectedYears || [] };
@@ -21979,8 +21984,6 @@ function initThemeEditorDynamicFontScalingObserver() {
         installObserver();
     }
 }
-
-initThemeEditorDynamicFontScalingObserver();
 
 function initThemeEditorFontSizeSelector() {
     const slider = document.getElementById('te-font-size');
