@@ -63,6 +63,90 @@ function saveMapUiState() {
     });
 }
 
+/* Kartenbibliotheken erst beim ersten Öffnen der Karte laden.
+   Dadurch blockieren Leaflet und seine Plugins nicht den App-Start. */
+const MAP_LEAFLET_CSS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+const MAP_CLUSTER_CSS = 'https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css';
+const MAP_LEAFLET_JS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+const MAP_HEAT_JS = 'https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js';
+const MAP_CLUSTER_JS = 'https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js';
+
+let mapLibrariesPromise = null;
+const mapLibraryScriptPromises = new Map();
+const mapLibraryStylePromises = new Map();
+
+function loadMapStylesheetOnce(url) {
+    if (mapLibraryStylePromises.has(url)) return mapLibraryStylePromises.get(url);
+    const promise = new Promise((resolve, reject) => {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = url;
+        link.dataset.mapLibraryStylesheet = 'true';
+        link.onload = resolve;
+        link.onerror = () => reject(new Error('Stylesheet nicht geladen: ' + url));
+        document.head.appendChild(link);
+    }).catch(error => {
+        mapLibraryStylePromises.delete(url);
+        throw error;
+    });
+    mapLibraryStylePromises.set(url, promise);
+    return promise;
+}
+
+function loadMapScriptOnce(url) {
+    if (mapLibraryScriptPromises.has(url)) return mapLibraryScriptPromises.get(url);
+    const promise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = url;
+        script.async = true;
+        script.dataset.mapLibraryScript = 'true';
+        script.onload = resolve;
+        script.onerror = () => reject(new Error('Skript nicht geladen: ' + url));
+        document.head.appendChild(script);
+    }).catch(error => {
+        mapLibraryScriptPromises.delete(url);
+        throw error;
+    });
+    mapLibraryScriptPromises.set(url, promise);
+    return promise;
+}
+
+function ensureMapLibraries() {
+    if (
+        window.L &&
+        typeof window.L.map === 'function' &&
+        typeof window.L.heatLayer === 'function' &&
+        typeof window.L.markerClusterGroup === 'function'
+    ) {
+        return Promise.all([
+            loadMapStylesheetOnce(MAP_LEAFLET_CSS),
+            loadMapStylesheetOnce(MAP_CLUSTER_CSS)
+        ]);
+    }
+    if (mapLibrariesPromise) return mapLibrariesPromise;
+
+    mapLibrariesPromise = (async () => {
+        await Promise.all([
+            loadMapStylesheetOnce(MAP_LEAFLET_CSS),
+            loadMapStylesheetOnce(MAP_CLUSTER_CSS)
+        ]);
+        if (!window.L || typeof window.L.map !== 'function') {
+            await loadMapScriptOnce(MAP_LEAFLET_JS);
+        }
+        if (typeof window.L.heatLayer !== 'function') {
+            await loadMapScriptOnce(MAP_HEAT_JS);
+        }
+        if (typeof window.L.markerClusterGroup !== 'function') {
+            await loadMapScriptOnce(MAP_CLUSTER_JS);
+        }
+        return true;
+    })().catch(error => {
+        mapLibrariesPromise = null;
+        throw error;
+    });
+    return mapLibrariesPromise;
+}
+
 const MAP_CENTER = [46.8268, 12.7671]; // Lienz, Osttirol
 const MAP_ZOOM   = 9;
 
