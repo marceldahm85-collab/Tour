@@ -5372,6 +5372,7 @@ body.green #theme-view .theme-editor-contrast-row {
 :root {
     --achievement-tile-complete-bg: linear-gradient(145deg, #d9f3e2, #effaf2);
     --achievement-tile-complete-border: #23834a;
+    --achievement-tile-complete-chip-bg: #176b39;
     --achievement-tile-complete-text: #174d2c;
     --achievement-tile-complete-glow: rgba(35,131,74,0.20);
 
@@ -5389,6 +5390,7 @@ body.green #theme-view .theme-editor-contrast-row {
 body.dark {
     --achievement-tile-complete-bg: linear-gradient(145deg, rgba(111,20,30,0.98), rgba(52,9,18,0.99));
     --achievement-tile-complete-border: #e46b77;
+    --achievement-tile-complete-chip-bg: #5a101b;
     --achievement-tile-complete-text: #fff0f2;
     --achievement-tile-complete-glow: rgba(228,107,119,0.22);
 
@@ -5406,6 +5408,7 @@ body.dark {
 body.green {
     --achievement-tile-complete-bg: linear-gradient(145deg, rgba(15,86,51,0.99), rgba(4,42,26,0.99));
     --achievement-tile-complete-border: #82e1a4;
+    --achievement-tile-complete-chip-bg: #0b4428;
     --achievement-tile-complete-text: #effff4;
     --achievement-tile-complete-glow: rgba(130,225,164,0.26);
 
@@ -5423,6 +5426,7 @@ body.green {
 body.summit {
     --achievement-tile-complete-bg: linear-gradient(145deg, rgba(31,91,130,0.99), rgba(22,43,60,0.99));
     --achievement-tile-complete-border: #72c2ff;
+    --achievement-tile-complete-chip-bg: #194665;
     --achievement-tile-complete-text: #f4fbff;
     --achievement-tile-complete-glow: rgba(114,194,255,0.24);
 
@@ -5502,7 +5506,7 @@ body.summit {
 }
 
 #achievements-view .achievement-category-tile.complete .achievement-category-tile-state {
-    background: var(--achievement-tile-complete-border);
+    background: var(--achievement-tile-complete-chip-bg) !important;
     color: #ffffff !important;
 }
 
