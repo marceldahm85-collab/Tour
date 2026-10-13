@@ -5585,9 +5585,7 @@ body.summit {
         border: 0 !important;
         border-bottom: 0 !important;
         border-radius: 0 !important;
-        background: transparent !important;
         box-shadow: none !important;
-        color: var(--text-main) !important;
         font-size: 12.5px !important;
         font-weight: 750 !important;
         line-height: 1.25 !important;
