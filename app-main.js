@@ -10113,6 +10113,116 @@ function shiftMapYear(direction) {
     yearSelect.dispatchEvent(new Event('change'));
 }
 
+let mapLibrariesPromise = null;
+let mapLibraryInitPending = false;
+
+function loadMapStylesheet(href, key) {
+    let link = document.querySelector('link[data-map-library="' + key + '"]');
+    if (link?.dataset.loaded === 'true') return Promise.resolve();
+
+    return new Promise((resolve, reject) => {
+        const isNew = !link;
+        if (!link) {
+            link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = href;
+            link.crossOrigin = 'anonymous';
+            link.dataset.mapLibrary = key;
+        }
+
+        link.addEventListener('load', () => {
+            link.dataset.loaded = 'true';
+            resolve();
+        }, { once: true });
+
+        link.addEventListener('error', () => {
+            link.remove();
+            reject(new Error('Karten-CSS konnte nicht geladen werden: ' + href));
+        }, { once: true });
+
+        if (isNew) document.head.appendChild(link);
+    });
+}
+
+function loadMapScript(src, key) {
+    let script = document.querySelector('script[data-map-library="' + key + '"]');
+    if (script?.dataset.loaded === 'true') return Promise.resolve();
+
+    return new Promise((resolve, reject) => {
+        const isNew = !script;
+        if (!script) {
+            script = document.createElement('script');
+            script.src = src;
+            script.async = false;
+            script.crossOrigin = 'anonymous';
+            script.dataset.mapLibrary = key;
+        }
+
+        script.addEventListener('load', () => {
+            script.dataset.loaded = 'true';
+            resolve();
+        }, { once: true });
+
+        script.addEventListener('error', () => {
+            script.remove();
+            reject(new Error('Karten-Bibliothek konnte nicht geladen werden: ' + src));
+        }, { once: true });
+
+        if (isNew) document.head.appendChild(script);
+    });
+}
+
+function ensureMapLibraries() {
+    if (
+        window.L &&
+        typeof window.L.heatLayer === 'function' &&
+        typeof window.L.markerClusterGroup === 'function'
+    ) {
+        return Promise.resolve();
+    }
+
+    if (!mapLibrariesPromise) {
+        mapLibrariesPromise = (async () => {
+            await Promise.all([
+                loadMapStylesheet(
+                    'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+                    'leaflet-css'
+                ),
+                loadMapStylesheet(
+                    'https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css',
+                    'leaflet-cluster-css'
+                )
+            ]);
+
+            await loadMapScript(
+                'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+                'leaflet-js'
+            );
+            await loadMapScript(
+                'https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js',
+                'leaflet-heat-js'
+            );
+            await loadMapScript(
+                'https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js',
+                'leaflet-cluster-js'
+            );
+
+            if (
+                !window.L ||
+                typeof window.L.heatLayer !== 'function' ||
+                typeof window.L.markerClusterGroup !== 'function'
+            ) {
+                throw new Error('Die Karten-Bibliotheken wurden unvollständig geladen.');
+            }
+        })().catch(error => {
+            mapLibrariesPromise = null;
+            throw error;
+        });
+    }
+
+    return mapLibrariesPromise;
+}
+
 function initTourMap() {
     const mapEl = document.getElementById('tour-map');
     if (!mapEl) return;
@@ -10121,6 +10231,34 @@ function initTourMap() {
     populateMapYearSelect();
 
     if (tourMap) return;
+
+    if (
+        !window.L ||
+        typeof window.L.heatLayer !== 'function' ||
+        typeof window.L.markerClusterGroup !== 'function'
+    ) {
+        if (mapLibraryInitPending) return;
+
+        mapLibraryInitPending = true;
+        ensureMapLibraries()
+            .then(() => {
+                mapLibraryInitPending = false;
+                initTourMap();
+                requestAnimationFrame(() => {
+                    tourMap?.invalidateSize();
+                    refreshCurrentMap();
+                });
+            })
+            .catch(error => {
+                mapLibraryInitPending = false;
+                console.error('[Karte] Bibliotheken konnten nicht geladen werden:', error);
+                showToast('Die Karte konnte nicht geladen werden. Bitte Verbindung prüfen und erneut öffnen.', {
+                    type: 'error',
+                    duration: 4000
+                });
+            });
+        return;
+    }
 
     tourMap = L.map('tour-map', {
     center: MAP_CENTER,
