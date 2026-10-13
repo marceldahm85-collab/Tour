@@ -1333,8 +1333,90 @@ function setPdfExportRangeMode(mode) {
     document.getElementById('pdf-export-range-panel')?.classList.toggle('is-hidden', pdfExportRangeMode !== 'range');
 }
 
+/* PDF-Bibliotheken erst bei der ersten Export-Aktion laden. */
+function loadTourbookPdfScriptOnce(url) {
+    if (!window.__tourbookPdfScriptPromises) {
+        window.__tourbookPdfScriptPromises = Object.create(null);
+    }
+    const loads = window.__tourbookPdfScriptPromises;
+    if (loads[url]) return loads[url];
+
+    loads[url] = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = url;
+        script.async = true;
+        script.onload = resolve;
+        script.onerror = () => {
+            script.remove();
+            reject(new Error('Skript nicht geladen: ' + url));
+        };
+        document.head.appendChild(script);
+    }).catch(error => {
+        delete loads[url];
+        throw error;
+    });
+    return loads[url];
+}
+
+function ensureTourbookPdfMagazineLoaded(runButton) {
+    if (window.__tourbookPdfMagazineReady) return Promise.resolve();
+    if (window.__tourbookPdfLoadPromise) return window.__tourbookPdfLoadPromise;
+
+    window.__tourbookPdfLoadPromise = (async () => {
+        await loadTourbookPdfScriptOnce('./libs/jspdf.umd.min.js');
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+            throw new Error('jsPDF wurde geladen, ist aber nicht verfügbar.');
+        }
+        await loadTourbookPdfScriptOnce('./libs/jspdf.plugin.autotable.min.js');
+        await loadTourbookPdfScriptOnce('./pdf-magazine.js');
+        if (!runButton || runButton.dataset.magazineBound !== '1') {
+            throw new Error('Der PDF-Magazin-Renderer wurde nicht initialisiert.');
+        }
+        window.__tourbookPdfMagazineReady = true;
+    })().catch(error => {
+        window.__tourbookPdfLoadPromise = null;
+        throw error;
+    });
+    return window.__tourbookPdfLoadPromise;
+}
+
 function initPdfExportFeature() {
     populatePdfExportYearSelects();
+
+    const runButton = document.getElementById('pdf-export-run-btn');
+    if (runButton && runButton.dataset.lazyPdfLoaderBound !== '1') {
+        runButton.dataset.lazyPdfLoaderBound = '1';
+        let isLoadingPdf = false;
+        runButton.addEventListener('click', async event => {
+            if (window.__tourbookPdfMagazineReady) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            if (isLoadingPdf) return;
+
+            isLoadingPdf = true;
+            const originalHtml = runButton.innerHTML;
+            const originalDisabled = runButton.disabled;
+            runButton.disabled = true;
+            runButton.textContent = 'PDF-Funktion wird geladen…';
+            try {
+                showToast('PDF-Funktion wird vorbereitet…', { type: 'info', duration: 1800 });
+                await ensureTourbookPdfMagazineLoaded(runButton);
+                runButton.disabled = originalDisabled;
+                runButton.innerHTML = originalHtml;
+                runButton.click();
+            } catch (error) {
+                console.error('[PDF] Bibliotheken konnten nicht geladen werden:', error);
+                showToast('PDF-Funktion konnte nicht geladen werden. Bitte Internetverbindung prüfen.', {
+                    type: 'error',
+                    duration: 3500
+                });
+            } finally {
+                runButton.disabled = originalDisabled;
+                runButton.innerHTML = originalHtml;
+                isLoadingPdf = false;
+            }
+        }, true);
+    }
 
     document.querySelectorAll('[data-pdf-range-mode]').forEach(btn => {
         btn.addEventListener('click', () => setPdfExportRangeMode(btn.dataset.pdfRangeMode));
