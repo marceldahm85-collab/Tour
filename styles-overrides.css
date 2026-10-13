@@ -5535,3 +5535,32 @@ body.summit {
 #achievements-view .achievement-category-tile.empty .achievement-category-progress-bar {
     background: transparent !important;
 }
+
+/* Theme Editor: geschlossene Gruppen in Hoch- und Querformat angleichen.
+   Die oberen beiden Gruppen hatten abweichende Summary-Trennlinie,
+   Typografie und im Querformat andere Außenabstände/Eckenradien. */
+@media (max-width: 1024px) and (pointer: coarse) {
+    #theme-view details[data-theme-editor-accordion]:not([open]) {
+        padding: 0 !important;
+        margin: 0 !important;
+        border-radius: 13px !important;
+        box-sizing: border-box !important;
+        overflow: hidden;
+    }
+
+    #theme-view details[data-theme-editor-accordion]:not([open]) > summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        min-height: 48px;
+        margin: 0 !important;
+        padding: 10px 11px !important;
+        border: 0 !important;
+        border-radius: 12px;
+        box-sizing: border-box;
+        font-size: 12.5px !important;
+        line-height: 1.25;
+        background: var(--ui-card-bg-interactive, rgba(127,127,127,0.06));
+    }
+}
