@@ -75,10 +75,11 @@
     function renderHoehenwelt() {
         const entries = yearTours();
         const total = sum(entries, ascent);
-        const metres = [3000, 8848, 12395, 16000, 20000];
+        const metres = [3798, 8848, 26544];
         const next = metres.find(v => v > total) || null;
-        const comparison = total >= 8848 ? 'Das entspricht mindestens einer Everest-Höhe an kumuliertem Aufstieg.' :
-            total >= 3000 ? 'Dein kumulierter Aufstieg übertrifft die Höhe des Großglockners.' :
+        const comparison = total >= 26544 ? 'Dein kumulierter Aufstieg entspricht mindestens drei Everest-Höhen.' :
+            total >= 8848 ? 'Das entspricht mindestens einer Everest-Höhe an kumuliertem Aufstieg.' :
+            total >= 3798 ? 'Dein kumulierter Aufstieg übertrifft die Höhe des Großglockners.' :
             'Jeder gespeicherte Höhenmeter zählt – Schritt für Schritt wächst deine Höhenwelt.';
         const markerCards = [
             { name: 'Großglockner', height: 3798 },
