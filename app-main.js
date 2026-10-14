@@ -5853,7 +5853,7 @@ function initTourDetailModal() {
         }
     });
 
-    editBtn?.addEventListener('click', () => {
+    editBtn?.addEventListener('click', async () => {
         if (!currentDetailEntry || !currentDetailType) return;
 
         const entryToEdit = JSON.parse(JSON.stringify(currentDetailEntry));
@@ -5862,7 +5862,7 @@ function initTourDetailModal() {
 if (currentDetailType === 'saved') {
     closeTourDetail();
 
-    fillSaveFormFromEntry(entryToEdit);
+    await fillSaveFormFromEntry(entryToEdit);
     removeSavedTourFromStorage(entryToEdit);
     loadData();
 
@@ -6005,7 +6005,7 @@ function initOverviewTableDelegation() {
 
     tableBody.dataset.delegated = '1';
 
-    tableBody.addEventListener('click', event => {
+    tableBody.addEventListener('click', async event => {
         const row = event.target.closest('tr[data-key]');
         if (!row || !tableBody.contains(row)) return;
 
@@ -6041,7 +6041,7 @@ function initOverviewTableDelegation() {
 
             const entryToEdit = JSON.parse(JSON.stringify(entry));
 
-            fillSaveFormFromEntry(entryToEdit);
+            await fillSaveFormFromEntry(entryToEdit);
             removeSavedTourFromStorage(entryToEdit);
 
             tablePage = 1;
