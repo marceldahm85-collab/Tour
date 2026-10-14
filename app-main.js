@@ -32969,6 +32969,10 @@ if (APP_PERF_ENABLED) {
     [
         'initStorage',
 
+        // Unteraufgaben des Storage-Starts separat messen.
+        'migrateToIDB',
+        '_idbGetAll',
+
         'loadData',
         'getFilteredData',
 
