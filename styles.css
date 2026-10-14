@@ -20857,10 +20857,6 @@ body.dark
         padding: 10px 4px;
     }
 
-    #wrapped-view #wrapped-back-btn {
-        align-self: center;
-    }
-
 #wrapped-view .wrapped-fullscreen-btn {
     width: 100%;
     font-size: 16px;
