@@ -2177,7 +2177,7 @@ function markBackupSavedNow() {
 async function buildAppDataPayload() {
     // Export nutzt Kopien, damit das Nachladen der Fotos den Start-Cache
     // nicht unnötig mit allen Bilddaten füllt.
-    const touren = cloneStorageValue(appStorage.get('touren') || []);
+    const touren = (appStorage.get('touren') || []).map(entry => ({ ...entry }));
     await loadTourImagesForEntries(touren);
 
     return {
@@ -30216,7 +30216,9 @@ async function initStorage() {
 
         // Diagnose only: identify large stored values that may dominate IndexedDB reads.
         // This serialization runs only with ?perf=1 and does not alter stored data.
-        const storageValueSizes = all.map(({ key, value }) => {
+        const storageValueSizes = all
+            .filter(({ key }) => key !== TOUR_IMAGE_SPLIT_MARKER)
+            .map(({ key, value }) => {
             const sizeStart = performance.now();
             let approximateKB = 0;
             let stringifyMs = 0;
