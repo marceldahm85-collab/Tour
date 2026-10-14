@@ -28926,14 +28926,41 @@ function _idbDel(key) {
 }
 function _idbGetAll() {
     return _openDB().then(db => new Promise((res, rej) => {
-        const tx = db.transaction(IDB_STORE,'readonly');
-        const result = [];
-        tx.objectStore(IDB_STORE).openCursor().onsuccess = e => {
-            const c = e.target.result;
-            if (c) { result.push({ key: c.key, value: c.value }); c.continue(); }
+        const tx = db.transaction(IDB_STORE, 'readonly');
+        const store = tx.objectStore(IDB_STORE);
+        const keysRequest = store.getAllKeys();
+        const valuesRequest = store.getAll();
+
+        let keys;
+        let values;
+        let keysLoaded = false;
+        let valuesLoaded = false;
+
+        keysRequest.onsuccess = () => {
+            keys = keysRequest.result;
+            keysLoaded = true;
         };
-        tx.oncomplete = () => res(result);
-        tx.onerror    = () => rej(tx.error);
+        valuesRequest.onsuccess = () => {
+            values = valuesRequest.result;
+            valuesLoaded = true;
+        };
+
+        const fail = () => rej(
+            tx.error || keysRequest.error || valuesRequest.error ||
+            new Error('IndexedDB konnte die gespeicherten Einträge nicht laden.')
+        );
+        tx.onerror = fail;
+        tx.onabort = fail;
+        tx.oncomplete = () => {
+            if (!keysLoaded || !valuesLoaded || keys.length !== values.length) {
+                rej(new Error('IndexedDB hat Schlüssel und Werte nicht vollständig geliefert.'));
+                return;
+            }
+            // getAllKeys() und getAll() liefern Einträge in derselben
+            // IndexedDB-Schlüsselreihenfolge. Damit bleibt das bisherige
+            // [{ key, value }]-Format erhalten, ohne Cursor-Schritt pro Eintrag.
+            res(keys.map((key, index) => ({ key, value: values[index] })));
+        };
     }));
 }
 
@@ -29947,9 +29974,11 @@ async function initStorage() {
     // wird direkt in diesem Ergebnis geprüft; eine separate IDB-Transaktion
     // nur für den Marker ist dadurch im normalen Start nicht mehr nötig.
     let storageStepStart = APP_PERF_ENABLED ? performance.now() : 0;
+    // Auf die früh begonnene Verbindung warten und sie bei Bedarf sicherstellen.
+    await _dbOpenWarmupPromise;
     await _openDB();
     if (APP_PERF_ENABLED) {
-        appPerfRecord('migrate.openDB', performance.now() - storageStepStart);
+        appPerfRecord('storage.openDBWait', performance.now() - storageStepStart);
     }
 
     storageStepStart = APP_PERF_ENABLED ? performance.now() : 0;
