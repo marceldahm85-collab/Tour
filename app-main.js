@@ -95,8 +95,8 @@ applyThemeEditorFontSize(
     document.getElementById('file-disconnect-btn')?.addEventListener('click', disconnectDataFile);
 
 // Einfacher Download (funktioniert auf allen Geräten)
-    document.getElementById('simple-download-btn')?.addEventListener('click', () => {
-        const payload = buildAppDataPayload();
+    document.getElementById('simple-download-btn')?.addEventListener('click', async () => {
+        const payload = await buildAppDataPayload();
         const json = JSON.stringify(payload, null, 2);
         const blob = new Blob([json], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -2174,11 +2174,14 @@ function markBackupSavedNow() {
     updateBackupStatusSummary();
 }
 
-function buildAppDataPayload() {
+async function buildAppDataPayload() {
+    const touren = appStorage.get('touren') || [];
+    await loadTourImagesForEntries(touren);
+
     return {
         version: 1,
         updatedAt: new Date().toISOString(),
-        touren: appStorage.get('touren') || [],
+        touren,
         plannedTours: appStorage.get('plannedTours') || [],
         meta: {
             theme: document.body.classList.contains('dark')
@@ -2451,7 +2454,7 @@ async function saveDataToLinkedFile(silent = false) {
         }
 
         const writable = await linkedFileHandle.createWritable();
-        const payload = buildAppDataPayload();
+        const payload = await buildAppDataPayload();
 
         await writable.write(JSON.stringify(payload, null, 2));
         await writable.close();
@@ -4345,7 +4348,8 @@ updateTourImagePreview(
     }
 }
 
-function fillSaveFormFromEntry(entry) {
+async function fillSaveFormFromEntry(entry) {
+    await loadTourImageData(entry);
     form.dataset.editEntryId = String(entry?.id || '');
 
     form.date.value = entry.date || '';
@@ -4617,7 +4621,7 @@ function renderModalActivityStats(entry) {
     return html;
 }
 
-function openTourDetail(entry, options = {}) {
+async function openTourDetail(entry, options = {}) {
     initModalSwipeDown();
 
     const backBtn = document.getElementById('td-back');
@@ -4708,6 +4712,7 @@ const highlightCategoryHtml =
         }
     }
 
+    await loadTourImageData(entry);
     currentDetailEntry = JSON.parse(JSON.stringify(entry));
     currentDetailType = 'saved';
 
@@ -22823,6 +22828,7 @@ function pickRandomWrappedPhoto(photoEntries) {
 }
 
 async function attachWrappedPhotos(slides, year) {
+    await loadTourImagesForEntries(getWrappedDataForYear(year));
     const photoEntries = getWrappedYearPhotos(year);
     if (!photoEntries.length) {
         slides.forEach(s => s.photoImg = null);
@@ -27113,6 +27119,7 @@ async function generateTourbookPdf(fromYear, toYear) {
     const colors = getPdfThemeColors();
 
     const entries = getToursInYearRange(fromYear, toYear);
+    await loadTourImagesForEntries(entries);
 
     // ---------- Seite 1: Dashboard-Stil, in Theme-Farben ----------
     const headerH = 32;
@@ -29105,7 +29112,7 @@ function _idbGetAll() {
         // PreisPilot (fremder Datensatz) und die separat gespeicherten Tourbilder.
         // Die Bilddaten bleiben in IndexedDB und werden bei Bedarf nachgeladen.
         const excludedKey = STARTUP_IGNORED_STORAGE_KEY;
-        const imagePrefixMax = TOUR_IMAGE_STORAGE_PREFIX + '\\uffff';
+        const imagePrefixMax = TOUR_IMAGE_STORAGE_PREFIX + String.fromCharCode(65535);
         const groups = [
             { range: IDBKeyRange.upperBound(excludedKey, true), keys: null, values: null },
             { range: IDBKeyRange.bound(excludedKey, true, TOUR_IMAGE_STORAGE_PREFIX, true), keys: null, values: null },
