@@ -6,6 +6,43 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Bergtouren Tracker</title>
+<!-- IndexedDB früh öffnen, während der Browser noch HTML und Abhängigkeiten verarbeitet. -->
+<script>
+(function () {
+    if (!('indexedDB' in window)) return;
+
+    window.__BERGTOUREN_DB_BOOTSTRAP_STARTED_AT__ = performance.now();
+
+    try {
+        window.__BERGTOUREN_DB_BOOTSTRAP_PROMISE__ = new Promise((resolve, reject) => {
+            const request = indexedDB.open('BergtorenDB', 1);
+
+            request.onupgradeneeded = event => {
+                const database = event.target.result;
+                if (!database.objectStoreNames.contains('keyval')) {
+                    database.createObjectStore('keyval');
+                }
+            };
+
+            request.onsuccess = event => {
+                window.__BERGTOUREN_DB_BOOTSTRAP_DONE_AT__ = performance.now();
+                resolve(event.target.result);
+            };
+
+            request.onerror = () => reject(request.error);
+        });
+
+        // Ein Fehler wird zusätzlich gespeichert, damit vor App-Start
+        // keine unbehandelte Promise-Ablehnung entsteht. app-main.js
+        // versucht bei Bedarf selbst erneut, die Verbindung zu öffnen.
+        window.__BERGTOUREN_DB_BOOTSTRAP_PROMISE__.catch(error => {
+            window.__BERGTOUREN_DB_BOOTSTRAP_ERROR__ = error;
+        });
+    } catch (error) {
+        window.__BERGTOUREN_DB_BOOTSTRAP_ERROR__ = error;
+    }
+})();
+</script>
 <!-- Globale Abhängigkeiten: bewusst vor dem App-Kern laden, damit Start und Karte stabil bleiben. -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="libs/jspdf.umd.min.js"></script>
@@ -2460,7 +2497,7 @@
     </div>
 </div>
 
-<script src="./app-main.js?v=a6526d62" defer></script>
+<script src="./app-main.js?v=59325823" defer></script>
 
 
 
