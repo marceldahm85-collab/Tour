@@ -142,7 +142,7 @@
             .map(e => ascentValue(e) / distanceValue(e));
         const maxSteepness = validSteepness.length ? Math.max(...validSteepness) : null;
         const activityTypes = new Set(entries.map(e => String(e.aktivitaet || e.tourart || e.typ || '').trim()).filter(Boolean));
-        const activityCount = entries.length ? activityTypes.size : null;
+        const activityCount = activityTypes.size ? activityTypes.size : null;
         const definitions = [
             ['Höhenmeter-Spezialist', asc, 5000, '5.000 hm Jahresaufstieg'],
             ['Gipfelsammler', peakCount, 10, '10 gespeicherte Gipfel'],
