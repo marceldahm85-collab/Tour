@@ -30019,6 +30019,33 @@ async function initStorage() {
     const all = await _idbGetAll();
     if (APP_PERF_ENABLED) {
         appPerfRecord('_idbGetAll', performance.now() - storageStepStart);
+
+        // Diagnose only: identify large stored values that may dominate IndexedDB reads.
+        // This serialization runs only with ?perf=1 and does not alter stored data.
+        const storageValueSizes = all.map(({ key, value }) => {
+            const sizeStart = performance.now();
+            let approximateKB = 0;
+            let stringifyMs = 0;
+            try {
+                const json = JSON.stringify(value);
+                approximateKB = typeof json === 'string'
+                    ? Number((json.length / 1024).toFixed(1))
+                    : 0;
+            } catch (error) {
+                approximateKB = -1;
+            }
+            stringifyMs = Number((performance.now() - sizeStart).toFixed(2));
+            return {
+                key: String(key),
+                type: Array.isArray(value) ? 'array' : (value === null ? 'null' : typeof value),
+                items: Array.isArray(value) ? value.length : (value && typeof value === 'object' ? Object.keys(value).length : 1),
+                approxKB: approximateKB,
+                stringifyMs: stringifyMs
+            };
+        }).sort((a, b) => b.approxKB - a.approxKB);
+
+        console.info('[PERF] Größe der gespeicherten Werte (JSON-Näherung; nur Diagnose)');
+        console.table(storageValueSizes);
     }
 
     storageStepStart = APP_PERF_ENABLED ? performance.now() : 0;
