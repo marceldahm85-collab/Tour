@@ -165,6 +165,9 @@
     font-size: 16px;
 }
 
+/* Der zusätzliche Rail-Container verändert Portrait/Desktop nicht. */
+#wrapped-view .bergwelt-side-nav { display: contents; }
+
 #wrapped-view .bergwelt-tab {
     min-width: 0;
     padding: 5px 6px;
