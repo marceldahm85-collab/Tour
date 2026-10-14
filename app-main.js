@@ -2175,7 +2175,9 @@ function markBackupSavedNow() {
 }
 
 async function buildAppDataPayload() {
-    const touren = appStorage.get('touren') || [];
+    // Export nutzt Kopien, damit das Nachladen der Fotos den Start-Cache
+    // nicht unnötig mit allen Bilddaten füllt.
+    const touren = cloneStorageValue(appStorage.get('touren') || []);
     await loadTourImagesForEntries(touren);
 
     return {
@@ -22828,10 +22830,28 @@ function pickRandomWrappedPhoto(photoEntries) {
 }
 
 async function attachWrappedPhotos(slides, year) {
-    await loadTourImagesForEntries(getWrappedDataForYear(year));
-    const photoEntries = getWrappedYearPhotos(year);
+    // Nur Kopien für den gewählten Jahresrückblick laden. Fotos bleiben
+    // außerhalb des synchronen Tour-Caches, auch nachdem Wrapped geschlossen wird.
+    const yearEntries = (getWrappedDataForYear(year) || [])
+        .map(entry => ({ ...entry }));
+    await loadTourImagesForEntries(yearEntries);
+
+    const photoEntries = yearEntries.filter(entry => entry.imageData);
+    const photosById = new Map(
+        photoEntries
+            .filter(entry => entry.id)
+            .map(entry => [String(entry.id), entry])
+    );
+    const photoForEntry = entry => {
+        if (!entry) return null;
+        if (entry.id && photosById.has(String(entry.id))) {
+            return photosById.get(String(entry.id));
+        }
+        return entry.imageData ? entry : null;
+    };
+
     if (!photoEntries.length) {
-        slides.forEach(s => s.photoImg = null);
+        slides.forEach(slide => slide.photoImg = null);
         return slides;
     }
 
@@ -22841,23 +22861,24 @@ async function attachWrappedPhotos(slides, year) {
         if (slide.key === 'intro' || slide.key === 'outro') {
             photoEntry = pickRandomWrappedPhoto(photoEntries);
         } else if (slide.key === 'bestTour') {
-            photoEntry = slide.data?.entry?.imageData ? slide.data.entry : pickRandomWrappedPhoto(photoEntries);
+            photoEntry = photoForEntry(slide.data?.entry) || pickRandomWrappedPhoto(photoEntries);
         } else if (slide.key === 'highestPeak') {
-            photoEntry = slide.data?.peak?.entry?.imageData
-                ? slide.data.peak.entry
-                : pickRandomWrappedPhoto(photoEntries);
+            photoEntry = photoForEntry(slide.data?.peak?.entry) || pickRandomWrappedPhoto(photoEntries);
         }
 
         if (slide.key === 'top3') {
             for (const item of (slide.data?.top3 || [])) {
-                item.photoImg = item.entry?.imageData
-                    ? await loadWrappedImage(item.entry.imageData)
+                const photo = photoForEntry(item.entry);
+                item.photoImg = photo?.imageData
+                    ? await loadWrappedImage(photo.imageData)
                     : null;
             }
         }
 
         if (slide.key !== 'top3') {
-            slide.photoImg = photoEntry?.imageData ? await loadWrappedImage(photoEntry.imageData) : null;
+            slide.photoImg = photoEntry?.imageData
+                ? await loadWrappedImage(photoEntry.imageData)
+                : null;
         }
     }
 
@@ -26312,6 +26333,8 @@ function getToursInYearRange(fromYear, toYear) {
     const from = Math.min(fromYear, toYear);
     const to = Math.max(fromYear, toYear);
 
+    // Exportierte Touren als flache Kopien zurückgeben: PDFs dürfen ihre
+    // nachgeladenen Bilddaten verwenden, ohne den synchronen App-Cache zu füllen.
     return getAllSavedTours()
         .filter(entry => {
             const date = parseStatsCalendarDate(entry?.date);
@@ -26319,7 +26342,8 @@ function getToursInYearRange(fromYear, toYear) {
             const year = date.getFullYear();
             return year >= from && year <= to;
         })
-        .sort((a, b) => parseStatsCalendarDate(a.date) - parseStatsCalendarDate(b.date));
+        .sort((a, b) => parseStatsCalendarDate(a.date) - parseStatsCalendarDate(b.date))
+        .map(entry => ({ ...entry }));
 }
 
 function getPdfExportAvailableYears() {
