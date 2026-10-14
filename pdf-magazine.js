@@ -883,6 +883,9 @@
         await ensurePdfLibraries();
         var js=window.jspdf.jsPDF, doc=new js({unit:'mm',format:'a4'}), colors=tc();
         var entries=window.getToursInYearRange(from,to), label=from===to?String(from):from+'–'+to;
+        if (typeof window.loadTourImagesForEntries === 'function') {
+            await window.loadTourImagesForEntries(entries);
+        }
         if(typeof window.showToast==='function') window.showToast('Magazin-Tourenbuch wird erstellt…',{type:'info',duration:2500});
         if(!entries.length){
             await cover(doc,[],{totalTours:0,totalDistance:0,totalAscent:0,totalPeaks:0,totalSteps:0,totalTimeText:'0:00',bigTours:0},label,colors,null);
