@@ -32980,9 +32980,9 @@ if (APP_PERF_ENABLED) {
     [
         'initStorage',
 
-        // Unteraufgaben des Storage-Starts separat messen.
-        'migrateToIDB',
-        '_idbGetAll',
+        // migrateToIDB und _idbGetAll werden in initStorage()
+        // bereits direkt gemessen. Nicht zusätzlich wrappen, sonst
+        // würden dieselben Aufrufe doppelt in der Statistik erscheinen.
 
         'loadData',
         'getFilteredData',
