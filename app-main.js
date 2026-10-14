@@ -22132,7 +22132,7 @@ const THEME_EDITOR_SOFT_SELECTORS = [
     '#filter-view input:not([type="checkbox"])', '#filter-view select', '#filter-view textarea',
     '.mob-sel-btn', '.dash-year-filter-wrap select', '.dash-year-filter-wrap .mob-sel-btn',
     '.dash-year-filter-wrap .dash-year-arrow-btn',
-    '.top-main-nav', '.chart-tabs', '.chart-tab', '.tab-sliding-highlight', '.stats-section-btn',
+    '.top-main-nav', '.chart-tabs', '.stats-section-btn',
     '.filter-section-nav-btn', '.plan-section-btn', '.map-mode-toggle', '.map-mode-btn',
     '.quick-filter-btn', '.tour-page-btn', '.yc-metric-btn', '.yc-year-toggle-btn',
     '.compare-mode-toggle', '.compare-mode-btn', '.checklist-mode-toggle', '.checklist-mode-btn',
@@ -22264,6 +22264,14 @@ function buildThemeEditorLiveCss() {
 
         css += `${bigSelectors} { background: ${bigGradient} !important; box-shadow: ${shadow} !important; border-radius: ${radius}px !important; backdrop-filter: blur(${blur}px) !important; -webkit-backdrop-filter: blur(${blur}px) !important; }\n`;
         css += `${softSelectors} { background: ${softGradient} !important; border-radius: ${softRadius}px !important; }\n`;
+
+        // Die Diagramm-Tabs nutzen einen gleitenden Akzentmarker. Die Tabs
+        // dürfen diesen Marker nicht mit dem weicheren Theme-Flächenverlauf
+        // überdecken. Radius bleibt weiterhin über den Theme-Editor steuerbar.
+        css += `${prefix} #chart-tabs .chart-tab { border-radius: ${softRadius}px !important; }\\n`;
+        css += `${prefix} #chart-tabs .chart-tab:not(.active) { background: ${softGradient} !important; }\\n`;
+        css += `${prefix} #chart-tabs .chart-tab.active { background: transparent !important; }\\n`;
+        css += `${prefix} #chart-tabs .tab-sliding-highlight { background: var(--accent-gradient) !important; border-radius: ${softRadius}px !important; }\\n`;
 
         const navGradient = themeEditorBuildGradient({
             ...settings,
