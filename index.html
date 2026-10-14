@@ -38,6 +38,68 @@
         window.__BERGTOUREN_DB_BOOTSTRAP_PROMISE__.catch(error => {
             window.__BERGTOUREN_DB_BOOTSTRAP_ERROR__ = error;
         });
+
+        // Tourmetadaten so früh wie möglich parallel zum HTML-Aufbau lesen.
+        // Die großen Tourbilder und der fremde PreisPilot-Datensatz bleiben draußen.
+        window.__BERGTOUREN_STORAGE_PREFETCH_PROMISE__ =
+            window.__BERGTOUREN_DB_BOOTSTRAP_PROMISE__.then(database => {
+                window.__BERGTOUREN_STORAGE_PREFETCH_STARTED_AT__ = performance.now();
+
+                return new Promise((resolve, reject) => {
+                    let transaction;
+                    try {
+                        transaction = database.transaction('keyval', 'readonly');
+                        const store = transaction.objectStore('keyval');
+                        const excludedKey = 'preispilot-osttirol-v1';
+                        const imagePrefix = '~tourImage:';
+                        const imagePrefixMax = imagePrefix + String.fromCharCode(65535);
+                        const groups = [
+                            { range: IDBKeyRange.upperBound(excludedKey, true), keys: null, values: null },
+                            { range: IDBKeyRange.bound(excludedKey, imagePrefix, true, true), keys: null, values: null },
+                            { range: IDBKeyRange.lowerBound(imagePrefixMax, true), keys: null, values: null }
+                        ];
+                        const requests = [];
+
+                        groups.forEach(group => {
+                            const keysRequest = store.getAllKeys(group.range);
+                            const valuesRequest = store.getAll(group.range);
+                            requests.push(keysRequest, valuesRequest);
+                            keysRequest.onsuccess = () => { group.keys = keysRequest.result; };
+                            valuesRequest.onsuccess = () => { group.values = valuesRequest.result; };
+                        });
+
+                        const fail = () => reject(
+                            transaction.error ||
+                            requests.find(request => request.error)?.error ||
+                            new Error('Frühes Laden der Tourdaten aus IndexedDB fehlgeschlagen.')
+                        );
+                        transaction.onerror = fail;
+                        transaction.onabort = fail;
+                        transaction.oncomplete = () => {
+                            const valid = groups.every(group =>
+                                Array.isArray(group.keys) &&
+                                Array.isArray(group.values) &&
+                                group.keys.length === group.values.length
+                            );
+                            if (!valid) {
+                                reject(new Error('Frühes IndexedDB-Lesen lieferte unvollständige Daten.'));
+                                return;
+                            }
+
+                            window.__BERGTOUREN_STORAGE_PREFETCH_DONE_AT__ = performance.now();
+                            resolve(groups.flatMap(group =>
+                                group.keys.map((key, index) => ({ key, value: group.values[index] }))
+                            ));
+                        };
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            });
+
+        window.__BERGTOUREN_STORAGE_PREFETCH_PROMISE__.catch(error => {
+            window.__BERGTOUREN_STORAGE_PREFETCH_ERROR__ = error;
+        });
     } catch (error) {
         window.__BERGTOUREN_DB_BOOTSTRAP_ERROR__ = error;
     }
