@@ -30078,6 +30078,51 @@ async function initStorage() {
 
         console.info('[PERF] Größe der gespeicherten Werte (JSON-Näherung; nur Diagnose)');
         console.table(storageValueSizes);
+
+        // Tourbilder separat auswerten, ohne Bilddaten oder Tournamen in die
+        // Konsole zu schreiben. So lässt sich der sinnvolle nächste Schritt
+        // (Bilder aus dem kritischen Startpfad auslagern) anhand realer Größen
+        // entscheiden. Diese Diagnose läuft ausschließlich mit ?perf=1.
+        const storedTours = all.find(({ key }) => key === 'touren')?.value;
+        if (Array.isArray(storedTours)) {
+            const tourImageSizes = storedTours.map((entry, index) => {
+                const imageData = typeof entry?.imageData === 'string'
+                    ? entry.imageData
+                    : '';
+                if (!imageData) return null;
+
+                const comma = imageData.indexOf(',');
+                const payload = imageData.startsWith('data:') && comma >= 0
+                    ? imageData.slice(comma + 1)
+                    : imageData;
+                const padding = (payload.match(/=*$/)?.[0] || '').length;
+                const approxKB = imageData.startsWith('data:') && comma >= 0
+                    ? Math.max(0, payload.length * 0.75 - padding) / 1024
+                    : imageData.length / 1024;
+
+                return {
+                    tourIndex: index + 1,
+                    approxKB: Number(approxKB.toFixed(1))
+                };
+            }).filter(Boolean).sort((a, b) => b.approxKB - a.approxKB);
+
+            const totalImageKB = tourImageSizes.reduce(
+                (sum, item) => sum + item.approxKB,
+                0
+            );
+            console.info('[PERF] Tourbild-Datenmenge (Näherung)', {
+                tourCount: storedTours.length,
+                toursWithImages: tourImageSizes.length,
+                totalImageKB: Number(totalImageKB.toFixed(1)),
+                averageImageKB: tourImageSizes.length
+                    ? Number((totalImageKB / tourImageSizes.length).toFixed(1))
+                    : 0
+            });
+            if (tourImageSizes.length) {
+                console.info('[PERF] Größte Tourbilder nach Index (keine Tourdaten ausgegeben)');
+                console.table(tourImageSizes.slice(0, 10));
+            }
+        }
     }
 
     storageStepStart = APP_PERF_ENABLED ? performance.now() : 0;
