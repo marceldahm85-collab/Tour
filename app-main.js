@@ -980,20 +980,26 @@ const sustainedAscent =
 }
 
 
+// Die Vergleichsvektoren in den Leistungsindex-Kontexten ändern sich
+// nicht, solange der Kontext gültig ist. Deshalb können ihre sortierten
+// Kopien wiederverwendet werden, anstatt pro Tour erneut zu sortieren.
+const performancePercentileValuesCache = new WeakMap();
+
 function getPerformancePercentile(
     value,
     values
 ) {
+    let validValues = performancePercentileValuesCache.get(values);
 
-    const validValues =
-        values
+    if (!validValues) {
+        validValues = values
             .filter(Number.isFinite)
             .sort((a, b) => a - b);
 
+        performancePercentileValuesCache.set(values, validValues);
+    }
 
-    const count =
-        validValues.length;
-
+    const count = validValues.length;
 
     if (
         !Number.isFinite(value) ||
@@ -1001,7 +1007,6 @@ function getPerformancePercentile(
     ) {
         return 0;
     }
-
 
     /*
      * Nur eine Vergleichstour:
@@ -1011,30 +1016,44 @@ function getPerformancePercentile(
         return 50;
     }
 
-
     const EPSILON = 0.000000001;
+    const lowerThreshold = value - EPSILON;
+    const upperThreshold = value + EPSILON;
 
+    // Binäre Suche: erster Wert >= unterer Grenzwert.
+    let low = 0;
+    let high = count;
 
-    const lowerCount =
-        validValues.filter(
-            item =>
-                item <
-                value - EPSILON
-        ).length;
+    while (low < high) {
+        const middle = (low + high) >>> 1;
+        if (validValues[middle] < lowerThreshold) {
+            low = middle + 1;
+        } else {
+            high = middle;
+        }
+    }
 
+    const lowerCount = low;
 
-    const equalCount =
-        validValues.filter(
-            item =>
-                Math.abs(
-                    item - value
-                ) <= EPSILON
-        ).length;
+    // Binäre Suche: erster Wert > oberer Grenzwert.
+    low = lowerCount;
+    high = count;
 
+    while (low < high) {
+        const middle = (low + high) >>> 1;
+        if (validValues[middle] <= upperThreshold) {
+            low = middle + 1;
+        } else {
+            high = middle;
+        }
+    }
+
+    const equalCount = low - lowerCount;
 
     /*
-     * Bei identischen Werten wird der
+     * Bei identischen Werten wird weiterhin der
      * gemeinsame mittlere Rang verwendet.
+     * Binäre Suche ersetzt nur wiederholte lineare Filter.
      */
     const position =
         lowerCount +
@@ -1043,13 +1062,11 @@ function getPerformancePercentile(
             equalCount - 1
         ) / 2;
 
-
     const percentile =
         (
             position /
             (count - 1)
         ) * 100;
-
 
     return Math.max(
         0,
