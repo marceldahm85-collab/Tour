@@ -25,35 +25,59 @@
             return Array.isArray(value) ? value.filter(x => x && typeof x === 'object') : [];
         } catch (_) { return []; }
     };
-    const parseNumber = value => {
-        if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
-        const n = Number.parseFloat(String(value ?? '').replace(/\s/g, '').replace(',', '.'));
-        return Number.isFinite(n) ? n : 0;
+    // Gemeinsame Leser: fehlende Messwerte bleiben intern null.
+    // Erst Summen/Anzeigen wandeln fehlende Werte bewusst in 0 um.
+    const readMetric = value => {
+        if (value === null || value === undefined || String(value).trim() === '') return null;
+        if (typeof value === 'number') return Number.isFinite(value) && value >= 0 ? value : null;
+        const normalized = String(value).replace(/\s/g, '').replace(',', '.');
+        if (!normalized) return null;
+        const n = Number(normalized);
+        return Number.isFinite(n) && n >= 0 ? n : null;
     };
+    const parseNumber = value => readMetric(value) ?? 0;
     const parseMinutes = value => {
-        const m = String(value || '').match(/^(\d{1,3}):(\d{1,2})$/);
-        return m ? Number(m[1]) * 60 + Number(m[2]) : 0;
+        if (value === null || value === undefined || String(value).trim() === '') return null;
+        const m = String(value).trim().match(/^(\d{1,4}):([0-5]?\d)$/);
+        return m ? Number(m[1]) * 60 + Number(m[2]) : null;
     };
-    const dateYear = entry => {
-        const raw = String(entry?.date || '');
-        const match = raw.match(/^(\d{4})[-/.]/);
-        if (match) return Number(match[1]);
-        const d = new Date(raw);
-        return Number.isNaN(d.getTime()) ? null : d.getFullYear();
+    const parseTourDate = value => {
+        const raw = String(value ?? '').trim();
+        if (!raw) return null;
+        let match = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:$|[T\s])/);
+        if (match) {
+            const d = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+            return d.getFullYear() === Number(match[1]) && d.getMonth() === Number(match[2]) - 1 && d.getDate() === Number(match[3]) ? d : null;
+        }
+        match = raw.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})$/);
+        if (match) {
+            const day = Number(match[1]), month = Number(match[2]), year = Number(match[3]);
+            const d = new Date(year, month - 1, day);
+            return d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day ? d : null;
+        }
+        const fallback = new Date(raw);
+        return Number.isNaN(fallback.getTime()) ? null : fallback;
     };
+    const dateYear = entry => parseTourDate(entry?.date)?.getFullYear() ?? null;
     const fmt = (n, digits = 0) => Number(n || 0).toLocaleString('de-AT', { maximumFractionDigits: digits, minimumFractionDigits: digits });
-    const escapeHTML = value => String(value ?? '').replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+    const escapeHTML = value => String(value ?? '').replace(/[&<>\"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;' }[ch]));
     const getYear = () => Number(document.getElementById('wrapped-year-select')?.value) || new Date().getFullYear();
     const yearTours = () => getTours().filter(e => dateYear(e) === getYear());
-    const ascent = e => Math.max(0, parseNumber(e.aufstieg));
-    const distance = e => Math.max(0, parseNumber(e.strecke));
-    const minutes = e => parseMinutes(e.zeit);
-    const peaks = e => Math.max(0, parseNumber(e.gipfel));
-    const uniqueTourCount = entries => {
-        const ids = new Set();
-        entries.forEach((e, i) => ids.add(e.tourGroup ? 'group:' + e.tourGroup : (e.id ? 'id:' + e.id : 'entry:' + i + ':' + String(e.date || '') + ':' + String(e.tourname || ''))));
-        return ids.size;
+    const ascentValue = e => readMetric(e?.aufstieg);
+    const distanceValue = e => readMetric(e?.strecke);
+    const minutesValue = e => parseMinutes(e?.zeit);
+    const peaksValue = e => readMetric(e?.gipfel);
+    const ascent = e => ascentValue(e) ?? 0;
+    const distance = e => distanceValue(e) ?? 0;
+    const minutes = e => minutesValue(e) ?? 0;
+    const peaks = e => peaksValue(e) ?? 0;
+    const tourIdentity = (entry, index = 0) => {
+        if (entry?.tourGroup !== undefined && entry?.tourGroup !== null && String(entry.tourGroup).trim()) return 'group:' + String(entry.tourGroup);
+        if (entry?.id !== undefined && entry?.id !== null && String(entry.id).trim()) return 'id:' + String(entry.id);
+        const fingerprint = [entry?.date, entry?.tourname, entry?.region, entry?.tourDay].map(v => String(v ?? '').trim()).join('|');
+        return fingerprint.replace(/\|/g, '') ? 'entry:' + fingerprint : 'entry-index:' + index;
     };
+    const uniqueTourCount = entries => new Set(entries.map((entry, index) => tourIdentity(entry, index))).size;
     const sum = (entries, getter) => entries.reduce((acc, e) => acc + getter(e), 0);
     const statCard = (label, value, unit, progress = null) => `
         <article class="bergwelt-card">
@@ -102,7 +126,10 @@
         const mins = sum(entries, minutes);
         const peakCount = sum(entries, peaks);
         const maxAscent = Math.max(0, ...entries.map(ascent));
-        const maxSteepness = Math.max(0, ...entries.map(e => distance(e) > 0 ? ascent(e) / distance(e) : 0));
+        const validSteepness = entries
+            .filter(e => ascentValue(e) !== null && distanceValue(e) !== null && distanceValue(e) > 0)
+            .map(e => ascentValue(e) / distanceValue(e));
+        const maxSteepness = validSteepness.length ? Math.max(...validSteepness) : 0;
         const maxSteps = Math.max(0, ...entries.map(e => parseNumber(e.schritte || e.steps)));
         const definitions = [
             ['Höhenmeter-Spezialist', asc, 5000, '5.000 hm Jahresaufstieg'],
@@ -123,7 +150,10 @@
             '<p class="bergwelt-footnote">Steilheit = gespeicherter Aufstieg ÷ gespeicherte Strecke. Schritte werden nur ausgewertet, wenn sie direkt in den Tourdaten vorliegen.</p>';
     }
     function renderTour() {
-        const entries = yearTours().slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+        const entries = yearTours().slice().sort((a, b) => {
+            const dateDiff = (parseTourDate(b.date)?.getTime() || 0) - (parseTourDate(a.date)?.getTime() || 0);
+            return dateDiff || Number(a.tourDay || 0) - Number(b.tourDay || 0);
+        });
         if (!entries.length) {
             panel.innerHTML = intro('Deine Erinnerung', 'Tour erleben', 'Wähle eine gespeicherte Tour aus und lass ihre Kennzahlen nacheinander erscheinen.') + empty('Für ' + getYear() + ' sind keine Touren gespeichert.');
             return;
@@ -134,7 +164,11 @@
         const title = e.tourname || e.region || 'Unbenannte Tour';
         panel.innerHTML = intro('Tour in Erinnerung · ' + getYear(), 'Tour erleben', 'Eine kleine Inszenierung deiner gespeicherten Tourdaten – ohne erfundene GPS-Route oder Höhenprofil.') +
             '<div class="bergwelt-tour-row"><select class="bergwelt-select" id="bergwelt-tour-select" aria-label="Gespeicherte Tour auswählen">' +
-            entries.map((item, i) => '<option value="' + escapeHTML(String(item.id || i)) + '"' + (String(item.id || i) === selectedTourId ? ' selected' : '') + '>' + escapeHTML(item.date || '') + ' · ' + escapeHTML(item.tourname || item.region || 'Unbenannte Tour') + '</option>').join('') +
+            entries.map((item, i) => {
+                const stage = item.tourDay && item.tourDayCount ? ' · Etappe ' + item.tourDay + '/' + item.tourDayCount : '';
+                const group = item.tourGroup ? ' · Mehrtagestour' : '';
+                return '<option value="' + escapeHTML(String(item.id || i)) + '"' + (String(item.id || i) === selectedTourId ? ' selected' : '') + '>' + escapeHTML(item.date || '') + ' · ' + escapeHTML(item.tourname || item.region || 'Unbenannte Tour') + escapeHTML(stage + group) + '</option>';
+            }).join('') +
             '</select><button type="button" class="bergwelt-action" id="bergwelt-play-tour">▶ Erleben</button></div>' +
             '<div class="bergwelt-animation" id="bergwelt-animation"><svg class="bergwelt-mountain" viewBox="0 0 600 130" role="img" aria-label="Symbolische Berglinie, kein aufgezeichnetes Höhenprofil"><path d="M12 112 L92 88 L145 101 L226 34 L282 74 L335 58 L405 14 L465 66 L512 48 L588 106"/></svg></div>' +
             '<h3 class="bergwelt-section-title">' + escapeHTML(title) + '</h3><div class="bergwelt-grid">' +
