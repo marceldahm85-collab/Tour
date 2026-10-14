@@ -287,7 +287,46 @@
         box-shadow: none;
     }
 
-    #wrapped-view.bergwelt-ready .bergwelt-side-nav > .wrapped-header > .wrapped-year-select {
+        /* Mobile replaces the native select with this wrapper.
+       It must span the whole first row, exactly like the Stats selector. */
+    #wrapped-view.bergwelt-ready .bergwelt-side-nav > .wrapped-header > .mob-sel-wrap {
+        grid-column: 1 / -1 !important;
+        grid-row: 1;
+        display: block !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        margin: 0 !important;
+        padding: 0;
+        box-sizing: border-box;
+        overflow: hidden;
+        border-radius: 9px;
+    }
+
+    #wrapped-view.bergwelt-ready .bergwelt-side-nav > .wrapped-header > .mob-sel-wrap > .mob-sel-btn {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        margin: 0 !important;
+        padding: 0 7px !important;
+        box-sizing: border-box;
+        border: 1px solid var(--year-control-border, var(--ui-card-border));
+        border-radius: 9px;
+        background: var(--year-control-bg, var(--ui-card-bg-interactive));
+        color: var(--text-main);
+        box-shadow: var(--year-control-shadow, var(--shadow-soft));
+        font-size: 11px;
+        line-height: 1.1;
+    }
+
+#wrapped-view.bergwelt-ready .bergwelt-side-nav > .wrapped-header > .wrapped-year-select {
         grid-column: 1 / -1;
         display: block !important;
         width: 100% !important;
@@ -313,6 +352,8 @@
         color: var(--year-option-text, var(--text-main));
     }
 
+    #wrapped-view.bergwelt-ready .bergwelt-side-nav > .wrapped-header > #wrapped-year-prev-btn,
+    #wrapped-view.bergwelt-ready .bergwelt-side-nav > .wrapped-header > #wrapped-year-next-btn,
     #wrapped-view.bergwelt-ready .bergwelt-side-nav > .wrapped-header > .dash-year-arrow-btn,
     #wrapped-view.bergwelt-ready .bergwelt-side-nav > .wrapped-header > .wrapped-share-btn {
         display: flex !important;
@@ -333,6 +374,14 @@
         box-shadow: var(--year-control-shadow, var(--shadow-soft));
         font-size: 12px;
         line-height: 1;
+    }
+
+    #wrapped-view.bergwelt-ready .bergwelt-side-nav > .wrapped-header > #wrapped-year-prev-btn,
+    #wrapped-view.bergwelt-ready .bergwelt-side-nav > .wrapped-header > #wrapped-year-next-btn {
+        background: var(--year-control-bg, var(--ui-card-bg-interactive));
+        border-color: var(--year-control-border, var(--ui-card-border));
+        color: var(--text-main);
+        box-shadow: var(--year-control-shadow, var(--shadow-soft));
     }
 
     /* Vier Bereichsbuttons unter den fünf Kopfsteuerungen.
