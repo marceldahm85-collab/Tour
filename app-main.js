@@ -14069,7 +14069,7 @@ const themeSwipeThresholdPx = 80;
 
 swipeArea.addEventListener('touchstart', (e) => {
     if (window.innerWidth > 900) return;
-    if (e.target.closest('#tour-map') || e.target.closest('#year-compare-canvas') || e.target.closest('.modal')) return;
+    if (e.target.closest('#tour-map, #year-compare-canvas, #image-lightbox, .modal')) return;
 
     const t = e.touches[0];
 
@@ -14090,7 +14090,7 @@ hasVerticalThemeIntent = false;
 
 swipeArea.addEventListener('touchmove', (e) => {
     if (!isDraggingView || window.innerWidth > 900) return;
-    if (e.target.closest('#tour-map') || e.target.closest('#year-compare-canvas') || e.target.closest('.modal')) return;
+    if (e.target.closest('#tour-map, #year-compare-canvas, #image-lightbox, .modal')) return;
 
     const t = e.touches[0];
 
@@ -14179,7 +14179,7 @@ if (hasVerticalIntent) {
 
 swipeArea.addEventListener('touchend', (e) => {
     if (!isDraggingView || window.innerWidth > 900) return;
-    if (e.target.closest('#tour-map') || e.target.closest('#year-compare-canvas') || e.target.closest('.modal')) return;
+    if (e.target.closest('#tour-map, #year-compare-canvas, #image-lightbox, .modal')) return;
 
     const endTouch =
     e.changedTouches?.[0];
@@ -22132,7 +22132,7 @@ const THEME_EDITOR_SOFT_SELECTORS = [
     '#filter-view input:not([type="checkbox"])', '#filter-view select', '#filter-view textarea',
     '.mob-sel-btn', '.dash-year-filter-wrap select', '.dash-year-filter-wrap .mob-sel-btn',
     '.dash-year-filter-wrap .dash-year-arrow-btn',
-    '.top-main-nav', '.chart-tabs', '.chart-tab', '.stats-section-btn',
+    '.top-main-nav', '.chart-tabs', '.chart-tab', '.tab-sliding-highlight', '.stats-section-btn',
     '.filter-section-nav-btn', '.plan-section-btn', '.map-mode-toggle', '.map-mode-btn',
     '.quick-filter-btn', '.tour-page-btn', '.yc-metric-btn', '.yc-year-toggle-btn',
     '.compare-mode-toggle', '.compare-mode-btn', '.checklist-mode-toggle', '.checklist-mode-btn',
