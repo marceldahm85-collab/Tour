@@ -29139,7 +29139,7 @@ function _idbGetAll() {
         const imagePrefixMax = TOUR_IMAGE_STORAGE_PREFIX + String.fromCharCode(65535);
         const groups = [
             { range: IDBKeyRange.upperBound(excludedKey, true), keys: null, values: null },
-            { range: IDBKeyRange.bound(excludedKey, true, TOUR_IMAGE_STORAGE_PREFIX, true), keys: null, values: null },
+            { range: IDBKeyRange.bound(excludedKey, TOUR_IMAGE_STORAGE_PREFIX, true, true), keys: null, values: null },
             { range: IDBKeyRange.lowerBound(imagePrefixMax, true), keys: null, values: null }
         ];
 
