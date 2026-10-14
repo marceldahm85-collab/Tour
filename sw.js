@@ -6,7 +6,6 @@ const APP_SHELL = [
   './',
   './index.html',
   './app-main.js?v=bergwelt1',
-  './bergwelt.css?v=1',
   './styles.css',
   './styles-overrides.css',
   './manifest.json',
