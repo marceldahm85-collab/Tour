@@ -29927,7 +29927,7 @@ async function initStorage() {
    Nur Diagnose – verändert keine App-Logik
    ========================================================= */
 
-const APP_PERF_ENABLED = false;
+const APP_PERF_ENABLED = new URLSearchParams(window.location.search).get('perf') === '1';
 
 const appPerfStats =
     Object.create(null);
@@ -32932,6 +32932,38 @@ function entryMatchesCompareSeason(entry, season, seasonYear) {
  * Diese Funktionen messen wir
  * in der ersten Runde.
  */
+if (APP_PERF_ENABLED) {
+    // Erst nach dem Laden berichten, damit auch asynchrone Startschritte
+    // erfasst werden. Der Diagnosemodus wird nur mit ?perf=1 aktiviert.
+    window.addEventListener('load', () => {
+        window.setTimeout(() => {
+            const navigation = performance.getEntriesByType('navigation')[0];
+            const paint = performance.getEntriesByType('paint');
+            console.group('[PERF] Appstart-Diagnose');
+
+            if (navigation) {
+                console.table([{
+                    'HTML-Antwort (ms)': Math.round(navigation.responseEnd),
+                    'DOMContentLoaded (ms)': Math.round(navigation.domContentLoadedEventEnd),
+                    'Load-Event (ms)': Math.round(navigation.loadEventEnd),
+                    'DOM interaktiv (ms)': Math.round(navigation.domInteractive)
+                }]);
+            }
+
+            if (paint.length) {
+                console.table(paint.map(entry => ({
+                    Messpunkt: entry.name,
+                    'Zeit ab Navigation (ms)': Math.round(entry.startTime)
+                })));
+            }
+
+            appPerfReport();
+            console.info('[PERF] Messung aktiv. Erneut anzeigen: appPerfReport(); Zurücksetzen: appPerfReset();');
+            console.groupEnd();
+        }, 3000);
+    }, { once: true });
+}
+
 if (APP_PERF_ENABLED) {
 
     [
