@@ -34038,11 +34038,33 @@ const endHold = () => {
         shareAllWrappedSlides(wrappedCurrentYear);
     });
 
+    // Bergwelt bleibt ein optionales Modul und wird erst beim Öffnen geladen.
+    function loadBergweltModule() {
+        window.__bergweltGetTours = () => appStorage.get('touren') || [];
+        if (window.__BERGWELT_MODULE_READY__ || window.__BERGWELT_LOADING__) {
+            window.__bergweltRender?.();
+            return;
+        }
+        window.__BERGWELT_LOADING__ = true;
+        const script = document.createElement('script');
+        script.src = './bergwelt.js?v=1';
+        script.onload = () => {
+            window.__BERGWELT_LOADING__ = false;
+            window.__bergweltRender?.();
+        };
+        script.onerror = () => {
+            window.__BERGWELT_LOADING__ = false;
+            showToast?.('Die Bergwelt konnte nicht geladen werden.', { type: 'error', duration: 3000 });
+        };
+        document.body.appendChild(script);
+    }
+
     document.getElementById('wrapped-toggle').addEventListener('click', () => {
         const years = getWrappedAvailableYears();
         if (!years.length) return;
         closeMoreMenu?.();
         openWrappedView(years[0]);
+        loadBergweltModule();
     });
 
     document.getElementById('wrapped-fullscreen-btn')?.addEventListener('click', toggleWrappedFullscreen);
