@@ -22118,7 +22118,8 @@ const THEME_EDITOR_BIG_SELECTORS = [
     '.backup-status-panel', '.backup-info-card', '.backup-file-status', '.mob-sel-sheet',
     '#chart-view .stats-year-filter-wrap', '#chart-view .stats-section-switch',
     '#map-view .map-view-inner', '#map-view .map-year-filter-wrap', '#map-view .map-mode-toggle',
-    '#backup-view .backup-card', '#backup-view .backup-view-inner'
+    '#backup-view .backup-card', '#backup-view .backup-view-inner',
+    '#wrapped-view .bergwelt-side-nav'
 ];
 
 const THEME_EDITOR_SOFT_SELECTORS = [
@@ -22137,6 +22138,9 @@ const THEME_EDITOR_SOFT_SELECTORS = [
     '.quick-filter-btn', '.tour-page-btn', '.yc-metric-btn', '.yc-year-toggle-btn',
     '.compare-mode-toggle', '.compare-mode-btn', '.checklist-mode-toggle', '.checklist-mode-btn',
     '.dash-year-arrow-btn',
+    '#wrapped-view .wrapped-year-select', '#wrapped-view .wrapped-share-btn',
+    '#wrapped-view .bergwelt-tab', '#wrapped-view .wrapped-control-btn',
+    '#wrapped-view .dash-year-arrow-btn',
     '#overview-table tr', '#planned-table tr', '#saved-tours-list .tour-list li',
     '#planned-tours-list .tour-list li',
     '.tour-image-preview-wrap', '.tour-detail-image-wrap', '.form-details',
@@ -22272,6 +22276,7 @@ function buildThemeEditorLiveCss() {
         css += `${prefix} #chart-tabs .chart-tab:not(.active) { background: ${softGradient} !important; }\n`;
         css += `${prefix} #chart-tabs .chart-tab.active { background: transparent !important; }\n`;
         css += `${prefix} #chart-tabs .tab-sliding-highlight { background: var(--accent-gradient) !important; border-radius: ${softRadius}px !important; }\n`;
+        css += `${prefix} #wrapped-view .bergwelt-tab.is-active { background: var(--accent-gradient) !important; color: var(--accent-text-color, var(--text-main)) !important; border-color: var(--accent) !important; }\n`;
 
         const navGradient = themeEditorBuildGradient({
             ...settings,
@@ -34061,7 +34066,7 @@ const endHold = () => {
         if (!document.querySelector('link[data-bergwelt-styles]')) {
             const styleLink = document.createElement('link');
             styleLink.rel = 'stylesheet';
-            styleLink.href = './bergwelt.css?v=5';
+            styleLink.href = './bergwelt.css?v=6';
             styleLink.dataset.bergweltStyles = '1';
             document.head.appendChild(styleLink);
         }
