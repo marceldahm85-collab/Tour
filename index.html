@@ -2760,7 +2760,68 @@ if ('serviceWorker' in navigator) {
 
 
 
-    <script src="./pdf-magazine.js" defer></script>
+    <script>
+/* PDF-Magazin erst laden, wenn die Sicherungs-/Buch-Ansicht gebraucht wird. */
+(function () {
+    let pdfMagazinePromise = null;
+    let pdfMagazineLoaded = false;
+
+    function ensurePdfMagazineLoaded() {
+        if (pdfMagazineLoaded) return Promise.resolve();
+        if (pdfMagazinePromise) return pdfMagazinePromise;
+
+        pdfMagazinePromise = new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = './pdf-magazine.js';
+            script.async = true;
+            script.dataset.lazyPdfMagazine = 'true';
+
+            script.onload = () => {
+                pdfMagazineLoaded = true;
+                resolve();
+            };
+            script.onerror = () => {
+                script.remove();
+                pdfMagazinePromise = null;
+                reject(new Error('PDF-Magazin-Renderer konnte nicht geladen werden.'));
+            };
+
+            document.head.appendChild(script);
+        });
+
+        return pdfMagazinePromise;
+    }
+
+    // Beim Öffnen von „Sicherung & Buch“ bereits im Hintergrund laden.
+    document.getElementById('backup-toggle')?.addEventListener('click', () => {
+        ensurePdfMagazineLoaded().catch(error => {
+            console.warn('[PDF] Renderer wird bei Bedarf erneut geladen:', error);
+        });
+    }, true);
+
+    // Falls der PDF-Button schneller geklickt wird, den Klick kurz halten,
+    // den Renderer laden und denselben Button-Klick danach erneut auslösen.
+    const pdfButton = document.getElementById('pdf-export-run-btn');
+    pdfButton?.addEventListener('click', event => {
+        if (pdfMagazineLoaded) return;
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        ensurePdfMagazineLoaded()
+            .then(() => pdfButton.click())
+            .catch(error => {
+                console.error('[PDF] Renderer konnte nicht geladen werden:', error);
+                if (typeof window.showToast === 'function') {
+                    window.showToast(
+                        'PDF-Funktion konnte nicht geladen werden. Bitte erneut versuchen.',
+                        { type: 'error', duration: 3500 }
+                    );
+                }
+            });
+    }, true);
+})();
+</script>
 </div>
 </div>
 </body>
