@@ -28841,6 +28841,7 @@ const IDB_NAME  = 'BergtorenDB';
 const IDB_VER   = 1;
 const IDB_STORE = 'keyval';
 let   _db       = null;
+let   _dbOpenPromise = null;
 const _cache    = {};
 let _storageWriteQueue = Promise.resolve();
 
@@ -28869,17 +28870,48 @@ function queueStorageWrite(task) {
 }
 
 function _openDB() {
-    return new Promise((resolve, reject) => {
-        if (_db) return resolve(_db);
+    if (_db) return Promise.resolve(_db);
+    if (_dbOpenPromise) return _dbOpenPromise;
+
+    _dbOpenPromise = new Promise((resolve, reject) => {
         const req = indexedDB.open(IDB_NAME, IDB_VER);
         req.onupgradeneeded = e => {
             if (!e.target.result.objectStoreNames.contains(IDB_STORE))
                 e.target.result.createObjectStore(IDB_STORE);
         };
-        req.onsuccess = e => { _db = e.target.result; resolve(_db); };
-        req.onerror   = e => reject(e.target.error);
+        req.onsuccess = e => {
+            _db = e.target.result;
+            _db.onversionchange = () => {
+                _db.close();
+                _db = null;
+                _dbOpenPromise = null;
+            };
+            _dbOpenPromise = null;
+            resolve(_db);
+        };
+        req.onerror = e => {
+            const error = e.target.error;
+            _dbOpenPromise = null;
+            reject(error);
+        };
     });
+
+    return _dbOpenPromise;
 }
+
+// Die Verbindung früh öffnen, damit der Datenbankstart bereits während der
+// restlichen App-Initialisierung laufen kann. Spätere Aufrufer teilen sich
+// dieselbe ausstehende Verbindung; die eigentliche Datenladung bleibt in initStorage().
+const _dbOpenWarmupStartedAt = performance.now();
+const _dbOpenWarmupPromise = _openDB()
+    .then(() => {
+        if (APP_PERF_ENABLED) {
+            appPerfRecord('storage.openDBWarmup', performance.now() - _dbOpenWarmupStartedAt);
+        }
+    })
+    .catch(error => {
+        console.warn('[Storage] Frühes Öffnen der IndexedDB fehlgeschlagen:', error);
+    });
 function _idbSet(key, val) {
     return _openDB().then(db => new Promise((res, rej) => {
         const req = db.transaction(IDB_STORE,'readwrite').objectStore(IDB_STORE).put(val, key);
