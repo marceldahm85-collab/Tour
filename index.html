@@ -124,6 +124,7 @@
 <link rel="stylesheet" href="./styles.css">
 <link rel="stylesheet" href="./styles-overrides.css">
 
+    <link rel="stylesheet" href="./bergwelt.css?v=1">
 </head>
 <body>
 
@@ -2545,6 +2546,14 @@
         <button type="button" id="wrapped-fullscreen-btn" class="wrapped-share-btn" title="Vollbild">⛶</button>
     </div>
 
+    <nav class="bergwelt-tabs" id="bergwelt-tabs" aria-label="Bergwelt-Bereiche">
+        <button type="button" class="bergwelt-tab is-active" data-bergwelt-tab="momente" aria-selected="true">Momente</button>
+        <button type="button" class="bergwelt-tab" data-bergwelt-tab="hoehenwelt" aria-selected="false">Höhenwelt</button>
+        <button type="button" class="bergwelt-tab" data-bergwelt-tab="level" aria-selected="false">Level</button>
+        <button type="button" class="bergwelt-tab" data-bergwelt-tab="tour" aria-selected="false">Tour erleben</button>
+    </nav>
+
+    <div class="bergwelt-panel" id="bergwelt-panel" hidden></div>
     <div class="wrapped-progress-bar" id="wrapped-progress-bar"></div>
 
     <div class="wrapped-stage" id="wrapped-stage">
