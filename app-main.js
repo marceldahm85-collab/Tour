@@ -28873,28 +28873,42 @@ function _openDB() {
     if (_db) return Promise.resolve(_db);
     if (_dbOpenPromise) return _dbOpenPromise;
 
-    _dbOpenPromise = new Promise((resolve, reject) => {
+    const attachDatabase = db => {
+        _db = db;
+        _db.onversionchange = () => {
+            _db.close();
+            _db = null;
+            _dbOpenPromise = null;
+            window.__BERGTOUREN_DB_BOOTSTRAP_PROMISE__ = null;
+        };
+        return db;
+    };
+
+    const openRequest = () => new Promise((resolve, reject) => {
         const req = indexedDB.open(IDB_NAME, IDB_VER);
         req.onupgradeneeded = e => {
             if (!e.target.result.objectStoreNames.contains(IDB_STORE))
                 e.target.result.createObjectStore(IDB_STORE);
         };
-        req.onsuccess = e => {
-            _db = e.target.result;
-            _db.onversionchange = () => {
-                _db.close();
-                _db = null;
-                _dbOpenPromise = null;
-            };
-            _dbOpenPromise = null;
-            resolve(_db);
-        };
-        req.onerror = e => {
-            const error = e.target.error;
-            _dbOpenPromise = null;
-            reject(error);
-        };
+        req.onsuccess = e => resolve(e.target.result);
+        req.onerror = e => reject(e.target.error);
     });
+
+    // Wenn index.html die Verbindung schon gestartet hat, deren Promise
+    // weiterverwenden, statt beim App-Start ein zweites Mal indexedDB.open aufzurufen.
+    const bootstrapPromise = window.__BERGTOUREN_DB_BOOTSTRAP_PROMISE__;
+    const sourcePromise = bootstrapPromise && typeof bootstrapPromise.then === 'function'
+        ? Promise.resolve(bootstrapPromise).catch(error => {
+            console.warn('[Storage] Früher DB-Start fehlgeschlagen; erneuter Versuch:', error);
+            return openRequest();
+        })
+        : openRequest();
+
+    _dbOpenPromise = sourcePromise
+        .then(attachDatabase)
+        .finally(() => {
+            _dbOpenPromise = null;
+        });
 
     return _dbOpenPromise;
 }
@@ -28906,7 +28920,27 @@ const _dbOpenWarmupStartedAt = performance.now();
 const _dbOpenWarmupPromise = _openDB()
     .then(() => {
         if (APP_PERF_ENABLED) {
-            appPerfRecord('storage.openDBWarmup', performance.now() - _dbOpenWarmupStartedAt);
+            const bootstrapStartedAt = window.__BERGTOUREN_DB_BOOTSTRAP_STARTED_AT__;
+            const bootstrapDoneAt = window.__BERGTOUREN_DB_BOOTSTRAP_DONE_AT__;
+            const hasBootstrapTiming =
+                Number.isFinite(bootstrapStartedAt) &&
+                Number.isFinite(bootstrapDoneAt);
+
+            const openDuration = hasBootstrapTiming
+                ? bootstrapDoneAt - bootstrapStartedAt
+                : performance.now() - _dbOpenWarmupStartedAt;
+
+            appPerfRecord('storage.openDBWarmup', openDuration);
+
+            if (hasBootstrapTiming) {
+                console.info(
+                    '[PERF] IndexedDB früh bereit nach',
+                    bootstrapDoneAt.toFixed(1),
+                    'ms; Öffnungsdauer:',
+                    openDuration.toFixed(1),
+                    'ms'
+                );
+            }
         }
     })
     .catch(error => {
