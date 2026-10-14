@@ -28998,14 +28998,29 @@ const appStorage = {
 
 // ── Einmalige Migration von localStorage ────────────────
 async function migrateToIDB() {
-    const already = await _openDB().then(db => new Promise(res => {
+    // Detailmessung nur im Diagnosemodus (?perf=1); die Speicherlogik
+    // bleibt im normalen Betrieb unverändert.
+    let stepStart = APP_PERF_ENABLED ? performance.now() : 0;
+    const db = await _openDB();
+    if (APP_PERF_ENABLED) {
+        appPerfRecord('migrate.openDB', performance.now() - stepStart);
+    }
+
+    stepStart = APP_PERF_ENABLED ? performance.now() : 0;
+    const already = await new Promise(res => {
         const req = db.transaction(IDB_STORE,'readonly').objectStore(IDB_STORE).get('__migrated__');
         req.onsuccess = () => res(req.result);
-    }));
+    });
+    if (APP_PERF_ENABLED) {
+        appPerfRecord('migrate.markerCheck', performance.now() - stepStart);
+        console.info('[PERF] Storage-Migrationsmarker:', already ? 'vorhanden – Migration übersprungen' : 'fehlt – Migration wird ausgeführt');
+    }
     if (already) return;
 
     console.log('[Storage] Migriere localStorage → IndexedDB …');
-    for (const key of Object.keys(localStorage)) {
+    const migrationKeys = Object.keys(localStorage);
+    stepStart = APP_PERF_ENABLED ? performance.now() : 0;
+    for (const key of migrationKeys) {
         try {
             const raw = localStorage.getItem(key);
             const val = (() => { try { return JSON.parse(raw); } catch { return raw; } })();
@@ -29013,8 +29028,17 @@ async function migrateToIDB() {
             _cache[key] = val;
         } catch(e) { console.warn('[Storage] Migration fehlgeschlagen:', key, e); }
     }
+    if (APP_PERF_ENABLED) {
+        appPerfRecord('migrate.copyLocalStorage', performance.now() - stepStart);
+        console.info('[PERF] Storage-Migration: lokale Schlüssel:', migrationKeys.length);
+    }
+
+    stepStart = APP_PERF_ENABLED ? performance.now() : 0;
     await _idbSet('__migrated__', true);
     _cache['__migrated__'] = true;
+    if (APP_PERF_ENABLED) {
+        appPerfRecord('migrate.writeMarker', performance.now() - stepStart);
+    }
     console.log('[Storage] Migration abgeschlossen.');
     // Nach dem Testen: localStorage.clear();
 }
