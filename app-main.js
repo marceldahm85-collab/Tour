@@ -28998,28 +28998,11 @@ const appStorage = {
 
 // ── Einmalige Migration von localStorage ────────────────
 async function migrateToIDB() {
-    // Detailmessung nur im Diagnosemodus (?perf=1); die Speicherlogik
-    // bleibt im normalen Betrieb unverändert.
-    let stepStart = APP_PERF_ENABLED ? performance.now() : 0;
-    const db = await _openDB();
-    if (APP_PERF_ENABLED) {
-        appPerfRecord('migrate.openDB', performance.now() - stepStart);
-    }
-
-    stepStart = APP_PERF_ENABLED ? performance.now() : 0;
-    const already = await new Promise(res => {
-        const req = db.transaction(IDB_STORE,'readonly').objectStore(IDB_STORE).get('__migrated__');
-        req.onsuccess = () => res(req.result);
-    });
-    if (APP_PERF_ENABLED) {
-        appPerfRecord('migrate.markerCheck', performance.now() - stepStart);
-        console.info('[PERF] Storage-Migrationsmarker:', already ? 'vorhanden – Migration übersprungen' : 'fehlt – Migration wird ausgeführt');
-    }
-    if (already) return;
-
+    // Wird nur aufgerufen, wenn initStorage() im bereits geladenen
+    // IndexedDB-Bestand keinen erfolgreichen Migrationsmarker gefunden hat.
     console.log('[Storage] Migriere localStorage → IndexedDB …');
     const migrationKeys = Object.keys(localStorage);
-    stepStart = APP_PERF_ENABLED ? performance.now() : 0;
+    let stepStart = APP_PERF_ENABLED ? performance.now() : 0;
     for (const key of migrationKeys) {
         try {
             const raw = localStorage.getItem(key);
@@ -29928,13 +29911,13 @@ async function initStorage() {
     // nicht auf die IndexedDB warten müssen.
     const preloadedTheme = _cache.theme;
 
-    // Im Diagnosemodus die beiden Storage-Teilschritte direkt messen.
-    // Die direkten Messungen funktionieren auch dann, wenn interne
-    // Funktionen nicht als window-Eigenschaften verfügbar sind.
+    // IndexedDB einmal öffnen und alle Einträge laden. Der Migrationsmarker
+    // wird direkt in diesem Ergebnis geprüft; eine separate IDB-Transaktion
+    // nur für den Marker ist dadurch im normalen Start nicht mehr nötig.
     let storageStepStart = APP_PERF_ENABLED ? performance.now() : 0;
-    await migrateToIDB();
+    await _openDB();
     if (APP_PERF_ENABLED) {
-        appPerfRecord('migrateToIDB', performance.now() - storageStepStart);
+        appPerfRecord('migrate.openDB', performance.now() - storageStepStart);
     }
 
     storageStepStart = APP_PERF_ENABLED ? performance.now() : 0;
@@ -29942,9 +29925,26 @@ async function initStorage() {
     if (APP_PERF_ENABLED) {
         appPerfRecord('_idbGetAll', performance.now() - storageStepStart);
     }
+
+    storageStepStart = APP_PERF_ENABLED ? performance.now() : 0;
+    const migrationAlreadyDone = all.some(({ key, value }) => key === '__migrated__' && Boolean(value));
+    if (APP_PERF_ENABLED) {
+        appPerfRecord('migrate.markerCheck', performance.now() - storageStepStart);
+        console.info('[PERF] Storage-Migrationsmarker:', migrationAlreadyDone ? 'vorhanden – Migration übersprungen' : 'fehlt – Migration wird ausgeführt');
+    }
+
+    if (!migrationAlreadyDone) {
+        storageStepStart = APP_PERF_ENABLED ? performance.now() : 0;
+        await migrateToIDB();
+        if (APP_PERF_ENABLED) {
+            appPerfRecord('migrateToIDB', performance.now() - storageStepStart);
+        }
+    }
+
     all.forEach(({ key, value }) => {
         // Bereits synchron vorab geladene Werte nicht mit einem älteren
-        // IndexedDB-Stand überschreiben.
+        // IndexedDB-Stand überschreiben. Bei einer ersten Migration werden
+        // die localStorage-Werte bereits während der Migration eingetragen.
         if (!(key in _cache)) {
             _cache[key] = value;
         }
