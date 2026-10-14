@@ -34024,12 +34024,6 @@ const endHold = () => {
     }
     });
 
-    document.getElementById('wrapped-back-btn').addEventListener('click', () => {
-    clearWrappedAutoAdvance();
-    exitWrappedFullscreenIfActive();
-    goToView('dashboard');
-});
-
     document.getElementById('wrapped-year-select').addEventListener('change', e => {
         openWrappedView(Number(e.target.value));
         window.__bergweltRender?.();
@@ -34067,7 +34061,7 @@ const endHold = () => {
         if (!document.querySelector('link[data-bergwelt-styles]')) {
             const styleLink = document.createElement('link');
             styleLink.rel = 'stylesheet';
-            styleLink.href = './bergwelt.css?v=3';
+            styleLink.href = './bergwelt.css?v=4';
             styleLink.dataset.bergweltStyles = '1';
             document.head.appendChild(styleLink);
         }
