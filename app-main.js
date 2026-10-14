@@ -29150,6 +29150,50 @@ function _idbDel(key) {
     }));
 }
 function _idbGetAll() {
+    const prefetchPromise = window.__BERGTOUREN_STORAGE_PREFETCH_PROMISE__;
+
+    if (prefetchPromise && typeof prefetchPromise.then === 'function') {
+        // Einmalig die vorab gelesenen Daten verwenden. Ein erneuter Aufruf
+        // (z. B. nach einer notwendigen Migration) muss den aktuellen DB-Stand lesen.
+        window.__BERGTOUREN_STORAGE_PREFETCH_PROMISE__ = null;
+        const waitStartedAt = performance.now();
+
+        return Promise.resolve(prefetchPromise).then(all => {
+            if (APP_PERF_ENABLED) {
+                const readStartedAt = window.__BERGTOUREN_STORAGE_PREFETCH_STARTED_AT__;
+                const readDoneAt = window.__BERGTOUREN_STORAGE_PREFETCH_DONE_AT__;
+
+                if (
+                    Number.isFinite(readStartedAt) &&
+                    Number.isFinite(readDoneAt) &&
+                    readDoneAt >= readStartedAt
+                ) {
+                    appPerfRecord('storage.readWarmup', readDoneAt - readStartedAt);
+                    console.info(
+                        '[PERF] IndexedDB-Daten früh bereit nach',
+                        readDoneAt.toFixed(1),
+                        'ms; Lesedauer:',
+                        (readDoneAt - readStartedAt).toFixed(1),
+                        'ms'
+                    );
+                }
+
+                appPerfRecord('storage.readWarmupWait', performance.now() - waitStartedAt);
+            }
+            return all;
+        }).catch(error => {
+            console.warn(
+                '[Storage] Frühes Lesen fehlgeschlagen; IndexedDB wird regulär gelesen:',
+                error
+            );
+            return _idbGetAllFromDB();
+        });
+    }
+
+    return _idbGetAllFromDB();
+}
+
+function _idbGetAllFromDB() {
     return _openDB().then(db => new Promise((res, rej) => {
         const tx = db.transaction(IDB_STORE, 'readonly');
         const store = tx.objectStore(IDB_STORE);
