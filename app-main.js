@@ -29904,9 +29904,20 @@ async function initStorage() {
     // nicht auf die IndexedDB warten müssen.
     const preloadedTheme = _cache.theme;
 
+    // Im Diagnosemodus die beiden Storage-Teilschritte direkt messen.
+    // Die direkten Messungen funktionieren auch dann, wenn interne
+    // Funktionen nicht als window-Eigenschaften verfügbar sind.
+    let storageStepStart = APP_PERF_ENABLED ? performance.now() : 0;
     await migrateToIDB();
+    if (APP_PERF_ENABLED) {
+        appPerfRecord('migrateToIDB', performance.now() - storageStepStart);
+    }
 
+    storageStepStart = APP_PERF_ENABLED ? performance.now() : 0;
     const all = await _idbGetAll();
+    if (APP_PERF_ENABLED) {
+        appPerfRecord('_idbGetAll', performance.now() - storageStepStart);
+    }
     all.forEach(({ key, value }) => {
         // Bereits synchron vorab geladene Werte nicht mit einem älteren
         // IndexedDB-Stand überschreiben.
