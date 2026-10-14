@@ -22268,10 +22268,10 @@ function buildThemeEditorLiveCss() {
         // Die Diagramm-Tabs nutzen einen gleitenden Akzentmarker. Die Tabs
         // dürfen diesen Marker nicht mit dem weicheren Theme-Flächenverlauf
         // überdecken. Radius bleibt weiterhin über den Theme-Editor steuerbar.
-        css += `${prefix} #chart-tabs .chart-tab { border-radius: ${softRadius}px !important; }\\n`;
-        css += `${prefix} #chart-tabs .chart-tab:not(.active) { background: ${softGradient} !important; }\\n`;
-        css += `${prefix} #chart-tabs .chart-tab.active { background: transparent !important; }\\n`;
-        css += `${prefix} #chart-tabs .tab-sliding-highlight { background: var(--accent-gradient) !important; border-radius: ${softRadius}px !important; }\\n`;
+        css += `${prefix} #chart-tabs .chart-tab { border-radius: ${softRadius}px !important; }\n`;
+        css += `${prefix} #chart-tabs .chart-tab:not(.active) { background: ${softGradient} !important; }\n`;
+        css += `${prefix} #chart-tabs .chart-tab.active { background: transparent !important; }\n`;
+        css += `${prefix} #chart-tabs .tab-sliding-highlight { background: var(--accent-gradient) !important; border-radius: ${softRadius}px !important; }\n`;
 
         const navGradient = themeEditorBuildGradient({
             ...settings,
