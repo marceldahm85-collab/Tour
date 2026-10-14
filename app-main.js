@@ -4352,6 +4352,18 @@ updateTourImagePreview(
 
 async function fillSaveFormFromEntry(entry) {
     await loadTourImageData(entry);
+
+    // Ohne erfolgreich geladenes Bild darf eine Tour mit Bildreferenz nicht
+    // in den Bearbeitungsmodus wechseln. Dadurch kann ein späteres Speichern
+    // das ausgelagerte Originalbild nicht versehentlich entfernen.
+    if (entry?.hasImage && !entry?.imageData) {
+        showToast(
+            'Das gespeicherte Tourbild konnte nicht geladen werden. Die Tour blieb unverändert. Bitte erneut versuchen.',
+            { type: 'error', duration: 4000 }
+        );
+        return false;
+    }
+
     form.dataset.editEntryId = String(entry?.id || '');
 
     form.date.value = entry.date || '';
@@ -5864,7 +5876,7 @@ function initTourDetailModal() {
 if (currentDetailType === 'saved') {
     closeTourDetail();
 
-    await fillSaveFormFromEntry(entryToEdit);
+    if (await fillSaveFormFromEntry(entryToEdit) === false) return;
     removeSavedTourFromStorage(entryToEdit);
     loadData();
 
@@ -6043,7 +6055,7 @@ function initOverviewTableDelegation() {
 
             const entryToEdit = JSON.parse(JSON.stringify(entry));
 
-            await fillSaveFormFromEntry(entryToEdit);
+            if (await fillSaveFormFromEntry(entryToEdit) === false) return;
             removeSavedTourFromStorage(entryToEdit);
 
             tablePage = 1;
@@ -29095,17 +29107,27 @@ async function loadTourImageData(entry) {
             .then(value => typeof value === 'string' ? value : '')
             .catch(error => {
                 console.warn('[Storage] Tourbild konnte nicht geladen werden:', error);
-                return '';
+                // Lesefehler nicht als fehlendes Bild behandeln. Sonst könnte
+                // ein späteres Speichern den weiterhin vorhandenen Bilddatensatz löschen.
+                return null;
             })
             .finally(() => tourImageLoadPromises.delete(key));
         tourImageLoadPromises.set(key, imagePromise);
     }
 
     const imageData = await imagePromise;
+    if (imageData === null) {
+        // Der Zugriff ist fehlgeschlagen: hasImage bewusst beibehalten,
+        // damit der Fehler nicht als Bildlöschung persistiert werden kann.
+        return entry;
+    }
+
     if (imageData) {
         entry.imageData = imageData;
         entry.hasImage = true;
     } else {
+        // Ein erfolgreiches Lesen ohne gespeicherten String bedeutet,
+        // dass kein Bilddatensatz vorhanden ist.
         entry.hasImage = false;
     }
 
