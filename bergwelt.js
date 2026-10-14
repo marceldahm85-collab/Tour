@@ -50,7 +50,7 @@
     const peaks = e => Math.max(0, parseNumber(e.gipfel));
     const uniqueTourCount = entries => {
         const ids = new Set();
-        entries.forEach((e, i) => ids.add(e.tourGroup ? 'group:' + e.tourGroup : (e.id ? 'id:' + e.id : 'entry:' + i + ':' + String(e.date || '') + ':' + String(e.tourname || '')));
+        entries.forEach((e, i) => ids.add(e.tourGroup ? 'group:' + e.tourGroup : (e.id ? 'id:' + e.id : 'entry:' + i + ':' + String(e.date || '') + ':' + String(e.tourname || ''))));
         return ids.size;
     };
     const sum = (entries, getter) => entries.reduce((acc, e) => acc + getter(e), 0);
