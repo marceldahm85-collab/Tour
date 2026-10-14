@@ -7,6 +7,7 @@
     const tabs = document.getElementById('bergwelt-tabs');
     const panel = document.getElementById('bergwelt-panel');
     if (!root || !tabs || !panel) return;
+    root.classList.add('bergwelt-ready');
 
     const tabNames = {
         momente: 'Momente',
