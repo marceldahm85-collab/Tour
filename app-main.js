@@ -22141,6 +22141,9 @@ const THEME_EDITOR_SOFT_SELECTORS = [
     '#wrapped-view .wrapped-year-select', '#wrapped-view .wrapped-share-btn',
     '#wrapped-view .bergwelt-tab', '#wrapped-view .wrapped-control-btn',
     '#wrapped-view .dash-year-arrow-btn',
+    '#wrapped-view #wrapped-year-prev-btn', '#wrapped-view #wrapped-year-next-btn',
+    '#wrapped-view .bergwelt-side-nav > .wrapped-header > .mob-sel-wrap',
+    '#wrapped-view .bergwelt-side-nav > .wrapped-header > .mob-sel-wrap .mob-sel-btn',
     '#overview-table tr', '#planned-table tr', '#saved-tours-list .tour-list li',
     '#planned-tours-list .tour-list li',
     '.tour-image-preview-wrap', '.tour-detail-image-wrap', '.form-details',
@@ -34066,7 +34069,7 @@ const endHold = () => {
         if (!document.querySelector('link[data-bergwelt-styles]')) {
             const styleLink = document.createElement('link');
             styleLink.rel = 'stylesheet';
-            styleLink.href = './bergwelt.css?v=7';
+            styleLink.href = './bergwelt.css?v=8';
             styleLink.dataset.bergweltStyles = '1';
             document.head.appendChild(styleLink);
         }
