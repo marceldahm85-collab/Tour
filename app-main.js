@@ -30175,7 +30175,7 @@ async function initStorage() {
     }
 
     storageStepStart = APP_PERF_ENABLED ? performance.now() : 0;
-    const all = await _idbGetAll();
+    let all = await _idbGetAll();
     if (APP_PERF_ENABLED) {
         appPerfRecord('_idbGetAll', performance.now() - storageStepStart);
         console.info(
@@ -30210,12 +30210,14 @@ async function initStorage() {
         console.info('[PERF] Größe der gespeicherten Werte (JSON-Näherung; nur Diagnose)');
         console.table(storageValueSizes);
 
-        // Tourbilder separat auswerten, ohne Bilddaten oder Tournamen in die
-        // Konsole zu schreiben. So lässt sich der sinnvolle nächste Schritt
-        // (Bilder aus dem kritischen Startpfad auslagern) anhand realer Größen
-        // entscheiden. Diese Diagnose läuft ausschließlich mit ?perf=1.
+        // Tourbilder nur zählen und bereits geladene Bilddaten messen.
+        // Nach der Auslagerung bleibt die Anzahl sichtbar, ohne die getrennten
+        // Bilddaten für eine Diagnose erneut zu laden.
         const storedTours = all.find(({ key }) => key === 'touren')?.value;
         if (Array.isArray(storedTours)) {
+            const toursWithImages = storedTours.filter(
+                entry => Boolean(entry?.hasImage || entry?.imageData)
+            ).length;
             const tourImageSizes = storedTours.map((entry, index) => {
                 const imageData = typeof entry?.imageData === 'string'
                     ? entry.imageData
@@ -30243,11 +30245,9 @@ async function initStorage() {
             );
             console.info('[PERF] Tourbild-Datenmenge (Näherung)', {
                 tourCount: storedTours.length,
-                toursWithImages: tourImageSizes.length,
-                totalImageKB: Number(totalImageKB.toFixed(1)),
-                averageImageKB: tourImageSizes.length
-                    ? Number((totalImageKB / tourImageSizes.length).toFixed(1))
-                    : 0
+                toursWithImages,
+                imageDataLoadedWithTouren: tourImageSizes.length,
+                totalImageKBInTourenRecord: Number(totalImageKB.toFixed(1))
             });
             if (tourImageSizes.length) {
                 console.info('[PERF] Größte Tourbilder nach Index (keine Tourdaten ausgegeben)');
@@ -30269,6 +30269,54 @@ async function initStorage() {
         if (APP_PERF_ENABLED) {
             appPerfRecord('migrateToIDB', performance.now() - storageStepStart);
         }
+        all = await _idbGetAll();
+    }
+
+    // Einmalige, transaktionssichere Umstellung: Die 4–5 MB typischen
+    // eingebetteten Fotos werden aus dem gemeinsamen Tourenarray in einzelne
+    // IndexedDB-Einträge verschoben. Bei einem Fehler bleibt der alte Datensatz
+    // intakt und die App kann mit Inline-Bildern weiterlaufen.
+    const tourImageSplitAlreadyDone = all.some(
+        ({ key, value }) => key === TOUR_IMAGE_SPLIT_MARKER && Boolean(value)
+    );
+    if (!tourImageSplitAlreadyDone) {
+        const tourRecord = all.find(({ key }) => key === 'touren');
+        if (Array.isArray(tourRecord?.value)) {
+            storageStepStart = APP_PERF_ENABLED ? performance.now() : 0;
+            try {
+                const normalizedTours = ensureUniqueEntryIds(
+                    tourRecord.value,
+                    'tour'
+                ).entries;
+                const prepared = prepareTourStorageEntries(normalizedTours);
+                await _idbWritePreparedTourStorage(prepared);
+                tourRecord.value = prepared.metadataTours;
+                _cache.touren = prepared.metadataTours;
+
+                all.push({ key: TOUR_IMAGE_SPLIT_MARKER, value: true });
+                console.info(
+                    '[Storage] Tourbilder separat gespeichert:',
+                    prepared.imageWrites.length
+                );
+            } catch (error) {
+                console.error(
+                    '[Storage] Tourbilder konnten nicht ausgelagert werden; Inline-Daten bleiben erhalten:',
+                    error
+                );
+            } finally {
+                if (APP_PERF_ENABLED) {
+                    appPerfRecord('storage.splitTourImages', performance.now() - storageStepStart);
+                }
+            }
+        }
+    }
+
+    // Der interne Versionsmarker muss nicht im synchronen App-Cache landen.
+    const splitMarkerIndex = all.findIndex(
+        ({ key }) => key === TOUR_IMAGE_SPLIT_MARKER
+    );
+    if (splitMarkerIndex >= 0) {
+        all.splice(splitMarkerIndex, 1);
     }
 
     all.forEach(({ key, value }) => {
