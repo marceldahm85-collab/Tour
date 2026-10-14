@@ -79,6 +79,15 @@
     };
     const uniqueTourCount = entries => new Set(entries.map((entry, index) => tourIdentity(entry, index))).size;
     const sum = (entries, getter) => entries.reduce((acc, e) => acc + getter(e), 0);
+    const sumKnown = (entries, getter) => {
+        const values = entries.map(getter).filter(value => value !== null && value !== undefined && Number.isFinite(value));
+        return values.length ? values.reduce((acc, value) => acc + value, 0) : null;
+    };
+    const maxKnown = (entries, getter) => {
+        const values = entries.map(getter).filter(value => value !== null && value !== undefined && Number.isFinite(value));
+        return values.length ? Math.max(...values) : null;
+    };
+    const fmtKnown = (value, digits = 0) => value === null || value === undefined || !Number.isFinite(value) ? '–' : fmt(value, digits);
     const statCard = (label, value, unit, progress = null) => `
         <article class="bergwelt-card">
             <div class="bergwelt-card-label">${label}</div>
@@ -99,10 +108,12 @@
     }
     function renderHoehenwelt() {
         const entries = yearTours();
-        const total = sum(entries, ascent);
+        const knownTotal = sumKnown(entries, ascentValue);
+        const total = knownTotal ?? 0;
         const metres = [3798, 8848, 26544];
-        const next = metres.find(v => v > total) || null;
-        const comparison = total >= 26544 ? 'Dein kumulierter Aufstieg entspricht mindestens drei Everest-Höhen.' :
+        const next = knownTotal === null ? null : (metres.find(v => v > total) || null);
+        const comparison = knownTotal === null ? 'Für dieses Jahr liegen keine gültigen Aufstiegswerte vor.' :
+            total >= 26544 ? 'Dein kumulierter Aufstieg entspricht mindestens drei Everest-Höhen.' :
             total >= 8848 ? 'Das entspricht mindestens einer Everest-Höhe an kumuliertem Aufstieg.' :
             total >= 3798 ? 'Dein kumulierter Aufstieg übertrifft die Höhe des Großglockners.' :
             'Jeder gespeicherte Höhenmeter zählt – Schritt für Schritt wächst deine Höhenwelt.';
@@ -113,40 +124,45 @@
         ];
         panel.innerHTML = intro('Dein Höhenkonto · ' + getYear(), 'Höhenwelt', 'Dein gespeicherter Aufstieg als persönliche Höhenmarke – symbolisch verglichen, nicht geografisch dargestellt.') +
             '<div class="bergwelt-grid">' +
-            statCard('Aufstieg im Jahr', fmt(total), 'hm') +
-            statCard('Noch bis 3.000 hm', fmt(Math.max(0, 3000 - total)), 'hm', Math.min(100, total / 3000 * 100)) +
+            statCard('Aufstieg im Jahr', fmtKnown(knownTotal), 'hm') +
+            statCard('Noch bis 3.000 hm', knownTotal === null ? '–' : fmt(Math.max(0, 3000 - total)), 'hm', knownTotal === null ? null : Math.min(100, total / 3000 * 100)) +
             '</div><h3 class="bergwelt-section-title">Bergmarken zum Vergleich</h3><div class="bergwelt-grid">' +
-            markerCards.map(m => statCard(m.name, fmt(m.height), 'm', Math.min(100, total / m.height * 100))).join('') +
+            markerCards.map(m => statCard(m.name, fmt(m.height), 'm', knownTotal === null ? null : Math.min(100, total / m.height * 100))).join('') +
             '</div><p class="bergwelt-footnote">' + escapeHTML(comparison) + (next ? ' Nächste persönliche Vergleichsmarke: ' + fmt(next) + ' hm.' : '') + ' Es werden nur gespeicherte Aufstiegswerte addiert.</p>';
     }
     function renderLevel() {
         const entries = yearTours();
-        const dist = sum(entries, distance);
-        const asc = sum(entries, ascent);
-        const mins = sum(entries, minutes);
-        const peakCount = sum(entries, peaks);
-        const maxAscent = Math.max(0, ...entries.map(ascent));
+        const dist = sumKnown(entries, distanceValue);
+        const asc = sumKnown(entries, ascentValue);
+        const mins = sumKnown(entries, minutesValue);
+        const peakCount = sumKnown(entries, peaksValue);
+        const maxAscent = maxKnown(entries, ascentValue);
         const validSteepness = entries
             .filter(e => ascentValue(e) !== null && distanceValue(e) !== null && distanceValue(e) > 0)
             .map(e => ascentValue(e) / distanceValue(e));
-        const maxSteepness = validSteepness.length ? Math.max(...validSteepness) : 0;
-        const maxSteps = Math.max(0, ...entries.map(e => parseNumber(e.schritte || e.steps)));
+        const maxSteepness = validSteepness.length ? Math.max(...validSteepness) : null;
+        const activityTypes = new Set(entries.map(e => String(e.aktivitaet || e.tourart || e.typ || '').trim()).filter(Boolean));
+        const activityCount = entries.length ? activityTypes.size : null;
         const definitions = [
             ['Höhenmeter-Spezialist', asc, 5000, '5.000 hm Jahresaufstieg'],
             ['Gipfelsammler', peakCount, 10, '10 gespeicherte Gipfel'],
-            ['Ausdauer-Alpinist', mins / 60, 25, '25 Stunden Gehzeit'],
+            ['Ausdauer-Alpinist', mins === null ? null : mins / 60, 25, '25 Stunden Gehzeit'],
             ['Steilheits-Profi', maxSteepness, 200, '200 hm/km bei einer Tour'],
-            ['Vielseitiger Wanderer', new Set(entries.map(e => String(e.aktivitaet || e.tourart || e.typ || '').trim()).filter(Boolean)).size, 3, '3 gespeicherte Aktivitätstypen']
+            ['Vielseitiger Wanderer', activityCount, 3, '3 gespeicherte Aktivitätstypen']
         ];
-        const levels = definitions.map(([name, value, target, detail]) => ({ name, value, target, detail, pct: Math.min(100, value / target * 100) }));
+        const levels = definitions.map(([name, value, target, detail]) => ({
+            name, value, target, detail,
+            pct: value === null ? null : Math.min(100, value / target * 100)
+        }));
         panel.innerHTML = intro('Dein Profil · ' + getYear(), 'Dein Bergsteiger-Level', 'Fünf nachvollziehbare Spezialisierungen auf Basis deiner gespeicherten Touren. Die Zielwerte sind Orientierung, keine Wertung.') +
             '<div class="bergwelt-grid">' +
-            statCard('Jahresstrecke', fmt(dist, 1), 'km') +
-            statCard('Stärkster Einzelaufstieg', fmt(maxAscent), 'hm') +
-            statCard('Gehzeit gesamt', fmt(mins / 60, 1), 'h') +
-            statCard('Gespeicherte Gipfel', fmt(peakCount), 'Gipfel') +
+            statCard('Jahresstrecke', fmtKnown(dist, 1), 'km') +
+            statCard('Stärkster Einzelaufstieg', fmtKnown(maxAscent), 'hm') +
+            statCard('Gehzeit gesamt', mins === null ? '–' : fmt(mins / 60, 1), 'h') +
+            statCard('Gespeicherte Gipfel', fmtKnown(peakCount), 'Gipfel') +
             '</div><h3 class="bergwelt-section-title">Spezialisierungen</h3>' +
-            levels.map(l => '<div class="bergwelt-level"><div class="bergwelt-level-top"><strong>' + l.name + '</strong><span>' + fmt(l.value, l.name === 'Ausdauer-Alpinist' ? 1 : 0) + ' / ' + fmt(l.target) + '</span></div><div class="bergwelt-track"><span style="width:' + l.pct + '%"></span></div><p class="bergwelt-footnote">' + l.detail + '</p></div>').join('') +
+            levels.map(l => '<div class="bergwelt-level"><div class="bergwelt-level-top"><strong>' + l.name + '</strong><span>' + fmtKnown(l.value, l.name === 'Ausdauer-Alpinist' ? 1 : 0) + ' / ' + fmt(l.target) + '</span></div>' +
+                (l.pct === null ? '<p class="bergwelt-footnote">Keine gültigen Daten für diese Spezialisierung.</p>' : '<div class="bergwelt-track"><span style="width:' + l.pct + '%"></span></div><p class="bergwelt-footnote">' + l.detail + '</p>') + '</div>').join('') +
             '<p class="bergwelt-footnote">Steilheit = gespeicherter Aufstieg ÷ gespeicherte Strecke. Schritte werden nur ausgewertet, wenn sie direkt in den Tourdaten vorliegen.</p>';
     }
     function renderTour() {
@@ -172,8 +188,9 @@
             '</select><button type="button" class="bergwelt-action" id="bergwelt-play-tour">▶ Erleben</button></div>' +
             '<div class="bergwelt-animation" id="bergwelt-animation"><svg class="bergwelt-mountain" viewBox="0 0 600 130" role="img" aria-label="Symbolische Berglinie, kein aufgezeichnetes Höhenprofil"><path d="M12 112 L92 88 L145 101 L226 34 L282 74 L335 58 L405 14 L465 66 L512 48 L588 106"/></svg></div>' +
             '<h3 class="bergwelt-section-title">' + escapeHTML(title) + '</h3><div class="bergwelt-grid">' +
-            statCard('Strecke', fmt(distance(e), 1), 'km') + statCard('Aufstieg', fmt(ascent(e)), 'hm') +
-            statCard('Gehzeit', fmt(minutes(e) / 60, 1), 'h') + statCard('Steilheit', fmt(distance(e) ? ascent(e) / distance(e) : 0), 'hm/km') +
+            statCard('Strecke', fmtKnown(distanceValue(e), 1), 'km') + statCard('Aufstieg', fmtKnown(ascentValue(e)), 'hm') +
+            statCard('Gehzeit', minutesValue(e) === null ? '–' : fmt(minutesValue(e) / 60, 1), 'h') +
+            statCard('Steilheit', ascentValue(e) !== null && distanceValue(e) !== null && distanceValue(e) > 0 ? fmt(ascentValue(e) / distanceValue(e)) : '–', 'hm/km') +
             '</div><p class="bergwelt-footnote">Die Berglinie ist eine dekorative Animation und stellt keine tatsächliche Tourengeometrie dar. Es werden keine fehlenden Messwerte ergänzt.</p>';
         document.getElementById('bergwelt-tour-select')?.addEventListener('change', ev => {
             selectedTourId = ev.target.value;
