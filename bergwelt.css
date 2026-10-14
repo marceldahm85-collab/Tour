@@ -189,15 +189,16 @@
 }
 
 /* ---------------------------------------------------------
-   Bergwelt – mobiles Querformat, an die Stats-View angelehnt.
-   Inhaltsbereich links; gesamte Bedienleiste rechts, als Gruppe
-   vertikal zentriert. Hochformat bleibt von diesen Regeln unberührt.
+   Bergwelt: mobiles Querformat
+   - Eine gemeinsame, theme-editor-fähige rechte Navigationsleiste
+   - Jahr in eigener Zeile, Pfeile darunter, Teilen/Vollbild darunter
+   - Momente-Steuerung als eigene schmale Spalte neben der Canvas
    --------------------------------------------------------- */
 @media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
-    #wrapped-view.bergwelt-ready:not(.wrapped-is-fullscreen) {
+    #wrapped-view.bergwelt-ready:not(.wrapped-is-fullscreen):not(.bergwelt-mode) {
         display: grid !important;
-        grid-template-columns: minmax(0, 1fr) 112px;
-        grid-template-rows: minmax(0, 1fr) auto auto minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1fr) 88px 112px;
+        grid-template-rows: repeat(2, minmax(0, 1fr));
         column-gap: 8px;
         row-gap: 0;
         align-items: stretch;
@@ -210,31 +211,80 @@
         overflow: hidden !important;
     }
 
-    /* Kopfsteuerung rechts oben: Jahr, Pfeile, Teilen, Vollbild. */
-    #wrapped-view.bergwelt-ready .wrapped-header {
-        grid-column: 2;
-        grid-row: 2;
-        align-self: end;
-        justify-self: stretch;
+    /* In Höhenwelt/Level/Tour erleben wird der freie Platz der
+       Momente-Steuerung wieder dem Inhalt zugeschlagen. */
+    #wrapped-view.bergwelt-ready.bergwelt-mode:not(.wrapped-is-fullscreen) {
         display: grid !important;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        grid-template-rows: 36px 36px 36px;
+        grid-template-columns: minmax(0, 1fr) 112px;
+        grid-template-rows: repeat(2, minmax(0, 1fr));
+        column-gap: 8px;
+        row-gap: 0;
+        align-items: stretch;
+        align-content: stretch;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        padding: 8px 12px 10px !important;
+        box-sizing: border-box;
+        overflow: hidden !important;
+    }
+
+    /* Gemeinsame Seitenleiste, wie im Stats-View.
+       Die Theme-Editor-Regeln stylen diese Hülle direkt. */
+    #wrapped-view.bergwelt-ready:not(.wrapped-is-fullscreen) .bergwelt-side-nav {
+        display: flex !important;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        align-self: center;
+        justify-self: stretch;
+        grid-column: 3;
+        grid-row: 1 / -1;
         gap: 4px;
         width: 100%;
         min-width: 0;
         max-width: none;
         height: auto;
-        margin: 0 !important;
-        padding: 6px 6px 4px !important;
+        margin: 0;
+        padding: 5px;
         box-sizing: border-box;
-        background: var(--glass-bg);
-        border: 1px solid var(--glass-border);
-        border-bottom: 0;
-        border-radius: 12px 12px 0 0;
-        z-index: 2;
+        background: var(--glass-bg, var(--ui-card-bg));
+        border: 1px solid var(--glass-border, var(--ui-card-border));
+        border-radius: var(--ui-card-radius, 12px);
+        box-shadow: var(--shadow-soft, none);
+        z-index: 3;
     }
 
-    #wrapped-view.bergwelt-ready .wrapped-header > .wrapped-year-select {
+    #wrapped-view.bergwelt-ready.bergwelt-mode:not(.wrapped-is-fullscreen) .bergwelt-side-nav {
+        grid-column: 2;
+    }
+
+    /* Kopfbereich: genau drei Zeilen.
+       1) Jahr allein
+       2) beide Jahres-Pfeile
+       3) Teilen und Vollbild */
+    #wrapped-view.bergwelt-ready .bergwelt-side-nav > .wrapped-header {
+        order: 1;
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: 36px 34px 34px;
+        gap: 4px;
+        align-items: stretch;
+        justify-content: stretch;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        height: auto;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    #wrapped-view.bergwelt-ready .bergwelt-side-nav > .wrapped-header > .wrapped-year-select {
         grid-column: 1 / -1;
         display: block !important;
         width: 100% !important;
@@ -243,57 +293,71 @@
         height: 36px !important;
         min-height: 36px !important;
         margin: 0 !important;
-        padding: 0 8px !important;
+        padding: 0 7px !important;
         box-sizing: border-box;
+        border: 1px solid var(--year-control-border, var(--ui-card-border));
+        border-radius: 9px;
+        background: var(--year-control-bg, var(--ui-card-bg-interactive));
+        color: var(--text-main);
+        box-shadow: var(--year-control-shadow, var(--shadow-soft));
         text-align: center;
+        font-size: 11px;
+        line-height: 1.1;
     }
 
-    #wrapped-view.bergwelt-ready .wrapped-header > .dash-year-arrow-btn,
-    #wrapped-view.bergwelt-ready .wrapped-header > .wrapped-share-btn {
-        width: 100% !important;
-        min-width: 0 !important;
-        max-width: none !important;
-        height: 36px !important;
-        min-height: 36px !important;
-        margin: 0 !important;
-        padding: 0 !important;
+    #wrapped-view.bergwelt-ready .wrapped-year-select option {
+        background: var(--year-option-bg, var(--ui-card-bg));
+        color: var(--year-option-text, var(--text-main));
+    }
+
+    #wrapped-view.bergwelt-ready .bergwelt-side-nav > .wrapped-header > .dash-year-arrow-btn,
+    #wrapped-view.bergwelt-ready .bergwelt-side-nav > .wrapped-header > .wrapped-share-btn {
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        border-radius: 8px;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        height: 34px !important;
+        min-height: 34px !important;
+        margin: 0 !important;
+        padding: 0 !important;
         box-sizing: border-box;
+        border: 1px solid var(--year-control-border, var(--ui-card-border));
+        border-radius: 9px;
+        background: var(--year-control-bg, var(--ui-card-bg-interactive));
+        color: var(--text-main);
+        box-shadow: var(--year-control-shadow, var(--shadow-soft));
+        font-size: 12px;
+        line-height: 1;
     }
 
-    /* Die vier Bereichsbuttons bilden die untere Hälfte derselben
-       rechten Leiste – genau wie die vertikale Stats-Navigation. */
-    #wrapped-view.bergwelt-ready .bergwelt-tabs {
-        grid-column: 2;
-        grid-row: 3;
-        align-self: start;
-        justify-self: stretch;
+    /* Vier Bereichsbuttons unter den fünf Kopfsteuerungen.
+       Beschriftungen bleiben vollständig sichtbar. */
+    #wrapped-view.bergwelt-ready .bergwelt-side-nav > .bergwelt-tabs {
+        order: 2;
         display: flex !important;
         flex: 0 0 auto;
         flex-direction: column !important;
         flex-wrap: nowrap;
-        align-items: stretch !important;
+        align-items: stretch;
         justify-content: flex-start;
         gap: 4px;
         width: 100%;
         min-width: 0;
         max-width: none;
         height: auto;
-        margin: 0 !important;
-        padding: 4px 6px 6px !important;
+        margin: 0;
+        padding: 0;
         box-sizing: border-box;
-        overflow: visible !important;
-        background: var(--glass-bg);
-        border: 1px solid var(--glass-border);
-        border-top: 0;
-        border-radius: 0 0 12px 12px;
-        z-index: 2;
+        overflow: visible;
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
     }
 
-    #wrapped-view.bergwelt-ready .bergwelt-tab {
+    #wrapped-view.bergwelt-ready .bergwelt-side-nav > .bergwelt-tabs > .bergwelt-tab {
         flex: 0 0 34px;
         width: 100%;
         min-width: 0;
@@ -301,59 +365,106 @@
         height: 34px;
         min-height: 34px;
         margin: 0;
-        padding: 4px 5px;
-        border-radius: 8px;
+        padding: 4px 4px;
+        box-sizing: border-box;
+        border: 1px solid var(--ui-card-border, var(--year-control-border));
+        border-radius: 9px;
+        background: var(--ui-card-bg-interactive, var(--year-control-bg));
+        color: var(--text-main);
+        box-shadow: var(--year-control-shadow, none);
         font-size: 10px;
         font-weight: 600;
-        line-height: 1;
+        line-height: 1.05;
         text-align: center;
         white-space: nowrap;
         overflow: visible;
         text-overflow: clip;
-        box-sizing: border-box;
     }
 
-    /* Momente: die Rückblick-Canvasfläche bleibt vollständig links.
-       Fortschritt und Steuerung liegen an ihren jeweiligen Rändern. */
-    #wrapped-view.bergwelt-ready .wrapped-stage {
+    #wrapped-view.bergwelt-ready .bergwelt-side-nav > .bergwelt-tabs > .bergwelt-tab.is-active {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+        color: var(--text-main);
+        font-weight: 750;
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent);
+    }
+
+    /* Momente: die Canvas bleibt links, die beiden Aktionen stehen
+       kompakt und untereinander in einer eigenen Spalte daneben. */
+    #wrapped-view.bergwelt-ready:not(.bergwelt-mode):not(.wrapped-is-fullscreen) .wrapped-stage {
         grid-column: 1;
         grid-row: 1 / -1;
         width: 100%;
         height: 100%;
         min-width: 0;
         min-height: 0;
-        align-self: stretch;
-        padding: 8px 0 calc(56px + env(safe-area-inset-bottom));
+        margin: 0;
+        padding: 0;
         box-sizing: border-box;
         position: relative;
-        z-index: 0;
+        z-index: 1;
     }
 
-    #wrapped-view.bergwelt-ready .wrapped-progress-bar {
+    #wrapped-view.bergwelt-ready:not(.bergwelt-mode):not(.wrapped-is-fullscreen) .wrapped-progress-bar {
         grid-column: 1;
-        grid-row: 1 / -1;
+        grid-row: 1;
         align-self: start;
         width: 100%;
         min-width: 0;
+        margin: 0;
         padding: 0 10px;
         box-sizing: border-box;
         position: relative;
-        z-index: 2;
+        z-index: 4;
     }
 
-    #wrapped-view.bergwelt-ready .wrapped-controls {
-        grid-column: 1;
+    #wrapped-view.bergwelt-ready:not(.bergwelt-mode):not(.wrapped-is-fullscreen) .wrapped-controls {
+        grid-column: 2;
         grid-row: 1 / -1;
-        align-self: end;
+        align-self: center;
+        justify-self: stretch;
+        display: flex !important;
+        flex: 0 0 auto;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
         min-width: 0;
-        padding: 8px 0 0;
+        max-width: none;
+        height: auto !important;
+        min-height: 0;
+        margin: 0;
+        padding: 0 3px;
         box-sizing: border-box;
         position: relative;
         z-index: 2;
     }
 
-    /* Höhenwelt, Level und Tour erleben belegen die linke Inhaltsfläche. */
-    #wrapped-view.bergwelt-ready .bergwelt-panel:not([hidden]) {
+    #wrapped-view.bergwelt-ready:not(.bergwelt-mode):not(.wrapped-is-fullscreen) .wrapped-controls > .wrapped-control-btn {
+        flex: 0 0 36px;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        height: 36px;
+        min-height: 36px;
+        margin: 0;
+        padding: 0 3px;
+        box-sizing: border-box;
+        border: 1px solid var(--ui-card-border, var(--year-control-border));
+        border-radius: 9px;
+        background: var(--ui-card-bg-interactive, var(--year-control-bg));
+        color: var(--text-main);
+        box-shadow: var(--year-control-shadow, none);
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    /* Die drei Bergwelt-Inhaltsbereiche bleiben links neben der
+       gemeinsamen rechten Leiste scrollbar. */
+    #wrapped-view.bergwelt-ready.bergwelt-mode:not(.wrapped-is-fullscreen) .bergwelt-panel:not([hidden]) {
         grid-column: 1;
         grid-row: 1 / -1;
         width: 100%;
@@ -365,11 +476,11 @@
         margin: 0;
         padding: 8px 12px 12px;
         overflow-y: auto;
+        overscroll-behavior: contain;
         box-sizing: border-box;
     }
 }
 
 @media (max-width: 420px) {
-    #wrapped-view .bergwelt-tabs { justify-content: flex-start; padding-inline: 10px; }
-    #wrapped-view .bergwelt-tab { padding-inline: 2px; font-size: 10px; }
+    #wrapped-view.bergwelt-ready .bergwelt-tab { padding-inline: 3px; font-size: 10px; }
 }
