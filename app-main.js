@@ -28840,6 +28840,7 @@ case 'steps': {
 const IDB_NAME  = 'BergtorenDB';
 const IDB_VER   = 1;
 const IDB_STORE = 'keyval';
+const STARTUP_IGNORED_STORAGE_KEY = 'preispilot-osttirol-v1';
 let   _db       = null;
 let   _dbOpenPromise = null;
 const _cache    = {};
@@ -28962,38 +28963,48 @@ function _idbGetAll() {
     return _openDB().then(db => new Promise((res, rej) => {
         const tx = db.transaction(IDB_STORE, 'readonly');
         const store = tx.objectStore(IDB_STORE);
-        const keysRequest = store.getAllKeys();
-        const valuesRequest = store.getAll();
 
-        let keys;
-        let values;
-        let keysLoaded = false;
-        let valuesLoaded = false;
+        // Die App-Datenbank enthält noch einen fremden, hier ungenutzten
+        // 425-KB-Eintrag aus PreisPilot. Er bleibt erhalten, wird aber beim
+        // Tour-Appstart nicht mitgeladen. Beide offenen Schlüsselbereiche
+        // erlauben weiter gebündelte Leseanforderungen.
+        const excludedKey = STARTUP_IGNORED_STORAGE_KEY;
+        const groups = [
+            { range: IDBKeyRange.upperBound(excludedKey, true), keys: null, values: null },
+            { range: IDBKeyRange.lowerBound(excludedKey, true), keys: null, values: null }
+        ];
 
-        keysRequest.onsuccess = () => {
-            keys = keysRequest.result;
-            keysLoaded = true;
-        };
-        valuesRequest.onsuccess = () => {
-            values = valuesRequest.result;
-            valuesLoaded = true;
-        };
+        const requests = [];
+        groups.forEach(group => {
+            const keysRequest = store.getAllKeys(group.range);
+            const valuesRequest = store.getAll(group.range);
+            requests.push(keysRequest, valuesRequest);
+            keysRequest.onsuccess = () => { group.keys = keysRequest.result; };
+            valuesRequest.onsuccess = () => { group.values = valuesRequest.result; };
+        });
 
         const fail = () => rej(
-            tx.error || keysRequest.error || valuesRequest.error ||
+            tx.error || requests.find(request => request.error)?.error ||
             new Error('IndexedDB konnte die gespeicherten Einträge nicht laden.')
         );
         tx.onerror = fail;
         tx.onabort = fail;
         tx.oncomplete = () => {
-            if (!keysLoaded || !valuesLoaded || keys.length !== values.length) {
+            const valid = groups.every(group =>
+                Array.isArray(group.keys) &&
+                Array.isArray(group.values) &&
+                group.keys.length === group.values.length
+            );
+            if (!valid) {
                 rej(new Error('IndexedDB hat Schlüssel und Werte nicht vollständig geliefert.'));
                 return;
             }
-            // getAllKeys() und getAll() liefern Einträge in derselben
-            // IndexedDB-Schlüsselreihenfolge. Damit bleibt das bisherige
-            // [{ key, value }]-Format erhalten, ohne Cursor-Schritt pro Eintrag.
-            res(keys.map((key, index) => ({ key, value: values[index] })));
+
+            // Unterer Schlüsselbereich gefolgt vom oberen Bereich erhält
+            // die IndexedDB-Schlüsselreihenfolge und das [{key, value}]-Format.
+            res(groups.flatMap(group =>
+                group.keys.map((key, index) => ({ key, value: group.values[index] }))
+            ));
         };
     }));
 }
@@ -30019,6 +30030,10 @@ async function initStorage() {
     const all = await _idbGetAll();
     if (APP_PERF_ENABLED) {
         appPerfRecord('_idbGetAll', performance.now() - storageStepStart);
+        console.info(
+            '[PERF] Nicht mitgeladen (bleibt gespeichert):',
+            STARTUP_IGNORED_STORAGE_KEY
+        );
 
         // Diagnose only: identify large stored values that may dominate IndexedDB reads.
         // This serialization runs only with ?perf=1 and does not alter stored data.
