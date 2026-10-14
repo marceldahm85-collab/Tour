@@ -73,7 +73,7 @@ applyThemeEditorFontSize(
     getThemeEditorFontSizeScale(),
     false
 );
-    initThemeEditor();
+    // initThemeEditor() wird beim ersten Öffnen der Theme-Ansicht ausgeführt.
 
     // Box-Höhen korrekt setzen, falls aktiv
     document.querySelectorAll('.box').forEach(box => {
@@ -13771,6 +13771,12 @@ function goToView(targetView, animate = true) {
     const targetIndex = viewOrder.indexOf(targetView);
     if (targetIndex === -1) return;
 
+    // Das Theme-Editor-Formular liegt beim Appstart unsichtbar im DOM.
+    // Seine Listener und Formularwerte erst beim ersten Öffnen initialisieren.
+    if (targetView === 'theme') {
+        initThemeEditor();
+    }
+
     const previousView = currentView;
     const isViewChange = targetView !== currentView;
 
@@ -22580,7 +22586,11 @@ function initThemeEditorAccordions(view) {
     }
 }
 
+let themeEditorInitialized = false;
+
 function initThemeEditor() {
+    if (themeEditorInitialized) return;
+
     const view = document.getElementById('theme-view');
     if (!view) return;
 
@@ -22675,6 +22685,7 @@ function initThemeEditor() {
 
     selectTab(themeEditorGetActiveTheme());
     applyThemeEditorSettingsToDom();
+    themeEditorInitialized = true;
 }
 
 /* =========================================================
