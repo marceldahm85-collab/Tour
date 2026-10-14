@@ -34032,7 +34032,25 @@ const endHold = () => {
 
     document.getElementById('wrapped-year-select').addEventListener('change', e => {
         openWrappedView(Number(e.target.value));
+        window.__bergweltRender?.();
     });
+
+    function shiftWrappedYear(direction) {
+        const select = document.getElementById('wrapped-year-select');
+        if (!select) return;
+        const years = getWrappedAvailableYears();
+        if (!years.length) return;
+        const current = Number(select.value) || wrappedCurrentYear || years[0];
+        let index = years.indexOf(current);
+        if (index < 0) index = 0;
+        const nextIndex = Math.max(0, Math.min(years.length - 1, index + (direction === 'next' ? -1 : 1)));
+        if (years[nextIndex] === current) return;
+        select.value = String(years[nextIndex]);
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    document.getElementById('wrapped-year-prev-btn')?.addEventListener('click', () => shiftWrappedYear('prev'));
+    document.getElementById('wrapped-year-next-btn')?.addEventListener('click', () => shiftWrappedYear('next'));
 
     document.getElementById('wrapped-share-btn').addEventListener('click', () => {
         shareAllWrappedSlides(wrappedCurrentYear);
