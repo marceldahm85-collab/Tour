@@ -28858,9 +28858,12 @@ const IDB_NAME  = 'BergtorenDB';
 const IDB_VER   = 1;
 const IDB_STORE = 'keyval';
 const STARTUP_IGNORED_STORAGE_KEY = 'preispilot-osttirol-v1';
+const TOUR_IMAGE_STORAGE_PREFIX = '~tourImage:';
+const TOUR_IMAGE_SPLIT_MARKER = '__tourImagesSplit_v1__';
 let   _db       = null;
 let   _dbOpenPromise = null;
 const _cache    = {};
+const tourImageLoadPromises = new Map();
 let _storageWriteQueue = Promise.resolve();
 
 function cloneStorageValue(value) {
@@ -28970,6 +28973,123 @@ function _idbSet(key, val) {
         req.onsuccess = res; req.onerror = () => rej(req.error);
     }));
 }
+function _idbGet(key) {
+    return _openDB().then(db => new Promise((res, rej) => {
+        const req = db.transaction(IDB_STORE, 'readonly').objectStore(IDB_STORE).get(key);
+        req.onsuccess = () => res(req.result == null ? null : req.result);
+        req.onerror = () => rej(req.error);
+    }));
+}
+
+// Liefert einen speicherbaren Touren-Datensatz ohne eingebettete Bilddaten.
+// Tourbilder werden unter stabilen Tour-IDs separat gespeichert.
+function prepareTourStorageEntries(tours) {
+    const metadataTours = [];
+    const imageWrites = [];
+    const imageDeletes = [];
+
+    tours.forEach(entry => {
+        if (!entry || typeof entry !== 'object') {
+            metadataTours.push(entry);
+            return;
+        }
+
+        const metadata = { ...entry };
+        const hasImageProperty = Object.prototype.hasOwnProperty.call(entry, 'imageData');
+        const imageData = typeof entry.imageData === 'string' ? entry.imageData : '';
+        const id = String(entry.id || '').trim();
+
+        if (hasImageProperty && id) {
+            const imageKey = TOUR_IMAGE_STORAGE_PREFIX + id;
+            if (imageData) {
+                imageWrites.push({ key: imageKey, value: imageData });
+                metadata.hasImage = true;
+                entry.hasImage = true;
+            } else {
+                imageDeletes.push(imageKey);
+                metadata.hasImage = false;
+                entry.hasImage = false;
+            }
+            delete metadata.imageData;
+        } else if (imageData && !id) {
+            // Bei unerwarteten Einträgen ohne ID nichts entfernen: Inline-Bild
+            // bleibt als sichere Rückfallvariante erhalten.
+            metadata.hasImage = true;
+            entry.hasImage = true;
+        } else {
+            metadata.hasImage = Boolean(entry.hasImage);
+            if (hasImageProperty && !imageData) {
+                delete metadata.imageData;
+            }
+        }
+
+        metadataTours.push(metadata);
+    });
+
+    return { metadataTours, imageWrites, imageDeletes };
+}
+
+// Speichert Metadaten, Bildänderungen und Versionsmarker atomar in einer
+// IndexedDB-Transaktion. Ein Abbruch lässt den vorherigen Stand intakt.
+function _idbWritePreparedTourStorage(prepared) {
+    return _openDB().then(db => new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        const store = tx.objectStore(IDB_STORE);
+
+        store.put(prepared.metadataTours, 'touren');
+        prepared.imageWrites.forEach(item => store.put(item.value, item.key));
+        prepared.imageDeletes.forEach(key => store.delete(key));
+        store.put(true, TOUR_IMAGE_SPLIT_MARKER);
+
+        const fail = () => reject(
+            tx.error || new Error('Touren und Tourbilder konnten nicht gemeinsam gespeichert werden.')
+        );
+        tx.onerror = fail;
+        tx.onabort = fail;
+        tx.oncomplete = () => resolve(prepared.metadataTours);
+    }));
+}
+
+async function loadTourImageData(entry) {
+    if (!entry || typeof entry !== 'object') return entry;
+    if (typeof entry.imageData === 'string' && entry.imageData) return entry;
+    if (!entry.hasImage || !entry.id) return entry;
+
+    const id = String(entry.id);
+    const key = TOUR_IMAGE_STORAGE_PREFIX + id;
+    let imagePromise = tourImageLoadPromises.get(key);
+
+    if (!imagePromise) {
+        imagePromise = _idbGet(key)
+            .then(value => typeof value === 'string' ? value : '')
+            .catch(error => {
+                console.warn('[Storage] Tourbild konnte nicht geladen werden:', error);
+                return '';
+            })
+            .finally(() => tourImageLoadPromises.delete(key));
+        tourImageLoadPromises.set(key, imagePromise);
+    }
+
+    const imageData = await imagePromise;
+    if (imageData) {
+        entry.imageData = imageData;
+        entry.hasImage = true;
+    } else {
+        entry.hasImage = false;
+    }
+
+    return entry;
+}
+
+async function loadTourImagesForEntries(entries) {
+    const list = Array.isArray(entries) ? entries : [];
+    await Promise.all(list.map(entry => loadTourImageData(entry)));
+    return list;
+}
+
+// Für den getrennten PDF-Magazin-Renderer, der in einer eigenen Datei liegt.
+window.loadTourImagesForEntries = loadTourImagesForEntries;
+
 function _idbDel(key) {
     return _openDB().then(db => new Promise((res, rej) => {
         const req = db.transaction(IDB_STORE,'readwrite').objectStore(IDB_STORE).delete(key);
@@ -28981,14 +29101,15 @@ function _idbGetAll() {
         const tx = db.transaction(IDB_STORE, 'readonly');
         const store = tx.objectStore(IDB_STORE);
 
-        // Die App-Datenbank enthält noch einen fremden, hier ungenutzten
-        // 425-KB-Eintrag aus PreisPilot. Er bleibt erhalten, wird aber beim
-        // Tour-Appstart nicht mitgeladen. Beide offenen Schlüsselbereiche
-        // erlauben weiter gebündelte Leseanforderungen.
+        // Zwei große Werte werden aus dem kritischen Startpfad ausgelassen:
+        // PreisPilot (fremder Datensatz) und die separat gespeicherten Tourbilder.
+        // Die Bilddaten bleiben in IndexedDB und werden bei Bedarf nachgeladen.
         const excludedKey = STARTUP_IGNORED_STORAGE_KEY;
+        const imagePrefixMax = TOUR_IMAGE_STORAGE_PREFIX + '\\uffff';
         const groups = [
             { range: IDBKeyRange.upperBound(excludedKey, true), keys: null, values: null },
-            { range: IDBKeyRange.lowerBound(excludedKey, true), keys: null, values: null }
+            { range: IDBKeyRange.bound(excludedKey, true, TOUR_IMAGE_STORAGE_PREFIX, true), keys: null, values: null },
+            { range: IDBKeyRange.lowerBound(imagePrefixMax, true), keys: null, values: null }
         ];
 
         const requests = [];
@@ -29077,9 +29198,19 @@ const appStorage = {
         const snapshot =
             cloneStorageValue(val);
 
-        queueStorageWrite(
-            () => _idbSet(key, snapshot)
-        );
+        if (key === 'touren' && Array.isArray(snapshot)) {
+            // Daten bleiben im synchronen Speicher-Cache wie bisher verfügbar.
+            // Persistiert werden jedoch nur Tourmetadaten; Bilder werden separat
+            // abgelegt und bei Bedarf für Details, Wrapped, PDF oder Sicherung geladen.
+            const prepared = prepareTourStorageEntries(snapshot);
+            queueStorageWrite(
+                () => _idbWritePreparedTourStorage(prepared)
+            );
+        } else {
+            queueStorageWrite(
+                () => _idbSet(key, snapshot)
+            );
+        }
     },
 
 
