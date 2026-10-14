@@ -33481,9 +33481,22 @@ if (APP_PERF_ENABLED) {
     [
         'initStorage',
 
-        // migrateToIDB und _idbGetAll werden in initStorage()
-        // bereits direkt gemessen. Nicht zusätzlich wrappen, sonst
-        // würden dieselben Aufrufe doppelt in der Statistik erscheinen.
+        // Storage-Teilschritte werden innerhalb von initStorage()
+        // direkt gemessen und deshalb hier nicht zusätzlich gewrappt.
+        // Die folgenden bislang nicht einzeln erfassten Startup-Aufgaben
+        // helfen, nach dem Storage-Laden den verbleibenden Zeitbedarf zu finden.
+        'initTheme',
+        'migrateLegacyDifficultyValues',
+        'migrateStoredEntryIds',
+        'computeAllAchievements',
+        'recomputeAndSyncAchievements',
+        'checkAchievementsWeeklyBanner',
+        'initThemeEditor',
+        'initMobileCustomSelects',
+        'initAchievementsUI',
+        'initWrappedControls',
+        'checkWrappedJanuaryReminder',
+        'restoreLinkedFileHandleOnStartup',
 
         'loadData',
         'getFilteredData',
