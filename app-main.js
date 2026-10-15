@@ -34141,7 +34141,7 @@ const endHold = () => {
         if (!document.querySelector('link[data-bergwelt-styles]')) {
             const styleLink = document.createElement('link');
             styleLink.rel = 'stylesheet';
-            styleLink.href = './bergwelt.css?v=16';
+            styleLink.href = './bergwelt.css?v=17';
             styleLink.dataset.bergweltStyles = '1';
             document.head.appendChild(styleLink);
         }
