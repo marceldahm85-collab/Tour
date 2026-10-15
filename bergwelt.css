@@ -123,6 +123,22 @@
 #wrapped-view .bergwelt-story-step.is-current > span { border-color:var(--accent-color,currentColor);background:color-mix(in srgb,var(--accent-color,currentColor) 16%,transparent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent-color,currentColor) 8%,transparent); }
 #wrapped-view .bergwelt-story-connector { flex:0 1 28px;height:1px;background:color-mix(in srgb,currentColor 20%,transparent); }
 #wrapped-view .bergwelt-story-connector.is-active { background:color-mix(in srgb,var(--accent-color,currentColor) 58%,transparent); }
+#wrapped-view .bergwelt-story-step.is-complete:not(.is-current) { opacity:.9; }
+#wrapped-view .bergwelt-story-rail.is-finale .bergwelt-story-step.is-current { animation:bergwelt-finale-glow 1.8s ease-in-out infinite alternate; }
+@keyframes bergwelt-finale-glow { from { filter:drop-shadow(0 0 0 color-mix(in srgb,var(--accent-color,currentColor) 0%,transparent)); } to { filter:drop-shadow(0 0 8px color-mix(in srgb,var(--accent-color,currentColor) 42%,transparent)); } }
+#wrapped-view .bergwelt-tour-finale {
+    margin:18px 0;padding:20px 16px;text-align:center;border:1px solid color-mix(in srgb,var(--accent-color,currentColor) 38%,transparent);
+    border-radius:20px;background:radial-gradient(ellipse at 50% 0%,color-mix(in srgb,var(--accent-color,currentColor) 17%,transparent),transparent 72%),color-mix(in srgb,var(--ui-card-bg,#111) 92%,transparent);
+    box-shadow:0 10px 34px color-mix(in srgb,var(--accent-color,currentColor) 10%,transparent);animation:bergwelt-finale-rise .55s cubic-bezier(.2,.8,.2,1) both;
+}
+#wrapped-view .bergwelt-tour-finale[hidden] { display:none; }
+#wrapped-view .bergwelt-tour-finale-kicker { margin:0 0 8px;color:var(--accent-color,currentColor);font-size:.65rem;font-weight:900;letter-spacing:.16em; }
+#wrapped-view .bergwelt-tour-finale h3 { margin:0 auto 8px;font-size:clamp(1.2rem,4.5vw,1.65rem);line-height:1.15; }
+#wrapped-view .bergwelt-tour-finale p:not(.bergwelt-tour-finale-kicker) { margin:0 0 15px;opacity:.82;font-size:.86rem; }
+#wrapped-view .bergwelt-tour-finale-return { display:inline-flex;align-items:center;justify-content:center;gap:8px;max-width:100%;padding:11px 15px;border:1px solid color-mix(in srgb,var(--accent-color,currentColor) 50%,transparent);border-radius:999px;background:color-mix(in srgb,var(--accent-color,currentColor) 13%,transparent);color:inherit;font:inherit;font-weight:750;cursor:pointer; }
+#wrapped-view .bergwelt-tour-finale-return:focus-visible { outline:2px solid var(--accent-color,currentColor);outline-offset:3px; }
+@keyframes bergwelt-finale-rise { from { opacity:0;transform:translateY(10px) scale(.985); } to { opacity:1;transform:translateY(0) scale(1); } }
+@media (prefers-reduced-motion:reduce) { #wrapped-view .bergwelt-story-rail.is-finale .bergwelt-story-step.is-current { animation:none; } #wrapped-view .bergwelt-tour-finale { animation:none; } }
 @media (max-width:420px) {
     #wrapped-view .bergwelt-story-rail { gap:4px;padding:9px 7px; }
     #wrapped-view .bergwelt-story-step strong { font-size:.6rem; }

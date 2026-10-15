@@ -104,13 +104,16 @@
         </header>`;
     const empty = text => '<div class="bergwelt-empty">' + text + '</div>';
     // Verbindet den Jahresrückblick mit der Expedition zu einem klaren Erlebnisablauf.
-    const experienceStoryRail = () => '<nav class="bergwelt-story-rail" aria-label="Dein Saisonerlebnis">' +
-        '<button type="button" class="bergwelt-story-step is-complete" data-bergwelt-back-to-moments><span>01</span><strong>Momente</strong></button>' +
-        '<span class="bergwelt-story-connector is-active" aria-hidden="true"></span>' +
-        '<span class="bergwelt-story-step is-current" aria-current="step"><span>02</span><strong>Expedition</strong></span>' +
-        '<span class="bergwelt-story-connector" aria-hidden="true"></span>' +
-        '<span class="bergwelt-story-step"><span>03</span><strong>Gipfelmoment</strong></span>' +
-    '</nav>';
+    const experienceStoryRail = (chapter = 'expedition') => {
+        const finale = chapter === 'finale';
+        return '<nav class="bergwelt-story-rail' + (finale ? ' is-finale' : '') + '" aria-label="Dein Saisonerlebnis">' +
+            '<button type="button" class="bergwelt-story-step is-complete" data-bergwelt-back-to-moments><span>01</span><strong>Momente</strong></button>' +
+            '<span class="bergwelt-story-connector is-active" aria-hidden="true"></span>' +
+            '<span class="bergwelt-story-step is-complete"><span>02</span><strong>Expedition</strong></span>' +
+            '<span class="bergwelt-story-connector' + (finale ? ' is-active' : '') + '" aria-hidden="true"></span>' +
+            '<span class="bergwelt-story-step' + (finale ? ' is-current' : '') + '"' + (finale ? ' aria-current="step"' : '') + '><span>03</span><strong>Gipfelmoment</strong></span>' +
+        '</nav>';
+    };
 
     function renderMomente() {
         panel.hidden = true;
@@ -441,6 +444,12 @@
                 '<p class="bergwelt-tour-stage-hint">Du kannst die Etappen direkt auswählen oder die Expedition abspielen, pausieren und fortsetzen.</p>' +
                 '<div class="bergwelt-tour-steps" id="bergwelt-tour-steps" aria-label="Tour-Etappen">' + stepMarkup + '</div>' +
             '</section>' +
+            '<section class="bergwelt-tour-finale" id="bergwelt-tour-finale" hidden aria-live="polite">' +
+                '<p class="bergwelt-tour-finale-kicker">EXPEDITION ABGESCHLOSSEN</p>' +
+                '<h3>Dieser Gipfel gehört zu deiner Geschichte.</h3>' +
+                '<p>' + escapeHTML(title) + ' · ' + (tourAscent !== null ? fmt(tourAscent) + ' hm Aufstieg' : 'Dein Bergabenteuer') + (tourDistance !== null ? ' · ' + fmt(tourDistance, 1) + ' km' : '') + '</p>' +
+                '<button type="button" class="bergwelt-tour-finale-return" data-bergwelt-back-to-moments>Meine Saisonmomente ansehen →</button>' +
+            '</section>' +
             '<h3 class="bergwelt-section-title">' + escapeHTML(title) + '</h3><div class="bergwelt-grid">' +
             statCard('Strecke', fmtKnown(tourDistance, 1), 'km') + statCard('Aufstieg', fmtKnown(tourAscent), 'hm') +
             statCard('Gehzeit', duration === null ? '–' : fmt(duration / 60, 1), 'h') +
@@ -517,6 +526,19 @@
             scene.classList.toggle('is-running', playing);
             scene.classList.toggle('is-complete', tourProgress >= 1);
             scene.classList.toggle('is-summit-moment', summitIndex >= 0 && stageIndex === summitIndex);
+            const finale = document.getElementById('bergwelt-tour-finale');
+            if (finale) finale.hidden = tourProgress < 1;
+            if (tourProgress >= 1) {
+                const storyRail = panel.querySelector('.bergwelt-story-rail');
+                if (storyRail && !storyRail.classList.contains('is-finale')) {
+                    storyRail.outerHTML = experienceStoryRail('finale');
+                }
+            } else {
+                const storyRail = panel.querySelector('.bergwelt-story-rail');
+                if (storyRail?.classList.contains('is-finale')) {
+                    storyRail.outerHTML = experienceStoryRail('expedition');
+                }
+            }
             scene.querySelectorAll('[data-tour-step]').forEach((stepButton, i) => {
                 stepButton.classList.toggle('is-revealed', i <= stageIndex);
                 stepButton.classList.toggle('is-current', i === stageIndex);
