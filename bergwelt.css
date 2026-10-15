@@ -967,7 +967,7 @@
 #wrapped-view .bergwelt-tour-ridge-front { fill: url(#bw-tour-front); stroke: color-mix(in srgb,var(--accent-color,currentColor) 24%,transparent); stroke-width: 1.5; }
 #wrapped-view .bergwelt-tour-route-bed { fill:none;stroke:color-mix(in srgb,var(--text-main,#fff) 28%,transparent);stroke-width:3;stroke-linecap:round;stroke-dasharray:3 7; }
 #wrapped-view .bergwelt-tour-route { fill:none;stroke:var(--accent-color,currentColor);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;filter:url(#bw-tour-glow); }
-#wrapped-view .bergwelt-hiker { filter:drop-shadow(0 0 5px color-mix(in srgb,var(--accent-color,currentColor) 44%,transparent)); }
+#wrapped-view .bergwelt-hiker { opacity:1;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--accent-color,currentColor) 44%,transparent)); }
 #wrapped-view .bergwelt-hiker-shadow { fill:color-mix(in srgb,var(--ui-card-bg,#111) 58%,transparent); }
 #wrapped-view .bergwelt-hiker-head { fill:var(--text-main,#fff);stroke:var(--ui-card-bg,#111);stroke-width:1.5; }
 #wrapped-view .bergwelt-hiker-body { fill:none;stroke:var(--text-main,#fff);stroke-width:3.6;stroke-linecap:round;stroke-linejoin:round; }
