@@ -121,10 +121,10 @@
             { name: '100.000 Höhenmeter', height: 100000 }
         ];
         const next = careerAscent === null ? null : (milestones.find(m => m.height > total) || null);
-        const previous = careerAscent === null ? null : milestones.slice().reverse().find(m => total >= m.height);
-        const segmentStart = previous?.height || 0;
+        // Fortschritt bedeutet hier: gesammelte Höhenmeter im Verhältnis zum nächsten Ziel.
+        // Dadurch stimmt der Wert mit den Prozentangaben in den einzelnen Höhenmarken überein.
         const progress = careerAscent === null ? 0 : next
-            ? Math.max(0, Math.min(100, (total - segmentStart) / (next.height - segmentStart) * 100))
+            ? Math.max(0, Math.min(100, total / next.height * 100))
             : 100;
         const comparison = careerAscent === null ? 'Für deine gespeicherten Touren liegen keine gültigen Aufstiegswerte vor.' :
             total >= 100000 ? 'Du hast die Marke von 100.000 Höhenmetern überschritten – eine außergewöhnliche persönliche Leistung.' :
@@ -168,8 +168,8 @@
                     '</svg>' +
                     '<div class="bergwelt-height-overlay"><span>Dein kumulierter Aufstieg</span><strong>' + fmtKnown(careerAscent) + ' <small>hm</small></strong></div>' +
                 '</div>' +
-                '<div class="bergwelt-height-progress"><div class="bergwelt-height-progress-label"><span>' + (careerAscent === null ? 'Fortschritt nicht verfügbar' : next ? 'Auf dem Weg zu ' + next.name : 'Alle bisherigen Höhenmarken erreicht') + '</span><strong>' + (careerAscent === null ? '–' : fmt(progress, 0) + '%') + '</strong></div><div class="bergwelt-track"><span style="width:' + progress + '%"></span></div>' +
-                    '<p class="bergwelt-footnote">' + (careerAscent === null ? 'Es fehlen gültige Aufstiegswerte.' : next ? fmt(Math.max(0, next.height - total)) + ' hm bis zur nächsten Marke (' + fmt(next.height) + ' hm).' : 'Die nächste Vergleichsstufe ist erreicht. Deine persönliche Höhenwelt wächst weiter.') + '</p></div>' +
+                '<div class="bergwelt-height-progress"><div class="bergwelt-height-progress-label"><span>' + (careerAscent === null ? 'Fortschritt nicht verfügbar' : next ? 'Anteil der nächsten Höhenmarke · ' + next.name : 'Alle bisherigen Höhenmarken erreicht') + '</span><strong>' + (careerAscent === null ? '–' : fmt(progress, 0) + '%') + '</strong></div><div class="bergwelt-track"><span style="width:' + progress + '%"></span></div>' +
+                    '<p class="bergwelt-footnote">' + (careerAscent === null ? 'Es fehlen gültige Aufstiegswerte.' : next ? 'Du hast ' + fmt(progress, 0) + ' % der nächsten Marke gesammelt. Noch ' + fmt(Math.max(0, next.height - total)) + ' hm bis ' + next.name + ' (' + fmt(next.height) + ' hm).' : 'Die nächste Vergleichsstufe ist erreicht. Deine persönliche Höhenwelt wächst weiter.') + '</p></div>' +
             '</div>' +
             '<div class="bergwelt-grid">' +
                 statCard('Aufstieg im Jahr ' + getYear(), fmtKnown(yearAscent), 'hm') +
