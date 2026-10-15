@@ -637,3 +637,69 @@
     #wrapped-view .bergwelt-tour-step { opacity: 1; transform: none; }
     #wrapped-view .bergwelt-hiker { display: none; }
 }
+
+
+/* Tour erleben: die Expedition läuft synchron zur Position des Markers. */
+#wrapped-view .bergwelt-tour-scene { padding: 2px 2px 8px; }
+#wrapped-view .bergwelt-tour-scene .bergwelt-mountain { overflow: visible; }
+#wrapped-view #bergwelt-tour-path {
+    fill: none;
+    stroke: var(--accent-color, currentColor);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 900;
+    stroke-dashoffset: 900;
+}
+#wrapped-view .bergwelt-animation.is-running #bergwelt-tour-path,
+#wrapped-view .bergwelt-animation.is-complete #bergwelt-tour-path {
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 5.2s linear;
+}
+#wrapped-view .bergwelt-hiker {
+    opacity: 1;
+    filter: drop-shadow(0 1px 3px color-mix(in srgb, var(--accent-color, currentColor) 35%, transparent));
+}
+#wrapped-view .bergwelt-tour-progress {
+    height: 5px;
+    margin: 3px 4px 7px;
+    overflow: hidden;
+    border-radius: 99px;
+    background: color-mix(in srgb, currentColor 12%, transparent);
+}
+#wrapped-view .bergwelt-tour-progress > span {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--accent-color, currentColor);
+    transition: width .08s linear;
+}
+#wrapped-view .bergwelt-tour-progress-label {
+    min-height: 1.2em;
+    text-align: center;
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--accent-color, currentColor);
+}
+#wrapped-view .bergwelt-tour-steps { margin-top: 12px; }
+#wrapped-view .bergwelt-tour-step {
+    opacity: .3;
+    transform: translateY(4px);
+    transition: opacity .25s ease, transform .25s ease, border-color .25s ease;
+}
+#wrapped-view .bergwelt-tour-step.is-revealed {
+    opacity: 1;
+    transform: translateY(0);
+    border-color: color-mix(in srgb, var(--accent-color, currentColor) 45%, transparent);
+    background: color-mix(in srgb, var(--accent-color, currentColor) 6%, transparent);
+}
+#wrapped-view .bergwelt-animation.is-running .bergwelt-tour-step {
+    animation: none;
+}
+#wrapped-view .bergwelt-animation.is-complete .bergwelt-tour-step { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+    #wrapped-view .bergwelt-animation.is-running #bergwelt-tour-path,
+    #wrapped-view .bergwelt-tour-progress > span,
+    #wrapped-view .bergwelt-tour-step { transition: none; }
+}
