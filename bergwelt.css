@@ -1141,3 +1141,20 @@
     #wrapped-view .bergwelt-tour-expedition.is-summit-moment .bergwelt-tour-sun,
     #wrapped-view .bergwelt-tour-expedition.is-summit-moment .bergwelt-tour-summit-flag { animation:none; }
 }
+
+
+/* Tour erleben: robuste mobile Bedienung, auch auf schmalen Displays. */
+@media (max-width: 560px) {
+    #wrapped-view .bergwelt-tour-transport button { min-height: 42px; }
+    #wrapped-view .bergwelt-tour-transport .bergwelt-tour-transport-restart { min-height: 36px; }
+    #wrapped-view .bergwelt-tour-finale-return { display:flex;width:100%;min-height:44px;white-space:normal;text-align:center;line-height:1.3; }
+    #wrapped-view .bergwelt-tour-summit-reveal { max-height:calc(100% - 56px);overflow:auto;overscroll-behavior:contain; }
+}
+@media (max-width: 360px) {
+    #wrapped-view .bergwelt-tour-transport { grid-template-columns:minmax(0,.9fr) minmax(0,1.5fr) minmax(0,.9fr); }
+    #wrapped-view .bergwelt-tour-transport button { font-size:.64rem;padding-inline:3px; }
+    #wrapped-view .bergwelt-tour-step { grid-template-columns:21px minmax(0,1fr) 8px;gap:5px;padding:8px 6px; }
+    #wrapped-view .bergwelt-tour-step-number { width:21px;height:21px; }
+    #wrapped-view .bergwelt-tour-step-copy strong { font-size:.69rem; }
+    #wrapped-view .bergwelt-tour-step-copy small { font-size:.61rem; }
+}

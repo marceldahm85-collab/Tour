@@ -20,6 +20,7 @@
     let selectedTourId = '';
     let selectedHeightMilestone = null;
     let animationRun = 0;
+    let activeTourCleanup = null;
 
     const getTours = () => {
         try {
@@ -349,6 +350,10 @@
             '<p class="bergwelt-footnote">Die Höhenmeter-, Gipfel- und Gehzeitstufen beziehen sich auf das ausgewählte Jahr. Steilheit wird nur aus Touren mit gültiger Strecke und gültigem Aufstieg berechnet. Aktivitätstypen werden nur gezählt, wenn sie in den gespeicherten Daten vorhanden sind.</p>';
     }
         function renderTour() {
+        if (activeTourCleanup) {
+            activeTourCleanup();
+            activeTourCleanup = null;
+        }
         const entries = yearTours().slice().sort((a, b) => {
             const dateDiff = (parseTourDate(b.date)?.getTime() || 0) - (parseTourDate(a.date)?.getTime() || 0);
             return dateDiff || Number(a.tourDay || 0) - Number(b.tourDay || 0);
@@ -460,7 +465,7 @@
                     summitReveal +
                     '<span class="bergwelt-tour-symbolic-note">KULISSE SYMBOLISCH · KEINE GPS-ROUTE</span>' +
                 '</div>' +
-                '<div class="bergwelt-tour-progress"><span id="bergwelt-tour-progress-fill"></span></div>' +
+                '<div class="bergwelt-tour-progress" role="progressbar" aria-label="Fortschritt der Expedition" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="bergwelt-tour-progress-fill"></span></div>' +
                 '<div class="bergwelt-tour-progress-meta"><span id="bergwelt-tour-progress-label">Bereit zum Aufbruch</span><strong id="bergwelt-tour-progress-percent">0 %</strong></div>' +
                 '<div class="bergwelt-tour-transport">' +
                     '<button type="button" class="bergwelt-tour-transport-secondary" id="bergwelt-tour-prev" aria-label="Vorherige Etappe">‹ <span>Zurück</span></button>' +
@@ -507,6 +512,7 @@
         const progressPath = document.getElementById('bergwelt-tour-progress-path');
         const hiker = document.getElementById('bergwelt-hiker');
         const fill = document.getElementById('bergwelt-tour-progress-fill');
+        const progressTrack = panel.querySelector('.bergwelt-tour-progress[role="progressbar"]');
         const toggleButton = document.getElementById('bergwelt-tour-toggle');
         const restartButton = document.getElementById('bergwelt-tour-restart');
         const prevButton = document.getElementById('bergwelt-tour-prev');
@@ -544,6 +550,7 @@
             hiker.setAttribute('transform', 'translate(' + point.x + ' ' + point.y + ')');
             progressPath.style.strokeDashoffset = String(pathLength * (1 - tourProgress));
             if (fill) fill.style.width = (tourProgress * 100) + '%';
+            if (progressTrack) progressTrack.setAttribute('aria-valuenow', String(Math.round(tourProgress * 100)));
             if (progressPercent) progressPercent.textContent = fmt(tourProgress * 100) + ' %';
             if (chapter) chapter.textContent = 'EXPEDITION · ETAPPE ' + String(stageIndex + 1).padStart(2, '0');
             if (sceneKicker) sceneKicker.textContent = 'ETAPPE ' + String(stageIndex + 1).padStart(2, '0') + ' / ' + String(stepCount).padStart(2, '0');
@@ -593,6 +600,10 @@
             if (frameId) window.cancelAnimationFrame(frameId);
             frameId = 0;
         };
+        activeTourCleanup = () => {
+            stopAnimation();
+            animationRun++;
+        };
 
         const animateFrame = now => {
             if (runId !== animationRun || !scene.isConnected || !playing) return;
@@ -627,7 +638,6 @@
 
         document.getElementById('bergwelt-tour-select')?.addEventListener('change', ev => {
             stopAnimation();
-            animationRun++;
             selectedTourId = ev.target.value;
             renderTour();
         });
@@ -653,6 +663,10 @@
         updateView(0);
     }
     function render() {
+        if (!(activeTab === 'erlebnis' && experienceMode === 'tour') && activeTourCleanup) {
+            activeTourCleanup();
+            activeTourCleanup = null;
+        }
         if (activeTab === 'erlebnis' && experienceMode === 'momente') return renderMomente();
         root.classList.add('bergwelt-mode');
         panel.hidden = false;
