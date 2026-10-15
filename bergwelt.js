@@ -270,10 +270,16 @@
         const dateLabel = e.date || 'Datum nicht gespeichert';
         const stageLabel = e.tourDay && e.tourDayCount ? ' · Etappe ' + e.tourDay + '/' + e.tourDayCount : '';
         const groupLabel = e.tourGroup ? ' · Mehrtagestour' : '';
-        const distanceLabel = tourDistance === null ? 'keine Streckenangabe' : fmt(tourDistance, 1) + ' km';
-        const ascentLabel = tourAscent === null ? 'kein Aufstiegswert' : fmt(tourAscent) + ' hm';
-        const durationLabel = minutesValue(e) === null ? 'keine Gehzeitangabe' : fmt(minutesValue(e) / 60, 1) + ' h';
-        panel.innerHTML = intro('Tour in Erinnerung · ' + getYear(), 'Tour erleben', 'Erlebe deine gespeicherte Tour in vier kurzen Etappen. Eingeblendet werden ausschließlich Werte aus deinem Tourarchiv.') +
+        const duration = minutesValue(e);
+        const peakCount = peaksValue(e);
+        const steps = [
+            { title: 'Aufbruch', value: dateLabel + stageLabel + groupLabel },
+            { title: 'Strecke', value: tourDistance === null ? 'Keine Streckenangabe gespeichert' : fmt(tourDistance, 1) + ' km' },
+            { title: 'Anstieg', value: tourAscent === null ? 'Kein Aufstiegswert gespeichert' : fmt(tourAscent) + ' hm' }
+        ];
+        if (peakCount !== null && peakCount > 0) steps.push({ title: 'Gipfelmoment', value: fmt(peakCount) + (peakCount === 1 ? ' gespeicherter Gipfel' : ' gespeicherte Gipfel') });
+        steps.push({ title: 'Ankommen', value: duration === null ? 'Keine Gehzeit gespeichert' : fmt(duration / 60, 1) + ' h Gehzeit' });
+        panel.innerHTML = intro('Tour in Erinnerung · ' + getYear(), 'Tour erleben', 'Starte deine Expedition. Die Etappen werden nacheinander freigeschaltet; verwendet werden nur die zu dieser Tour gespeicherten Angaben.') +
             '<div class="bergwelt-tour-row"><select class="bergwelt-select" id="bergwelt-tour-select" aria-label="Gespeicherte Tour auswählen">' +
             entries.map((item, i) => {
                 const stage = item.tourDay && item.tourDayCount ? ' · Etappe ' + item.tourDay + '/' + item.tourDayCount : '';
@@ -281,50 +287,72 @@
                 const itemId = String(item.id ?? i);
                 return '<option value="' + escapeHTML(itemId) + '"' + (itemId === selectedTourId ? ' selected' : '') + '>' + escapeHTML(item.date || '') + ' · ' + escapeHTML(item.tourname || item.region || 'Unbenannte Tour') + escapeHTML(stage + group) + '</option>';
             }).join('') +
-            '</select><button type="button" class="bergwelt-action" id="bergwelt-play-tour">▶ Tour erleben</button></div>' +
+            '</select><button type="button" class="bergwelt-action" id="bergwelt-play-tour">▶ Expedition starten</button></div>' +
             '<div class="bergwelt-animation" id="bergwelt-animation">' +
-                '<svg class="bergwelt-mountain" viewBox="0 0 600 130" role="img" aria-label="Symbolische Berglinie, kein aufgezeichnetes Höhenprofil">' +
-                    '<path id="bergwelt-tour-path" d="M12 112 L92 88 L145 101 L226 34 L282 74 L335 58 L405 14 L465 66 L512 48 L588 106"/>' +
-                    '<circle class="bergwelt-hiker" r="7" cx="12" cy="112"><animateMotion dur="1.8s" begin="indefinite" fill="freeze" path="M12 112 L92 88 L145 101 L226 34 L282 74 L335 58 L405 14 L465 66 L512 48 L588 106"/></circle>' +
-                '</svg>' +
+                '<div class="bergwelt-tour-scene">' +
+                    '<svg class="bergwelt-mountain" viewBox="0 0 600 130" role="img" aria-label="Symbolische Berglinie, kein aufgezeichnetes Höhenprofil">' +
+                        '<path id="bergwelt-tour-path" d="M12 112 L92 88 L145 101 L226 34 L282 74 L335 58 L405 14 L465 66 L512 48 L588 106"/>' +
+                        '<circle class="bergwelt-hiker" id="bergwelt-hiker" r="7" cx="12" cy="112"/>' +
+                    '</svg>' +
+                    '<div class="bergwelt-tour-progress" aria-hidden="true"><span id="bergwelt-tour-progress-fill"></span></div>' +
+                    '<div class="bergwelt-tour-progress-label" id="bergwelt-tour-progress-label">Bereit zum Aufbruch</div>' +
+                '</div>' +
                 '<div class="bergwelt-tour-steps" aria-live="polite">' +
-                    '<div class="bergwelt-tour-step"><span>01</span><div><strong>Aufbruch</strong><small>' + escapeHTML(dateLabel + stageLabel + groupLabel) + '</small></div></div>' +
-                    '<div class="bergwelt-tour-step"><span>02</span><div><strong>Strecke</strong><small>' + escapeHTML(distanceLabel) + '</small></div></div>' +
-                    '<div class="bergwelt-tour-step"><span>03</span><div><strong>Höhenmeter</strong><small>' + escapeHTML(ascentLabel) + '</small></div></div>' +
-                    '<div class="bergwelt-tour-step"><span>04</span><div><strong>Ankommen</strong><small>' + escapeHTML(durationLabel) + '</small></div></div>' +
+                    steps.map((step, i) => '<div class="bergwelt-tour-step" data-step="' + i + '"><span>' + String(i + 1).padStart(2, '0') + '</span><div><strong>' + escapeHTML(step.title) + '</strong><small>' + escapeHTML(step.value) + '</small></div></div>').join('') +
                 '</div>' +
             '</div>' +
             '<h3 class="bergwelt-section-title">' + escapeHTML(title) + '</h3><div class="bergwelt-grid">' +
             statCard('Strecke', fmtKnown(tourDistance, 1), 'km') + statCard('Aufstieg', fmtKnown(tourAscent), 'hm') +
-            statCard('Gehzeit', minutesValue(e) === null ? '–' : fmt(minutesValue(e) / 60, 1), 'h') +
+            statCard('Gehzeit', duration === null ? '–' : fmt(duration / 60, 1), 'h') +
             statCard('Steilheit', fmtKnown(steepness), 'hm/km') +
-            '</div><p class="bergwelt-footnote">Die Berglinie ist symbolisch und kein aufgezeichnetes Höhenprofil. Steilheit wird wie in Stats/Highlights mit halber Strecke berechnet, außer wenn für diese Tour die volle Strecke aktiviert ist.</p>';
+            '</div><p class="bergwelt-footnote">Die Berglinie ist symbolisch und kein aufgezeichnetes Höhenprofil. Es werden keine GPS-Route, Höhenverläufe oder Gipfelnamen erfunden. Steilheit wird wie in Stats/Highlights berechnet.</p>';
         document.getElementById('bergwelt-tour-select')?.addEventListener('change', ev => {
             selectedTourId = ev.target.value;
+            animationRun++;
             renderTour();
         });
         document.getElementById('bergwelt-play-tour')?.addEventListener('click', () => {
-            const mountain = document.getElementById('bergwelt-animation');
-            if (!mountain) return;
-            mountain.classList.remove('is-running');
-            void mountain.offsetWidth;
-            mountain.classList.add('is-running');
-            animationRun++;
-            const motion = mountain.querySelector('.bergwelt-hiker animateMotion');
-            if (motion) {
-                try { motion.beginElement(); } catch (_) { /* SVG-Motion wird bei fehlender Unterstützung übersprungen. */ }
-            }
+            const scene = document.getElementById('bergwelt-animation');
+            const path = document.getElementById('bergwelt-tour-path');
+            const hiker = document.getElementById('bergwelt-hiker');
             const button = document.getElementById('bergwelt-play-tour');
-            if (button) {
-                button.textContent = '⛰️ Unterwegs …';
-                button.disabled = true;
-                window.setTimeout(() => {
-                    if (button.isConnected) {
-                        button.textContent = '↻ Nochmal erleben';
-                        button.disabled = false;
-                    }
-                }, 1900);
-            }
+            const fill = document.getElementById('bergwelt-tour-progress-fill');
+            const label = document.getElementById('bergwelt-tour-progress-label');
+            if (!scene || !path || !hiker || !button) return;
+            const runId = ++animationRun;
+            scene.classList.remove('is-running', 'is-complete');
+            scene.querySelectorAll('.bergwelt-tour-step').forEach(step => step.classList.remove('is-revealed'));
+            if (fill) fill.style.width = '0%';
+            if (label) label.textContent = 'Aufbruch';
+            const totalLength = path.getTotalLength();
+            const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+            button.disabled = true;
+            button.textContent = '⛰️ Expedition läuft …';
+            scene.classList.add('is-running');
+            const durationMs = reduceMotion ? 100 : 5200;
+            const startTime = performance.now();
+            const revealCount = scene.querySelectorAll('.bergwelt-tour-step').length;
+            const labels = ['Aufbruch', 'Strecke erkunden', 'Anstieg bewältigen', 'Gipfelmoment', 'Ankommen'];
+            const frame = now => {
+                if (runId !== animationRun || !scene.isConnected) return;
+                const progress = Math.min(1, (now - startTime) / durationMs);
+                const point = path.getPointAtLength(totalLength * progress);
+                hiker.setAttribute('cx', String(point.x));
+                hiker.setAttribute('cy', String(point.y));
+                if (fill) fill.style.width = (progress * 100) + '%';
+                const revealed = Math.min(revealCount, Math.floor(progress * revealCount) + 1);
+                scene.querySelectorAll('.bergwelt-tour-step').forEach((step, i) => step.classList.toggle('is-revealed', i < revealed));
+                if (label) label.textContent = progress >= 1 ? 'Tour abgeschlossen' : (labels[Math.min(labels.length - 1, revealed - 1)] || 'Unterwegs');
+                if (progress < 1) {
+                    window.requestAnimationFrame(frame);
+                } else {
+                    scene.classList.add('is-complete');
+                    button.disabled = false;
+                    button.textContent = '↻ Expedition erneut erleben';
+                }
+            };
+            hiker.style.display = reduceMotion ? 'none' : '';
+            window.requestAnimationFrame(frame);
         });
     }
     function render() {
