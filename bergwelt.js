@@ -323,7 +323,6 @@
         });
         if (!entries.length) {
             panel.innerHTML = intro('Deine Erinnerung', 'Tour erleben', 'Wähle eine gespeicherte Tour und erlebe ihre Etappen als kleine Expedition.') +
-            '<button type="button" class="bergwelt-action bergwelt-experience-back" data-bergwelt-back-to-moments>‹ Zurück zu deinen Momenten</button>' +
                 '<button type="button" class="bergwelt-action bergwelt-experience-back" data-bergwelt-back-to-moments>‹ Zurück zu deinen Momenten</button>' +
                 empty('Für ' + getYear() + ' sind keine Touren gespeichert.');
             return;
@@ -384,6 +383,7 @@
             : '';
 
         panel.innerHTML = intro('Dein Bergabenteuer · ' + getYear(), 'Tour erleben', 'Wähle eine gespeicherte Tour. Die Landschaft ist bewusst symbolisch; Etappen und Kennzahlen stammen ausschließlich aus deinen Tourdaten.') +
+            '<button type="button" class="bergwelt-action bergwelt-experience-back" data-bergwelt-back-to-moments>‹ Zurück zu deinen Momenten</button>' +
             '<div class="bergwelt-tour-row"><select class="bergwelt-select" id="bergwelt-tour-select" aria-label="Gespeicherte Tour auswählen">' +
             entries.map((item, i) => {
                 const stage = item.tourDay && item.tourDayCount ? ' · Etappe ' + item.tourDay + '/' + item.tourDayCount : '';
