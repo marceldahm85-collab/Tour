@@ -1034,3 +1034,45 @@
     #wrapped-view .bergwelt-tour-transport button,
     #wrapped-view .bergwelt-tour-progress > span { animation:none;transition:none; }
 }
+
+/* Tour erleben: Gipfelmoment mit gespeicherter Gipfelzahl. */
+#wrapped-view .bergwelt-tour-summit-reveal {
+    display:none;position:absolute;z-index:4;top:40%;left:50%;min-width:min(220px,72%);max-width:calc(100% - 32px);
+    padding:15px 22px 13px;box-sizing:border-box;flex-direction:column;align-items:center;gap:4px;
+    border:1px solid color-mix(in srgb,var(--accent-color,currentColor) 48%,var(--text-main,#fff));border-radius:18px;
+    background:color-mix(in srgb,var(--ui-card-bg,#111) 70%,transparent);color:var(--text-main,#fff);text-align:center;
+    transform:translate(-50%,-43%) scale(.94);opacity:0;backdrop-filter:blur(12px);
+    box-shadow:0 8px 34px color-mix(in srgb,var(--accent-color,currentColor) 22%,transparent),inset 0 0 0 1px color-mix(in srgb,var(--text-main,#fff) 7%,transparent);
+    pointer-events:none;
+}
+#wrapped-view .bergwelt-tour-summit-kicker { font-size:.62rem;font-weight:900;letter-spacing:.15em;color:var(--accent-color,currentColor); }
+#wrapped-view .bergwelt-tour-summit-reveal > strong { margin-top:2px;font-size:clamp(2.7rem,10vw,4.5rem);line-height:.95;letter-spacing:-.06em;text-shadow:0 0 28px color-mix(in srgb,var(--accent-color,currentColor) 42%,transparent); }
+#wrapped-view .bergwelt-tour-summit-count { font-size:.64rem;font-weight:850;letter-spacing:.1em; }
+#wrapped-view .bergwelt-tour-summit-facts { margin-top:5px;padding-top:7px;width:100%;border-top:1px solid color-mix(in srgb,var(--text-main,#fff) 15%,transparent);font-size:.7rem;opacity:.84; }
+#wrapped-view .bergwelt-tour-expedition.is-summit-moment .bergwelt-tour-summit-reveal { display:flex;animation:bergwelt-tour-summit-reveal .7s cubic-bezier(.18,.78,.2,1) both; }
+#wrapped-view .bergwelt-tour-expedition.is-summit-moment .bergwelt-tour-cinematic::before {
+    content:"";position:absolute;z-index:1;inset:0;
+    background:radial-gradient(ellipse at 78% 18%,color-mix(in srgb,var(--accent-color,currentColor) 22%,transparent),transparent 39%),linear-gradient(115deg,transparent 30%,color-mix(in srgb,var(--accent-color,currentColor) 8%,transparent) 55%,transparent 75%);
+    animation:bergwelt-tour-summit-light 1.5s ease-out both;pointer-events:none;
+}
+#wrapped-view .bergwelt-tour-expedition.is-summit-moment .bergwelt-tour-sun { filter:drop-shadow(0 0 24px color-mix(in srgb,var(--accent-color,currentColor) 70%,transparent));animation:bergwelt-tour-sun-pulse 1.6s ease-in-out infinite alternate; }
+#wrapped-view .bergwelt-tour-expedition.is-summit-moment .bergwelt-tour-summit-flag { transform-box:fill-box;transform-origin:bottom left;animation:bergwelt-tour-flag-wave .55s ease-in-out infinite alternate; }
+#wrapped-view .bergwelt-tour-expedition.is-summit-moment .bergwelt-tour-route { stroke-width:5; }
+#wrapped-view .bergwelt-tour-expedition.is-summit-moment .bergwelt-tour-summit-point { filter:drop-shadow(0 0 9px var(--accent-color,currentColor)); }
+@keyframes bergwelt-tour-summit-reveal { 0% { opacity:0;transform:translate(-50%,-38%) scale(.88);filter:blur(3px); } 65% { opacity:1;transform:translate(-50%,-51%) scale(1.025);filter:blur(0); } 100% { opacity:1;transform:translate(-50%,-50%) scale(1);filter:blur(0); } }
+@keyframes bergwelt-tour-summit-light { 0% { opacity:0; } 35% { opacity:1; } 100% { opacity:.76; } }
+@keyframes bergwelt-tour-sun-pulse { from { opacity:.76; } to { opacity:1; } }
+@keyframes bergwelt-tour-flag-wave { from { transform:rotate(-2deg); } to { transform:rotate(3deg); } }
+@media (max-width:560px) {
+    #wrapped-view .bergwelt-tour-summit-reveal { top:39%;min-width:min(185px,70%);padding:12px 15px 10px;border-radius:15px; }
+    #wrapped-view .bergwelt-tour-summit-reveal > strong { font-size:clamp(2.5rem,12vw,3.4rem); }
+    #wrapped-view .bergwelt-tour-summit-kicker { font-size:.55rem; }
+    #wrapped-view .bergwelt-tour-summit-count { font-size:.56rem; }
+    #wrapped-view .bergwelt-tour-summit-facts { font-size:.64rem; }
+}
+@media (prefers-reduced-motion:reduce) {
+    #wrapped-view .bergwelt-tour-expedition.is-summit-moment .bergwelt-tour-summit-reveal { animation:none;opacity:1;transform:translate(-50%,-50%) scale(1);filter:none; }
+    #wrapped-view .bergwelt-tour-expedition.is-summit-moment .bergwelt-tour-cinematic::before,
+    #wrapped-view .bergwelt-tour-expedition.is-summit-moment .bergwelt-tour-sun,
+    #wrapped-view .bergwelt-tour-expedition.is-summit-moment .bergwelt-tour-summit-flag { animation:none; }
+}
