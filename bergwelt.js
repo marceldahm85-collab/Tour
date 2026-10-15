@@ -139,7 +139,7 @@
                         '<defs><linearGradient id="bergwelt-mountain-fill" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="var(--accent-color, #4b8b75)" stop-opacity=".42"/><stop offset="100%" stop-color="var(--accent-color, #4b8b75)" stop-opacity=".04"/></linearGradient></defs>' +
                         '<path class="bergwelt-height-silhouette" d="M0 210 L85 155 L132 176 L230 58 L280 105 L350 28 L410 96 L456 66 L535 158 L600 128 L600 230 L0 230 Z"/>' +
                         '<path class="bergwelt-height-ridge" d="M85 155 L132 176 L230 58 L280 105 L350 28 L410 96 L456 66 L535 158"/>' +
-                        '<path class="bergwelt-height-trail" d="M25 208 C100 198 125 175 155 164 S210 122 230 108 S285 100 305 79 S345 67 350 45"/>' +
+                        '<path class="bergwelt-height-trail" style="stroke-dashoffset:' + (520 * (1 - progress / 100)) + '" d="M25 208 C100 198 125 175 155 164 S210 122 230 108 S285 100 305 79 S345 67 350 45"/>' +
                         '<circle class="bergwelt-height-summit" cx="350" cy="45" r="7"/>' +
                     '</svg>' +
                     '<div class="bergwelt-height-overlay"><span>Dein kumulierter Aufstieg</span><strong>' + fmtKnown(careerAscent) + ' <small>hm</small></strong></div>' +
@@ -152,7 +152,7 @@
                 statCard('Touren insgesamt', fmtKnown(allEntries.length ? uniqueTourCount(allEntries) : null), '') +
             '</div>' +
             '<h3 class="bergwelt-section-title">Reale Höhen als Vergleich</h3><div class="bergwelt-grid">' +
-            milestones.slice(0, 3).map(m => statCard(m.name, fmt(m.height), 'm', careerAscent === null ? null : Math.min(100, total / m.height * 100))).join('') +
+            milestones.map(m => statCard(m.name, fmt(m.height), 'm', careerAscent === null ? null : Math.min(100, total / m.height * 100))).join('') +
             '</div><p class="bergwelt-footnote">' + escapeHTML(comparison) + ' Es werden ausschließlich gespeicherte Aufstiegswerte addiert; Mehrtagestouren zählen mit ihren Etappen, ohne Etappen doppelt zu summieren.</p>';
     }
     function renderLevel() {
