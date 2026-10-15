@@ -5,7 +5,7 @@ const CACHE_NAME = 'bergtouren-cache-v84';
 const APP_SHELL = [
   './',
   './index.html',
-  './app-main.js?v=bergwelt7',
+  './app-main.js?v=bergwelt8',
   './styles.css',
   './styles-overrides.css',
   './manifest.json',
