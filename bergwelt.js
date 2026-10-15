@@ -166,31 +166,76 @@
             .filter(e => ascentValue(e) !== null && distanceValue(e) !== null && distanceValue(e) > 0)
             .map(e => ascentValue(e) / distanceValue(e));
         const maxSteepness = validSteepness.length ? Math.max(...validSteepness) : null;
-        const activityTypes = new Set(entries.map(e => String(e.aktivitaet || e.tourart || e.typ || '').trim()).filter(Boolean));
+        const activityTypes = new Set(entries
+            .map(e => String(e.aktivitaet || e.tourart || e.typ || '').trim().toLocaleLowerCase())
+            .filter(Boolean));
         const activityCount = activityTypes.size ? activityTypes.size : null;
+
+        // Schwellen sind transparent definiert; es werden keine fehlenden Werte geschätzt.
         const definitions = [
-            ['Höhenmeter-Spezialist', asc, 5000, '5.000 hm Jahresaufstieg'],
-            ['Gipfelsammler', peakCount, 10, '10 gespeicherte Gipfel'],
-            ['Ausdauer-Alpinist', mins === null ? null : mins / 60, 25, '25 Stunden Gehzeit'],
-            ['Steilheits-Profi', maxSteepness, 200, '200 hm/km bei einer Tour'],
-            ['Vielseitiger Wanderer', activityCount, 3, '3 gespeicherte Aktivitätstypen']
+            {
+                name: 'Höhenmeter-Spezialist', value: asc, unit: 'hm',
+                tiers: [[1000, 'Höhenmeter-Sammler'], [3000, 'Bergauf unterwegs'], [5000, 'Höhenmeter-Spezialist'], [10000, 'Höhenprofi'], [20000, 'Höhenlegende']],
+                detail: 'Kumulierte Aufstiegshöhen im ausgewählten Jahr.'
+            },
+            {
+                name: 'Gipfelsammler', value: peakCount, unit: 'Gipfel',
+                tiers: [[1, 'Gipfel entdeckt'], [5, 'Gipfelsammler'], [10, 'Gipfeljäger'], [25, 'Gipfelkenner'], [50, 'Gipfellegende']],
+                detail: 'Summe der gespeicherten Gipfelangaben im ausgewählten Jahr.'
+            },
+            {
+                name: 'Ausdauer-Alpinist', value: mins === null ? null : mins / 60, unit: 'h',
+                tiers: [[5, 'Ausdauer-Einsteiger'], [15, 'Ausdauerstark'], [25, 'Ausdauer-Alpinist'], [50, 'Langstrecken-Profi'], [100, 'Ausdauerlegende']],
+                detail: 'Gespeicherte Gehzeit im ausgewählten Jahr.'
+            },
+            {
+                name: 'Steilheits-Profi', value: maxSteepness, unit: 'hm/km',
+                tiers: [[100, 'Steile Wege'], [150, 'Steilheits-Kenner'], [200, 'Steilheits-Profi'], [250, 'Extrem steil'], [300, 'Steilheitslegende']],
+                detail: 'Höchster berechenbarer Aufstieg pro Kilometer einer einzelnen Tour.'
+            },
+            {
+                name: 'Vielseitiger Wanderer', value: activityCount, unit: 'Typen',
+                tiers: [[1, 'Erster Stil'], [2, 'Abwechslungsreich'], [3, 'Vielseitiger Wanderer'], [4, 'Allrounder'], [5, 'Bergwelt-Allrounder']],
+                detail: 'Unterschiedliche Aktivitätstypen, die in den Tourdaten tatsächlich gespeichert sind.'
+            }
         ];
-        const levels = definitions.map(([name, value, target, detail]) => ({
-            name, value, target, detail,
-            pct: value === null ? null : Math.min(100, value / target * 100)
-        }));
-        panel.innerHTML = intro('Dein Profil · ' + getYear(), 'Dein Bergsteiger-Level', 'Fünf nachvollziehbare Spezialisierungen auf Basis deiner gespeicherten Touren. Die Zielwerte sind Orientierung, keine Wertung.') +
+        const levels = definitions.map(def => {
+            const achieved = def.value === null ? [] : def.tiers.filter(tier => def.value >= tier[0]);
+            const current = achieved.length ? achieved[achieved.length - 1] : null;
+            const next = def.value === null ? null : (def.tiers.find(tier => def.value < tier[0]) || null);
+            const previousThreshold = current ? current[0] : 0;
+            const pct = def.value === null ? null : next
+                ? Math.max(0, Math.min(100, (def.value - previousThreshold) / (next[0] - previousThreshold) * 100))
+                : 100;
+            return { ...def, current, next, pct };
+        });
+        panel.innerHTML = intro('Dein Profil · ' + getYear(), 'Dein Bergsteiger-Level', 'Fünf Spezialisierungen mit klaren Schwellen. Jede Stufe basiert auf gespeicherten Tourdaten; fehlende Werte bleiben unbekannt.') +
             '<div class="bergwelt-grid">' +
             statCard('Jahresstrecke', fmtKnown(dist, 1), 'km') +
             statCard('Stärkster Einzelaufstieg', fmtKnown(maxAscent), 'hm') +
             statCard('Gehzeit gesamt', mins === null ? '–' : fmt(mins / 60, 1), 'h') +
             statCard('Gespeicherte Gipfel', fmtKnown(peakCount), 'Gipfel') +
-            '</div><h3 class="bergwelt-section-title">Spezialisierungen</h3>' +
-            levels.map(l => '<div class="bergwelt-level"><div class="bergwelt-level-top"><strong>' + l.name + '</strong><span>' + fmtKnown(l.value, l.name === 'Ausdauer-Alpinist' ? 1 : 0) + ' / ' + fmt(l.target) + '</span></div>' +
-                (l.pct === null ? '<p class="bergwelt-footnote">Keine gültigen Daten für diese Spezialisierung.</p>' : '<div class="bergwelt-track"><span style="width:' + l.pct + '%"></span></div><p class="bergwelt-footnote">' + l.detail + '</p>') + '</div>').join('') +
-            '<p class="bergwelt-footnote">Steilheit = gespeicherter Aufstieg ÷ gespeicherte Strecke. Schritte werden nur ausgewertet, wenn sie direkt in den Tourdaten vorliegen.</p>';
+            '</div><h3 class="bergwelt-section-title">Deine Spezialisierungen</h3>' +
+            levels.map(l => {
+                const valueText = l.value === null ? '– ' + l.unit : fmt(l.value, l.name === 'Ausdauer-Alpinist' ? 1 : (l.name === 'Steilheits-Profi' ? 0 : 0)) + ' ' + l.unit;
+                const tierText = l.value === null
+                    ? 'Noch nicht bestimmbar'
+                    : l.current
+                        ? l.current[1]
+                        : 'Noch keine Stufe erreicht';
+                const goalText = l.value === null
+                    ? 'Es fehlen gültige Daten für diese Spezialisierung.'
+                    : l.next
+                        ? fmt(Math.max(0, l.next[0] - l.value), l.name === 'Ausdauer-Alpinist' || l.name === 'Steilheits-Profi' ? 1 : 0) + ' ' + l.unit + ' bis ' + l.next[1] + ' (' + fmt(l.next[0]) + ' ' + l.unit + ')'
+                        : 'Höchste definierte Stufe erreicht – weitere Fortschritte werden weiterhin gezählt.';
+                return '<div class="bergwelt-level"><div class="bergwelt-level-top"><strong>' + l.name + '</strong><span>' + valueText + '</span></div>' +
+                    '<div class="bergwelt-level-tier">' + tierText + '</div>' +
+                    (l.pct === null ? '<p class="bergwelt-footnote">' + goalText + '</p>' : '<div class="bergwelt-track"><span style="width:' + l.pct + '%"></span></div><p class="bergwelt-footnote">' + goalText + '</p>') +
+                    '<p class="bergwelt-footnote">' + l.detail + '</p></div>';
+            }).join('') +
+            '<p class="bergwelt-footnote">Die Höhenmeter-, Gipfel- und Gehzeitstufen beziehen sich auf das ausgewählte Jahr. Steilheit wird nur aus Touren mit gültiger Strecke und gültigem Aufstieg berechnet. Aktivitätstypen werden nur gezählt, wenn sie in den gespeicherten Daten vorhanden sind.</p>';
     }
-    function renderTour() {
+        function renderTour() {
         const entries = yearTours().slice().sort((a, b) => {
             const dateDiff = (parseTourDate(b.date)?.getTime() || 0) - (parseTourDate(a.date)?.getTime() || 0);
             return dateDiff || Number(a.tourDay || 0) - Number(b.tourDay || 0);
