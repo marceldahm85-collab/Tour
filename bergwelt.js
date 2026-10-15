@@ -260,20 +260,45 @@
         const index = Math.max(0, entries.findIndex((e, i) => String(e.id || i) === selectedTourId));
         const e = entries[index];
         const title = e.tourname || e.region || 'Unbenannte Tour';
-        panel.innerHTML = intro('Tour in Erinnerung · ' + getYear(), 'Tour erleben', 'Eine kleine Inszenierung deiner gespeicherten Tourdaten – ohne erfundene GPS-Route oder Höhenprofil.') +
+        const tourDistance = distanceValue(e);
+        const tourAscent = ascentValue(e);
+        const adjustedDistance = tourDistance !== null && tourDistance > 0
+            ? (e.useFullDistanceForGradient ? tourDistance : tourDistance / 2)
+            : null;
+        const steepness = tourAscent !== null && adjustedDistance !== null && adjustedDistance > 0
+            ? tourAscent / adjustedDistance : null;
+        const dateLabel = e.date || 'Datum nicht gespeichert';
+        const stageLabel = e.tourDay && e.tourDayCount ? ' · Etappe ' + e.tourDay + '/' + e.tourDayCount : '';
+        const groupLabel = e.tourGroup ? ' · Mehrtagestour' : '';
+        const distanceLabel = tourDistance === null ? 'keine Streckenangabe' : fmt(tourDistance, 1) + ' km';
+        const ascentLabel = tourAscent === null ? 'kein Aufstiegswert' : fmt(tourAscent) + ' hm';
+        const durationLabel = minutesValue(e) === null ? 'keine Gehzeitangabe' : fmt(minutesValue(e) / 60, 1) + ' h';
+        panel.innerHTML = intro('Tour in Erinnerung · ' + getYear(), 'Tour erleben', 'Erlebe deine gespeicherte Tour in vier kurzen Etappen. Eingeblendet werden ausschließlich Werte aus deinem Tourarchiv.') +
             '<div class="bergwelt-tour-row"><select class="bergwelt-select" id="bergwelt-tour-select" aria-label="Gespeicherte Tour auswählen">' +
             entries.map((item, i) => {
                 const stage = item.tourDay && item.tourDayCount ? ' · Etappe ' + item.tourDay + '/' + item.tourDayCount : '';
                 const group = item.tourGroup ? ' · Mehrtagestour' : '';
-                return '<option value="' + escapeHTML(String(item.id || i)) + '"' + (String(item.id || i) === selectedTourId ? ' selected' : '') + '>' + escapeHTML(item.date || '') + ' · ' + escapeHTML(item.tourname || item.region || 'Unbenannte Tour') + escapeHTML(stage + group) + '</option>';
+                const itemId = String(item.id ?? i);
+                return '<option value="' + escapeHTML(itemId) + '"' + (itemId === selectedTourId ? ' selected' : '') + '>' + escapeHTML(item.date || '') + ' · ' + escapeHTML(item.tourname || item.region || 'Unbenannte Tour') + escapeHTML(stage + group) + '</option>';
             }).join('') +
-            '</select><button type="button" class="bergwelt-action" id="bergwelt-play-tour">▶ Erleben</button></div>' +
-            '<div class="bergwelt-animation" id="bergwelt-animation"><svg class="bergwelt-mountain" viewBox="0 0 600 130" role="img" aria-label="Symbolische Berglinie, kein aufgezeichnetes Höhenprofil"><path d="M12 112 L92 88 L145 101 L226 34 L282 74 L335 58 L405 14 L465 66 L512 48 L588 106"/></svg></div>' +
+            '</select><button type="button" class="bergwelt-action" id="bergwelt-play-tour">▶ Tour erleben</button></div>' +
+            '<div class="bergwelt-animation" id="bergwelt-animation">' +
+                '<svg class="bergwelt-mountain" viewBox="0 0 600 130" role="img" aria-label="Symbolische Berglinie, kein aufgezeichnetes Höhenprofil">' +
+                    '<path id="bergwelt-tour-path" d="M12 112 L92 88 L145 101 L226 34 L282 74 L335 58 L405 14 L465 66 L512 48 L588 106"/>' +
+                    '<circle class="bergwelt-hiker" r="7" cx="12" cy="112"><animateMotion dur="1.8s" begin="indefinite" fill="freeze" path="M12 112 L92 88 L145 101 L226 34 L282 74 L335 58 L405 14 L465 66 L512 48 L588 106"/></circle>' +
+                '</svg>' +
+                '<div class="bergwelt-tour-steps" aria-live="polite">' +
+                    '<div class="bergwelt-tour-step"><span>01</span><div><strong>Aufbruch</strong><small>' + escapeHTML(dateLabel + stageLabel + groupLabel) + '</small></div></div>' +
+                    '<div class="bergwelt-tour-step"><span>02</span><div><strong>Strecke</strong><small>' + escapeHTML(distanceLabel) + '</small></div></div>' +
+                    '<div class="bergwelt-tour-step"><span>03</span><div><strong>Höhenmeter</strong><small>' + escapeHTML(ascentLabel) + '</small></div></div>' +
+                    '<div class="bergwelt-tour-step"><span>04</span><div><strong>Ankommen</strong><small>' + escapeHTML(durationLabel) + '</small></div></div>' +
+                '</div>' +
+            '</div>' +
             '<h3 class="bergwelt-section-title">' + escapeHTML(title) + '</h3><div class="bergwelt-grid">' +
-            statCard('Strecke', fmtKnown(distanceValue(e), 1), 'km') + statCard('Aufstieg', fmtKnown(ascentValue(e)), 'hm') +
+            statCard('Strecke', fmtKnown(tourDistance, 1), 'km') + statCard('Aufstieg', fmtKnown(tourAscent), 'hm') +
             statCard('Gehzeit', minutesValue(e) === null ? '–' : fmt(minutesValue(e) / 60, 1), 'h') +
-            statCard('Steilheit', ascentValue(e) !== null && distanceValue(e) !== null && distanceValue(e) > 0 ? fmt(ascentValue(e) / distanceValue(e)) : '–', 'hm/km') +
-            '</div><p class="bergwelt-footnote">Die Berglinie ist eine dekorative Animation und stellt keine tatsächliche Tourengeometrie dar. Es werden keine fehlenden Messwerte ergänzt.</p>';
+            statCard('Steilheit', fmtKnown(steepness), 'hm/km') +
+            '</div><p class="bergwelt-footnote">Die Berglinie ist symbolisch und kein aufgezeichnetes Höhenprofil. Steilheit wird wie in Stats/Highlights mit halber Strecke berechnet, außer wenn für diese Tour die volle Strecke aktiviert ist.</p>';
         document.getElementById('bergwelt-tour-select')?.addEventListener('change', ev => {
             selectedTourId = ev.target.value;
             renderTour();
@@ -285,10 +310,20 @@
             void mountain.offsetWidth;
             mountain.classList.add('is-running');
             animationRun++;
+            const motion = mountain.querySelector('.bergwelt-hiker animateMotion');
+            if (motion) {
+                try { motion.beginElement(); } catch (_) { /* SVG-Motion wird bei fehlender Unterstützung übersprungen. */ }
+            }
             const button = document.getElementById('bergwelt-play-tour');
             if (button) {
                 button.textContent = '⛰️ Unterwegs …';
-                window.setTimeout(() => { if (button.isConnected) button.textContent = '↻ Nochmal erleben'; }, 1900);
+                button.disabled = true;
+                window.setTimeout(() => {
+                    if (button.isConnected) {
+                        button.textContent = '↻ Nochmal erleben';
+                        button.disabled = false;
+                    }
+                }, 1900);
             }
         });
     }
