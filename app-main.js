@@ -34069,12 +34069,12 @@ const endHold = () => {
         if (!document.querySelector('link[data-bergwelt-styles]')) {
             const styleLink = document.createElement('link');
             styleLink.rel = 'stylesheet';
-            styleLink.href = './bergwelt.css?v=14';
+            styleLink.href = './bergwelt.css?v=15';
             styleLink.dataset.bergweltStyles = '1';
             document.head.appendChild(styleLink);
         }
         const script = document.createElement('script');
-        script.src = './bergwelt.js?v=15';
+        script.src = './bergwelt.js?v=16';
         script.onload = () => {
             window.__BERGWELT_LOADING__ = false;
             window.__bergweltRender?.();
