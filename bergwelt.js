@@ -340,6 +340,21 @@
         const groupLabel = e.tourGroup ? ' · Mehrtagestour' : '';
         const duration = minutesValue(e);
         const peakCount = peaksValue(e);
+        const peakDetails = (Array.isArray(e.gipfelDetails) ? e.gipfelDetails : [])
+            .map(peak => ({
+                name: String(peak?.name ?? '').trim(),
+                height: readMetric(peak?.hoehe)
+            }))
+            .filter(peak => peak.name || peak.height !== null);
+        const peakDetailsMarkup = peakDetails.length
+            ? peakDetails.map(peak =>
+                '<span class="bergwelt-tour-summit-peak"><strong>' +
+                escapeHTML(peak.name || 'Name nicht gespeichert') +
+                '</strong><small>' +
+                (peak.height !== null ? fmt(peak.height) + ' m' : 'Höhe nicht gespeichert') +
+                '</small></span>'
+            ).join('')
+            : '<span class="bergwelt-tour-summit-peak bergwelt-tour-summit-peak-missing">Gipfelname und Höhe nicht gespeichert</span>';
         const steps = [
             { title: 'Aufbruch', value: dateLabel + stageLabel + groupLabel },
             { title: 'Strecke', value: tourDistance === null ? 'Keine Streckenangabe gespeichert' : fmt(tourDistance, 1) + ' km' },
@@ -361,6 +376,7 @@
                 '<span class="bergwelt-tour-summit-kicker">DEIN GIPFELMOMENT</span>' +
                 '<strong>' + fmt(peakCount) + '</strong>' +
                 '<span class="bergwelt-tour-summit-count">' + (peakCount === 1 ? 'GESPEICHERTER GIPFEL' : 'GESPEICHERTE GIPFEL') + '</span>' +
+                '<span class="bergwelt-tour-summit-peaks">' + peakDetailsMarkup + '</span>' +
                 '<span class="bergwelt-tour-summit-facts">' + (tourAscent !== null ? fmt(tourAscent) + ' hm Aufstieg' : 'Deine gespeicherten Gipfel') + (tourDistance !== null ? ' · ' + fmt(tourDistance, 1) + ' km' : '') + '</span>' +
             '</div>'
             : '';
