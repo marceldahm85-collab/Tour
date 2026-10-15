@@ -2825,9 +2825,38 @@ function removeToast(toast) {
 // ─── Achievement-Toast bei neu erreichten Meilensteinen ─────────────────────
 
 function getYearFromDate(dateStr) {
-    if (!dateStr) return null;
-    const d = new Date(dateStr);
-    return isNaN(d.getTime()) ? null : d.getFullYear();
+    const raw = String(dateStr ?? '').trim();
+    if (!raw) return null;
+    let match = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:$|[T\s])/);
+    if (match) {
+        const year = Number(match[1]);
+        const month = Number(match[2]);
+        const day = Number(match[3]);
+        const date = new Date(year, month - 1, day);
+        return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? year : null;
+    }
+    match = raw.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})$/);
+    if (match) {
+        const day = Number(match[1]);
+        const month = Number(match[2]);
+        const year = Number(match[3]);
+        const date = new Date(year, month - 1, day);
+        return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? year : null;
+    }
+    const date = new Date(raw);
+    return Number.isNaN(date.getTime()) ? null : date.getFullYear();
+}
+
+function readTourMetricNumber(value) {
+    if (value === null || value === undefined || String(value).trim() === '') return null;
+    const normalized = typeof value === 'number' ? value : Number(String(value).trim().replace(/\s/g, '').replace(',', '.'));
+    return Number.isFinite(normalized) && normalized >= 0 ? normalized : null;
+}
+
+function readTourMetricMinutes(value) {
+    if (value === null || value === undefined || String(value).trim() === '') return null;
+    const match = String(value).trim().match(/^(\d{1,4}):([0-5]?\d)$/);
+    return match ? Number(match[1]) * 60 + Number(match[2]) : null;
 }
 
 const MILESTONE_LABELS = {
@@ -5931,18 +5960,27 @@ function getBigTourIndex(entry, list = null, options = {}) {
     return baseIndex * timeFactor;
 }
 
-function countDistinctTours(entries) {
-    const seenGroups = new Set();
-    let count = 0;
-    entries.forEach(e => {
-        if (e.tourGroup) {
-            if (seenGroups.has(e.tourGroup)) return;
-            seenGroups.add(e.tourGroup);
-        }
-        count++;
-    });
-    return count;
+function tourIdentity(entry, index = 0) {
+    if (entry?.tourGroup !== undefined && entry?.tourGroup !== null && String(entry.tourGroup).trim()) return 'group:' + String(entry.tourGroup);
+    if (entry?.id !== undefined && entry?.id !== null && String(entry.id).trim()) return 'id:' + String(entry.id);
+    const fingerprint = [entry?.date, entry?.tourname, entry?.region, entry?.tourDay].map(value => String(value ?? '').trim()).join('|');
+    return fingerprint.replace(/\|/g, '') ? 'entry:' + fingerprint : 'entry-index:' + index;
 }
+
+function countDistinctTours(entries) {
+    const seen = new Set();
+    (entries || []).forEach((entry, index) => seen.add(tourIdentity(entry, index)));
+    return seen.size;
+}
+
+// Öffentliche, read-only Datenregeln für lazy geladene Module wie Bergwelt.
+window.__tourDataRules = Object.freeze({
+    readMetric: readTourMetricNumber,
+    parseMinutes: readTourMetricMinutes,
+    yearFromDate: getYearFromDate,
+    tourIdentity,
+    countDistinctTours
+});
 
 
 
@@ -16802,147 +16840,62 @@ const MILESTONE_DEFS = {
 function computeMilestones(toursInput = null) {
     const allTours = toursInput ?? (appStorage.get('touren') || []);
 
+    // Nur Touren mit gültigem Datum können einen zeitlich zuordenbaren Meilenstein auslösen.
     const sorted = [...allTours]
-        .filter(e => e.date)
+        .filter(e => e && getYearFromDate(e.date) !== null)
         .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    let totalDist = 0;
-let totalAsc = 0;
-let totalMins = 0;
-let totalPeaks = 0;
-let totalSteps = 0;
-    const reached = {
-    dist: [],
-    asc: [],
-    time: [],
-    peaks: [],
-    steps: []
-};
+    // Fehlende Messwerte bleiben von echten Nullwerten unterscheidbar.
+    // Numerische Summen bleiben kompatibel; hasData/knownEntries zeigen die Datenlage.
 
-const nextIdx = {
-    dist: 0,
-    asc: 0,
-    time: 0,
-    peaks: 0,
-    steps: 0
-};
+
+    const totals = { dist: 0, asc: 0, time: 0, peaks: 0, steps: 0 };
+    const knownEntries = { dist: 0, asc: 0, time: 0, peaks: 0, steps: 0 };
+    const reached = { dist: [], asc: [], time: [], peaks: [], steps: [] };
+    const nextIdx = { dist: 0, asc: 0, time: 0, peaks: 0, steps: 0 };
 
     sorted.forEach(entry => {
-        const d = parseFloat(
-    String(entry.strecke || '').replace(',', '.')
-) || 0;
+        const d = readTourMetricNumber(entry.strecke);
+        const a = readTourMetricNumber(entry.aufstieg);
+        const mins = readTourMetricMinutes(entry.zeit);
+        const peakCount = readTourMetricNumber(entry.gipfel);
+        const entrySteps = readTourMetricNumber(calculateEntrySteps(entry));
 
-const a = parseFloat(
-    String(entry.aufstieg || '').replace(',', '.')
-) || 0;
+        if (d !== null) { totals.dist += d; knownEntries.dist++; }
+        if (a !== null) { totals.asc += a; knownEntries.asc++; }
+        if (mins !== null) { totals.time += mins; knownEntries.time++; }
+        if (peakCount !== null) { totals.peaks += peakCount; knownEntries.peaks++; }
+        if (entrySteps !== null) { totals.steps += entrySteps; knownEntries.steps++; }
 
-const entrySteps = Number(
-    calculateEntrySteps(entry)
-) || 0;
-
-let mins = 0;
-        if (entry.zeit && entry.zeit.includes(':')) {
-            const [h, m] = entry.zeit.split(':').map(Number);
-            if (!isNaN(h) && !isNaN(m)) mins = h * 60 + m;
-        }
-
-        totalDist  += d;
-totalAsc   += a;
-totalMins  += mins;
-totalPeaks += parseInt(entry.gipfel) || 0;
-totalSteps += entrySteps;
-        const totalH = totalMins / 60;
-
-        while (nextIdx.dist < MILESTONE_DEFS.dist.length &&
-               totalDist >= MILESTONE_DEFS.dist[nextIdx.dist]) {
-            reached.dist.push({
-                milestone: MILESTONE_DEFS.dist[nextIdx.dist],
-                date: entry.date,
-                tourname: entry.tourname || '–',
-                entry: entry
-            });
-            nextIdx.dist++;
-        }
-
-        while (nextIdx.asc < MILESTONE_DEFS.asc.length &&
-               totalAsc >= MILESTONE_DEFS.asc[nextIdx.asc]) {
-            reached.asc.push({
-                milestone: MILESTONE_DEFS.asc[nextIdx.asc],
-                date: entry.date,
-                tourname: entry.tourname || '–',
-                entry: entry
-            });
-            nextIdx.asc++;
-        }
-
-        while (nextIdx.time < MILESTONE_DEFS.time.length &&
-               totalH >= MILESTONE_DEFS.time[nextIdx.time]) {
-            reached.time.push({
-                milestone: MILESTONE_DEFS.time[nextIdx.time],
-                date: entry.date,
-                tourname: entry.tourname || '–',
-                entry: entry
-            });
-            nextIdx.time++;
-        }
-
-        while (nextIdx.peaks < MILESTONE_DEFS.peaks.length &&
-               totalPeaks >= MILESTONE_DEFS.peaks[nextIdx.peaks]) {
-            reached.peaks.push({
-                milestone: MILESTONE_DEFS.peaks[nextIdx.peaks],
-                date: entry.date,
-                tourname: entry.tourname || '–',
-                entry: entry
-            });
-            nextIdx.peaks++;
-        }
-
-        while (
-    nextIdx.steps < MILESTONE_DEFS.steps.length &&
-    totalSteps >= MILESTONE_DEFS.steps[nextIdx.steps]
-) {
-    reached.steps.push({
-        milestone: MILESTONE_DEFS.steps[nextIdx.steps],
-        date: entry.date,
-        tourname: entry.tourname || '–',
-        entry: entry
+        const values = { dist: totals.dist, asc: totals.asc, time: totals.time / 60, peaks: totals.peaks, steps: totals.steps };
+        Object.keys(MILESTONE_DEFS).forEach(type => {
+            while (nextIdx[type] < MILESTONE_DEFS[type].length && values[type] >= MILESTONE_DEFS[type][nextIdx[type]]) {
+                reached[type].push({
+                    milestone: MILESTONE_DEFS[type][nextIdx[type]],
+                    date: entry.date,
+                    tourname: entry.tourname || '–',
+                    entry
+                });
+                nextIdx[type]++;
+            }
+        });
     });
 
-    nextIdx.steps++;
-}
+    const resultFor = (type, total) => ({
+        reached: reached[type],
+        next: MILESTONE_DEFS[type][nextIdx[type]] ?? null,
+        total,
+        knownEntries: knownEntries[type],
+        hasData: knownEntries[type] > 0
     });
 
     return {
-    dist: {
-        reached: reached.dist,
-        next: MILESTONE_DEFS.dist[nextIdx.dist] ?? null,
-        total: totalDist
-    },
-
-    asc: {
-        reached: reached.asc,
-        next: MILESTONE_DEFS.asc[nextIdx.asc] ?? null,
-        total: totalAsc
-    },
-
-    time: {
-        reached: reached.time,
-        next: MILESTONE_DEFS.time[nextIdx.time] ?? null,
-        total: totalMins / 60
-    },
-
-    peaks: {
-        reached: reached.peaks,
-        next: MILESTONE_DEFS.peaks[nextIdx.peaks] ?? null,
-        total: totalPeaks
-    },
-
-    steps: {
-        reached: reached.steps,
-        next: MILESTONE_DEFS.steps[nextIdx.steps] ?? null,
-        total: totalSteps
-    }
-};
+        dist: resultFor('dist', totals.dist),
+        asc: resultFor('asc', totals.asc),
+        time: resultFor('time', totals.time / 60),
+        peaks: resultFor('peaks', totals.peaks),
+        steps: resultFor('steps', totals.steps)
+    };
 }
 
 /* =========================================================
@@ -17200,19 +17153,31 @@ function computeAllAchievements(toursInput = null) {
         });
     });
 
-    const sortedByDate = [...allTours].filter(e => e.date).sort((a, b) => new Date(a.date) - new Date(b.date));
+    const sortedByDate = [...allTours]
+        .filter(e => e && getYearFromDate(e.date) !== null)
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // Mehrtägige Touren zählen einmal; ihre Etappen bleiben für
+    // Strecken-, Höhenmeter-, Zeit- und Schrittwerte separat erhalten.
+    const uniqueTourEntries = [];
+    const seenTourIdentities = new Set();
+    sortedByDate.forEach((entry, index) => {
+        const identity = tourIdentity(entry, index);
+        if (seenTourIdentities.has(identity)) return;
+        seenTourIdentities.add(identity);
+        uniqueTourEntries.push(entry);
+    });
 
     ACHIEVEMENT_CATEGORIES.tourCount.badges.forEach(badge => {
-        const reachedAt = sortedByDate[badge.threshold - 1];
-
-results[badge.id] = {
-    unlocked: allTours.length >= badge.threshold,
-    unlockedAt: reachedAt?.date || null,
-    unlockedTour: reachedAt?.tourname || null,
-    unlockedTourId: reachedAt?.id || null,
-    progressCurrent: allTours.length,
-    progressTarget: badge.threshold
-};
+        const reachedAt = uniqueTourEntries[badge.threshold - 1];
+        results[badge.id] = {
+            unlocked: uniqueTourEntries.length >= badge.threshold,
+            unlockedAt: reachedAt?.date || null,
+            unlockedTour: reachedAt?.tourname || null,
+            unlockedTourId: reachedAt?.id || null,
+            progressCurrent: uniqueTourEntries.length,
+            progressTarget: badge.threshold
+        };
     });
 
     const bigTours = sortedByDate.filter(e => {
