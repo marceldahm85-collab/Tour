@@ -108,27 +108,52 @@
     }
     function renderHoehenwelt() {
         const entries = yearTours();
-        const knownTotal = sumKnown(entries, ascentValue);
-        const total = knownTotal ?? 0;
-        const metres = [3798, 8848, 26544];
-        const next = knownTotal === null ? null : (metres.find(v => v > total) || null);
-        const comparison = knownTotal === null ? 'Für dieses Jahr liegen keine gültigen Aufstiegswerte vor.' :
-            total >= 26544 ? 'Dein kumulierter Aufstieg entspricht mindestens drei Everest-Höhen.' :
-            total >= 8848 ? 'Das entspricht mindestens einer Everest-Höhe an kumuliertem Aufstieg.' :
-            total >= 3798 ? 'Dein kumulierter Aufstieg übertrifft die Höhe des Großglockners.' :
-            'Jeder gespeicherte Höhenmeter zählt – Schritt für Schritt wächst deine Höhenwelt.';
-        const markerCards = [
+        const allEntries = getTours();
+        const yearAscent = sumKnown(entries, ascentValue);
+        const careerAscent = sumKnown(allEntries, ascentValue);
+        const total = careerAscent ?? 0;
+        const milestones = [
             { name: 'Großglockner', height: 3798 },
             { name: 'Everest', height: 8848 },
-            { name: 'Drei Everest-Höhen', height: 26544 }
+            { name: 'Drei Everest-Höhen', height: 26544 },
+            { name: '50.000 Höhenmeter', height: 50000 },
+            { name: '100.000 Höhenmeter', height: 100000 }
         ];
-        panel.innerHTML = intro('Dein Höhenkonto · ' + getYear(), 'Höhenwelt', 'Dein gespeicherter Aufstieg als persönliche Höhenmarke – symbolisch verglichen, nicht geografisch dargestellt.') +
+        const next = careerAscent === null ? null : (milestones.find(m => m.height > total) || null);
+        const previous = careerAscent === null ? null : milestones.slice().reverse().find(m => total >= m.height);
+        const segmentStart = previous?.height || 0;
+        const progress = careerAscent === null ? 0 : next
+            ? Math.max(0, Math.min(100, (total - segmentStart) / (next.height - segmentStart) * 100))
+            : 100;
+        const comparison = careerAscent === null ? 'Für deine gespeicherten Touren liegen keine gültigen Aufstiegswerte vor.' :
+            total >= 100000 ? 'Du hast die Marke von 100.000 Höhenmetern überschritten – eine außergewöhnliche persönliche Leistung.' :
+            total >= 50000 ? 'Du hast bereits mehr als 50.000 Höhenmeter gesammelt. Die nächste große Marke wartet.' :
+            total >= 26544 ? 'Dein kumulierter Aufstieg entspricht mindestens drei Everest-Höhen.' :
+            total >= 8848 ? 'Dein kumulierter Aufstieg entspricht mindestens einer Everest-Höhe.' :
+            total >= 3798 ? 'Dein kumulierter Aufstieg übertrifft die Höhe des Großglockners.' :
+            'Jeder gespeicherte Höhenmeter zählt. Deine persönliche Bergwelt wächst mit jeder Tour.';
+        panel.innerHTML = intro('Dein persönlicher Berg · ' + getYear(), 'Höhenwelt', 'Nicht nur ein Jahreswert: Hier wächst deine persönliche Höhenwelt mit allen gespeicherten Touren. Die Jahresleistung bleibt separat sichtbar.') +
+            '<div class="bergwelt-height-hero">' +
+                '<div class="bergwelt-height-visual" role="img" aria-label="Symbolischer Berg mit Fortschritt zur nächsten Höhenmarke">' +
+                    '<svg viewBox="0 0 600 230" class="bergwelt-height-mountain" aria-hidden="true">' +
+                        '<defs><linearGradient id="bergwelt-mountain-fill" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="var(--accent-color, #4b8b75)" stop-opacity=".42"/><stop offset="100%" stop-color="var(--accent-color, #4b8b75)" stop-opacity=".04"/></linearGradient></defs>' +
+                        '<path class="bergwelt-height-silhouette" d="M0 210 L85 155 L132 176 L230 58 L280 105 L350 28 L410 96 L456 66 L535 158 L600 128 L600 230 L0 230 Z"/>' +
+                        '<path class="bergwelt-height-ridge" d="M85 155 L132 176 L230 58 L280 105 L350 28 L410 96 L456 66 L535 158"/>' +
+                        '<path class="bergwelt-height-trail" d="M25 208 C100 198 125 175 155 164 S210 122 230 108 S285 100 305 79 S345 67 350 45"/>' +
+                        '<circle class="bergwelt-height-summit" cx="350" cy="45" r="7"/>' +
+                    '</svg>' +
+                    '<div class="bergwelt-height-overlay"><span>Dein kumulierter Aufstieg</span><strong>' + fmtKnown(careerAscent) + ' <small>hm</small></strong></div>' +
+                '</div>' +
+                '<div class="bergwelt-height-progress"><div class="bergwelt-height-progress-label"><span>' + (careerAscent === null ? 'Fortschritt nicht verfügbar' : next ? 'Auf dem Weg zu ' + next.name : 'Alle bisherigen Höhenmarken erreicht') + '</span><strong>' + (careerAscent === null ? '–' : fmt(progress, 0) + '%') + '</strong></div><div class="bergwelt-track"><span style="width:' + progress + '%"></span></div>' +
+                    '<p class="bergwelt-footnote">' + (careerAscent === null ? 'Es fehlen gültige Aufstiegswerte.' : next ? fmt(Math.max(0, next.height - total)) + ' hm bis zur nächsten Marke (' + fmt(next.height) + ' hm).' : 'Die nächste Vergleichsstufe ist erreicht. Deine persönliche Höhenwelt wächst weiter.') + '</p></div>' +
+            '</div>' +
             '<div class="bergwelt-grid">' +
-            statCard('Aufstieg im Jahr', fmtKnown(knownTotal), 'hm') +
-            statCard('Noch bis 3.000 hm', knownTotal === null ? '–' : fmt(Math.max(0, 3000 - total)), 'hm', knownTotal === null ? null : Math.min(100, total / 3000 * 100)) +
-            '</div><h3 class="bergwelt-section-title">Bergmarken zum Vergleich</h3><div class="bergwelt-grid">' +
-            markerCards.map(m => statCard(m.name, fmt(m.height), 'm', knownTotal === null ? null : Math.min(100, total / m.height * 100))).join('') +
-            '</div><p class="bergwelt-footnote">' + escapeHTML(comparison) + (next ? ' Nächste persönliche Vergleichsmarke: ' + fmt(next) + ' hm.' : '') + ' Es werden nur gespeicherte Aufstiegswerte addiert.</p>';
+                statCard('Aufstieg im Jahr ' + getYear(), fmtKnown(yearAscent), 'hm') +
+                statCard('Touren insgesamt', fmtKnown(allEntries.length ? uniqueTourCount(allEntries) : null), '') +
+            '</div>' +
+            '<h3 class="bergwelt-section-title">Reale Höhen als Vergleich</h3><div class="bergwelt-grid">' +
+            milestones.slice(0, 3).map(m => statCard(m.name, fmt(m.height), 'm', careerAscent === null ? null : Math.min(100, total / m.height * 100))).join('') +
+            '</div><p class="bergwelt-footnote">' + escapeHTML(comparison) + ' Es werden ausschließlich gespeicherte Aufstiegswerte addiert; Mehrtagestouren zählen mit ihren Etappen, ohne Etappen doppelt zu summieren.</p>';
     }
     function renderLevel() {
         const entries = yearTours();
