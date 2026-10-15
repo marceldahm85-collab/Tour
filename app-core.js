@@ -17126,19 +17126,33 @@ function computeAllAchievements(toursInput = null) {
         });
     });
 
-    const sortedByDate = [...allTours].filter(e => e.date).sort((a, b) => new Date(a.date) - new Date(b.date));
+    const sortedByDate = [...allTours]
+        .filter(e => e && getYearFromDate(e.date) !== null)
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // Mehrtägige Touren zählen einmal; ihre Etappen bleiben für
+    // Strecken-, Höhenmeter-, Zeit- und Schrittwerte separat erhalten.
+    const uniqueTourEntries = [];
+    const seenTourGroups = new Set();
+    sortedByDate.forEach(entry => {
+        const group = String(entry.tourGroup || '').trim();
+        if (group) {
+            if (seenTourGroups.has(group)) return;
+            seenTourGroups.add(group);
+        }
+        uniqueTourEntries.push(entry);
+    });
 
     ACHIEVEMENT_CATEGORIES.tourCount.badges.forEach(badge => {
-        const reachedAt = sortedByDate[badge.threshold - 1];
-
-results[badge.id] = {
-    unlocked: allTours.length >= badge.threshold,
-    unlockedAt: reachedAt?.date || null,
-    unlockedTour: reachedAt?.tourname || null,
-    unlockedTourId: reachedAt?.id || null,
-    progressCurrent: allTours.length,
-    progressTarget: badge.threshold
-};
+        const reachedAt = uniqueTourEntries[badge.threshold - 1];
+        results[badge.id] = {
+            unlocked: uniqueTourEntries.length >= badge.threshold,
+            unlockedAt: reachedAt?.date || null,
+            unlockedTour: reachedAt?.tourname || null,
+            unlockedTourId: reachedAt?.id || null,
+            progressCurrent: uniqueTourEntries.length,
+            progressTarget: badge.threshold
+        };
     });
 
     const bigTours = sortedByDate.filter(e => {
