@@ -166,9 +166,11 @@
             .filter(e => ascentValue(e) !== null && distanceValue(e) !== null && distanceValue(e) > 0)
             .map(e => ascentValue(e) / distanceValue(e));
         const maxSteepness = validSteepness.length ? Math.max(...validSteepness) : null;
+        // "difficulty" ist das tatsächliche Feld für die gespeicherte Tourart.
+        // "Mehrtägig" beschreibt die Tourstruktur, keinen eigenen Aktivitätstyp.
         const activityTypes = new Set(entries
-            .map(e => String(e.aktivitaet || e.tourart || e.typ || '').trim().toLocaleLowerCase())
-            .filter(Boolean));
+            .map(e => String(e.difficulty || '').trim().toLocaleLowerCase())
+            .filter(type => type && type !== 'mehrtägig'));
         const activityCount = activityTypes.size ? activityTypes.size : null;
 
         // Schwellen sind transparent definiert; es werden keine fehlenden Werte geschätzt.
