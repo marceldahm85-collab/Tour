@@ -103,6 +103,14 @@
             <p class="bergwelt-copy">${copy}</p>
         </header>`;
     const empty = text => '<div class="bergwelt-empty">' + text + '</div>';
+    // Verbindet den Jahresrückblick mit der Expedition zu einem klaren Erlebnisablauf.
+    const experienceStoryRail = () => '<nav class="bergwelt-story-rail" aria-label="Dein Saisonerlebnis">' +
+        '<button type="button" class="bergwelt-story-step is-complete" data-bergwelt-back-to-moments><span>01</span><strong>Momente</strong></button>' +
+        '<span class="bergwelt-story-connector is-active" aria-hidden="true"></span>' +
+        '<span class="bergwelt-story-step is-current" aria-current="step"><span>02</span><strong>Expedition</strong></span>' +
+        '<span class="bergwelt-story-connector" aria-hidden="true"></span>' +
+        '<span class="bergwelt-story-step"><span>03</span><strong>Gipfelmoment</strong></span>' +
+    '</nav>';
 
     function renderMomente() {
         panel.hidden = true;
@@ -322,8 +330,8 @@
             return dateDiff || Number(a.tourDay || 0) - Number(b.tourDay || 0);
         });
         if (!entries.length) {
-            panel.innerHTML = intro('Deine Erinnerung', 'Tour erleben', 'Wähle eine gespeicherte Tour und erlebe ihre Etappen als kleine Expedition.') +
-                '<button type="button" class="bergwelt-action bergwelt-experience-back" data-bergwelt-back-to-moments>‹ Zurück zu deinen Momenten</button>' +
+            panel.innerHTML = experienceStoryRail() +
+                intro('Deine Erinnerung · ' + getYear(), 'Tour erleben', 'Der Jahresrückblick bleibt dein Einstieg. Hier beginnt die Expedition durch deine gespeicherten Touren.') +
                 empty('Für ' + getYear() + ' sind keine Touren gespeichert.');
             return;
         }
@@ -382,8 +390,8 @@
             '</div>'
             : '';
 
-        panel.innerHTML = intro('Dein Bergabenteuer · ' + getYear(), 'Tour erleben', 'Wähle eine gespeicherte Tour. Die Landschaft ist bewusst symbolisch; Etappen und Kennzahlen stammen ausschließlich aus deinen Tourdaten.') +
-            '<button type="button" class="bergwelt-action bergwelt-experience-back" data-bergwelt-back-to-moments>‹ Zurück zu deinen Momenten</button>' +
+        panel.innerHTML = experienceStoryRail() +
+            intro('Dein Bergabenteuer · ' + getYear(), 'Tour erleben', 'Aus den Momenten deiner Saison wird eine persönliche Expedition. Wähle eine gespeicherte Tour; Etappen und Kennzahlen stammen ausschließlich aus deinen Tourdaten.') +
             '<div class="bergwelt-tour-row"><select class="bergwelt-select" id="bergwelt-tour-select" aria-label="Gespeicherte Tour auswählen">' +
             entries.map((item, i) => {
                 const stage = item.tourDay && item.tourDayCount ? ' · Etappe ' + item.tourDay + '/' + item.tourDayCount : '';
