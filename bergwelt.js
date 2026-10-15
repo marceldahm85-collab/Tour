@@ -162,9 +162,19 @@
         const mins = sumKnown(entries, minutesValue);
         const peakCount = sumKnown(entries, peaksValue);
         const maxAscent = maxKnown(entries, ascentValue);
+        // Exakt wie Stats/Highlights: Aufstieg bleibt unverändert.
+        // Standardmäßig zählt für hm/km nur die halbe Strecke; mit
+        // useFullDistanceForGradient wird die volle Strecke verwendet.
+        const steepnessValue = entry => {
+            const ascent = ascentValue(entry);
+            const fullDistance = distanceValue(entry);
+            if (ascent === null || fullDistance === null || fullDistance <= 0) return null;
+            const adjustedDistance = entry.useFullDistanceForGradient ? fullDistance : fullDistance / 2;
+            return adjustedDistance > 0 ? ascent / adjustedDistance : null;
+        };
         const validSteepness = entries
-            .filter(e => ascentValue(e) !== null && distanceValue(e) !== null && distanceValue(e) > 0)
-            .map(e => ascentValue(e) / distanceValue(e));
+            .map(steepnessValue)
+            .filter(value => value !== null && Number.isFinite(value));
         const maxSteepness = validSteepness.length ? Math.max(...validSteepness) : null;
         // "difficulty" ist das tatsächliche Feld für die gespeicherte Tourart.
         // "Mehrtägig" beschreibt die Tourstruktur, keinen eigenen Aktivitätstyp.
@@ -193,7 +203,7 @@
             {
                 name: 'Steilheits-Profi', value: maxSteepness, unit: 'hm/km',
                 tiers: [[100, 'Steile Wege'], [150, 'Steilheits-Kenner'], [200, 'Steilheits-Profi'], [250, 'Extrem steil'], [300, 'Steilheitslegende']],
-                detail: 'Höchster berechenbarer Aufstieg pro Kilometer einer einzelnen Tour.'
+                detail: 'Höchste Steigung einer einzelnen Tour – nach derselben Rundtour-Logik wie in Stats/Highlights (standardmäßig halbe Strecke; bei aktivierter Option volle Strecke).'
             },
             {
                 name: 'Vielseitiger Wanderer', value: activityCount, unit: 'Typen',
