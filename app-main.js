@@ -23052,6 +23052,22 @@ function getWrappedTotals(entries) {
     return { tourCount: countDistinctTours(entries), distance, ascent, minutes, peaks, steps };
 }
 
+function getWrappedSeasonTitle(totals) {
+    const tourCount = Number(totals?.tourCount) || 0;
+    const ascent = Number(totals?.ascent) || 0;
+    const distance = Number(totals?.distance) || 0;
+
+    // Titel nur aus tatsächlich gespeicherten Jahreswerten ableiten.
+    if (tourCount === 0) return 'Ein neues Kapitel beginnt';
+    if (ascent >= 20000) return 'Höhenmeter ohne Ende';
+    if (distance >= 1000) return 'Weite Wege, große Momente';
+    if (ascent >= 10000) return 'Hoch hinaus';
+    if (tourCount >= 50) return 'Ein Jahr voller Bergmomente';
+    if (distance >= 300) return 'Auf langen Wegen';
+    if (tourCount >= 20) return 'Draußen zuhause';
+    return 'Dein Jahr in den Bergen';
+}
+
 function buildWrappedSlideData(year) {
     const entries = getWrappedDataForYear(year);
     const previousEntries = getWrappedDataForYear(year - 1);
@@ -23072,7 +23088,7 @@ function buildWrappedSlideData(year) {
 
     const slides = [
         { key: 'intro', type: 'intro', duration: WRAPPED_SLIDE_DURATIONS.intro,
-          data: { year, tourCount: totals.tourCount } },
+          data: { year, tourCount: totals.tourCount, seasonTitle: getWrappedSeasonTitle(totals) } },
 
         { key: 'distance', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
           data: { distance: totals.distance } },
@@ -34261,12 +34277,51 @@ function renderWrappedSlide(index) {
 }
 
 function renderWrappedIntroSlide(ctx, w, h, colors, data) {
-    drawWrappedCenteredTitle(ctx, `Dein Jahr ${data.year}`, 400, 90, colors.text, w);
-    drawWrappedBigNumber(ctx, data.tourCount, 'Touren', 900, colors.text, w);
+    // Dezente Alpen-Silhouette als visuelle Klammer für den Jahresrückblick.
+    const baseY = h * 0.91;
+    ctx.save();
+    ctx.globalAlpha = 0.25;
+    ctx.fillStyle = colors.accent;
+    ctx.beginPath();
+    ctx.moveTo(0, baseY);
+    ctx.lineTo(w * 0.13, h * 0.75);
+    ctx.lineTo(w * 0.23, h * 0.82);
+    ctx.lineTo(w * 0.39, h * 0.64);
+    ctx.lineTo(w * 0.49, h * 0.77);
+    ctx.lineTo(w * 0.65, h * 0.59);
+    ctx.lineTo(w * 0.76, h * 0.76);
+    ctx.lineTo(w * 0.88, h * 0.68);
+    ctx.lineTo(w, h * 0.79);
+    ctx.lineTo(w, h);
+    ctx.lineTo(0, h);
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = 0.15;
+    ctx.fillStyle = colors.text;
+    ctx.beginPath();
+    ctx.moveTo(0, h * 0.88);
+    ctx.lineTo(w * 0.2, h * 0.79);
+    ctx.lineTo(w * 0.34, h * 0.87);
+    ctx.lineTo(w * 0.52, h * 0.75);
+    ctx.lineTo(w * 0.69, h * 0.86);
+    ctx.lineTo(w * 0.84, h * 0.77);
+    ctx.lineTo(w, h * 0.87);
+    ctx.lineTo(w, h);
+    ctx.lineTo(0, h);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    drawWrappedCenteredTitle(ctx, `Dein Jahr ${data.year}`, 330, 90, colors.text, w);
+    setWrappedFont(ctx, Math.max(36, Math.min(58, w * 0.055)), 'bold');
+    ctx.fillStyle = colors.accent;
+    ctx.textAlign = 'center';
+    wrapWrappedText(ctx, data.seasonTitle || 'Dein Jahr in den Bergen', w / 2, h * 0.36, w * 0.82, 64);
+    drawWrappedBigNumber(ctx, data.tourCount, 'Touren', h * 0.68, colors.text, w);
     setWrappedFont(ctx, 42);
     ctx.fillStyle = colors.text;
     ctx.textAlign = 'center';
-    ctx.fillText('Stolzer Blick zurück... 🏔️', w / 2, 1050);
+    ctx.fillText('Stolzer Blick zurück... 🏔️', w / 2, h * 0.79);
 }
 
 function renderWrappedDistanceSlide(ctx, w, h, colors, data) {
