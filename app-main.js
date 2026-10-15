@@ -22907,7 +22907,7 @@ async function attachWrappedPhotos(slides, year) {
 
         if (slide.key === 'top3') {
             for (const item of (slide.data?.top3 || [])) {
-                const photo = photoForEntry(item.entry);
+                const photo = photoForEntry(item.entry) || pickRandomWrappedPhoto(photoEntries);
                 item.photoImg = photo?.imageData
                     ? await loadWrappedImage(photo.imageData)
                     : null;
@@ -22915,6 +22915,10 @@ async function attachWrappedPhotos(slides, year) {
         }
 
         if (slide.key !== 'top3') {
+            // Jede Folie ohne eigenes Tourfoto erhält ein echtes Foto aus derselben Saison.
+            // So bleibt der Rückblick auch bei Statistikfolien visuell alpin, ohne künstliche
+            // Vektorberge über dem Inhalt zu zeichnen.
+            if (!photoEntry) photoEntry = pickRandomWrappedPhoto(photoEntries);
             slide.photoImg = photoEntry?.imageData
                 ? await loadWrappedImage(photoEntry.imageData)
                 : null;
@@ -34277,10 +34281,8 @@ function renderWrappedSlide(index) {
 }
 
 function renderWrappedIntroSlide(ctx, w, h, colors, data, showAlpineArtwork = true) {
-    // Die Berggrafik darf ein echtes Tourfoto niemals überlagern.
-    if (showAlpineArtwork) {
-        drawWrappedAlpineArtwork(ctx, w, h, colors);
-    }
+    // Bei vorhandenen Tourfotos bleibt das Foto frei von zusätzlichen Bergformen.
+    // Die alte, künstlich wirkende Vektorillustration wird nicht mehr verwendet.
 
     drawWrappedCenteredTitle(ctx, `Dein Jahr ${data.year}`, 330, 90, colors.text, w);
     setWrappedFont(ctx, Math.max(36, Math.min(58, w * 0.055)), 'bold');
@@ -34294,92 +34296,6 @@ function renderWrappedIntroSlide(ctx, w, h, colors, data, showAlpineArtwork = tr
     ctx.fillText('Stolzer Blick zurück... 🏔️', w / 2, h * 0.79);
 }
 
-function drawWrappedAlpineArtwork(ctx, w, h, colors) {
-    // Mehrschichtige Alpenillustration mit atmosphärischer Tiefe, Felsflanken
-    // und Schneefeldern statt der bisherigen groben Zickzack-Silhouette.
-    const horizon = h * 0.91;
-    ctx.save();
-
-    const haze = ctx.createLinearGradient(0, h * 0.52, 0, h);
-    haze.addColorStop(0, 'rgba(255,255,255,0)');
-    haze.addColorStop(1, colors.accent + '18');
-    ctx.fillStyle = haze;
-    ctx.fillRect(0, h * 0.5, w, h * 0.5);
-
-    function ridge(points, fill, alpha = 1) {
-        ctx.save();
-        ctx.globalAlpha = alpha;
-        ctx.beginPath();
-        ctx.moveTo(points[0][0] * w, points[0][1] * h);
-        for (let i = 1; i < points.length; i++) {
-            ctx.lineTo(points[i][0] * w, points[i][1] * h);
-        }
-        ctx.lineTo(w, h);
-        ctx.lineTo(0, h);
-        ctx.closePath();
-        ctx.fillStyle = fill;
-        ctx.fill();
-        ctx.restore();
-    }
-
-    const distant = ctx.createLinearGradient(0, h * 0.5, 0, h);
-    distant.addColorStop(0, colors.text + '24');
-    distant.addColorStop(1, colors.text + '08');
-    ridge([[0, .83], [.08, .75], [.16, .79], [.27, .62], [.34, .70], [.44, .55],
-        [.51, .68], [.61, .58], [.70, .72], [.82, .61], [.91, .73], [1, .67]], distant, .65);
-
-    const main = ctx.createLinearGradient(0, h * .58, w * .72, h);
-    main.addColorStop(0, colors.accent + 'b0');
-    main.addColorStop(.48, colors.accent + '62');
-    main.addColorStop(1, colors.text + '24');
-    ridge([[0, .91], [.09, .79], [.17, .84], [.29, .66], [.36, .75],
-        [.47, .48], [.53, .60], [.58, .55], [.67, .77], [.77, .66],
-        [.88, .81], [1, .72]], main, .7);
-
-    // Schneekämme und schattierte Felsflanken auf den markanten Gipfeln.
-    ctx.globalAlpha = .5;
-    ctx.fillStyle = colors.text;
-    ctx.beginPath();
-    ctx.moveTo(w * .405, h * .625);
-    ctx.lineTo(w * .47, h * .48);
-    ctx.lineTo(w * .505, h * .57);
-    ctx.lineTo(w * .477, h * .545);
-    ctx.lineTo(w * .46, h * .575);
-    ctx.lineTo(w * .445, h * .552);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.globalAlpha = .26;
-    ctx.fillStyle = colors.bg2 || '#24313a';
-    ctx.beginPath();
-    ctx.moveTo(w * .47, h * .48);
-    ctx.lineTo(w * .53, h * .60);
-    ctx.lineTo(w * .505, h * .57);
-    ctx.lineTo(w * .49, h * .59);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.globalAlpha = .34;
-    ctx.fillStyle = colors.text;
-    ctx.beginPath();
-    ctx.moveTo(w * .245, h * .71);
-    ctx.lineTo(w * .29, h * .66);
-    ctx.lineTo(w * .33, h * .72);
-    ctx.lineTo(w * .305, h * .705);
-    ctx.lineTo(w * .29, h * .72);
-    ctx.lineTo(w * .278, h * .695);
-    ctx.closePath();
-    ctx.fill();
-
-    // Feine, gestaffelte Vorberge sorgen für Tiefe am unteren Bildrand.
-    const foreground = ctx.createLinearGradient(0, h * .78, 0, h);
-    foreground.addColorStop(0, colors.accent + '52');
-    foreground.addColorStop(1, colors.bg2 || '#18252d');
-    ridge([[0, .92], [.12, .86], [.23, .90], [.37, .80], [.48, .87],
-        [.62, .82], [.74, .90], [.88, .84], [1, .9]], foreground, .72);
-
-    ctx.restore();
-}
 function renderWrappedDistanceSlide(ctx, w, h, colors, data) {
     drawWrappedCenteredTitle(ctx, 'Deine Strecke', 350, 70, colors.text, w);
     drawWrappedBigNumber(ctx, data.distance.toFixed(1), 'km', 800, colors.text, w);
