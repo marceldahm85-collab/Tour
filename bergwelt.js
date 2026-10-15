@@ -546,6 +546,7 @@
         let lastPercent = -1;
         let lastProgressLabel = '';
         let lastLiveStatus = '';
+        let lastToggleLabel = '';
         let lastPlayingState = null;
         let lastCompleteState = false;
         let lastSummitState = null;
@@ -621,7 +622,11 @@
                 scene.classList.toggle('is-summit-moment', isSummitMoment);
                 lastSummitState = isSummitMoment;
             }
-            if (toggleButton) toggleButton.textContent = playing ? 'Ⅱ Pause' : isComplete ? '↻ Noch einmal erleben' : tourProgress > 0 ? '▶ Weiter' : '▶ Expedition starten';
+            const toggleLabel = playing ? 'Ⅱ Pause' : isComplete ? '↻ Noch einmal erleben' : tourProgress > 0 ? '▶ Weiter' : '▶ Expedition starten';
+            if (toggleButton && toggleLabel !== lastToggleLabel) {
+                toggleButton.textContent = toggleLabel;
+                lastToggleLabel = toggleLabel;
+            }
         };
 
         const stopAnimation = () => {
