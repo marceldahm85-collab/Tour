@@ -126,10 +126,11 @@
     // Verbindet den Jahresrückblick mit der Expedition zu einem klaren Erlebnisablauf.
     const experienceStoryRail = (chapter = 'expedition') => {
         const finale = chapter === 'finale';
+        const expeditionClass = finale ? ' is-complete' : ' is-current';
         return '<nav class="bergwelt-story-rail' + (finale ? ' is-finale' : '') + '" aria-label="Dein Saisonerlebnis">' +
             '<button type="button" class="bergwelt-story-step is-complete" data-bergwelt-back-to-moments><span>01</span><strong>Momente</strong></button>' +
             '<span class="bergwelt-story-connector is-active" aria-hidden="true"></span>' +
-            '<span class="bergwelt-story-step is-complete"><span>02</span><strong>Expedition</strong></span>' +
+            '<span class="bergwelt-story-step' + expeditionClass + '"' + (finale ? '' : ' aria-current="step"') + '><span>02</span><strong>Expedition</strong></span>' +
             '<span class="bergwelt-story-connector' + (finale ? ' is-active' : '') + '" aria-hidden="true"></span>' +
             '<span class="bergwelt-story-step' + (finale ? ' is-current' : '') + '"' + (finale ? ' aria-current="step"' : '') + '><span>03</span><strong>Gipfelmoment</strong></span>' +
         '</nav>';
@@ -536,6 +537,7 @@
             : Math.max(0, Math.min(stepCount - 1, Math.floor(progress * stepCount)));
 
         const updateView = progress => {
+            const previousProgress = tourProgress;
             tourProgress = Math.max(0, Math.min(1, progress));
             const stageIndex = getStageIndex(tourProgress);
             const point = path.getPointAtLength(pathLength * tourProgress);
@@ -554,7 +556,15 @@
             scene.classList.toggle('is-complete', tourProgress >= 1);
             scene.classList.toggle('is-summit-moment', summitIndex >= 0 && stageIndex === summitIndex);
             const finale = document.getElementById('bergwelt-tour-finale');
-            if (finale) finale.hidden = tourProgress < 1;
+            if (finale) {
+                finale.hidden = tourProgress < 1;
+                if (tourProgress >= 1 && previousProgress < 1) {
+                    finale.scrollIntoView({
+                        behavior: reduceMotion ? 'auto' : 'smooth',
+                        block: 'nearest'
+                    });
+                }
+            }
             if (tourProgress >= 1) {
                 const storyRail = panel.querySelector('.bergwelt-story-rail');
                 if (storyRail && !storyRail.classList.contains('is-finale')) {
