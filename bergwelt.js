@@ -374,8 +374,6 @@
         const summitReveal = peakCount !== null && peakCount > 0
             ? '<div class="bergwelt-tour-summit-reveal" aria-hidden="true">' +
                 '<span class="bergwelt-tour-summit-kicker">DEIN GIPFELMOMENT</span>' +
-                '<strong>' + fmt(peakCount) + '</strong>' +
-                '<span class="bergwelt-tour-summit-count">' + (peakCount === 1 ? 'GESPEICHERTER GIPFEL' : 'GESPEICHERTE GIPFEL') + '</span>' +
                 '<span class="bergwelt-tour-summit-peaks">' + peakDetailsMarkup + '</span>' +
                 '<span class="bergwelt-tour-summit-facts">' + (tourAscent !== null ? fmt(tourAscent) + ' hm Aufstieg' : 'Deine gespeicherten Gipfel') + (tourDistance !== null ? ' · ' + fmt(tourDistance, 1) + ' km' : '') + '</span>' +
             '</div>'
@@ -389,7 +387,7 @@
                 const itemId = String(item.id ?? i);
                 return '<option value="' + escapeHTML(itemId) + '"' + (itemId === selectedTourId ? ' selected' : '') + '>' + escapeHTML(item.date || '') + ' · ' + escapeHTML(item.tourname || item.region || 'Unbenannte Tour') + escapeHTML(stage + group) + '</option>';
             }).join('') +
-            '</select><button type="button" class="bergwelt-action" id="bergwelt-play-tour">▶ Expedition starten</button></div>' +
+            '</select></div>' +
             '<section class="bergwelt-animation bergwelt-tour-expedition" id="bergwelt-animation" data-stage="0">' +
                 '<div class="bergwelt-tour-cinematic">' +
                     '<div class="bergwelt-tour-cinematic-meta"><span id="bergwelt-tour-chapter">EXPEDITION · ETAPPE 01</span><span class="bergwelt-tour-live-status" id="bergwelt-tour-live-status">BEREIT</span></div>' +
