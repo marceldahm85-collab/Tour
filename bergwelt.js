@@ -390,6 +390,7 @@
             '</select></div>' +
             '<section class="bergwelt-animation bergwelt-tour-expedition" id="bergwelt-animation" data-stage="0">' +
                 '<div class="bergwelt-tour-cinematic">' +
+                    '<img class="bergwelt-tour-original-photo" id="bergwelt-tour-original-photo" alt="Originalfoto der ausgewählten Tour" hidden>' +
                     '<div class="bergwelt-tour-cinematic-meta"><span id="bergwelt-tour-chapter">EXPEDITION · ETAPPE 01</span><span class="bergwelt-tour-live-status" id="bergwelt-tour-live-status">BEREIT</span></div>' +
                     '<svg class="bergwelt-tour-landscape" viewBox="0 0 760 310" role="img" aria-label="Atmosphärische, symbolische Berglandschaft. Die Linie ist keine aufgezeichnete Route oder Höhenprofil." preserveAspectRatio="xMidYMid slice">' +
                         '<defs>' +
@@ -433,6 +434,24 @@
             statCard('Gehzeit', duration === null ? '–' : fmt(duration / 60, 1), 'h') +
             statCard('Steilheit', fmtKnown(steepness), 'hm/km') +
             '</div><p class="bergwelt-footnote">Die Berglandschaft und der Wanderweg sind symbolisch, kein aufgezeichnetes Höhenprofil und keine echte Route. Es werden keine Streckenverläufe oder Gipfelnamen erfunden. Steilheit wird wie in Stats/Highlights berechnet.</p>';
+
+        const originalPhoto = document.getElementById('bergwelt-tour-original-photo');
+        const applyOriginalPhoto = imageData => {
+            if (!originalPhoto || !imageData || !String(imageData).startsWith('data:image/')) return;
+            originalPhoto.src = imageData;
+            originalPhoto.hidden = false;
+            originalPhoto.classList.add('is-loaded');
+        };
+        if (e.imageData) {
+            applyOriginalPhoto(e.imageData);
+        } else if (e.hasImage && e.id && typeof window.loadTourImagesForEntries === 'function') {
+            const photoTourId = String(e.id);
+            window.loadTourImagesForEntries([{ ...e }]).then(loadedEntries => {
+                const loaded = loadedEntries?.[0];
+                const currentSelect = document.getElementById('bergwelt-tour-select');
+                if (currentSelect?.value === photoTourId && loaded?.imageData) applyOriginalPhoto(loaded.imageData);
+            }).catch(error => console.warn('[Bergwelt] Originalfoto konnte nicht geladen werden:', error));
+        }
 
         const scene = document.getElementById('bergwelt-animation');
         const path = document.getElementById('bergwelt-tour-route-bed');
