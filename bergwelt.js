@@ -234,8 +234,50 @@
             '</div>' + milestoneMoment +
             '<p class="bergwelt-footnote">' + escapeHTML(comparison) + ' Alle Summen beruhen ausschließlich auf gespeicherten Aufstiegswerten. Die Höhenmarken sind Vergleichswerte; sie behaupten keine konkrete Besteigung.</p>';
     }
+    function renderLiveMilestones(entries) {
+        const calculate = window.__tourDataRules?.computeMilestones;
+        if (typeof calculate !== 'function') return '';
+        const metrics = calculate(entries);
+        const definitions = [
+            { key: 'dist', label: 'Strecke', icon: '📏', unit: 'km', digits: 1 },
+            { key: 'asc', label: 'Aufstieg', icon: '⛰️', unit: 'hm', digits: 0 },
+            { key: 'time', label: 'Gehzeit', icon: '⏱️', unit: 'h', digits: 1 },
+            { key: 'peaks', label: 'Gipfel', icon: '🏔️', unit: 'Gipfel', digits: 0 },
+            { key: 'steps', label: 'Schritte', icon: '👣', unit: 'Schritte', digits: 0 }
+        ];
+        const cards = definitions.map(def => {
+            const data = metrics[def.key];
+            const hasData = Boolean(data?.hasData);
+            const total = Number(data?.total || 0);
+            const next = data?.next ?? null;
+            const progress = !hasData ? 0 : next === null ? 100 : Math.max(0, Math.min(100, total / next * 100));
+            const valueText = hasData ? fmt(total, def.digits) : '–';
+            const reachedText = data?.reached?.length
+                ? data.reached.length + (data.reached.length === 1 ? ' Marke erreicht' : ' Marken erreicht')
+                : 'Noch keine Marke erreicht';
+            const goalText = !hasData
+                ? 'Keine gültigen Werte gespeichert'
+                : next === null
+                    ? 'Alle definierten Marken erreicht'
+                    : 'Noch ' + fmt(Math.max(0, next - total), def.digits) + ' ' + def.unit + ' bis ' + fmt(next, def.digits) + ' ' + def.unit;
+            return '<article class="bergwelt-live-milestone' + (!hasData ? ' has-no-data' : '') + (next === null && hasData ? ' is-complete' : '') + '">' +
+                '<div class="bergwelt-live-milestone-top"><span class="bergwelt-live-milestone-icon" aria-hidden="true">' + def.icon + '</span>' +
+                    '<div class="bergwelt-live-milestone-title"><strong>' + def.label + '</strong><small>' + reachedText + '</small></div>' +
+                    '<div class="bergwelt-live-milestone-value"><strong>' + valueText + '</strong><small>' + def.unit + '</small></div></div>' +
+                '<div class="bergwelt-track bergwelt-live-milestone-track" role="progressbar" aria-label="' + def.label + ': Fortschritt zur nächsten Meilensteinmarke" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(progress) + '"><span style="width:' + progress + '%"></span></div>' +
+                '<div class="bergwelt-live-milestone-meta"><span>' + goalText + '</span><strong>' + (hasData ? Math.round(progress) + ' %' : '–') + '</strong></div>' +
+            '</article>';
+        }).join('');
+        return '<section class="bergwelt-live-milestones" aria-label="Live-Meilensteine">' +
+            '<div class="bergwelt-live-milestones-heading"><div><span>LIVE-MEILENSTEINE</span><h3>Dein Fortschritt ' + getYear() + '</h3></div>' +
+                '<p>Dieselben fünf Meilensteinreihen wie im Dashboard – berechnet aus den gespeicherten Touren dieses Jahres.</p></div>' +
+            '<div class="bergwelt-live-milestones-grid">' + cards + '</div>' +
+        '</section>';
+    }
+
     function renderLevel() {
         const entries = yearTours();
+        const liveMilestonesHtml = renderLiveMilestones(entries);
         const dist = sumKnown(entries, distanceValue);
         const asc = sumKnown(entries, ascentValue);
         const mins = sumKnown(entries, minutesValue);
@@ -310,6 +352,7 @@
                     '<div class="bergwelt-level-overview-status"><strong>' + earnedCount + ' von 5</strong><span>Spezialisierungen mit Rang</span></div></div>' +
                 '<div class="bergwelt-level-overview-ring" style="--level-overview-progress:' + overviewProgress + '%" role="img" aria-label="' + earnedCount + ' von 5 Spezialisierungen mit mindestens einem Rang"><div><strong>' + earnedCount + '<small>/5</small></strong><span>RÄNGE</span></div></div>' +
             '</section>' +
+            liveMilestonesHtml +
             '<div class="bergwelt-grid bergwelt-level-stats">' +
                 statCard('Jahresstrecke', fmtKnown(dist, 1), 'km') +
                 statCard('Stärkster Einzelaufstieg', fmtKnown(maxAscent), 'hm') +
