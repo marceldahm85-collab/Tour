@@ -22863,9 +22863,50 @@ function getWrappedYearPhotos(year) {
     return entries.filter(e => e.imageData);
 }
 
-function pickRandomWrappedPhoto(photoEntries) {
-    if (!photoEntries.length) return null;
-    return photoEntries[Math.floor(Math.random() * photoEntries.length)];
+function shuffleWrappedPhotos(photoEntries) {
+    const shuffled = photoEntries.slice();
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
+function createWrappedPhotoAllocator(photoEntries) {
+    // Identische Bilddaten nur einmal in den Pool aufnehmen. Sonst könnte dieselbe
+    // gespeicherte Aufnahme trotz unterschiedlicher Tour-Einträge doppelt erscheinen.
+    const uniquePhotos = [...new Map(
+        photoEntries
+            .filter(entry => entry?.imageData)
+            .map(entry => [entry.imageData, entry])
+    ).values()];
+    let available = shuffleWrappedPhotos(uniquePhotos);
+    let lastImageData = null;
+
+    return function takeWrappedPhoto(preferredEntry = null) {
+        if (!uniquePhotos.length) return null;
+
+        // Erst wenn jedes verfügbare Bild einmal vergeben wurde, darf eine Runde
+        // mit Wiederholungen beginnen. An der Rundengrenze möglichst nicht dasselbe
+        // Bild direkt zweimal hintereinander verwenden.
+        if (!available.length) {
+            available = shuffleWrappedPhotos(uniquePhotos);
+            if (available.length > 1 && available[0].imageData === lastImageData) {
+                const swapIndex = available.findIndex(entry => entry.imageData !== lastImageData);
+                if (swapIndex > 0) {
+                    [available[0], available[swapIndex]] = [available[swapIndex], available[0]];
+                }
+            }
+        }
+
+        const preferredKey = preferredEntry?.imageData;
+        const preferredIndex = preferredKey
+            ? available.findIndex(entry => entry.imageData === preferredKey)
+            : -1;
+        const [picked] = available.splice(preferredIndex >= 0 ? preferredIndex : 0, 1);
+        lastImageData = picked?.imageData || null;
+        return picked || null;
+    };
 }
 
 async function attachWrappedPhotos(slides, year) {
@@ -22890,38 +22931,59 @@ async function attachWrappedPhotos(slides, year) {
     };
 
     if (!photoEntries.length) {
-        slides.forEach(slide => slide.photoImg = null);
+        slides.forEach(slide => {
+            slide.photoImg = null;
+            (slide.data?.top3 || []).forEach(item => item.photoImg = null);
+        });
         return slides;
     }
 
+    const takePhoto = createWrappedPhotoAllocator(photoEntries);
+    const top3Slots = [];
+    const specificBackgroundSlots = [];
+    const genericBackgroundSlots = [];
+
     for (const slide of slides) {
-        let photoEntry = null;
-
-        if (slide.key === 'intro' || slide.key === 'outro') {
-            photoEntry = pickRandomWrappedPhoto(photoEntries);
-        } else if (slide.key === 'bestTour') {
-            photoEntry = photoForEntry(slide.data?.entry) || pickRandomWrappedPhoto(photoEntries);
-        } else if (slide.key === 'highestPeak') {
-            photoEntry = photoForEntry(slide.data?.peak?.entry) || pickRandomWrappedPhoto(photoEntries);
-        }
-
+        slide.photoImg = null;
         if (slide.key === 'top3') {
             for (const item of (slide.data?.top3 || [])) {
-                const photo = photoForEntry(item.entry) || pickRandomWrappedPhoto(photoEntries);
-                item.photoImg = photo?.imageData
-                    ? await loadWrappedImage(photo.imageData)
-                    : null;
+                item.photoImg = null;
+                top3Slots.push({ slide, item, preferred: photoForEntry(item.entry) });
             }
+        } else if (slide.key === 'bestTour') {
+            specificBackgroundSlots.push({
+                slide,
+                preferred: photoForEntry(slide.data?.entry)
+            });
+        } else if (slide.key === 'highestPeak') {
+            specificBackgroundSlots.push({
+                slide,
+                preferred: photoForEntry(slide.data?.peak?.entry)
+            });
+        } else {
+            genericBackgroundSlots.push({ slide, preferred: null });
         }
+    }
 
-        if (slide.key !== 'top3') {
-            // Jede Folie ohne eigenes Tourfoto erhält ein echtes Foto aus derselben Saison.
-            // So bleibt der Rückblick auch bei Statistikfolien visuell alpin, ohne künstliche
-            // Vektorberge über dem Inhalt zu zeichnen.
-            if (!photoEntry) photoEntry = pickRandomWrappedPhoto(photoEntries);
-            slide.photoImg = photoEntry?.imageData
-                ? await loadWrappedImage(photoEntry.imageData)
-                : null;
+    // Semantisch passende Bilder zuerst vergeben. Danach erhalten die Top-3-Karten
+    // ihre Bilder, anschließend die restlichen Folien. Der gemeinsame Pool verhindert
+    // Wiederholungen über Folienhintergründe und Top-3-Karten hinweg, solange genügend
+    // unterschiedliche Fotos vorhanden sind.
+    const slots = [
+        ...specificBackgroundSlots.map(slot => ({ ...slot, type: 'background' })),
+        ...top3Slots.map(slot => ({ ...slot, type: 'top3' })),
+        ...genericBackgroundSlots.map(slot => ({ ...slot, type: 'background' }))
+    ];
+
+    for (const slot of slots) {
+        const photoEntry = takePhoto(slot.preferred);
+        if (!photoEntry?.imageData) continue;
+
+        const photoImg = await loadWrappedImage(photoEntry.imageData);
+        if (slot.type === 'top3') {
+            slot.item.photoImg = photoImg;
+        } else {
+            slot.slide.photoImg = photoImg;
         }
     }
 
