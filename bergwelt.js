@@ -28,22 +28,25 @@
             return Array.isArray(value) ? value.filter(x => x && typeof x === 'object') : [];
         } catch (_) { return []; }
     };
-    // Gemeinsame Leser: fehlende Messwerte bleiben intern null.
-    // Erst Summen/Anzeigen wandeln fehlende Werte bewusst in 0 um.
-    const readMetric = value => {
-        if (value === null || value === undefined || String(value).trim() === '') return null;
-        if (typeof value === 'number') return Number.isFinite(value) && value >= 0 ? value : null;
-        const normalized = String(value).replace(/\s/g, '').replace(',', '.');
-        if (!normalized) return null;
-        const n = Number(normalized);
-        return Number.isFinite(n) && n >= 0 ? n : null;
-    };
+    // Bevorzugt die gemeinsame Datenbasis aus app-core.js. Fallbacks halten
+    // Bergwelt auch bei isolierten Tests oder abweichender Script-Reihenfolge funktionsfähig.
+    const readMetric = value => typeof window.__tourDataRules?.readMetric === 'function'
+        ? window.__tourDataRules.readMetric(value)
+        : (() => {
+            if (value === null || value === undefined || String(value).trim() === '') return null;
+            const normalized = String(value).replace(/\s/g, '').replace(',', '.');
+            if (!normalized) return null;
+            const n = Number(normalized);
+            return Number.isFinite(n) && n >= 0 ? n : null;
+        })();
     const parseNumber = value => readMetric(value) ?? 0;
-    const parseMinutes = value => {
-        if (value === null || value === undefined || String(value).trim() === '') return null;
-        const m = String(value).trim().match(/^(\d{1,4}):([0-5]?\d)$/);
-        return m ? Number(m[1]) * 60 + Number(m[2]) : null;
-    };
+    const parseMinutes = value => typeof window.__tourDataRules?.parseMinutes === 'function'
+        ? window.__tourDataRules.parseMinutes(value)
+        : (() => {
+            if (value === null || value === undefined || String(value).trim() === '') return null;
+            const m = String(value).trim().match(/^(\d{1,4}):([0-5]?\d)$/);
+            return m ? Number(m[1]) * 60 + Number(m[2]) : null;
+        })();
     const parseTourDate = value => {
         const raw = String(value ?? '').trim();
         if (!raw) return null;
@@ -61,7 +64,7 @@
         const fallback = new Date(raw);
         return Number.isNaN(fallback.getTime()) ? null : fallback;
     };
-    const dateYear = entry => parseTourDate(entry?.date)?.getFullYear() ?? null;
+    const dateYear = entry => typeof window.__tourDataRules?.yearFromDate === 'function' ? window.__tourDataRules.yearFromDate(entry?.date) : parseTourDate(entry?.date)?.getFullYear() ?? null;
     const fmt = (n, digits = 0) => Number(n || 0).toLocaleString('de-AT', { maximumFractionDigits: digits, minimumFractionDigits: digits });
     const escapeHTML = value => String(value ?? '').replace(/[&<>\"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;' }[ch]));
     const getYear = () => Number(document.getElementById('wrapped-year-select')?.value) || new Date().getFullYear();
@@ -94,13 +97,17 @@
     const distance = e => distanceValue(e) ?? 0;
     const minutes = e => minutesValue(e) ?? 0;
     const peaks = e => peaksValue(e) ?? 0;
-    const tourIdentity = (entry, index = 0) => {
-        if (entry?.tourGroup !== undefined && entry?.tourGroup !== null && String(entry.tourGroup).trim()) return 'group:' + String(entry.tourGroup);
-        if (entry?.id !== undefined && entry?.id !== null && String(entry.id).trim()) return 'id:' + String(entry.id);
-        const fingerprint = [entry?.date, entry?.tourname, entry?.region, entry?.tourDay].map(v => String(v ?? '').trim()).join('|');
-        return fingerprint.replace(/\|/g, '') ? 'entry:' + fingerprint : 'entry-index:' + index;
-    };
-    const uniqueTourCount = entries => new Set(entries.map((entry, index) => tourIdentity(entry, index))).size;
+    const tourIdentity = (entry, index = 0) => typeof window.__tourDataRules?.tourIdentity === 'function'
+        ? window.__tourDataRules.tourIdentity(entry, index)
+        : (() => {
+            if (entry?.tourGroup !== undefined && entry?.tourGroup !== null && String(entry.tourGroup).trim()) return 'group:' + String(entry.tourGroup);
+            if (entry?.id !== undefined && entry?.id !== null && String(entry.id).trim()) return 'id:' + String(entry.id);
+            const fingerprint = [entry?.date, entry?.tourname, entry?.region, entry?.tourDay].map(v => String(v ?? '').trim()).join('|');
+            return fingerprint.replace(/\|/g, '') ? 'entry:' + fingerprint : 'entry-index:' + index;
+        })();
+    const uniqueTourCount = entries => typeof window.__tourDataRules?.countDistinctTours === 'function'
+        ? window.__tourDataRules.countDistinctTours(entries)
+        : new Set(entries.map((entry, index) => tourIdentity(entry, index))).size;
     const sum = (entries, getter) => entries.reduce((acc, e) => acc + getter(e), 0);
     const sumKnown = (entries, getter) => {
         const values = entries.map(getter).filter(value => value !== null && value !== undefined && Number.isFinite(value));
