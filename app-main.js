@@ -22873,8 +22873,6 @@ function shuffleWrappedPhotos(photoEntries) {
 }
 
 function createWrappedPhotoAllocator(photoEntries) {
-    // Identische Bilddaten nur einmal in den Pool aufnehmen. Sonst könnte dieselbe
-    // gespeicherte Aufnahme trotz unterschiedlicher Tour-Einträge doppelt erscheinen.
     const uniquePhotos = [...new Map(
         photoEntries
             .filter(entry => entry?.imageData)
@@ -22883,12 +22881,11 @@ function createWrappedPhotoAllocator(photoEntries) {
     let available = shuffleWrappedPhotos(uniquePhotos);
     let lastImageData = null;
 
-    return function takeWrappedPhoto(preferredEntry = null) {
+    return function takeWrappedPhoto() {
         if (!uniquePhotos.length) return null;
 
-        // Erst wenn jedes verfügbare Bild einmal vergeben wurde, darf eine Runde
-        // mit Wiederholungen beginnen. An der Rundengrenze möglichst nicht dasselbe
-        // Bild direkt zweimal hintereinander verwenden.
+        // Zuerst alle nicht reservierten Bilder einmal nutzen. Erst danach werden
+        // diese Bilder erneut verteilt; direkt aufeinanderfolgende Duplikate vermeiden.
         if (!available.length) {
             available = shuffleWrappedPhotos(uniquePhotos);
             if (available.length > 1 && available[0].imageData === lastImageData) {
@@ -22899,11 +22896,7 @@ function createWrappedPhotoAllocator(photoEntries) {
             }
         }
 
-        const preferredKey = preferredEntry?.imageData;
-        const preferredIndex = preferredKey
-            ? available.findIndex(entry => entry.imageData === preferredKey)
-            : -1;
-        const [picked] = available.splice(preferredIndex >= 0 ? preferredIndex : 0, 1);
+        const [picked] = available.splice(0, 1);
         lastImageData = picked?.imageData || null;
         return picked || null;
     };
@@ -22938,7 +22931,6 @@ async function attachWrappedPhotos(slides, year) {
         return slides;
     }
 
-    const takePhoto = createWrappedPhotoAllocator(photoEntries);
     const top3Slots = [];
     const specificBackgroundSlots = [];
     const genericBackgroundSlots = [];
@@ -22965,10 +22957,38 @@ async function attachWrappedPhotos(slides, year) {
         }
     }
 
-    // Semantisch passende Bilder zuerst vergeben. Danach erhalten die Top-3-Karten
-    // ihre Bilder, anschließend die restlichen Folien. Der gemeinsame Pool verhindert
-    // Wiederholungen über Folienhintergründe und Top-3-Karten hinweg, solange genügend
-    // unterschiedliche Fotos vorhanden sind.
+    // Fotos zu konkreten Touren sind absichtlich wiederverwendbar: etwa auf
+    // "Beste Tour" bzw. "Höchster Gipfel" und zusätzlich bei derselben Tour in Top 3.
+    // Solche Tourfotos werden deshalb direkt zugeordnet und aus dem Pool für die
+    // allgemeinen Statistik-Hintergründe herausgehalten.
+    const reservedImageData = new Set([
+        ...specificBackgroundSlots,
+        ...top3Slots
+    ].map(slot => slot.preferred?.imageData).filter(Boolean));
+
+    const uniquePhotoEntries = [...new Map(
+        photoEntries.map(entry => [entry.imageData, entry])
+    ).values()];
+    const nonReservedPhotos = uniquePhotoEntries.filter(
+        entry => !reservedImageData.has(entry.imageData)
+    );
+
+    // Verteile zunächst Fotos, die keiner Tour-spezifischen Folie/Top-3-Karte
+    // zugeordnet sind. Nur wenn diese Auswahl aufgebraucht ist, müssen sie sich
+    // wiederholen. Falls alle Bilder reserviert sind, bleibt Wiederverwendung
+    // möglich, damit jede Folie weiterhin einen fotografischen Hintergrund hat.
+    const takeFallbackPhoto = createWrappedPhotoAllocator(
+        nonReservedPhotos.length ? nonReservedPhotos : uniquePhotoEntries
+    );
+    const imageCache = new Map();
+    const getPhotoImage = async entry => {
+        if (!entry?.imageData) return null;
+        if (!imageCache.has(entry.imageData)) {
+            imageCache.set(entry.imageData, await loadWrappedImage(entry.imageData));
+        }
+        return imageCache.get(entry.imageData);
+    };
+
     const slots = [
         ...specificBackgroundSlots.map(slot => ({ ...slot, type: 'background' })),
         ...top3Slots.map(slot => ({ ...slot, type: 'top3' })),
@@ -22976,10 +22996,10 @@ async function attachWrappedPhotos(slides, year) {
     ];
 
     for (const slot of slots) {
-        const photoEntry = takePhoto(slot.preferred);
-        if (!photoEntry?.imageData) continue;
-
-        const photoImg = await loadWrappedImage(photoEntry.imageData);
+        // Für zuordenbare Tourfolien immer das eigentliche Tourfoto einsetzen,
+        // auch wenn es bereits bei einer weiteren Darstellung derselben Tour vorkam.
+        const photoEntry = slot.preferred || takeFallbackPhoto();
+        const photoImg = await getPhotoImage(photoEntry);
         if (slot.type === 'top3') {
             slot.item.photoImg = photoImg;
         } else {
