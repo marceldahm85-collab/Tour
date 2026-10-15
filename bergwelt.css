@@ -569,3 +569,14 @@
 @media (prefers-reduced-motion: reduce) {
     #wrapped-view .bergwelt-height-trail { animation: none; stroke-dashoffset: 0; }
 }
+
+
+/* Level-System: erreichte Spezialisierung und nächstes Ziel klar trennen. */
+#wrapped-view .bergwelt-level-tier {
+    margin: 5px 0 8px;
+    color: var(--accent-color, currentColor);
+    font-weight: 750;
+    letter-spacing: .01em;
+}
+#wrapped-view .bergwelt-level .bergwelt-track { overflow: hidden; }
+#wrapped-view .bergwelt-level .bergwelt-footnote { margin-top: 6px; }
