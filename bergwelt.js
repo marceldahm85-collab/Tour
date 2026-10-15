@@ -259,29 +259,59 @@
                 : 100;
             return { ...def, current, next, pct };
         });
-        panel.innerHTML = intro('Dein Profil · ' + getYear(), 'Dein Bergsteiger-Level', 'Fünf Spezialisierungen mit klaren Schwellen. Jede Stufe basiert auf gespeicherten Tourdaten; fehlende Werte bleiben unbekannt.') +
-            '<div class="bergwelt-grid">' +
-            statCard('Jahresstrecke', fmtKnown(dist, 1), 'km') +
-            statCard('Stärkster Einzelaufstieg', fmtKnown(maxAscent), 'hm') +
-            statCard('Gehzeit gesamt', mins === null ? '–' : fmt(mins / 60, 1), 'h') +
-            statCard('Gespeicherte Gipfel', fmtKnown(peakCount), 'Gipfel') +
-            '</div><h3 class="bergwelt-section-title">Deine Spezialisierungen</h3>' +
-            levels.map(l => {
-                const valueText = l.value === null ? '– ' + l.unit : fmt(l.value, l.name === 'Ausdauer-Alpinist' ? 1 : (l.name === 'Steilheits-Profi' ? 0 : 0)) + ' ' + l.unit;
-                const tierText = l.value === null
-                    ? 'Noch nicht bestimmbar'
-                    : l.current
-                        ? l.current[1]
-                        : 'Noch keine Stufe erreicht';
+        const earnedCount = levels.filter(level => level.current).length;
+        const overviewProgress = earnedCount / definitions.length * 100;
+        const badgeIcons = ['🏔️', '⛰️', '⌚', '⚡', '🧭'];
+        const levelDigits = level => level.name === 'Ausdauer-Alpinist' || level.name === 'Steilheits-Profi' ? 1 : 0;
+        panel.innerHTML = intro('Dein Bergprofil · ' + getYear(), 'Dein Bergsteiger-Level', 'Deine Touren formen fünf Spezialisierungen. Mit jedem erreichten Schwellenwert schaltest du einen neuen Rang frei – ausschließlich anhand deiner gespeicherten Daten.') +
+            '<section class="bergwelt-level-overview">' +
+                '<div class="bergwelt-level-overview-copy"><span class="bergwelt-level-kicker">DEIN PROFIL</span><h3>Jede Tour zählt.</h3><p>Fünf Wege, deinen persönlichen Bergstil zu entdecken.</p>' +
+                    '<div class="bergwelt-level-overview-status"><strong>' + earnedCount + ' von 5</strong><span>Spezialisierungen mit Rang</span></div></div>' +
+                '<div class="bergwelt-level-overview-ring" style="--level-overview-progress:' + overviewProgress + '%" role="img" aria-label="' + earnedCount + ' von 5 Spezialisierungen mit mindestens einem Rang"><div><strong>' + earnedCount + '<small>/5</small></strong><span>RÄNGE</span></div></div>' +
+            '</section>' +
+            '<div class="bergwelt-grid bergwelt-level-stats">' +
+                statCard('Jahresstrecke', fmtKnown(dist, 1), 'km') +
+                statCard('Stärkster Einzelaufstieg', fmtKnown(maxAscent), 'hm') +
+                statCard('Gehzeit gesamt', mins === null ? '–' : fmt(mins / 60, 1), 'h') +
+                statCard('Gespeicherte Gipfel', fmtKnown(peakCount), 'Gipfel') +
+            '</div>' +
+            '<div class="bergwelt-level-badge-heading"><div><span>DEINE ERFOLGE</span><h3>Abzeichen-Galerie</h3></div><span class="bergwelt-level-badge-count">' + earnedCount + ' / 5 freigeschaltet</span></div>' +
+            '<div class="bergwelt-level-badges">' +
+            levels.map((l, i) => {
+                const currentIndex = l.current ? l.tiers.indexOf(l.current) : -1;
+                const valueText = l.value === null ? '– ' + l.unit : fmt(l.value, levelDigits(l)) + ' ' + l.unit;
+                const unlocked = Boolean(l.current);
+                const badgeTitle = unlocked ? l.current[1] : l.next ? l.next[1] : 'Daten fehlen';
+                const badgeStatus = unlocked
+                    ? (l.next ? 'Nächster Rang: ' + l.next[1] : 'Höchster Rang erreicht')
+                    : l.value === null ? 'Wartet auf Daten' : l.next ? 'Noch zu verdienen' : 'Noch kein Rang';
+                return '<article class="bergwelt-level-badge' + (unlocked ? ' is-unlocked' : ' is-locked') + '">' +
+                    '<div class="bergwelt-level-badge-emblem" aria-hidden="true"><span>' + badgeIcons[i] + '</span><i>' + (unlocked ? '✓' : '·') + '</i></div>' +
+                    '<div class="bergwelt-level-badge-body"><span class="bergwelt-level-badge-name">' + escapeHTML(l.name) + '</span><strong>' + escapeHTML(badgeTitle) + '</strong><small>' + escapeHTML(badgeStatus) + '</small>' +
+                    (unlocked ? '<span class="bergwelt-level-badge-value">' + valueText + '</span>' : l.value === null ? '<span class="bergwelt-level-badge-value">Keine gültigen Werte</span>' : '<span class="bergwelt-level-badge-value">' + fmt(Math.max(0, l.next[0] - l.value), levelDigits(l)) + ' ' + l.unit + ' bis zum Rang</span>') +
+                    '</div></article>';
+            }).join('') +
+            '</div>' +
+            '<div class="bergwelt-level-specialization-heading"><span>DEINE ENTWICKLUNG</span><h3>Fortschritt je Spezialisierung</h3><p>Die Balken zeigen deinen Fortschritt von der letzten erreichten bis zur nächsten Stufe.</p></div>' +
+            levels.map((l, i) => {
+                const valueText = l.value === null ? '– ' + l.unit : fmt(l.value, levelDigits(l)) + ' ' + l.unit;
+                const currentIndex = l.current ? l.tiers.indexOf(l.current) : -1;
+                const tierText = l.value === null ? 'Noch nicht bestimmbar' : l.current ? l.current[1] : 'Dein erster Rang wartet';
                 const goalText = l.value === null
                     ? 'Es fehlen gültige Daten für diese Spezialisierung.'
                     : l.next
-                        ? fmt(Math.max(0, l.next[0] - l.value), l.name === 'Ausdauer-Alpinist' || l.name === 'Steilheits-Profi' ? 1 : 0) + ' ' + l.unit + ' bis ' + l.next[1] + ' (' + fmt(l.next[0]) + ' ' + l.unit + ')'
-                        : 'Höchste definierte Stufe erreicht – weitere Fortschritte werden weiterhin gezählt.';
-                return '<div class="bergwelt-level"><div class="bergwelt-level-top"><strong>' + l.name + '</strong><span>' + valueText + '</span></div>' +
-                    '<div class="bergwelt-level-tier">' + tierText + '</div>' +
-                    (l.pct === null ? '<p class="bergwelt-footnote">' + goalText + '</p>' : '<div class="bergwelt-track"><span style="width:' + l.pct + '%"></span></div><p class="bergwelt-footnote">' + goalText + '</p>') +
-                    '<p class="bergwelt-footnote">' + l.detail + '</p></div>';
+                        ? fmt(Math.max(0, l.next[0] - l.value), levelDigits(l)) + ' ' + l.unit + ' bis ' + l.next[1] + ' (' + fmt(l.next[0], levelDigits(l)) + ' ' + l.unit + ')'
+                        : 'Höchster definierter Rang freigeschaltet – weitere Fortschritte werden weiterhin gezählt.';
+                const rankSteps = l.tiers.map((tier, index) => {
+                    const reached = index <= currentIndex;
+                    const nextStep = l.next && index === l.tiers.indexOf(l.next);
+                    return '<span class="bergwelt-level-rank-step' + (reached ? ' is-reached' : '') + (nextStep ? ' is-next' : '') + '" title="' + escapeHTML(tier[1]) + '" aria-label="Rang ' + (index + 1) + ': ' + escapeHTML(tier[1]) + '"></span>';
+                }).join('');
+                return '<article class="bergwelt-level bergwelt-level-card' + (l.value === null ? ' has-no-data' : '') + (l.current ? ' has-rank' : '') + '">' +
+                    '<div class="bergwelt-level-top"><div class="bergwelt-level-title-wrap"><span class="bergwelt-level-emblem" aria-hidden="true">' + badgeIcons[i] + '</span><div><strong>' + escapeHTML(l.name) + '</strong><small>' + escapeHTML(tierText) + '</small></div></div><div class="bergwelt-level-value-wrap"><strong>' + valueText + '</strong><span>' + (currentIndex >= 0 ? 'RANG ' + (currentIndex + 1) + ' / 5' : l.value === null ? 'DATEN FEHLEN' : 'NOCH OFFEN') + '</span></div></div>' +
+                    '<div class="bergwelt-level-rank-steps" aria-label="' + (currentIndex + 1) + ' von 5 Rängen erreicht">' + rankSteps + '</div>' +
+                    (l.pct === null ? '<p class="bergwelt-level-goal">' + goalText + '</p>' : '<div class="bergwelt-track bergwelt-level-progress-track" role="progressbar" aria-label="Fortschritt zur nächsten Stufe für ' + escapeHTML(l.name) + '" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(l.pct) + '"><span style="width:' + l.pct + '%"></span></div><div class="bergwelt-level-progress-meta"><span>' + (l.next ? 'Fortschritt zur nächsten Stufe' : 'Alle Stufen abgeschlossen') + '</span><strong>' + fmt(l.pct) + ' %</strong></div><p class="bergwelt-level-goal">' + goalText + '</p>') +
+                    '<p class="bergwelt-level-detail">' + escapeHTML(l.detail) + '</p></article>';
             }).join('') +
             '<p class="bergwelt-footnote">Die Höhenmeter-, Gipfel- und Gehzeitstufen beziehen sich auf das ausgewählte Jahr. Steilheit wird nur aus Touren mit gültiger Strecke und gültigem Aufstieg berechnet. Aktivitätstypen werden nur gezählt, wenn sie in den gespeicherten Daten vorhanden sind.</p>';
     }
