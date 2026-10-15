@@ -513,6 +513,7 @@
         const hiker = document.getElementById('bergwelt-hiker');
         const fill = document.getElementById('bergwelt-tour-progress-fill');
         const progressTrack = panel.querySelector('.bergwelt-tour-progress[role="progressbar"]');
+        const finale = document.getElementById('bergwelt-tour-finale');
         const toggleButton = document.getElementById('bergwelt-tour-toggle');
         const restartButton = document.getElementById('bergwelt-tour-restart');
         const prevButton = document.getElementById('bergwelt-tour-prev');
@@ -547,6 +548,7 @@
         let lastLiveStatus = '';
         let lastPlayingState = null;
         let lastCompleteState = false;
+        let lastSummitState = null;
 
         const getStageIndex = progress => progress >= 1
             ? stepCount - 1
@@ -615,7 +617,10 @@
                 lastCompleteState = isComplete;
             }
             const isSummitMoment = summitIndex >= 0 && stageIndex === summitIndex;
-            scene.classList.toggle('is-summit-moment', isSummitMoment);
+            if (isSummitMoment !== lastSummitState) {
+                scene.classList.toggle('is-summit-moment', isSummitMoment);
+                lastSummitState = isSummitMoment;
+            }
             if (toggleButton) toggleButton.textContent = playing ? 'Ⅱ Pause' : isComplete ? '↻ Noch einmal erleben' : tourProgress > 0 ? '▶ Weiter' : '▶ Expedition starten';
         };
 
