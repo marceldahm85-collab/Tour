@@ -65,6 +65,26 @@
     const escapeHTML = value => String(value ?? '').replace(/[&<>\"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;' }[ch]));
     const getYear = () => Number(document.getElementById('wrapped-year-select')?.value) || new Date().getFullYear();
     const yearTours = () => getTours().filter(e => dateYear(e) === getYear());
+    const getSeasonHighlightForEntry = entry => {
+        if (!entry || typeof window.buildWrappedSlideData !== 'function') return null;
+        try {
+            const slides = window.buildWrappedSlideData(getYear());
+            const highlights = slides.find(slide => slide?.key === 'highlights')?.data?.highlights || [];
+            return highlights.find(item => {
+                const candidate = item?.entry;
+                if (!candidate) return false;
+                if (entry.id != null && candidate.id != null) {
+                    return String(entry.id) === String(candidate.id);
+                }
+                return String(entry.date ?? '') === String(candidate.date ?? '') &&
+                    String(entry.tourname ?? '') === String(candidate.tourname ?? '') &&
+                    String(entry.region ?? '') === String(candidate.region ?? '') &&
+                    String(entry.tourDay ?? '') === String(candidate.tourDay ?? '');
+            }) || null;
+        } catch (_) {
+            return null;
+        }
+    };
     const ascentValue = e => readMetric(e?.aufstieg);
     const distanceValue = e => readMetric(e?.strecke);
     const minutesValue = e => parseMinutes(e?.zeit);
@@ -354,6 +374,12 @@
         const groupLabel = e.tourGroup ? ' · Mehrtagestour' : '';
         const duration = minutesValue(e);
         const peakCount = peaksValue(e);
+        const seasonHighlight = getSeasonHighlightForEntry(e);
+        const seasonHighlightMarkup = seasonHighlight
+            ? '<p class="bergwelt-tour-finale-highlight"><span>DEIN SAISONREKORD</span><strong>' +
+                escapeHTML(seasonHighlight.label) + '</strong><b>' +
+                escapeHTML(seasonHighlight.value) + '</b></p>'
+            : '';
         const peakDetails = (Array.isArray(e.gipfelDetails) ? e.gipfelDetails : [])
             .map(peak => ({
                 name: String(peak?.name ?? '').trim(),
@@ -448,6 +474,7 @@
                 '<p class="bergwelt-tour-finale-kicker">EXPEDITION ABGESCHLOSSEN</p>' +
                 '<h3>Dieser Gipfel gehört zu deiner Geschichte.</h3>' +
                 '<p>' + escapeHTML(title) + ' · ' + (tourAscent !== null ? fmt(tourAscent) + ' hm Aufstieg' : 'Dein Bergabenteuer') + (tourDistance !== null ? ' · ' + fmt(tourDistance, 1) + ' km' : '') + '</p>' +
+                seasonHighlightMarkup +
                 '<button type="button" class="bergwelt-tour-finale-return" data-bergwelt-back-to-moments>Meine Saisonmomente ansehen →</button>' +
             '</section>' +
             '<h3 class="bergwelt-section-title">' + escapeHTML(title) + '</h3><div class="bergwelt-grid">' +
