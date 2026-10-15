@@ -703,3 +703,5 @@
     #wrapped-view .bergwelt-tour-progress > span,
     #wrapped-view .bergwelt-tour-step { transition: none; }
 }
+
+#wrapped-view .bergwelt-animation.is-running #bergwelt-tour-path { animation: none; }
