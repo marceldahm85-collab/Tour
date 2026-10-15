@@ -104,7 +104,7 @@
     font: inherit;
 }
 #wrapped-view .bergwelt-action { cursor: pointer; font-weight: 650; }
-#wrapped-view .bergwelt-tour-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; margin: 14px 0; }
+#wrapped-view .bergwelt-tour-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; align-items: center; margin: 14px 0; }
 #wrapped-view .bergwelt-tour-row .bergwelt-select { width: 100%; }
 #wrapped-view .bergwelt-animation {
     position: relative;
@@ -1047,11 +1047,10 @@
 }
 #wrapped-view .bergwelt-tour-summit-kicker { font-size:.62rem;font-weight:900;letter-spacing:.15em;color:var(--accent-color,currentColor); }
 #wrapped-view .bergwelt-tour-summit-reveal > strong { margin-top:2px;font-size:clamp(2.7rem,10vw,4.5rem);line-height:.95;letter-spacing:-.06em;text-shadow:0 0 28px color-mix(in srgb,var(--accent-color,currentColor) 42%,transparent); }
-#wrapped-view .bergwelt-tour-summit-count { font-size:.64rem;font-weight:850;letter-spacing:.1em; }
 #wrapped-view .bergwelt-tour-summit-peaks { display:flex;flex-direction:column;align-items:center;gap:5px;width:100%;margin-top:7px; }
-#wrapped-view .bergwelt-tour-summit-peak { display:flex;align-items:baseline;justify-content:center;flex-wrap:wrap;gap:5px 9px;max-width:100%;font-size:.78rem;line-height:1.3; }
-#wrapped-view .bergwelt-tour-summit-peak strong { font-weight:850;overflow-wrap:anywhere; }
-#wrapped-view .bergwelt-tour-summit-peak small { font-size:.72rem;font-weight:750;color:var(--accent-color,currentColor);white-space:nowrap; }
+#wrapped-view .bergwelt-tour-summit-peak { display:flex;align-items:baseline;justify-content:center;flex-wrap:wrap;gap:5px 9px;max-width:100%;font-size:1rem;line-height:1.35; }
+#wrapped-view .bergwelt-tour-summit-peak strong { font-size:1.05em;font-weight:900;overflow-wrap:anywhere; }
+#wrapped-view .bergwelt-tour-summit-peak small { font-size:.95em;font-weight:850;color:var(--accent-color,currentColor);white-space:nowrap; }
 #wrapped-view .bergwelt-tour-summit-peak-missing { font-size:.65rem;font-weight:650;opacity:.7;text-align:center; }
 #wrapped-view .bergwelt-tour-summit-facts { margin-top:5px;padding-top:7px;width:100%;border-top:1px solid color-mix(in srgb,var(--text-main,#fff) 15%,transparent);font-size:.7rem;opacity:.84; }
 #wrapped-view .bergwelt-tour-expedition.is-summit-moment .bergwelt-tour-summit-reveal { display:flex;animation:bergwelt-tour-summit-reveal .7s cubic-bezier(.18,.78,.2,1) both; }
@@ -1069,10 +1068,9 @@
 @keyframes bergwelt-tour-sun-pulse { from { opacity:.76; } to { opacity:1; } }
 @keyframes bergwelt-tour-flag-wave { from { transform:rotate(-2deg); } to { transform:rotate(3deg); } }
 @media (max-width:560px) {
-    #wrapped-view .bergwelt-tour-summit-reveal { top:39%;min-width:min(185px,70%);padding:12px 15px 10px;border-radius:15px; }
+    #wrapped-view .bergwelt-tour-summit-reveal { top:39%;min-width:min(235px,82%);padding:12px 15px 10px;border-radius:15px; }
     #wrapped-view .bergwelt-tour-summit-reveal > strong { font-size:clamp(2.5rem,12vw,3.4rem); }
     #wrapped-view .bergwelt-tour-summit-kicker { font-size:.55rem; }
-    #wrapped-view .bergwelt-tour-summit-count { font-size:.56rem; }
     #wrapped-view .bergwelt-tour-summit-facts { font-size:.64rem; }
 }
 @media (prefers-reduced-motion:reduce) {
