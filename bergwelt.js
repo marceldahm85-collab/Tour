@@ -469,6 +469,8 @@
             if (progressLabel) progressLabel.textContent = playing ? 'Du bist unterwegs' : tourProgress >= 1 ? 'Expedition abgeschlossen' : tourProgress > 0 ? 'Expedition pausiert' : 'Bereit zum Aufbruch';
             if (liveStatus) liveStatus.textContent = playing ? 'UNTERWEGS' : tourProgress >= 1 ? 'ABGESCHLOSSEN' : tourProgress > 0 ? 'PAUSIERT' : 'BEREIT';
             scene.setAttribute('data-stage', String(stageIndex));
+            scene.classList.toggle('is-running', playing);
+            scene.classList.toggle('is-complete', tourProgress >= 1);
             scene.classList.toggle('is-summit-moment', summitIndex >= 0 && stageIndex === summitIndex);
             scene.querySelectorAll('[data-tour-step]').forEach((stepButton, i) => {
                 stepButton.classList.toggle('is-revealed', i <= stageIndex);
