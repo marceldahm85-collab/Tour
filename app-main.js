@@ -6673,7 +6673,8 @@ window.__tourDataRules = Object.freeze({
     parseMinutes: readTourMetricMinutes,
     yearFromDate: getYearFromDate,
     tourIdentity,
-    countDistinctTours
+    countDistinctTours,
+    computeMilestones
 });
 
 
@@ -18587,7 +18588,11 @@ function computeMilestones(toursInput = null) {
         const a = readTourMetricNumber(entry.aufstieg);
         const mins = readTourMetricMinutes(entry.zeit);
         const peakCount = readTourMetricNumber(entry.gipfel);
-        const entrySteps = readTourMetricNumber(calculateEntrySteps(entry));
+        const difficulty = String(entry.difficulty || '').trim().toLowerCase();
+        const hasStepSource = d !== null || a !== null || mins !== null || difficulty === 'radtour' ||
+            ['ferrataStrecke', 'ferrataHm', 'bikeStrecke', 'bikeHm'].some(key => readTourMetricNumber(entry[key]) !== null) ||
+            ['ferrataZeit', 'bikeZeit'].some(key => readTourMetricMinutes(entry[key]) !== null);
+        const entrySteps = hasStepSource ? readTourMetricNumber(calculateEntrySteps(entry)) : null;
 
         if (d !== null) { totals.dist += d; knownEntries.dist++; }
         if (a !== null) { totals.asc += a; knownEntries.asc++; }
@@ -34141,12 +34146,12 @@ const endHold = () => {
         if (!document.querySelector('link[data-bergwelt-styles]')) {
             const styleLink = document.createElement('link');
             styleLink.rel = 'stylesheet';
-            styleLink.href = './bergwelt.css?v=17';
+            styleLink.href = './bergwelt.css?v=18';
             styleLink.dataset.bergweltStyles = '1';
             document.head.appendChild(styleLink);
         }
         const script = document.createElement('script');
-        script.src = './bergwelt.js?v=17';
+        script.src = './bergwelt.js?v=18';
         script.onload = () => {
             window.__BERGWELT_LOADING__ = false;
             window.__bergweltRender?.();
