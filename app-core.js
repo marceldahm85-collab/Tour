@@ -2827,8 +2827,6 @@ function removeToast(toast) {
 function getYearFromDate(dateStr) {
     const raw = String(dateStr ?? '').trim();
     if (!raw) return null;
-
-    // Unterstützt ISO-Daten und ältere österreichische Datumsangaben.
     let match = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:$|[T\s])/);
     if (match) {
         const year = Number(match[1]);
@@ -2845,9 +2843,20 @@ function getYearFromDate(dateStr) {
         const date = new Date(year, month - 1, day);
         return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? year : null;
     }
-
     const date = new Date(raw);
     return Number.isNaN(date.getTime()) ? null : date.getFullYear();
+}
+
+function readTourMetricNumber(value) {
+    if (value === null || value === undefined || String(value).trim() === '') return null;
+    const normalized = typeof value === 'number' ? value : Number(String(value).trim().replace(/\s/g, '').replace(',', '.'));
+    return Number.isFinite(normalized) && normalized >= 0 ? normalized : null;
+}
+
+function readTourMetricMinutes(value) {
+    if (value === null || value === undefined || String(value).trim() === '') return null;
+    const match = String(value).trim().match(/^(\d{1,4}):([0-5]?\d)$/);
+    return match ? Number(match[1]) * 60 + Number(match[2]) : null;
 }
 
 const MILESTONE_LABELS = {
@@ -5951,18 +5960,27 @@ function getBigTourIndex(entry, list = null, options = {}) {
     return baseIndex * timeFactor;
 }
 
-function countDistinctTours(entries) {
-    const seenGroups = new Set();
-    let count = 0;
-    entries.forEach(e => {
-        if (e.tourGroup) {
-            if (seenGroups.has(e.tourGroup)) return;
-            seenGroups.add(e.tourGroup);
-        }
-        count++;
-    });
-    return count;
+function tourIdentity(entry, index = 0) {
+    if (entry?.tourGroup !== undefined && entry?.tourGroup !== null && String(entry.tourGroup).trim()) return 'group:' + String(entry.tourGroup);
+    if (entry?.id !== undefined && entry?.id !== null && String(entry.id).trim()) return 'id:' + String(entry.id);
+    const fingerprint = [entry?.date, entry?.tourname, entry?.region, entry?.tourDay].map(value => String(value ?? '').trim()).join('|');
+    return fingerprint.replace(/\|/g, '') ? 'entry:' + fingerprint : 'entry-index:' + index;
 }
+
+function countDistinctTours(entries) {
+    const seen = new Set();
+    (entries || []).forEach((entry, index) => seen.add(tourIdentity(entry, index)));
+    return seen.size;
+}
+
+// Öffentliche, read-only Datenregeln für lazy geladene Module wie Bergwelt.
+window.__tourDataRules = Object.freeze({
+    readMetric: readTourMetricNumber,
+    parseMinutes: readTourMetricMinutes,
+    yearFromDate: getYearFromDate,
+    tourIdentity,
+    countDistinctTours
+});
 
 
 
@@ -16829,18 +16847,7 @@ function computeMilestones(toursInput = null) {
 
     // Fehlende Messwerte bleiben von echten Nullwerten unterscheidbar.
     // Numerische Summen bleiben kompatibel; hasData/knownEntries zeigen die Datenlage.
-    const readNonNegativeNumber = value => {
-        if (value === null || value === undefined || String(value).trim() === '') return null;
-        const normalized = typeof value === 'number'
-            ? value
-            : Number(String(value).trim().replace(/\s/g, '').replace(',', '.'));
-        return Number.isFinite(normalized) && normalized >= 0 ? normalized : null;
-    };
-    const readMinutes = value => {
-        if (value === null || value === undefined || String(value).trim() === '') return null;
-        const match = String(value).trim().match(/^(\d{1,4}):([0-5]?\d)$/);
-        return match ? Number(match[1]) * 60 + Number(match[2]) : null;
-    };
+
 
     const totals = { dist: 0, asc: 0, time: 0, peaks: 0, steps: 0 };
     const knownEntries = { dist: 0, asc: 0, time: 0, peaks: 0, steps: 0 };
@@ -16848,11 +16855,11 @@ function computeMilestones(toursInput = null) {
     const nextIdx = { dist: 0, asc: 0, time: 0, peaks: 0, steps: 0 };
 
     sorted.forEach(entry => {
-        const d = readNonNegativeNumber(entry.strecke);
-        const a = readNonNegativeNumber(entry.aufstieg);
-        const mins = readMinutes(entry.zeit);
-        const peakCount = readNonNegativeNumber(entry.gipfel);
-        const entrySteps = readNonNegativeNumber(calculateEntrySteps(entry));
+        const d = readTourMetricNumber(entry.strecke);
+        const a = readTourMetricNumber(entry.aufstieg);
+        const mins = readTourMetricMinutes(entry.zeit);
+        const peakCount = readTourMetricNumber(entry.gipfel);
+        const entrySteps = readTourMetricNumber(calculateEntrySteps(entry));
 
         if (d !== null) { totals.dist += d; knownEntries.dist++; }
         if (a !== null) { totals.asc += a; knownEntries.asc++; }
