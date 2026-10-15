@@ -538,6 +538,16 @@
         let playFromProgress = 0;
         let playFromTime = 0;
 
+        const stepButtons = Array.from(scene.querySelectorAll('[data-tour-step]'));
+        const stepStates = stepButtons.map(button => button.querySelector('.bergwelt-tour-step-state'));
+        let storyRail = panel.querySelector('.bergwelt-story-rail');
+        let lastRenderedStageIndex = -1;
+        let lastPercent = -1;
+        let lastProgressLabel = '';
+        let lastLiveStatus = '';
+        let lastPlayingState = null;
+        let lastCompleteState = false;
+
         const getStageIndex = progress => progress >= 1
             ? stepCount - 1
             : Math.max(0, Math.min(stepCount - 1, Math.floor(progress * stepCount)));
@@ -546,53 +556,67 @@
             const previousProgress = tourProgress;
             tourProgress = Math.max(0, Math.min(1, progress));
             const stageIndex = getStageIndex(tourProgress);
+            const percent = Math.round(tourProgress * 100);
+            const isComplete = tourProgress >= 1;
             const point = path.getPointAtLength(pathLength * tourProgress);
             hiker.setAttribute('transform', 'translate(' + point.x + ' ' + point.y + ')');
             progressPath.style.strokeDashoffset = String(pathLength * (1 - tourProgress));
             if (fill) fill.style.width = (tourProgress * 100) + '%';
-            if (progressTrack) progressTrack.setAttribute('aria-valuenow', String(Math.round(tourProgress * 100)));
-            if (progressPercent) progressPercent.textContent = fmt(tourProgress * 100) + ' %';
-            if (chapter) chapter.textContent = 'EXPEDITION · ETAPPE ' + String(stageIndex + 1).padStart(2, '0');
-            if (sceneKicker) sceneKicker.textContent = 'ETAPPE ' + String(stageIndex + 1).padStart(2, '0') + ' / ' + String(stepCount).padStart(2, '0');
-            if (sceneTitle) sceneTitle.textContent = steps[stageIndex].title;
-            if (sceneCopy) sceneCopy.textContent = steps[stageIndex].value;
-            if (progressLabel) progressLabel.textContent = playing ? 'Du bist unterwegs' : tourProgress >= 1 ? 'Expedition abgeschlossen' : tourProgress > 0 ? 'Expedition pausiert' : 'Bereit zum Aufbruch';
-            if (liveStatus) liveStatus.textContent = playing ? 'UNTERWEGS' : tourProgress >= 1 ? 'ABGESCHLOSSEN' : tourProgress > 0 ? 'PAUSIERT' : 'BEREIT';
-            scene.setAttribute('data-stage', String(stageIndex));
-            scene.classList.toggle('is-running', playing);
-            scene.classList.toggle('is-complete', tourProgress >= 1);
-            scene.classList.toggle('is-summit-moment', summitIndex >= 0 && stageIndex === summitIndex);
-            const finale = document.getElementById('bergwelt-tour-finale');
-            if (finale) {
-                finale.hidden = tourProgress < 1;
-                if (tourProgress >= 1 && previousProgress < 1) {
+            if (percent !== lastPercent) {
+                if (progressTrack) progressTrack.setAttribute('aria-valuenow', String(percent));
+                if (progressPercent) progressPercent.textContent = fmt(percent) + ' %';
+                lastPercent = percent;
+            }
+
+            if (stageIndex !== lastRenderedStageIndex) {
+                if (chapter) chapter.textContent = 'EXPEDITION · ETAPPE ' + String(stageIndex + 1).padStart(2, '0');
+                if (sceneKicker) sceneKicker.textContent = 'ETAPPE ' + String(stageIndex + 1).padStart(2, '0') + ' / ' + String(stepCount).padStart(2, '0');
+                if (sceneTitle) sceneTitle.textContent = steps[stageIndex].title;
+                if (sceneCopy) sceneCopy.textContent = steps[stageIndex].value;
+                scene.setAttribute('data-stage', String(stageIndex));
+                stepButtons.forEach((stepButton, i) => {
+                    stepButton.classList.toggle('is-revealed', i <= stageIndex);
+                    stepButton.classList.toggle('is-current', i === stageIndex);
+                    stepButton.setAttribute('aria-pressed', String(i === stageIndex));
+                    if (stepStates[i]) stepStates[i].textContent = i < stageIndex ? '✓' : i === stageIndex ? '●' : '○';
+                });
+                if (prevButton) prevButton.disabled = stageIndex <= 0 && tourProgress <= 0;
+                if (nextButton) nextButton.disabled = stageIndex >= stepCount - 1;
+                lastRenderedStageIndex = stageIndex;
+            }
+
+            const progressText = playing ? 'Du bist unterwegs' : isComplete ? 'Expedition abgeschlossen' : tourProgress > 0 ? 'Expedition pausiert' : 'Bereit zum Aufbruch';
+            const statusText = playing ? 'UNTERWEGS' : isComplete ? 'ABGESCHLOSSEN' : tourProgress > 0 ? 'PAUSIERT' : 'BEREIT';
+            if (progressLabel && progressText !== lastProgressLabel) {
+                progressLabel.textContent = progressText;
+                lastProgressLabel = progressText;
+            }
+            if (liveStatus && statusText !== lastLiveStatus) {
+                liveStatus.textContent = statusText;
+                lastLiveStatus = statusText;
+            }
+            if (playing !== lastPlayingState) {
+                scene.classList.toggle('is-running', playing);
+                lastPlayingState = playing;
+            }
+            if (isComplete !== lastCompleteState) {
+                scene.classList.toggle('is-complete', isComplete);
+                if (finale) finale.hidden = !isComplete;
+                if (storyRail) {
+                    storyRail.outerHTML = experienceStoryRail(isComplete ? 'finale' : 'expedition');
+                    storyRail = panel.querySelector('.bergwelt-story-rail');
+                }
+                if (isComplete && previousProgress < 1 && finale) {
                     finale.scrollIntoView({
                         behavior: reduceMotion ? 'auto' : 'smooth',
                         block: 'nearest'
                     });
                 }
+                lastCompleteState = isComplete;
             }
-            if (tourProgress >= 1) {
-                const storyRail = panel.querySelector('.bergwelt-story-rail');
-                if (storyRail && !storyRail.classList.contains('is-finale')) {
-                    storyRail.outerHTML = experienceStoryRail('finale');
-                }
-            } else {
-                const storyRail = panel.querySelector('.bergwelt-story-rail');
-                if (storyRail?.classList.contains('is-finale')) {
-                    storyRail.outerHTML = experienceStoryRail('expedition');
-                }
-            }
-            scene.querySelectorAll('[data-tour-step]').forEach((stepButton, i) => {
-                stepButton.classList.toggle('is-revealed', i <= stageIndex);
-                stepButton.classList.toggle('is-current', i === stageIndex);
-                stepButton.setAttribute('aria-pressed', String(i === stageIndex));
-                const state = stepButton.querySelector('.bergwelt-tour-step-state');
-                if (state) state.textContent = i < stageIndex ? '✓' : i === stageIndex ? '●' : '○';
-            });
-            if (prevButton) prevButton.disabled = stageIndex <= 0 && tourProgress <= 0;
-            if (nextButton) nextButton.disabled = stageIndex >= stepCount - 1;
-            if (toggleButton) toggleButton.textContent = playing ? 'Ⅱ Pause' : tourProgress >= 1 ? '↻ Noch einmal erleben' : tourProgress > 0 ? '▶ Weiter' : '▶ Expedition starten';
+            const isSummitMoment = summitIndex >= 0 && stageIndex === summitIndex;
+            scene.classList.toggle('is-summit-moment', isSummitMoment);
+            if (toggleButton) toggleButton.textContent = playing ? 'Ⅱ Pause' : isComplete ? '↻ Noch einmal erleben' : tourProgress > 0 ? '▶ Weiter' : '▶ Expedition starten';
         };
 
         const stopAnimation = () => {
@@ -610,7 +634,6 @@
             const elapsed = now - playFromTime;
             const progress = playFromProgress + (elapsed / durationMs) * (1 - playFromProgress);
             if (progress >= 1) {
-                tourProgress = 1;
                 playing = false;
                 frameId = 0;
                 updateView(1);
@@ -622,7 +645,7 @@
 
         const startAnimation = () => {
             if (playing) return;
-            if (tourProgress >= 1) tourProgress = 0;
+            if (tourProgress >= 1) updateView(0);
             playing = true;
             playFromProgress = tourProgress;
             playFromTime = performance.now();
@@ -646,7 +669,6 @@
                 stopAnimation();
                 updateView(tourProgress);
             } else {
-                if (tourProgress >= 1) tourProgress = 0;
                 startAnimation();
             }
         });
@@ -657,7 +679,7 @@
         });
         prevButton?.addEventListener('click', () => chooseStage(getStageIndex(tourProgress) - 1));
         nextButton?.addEventListener('click', () => chooseStage(getStageIndex(tourProgress) + 1));
-        scene.querySelectorAll('[data-tour-step]').forEach(stepButton => {
+        stepButtons.forEach(stepButton => {
             stepButton.addEventListener('click', () => chooseStage(Number(stepButton.dataset.tourStep)));
         });
         updateView(0);
