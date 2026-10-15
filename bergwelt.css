@@ -931,3 +931,106 @@
     #wrapped-view .bergwelt-level-rank-step,
     #wrapped-view .bergwelt-level-progress-track > span { animation:none;transition:none; }
 }
+
+/* Tour erleben v2: filmische symbolische Bergkulisse, Etappensteuerung und zugängliche Direktwahl. */
+#wrapped-view .bergwelt-tour-expedition {
+    padding: 9px;
+    border: 1px solid color-mix(in srgb,var(--accent-color,currentColor) 24%,transparent);
+    border-radius: 22px;
+    background: linear-gradient(155deg,color-mix(in srgb,var(--accent-color,#5da88d) 9%,transparent),color-mix(in srgb,currentColor 3%,transparent) 78%);
+    box-shadow: 0 14px 38px color-mix(in srgb,var(--accent-color,currentColor) 7%,transparent);
+}
+#wrapped-view .bergwelt-tour-cinematic {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    border-radius: 17px;
+    background: linear-gradient(180deg,color-mix(in srgb,var(--accent-color,#5da88d) 11%,transparent),var(--ui-card-bg,#17201d));
+}
+#wrapped-view .bergwelt-tour-landscape {
+    position: relative;
+    z-index: 0;
+    display: block;
+    width: 100%;
+    height: clamp(225px,48vw,335px);
+    min-height: 225px;
+}
+#wrapped-view .bergwelt-tour-sun-halo { fill: color-mix(in srgb,var(--accent-color,currentColor) 13%,transparent); }
+#wrapped-view .bergwelt-tour-sun { fill: color-mix(in srgb,var(--accent-color,currentColor) 44%,var(--text-main,#fff)); filter: drop-shadow(0 0 16px color-mix(in srgb,var(--accent-color,currentColor) 38%,transparent)); }
+#wrapped-view .bergwelt-tour-cloud { fill: color-mix(in srgb,var(--text-main,#fff) 28%,transparent); opacity: .44; }
+#wrapped-view .bergwelt-tour-cloud.cloud-one { animation: bergwelt-tour-cloud-drift 17s ease-in-out infinite alternate; }
+#wrapped-view .bergwelt-tour-cloud.cloud-two { animation: bergwelt-tour-cloud-drift 23s ease-in-out infinite alternate-reverse; }
+#wrapped-view .bergwelt-tour-stars { fill: var(--text-main,#fff); opacity: .56; }
+#wrapped-view .bergwelt-tour-ridge-back { fill: url(#bw-tour-rear); }
+#wrapped-view .bergwelt-tour-snow { fill: color-mix(in srgb,var(--text-main,#fff) 54%,var(--accent-color,currentColor)); opacity: .62; }
+#wrapped-view .bergwelt-tour-ridge-mid { fill: color-mix(in srgb,var(--accent-color,currentColor) 25%,var(--ui-card-bg,#17201d)); opacity: .92; }
+#wrapped-view .bergwelt-tour-ridge-front { fill: url(#bw-tour-front); stroke: color-mix(in srgb,var(--accent-color,currentColor) 24%,transparent); stroke-width: 1.5; }
+#wrapped-view .bergwelt-tour-route-bed { fill:none;stroke:color-mix(in srgb,var(--text-main,#fff) 28%,transparent);stroke-width:3;stroke-linecap:round;stroke-dasharray:3 7; }
+#wrapped-view .bergwelt-tour-route { fill:none;stroke:var(--accent-color,currentColor);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;filter:url(#bw-tour-glow); }
+#wrapped-view .bergwelt-hiker { filter:drop-shadow(0 0 5px color-mix(in srgb,var(--accent-color,currentColor) 44%,transparent)); }
+#wrapped-view .bergwelt-hiker-shadow { fill:color-mix(in srgb,var(--ui-card-bg,#111) 58%,transparent); }
+#wrapped-view .bergwelt-hiker-head { fill:var(--text-main,#fff);stroke:var(--ui-card-bg,#111);stroke-width:1.5; }
+#wrapped-view .bergwelt-hiker-body { fill:none;stroke:var(--text-main,#fff);stroke-width:3.6;stroke-linecap:round;stroke-linejoin:round; }
+#wrapped-view .bergwelt-hiker-pack { fill:var(--accent-color,currentColor);stroke:var(--text-main,#fff);stroke-width:1; }
+#wrapped-view .bergwelt-hiker-pole { fill:none;stroke:var(--accent-color,currentColor);stroke-width:2;stroke-linecap:round; }
+#wrapped-view .bergwelt-tour-summit-flag { fill:var(--accent-color,currentColor);stroke:var(--text-main,#fff);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round; }
+#wrapped-view .bergwelt-tour-summit-point { fill:var(--text-main,#fff);stroke:var(--accent-color,currentColor);stroke-width:2; }
+#wrapped-view .bergwelt-tour-cinematic-meta { position:absolute;z-index:3;top:10px;left:10px;right:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;pointer-events:none; }
+#wrapped-view .bergwelt-tour-cinematic-meta > span { padding:6px 8px;border:1px solid color-mix(in srgb,var(--text-main,#fff) 17%,transparent);border-radius:99px;background:color-mix(in srgb,var(--ui-card-bg,#111) 48%,transparent);backdrop-filter:blur(10px);color:var(--text-main,#fff);font-size:.6rem;font-weight:850;letter-spacing:.09em;line-height:1.1; }
+#wrapped-view .bergwelt-tour-live-status { color:var(--accent-color,currentColor)!important; }
+#wrapped-view .bergwelt-tour-scene-vignette { position:absolute;z-index:1;inset:40% 0 0;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--ui-card-bg,#111) 60%,transparent));pointer-events:none; }
+#wrapped-view .bergwelt-tour-scene-caption { position:absolute;z-index:2;left:16px;right:16px;bottom:28px;display:flex;flex-direction:column;gap:5px;pointer-events:none;text-shadow:0 2px 14px var(--ui-card-bg,#111); }
+#wrapped-view .bergwelt-tour-scene-kicker { font-size:.62rem;font-weight:900;letter-spacing:.14em;color:var(--accent-color,currentColor); }
+#wrapped-view .bergwelt-tour-scene-caption h3 { margin:0;font-size:clamp(1.35rem,5vw,2.15rem);line-height:1.05;letter-spacing:-.035em;color:var(--text-main,#fff); }
+#wrapped-view .bergwelt-tour-scene-caption p { max-width:34em;margin:0;font-size:.78rem;line-height:1.35;color:var(--text-main,#fff);opacity:.88; }
+#wrapped-view .bergwelt-tour-symbolic-note { position:absolute;z-index:3;right:10px;bottom:8px;max-width:70%;text-align:right;font-size:.55rem;font-weight:750;letter-spacing:.04em;color:var(--text-main,#fff);opacity:.7;text-shadow:0 1px 6px var(--ui-card-bg,#111); }
+#wrapped-view .bergwelt-tour-progress { height:7px;margin:0;overflow:hidden;border-radius:0;background:color-mix(in srgb,currentColor 11%,transparent); }
+#wrapped-view .bergwelt-tour-progress > span { display:block;width:0;height:100%;border-radius:inherit;background:var(--accent-color,currentColor);box-shadow:0 0 13px color-mix(in srgb,var(--accent-color,currentColor) 50%,transparent);transition:width .08s linear; }
+#wrapped-view .bergwelt-tour-progress-meta { display:flex;justify-content:space-between;align-items:center;gap:8px;margin:8px 4px 11px;font-size:.74rem;opacity:.75; }
+#wrapped-view .bergwelt-tour-progress-meta strong { color:var(--accent-color,currentColor);font-size:.78rem;font-variant-numeric:tabular-nums; }
+#wrapped-view .bergwelt-tour-transport { display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.65fr) minmax(0,1fr);gap:7px;align-items:center; }
+#wrapped-view .bergwelt-tour-transport button { display:flex;align-items:center;justify-content:center;gap:5px;min-width:0;min-height:40px;padding:8px 7px;border:1px solid color-mix(in srgb,currentColor 16%,transparent);border-radius:12px;background:color-mix(in srgb,currentColor 4%,transparent);color:inherit;font:inherit;font-size:.74rem;font-weight:750;line-height:1.1;cursor:pointer;transition:background .2s ease,border-color .2s ease,transform .2s ease; }
+#wrapped-view .bergwelt-tour-transport button:active { transform:scale(.98); }
+#wrapped-view .bergwelt-tour-transport button:focus-visible { outline:2px solid var(--accent-color,currentColor);outline-offset:2px; }
+#wrapped-view .bergwelt-tour-transport button:disabled { opacity:.38;cursor:default; }
+#wrapped-view .bergwelt-tour-transport .bergwelt-tour-transport-primary { border-color:color-mix(in srgb,var(--accent-color,currentColor) 45%,transparent);background:color-mix(in srgb,var(--accent-color,currentColor) 17%,transparent);color:var(--text-main,currentColor);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent-color,currentColor) 8%,transparent); }
+#wrapped-view .bergwelt-tour-transport .bergwelt-tour-transport-restart { grid-column:1 / -1;min-height:32px;border:0;background:transparent;opacity:.68;font-size:.68rem; }
+#wrapped-view .bergwelt-tour-stage-hint { margin:10px 2px 8px;font-size:.7rem;line-height:1.4;opacity:.62; }
+#wrapped-view .bergwelt-tour-steps { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0; }
+#wrapped-view .bergwelt-tour-step { position:relative;display:grid;grid-template-columns:27px minmax(0,1fr) 12px;align-items:start;gap:8px;width:100%;min-width:0;min-height:74px;margin:0;padding:10px 9px;border:1px solid color-mix(in srgb,currentColor 13%,transparent);border-radius:13px;background:color-mix(in srgb,currentColor 3%,transparent);color:inherit;text-align:left;font:inherit;opacity:.48;transform:none;cursor:pointer;transition:opacity .22s ease,border-color .22s ease,background .22s ease,transform .22s ease,box-shadow .22s ease; }
+#wrapped-view .bergwelt-tour-step:focus-visible { outline:2px solid var(--accent-color,currentColor);outline-offset:2px; }
+#wrapped-view .bergwelt-tour-step.is-revealed { opacity:.83; }
+#wrapped-view .bergwelt-tour-step.is-current { opacity:1;border-color:color-mix(in srgb,var(--accent-color,currentColor) 50%,transparent);background:linear-gradient(145deg,color-mix(in srgb,var(--accent-color,currentColor) 11%,transparent),color-mix(in srgb,currentColor 2%,transparent));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent-color,currentColor) 10%,transparent); }
+#wrapped-view .bergwelt-tour-step-number { display:grid;place-items:center;width:27px;height:27px;border-radius:9px;background:color-mix(in srgb,currentColor 7%,transparent);font-size:.64rem;font-weight:900;opacity:.8; }
+#wrapped-view .bergwelt-tour-step.is-current .bergwelt-tour-step-number,#wrapped-view .bergwelt-tour-step.is-revealed .bergwelt-tour-step-number { background:color-mix(in srgb,var(--accent-color,currentColor) 19%,transparent);color:var(--accent-color,currentColor); }
+#wrapped-view .bergwelt-tour-step-copy { display:flex;flex-direction:column;gap:5px;min-width:0; }
+#wrapped-view .bergwelt-tour-step-copy strong { font-size:.78rem;line-height:1.2; }
+#wrapped-view .bergwelt-tour-step-copy small { font-size:.68rem;line-height:1.35;overflow-wrap:anywhere;opacity:.76; }
+#wrapped-view .bergwelt-tour-step-state { padding-top:3px;font-size:.66rem;color:var(--accent-color,currentColor);text-align:center; }
+#wrapped-view .bergwelt-tour-step.is-current .bergwelt-tour-step-state { text-shadow:0 0 9px color-mix(in srgb,var(--accent-color,currentColor) 60%,transparent); }
+@keyframes bergwelt-tour-cloud-drift { from { transform:translateX(-8px); } to { transform:translateX(12px); } }
+@media (max-width:560px) {
+    #wrapped-view .bergwelt-tour-expedition { padding:6px;border-radius:18px; }
+    #wrapped-view .bergwelt-tour-cinematic { border-radius:14px; }
+    #wrapped-view .bergwelt-tour-landscape { height:clamp(215px,61vw,280px);min-height:215px; }
+    #wrapped-view .bergwelt-tour-scene-caption { left:12px;right:12px;bottom:25px; }
+    #wrapped-view .bergwelt-tour-scene-caption h3 { font-size:1.5rem; }
+    #wrapped-view .bergwelt-tour-scene-caption p { font-size:.72rem; }
+    #wrapped-view .bergwelt-tour-cinematic-meta { top:8px;left:8px;right:8px; }
+    #wrapped-view .bergwelt-tour-cinematic-meta > span { padding:5px 7px;font-size:.55rem; }
+    #wrapped-view .bergwelt-tour-transport { grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) minmax(0,1fr);gap:5px; }
+    #wrapped-view .bergwelt-tour-transport button { min-height:38px;padding:7px 4px;font-size:.67rem; }
+    #wrapped-view .bergwelt-tour-transport .bergwelt-tour-transport-secondary span { display:none; }
+    #wrapped-view .bergwelt-tour-steps { gap:6px; }
+    #wrapped-view .bergwelt-tour-step { grid-template-columns:23px minmax(0,1fr) 9px;gap:6px;min-height:75px;padding:8px 7px; }
+    #wrapped-view .bergwelt-tour-step-number { width:23px;height:23px;border-radius:7px;font-size:.59rem; }
+    #wrapped-view .bergwelt-tour-step-copy strong { font-size:.73rem; }
+    #wrapped-view .bergwelt-tour-step-copy small { font-size:.63rem; }
+    #wrapped-view .bergwelt-tour-step-state { font-size:.58rem; }
+}
+@media (prefers-reduced-motion:reduce) {
+    #wrapped-view .bergwelt-tour-cloud,
+    #wrapped-view .bergwelt-tour-step,
+    #wrapped-view .bergwelt-tour-transport button,
+    #wrapped-view .bergwelt-tour-progress > span { animation:none;transition:none; }
+}
