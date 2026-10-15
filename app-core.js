@@ -16813,12 +16813,12 @@ function computeMilestones(toursInput = null) {
         if (value === null || value === undefined || String(value).trim() === '') return null;
         const normalized = typeof value === 'number'
             ? value
-            : Number(String(value).trim().replace(/\\s/g, '').replace(',', '.'));
+            : Number(String(value).trim().replace(/\s/g, '').replace(',', '.'));
         return Number.isFinite(normalized) && normalized >= 0 ? normalized : null;
     };
     const readMinutes = value => {
         if (value === null || value === undefined || String(value).trim() === '') return null;
-        const match = String(value).trim().match(/^(\\d{1,4}):([0-5]?\\d)$/);
+        const match = String(value).trim().match(/^(\d{1,4}):([0-5]?\d)$/);
         return match ? Number(match[1]) * 60 + Number(match[2]) : null;
     };
 
