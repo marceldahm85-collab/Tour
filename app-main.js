@@ -34146,7 +34146,7 @@ const endHold = () => {
             document.head.appendChild(styleLink);
         }
         const script = document.createElement('script');
-        script.src = './bergwelt.js?v=16';
+        script.src = './bergwelt.js?v=17';
         script.onload = () => {
             window.__BERGWELT_LOADING__ = false;
             window.__bergweltRender?.();
