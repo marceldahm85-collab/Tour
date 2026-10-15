@@ -13777,6 +13777,13 @@ function goToView(targetView, animate = true) {
         initThemeEditor();
     }
 
+    // Bergwelt auch beim horizontalen View-Swipe initialisieren/aktualisieren.
+    // Beim direkten Menüaufruf wird derselbe Loader verwendet; das Modul bleibt
+    // weiterhin lazy und wird nicht beim Appstart geladen.
+    if (targetView === 'wrapped') {
+        window.__bergweltEnsureLoaded?.();
+    }
+
     const previousView = currentView;
     const isViewChange = targetView !== currentView;
 
@@ -34190,6 +34197,9 @@ const endHold = () => {
         };
         document.body.appendChild(script);
     }
+
+    // Von der zentralen View-Navigation (einschließlich Swipe) nutzbarer Loader.
+    window.__bergweltEnsureLoaded = loadBergweltModule;
 
     document.getElementById('wrapped-toggle').addEventListener('click', () => {
         const years = getWrappedAvailableYears();
