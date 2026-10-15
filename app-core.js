@@ -17160,13 +17160,11 @@ function computeAllAchievements(toursInput = null) {
     // Mehrtägige Touren zählen einmal; ihre Etappen bleiben für
     // Strecken-, Höhenmeter-, Zeit- und Schrittwerte separat erhalten.
     const uniqueTourEntries = [];
-    const seenTourGroups = new Set();
-    sortedByDate.forEach(entry => {
-        const group = String(entry.tourGroup || '').trim();
-        if (group) {
-            if (seenTourGroups.has(group)) return;
-            seenTourGroups.add(group);
-        }
+    const seenTourIdentities = new Set();
+    sortedByDate.forEach((entry, index) => {
+        const identity = tourIdentity(entry, index);
+        if (seenTourIdentities.has(identity)) return;
+        seenTourIdentities.add(identity);
         uniqueTourEntries.push(entry);
     });
 
