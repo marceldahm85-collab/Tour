@@ -2825,9 +2825,29 @@ function removeToast(toast) {
 // ─── Achievement-Toast bei neu erreichten Meilensteinen ─────────────────────
 
 function getYearFromDate(dateStr) {
-    if (!dateStr) return null;
-    const d = new Date(dateStr);
-    return isNaN(d.getTime()) ? null : d.getFullYear();
+    const raw = String(dateStr ?? '').trim();
+    if (!raw) return null;
+
+    // Unterstützt ISO-Daten und ältere österreichische Datumsangaben.
+    let match = raw.match(/^(\\d{4})-(\\d{2})-(\\d{2})(?:$|[T\\s])/);
+    if (match) {
+        const year = Number(match[1]);
+        const month = Number(match[2]);
+        const day = Number(match[3]);
+        const date = new Date(year, month - 1, day);
+        return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? year : null;
+    }
+    match = raw.match(/^(\\d{1,2})[./](\\d{1,2})[./](\\d{4})$/);
+    if (match) {
+        const day = Number(match[1]);
+        const month = Number(match[2]);
+        const year = Number(match[3]);
+        const date = new Date(year, month - 1, day);
+        return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? year : null;
+    }
+
+    const date = new Date(raw);
+    return Number.isNaN(date.getTime()) ? null : date.getFullYear();
 }
 
 const MILESTONE_LABELS = {
