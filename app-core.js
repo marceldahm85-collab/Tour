@@ -2829,7 +2829,7 @@ function getYearFromDate(dateStr) {
     if (!raw) return null;
 
     // Unterstützt ISO-Daten und ältere österreichische Datumsangaben.
-    let match = raw.match(/^(\\d{4})-(\\d{2})-(\\d{2})(?:$|[T\\s])/);
+    let match = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:$|[T\s])/);
     if (match) {
         const year = Number(match[1]);
         const month = Number(match[2]);
@@ -2837,7 +2837,7 @@ function getYearFromDate(dateStr) {
         const date = new Date(year, month - 1, day);
         return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? year : null;
     }
-    match = raw.match(/^(\\d{1,2})[./](\\d{1,2})[./](\\d{4})$/);
+    match = raw.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})$/);
     if (match) {
         const day = Number(match[1]);
         const month = Number(match[2]);
