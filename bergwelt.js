@@ -355,6 +355,15 @@
                 '<span class="bergwelt-tour-step-state" aria-hidden="true">' + (i === 0 ? '●' : '○') + '</span>' +
             '</button>'
         ).join('');
+        const summitIndex = steps.findIndex(step => step.title === 'Gipfelmoment');
+        const summitReveal = peakCount !== null && peakCount > 0
+            ? '<div class="bergwelt-tour-summit-reveal" aria-hidden="true">' +
+                '<span class="bergwelt-tour-summit-kicker">DEIN GIPFELMOMENT</span>' +
+                '<strong>' + fmt(peakCount) + '</strong>' +
+                '<span class="bergwelt-tour-summit-count">' + (peakCount === 1 ? 'GESPEICHERTER GIPFEL' : 'GESPEICHERTE GIPFEL') + '</span>' +
+                '<span class="bergwelt-tour-summit-facts">' + (tourAscent !== null ? fmt(tourAscent) + ' hm Aufstieg' : 'Deine gespeicherten Gipfel') + (tourDistance !== null ? ' · ' + fmt(tourDistance, 1) + ' km' : '') + '</span>' +
+            '</div>'
+            : '';
 
         panel.innerHTML = intro('Dein Bergabenteuer · ' + getYear(), 'Tour erleben', 'Wähle eine gespeicherte Tour. Die Landschaft ist bewusst symbolisch; Etappen und Kennzahlen stammen ausschließlich aus deinen Tourdaten.') +
             '<div class="bergwelt-tour-row"><select class="bergwelt-select" id="bergwelt-tour-select" aria-label="Gespeicherte Tour auswählen">' +
@@ -391,6 +400,7 @@
                     '</svg>' +
                     '<div class="bergwelt-tour-scene-vignette"></div>' +
                     '<div class="bergwelt-tour-scene-caption"><span class="bergwelt-tour-scene-kicker" id="bergwelt-tour-scene-kicker">ETAPPE 01 / ' + String(stepCount).padStart(2, '0') + '</span><h3 id="bergwelt-tour-scene-title">Aufbruch</h3><p id="bergwelt-tour-scene-copy">' + escapeHTML(steps[0].value) + '</p></div>' +
+                    summitReveal +
                     '<span class="bergwelt-tour-symbolic-note">KULISSE SYMBOLISCH · KEINE GPS-ROUTE</span>' +
                 '</div>' +
                 '<div class="bergwelt-tour-progress"><span id="bergwelt-tour-progress-fill"></span></div>' +
@@ -459,6 +469,7 @@
             if (progressLabel) progressLabel.textContent = playing ? 'Du bist unterwegs' : tourProgress >= 1 ? 'Expedition abgeschlossen' : tourProgress > 0 ? 'Expedition pausiert' : 'Bereit zum Aufbruch';
             if (liveStatus) liveStatus.textContent = playing ? 'UNTERWEGS' : tourProgress >= 1 ? 'ABGESCHLOSSEN' : tourProgress > 0 ? 'PAUSIERT' : 'BEREIT';
             scene.setAttribute('data-stage', String(stageIndex));
+            scene.classList.toggle('is-summit-moment', summitIndex >= 0 && stageIndex === summitIndex);
             scene.querySelectorAll('[data-tour-step]').forEach((stepButton, i) => {
                 stepButton.classList.toggle('is-revealed', i <= stageIndex);
                 stepButton.classList.toggle('is-current', i === stageIndex);
