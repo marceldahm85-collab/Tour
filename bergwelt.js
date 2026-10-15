@@ -10,12 +10,13 @@
     root.classList.add('bergwelt-ready');
 
     const tabNames = {
-        momente: 'Momente',
+        erlebnis: 'Erlebnis',
         hoehenwelt: 'Höhenwelt',
         level: 'Level',
         tour: 'Tour erleben'
     };
-    let activeTab = 'momente';
+    let activeTab = 'erlebnis';
+    let experienceMode = 'momente';
     let selectedTourId = '';
     let selectedHeightMilestone = null;
     let animationRun = 0;
@@ -321,7 +322,9 @@
             return dateDiff || Number(a.tourDay || 0) - Number(b.tourDay || 0);
         });
         if (!entries.length) {
-            panel.innerHTML = intro('Deine Erinnerung', 'Tour erleben', 'Wähle eine gespeicherte Tour und erlebe ihre Etappen als kleine Expedition.') + empty('Für ' + getYear() + ' sind keine Touren gespeichert.');
+            panel.innerHTML = intro('Deine Erinnerung', 'Tour erleben', 'Wähle eine gespeicherte Tour und erlebe ihre Etappen als kleine Expedition.') +
+                '<button type="button" class="bergwelt-action bergwelt-experience-back" data-bergwelt-back-to-moments>‹ Zurück zu deinen Momenten</button>' +
+                empty('Für ' + getYear() + ' sind keine Touren gespeichert.');
             return;
         }
         if (!entries.some((e, i) => String(e.id ?? i) === selectedTourId)) selectedTourId = String(entries[0].id ?? 0);
@@ -380,6 +383,7 @@
             : '';
 
         panel.innerHTML = intro('Dein Bergabenteuer · ' + getYear(), 'Tour erleben', 'Wähle eine gespeicherte Tour. Die Landschaft ist bewusst symbolisch; Etappen und Kennzahlen stammen ausschließlich aus deinen Tourdaten.') +
+            '<button type="button" class="bergwelt-action bergwelt-experience-back" data-bergwelt-back-to-moments>‹ Zurück zu deinen Momenten</button>' +
             '<div class="bergwelt-tour-row"><select class="bergwelt-select" id="bergwelt-tour-select" aria-label="Gespeicherte Tour auswählen">' +
             entries.map((item, i) => {
                 const stage = item.tourDay && item.tourDayCount ? ' · Etappe ' + item.tourDay + '/' + item.tourDayCount : '';
@@ -582,14 +586,20 @@
         updateView(0);
     }
     function render() {
-        if (activeTab === 'momente') return renderMomente();
+        if (activeTab === 'erlebnis' && experienceMode === 'momente') return renderMomente();
         root.classList.add('bergwelt-mode');
         panel.hidden = false;
         if (activeTab === 'hoehenwelt') renderHoehenwelt();
         else if (activeTab === 'level') renderLevel();
-        else if (activeTab === 'tour') renderTour();
+        else if (activeTab === 'erlebnis' && experienceMode === 'tour') renderTour();
     }
     panel.addEventListener('click', event => {
+        const backToMoments = event.target.closest('[data-bergwelt-back-to-moments]');
+        if (backToMoments) {
+            experienceMode = 'momente';
+            render();
+            return;
+        }
         const closeButton = event.target.closest('[data-bergwelt-height-milestone-close]');
         if (closeButton) {
             selectedHeightMilestone = null;
@@ -603,10 +613,21 @@
         selectedHeightMilestone = selectedHeightMilestone === height ? null : height;
         renderHoehenwelt();
     });
+    document.getElementById('wrapped-open-tour-btn')?.addEventListener('click', () => {
+        activeTab = 'erlebnis';
+        experienceMode = 'tour';
+        tabs.querySelectorAll('[data-bergwelt-tab]').forEach(tab => {
+            const active = tab.dataset.bergweltTab === 'erlebnis';
+            tab.classList.toggle('is-active', active);
+            tab.setAttribute('aria-selected', String(active));
+        });
+        render();
+    });
     tabs.addEventListener('click', event => {
         const button = event.target.closest('[data-bergwelt-tab]');
         if (!button) return;
         activeTab = button.dataset.bergweltTab;
+        experienceMode = 'momente';
         tabs.querySelectorAll('[data-bergwelt-tab]').forEach(tab => {
             const active = tab === button;
             tab.classList.toggle('is-active', active);
@@ -615,12 +636,13 @@
         render();
     });
     document.getElementById('wrapped-year-select')?.addEventListener('change', () => {
-        if (activeTab !== 'momente') render();
+        if (activeTab !== 'erlebnis' || experienceMode === 'tour') render();
     });
     document.getElementById('wrapped-toggle')?.addEventListener('click', () => {
-        activeTab = 'momente';
+        activeTab = 'erlebnis';
+        experienceMode = 'momente';
         tabs.querySelectorAll('[data-bergwelt-tab]').forEach(tab => {
-            const active = tab.dataset.bergweltTab === 'momente';
+            const active = tab.dataset.bergweltTab === 'erlebnis';
             tab.classList.toggle('is-active', active);
             tab.setAttribute('aria-selected', String(active));
         });
