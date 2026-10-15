@@ -1158,3 +1158,118 @@
     #wrapped-view .bergwelt-tour-step-copy strong { font-size:.69rem; }
     #wrapped-view .bergwelt-tour-step-copy small { font-size:.61rem; }
 }
+
+/* ---------------------------------------------------------
+   Bergwelt: gemeinsame visuelle Sprache für alle Bereiche
+   Einheitliche Typografie, Flächen und Abstände; die
+   filmische Expedition behält ihre eigene Bildsprache.
+   --------------------------------------------------------- */
+#wrapped-view .bergwelt-panel:not([hidden]) {
+    --bergwelt-surface: color-mix(in srgb, currentColor 4%, transparent);
+    --bergwelt-surface-border: color-mix(in srgb, currentColor 14%, transparent);
+    --bergwelt-section-gap: clamp(16px, 3.5vw, 24px);
+}
+
+#wrapped-view .bergwelt-intro {
+    margin: 4px 0 var(--bergwelt-section-gap);
+    padding: 0 2px;
+}
+
+#wrapped-view .bergwelt-eyebrow {
+    margin: 0 0 6px;
+    color: var(--accent-color, currentColor);
+    font-size: .68rem;
+    font-weight: 850;
+    letter-spacing: .12em;
+    line-height: 1.35;
+    text-transform: uppercase;
+}
+
+#wrapped-view .bergwelt-heading {
+    margin: 0;
+    font-size: clamp(1.55rem, 5.5vw, 2rem);
+    font-weight: 800;
+    line-height: 1.12;
+    letter-spacing: -.025em;
+    text-wrap: balance;
+}
+
+#wrapped-view .bergwelt-copy {
+    max-width: 48rem;
+    margin: 8px 0 0;
+    font-size: .88rem;
+    line-height: 1.5;
+    opacity: .76;
+}
+
+#wrapped-view .bergwelt-grid {
+    gap: 10px;
+    margin-block: 12px var(--bergwelt-section-gap);
+}
+
+#wrapped-view .bergwelt-card {
+    padding: clamp(12px, 2.8vw, 16px);
+    border: 1px solid var(--bergwelt-surface-border);
+    border-radius: 16px;
+    background: var(--bergwelt-surface);
+    box-shadow: 0 6px 18px color-mix(in srgb, currentColor 3%, transparent);
+}
+
+#wrapped-view .bergwelt-card-label {
+    margin-bottom: 7px;
+    font-size: .76rem;
+    font-weight: 650;
+    line-height: 1.35;
+    letter-spacing: .015em;
+}
+
+#wrapped-view .bergwelt-section-title,
+#wrapped-view .bergwelt-height-milestone-heading,
+#wrapped-view .bergwelt-level-badge-heading,
+#wrapped-view .bergwelt-level-specialization-heading {
+    margin-top: var(--bergwelt-section-gap);
+    margin-bottom: 10px;
+}
+
+#wrapped-view .bergwelt-empty {
+    padding: 20px 14px;
+    border: 1px dashed var(--bergwelt-surface-border);
+    border-radius: 16px;
+    background: color-mix(in srgb, currentColor 2%, transparent);
+    font-size: .88rem;
+    line-height: 1.5;
+}
+
+#wrapped-view .bergwelt-footnote {
+    max-width: 58rem;
+    line-height: 1.5;
+}
+
+@media (max-width: 420px) {
+    #wrapped-view .bergwelt-intro { padding-inline: 0; }
+    #wrapped-view .bergwelt-copy { font-size: .82rem; }
+    #wrapped-view .bergwelt-grid { gap: 8px; }
+    #wrapped-view .bergwelt-card { padding: 11px; }
+}
+
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    #wrapped-view.bergwelt-mode .bergwelt-panel:not([hidden]) {
+        padding: 10px 14px 18px;
+    }
+    #wrapped-view .bergwelt-intro {
+        margin-bottom: 14px;
+    }
+    #wrapped-view .bergwelt-heading {
+        font-size: clamp(1.35rem, 3.3vw, 1.75rem);
+    }
+    #wrapped-view .bergwelt-grid {
+        margin-block: 10px 16px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #wrapped-view .bergwelt-card,
+    #wrapped-view .bergwelt-empty {
+        scroll-behavior: auto;
+    }
+}
