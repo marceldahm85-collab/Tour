@@ -256,8 +256,8 @@
             panel.innerHTML = intro('Deine Erinnerung', 'Tour erleben', 'Wähle eine gespeicherte Tour aus und lass ihre Kennzahlen nacheinander erscheinen.') + empty('Für ' + getYear() + ' sind keine Touren gespeichert.');
             return;
         }
-        if (!entries.some((e, i) => String(e.id || i) === selectedTourId)) selectedTourId = String(entries[0].id || 0);
-        const index = Math.max(0, entries.findIndex((e, i) => String(e.id || i) === selectedTourId));
+        if (!entries.some((e, i) => String(e.id ?? i) === selectedTourId)) selectedTourId = String(entries[0].id ?? 0);
+        const index = Math.max(0, entries.findIndex((e, i) => String(e.id ?? i) === selectedTourId));
         const e = entries[index];
         const title = e.tourname || e.region || 'Unbenannte Tour';
         const tourDistance = distanceValue(e);
