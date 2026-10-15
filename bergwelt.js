@@ -321,7 +321,7 @@
             return dateDiff || Number(a.tourDay || 0) - Number(b.tourDay || 0);
         });
         if (!entries.length) {
-            panel.innerHTML = intro('Deine Erinnerung', 'Tour erleben', 'Wähle eine gespeicherte Tour aus und lass ihre Kennzahlen nacheinander erscheinen.') + empty('Für ' + getYear() + ' sind keine Touren gespeichert.');
+            panel.innerHTML = intro('Deine Erinnerung', 'Tour erleben', 'Wähle eine gespeicherte Tour und erlebe ihre Etappen als kleine Expedition.') + empty('Für ' + getYear() + ' sind keine Touren gespeichert.');
             return;
         }
         if (!entries.some((e, i) => String(e.id ?? i) === selectedTourId)) selectedTourId = String(entries[0].id ?? 0);
@@ -347,7 +347,16 @@
         ];
         if (peakCount !== null && peakCount > 0) steps.push({ title: 'Gipfelmoment', value: fmt(peakCount) + (peakCount === 1 ? ' gespeicherter Gipfel' : ' gespeicherte Gipfel') });
         steps.push({ title: 'Ankommen', value: duration === null ? 'Keine Gehzeit gespeichert' : fmt(duration / 60, 1) + ' h Gehzeit' });
-        panel.innerHTML = intro('Tour in Erinnerung · ' + getYear(), 'Tour erleben', 'Starte deine Expedition. Die Etappen werden nacheinander freigeschaltet; verwendet werden nur die zu dieser Tour gespeicherten Angaben.') +
+        const stepCount = steps.length;
+        const stepMarkup = steps.map((step, i) =>
+            '<button type="button" class="bergwelt-tour-step' + (i === 0 ? ' is-current is-revealed' : '') + '" data-tour-step="' + i + '" aria-pressed="' + (i === 0) + '">' +
+                '<span class="bergwelt-tour-step-number">' + String(i + 1).padStart(2, '0') + '</span>' +
+                '<span class="bergwelt-tour-step-copy"><strong>' + escapeHTML(step.title) + '</strong><small>' + escapeHTML(step.value) + '</small></span>' +
+                '<span class="bergwelt-tour-step-state" aria-hidden="true">' + (i === 0 ? '●' : '○') + '</span>' +
+            '</button>'
+        ).join('');
+
+        panel.innerHTML = intro('Dein Bergabenteuer · ' + getYear(), 'Tour erleben', 'Wähle eine gespeicherte Tour. Die Landschaft ist bewusst symbolisch; Etappen und Kennzahlen stammen ausschließlich aus deinen Tourdaten.') +
             '<div class="bergwelt-tour-row"><select class="bergwelt-select" id="bergwelt-tour-select" aria-label="Gespeicherte Tour auswählen">' +
             entries.map((item, i) => {
                 const stage = item.tourDay && item.tourDayCount ? ' · Etappe ' + item.tourDay + '/' + item.tourDayCount : '';
@@ -356,72 +365,175 @@
                 return '<option value="' + escapeHTML(itemId) + '"' + (itemId === selectedTourId ? ' selected' : '') + '>' + escapeHTML(item.date || '') + ' · ' + escapeHTML(item.tourname || item.region || 'Unbenannte Tour') + escapeHTML(stage + group) + '</option>';
             }).join('') +
             '</select><button type="button" class="bergwelt-action" id="bergwelt-play-tour">▶ Expedition starten</button></div>' +
-            '<div class="bergwelt-animation" id="bergwelt-animation">' +
-                '<div class="bergwelt-tour-scene">' +
-                    '<svg class="bergwelt-mountain" viewBox="0 0 600 130" role="img" aria-label="Symbolische Berglinie, kein aufgezeichnetes Höhenprofil">' +
-                        '<path id="bergwelt-tour-path" d="M12 112 L92 88 L145 101 L226 34 L282 74 L335 58 L405 14 L465 66 L512 48 L588 106"/>' +
-                        '<circle class="bergwelt-hiker" id="bergwelt-hiker" r="7" cx="12" cy="112"/>' +
+            '<section class="bergwelt-animation bergwelt-tour-expedition" id="bergwelt-animation" data-stage="0">' +
+                '<div class="bergwelt-tour-cinematic">' +
+                    '<div class="bergwelt-tour-cinematic-meta"><span id="bergwelt-tour-chapter">EXPEDITION · ETAPPE 01</span><span class="bergwelt-tour-live-status" id="bergwelt-tour-live-status">BEREIT</span></div>' +
+                    '<svg class="bergwelt-tour-landscape" viewBox="0 0 760 310" role="img" aria-label="Atmosphärische, symbolische Berglandschaft. Die Linie ist keine aufgezeichnete Route oder Höhenprofil." preserveAspectRatio="xMidYMid slice">' +
+                        '<defs>' +
+                            '<linearGradient id="bw-tour-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent-color, #5da88d)" stop-opacity=".30"/><stop offset="66%" stop-color="var(--accent-color, #5da88d)" stop-opacity=".08"/><stop offset="100%" stop-color="var(--ui-card-bg, #18221f)" stop-opacity=".10"/></linearGradient>' +
+                            '<linearGradient id="bw-tour-rear" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent-color, #5da88d)" stop-opacity=".30"/><stop offset="100%" stop-color="var(--ui-card-bg, #18221f)" stop-opacity=".45"/></linearGradient>' +
+                            '<linearGradient id="bw-tour-front" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent-color, #5da88d)" stop-opacity=".58"/><stop offset="100%" stop-color="var(--ui-card-bg, #18221f)" stop-opacity=".95"/></linearGradient>' +
+                            '<filter id="bw-tour-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="3.2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
+                        '</defs>' +
+                        '<rect width="760" height="310" fill="url(#bw-tour-sky)"/>' +
+                        '<circle class="bergwelt-tour-sun" cx="595" cy="62" r="27"/><circle class="bergwelt-tour-sun-halo" cx="595" cy="62" r="47"/>' +
+                        '<g class="bergwelt-tour-cloud cloud-one"><path d="M65 83 C52 83 50 67 62 62 C65 46 88 44 95 58 C110 54 122 64 117 76 C113 84 103 83 97 83 Z"/></g>' +
+                        '<g class="bergwelt-tour-cloud cloud-two"><path d="M430 113 C418 113 414 101 423 94 C426 79 447 79 453 91 C468 87 481 97 476 107 C472 114 461 113 455 113 Z"/></g>' +
+                        '<g class="bergwelt-tour-stars" aria-hidden="true"><circle cx="170" cy="40" r="1.7"/><circle cx="260" cy="72" r="1.2"/><circle cx="344" cy="34" r="1.5"/><circle cx="505" cy="36" r="1.4"/><circle cx="690" cy="97" r="1.5"/></g>' +
+                        '<path class="bergwelt-tour-ridge-back" d="M0 205 L57 145 L95 171 L185 63 L242 132 L296 32 L355 111 L411 69 L487 154 L545 107 L614 172 L674 120 L760 182 L760 310 L0 310 Z"/>' +
+                        '<path class="bergwelt-tour-snow" d="M185 63 L165 103 L185 94 L201 115 L222 106 L242 132 L220 91 L202 86 L195 73 Z M296 32 L270 80 L294 70 L309 91 L328 81 L355 111 L325 67 L308 60 Z M411 69 L393 104 L412 94 L430 115 L449 108 L487 154 L450 91 L430 85 Z M674 120 L655 150 L674 144 L692 159 L711 151 L728 163 Z"/>' +
+                        '<path class="bergwelt-tour-ridge-mid" d="M0 242 L83 190 L130 220 L226 141 L278 194 L344 133 L399 193 L467 143 L529 220 L593 166 L649 211 L711 174 L760 212 L760 310 L0 310 Z"/>' +
+                        '<path class="bergwelt-tour-ridge-front" d="M0 282 L66 246 L126 265 L206 217 L265 245 L330 213 L393 241 L461 200 L512 232 L576 190 L635 222 L701 185 L760 226 L760 310 L0 310 Z"/>' +
+                        '<path class="bergwelt-tour-route-bed" id="bergwelt-tour-route-bed" d="M34 279 C92 269 104 239 156 244 S231 222 278 207 S336 233 385 203 S443 184 477 160 S543 173 587 141 S648 128 714 91"/>' +
+                        '<path class="bergwelt-tour-route" id="bergwelt-tour-progress-path" d="M34 279 C92 269 104 239 156 244 S231 222 278 207 S336 233 385 203 S443 184 477 160 S543 173 587 141 S648 128 714 91"/>' +
+                        '<g class="bergwelt-hiker" id="bergwelt-hiker" transform="translate(34 279)" aria-hidden="true"><ellipse class="bergwelt-hiker-shadow" cx="0" cy="2" rx="11" ry="3.5"/><path class="bergwelt-hiker-pole" d="M7 -7 L12 11"/><rect class="bergwelt-hiker-pack" x="-7" y="-12" width="6" height="11" rx="2"/><circle class="bergwelt-hiker-head" cx="0" cy="-15" r="4.5"/><path class="bergwelt-hiker-body" d="M0 -10 L1 1 M0 -7 L-7 -2 M0 -7 L7 -4 M1 1 L-6 10 M1 1 L8 8"/></g>' +
+                        '<path class="bergwelt-tour-summit-flag" d="M714 91 V58 L740 66 L714 75"/><circle class="bergwelt-tour-summit-point" cx="714" cy="91" r="4"/>' +
                     '</svg>' +
-                    '<div class="bergwelt-tour-progress" aria-hidden="true"><span id="bergwelt-tour-progress-fill"></span></div>' +
-                    '<div class="bergwelt-tour-progress-label" id="bergwelt-tour-progress-label">Bereit zum Aufbruch</div>' +
+                    '<div class="bergwelt-tour-scene-vignette"></div>' +
+                    '<div class="bergwelt-tour-scene-caption"><span class="bergwelt-tour-scene-kicker" id="bergwelt-tour-scene-kicker">ETAPPE 01 / ' + String(stepCount).padStart(2, '0') + '</span><h3 id="bergwelt-tour-scene-title">Aufbruch</h3><p id="bergwelt-tour-scene-copy">' + escapeHTML(steps[0].value) + '</p></div>' +
+                    '<span class="bergwelt-tour-symbolic-note">KULISSE SYMBOLISCH · KEINE GPS-ROUTE</span>' +
                 '</div>' +
-                '<div class="bergwelt-tour-steps" aria-live="polite">' +
-                    steps.map((step, i) => '<div class="bergwelt-tour-step" data-step="' + i + '"><span>' + String(i + 1).padStart(2, '0') + '</span><div><strong>' + escapeHTML(step.title) + '</strong><small>' + escapeHTML(step.value) + '</small></div></div>').join('') +
+                '<div class="bergwelt-tour-progress"><span id="bergwelt-tour-progress-fill"></span></div>' +
+                '<div class="bergwelt-tour-progress-meta"><span id="bergwelt-tour-progress-label">Bereit zum Aufbruch</span><strong id="bergwelt-tour-progress-percent">0 %</strong></div>' +
+                '<div class="bergwelt-tour-transport">' +
+                    '<button type="button" class="bergwelt-tour-transport-secondary" id="bergwelt-tour-prev" aria-label="Vorherige Etappe">‹ <span>Zurück</span></button>' +
+                    '<button type="button" class="bergwelt-tour-transport-primary" id="bergwelt-tour-toggle">▶ Expedition starten</button>' +
+                    '<button type="button" class="bergwelt-tour-transport-secondary" id="bergwelt-tour-next" aria-label="Nächste Etappe"><span>Weiter</span> ›</button>' +
+                    '<button type="button" class="bergwelt-tour-transport-restart" id="bergwelt-tour-restart" aria-label="Expedition neu starten">↻ Neu starten</button>' +
                 '</div>' +
-            '</div>' +
+                '<p class="bergwelt-tour-stage-hint">Du kannst die Etappen direkt auswählen oder die Expedition abspielen, pausieren und fortsetzen.</p>' +
+                '<div class="bergwelt-tour-steps" id="bergwelt-tour-steps" aria-label="Tour-Etappen">' + stepMarkup + '</div>' +
+            '</section>' +
             '<h3 class="bergwelt-section-title">' + escapeHTML(title) + '</h3><div class="bergwelt-grid">' +
             statCard('Strecke', fmtKnown(tourDistance, 1), 'km') + statCard('Aufstieg', fmtKnown(tourAscent), 'hm') +
             statCard('Gehzeit', duration === null ? '–' : fmt(duration / 60, 1), 'h') +
             statCard('Steilheit', fmtKnown(steepness), 'hm/km') +
-            '</div><p class="bergwelt-footnote">Die Berglinie ist symbolisch und kein aufgezeichnetes Höhenprofil. Es werden keine GPS-Route, Höhenverläufe oder Gipfelnamen erfunden. Steilheit wird wie in Stats/Highlights berechnet.</p>';
+            '</div><p class="bergwelt-footnote">Die Berglandschaft und der Wanderweg sind symbolisch, kein aufgezeichnetes Höhenprofil und keine echte Route. Es werden keine Streckenverläufe oder Gipfelnamen erfunden. Steilheit wird wie in Stats/Highlights berechnet.</p>';
+
+        const scene = document.getElementById('bergwelt-animation');
+        const path = document.getElementById('bergwelt-tour-route-bed');
+        const progressPath = document.getElementById('bergwelt-tour-progress-path');
+        const hiker = document.getElementById('bergwelt-hiker');
+        const fill = document.getElementById('bergwelt-tour-progress-fill');
+        const toggleButton = document.getElementById('bergwelt-tour-toggle');
+        const restartButton = document.getElementById('bergwelt-tour-restart');
+        const prevButton = document.getElementById('bergwelt-tour-prev');
+        const nextButton = document.getElementById('bergwelt-tour-next');
+        const liveStatus = document.getElementById('bergwelt-tour-live-status');
+        const chapter = document.getElementById('bergwelt-tour-chapter');
+        const sceneKicker = document.getElementById('bergwelt-tour-scene-kicker');
+        const sceneTitle = document.getElementById('bergwelt-tour-scene-title');
+        const sceneCopy = document.getElementById('bergwelt-tour-scene-copy');
+        const progressLabel = document.getElementById('bergwelt-tour-progress-label');
+        const progressPercent = document.getElementById('bergwelt-tour-progress-percent');
+        if (!scene || !path || !progressPath || !hiker || !toggleButton) return;
+
+        const runId = ++animationRun;
+        const pathLength = path.getTotalLength();
+        progressPath.style.strokeDasharray = String(pathLength);
+        progressPath.style.strokeDashoffset = String(pathLength);
+        const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+        const durationMs = reduceMotion ? 650 : Math.max(7200, stepCount * 1650);
+        let tourProgress = 0;
+        let playing = false;
+        let frameId = 0;
+        let playFromProgress = 0;
+        let playFromTime = 0;
+
+        const getStageIndex = progress => progress >= 1
+            ? stepCount - 1
+            : Math.max(0, Math.min(stepCount - 1, Math.floor(progress * stepCount)));
+
+        const updateView = progress => {
+            tourProgress = Math.max(0, Math.min(1, progress));
+            const stageIndex = getStageIndex(tourProgress);
+            const point = path.getPointAtLength(pathLength * tourProgress);
+            hiker.setAttribute('transform', 'translate(' + point.x + ' ' + point.y + ')');
+            progressPath.style.strokeDashoffset = String(pathLength * (1 - tourProgress));
+            if (fill) fill.style.width = (tourProgress * 100) + '%';
+            if (progressPercent) progressPercent.textContent = fmt(tourProgress * 100) + ' %';
+            if (chapter) chapter.textContent = 'EXPEDITION · ETAPPE ' + String(stageIndex + 1).padStart(2, '0');
+            if (sceneKicker) sceneKicker.textContent = 'ETAPPE ' + String(stageIndex + 1).padStart(2, '0') + ' / ' + String(stepCount).padStart(2, '0');
+            if (sceneTitle) sceneTitle.textContent = steps[stageIndex].title;
+            if (sceneCopy) sceneCopy.textContent = steps[stageIndex].value;
+            if (progressLabel) progressLabel.textContent = playing ? 'Du bist unterwegs' : tourProgress >= 1 ? 'Expedition abgeschlossen' : tourProgress > 0 ? 'Expedition pausiert' : 'Bereit zum Aufbruch';
+            if (liveStatus) liveStatus.textContent = playing ? 'UNTERWEGS' : tourProgress >= 1 ? 'ABGESCHLOSSEN' : tourProgress > 0 ? 'PAUSIERT' : 'BEREIT';
+            scene.setAttribute('data-stage', String(stageIndex));
+            scene.querySelectorAll('[data-tour-step]').forEach((stepButton, i) => {
+                stepButton.classList.toggle('is-revealed', i <= stageIndex);
+                stepButton.classList.toggle('is-current', i === stageIndex);
+                stepButton.setAttribute('aria-pressed', String(i === stageIndex));
+                const state = stepButton.querySelector('.bergwelt-tour-step-state');
+                if (state) state.textContent = i < stageIndex ? '✓' : i === stageIndex ? '●' : '○';
+            });
+            if (prevButton) prevButton.disabled = stageIndex <= 0 && tourProgress <= 0;
+            if (nextButton) nextButton.disabled = stageIndex >= stepCount - 1;
+            if (toggleButton) toggleButton.textContent = playing ? 'Ⅱ Pause' : tourProgress >= 1 ? '↻ Noch einmal erleben' : tourProgress > 0 ? '▶ Weiter' : '▶ Expedition starten';
+        };
+
+        const stopAnimation = () => {
+            playing = false;
+            if (frameId) window.cancelAnimationFrame(frameId);
+            frameId = 0;
+        };
+
+        const animateFrame = now => {
+            if (runId !== animationRun || !scene.isConnected || !playing) return;
+            const elapsed = now - playFromTime;
+            const progress = playFromProgress + (elapsed / durationMs) * (1 - playFromProgress);
+            if (progress >= 1) {
+                tourProgress = 1;
+                playing = false;
+                frameId = 0;
+                updateView(1);
+                return;
+            }
+            updateView(progress);
+            frameId = window.requestAnimationFrame(animateFrame);
+        };
+
+        const startAnimation = () => {
+            if (playing) return;
+            if (tourProgress >= 1) tourProgress = 0;
+            playing = true;
+            playFromProgress = tourProgress;
+            playFromTime = performance.now();
+            updateView(tourProgress);
+            frameId = window.requestAnimationFrame(animateFrame);
+        };
+
+        const chooseStage = stageIndex => {
+            stopAnimation();
+            const nextIndex = Math.max(0, Math.min(stepCount - 1, stageIndex));
+            updateView(Math.min(0.999, (nextIndex + 0.2) / stepCount));
+        };
+
         document.getElementById('bergwelt-tour-select')?.addEventListener('change', ev => {
-            selectedTourId = ev.target.value;
+            stopAnimation();
             animationRun++;
+            selectedTourId = ev.target.value;
             renderTour();
         });
-        document.getElementById('bergwelt-play-tour')?.addEventListener('click', () => {
-            const scene = document.getElementById('bergwelt-animation');
-            const path = document.getElementById('bergwelt-tour-path');
-            const hiker = document.getElementById('bergwelt-hiker');
-            const button = document.getElementById('bergwelt-play-tour');
-            const fill = document.getElementById('bergwelt-tour-progress-fill');
-            const label = document.getElementById('bergwelt-tour-progress-label');
-            if (!scene || !path || !hiker || !button) return;
-            const runId = ++animationRun;
-            scene.classList.remove('is-running', 'is-complete');
-            scene.querySelectorAll('.bergwelt-tour-step').forEach(step => step.classList.remove('is-revealed'));
-            if (fill) fill.style.width = '0%';
-            if (label) label.textContent = 'Aufbruch';
-            const totalLength = path.getTotalLength();
-            const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-            button.disabled = true;
-            button.textContent = '⛰️ Expedition läuft …';
-            scene.classList.add('is-running');
-            const durationMs = reduceMotion ? 100 : 5200;
-            const startTime = performance.now();
-            const revealCount = scene.querySelectorAll('.bergwelt-tour-step').length;
-            const labels = ['Aufbruch', 'Strecke erkunden', 'Anstieg bewältigen', 'Gipfelmoment', 'Ankommen'];
-            const frame = now => {
-                if (runId !== animationRun || !scene.isConnected) return;
-                const progress = Math.min(1, (now - startTime) / durationMs);
-                const point = path.getPointAtLength(totalLength * progress);
-                hiker.setAttribute('cx', String(point.x));
-                hiker.setAttribute('cy', String(point.y));
-                if (fill) fill.style.width = (progress * 100) + '%';
-                const revealed = Math.min(revealCount, Math.floor(progress * revealCount) + 1);
-                scene.querySelectorAll('.bergwelt-tour-step').forEach((step, i) => step.classList.toggle('is-revealed', i < revealed));
-                if (label) label.textContent = progress >= 1 ? 'Tour abgeschlossen' : (labels[Math.min(labels.length - 1, revealed - 1)] || 'Unterwegs');
-                if (progress < 1) {
-                    window.requestAnimationFrame(frame);
-                } else {
-                    scene.classList.add('is-complete');
-                    button.disabled = false;
-                    button.textContent = '↻ Expedition erneut erleben';
-                }
-            };
-            hiker.style.display = reduceMotion ? 'none' : '';
-            window.requestAnimationFrame(frame);
+        toggleButton.addEventListener('click', () => {
+            if (playing) {
+                stopAnimation();
+                updateView(tourProgress);
+            } else {
+                if (tourProgress >= 1) tourProgress = 0;
+                startAnimation();
+            }
         });
+        restartButton?.addEventListener('click', () => {
+            stopAnimation();
+            updateView(0);
+            startAnimation();
+        });
+        prevButton?.addEventListener('click', () => chooseStage(getStageIndex(tourProgress) - 1));
+        nextButton?.addEventListener('click', () => chooseStage(getStageIndex(tourProgress) + 1));
+        scene.querySelectorAll('[data-tour-step]').forEach(stepButton => {
+            stepButton.addEventListener('click', () => chooseStage(Number(stepButton.dataset.tourStep)));
+        });
+        updateView(0);
     }
     function render() {
         if (activeTab === 'momente') return renderMomente();
