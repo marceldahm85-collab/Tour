@@ -5979,7 +5979,8 @@ window.__tourDataRules = Object.freeze({
     parseMinutes: readTourMetricMinutes,
     yearFromDate: getYearFromDate,
     tourIdentity,
-    countDistinctTours
+    countDistinctTours,
+    computeMilestones
 });
 
 
