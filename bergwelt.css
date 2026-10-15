@@ -705,3 +705,77 @@
 }
 
 #wrapped-view .bergwelt-animation.is-running #bergwelt-tour-path { animation: none; }
+
+/* Höhenwelt v2: deutlich immersivere Bergkulisse, ohne Datenlogik zu verändern. */
+#wrapped-view .bergwelt-height-hero {
+    position: relative;
+    margin: 16px 0 22px;
+    padding: 10px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--accent-color, currentColor) 28%, transparent);
+    border-radius: 24px;
+    background: linear-gradient(145deg, color-mix(in srgb, var(--accent-color, #5da88d) 15%, transparent), color-mix(in srgb, currentColor 3%, transparent) 76%);
+    box-shadow: 0 16px 42px color-mix(in srgb, var(--accent-color, #5da88d) 10%, transparent);
+}
+#wrapped-view .bergwelt-height-visual {
+    min-height: 245px;
+    overflow: hidden;
+    isolation: isolate;
+    border-radius: 17px;
+    background:
+        radial-gradient(circle at 77% 19%, color-mix(in srgb, var(--accent-color, #5da88d) 25%, transparent) 0 5%, transparent 25%),
+        linear-gradient(180deg, color-mix(in srgb, var(--accent-color, #5da88d) 15%, transparent), color-mix(in srgb, currentColor 2%, transparent) 74%);
+}
+#wrapped-view .bergwelt-height-visual::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: 13%;
+    right: 16%;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--accent-color, #5da88d) 28%, transparent);
+    box-shadow: 0 0 0 12px color-mix(in srgb, var(--accent-color, #5da88d) 5%, transparent), 0 0 44px 22px color-mix(in srgb, var(--accent-color, #5da88d) 15%, transparent);
+    pointer-events: none;
+}
+#wrapped-view .bergwelt-height-visual::after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    inset: 42% 0 0;
+    background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--ui-card-bg, #111) 36%, transparent));
+    pointer-events: none;
+}
+#wrapped-view .bergwelt-height-mountain { position: relative; z-index: 0; display: block; width: 100%; height: 245px; }
+#wrapped-view .bergwelt-height-silhouette { fill: url(#bergwelt-mountain-fill); }
+#wrapped-view .bergwelt-height-ridge { stroke: color-mix(in srgb, var(--accent-color, currentColor) 72%, var(--text-main, white)); stroke-width: 2; opacity: .78; filter: drop-shadow(0 0 5px color-mix(in srgb, var(--accent-color, currentColor) 22%, transparent)); }
+#wrapped-view .bergwelt-height-trail { stroke: var(--accent-color, currentColor); stroke-width: 5; stroke-linecap: round; filter: drop-shadow(0 0 5px color-mix(in srgb, var(--accent-color, currentColor) 70%, transparent)); stroke-dasharray: 520; stroke-dashoffset: 520; animation: bergwelt-height-climb 1.8s cubic-bezier(.2,.7,.2,1) forwards; }
+#wrapped-view .bergwelt-height-summit { fill: var(--accent-color, currentColor); stroke: var(--text-main, #fff); stroke-width: 3; filter: drop-shadow(0 0 8px var(--accent-color, currentColor)); }
+#wrapped-view .bergwelt-height-overlay { z-index: 2; left: 16px; right: 16px; bottom: 22px; gap: 5px; text-shadow: 0 2px 14px var(--ui-card-bg, rgba(0,0,0,.6)); }
+#wrapped-view .bergwelt-height-overlay span { font-size: .7rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+#wrapped-view .bergwelt-height-overlay strong { font-size: clamp(2rem, 7vw, 3rem); letter-spacing: -.045em; }
+#wrapped-view .bergwelt-height-progress { padding: 14px 5px 4px; }
+#wrapped-view .bergwelt-height-progress-label { font-size: .86rem; }
+#wrapped-view .bergwelt-height-progress-label strong { color: var(--accent-color, currentColor); font-size: 1rem; }
+#wrapped-view .bergwelt-height-progress .bergwelt-track { height: 9px; margin-top: 8px; }
+#wrapped-view .bergwelt-height-progress .bergwelt-track > span { box-shadow: 0 0 14px color-mix(in srgb, var(--accent-color, currentColor) 55%, transparent); }
+#wrapped-view .bergwelt-height-hero + .bergwelt-grid .bergwelt-card {
+    border-color: color-mix(in srgb, var(--accent-color, currentColor) 18%, transparent);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--accent-color, currentColor) 7%, transparent), color-mix(in srgb, currentColor 3%, transparent));
+    box-shadow: 0 8px 22px color-mix(in srgb, currentColor 3%, transparent);
+}
+#wrapped-view .bergwelt-height-hero + .bergwelt-grid .bergwelt-card-label { font-size: .7rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+#wrapped-view .bergwelt-height-hero + .bergwelt-grid .bergwelt-value { font-size: clamp(1.45rem, 5.5vw, 2.1rem); }
+#wrapped-view .bergwelt-section-title { display: flex; align-items: center; gap: 10px; margin-top: 26px; }
+#wrapped-view .bergwelt-section-title::before { content: ""; display: block; width: 4px; height: 1.2em; border-radius: 4px; background: var(--accent-color, currentColor); box-shadow: 0 0 10px color-mix(in srgb, var(--accent-color, currentColor) 35%, transparent); }
+#wrapped-view .bergwelt-height-hero ~ .bergwelt-grid .bergwelt-card .bergwelt-track { height: 5px; }
+@media (max-width: 560px) {
+    #wrapped-view .bergwelt-height-hero { padding: 7px; border-radius: 20px; }
+    #wrapped-view .bergwelt-height-visual { min-height: 220px; }
+    #wrapped-view .bergwelt-height-mountain { height: 220px; }
+    #wrapped-view .bergwelt-height-overlay { bottom: 19px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    #wrapped-view .bergwelt-height-trail { animation: none; stroke-dashoffset: 0; }
+}
