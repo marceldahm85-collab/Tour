@@ -5936,3 +5936,10 @@ body.summit {
         box-sizing: border-box !important;
     }
 }
+
+
+/* Bergwelt soll dieselbe theme-gesteuerte Seitenfläche wie die übrigen Views nutzen.
+   Nur der echte Vollbildmodus bleibt bewusst schwarz für die Story-Wiedergabe. */
+#wrapped-view.bergwelt-ready:not(.wrapped-is-fullscreen) {
+    background: transparent !important;
+}
