@@ -22996,9 +22996,12 @@ async function attachWrappedPhotos(slides, year) {
     ];
 
     for (const slot of slots) {
-        // Für zuordenbare Tourfolien immer das eigentliche Tourfoto einsetzen,
-        // auch wenn es bereits bei einer weiteren Darstellung derselben Tour vorkam.
-        const photoEntry = slot.preferred || takeFallbackPhoto();
+        // Tourfolien und Top-3-Karten dürfen das eigene Tourfoto wiederverwenden.
+        // Bei Top 3 kein Ersatzfoto einer anderen Tour einsetzen: ohne eigenes Bild
+        // bleibt der Fotobereich dieser Karte bewusst leer.
+        const photoEntry = slot.type === 'top3'
+            ? slot.preferred
+            : (slot.preferred || takeFallbackPhoto());
         const photoImg = await getPhotoImage(photoEntry);
         if (slot.type === 'top3') {
             slot.item.photoImg = photoImg;
