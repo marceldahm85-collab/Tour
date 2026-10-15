@@ -16860,7 +16860,11 @@ function computeMilestones(toursInput = null) {
         const a = readTourMetricNumber(entry.aufstieg);
         const mins = readTourMetricMinutes(entry.zeit);
         const peakCount = readTourMetricNumber(entry.gipfel);
-        const entrySteps = readTourMetricNumber(calculateEntrySteps(entry));
+        const difficulty = String(entry.difficulty || '').trim().toLowerCase();
+        const hasStepSource = d !== null || a !== null || mins !== null || difficulty === 'radtour' ||
+            ['ferrataStrecke', 'ferrataHm', 'bikeStrecke', 'bikeHm'].some(key => readTourMetricNumber(entry[key]) !== null) ||
+            ['ferrataZeit', 'bikeZeit'].some(key => readTourMetricMinutes(entry[key]) !== null);
+        const entrySteps = hasStepSource ? readTourMetricNumber(calculateEntrySteps(entry)) : null;
 
         if (d !== null) { totals.dist += d; knownEntries.dist++; }
         if (a !== null) { totals.asc += a; knownEntries.asc++; }
