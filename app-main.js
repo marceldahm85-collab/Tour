@@ -3573,12 +3573,17 @@ const MILESTONE_UNITS = {
 const pendingMilestoneTileCelebrations = new Set();
 
 function filterToursForDashboardYear(entries, yearFilter = dashYearFilter) {
-    const source = (Array.isArray(entries) ? entries : [])
-        .filter(entry => getYearFromDate(entry?.date) !== null);
-    if (yearFilter === 'all') return source;
+    const source = Array.isArray(entries) ? entries : [];
 
+    // „Alle Jahre“ meint alle gespeicherten Touren, auch wenn das Datum fehlt.
+    // Die Meilensteinberechnung selbst ignoriert undatierte Einträge weiterhin,
+    // weil sie diese keinem Zeitpunkt in der Meilenstein-Chronologie zuordnen kann.
+    if (yearFilter === 'all') return source.slice();
+
+    // Zeitlich begrenzte Filter benötigen ein gültiges Datum.
+    const datedSource = source.filter(entry => getYearFromDate(entry?.date) !== null);
     const currentYear = new Date().getFullYear();
-    return source.filter(entry => {
+    return datedSource.filter(entry => {
         const year = getYearFromDate(entry?.date);
         return yearFilter === 'past'
             ? year !== currentYear
