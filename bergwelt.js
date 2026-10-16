@@ -161,6 +161,13 @@
             { name: '50.000 Höhenmeter', height: 50000 },
             { name: '100.000 Höhenmeter', height: 100000 }
         ];
+        const heightIcons = [
+            '<svg viewBox="0 0 64 64" focusable="false"><path d="M7 49 25 19l9 15 7-10 16 25Z"/><path d="m19 29 6-10 9 15-5-4-4 2Z" class="bw-height-snow"/></svg>',
+            '<svg viewBox="0 0 64 64" focusable="false"><path d="M6 49 22 24l8 12 10-21 18 34Z"/><path d="m34 23 6-8 7 18-7-5-4 2Z" class="bw-height-snow"/></svg>',
+            '<svg viewBox="0 0 64 64" focusable="false"><path d="m4 49 13-20 8 10 9-22 9 18 7-10 11 24Z"/><path d="m29 25 5-8 6 13-6-4-3 2Z" class="bw-height-snow"/></svg>',
+            '<svg viewBox="0 0 64 64" focusable="false"><path d="M7 49 24 21l9 15 8-12 16 25Z"/><path d="M40 8v18m-1-17h12l-6 5 6 5H39" class="bw-height-flag"/></svg>',
+            '<svg viewBox="0 0 64 64" focusable="false"><path d="M7 49 24 21l9 15 8-12 16 25Z"/><path d="m20 13 4 5 8-8 8 8 4-5-2 12H22Z" class="bw-height-crown"/></svg>'
+        ];
         const next = careerAscent === null ? null : (milestones.find(m => m.height > total) || null);
         // Fortschritt bedeutet hier: gesammelte Höhenmeter im Verhältnis zum nächsten Ziel.
         // Dadurch stimmt der Wert mit den Prozentangaben in den einzelnen Höhenmarken überein.
@@ -309,13 +316,7 @@
             '<svg viewBox="0 0 64 64" focusable="false"><path class="bw-badge-shield" d="M32 3 55 12v17c0 15-9 25-23 32C18 54 9 44 9 29V12Z"/><path class="bw-badge-line" d="m36 13-17 22h11l-3 16 18-25H34Z"/><path class="bw-badge-highlight" d="m36 13-6 17h8l-7 13 14-17H34Z"/></svg>',
             '<svg viewBox="0 0 64 64" focusable="false"><path class="bw-badge-shield" d="M32 3 55 12v17c0 15-9 25-23 32C18 54 9 44 9 29V12Z"/><circle class="bw-badge-line" cx="32" cy="30" r="15"/><path class="bw-badge-line" d="M20 39 29 29l6 6 9-12"/><path class="bw-badge-highlight" d="m38 23 6 0-1 6Z"/><path class="bw-badge-line" d="M24 47h16"/></svg>'
         ];
-        const heightIcons = [
-            '<svg viewBox="0 0 64 64" focusable="false"><path d="M7 49 25 19l9 15 7-10 16 25Z"/><path d="m19 29 6-10 9 15-5-4-4 2Z" class="bw-height-snow"/></svg>',
-            '<svg viewBox="0 0 64 64" focusable="false"><path d="M6 49 22 24l8 12 10-21 18 34Z"/><path d="m34 23 6-8 7 18-7-5-4 2Z" class="bw-height-snow"/></svg>',
-            '<svg viewBox="0 0 64 64" focusable="false"><path d="m4 49 13-20 8 10 9-22 9 18 7-10 11 24Z"/><path d="m29 25 5-8 6 13-6-4-3 2Z" class="bw-height-snow"/></svg>',
-            '<svg viewBox="0 0 64 64" focusable="false"><path d="M7 49 24 21l9 15 8-12 16 25Z"/><path d="M40 8v18m-1-17h12l-6 5 6 5H39" class="bw-height-flag"/></svg>',
-            '<svg viewBox="0 0 64 64" focusable="false"><path d="M7 49 24 21l9 15 8-12 16 25Z"/><path d="m20 13 4 5 8-8 8 8 4-5-2 12H22Z" class="bw-height-crown"/></svg>'
-        ];
+
         const levelDigits = level => level.name === 'Ausdauer-Alpinist' || level.name === 'Steilheits-Profi' ? 1 : 0;
         panel.innerHTML = intro('Dein Bergprofil · ' + getYear(), 'Dein Bergsteiger-Level', 'Deine Touren formen fünf Spezialisierungen. Mit jedem erreichten Schwellenwert schaltest du einen neuen Rang frei – ausschließlich anhand deiner gespeicherten Daten.') +
             '<section class="bergwelt-level-overview">' +
