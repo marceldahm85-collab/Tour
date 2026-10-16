@@ -13622,7 +13622,7 @@ gipfelDetails: (gipfelDetails || []).map(g => ({
         : null;
 
     if (editIndex >= 0) {
-        data[editIndex] = entry;
+        data[editIndex] = { ...data[editIndex], ...entry };
     } else {
         data.push(entry);
     }
