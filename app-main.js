@@ -20299,7 +20299,7 @@ ${msTileHTML('steps')}
             setTimeout(() => {
                 tile.classList.remove('is-milestone-celebrating');
                 tile.querySelectorAll('.dash-ms-sparkle').forEach(sparkle => sparkle.remove());
-            }, 1850);
+            }, 2850);
         }
     });
 
