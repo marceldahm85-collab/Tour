@@ -6967,6 +6967,23 @@ body.green .toast.toast-achievement {
     50%      { box-shadow: 0 8px 28px rgba(0,0,0,0.4), 0 0 18px rgba(82,183,136,0.55); }
 }
 
+/* Der Gipfelmoment behält auch in Dark/Green die jeweilige Theme-Akzentfarbe. */
+body.dark .toast.toast-milestone-epic,
+body.green .toast.toast-milestone-epic {
+    border-color: color-mix(in srgb, var(--accent) 64%, rgba(249,215,126,.35));
+    background:
+        radial-gradient(ellipse at 0% 0%, color-mix(in srgb, var(--accent) 28%, transparent), transparent 65%),
+        linear-gradient(135deg, color-mix(in srgb, var(--accent) 13%, rgba(12,18,24,.92)), rgba(8,13,19,.96));
+    animation: toastIn .32s cubic-bezier(.2,.8,.25,1), milestoneEpicPulse 2s ease-in-out 2;
+}
+@media (prefers-reduced-motion: reduce) {
+    .toast.toast-milestone-epic,
+    .toast.toast-milestone-epic .milestone-epic-crest,
+    .toast.toast-milestone-epic .milestone-epic-sweep {
+        animation: none !important;
+    }
+}
+
 /* =========================
    Konfetti-Effekt (Rekord gebrochen)
    ========================= */
