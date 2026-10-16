@@ -20025,7 +20025,7 @@ const recentGrouped =
         allTours,
         'saved'
     )
-    .filter(e => e.date);
+    .filter(e => getYearFromDate(e?.date) !== null);
 
 
 /*
