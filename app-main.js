@@ -3504,27 +3504,34 @@ function removeToast(toast) {
 
 // ─── Achievement-Toast bei neu erreichten Meilensteinen ─────────────────────
 
-function getYearFromDate(dateStr) {
+function parseTourDateValue(dateStr) {
     const raw = String(dateStr ?? '').trim();
     if (!raw) return null;
+
     let match = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:$|[T\s])/);
     if (match) {
         const year = Number(match[1]);
         const month = Number(match[2]);
         const day = Number(match[3]);
         const date = new Date(year, month - 1, day);
-        return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? year : null;
+        return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? date : null;
     }
+
     match = raw.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})$/);
     if (match) {
         const day = Number(match[1]);
         const month = Number(match[2]);
         const year = Number(match[3]);
         const date = new Date(year, month - 1, day);
-        return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? year : null;
+        return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? date : null;
     }
+
     const date = new Date(raw);
-    return Number.isNaN(date.getTime()) ? null : date.getFullYear();
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function getYearFromDate(dateStr) {
+    return parseTourDateValue(dateStr)?.getFullYear() ?? null;
 }
 
 function readTourMetricNumber(value) {
@@ -3565,8 +3572,28 @@ const MILESTONE_UNITS = {
 
 const pendingMilestoneTileCelebrations = new Set();
 
+function filterToursForDashboardYear(entries, yearFilter = dashYearFilter) {
+    const source = (Array.isArray(entries) ? entries : [])
+        .filter(entry => getYearFromDate(entry?.date) !== null);
+    if (yearFilter === 'all') return source;
+
+    const currentYear = new Date().getFullYear();
+    return source.filter(entry => {
+        const year = getYearFromDate(entry?.date);
+        return yearFilter === 'past'
+            ? year !== currentYear
+            : year === Number(yearFilter);
+    });
+}
+
+function getDashboardMilestoneFilterLabel(yearFilter = dashYearFilter) {
+    if (yearFilter === 'all') return 'Gesamt';
+    if (yearFilter === 'past') return 'Vergangene Jahre';
+    return 'Jahr ' + String(yearFilter);
+}
+
 function collectNewMilestoneEvents(before, after, opts = {}) {
-    const { scope = 'lifetime', year = null, startDelay = 0 } = opts;
+    const { scope = 'lifetime', year = null, startDelay = 0, filterLabel = null } = opts;
     const events = [];
 
     ['dist', 'asc', 'time', 'peaks', 'steps'].forEach(type => {
@@ -3582,6 +3609,7 @@ function collectNewMilestoneEvents(before, after, opts = {}) {
                 milestone: item.milestone,
                 scope,
                 year,
+                filterLabel,
                 delay: startDelay + events.length * 600
             });
         });
@@ -3590,10 +3618,10 @@ function collectNewMilestoneEvents(before, after, opts = {}) {
     return events;
 }
 
-function showNewMilestoneNotifications(lifetimeEvents = [], yearEvents = []) {
+function showNewMilestoneNotifications(lifetimeEvents = [], yearEvents = [], dashboardEvents = []) {
     const mergedByKey = new Map();
 
-    [...lifetimeEvents, ...yearEvents].forEach(event => {
+    [...lifetimeEvents, ...yearEvents, ...dashboardEvents].forEach(event => {
         const key = event.type + ':' + event.milestone;
         let merged = mergedByKey.get(key);
 
@@ -3603,6 +3631,7 @@ function showNewMilestoneNotifications(lifetimeEvents = [], yearEvents = []) {
                 milestone: event.milestone,
                 scopes: new Set(),
                 years: new Set(),
+                dashboardFilters: new Set(),
                 delay: event.delay || 0
             };
             mergedByKey.set(key, merged);
@@ -3612,12 +3641,15 @@ function showNewMilestoneNotifications(lifetimeEvents = [], yearEvents = []) {
         if (event.scope === 'year' && event.year !== null && event.year !== undefined) {
             merged.years.add(Number(event.year));
         }
+        if (event.scope === 'dashboard' && event.filterLabel) {
+            merged.dashboardFilters.add(event.filterLabel);
+        }
         merged.delay = Math.min(merged.delay, event.delay || 0);
     });
 
-    // Die betroffene Dashboard-Kachel darf den Meilenstein im selben Renderzyklus feiern.
+    // Nur Schwellen im aktuell sichtbaren Zeitraum lösen eine Kachel-Animation aus.
     if (currentView === 'dashboard') {
-        [...mergedByKey.values()].forEach(event => pendingMilestoneTileCelebrations.add(event.type));
+        dashboardEvents.forEach(event => pendingMilestoneTileCelebrations.add(event.type));
     }
 
     [...mergedByKey.values()].forEach(event => {
@@ -3628,12 +3660,22 @@ function showNewMilestoneNotifications(lifetimeEvents = [], yearEvents = []) {
             const icon = MILESTONE_ICONS[event.type];
             const years = [...event.years].sort((a, b) => a - b);
             const hasLifetime = event.scopes.has('lifetime');
+            const dashboardFilters = [...event.dashboardFilters];
+            const contexts = [];
+            if (hasLifetime) contexts.push('Gesamt');
+            years.forEach(year => contexts.push('Jahr ' + year));
+            dashboardFilters.forEach(filter => contexts.push(filter));
+            const uniqueContexts = [...new Set(contexts)];
             let message;
 
-            if (hasLifetime && years.length) {
-                message = icon + ' ' + label + ': ' + amount + ' ' + unit + ' erreicht (Gesamt + Jahr ' + years.join(', ') + ').';
+            if (uniqueContexts.length > 1) {
+                message = icon + ' ' + label + ': ' + amount + ' ' + unit +
+                    ' erreicht (' + uniqueContexts.join(' + ') + ').';
             } else if (years.length) {
-                message = icon + ' ' + label + ' ' + years.join(', ') + ': ' + amount + ' ' + unit + ' in diesem Jahr erreicht!';
+                message = icon + ' ' + label + ' ' + years[0] + ': ' + amount + ' ' + unit + ' in diesem Jahr erreicht!';
+            } else if (dashboardFilters.length && !hasLifetime) {
+                message = icon + ' ' + label + ': ' + amount + ' ' + unit +
+                    ' im Filter „' + dashboardFilters[0] + '“ erreicht!';
             } else {
                 message = icon + ' ' + label + ': ' + amount + ' ' + unit + ' erreicht!';
             }
@@ -3644,6 +3686,7 @@ function showNewMilestoneNotifications(lifetimeEvents = [], yearEvents = []) {
 
     return mergedByKey.size;
 }
+
 function showAchievementToast(message) {
     const container = getToastContainer();
 
@@ -6726,6 +6769,7 @@ function countDistinctTours(entries) {
 window.__tourDataRules = Object.freeze({
     readMetric: readTourMetricNumber,
     parseMinutes: readTourMetricMinutes,
+    parseDate: parseTourDateValue,
     yearFromDate: getYearFromDate,
     tourIdentity,
     countDistinctTours,
@@ -13558,10 +13602,31 @@ gipfelDetails: (gipfelDetails || []).map(g => ({
 };
 
     const data = appStorage.get('touren') || [];
-    const milestonesBefore = computeMilestones(data);
-    const toursBeforeSave = data.slice(); // Kopie für Rekord-Vergleich, bevor neue Tour eingefügt wird
+    const editEntryId = String(form.dataset.editEntryId || '').trim();
+    const editIndex = editEntryId
+        ? data.findIndex(item => String(item?.id ?? '') === editEntryId)
+        : -1;
 
-    data.push(entry);
+    if (editEntryId && editIndex < 0) {
+        showToast('Die zu bearbeitende Tour wurde nicht gefunden. Sie wurde nicht erneut angelegt.', {
+            type: 'error',
+            duration: 3500
+        });
+        return;
+    }
+
+    const milestonesBefore = computeMilestones(data);
+    const toursBeforeSave = data.slice(); // Unveränderte Basis für Vorher/Nachher-Vergleiche.
+    const dashboardMilestonesBefore = currentView === 'dashboard'
+        ? computeMilestones(filterToursForDashboardYear(toursBeforeSave))
+        : null;
+
+    if (editIndex >= 0) {
+        data[editIndex] = { ...data[editIndex], ...entry };
+    } else {
+        data.push(entry);
+    }
+
     appStorage.set('touren', data);
     delete form.dataset.editEntryId;
 
@@ -13602,9 +13667,23 @@ gipfelDetails: (gipfelDetails || []).map(g => ({
         });
     }
 
-    // Ein Meilenstein, der gleichzeitig Gesamt- und Jahresschwelle erreicht,
-    // erzeugt nur eine Toast-Meldung mit beiden Kontexten.
-    showNewMilestoneNotifications(lifetimeMilestoneEvents, yearMilestoneEvents);
+    const dashboardMilestoneEvents = dashboardMilestonesBefore
+        ? collectNewMilestoneEvents(
+            dashboardMilestonesBefore,
+            computeMilestones(filterToursForDashboardYear(data)),
+            {
+                scope: 'dashboard',
+                filterLabel: getDashboardMilestoneFilterLabel()
+            }
+        )
+        : [];
+
+    // Eine gemeinsame Benachrichtigung; nur der sichtbare Zeitraum löst die Kachel-Animation aus.
+    showNewMilestoneNotifications(
+        lifetimeMilestoneEvents,
+        yearMilestoneEvents,
+        dashboardMilestoneEvents
+    );
 
     // Tabelle aktualisieren
     loadData();
@@ -18642,7 +18721,7 @@ function computeMilestones(toursInput = null) {
     // Nur Touren mit gültigem Datum können einen zeitlich zuordenbaren Meilenstein auslösen.
     const sorted = [...allTours]
         .filter(e => e && getYearFromDate(e.date) !== null)
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
+        .sort((a, b) => parseTourDateValue(a.date) - parseTourDateValue(b.date));
 
     // Fehlende Messwerte bleiben von echten Nullwerten unterscheidbar.
     // Numerische Summen bleiben kompatibel; hasData/knownEntries zeigen die Datenlage.
@@ -18909,7 +18988,7 @@ function computeFullYearActive(entries) {
 function computePerformanceRecordHistory(entries) {
     const sorted = [...entries]
         .filter(e => e.date)
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
+        .sort((a, b) => parseTourDateValue(a.date) - parseTourDateValue(b.date));
 
     let maxScore = -Infinity;
     const records = [];
@@ -18955,7 +19034,7 @@ function computeAllAchievements(toursInput = null) {
 
     const sortedByDate = [...allTours]
         .filter(e => e && getYearFromDate(e.date) !== null)
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
+        .sort((a, b) => parseTourDateValue(a.date) - parseTourDateValue(b.date));
 
     const uniqueTourEntries = [];
     const seenTourIdentities = new Set();
@@ -19009,7 +19088,7 @@ results[badge.id] = {
             }
         });
     });
-    const uniquePeakEntries = [...peakFirstSeen.values()].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const uniquePeakEntries = [...peakFirstSeen.values()].sort((a, b) => parseTourDateValue(a.date) - parseTourDateValue(b.date));
     ACHIEVEMENT_CATEGORIES.uniquePeaks.badges.forEach(badge => {
         const reachedAt = uniquePeakEntries[badge.threshold - 1];
         results[badge.id] = {
@@ -19059,7 +19138,7 @@ sortedByDate.forEach(entry => {
 });
     }
 });
-    const regionEntries = [...regionFirstSeen.values()].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const regionEntries = [...regionFirstSeen.values()].sort((a, b) => parseTourDateValue(a.date) - parseTourDateValue(b.date));
     ACHIEVEMENT_CATEGORIES.regions.badges.forEach(badge => {
         const reachedAt = regionEntries[badge.threshold - 1];
         results[badge.id] = {
@@ -19087,7 +19166,7 @@ progressCurrent: regionFirstSeen.size,
             const requiredTypes = ['wandern', 'Klettersteig', 'Radtour', 'Hike & Climb', 'Bike & Hike'];
             const allPresent = requiredTypes.every(t => typeFirstSeen[t]);
             const lastNeeded = allPresent
-                ? requiredTypes.map(t => typeFirstSeen[t]).sort((a, b) => new Date(b.date) - new Date(a.date))[0]
+                ? requiredTypes.map(t => typeFirstSeen[t]).sort((a, b) => parseTourDateValue(b.date) - parseTourDateValue(a.date))[0]
                 : null;
             results[badge.id] = {
                 unlocked: allPresent,
@@ -19627,19 +19706,7 @@ const UNITS = {
     titleEl.textContent = LABELS[type] || '';
 
     const allTours = appStorage.get('touren') || [];
-    const filteredTours = dashYearFilter === 'all'
-        ? allTours
-        : dashYearFilter === 'past'
-        ? allTours.filter(e => {
-            if (!e.date) return false;
-            const d = new Date(e.date);
-            return !isNaN(d.getTime()) && d.getFullYear() !== new Date().getFullYear();
-          })
-        : allTours.filter(e => {
-            if (!e.date) return false;
-            const d = new Date(e.date);
-            return !isNaN(d.getTime()) && d.getFullYear() === Number(dashYearFilter);
-          });
+    const filteredTours = filterToursForDashboardYear(allTours, dashYearFilter);
     const data = computeMilestones(filteredTours)[type];
     const unit = UNITS[type];
 
@@ -19761,10 +19828,9 @@ function renderDashboard() {
     const yearSel = document.getElementById('dash-year-select');
     if (yearSel) {
         const yearSet = new Set();
-        allTours.forEach(e => {
-            if (!e.date) return;
-            const d = new Date(e.date);
-            if (!isNaN(d.getTime())) yearSet.add(d.getFullYear());
+        allTours.forEach(entry => {
+            const year = getYearFromDate(entry?.date);
+            if (year !== null) yearSet.add(year);
         });
         const sortedYrs = Array.from(yearSet).sort((a, b) => b - a);
         yearSel.innerHTML = '<option value="all">Alle Jahre</option><option value="past">Vergangene Jahre</option>';
@@ -19793,19 +19859,7 @@ function renderDashboard() {
     }
 
     // Touren nach gewähltem Jahr filtern
-    const filteredForYear = dashYearFilter === 'all'
-        ? allTours
-        : dashYearFilter === 'past'
-        ? allTours.filter(e => {
-            if (!e.date) return false;
-            const d = new Date(e.date);
-            return !isNaN(d.getTime()) && d.getFullYear() !== new Date().getFullYear();
-          })
-        : allTours.filter(e => {
-            if (!e.date) return false;
-            const d = new Date(e.date);
-            return !isNaN(d.getTime()) && d.getFullYear() === Number(dashYearFilter);
-          });
+    const filteredForYear = filterToursForDashboardYear(allTours, dashYearFilter);
 
 function quickStats(tours) {
     let dist = 0;
@@ -19971,7 +20025,7 @@ const recentGrouped =
         allTours,
         'saved'
     )
-    .filter(e => e.date);
+    .filter(e => getYearFromDate(e?.date) !== null);
 
 
 /*
@@ -19981,30 +20035,7 @@ const recentGrouped =
  * Dadurch wird eine Mehrtagestour immer
  * dem Jahr ihrer ersten Etappe zugeordnet.
  */
-const recentForYear =
-    dashYearFilter === 'all'
-        ? recentGrouped
-
-        : dashYearFilter === 'past'
-        ? recentGrouped.filter(e => {
-            const d = new Date(e.date);
-
-            return (
-                !isNaN(d.getTime()) &&
-                d.getFullYear() !==
-                    new Date().getFullYear()
-            );
-        })
-
-        : recentGrouped.filter(e => {
-            const d = new Date(e.date);
-
-            return (
-                !isNaN(d.getTime()) &&
-                d.getFullYear() ===
-                    Number(dashYearFilter)
-            );
-        });
+const recentForYear = filterToursForDashboardYear(recentGrouped, dashYearFilter);
 
 
 /*
@@ -20013,11 +20044,7 @@ const recentForYear =
  */
 const recent =
     recentForYear
-        .sort(
-            (a, b) =>
-                new Date(b.date) -
-                new Date(a.date)
-        )
+        .sort((a, b) => parseTourDateValue(b.date) - parseTourDateValue(a.date))
         .slice(0, 5);
 
         const listHTML = recent.length === 0

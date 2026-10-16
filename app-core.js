@@ -2824,27 +2824,34 @@ function removeToast(toast) {
 
 // ─── Achievement-Toast bei neu erreichten Meilensteinen ─────────────────────
 
-function getYearFromDate(dateStr) {
+function parseTourDateValue(dateStr) {
     const raw = String(dateStr ?? '').trim();
     if (!raw) return null;
+
     let match = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:$|[T\s])/);
     if (match) {
         const year = Number(match[1]);
         const month = Number(match[2]);
         const day = Number(match[3]);
         const date = new Date(year, month - 1, day);
-        return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? year : null;
+        return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? date : null;
     }
+
     match = raw.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})$/);
     if (match) {
         const day = Number(match[1]);
         const month = Number(match[2]);
         const year = Number(match[3]);
         const date = new Date(year, month - 1, day);
-        return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? year : null;
+        return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? date : null;
     }
+
     const date = new Date(raw);
-    return Number.isNaN(date.getTime()) ? null : date.getFullYear();
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function getYearFromDate(dateStr) {
+    return parseTourDateValue(dateStr)?.getFullYear() ?? null;
 }
 
 function readTourMetricNumber(value) {
@@ -6032,6 +6039,7 @@ function countDistinctTours(entries) {
 window.__tourDataRules = Object.freeze({
     readMetric: readTourMetricNumber,
     parseMinutes: readTourMetricMinutes,
+    parseDate: parseTourDateValue,
     yearFromDate: getYearFromDate,
     tourIdentity,
     countDistinctTours,
@@ -16912,7 +16920,7 @@ function computeMilestones(toursInput = null) {
     // Nur Touren mit gültigem Datum können einen zeitlich zuordenbaren Meilenstein auslösen.
     const sorted = [...allTours]
         .filter(e => e && getYearFromDate(e.date) !== null)
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
+        .sort((a, b) => parseTourDateValue(a.date) - parseTourDateValue(b.date));
 
     // Fehlende Messwerte bleiben von echten Nullwerten unterscheidbar.
     // Numerische Summen bleiben kompatibel; hasData/knownEntries zeigen die Datenlage.
@@ -17182,7 +17190,7 @@ function computeFullYearActive(entries) {
 function computePerformanceRecordHistory(entries) {
     const sorted = [...entries]
         .filter(e => e.date)
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
+        .sort((a, b) => parseTourDateValue(a.date) - parseTourDateValue(b.date));
 
     let maxScore = -Infinity;
     const records = [];
@@ -17228,7 +17236,7 @@ function computeAllAchievements(toursInput = null) {
 
     const sortedByDate = [...allTours]
         .filter(e => e && getYearFromDate(e.date) !== null)
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
+        .sort((a, b) => parseTourDateValue(a.date) - parseTourDateValue(b.date));
 
     // Mehrtägige Touren zählen einmal; ihre Etappen bleiben für
     // Strecken-, Höhenmeter-, Zeit- und Schrittwerte separat erhalten.
@@ -17284,7 +17292,7 @@ results[badge.id] = {
             }
         });
     });
-    const uniquePeakEntries = [...peakFirstSeen.values()].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const uniquePeakEntries = [...peakFirstSeen.values()].sort((a, b) => parseTourDateValue(a.date) - parseTourDateValue(b.date));
     ACHIEVEMENT_CATEGORIES.uniquePeaks.badges.forEach(badge => {
         const reachedAt = uniquePeakEntries[badge.threshold - 1];
         results[badge.id] = {
@@ -17334,7 +17342,7 @@ sortedByDate.forEach(entry => {
 });
     }
 });
-    const regionEntries = [...regionFirstSeen.values()].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const regionEntries = [...regionFirstSeen.values()].sort((a, b) => parseTourDateValue(a.date) - parseTourDateValue(b.date));
     ACHIEVEMENT_CATEGORIES.regions.badges.forEach(badge => {
         const reachedAt = regionEntries[badge.threshold - 1];
         results[badge.id] = {
@@ -17362,7 +17370,7 @@ progressCurrent: regionFirstSeen.size,
             const requiredTypes = ['wandern', 'Klettersteig', 'Radtour', 'Hike & Climb', 'Bike & Hike'];
             const allPresent = requiredTypes.every(t => typeFirstSeen[t]);
             const lastNeeded = allPresent
-                ? requiredTypes.map(t => typeFirstSeen[t]).sort((a, b) => new Date(b.date) - new Date(a.date))[0]
+                ? requiredTypes.map(t => typeFirstSeen[t]).sort((a, b) => parseTourDateValue(b.date) - parseTourDateValue(a.date))[0]
                 : null;
             results[badge.id] = {
                 unlocked: allPresent,
