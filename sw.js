@@ -1,11 +1,13 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Der PDF-Magazin-Renderer wird direkt über index.html geladen.
-const CACHE_NAME = 'bergtouren-cache-v101';
+const CACHE_NAME = 'bergtouren-cache-v102';
 
 const APP_SHELL = [
   './',
   './index.html',
-  './app-main.js?v=dashboard-milestone-wow12',
+  './app-main.js?v=dashboard-milestone-wow13',
+  './bergwelt.css?v=26',
+  './bergwelt.js?v=28',
   './styles.css',
   './styles-overrides.css',
   './manifest.json',
@@ -64,13 +66,17 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
-  // Navigationen (App-Start / Reload) zuerst aktuell aus dem Netz laden.
-  // Bei Offline-Nutzung bleibt der zuletzt gespeicherte App-Shell-Eintrag verfügbar.
-  if (event.request.mode === 'navigate') {
+  const requestUrl = new URL(event.request.url);
+  const isCriticalAppAsset = requestUrl.origin === self.location.origin &&
+    /\/(?:index\.html|app-main\.js|bergwelt\.js|bergwelt\.css)$/.test(requestUrl.pathname);
+
+  // App-Einstieg und kritische Module netzwerkzuerst laden. Bei Offline-Betrieb
+  // wird auf die im aktuellen Cache gespeicherte Datei zurückgegriffen.
+  if (event.request.mode === 'navigate' || isCriticalAppAsset) {
     event.respondWith(
       fetch(event.request, { cache: 'no-cache' })
         .then((networkResponse) => {
-          if (networkResponse && networkResponse.ok) {
+          if (networkResponse && (networkResponse.ok || networkResponse.type === 'opaque')) {
             const responseClone = networkResponse.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
           }
@@ -81,6 +87,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Für übrige Ressourcen Cache zuerst, mit Netz-Fallback und Aktualisierung.
   event.respondWith(
     caches.match(event.request).then((cached) => {
       const networkFetch = fetch(event.request)
