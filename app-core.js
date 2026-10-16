@@ -2883,6 +2883,8 @@ const MILESTONE_UNITS = {
     steps: 'Schritte'
 };
 
+const pendingMilestoneTileCelebrations = new Set();
+
 function collectNewMilestoneEvents(before, after, opts = {}) {
     const { scope = 'lifetime', year = null, startDelay = 0 } = opts;
     const events = [];
@@ -2932,6 +2934,11 @@ function showNewMilestoneNotifications(lifetimeEvents = [], yearEvents = []) {
         }
         merged.delay = Math.min(merged.delay, event.delay || 0);
     });
+
+    // Die betroffene Dashboard-Kachel darf den Meilenstein im selben Renderzyklus feiern.
+    if (currentView === 'dashboard') {
+        [...mergedByKey.values()].forEach(event => pendingMilestoneTileCelebrations.add(event.type));
+    }
 
     [...mergedByKey.values()].forEach(event => {
         setTimeout(() => {
@@ -18442,6 +18449,11 @@ ${msTileHTML('steps')}
         tile.addEventListener('click', () => {
             openMilestoneModal(tile.dataset.msType);
         });
+
+        if (pendingMilestoneTileCelebrations.delete(tile.dataset.msType)) {
+            tile.classList.add('is-milestone-celebrating');
+            setTimeout(() => tile.classList.remove('is-milestone-celebrating'), 1500);
+        }
     });
 
     /*
