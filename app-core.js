@@ -18527,7 +18527,31 @@ ${msTileHTML('steps')}
 
         if (pendingMilestoneTileCelebrations.delete(tile.dataset.msType)) {
             tile.classList.add('is-milestone-celebrating');
-            setTimeout(() => tile.classList.remove('is-milestone-celebrating'), 1850);
+
+            const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+            if (!reduceMotion) {
+                const sparklePositions = [
+                    { left: '14%', top: '20%' },
+                    { left: '34%', top: '8%' },
+                    { left: '62%', top: '18%' },
+                    { left: '83%', top: '12%' },
+                    { left: '91%', top: '56%' }
+                ];
+                sparklePositions.forEach((position, index) => {
+                    const sparkle = document.createElement('span');
+                    sparkle.className = 'dash-ms-sparkle';
+                    sparkle.setAttribute('aria-hidden', 'true');
+                    sparkle.style.left = position.left;
+                    sparkle.style.top = position.top;
+                    sparkle.style.setProperty('--sparkle-delay', (index * 65) + 'ms');
+                    tile.appendChild(sparkle);
+                });
+            }
+
+            setTimeout(() => {
+                tile.classList.remove('is-milestone-celebrating');
+                tile.querySelectorAll('.dash-ms-sparkle').forEach(sparkle => sparkle.remove());
+            }, 1850);
         }
     });
 
