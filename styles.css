@@ -5810,12 +5810,6 @@ body.green .dash-milestone-tile {
     color: var(--text-main);
 }
 
-.dash-ms-count {
-    font-size: 11px;
-    opacity: 0.60;
-    color: var(--text-main);
-}
-
 .dash-ms-current {
     margin-top: 2px;
     color: var(--accent);
@@ -6014,10 +6008,6 @@ body.green .dash-year-arrow-btn {
 
     .dash-ms-label {
         font-size: 13px;
-    }
-
-    .dash-ms-count {
-        font-size: 10px;
     }
 
     .dash-ms-arrow {
@@ -7063,7 +7053,6 @@ textarea:focus {
 .compare-delta,
 .compare-chip,
 .dash-ms-label,
-.dash-ms-count,
 .dash-ms-progress-text,
 .highlight-nr,
 .tour-stat-value,
@@ -19182,11 +19171,6 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
 
     #dashboard-view .dash-ms-label {
         font-size: 11px;
-        line-height: 1;
-    }
-
-    #dashboard-view .dash-ms-count {
-        font-size: 8px;
         line-height: 1;
     }
 
