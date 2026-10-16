@@ -6107,8 +6107,7 @@ window.__tourDataRules = Object.freeze({
     parseDate: parseTourDateValue,
     yearFromDate: getYearFromDate,
     tourIdentity,
-    countDistinctTours,
-    computeMilestones
+    countDistinctTours
 });
 
 
@@ -18528,7 +18527,7 @@ ${msTileHTML('steps')}
 
         if (pendingMilestoneTileCelebrations.delete(tile.dataset.msType)) {
             tile.classList.add('is-milestone-celebrating');
-            setTimeout(() => tile.classList.remove('is-milestone-celebrating'), 1500);
+            setTimeout(() => tile.classList.remove('is-milestone-celebrating'), 1850);
         }
     });
 
