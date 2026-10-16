@@ -1316,3 +1316,13 @@
     #wrapped-view .bergwelt-live-milestone,
     #wrapped-view .bergwelt-live-milestone-track > span { animation:none;transition:none; }
 }
+
+
+/* Live-Meilensteine öffnen die gemeinsame Detailansicht. */
+#wrapped-view .bergwelt-live-milestone[role="button"] {
+    cursor: pointer;
+}
+#wrapped-view .bergwelt-live-milestone[role="button"]:focus-visible {
+    outline: 2px solid var(--accent-color, currentColor);
+    outline-offset: 3px;
+}
