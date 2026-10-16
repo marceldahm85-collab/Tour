@@ -1,11 +1,11 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Der PDF-Magazin-Renderer wird direkt über index.html geladen.
-const CACHE_NAME = 'bergtouren-cache-v100';
+const CACHE_NAME = 'bergtouren-cache-v101';
 
 const APP_SHELL = [
   './',
   './index.html',
-  './app-main.js?v=dashboard-milestone-wow11',
+  './app-main.js?v=dashboard-milestone-wow12',
   './styles.css',
   './styles-overrides.css',
   './manifest.json',
@@ -29,7 +29,9 @@ self.addEventListener('install', (event) => {
         APP_SHELL.map(async (url) => {
           try {
             const request = new Request(url, {
-              mode: url.startsWith('http') ? 'cors' : 'same-origin'
+              mode: url.startsWith('http') ? 'cors' : 'same-origin',
+              // Refresh the browser HTTP cache as well as this service-worker cache.
+              cache: url.startsWith('http') ? 'default' : 'reload'
             });
             const response = await fetch(request);
             if (response && (response.ok || response.type === 'opaque')) {
@@ -61,6 +63,23 @@ self.addEventListener('activate', (event) => {
 // --- Fetch-Strategie: Stale-While-Revalidate ---
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  // Navigationen (App-Start / Reload) zuerst aktuell aus dem Netz laden.
+  // Bei Offline-Nutzung bleibt der zuletzt gespeicherte App-Shell-Eintrag verfügbar.
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request, { cache: 'no-cache' })
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.ok) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cached) => {
