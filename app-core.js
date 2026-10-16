@@ -18482,9 +18482,8 @@ return `
                     <span class="dash-ms-icon">${ICONS[type]}</span>
                     <div class="dash-ms-info">
                         <span class="dash-ms-label">${LABELS[type]}</span>
-                        <span class="dash-ms-count">${reachedCount} Meilenstein${reachedCount !== 1 ? 'e' : ''} erreicht</span>
                         <span class="dash-ms-current${data.hasData ? '' : ' is-empty'}">${data.hasData
-                            ? (type === 'dist' ? Number(data.total).toFixed(1).replace('.', ',') : Math.round(data.total).toLocaleString('de-AT')) + ' ' + unit + ' gesammelt'
+                            ? (type === 'dist' ? Number(data.total).toFixed(1).replace('.', ',') : Math.round(data.total).toLocaleString('de-AT')) + ' ' + unit + ' erreicht'
                             : 'Noch keine Messwerte'}</span>
                     </div>
                     <div class="dash-ms-progress-text">${progressText}</div>
