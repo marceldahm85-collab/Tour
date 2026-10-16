@@ -6842,8 +6842,7 @@ window.__tourDataRules = Object.freeze({
     parseDate: parseTourDateValue,
     yearFromDate: getYearFromDate,
     tourIdentity,
-    countDistinctTours,
-    computeMilestones
+    countDistinctTours
 });
 
 
@@ -20278,7 +20277,7 @@ ${msTileHTML('steps')}
 
         if (pendingMilestoneTileCelebrations.delete(tile.dataset.msType)) {
             tile.classList.add('is-milestone-celebrating');
-            setTimeout(() => tile.classList.remove('is-milestone-celebrating'), 1500);
+            setTimeout(() => tile.classList.remove('is-milestone-celebrating'), 1850);
         }
     });
 
@@ -34325,7 +34324,7 @@ const endHold = () => {
             document.head.appendChild(styleLink);
         }
         const script = document.createElement('script');
-        script.src = './bergwelt.js?v=21';
+        script.src = './bergwelt.js?v=22';
         script.onload = () => {
             window.__BERGWELT_LOADING__ = false;
             window.__bergweltRender?.();
