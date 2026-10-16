@@ -3652,10 +3652,9 @@ function showNewMilestoneNotifications(lifetimeEvents = [], yearEvents = [], das
         merged.delay = Math.min(merged.delay, event.delay || 0);
     });
 
-    // Nur Schwellen im aktuell sichtbaren Zeitraum lösen eine Kachel-Animation aus.
-    if (currentView === 'dashboard') {
-        dashboardEvents.forEach(event => pendingMilestoneTileCelebrations.add(event.type));
-    }
+    // Neue Dashboard-Schwellen vormerken, auch wenn die Tour aus einer anderen
+    // Ansicht gespeichert wurde. Die Kachel feiert beim nächsten Dashboard-Rendern.
+    dashboardEvents.forEach(event => pendingMilestoneTileCelebrations.add(event.type));
 
     [...mergedByKey.values()].forEach(event => {
         setTimeout(() => {
