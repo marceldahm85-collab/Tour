@@ -5,7 +5,7 @@ const CACHE_NAME = 'bergtouren-cache-v96';
 const APP_SHELL = [
   './',
   './index.html',
-  './app-main.js?v=dashboard-milestone-wow6',
+  './app-main.js?v=dashboard-milestone-wow7',
   './styles.css',
   './styles-overrides.css',
   './manifest.json',
