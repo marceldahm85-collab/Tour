@@ -19686,7 +19686,7 @@ document.querySelector('#achievement-category-modal .modal-backdrop')?.addEventL
     });
 }
 
-function openMilestoneModal(type) {
+function openMilestoneModal(type, yearFilter = dashYearFilter) {
     const modal   = document.getElementById('milestone-modal');
     const titleEl = document.getElementById('milestone-modal-title');
     const bodyEl  = document.getElementById('milestone-modal-body');
@@ -19708,10 +19708,11 @@ const UNITS = {
     steps: 'Schritte'
 };
 
-    titleEl.textContent = LABELS[type] || '';
+    titleEl.textContent = (LABELS[type] || '') +
+        (String(yearFilter) === String(dashYearFilter) ? '' : ' · ' + getDashboardMilestoneFilterLabel(yearFilter));
 
     const allTours = appStorage.get('touren') || [];
-    const filteredTours = filterToursForDashboardYear(allTours, dashYearFilter);
+    const filteredTours = filterToursForDashboardYear(allTours, yearFilter);
     const data = computeMilestones(filteredTours)[type];
     const unit = UNITS[type];
 
@@ -34251,12 +34252,12 @@ const endHold = () => {
         if (!document.querySelector('link[data-bergwelt-styles]')) {
             const styleLink = document.createElement('link');
             styleLink.rel = 'stylesheet';
-            styleLink.href = './bergwelt.css?v=18';
+            styleLink.href = './bergwelt.css?v=19';
             styleLink.dataset.bergweltStyles = '1';
             document.head.appendChild(styleLink);
         }
         const script = document.createElement('script');
-        script.src = './bergwelt.js?v=18';
+        script.src = './bergwelt.js?v=19';
         script.onload = () => {
             window.__BERGWELT_LOADING__ = false;
             window.__bergweltRender?.();
