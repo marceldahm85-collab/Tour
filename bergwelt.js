@@ -310,11 +310,16 @@
         const earnedCount = levels.filter(level => level.current).length;
         const overviewProgress = earnedCount / definitions.length * 100;
         const badgeIcons = [
-            '<svg viewBox="0 0 64 64" focusable="false"><path class="bw-badge-shield" d="M32 3 55 12v17c0 15-9 25-23 32C18 54 9 44 9 29V12Z"/><path class="bw-badge-line" d="m15 39 12-17 8 10 6-8 9 15Z"/><path class="bw-badge-highlight" d="m27 22 5 7 3-4 6 7H24Z"/><path class="bw-badge-line" d="M19 44h26"/></svg>',
-            '<svg viewBox="0 0 64 64" focusable="false"><path class="bw-badge-shield" d="M32 3 55 12v17c0 15-9 25-23 32C18 54 9 44 9 29V12Z"/><path class="bw-badge-line" d="m14 41 12-17 7 9 7-13 11 21Z"/><path class="bw-badge-highlight" d="m26 24 7 9 7-13 4 8-5 1-6 9-8-10Z"/></svg>',
-            '<svg viewBox="0 0 64 64" focusable="false"><path class="bw-badge-shield" d="M32 3 55 12v17c0 15-9 25-23 32C18 54 9 44 9 29V12Z"/><circle class="bw-badge-line" cx="32" cy="31" r="15"/><path class="bw-badge-highlight" d="M32 19 35 28 44 31 35 34 32 43 29 34 20 31 29 28Z"/><circle class="bw-badge-line" cx="32" cy="31" r="4"/></svg>',
-            '<svg viewBox="0 0 64 64" focusable="false"><path class="bw-badge-shield" d="M32 3 55 12v17c0 15-9 25-23 32C18 54 9 44 9 29V12Z"/><path class="bw-badge-line" d="m36 13-17 22h11l-3 16 18-25H34Z"/><path class="bw-badge-highlight" d="m36 13-6 17h8l-7 13 14-17H34Z"/></svg>',
-            '<svg viewBox="0 0 64 64" focusable="false"><path class="bw-badge-shield" d="M32 3 55 12v17c0 15-9 25-23 32C18 54 9 44 9 29V12Z"/><circle class="bw-badge-line" cx="32" cy="30" r="15"/><path class="bw-badge-line" d="M20 39 29 29l6 6 9-12"/><path class="bw-badge-highlight" d="m38 23 6 0-1 6Z"/><path class="bw-badge-line" d="M24 47h16"/></svg>'
+            // Höhenmeter-Spezialist: gestaffelte Bergflanken und Höhenlinien.
+            '<svg viewBox="0 0 64 64" focusable="false"><path class="bw-badge-shield" d="M32 3 55 12v17c0 15-9 25-23 32C18 54 9 44 9 29V12Z"/><path class="bw-badge-line" d="m13 42 10-15 7 8 8-15 13 22Z"/><path class="bw-badge-highlight" d="m30 35 8-15 6 10-5-2-4 5Z"/><path class="bw-badge-line" d="M17 45h30M23 49h18"/><path class="bw-badge-highlight" d="m17 39 5-7 4 5-4-1-2 3Z"/></svg>',
+            // Gipfelsammler: mehrere Gipfel und eine markante Gipfelflagge.
+            '<svg viewBox="0 0 64 64" focusable="false"><path class="bw-badge-shield" d="M32 3 55 12v17c0 15-9 25-23 32C18 54 9 44 9 29V12Z"/><path class="bw-badge-line" d="m12 42 10-13 7 9 8-17 15 21Z"/><path class="bw-badge-highlight" d="m30 31 7-10 5 8-5-2-3 5Z"/><path class="bw-badge-line" d="M39 21V12"/><path class="bw-badge-highlight" d="M39 12h10l-4 4 4 3H39Z"/><circle class="bw-badge-highlight" cx="22" cy="29" r="2"/></svg>',
+            // Ausdauer-Alpinist: Wegschleife, Kompassring und stetiger Rhythmus.
+            '<svg viewBox="0 0 64 64" focusable="false"><path class="bw-badge-shield" d="M32 3 55 12v17c0 15-9 25-23 32C18 54 9 44 9 29V12Z"/><circle class="bw-badge-line" cx="32" cy="31" r="17"/><circle class="bw-badge-line" cx="32" cy="31" r="11"/><path class="bw-badge-highlight" d="m24 39 5-15 12-5-5 15Z"/><circle class="bw-badge-line" cx="32" cy="31" r="2.5"/><path class="bw-badge-line" d="M22 47h20"/></svg>',
+            // Steilheits-Profi: steile Felsflanke mit prägnantem Blitz.
+            '<svg viewBox="0 0 64 64" focusable="false"><path class="bw-badge-shield" d="M32 3 55 12v17c0 15-9 25-23 32C18 54 9 44 9 29V12Z"/><path class="bw-badge-line" d="m14 47 13-16 4-14 7 8 12 22Z"/><path class="bw-badge-highlight" d="m35 14-12 20h9l-3 14 16-23H35Z"/><path class="bw-badge-line" d="m18 48 8-5m14 5h7"/></svg>',
+            // Vielseitiger Wanderer: Wegkreuzung mit drei Etappenpunkten.
+            '<svg viewBox="0 0 64 64" focusable="false"><path class="bw-badge-shield" d="M32 3 55 12v17c0 15-9 25-23 32C18 54 9 44 9 29V12Z"/><path class="bw-badge-line" d="M19 43 29 32 24 22M29 32l13-11M29 32l11 13"/><circle class="bw-badge-highlight" cx="24" cy="22" r="4"/><circle class="bw-badge-highlight" cx="42" cy="21" r="4"/><circle class="bw-badge-highlight" cx="40" cy="45" r="4"/><circle class="bw-badge-line" cx="29" cy="32" r="5"/></svg>'
         ];
 
         const levelDigits = level => level.name === 'Ausdauer-Alpinist' || level.name === 'Steilheits-Profi' ? 1 : 0;
