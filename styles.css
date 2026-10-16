@@ -5634,39 +5634,115 @@ body.green .toggle-btn.view-active {
 }
 
 .dash-milestone-tile {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     padding: 10px 12px;
     border-radius: 12px;
     background: rgba(255,255,255,0.34);
     border: 1px solid rgba(255,255,255,0.42);
     cursor: pointer;
-    transition: background 0.15s ease, transform 0.12s ease;
+    transition: background 0.15s ease, transform 0.12s ease, border-color 0.2s ease;
     -webkit-tap-highlight-color: transparent;
+}
+
+.dash-milestone-tile::before,
+.dash-milestone-tile::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.dash-milestone-tile::before {
+    background: radial-gradient(ellipse at 10% 50%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 68%);
+}
+
+.dash-ms-top,
+.dash-ms-progress-wrap {
+    position: relative;
+    z-index: 1;
 }
 
 body:not(.touch-mode) .dash-milestone-tile:hover{ background: rgba(255,255,255,0.16); }
 .dash-milestone-tile:active { transform: scale(0.985); }
 
-/* Subtile Feier, wenn ein Meilenstein gerade erreicht wurde. */
+/* Feiermoment: die erreichte Dashboard-Marke wird sichtbar hervorgehoben. */
 .dash-milestone-tile.is-milestone-celebrating {
-    animation: dashMilestoneCelebrate 1.25s ease-out both;
+    border-color: color-mix(in srgb, var(--accent) 68%, white 12%);
+    animation: dashMilestoneCelebrate 1.7s cubic-bezier(.2,.75,.25,1) both;
+}
+
+.dash-milestone-tile.is-milestone-celebrating::before {
+    opacity: 1;
+    animation: dashMilestoneHalo 1.7s ease-out both;
+}
+
+.dash-milestone-tile.is-milestone-celebrating::after {
+    opacity: 1;
+    background: linear-gradient(112deg, transparent 28%, rgba(255,255,255,.04) 39%, rgba(255,255,255,.62) 49%, rgba(255,255,255,.08) 57%, transparent 69%);
+    transform: translateX(-130%) skewX(-14deg);
+    animation: dashMilestoneShine 1.15s cubic-bezier(.2,.7,.2,1) .12s both;
+}
+
+.dash-milestone-tile.is-milestone-celebrating .dash-ms-icon {
+    animation: dashMilestoneIconPop .72s cubic-bezier(.2,.8,.25,1) both;
+}
+
+.dash-milestone-tile.is-milestone-celebrating .dash-ms-current {
+    animation: dashMilestoneValuePop .65s cubic-bezier(.2,.8,.25,1) .1s both;
+}
+
+.dash-milestone-tile.is-milestone-celebrating .dash-ms-progress-bar {
+    box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 68%, transparent);
 }
 
 @keyframes dashMilestoneCelebrate {
-    0%, 100% {
-        box-shadow: inset 0 0 0 0 transparent;
-    }
-    35% {
-        box-shadow:
-            inset 0 0 0 2px var(--accent),
-            0 0 15px color-mix(in srgb, var(--accent) 38%, transparent);
-    }
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 transparent; }
+    18% { transform: scale(1.012); box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 50%, transparent), 0 0 16px color-mix(in srgb, var(--accent) 38%, transparent); }
+    48% { transform: scale(1); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 64%, transparent), 0 0 26px color-mix(in srgb, var(--accent) 55%, transparent); }
+    76% { box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 0 10px color-mix(in srgb, var(--accent) 22%, transparent); }
+}
+
+@keyframes dashMilestoneHalo {
+    0% { opacity: 0; }
+    28% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes dashMilestoneShine {
+    0% { transform: translateX(-130%) skewX(-14deg); }
+    100% { transform: translateX(130%) skewX(-14deg); }
+}
+
+@keyframes dashMilestoneIconPop {
+    0% { transform: scale(.55) rotate(-14deg); filter: drop-shadow(0 0 0 transparent); }
+    62% { transform: scale(1.3) rotate(7deg); filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 75%, transparent)); }
+    100% { transform: scale(1) rotate(0); filter: drop-shadow(0 0 3px color-mix(in srgb, var(--accent) 40%, transparent)); }
+}
+
+@keyframes dashMilestoneValuePop {
+    0% { transform: translateY(5px); opacity: .55; }
+    60% { transform: translateY(-1px); opacity: 1; }
+    100% { transform: translateY(0); opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .dash-milestone-tile.is-milestone-celebrating {
+    .dash-milestone-tile.is-milestone-celebrating,
+    .dash-milestone-tile.is-milestone-celebrating::before,
+    .dash-milestone-tile.is-milestone-celebrating::after,
+    .dash-milestone-tile.is-milestone-celebrating .dash-ms-icon,
+    .dash-milestone-tile.is-milestone-celebrating .dash-ms-current {
         animation: none !important;
+        transform: none !important;
+    }
+    .dash-milestone-tile.is-milestone-celebrating {
         box-shadow: inset 0 0 0 2px var(--accent);
     }
+    .dash-milestone-tile.is-milestone-celebrating::before,
+    .dash-milestone-tile.is-milestone-celebrating::after { display: none; }
 }
 
 body.dark .dash-milestone-tile {
@@ -5715,6 +5791,22 @@ body.green .dash-milestone-tile {
     font-size: 11px;
     opacity: 0.60;
     color: var(--text-main);
+}
+
+.dash-ms-current {
+    margin-top: 2px;
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .005em;
+    font-variant-numeric: tabular-nums;
+}
+
+.dash-ms-current.is-empty {
+    opacity: .48;
+    color: var(--text-main);
+    font-size: 10px;
+    font-weight: 600;
 }
 
 .dash-ms-arrow {
@@ -6736,6 +6828,116 @@ body.green .time-tint {
 .toast-achievement-icon {
     font-size: 22px;
     animation: achievementIconPop 0.6s ease;
+}
+
+/* Größerer, aber kurzlebiger Gipfelmoment für neu erreichte Dashboard-Marken. */
+.toast.toast-milestone-epic {
+    align-items: center;
+    gap: 13px;
+    padding: 14px 16px 17px;
+    border-color: color-mix(in srgb, var(--accent) 58%, rgba(249,215,126,.5));
+    background:
+        radial-gradient(ellipse at 0% 0%, color-mix(in srgb, var(--accent) 25%, transparent), transparent 65%),
+        linear-gradient(135deg, color-mix(in srgb, var(--accent) 11%, rgba(20,25,30,.88)), rgba(12,18,24,.94));
+    animation: toastIn .32s cubic-bezier(.2,.8,.25,1), milestoneEpicPulse 2s ease-in-out 2;
+}
+
+.milestone-epic-crest {
+    position: relative;
+    flex: 0 0 54px;
+    display: grid;
+    place-items: center;
+    width: 54px;
+    height: 54px;
+    border: 1px solid color-mix(in srgb, var(--accent) 56%, rgba(249,215,126,.3));
+    border-radius: 18px;
+    background: radial-gradient(circle at 40% 25%, color-mix(in srgb, var(--accent) 28%, transparent), transparent 74%);
+    font-size: 27px;
+    box-shadow: inset 0 0 18px color-mix(in srgb, var(--accent) 12%, transparent), 0 0 18px color-mix(in srgb, var(--accent) 12%, transparent);
+    animation: milestoneEpicCrest 1.1s cubic-bezier(.2,.8,.25,1) both;
+}
+
+.milestone-epic-crest i,
+.milestone-epic-crest b {
+    position: absolute;
+    color: color-mix(in srgb, var(--accent) 65%, #ffe7a6);
+    font-size: 12px;
+    font-style: normal;
+    line-height: 1;
+}
+.milestone-epic-crest i { top: 1px; right: 2px; }
+.milestone-epic-crest b { left: 1px; bottom: 2px; font-size: 9px; }
+
+.milestone-epic-copy {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.milestone-epic-kicker {
+    color: var(--accent);
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: .16em;
+    line-height: 1.3;
+}
+.milestone-epic-value {
+    margin-top: 1px;
+    color: #fff0bc;
+    font-size: clamp(20px, 5vw, 25px);
+    font-weight: 950;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.035em;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+    text-shadow: 0 0 18px color-mix(in srgb, var(--accent) 26%, transparent);
+}
+.milestone-epic-title {
+    color: var(--text-main);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.3;
+}
+.milestone-epic-context {
+    margin-top: 2px;
+    color: var(--text-main);
+    font-size: 10px;
+    opacity: .7;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+.milestone-epic-sweep {
+    position: absolute;
+    inset: -35% -65%;
+    pointer-events: none;
+    background: linear-gradient(112deg, transparent 40%, color-mix(in srgb, var(--accent) 6%, transparent) 47%, rgba(255,255,255,.16) 50%, transparent 57%);
+    transform: translateX(-72%) skewX(-12deg);
+    animation: milestoneEpicSweep 1.3s ease-out .15s both;
+}
+.toast.toast-milestone-epic .toast-bar {
+    height: 4px;
+    opacity: 1;
+}
+@keyframes milestoneEpicPulse {
+    0%, 100% { box-shadow: 0 8px 28px rgba(0,0,0,.22), 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent); }
+    50% { box-shadow: 0 8px 28px rgba(0,0,0,.28), 0 0 24px color-mix(in srgb, var(--accent) 42%, transparent); }
+}
+@keyframes milestoneEpicCrest {
+    0% { transform: scale(.6) rotate(-10deg); opacity: .4; }
+    65% { transform: scale(1.12) rotate(4deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+@keyframes milestoneEpicSweep {
+    from { transform: translateX(-72%) skewX(-12deg); }
+    to { transform: translateX(72%) skewX(-12deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .toast.toast-milestone-epic,
+    .toast.toast-milestone-epic .milestone-epic-crest,
+    .toast.toast-milestone-epic .milestone-epic-sweep {
+        animation: none !important;
+    }
 }
 
 @keyframes achievementPulse {
