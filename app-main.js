@@ -3573,13 +3573,13 @@ const MILESTONE_UNITS = {
 const pendingMilestoneTileCelebrations = new Set();
 
 function filterToursForDashboardYear(entries, yearFilter = dashYearFilter) {
-    const source = Array.isArray(entries) ? entries : [];
-    if (yearFilter === 'all') return source.slice();
+    const source = (Array.isArray(entries) ? entries : [])
+        .filter(entry => getYearFromDate(entry?.date) !== null);
+    if (yearFilter === 'all') return source;
 
     const currentYear = new Date().getFullYear();
     return source.filter(entry => {
         const year = getYearFromDate(entry?.date);
-        if (year === null) return false;
         return yearFilter === 'past'
             ? year !== currentYear
             : year === Number(yearFilter);
