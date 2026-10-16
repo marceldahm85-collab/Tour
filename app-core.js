@@ -2965,12 +2965,77 @@ function showNewMilestoneNotifications(lifetimeEvents = [], yearEvents = []) {
                 message = icon + ' ' + label + ': ' + amount + ' ' + unit + ' erreicht!';
             }
 
-            showAchievementToast(message);
+            if (dashboardFilters.length) {
+                showDashboardMilestoneCelebrationToast({
+                    type: event.type,
+                    milestone: event.milestone,
+                    contexts: uniqueContexts
+                });
+            } else {
+                showAchievementToast(message);
+            }
         }, event.delay);
     });
 
     return mergedByKey.size;
 }
+function showDashboardMilestoneCelebrationToast(event) {
+    const container = getToastContainer();
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-achievement toast-milestone-epic';
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+
+    const crest = document.createElement('div');
+    crest.className = 'milestone-epic-crest';
+    crest.setAttribute('aria-hidden', 'true');
+    crest.innerHTML = '<span>' + (event.type === 'peaks' ? '🏔️' : (MILESTONE_ICONS[event.type] || '🏆')) +
+        '</span><i>✦</i><b>✦</b>';
+
+    const copy = document.createElement('div');
+    copy.className = 'milestone-epic-copy';
+
+    const kicker = document.createElement('span');
+    kicker.className = 'milestone-epic-kicker';
+    kicker.textContent = 'DEIN GIPFELMOMENT';
+
+    const value = document.createElement('strong');
+    value.className = 'milestone-epic-value';
+    value.textContent = Number(event.milestone).toLocaleString('de-AT') + ' ' + (MILESTONE_UNITS[event.type] || '');
+
+    const title = document.createElement('span');
+    title.className = 'milestone-epic-title';
+    title.textContent = (MILESTONE_LABELS[event.type] || 'Meilenstein') + ' gemeistert';
+
+    const context = document.createElement('span');
+    context.className = 'milestone-epic-context';
+    context.textContent = Array.isArray(event.contexts) && event.contexts.length
+        ? event.contexts.join(' · ')
+        : 'Deine persönliche Tourengeschichte';
+
+    copy.append(kicker, value, title, context);
+
+    const sweep = document.createElement('span');
+    sweep.className = 'milestone-epic-sweep';
+    sweep.setAttribute('aria-hidden', 'true');
+
+    const bar = document.createElement('div');
+    bar.className = 'toast-bar';
+
+    toast.append(crest, copy, sweep, bar);
+    container.appendChild(toast);
+
+    const duration = 5600;
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (!reduceMotion) {
+        requestAnimationFrame(() => {
+            bar.style.transition = 'transform ' + duration + 'ms linear';
+            bar.style.transform = 'scaleX(0)';
+        });
+    }
+    setTimeout(() => removeToast(toast), duration);
+}
+
 function showAchievementToast(message) {
     const container = getToastContainer();
 
@@ -18419,6 +18484,9 @@ return `
                     <div class="dash-ms-info">
                         <span class="dash-ms-label">${LABELS[type]}</span>
                         <span class="dash-ms-count">${reachedCount} Meilenstein${reachedCount !== 1 ? 'e' : ''} erreicht</span>
+                        <span class="dash-ms-current${data.hasData ? '' : ' is-empty'}">${data.hasData
+                            ? (type === 'dist' ? Number(data.total).toFixed(1).replace('.', ',') : Math.round(data.total).toLocaleString('de-AT')) + ' ' + unit + ' gesammelt'
+                            : 'Noch keine Messwerte'}</span>
                     </div>
                     <div class="dash-ms-progress-text">${progressText}</div>
                     <span class="dash-ms-arrow">›</span>
