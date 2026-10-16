@@ -2570,7 +2570,7 @@
     </div>
 </div>
 
-<script src="./app-main.js?v=dashboard-milestone-wow12" defer></script>
+<script src="./app-main.js?v=dashboard-milestone-wow13" defer></script>
 
 
 
@@ -2761,9 +2761,19 @@
 
 <script>
 if ('serviceWorker' in navigator) {
+  // Nach einer Worker-Aktualisierung neu starten, damit keine alten Module
+  // im bereits laufenden SPA-Speicher weiterverwendet werden.
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload();
+  }, { once: true });
+
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then((reg) => console.log('SW registriert:', reg.scope))
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
+      .then((reg) => {
+        console.log('SW registriert:', reg.scope);
+        // Versionsprüfung aktiv anstoßen; der Worker verwendet skipWaiting().
+        reg.update().catch((err) => console.warn('SW-Aktualisierung fehlgeschlagen:', err));
+      })
       .catch((err) => console.warn('SW-Registrierung fehlgeschlagen:', err));
   });
 }
