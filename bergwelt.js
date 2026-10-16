@@ -250,7 +250,19 @@
             const hasData = Boolean(data?.hasData);
             const total = Number(data?.total || 0);
             const next = data?.next ?? null;
-            const progress = !hasData ? 0 : next === null ? 100 : Math.max(0, Math.min(100, total / next * 100));
+            // Fortschritt innerhalb des aktuellen Meilenstein-Abschnitts berechnen.
+            // So springt der Balken nach Erreichen einer Marke nachvollziehbar auf 0 %.
+            const previous = data?.reached?.length
+                ? Number(data.reached[data.reached.length - 1].milestone) || 0
+                : 0;
+            const interval = next === null ? 0 : next - previous;
+            const progress = !hasData
+                ? 0
+                : next === null
+                    ? 100
+                    : interval > 0
+                        ? Math.max(0, Math.min(100, (total - previous) / interval * 100))
+                        : 0;
             const valueText = hasData ? fmt(total, def.digits) : '–';
             const reachedText = data?.reached?.length
                 ? data.reached.length + (data.reached.length === 1 ? ' Marke erreicht' : ' Marken erreicht')
@@ -264,7 +276,7 @@
                 '<div class="bergwelt-live-milestone-top"><span class="bergwelt-live-milestone-icon" aria-hidden="true">' + def.icon + '</span>' +
                     '<div class="bergwelt-live-milestone-title"><strong>' + def.label + '</strong><small>' + reachedText + '</small></div>' +
                     '<div class="bergwelt-live-milestone-value"><strong>' + valueText + '</strong><small>' + def.unit + '</small></div></div>' +
-                '<div class="bergwelt-track bergwelt-live-milestone-track" role="progressbar" aria-label="' + def.label + ': Fortschritt zur nächsten Meilensteinmarke" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(progress) + '"><span style="width:' + progress + '%"></span></div>' +
+                '<div class="bergwelt-track bergwelt-live-milestone-track" role="progressbar" aria-label="' + def.label + ': Fortschritt von ' + fmt(previous, def.digits) + ' bis ' + (next === null ? 'zum Abschluss' : fmt(next, def.digits) + ' ' + def.unit) + '" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(progress) + '"><span style="width:' + progress + '%"></span></div>' +
                 '<div class="bergwelt-live-milestone-meta"><span>' + goalText + '</span><strong>' + (hasData ? Math.round(progress) + ' %' : '–') + '</strong></div>' +
             '</article>';
         }).join('');
