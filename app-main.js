@@ -13686,9 +13686,11 @@ gipfelDetails: (gipfelDetails || []).map(g => ({
 
     const milestonesBefore = computeMilestones(data);
     const toursBeforeSave = data.slice(); // Unveränderte Basis für Vorher/Nachher-Vergleiche.
-    const dashboardMilestonesBefore = currentView === 'dashboard'
-        ? computeMilestones(filterToursForDashboardYear(toursBeforeSave))
-        : null;
+    // Dashboard-Meilensteine auch dann vorab erfassen, wenn das Formular
+    // aus einer anderen View geöffnet wurde. Die Anzeige selbst bleibt im Dashboard.
+    const dashboardMilestonesBefore = computeMilestones(
+        filterToursForDashboardYear(toursBeforeSave)
+    );
 
     if (editIndex >= 0) {
         data[editIndex] = { ...data[editIndex], ...entry };
@@ -13736,16 +13738,14 @@ gipfelDetails: (gipfelDetails || []).map(g => ({
         });
     }
 
-    const dashboardMilestoneEvents = dashboardMilestonesBefore
-        ? collectNewMilestoneEvents(
-            dashboardMilestonesBefore,
-            computeMilestones(filterToursForDashboardYear(data)),
-            {
-                scope: 'dashboard',
-                filterLabel: getDashboardMilestoneFilterLabel()
-            }
-        )
-        : [];
+    const dashboardMilestoneEvents = collectNewMilestoneEvents(
+        dashboardMilestonesBefore,
+        computeMilestones(filterToursForDashboardYear(data)),
+        {
+            scope: 'dashboard',
+            filterLabel: getDashboardMilestoneFilterLabel()
+        }
+    );
 
     // Eine gemeinsame Benachrichtigung; nur der sichtbare Zeitraum löst die Kachel-Animation aus.
     showNewMilestoneNotifications(
@@ -20277,7 +20277,31 @@ ${msTileHTML('steps')}
 
         if (pendingMilestoneTileCelebrations.delete(tile.dataset.msType)) {
             tile.classList.add('is-milestone-celebrating');
-            setTimeout(() => tile.classList.remove('is-milestone-celebrating'), 1850);
+
+            const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+            if (!reduceMotion) {
+                const sparklePositions = [
+                    { left: '14%', top: '20%' },
+                    { left: '34%', top: '8%' },
+                    { left: '62%', top: '18%' },
+                    { left: '83%', top: '12%' },
+                    { left: '91%', top: '56%' }
+                ];
+                sparklePositions.forEach((position, index) => {
+                    const sparkle = document.createElement('span');
+                    sparkle.className = 'dash-ms-sparkle';
+                    sparkle.setAttribute('aria-hidden', 'true');
+                    sparkle.style.left = position.left;
+                    sparkle.style.top = position.top;
+                    sparkle.style.setProperty('--sparkle-delay', (index * 65) + 'ms');
+                    tile.appendChild(sparkle);
+                });
+            }
+
+            setTimeout(() => {
+                tile.classList.remove('is-milestone-celebrating');
+                tile.querySelectorAll('.dash-ms-sparkle').forEach(sparkle => sparkle.remove());
+            }, 1850);
         }
     });
 
