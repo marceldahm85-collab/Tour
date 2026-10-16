@@ -260,7 +260,7 @@
                 : next === null
                     ? 'Alle definierten Marken erreicht'
                     : 'Noch ' + fmt(Math.max(0, next - total), def.digits) + ' ' + def.unit + ' bis ' + fmt(next, def.digits) + ' ' + def.unit;
-            return '<article class="bergwelt-live-milestone' + (!hasData ? ' has-no-data' : '') + (next === null && hasData ? ' is-complete' : '') + '">' +
+            return '<article class="bergwelt-live-milestone' + (!hasData ? ' has-no-data' : '') + (next === null && hasData ? ' is-complete' : '') + '" role="button" tabindex="0" data-live-milestone-type="' + def.key + '" aria-label="Details zu ' + def.label + ' im Jahr ' + getYear() + ' öffnen">' +
                 '<div class="bergwelt-live-milestone-top"><span class="bergwelt-live-milestone-icon" aria-hidden="true">' + def.icon + '</span>' +
                     '<div class="bergwelt-live-milestone-title"><strong>' + def.label + '</strong><small>' + reachedText + '</small></div>' +
                     '<div class="bergwelt-live-milestone-value"><strong>' + valueText + '</strong><small>' + def.unit + '</small></div></div>' +
@@ -757,6 +757,13 @@
         else if (activeTab === 'erlebnis' && experienceMode === 'tour') renderTour();
     }
     panel.addEventListener('click', event => {
+        const liveMilestone = event.target.closest('[data-live-milestone-type]');
+        if (liveMilestone) {
+            if (typeof window.openMilestoneModal === 'function') {
+                window.openMilestoneModal(liveMilestone.dataset.liveMilestoneType, getYear());
+            }
+            return;
+        }
         const backToMoments = event.target.closest('[data-bergwelt-back-to-moments]');
         if (backToMoments) {
             experienceMode = 'momente';
@@ -775,6 +782,15 @@
         if (!Number.isFinite(height) || height <= 0) return;
         selectedHeightMilestone = selectedHeightMilestone === height ? null : height;
         renderHoehenwelt();
+    });
+    panel.addEventListener('keydown', event => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        const liveMilestone = event.target.closest?.('[data-live-milestone-type]');
+        if (!liveMilestone) return;
+        event.preventDefault();
+        if (typeof window.openMilestoneModal === 'function') {
+            window.openMilestoneModal(liveMilestone.dataset.liveMilestoneType, getYear());
+        }
     });
     document.getElementById('wrapped-open-tour-btn')?.addEventListener('click', () => {
         activeTab = 'erlebnis';
