@@ -3563,32 +3563,80 @@ const MILESTONE_UNITS = {
     steps: 'Schritte'
 };
 
-function checkAndShowNewMilestones(before, after, opts = {}) {
+function collectNewMilestoneEvents(before, after, opts = {}) {
     const { scope = 'lifetime', year = null, startDelay = 0 } = opts;
-    const newAchievements = [];
+    const events = [];
 
     ['dist', 'asc', 'time', 'peaks', 'steps'].forEach(type => {
-        const beforeCount = before[type].reached.length;
-        const afterReached = after[type].reached;
-        if (afterReached.length > beforeCount) {
-            afterReached.slice(beforeCount).forEach(m => {
-                newAchievements.push({ type, milestone: m.milestone });
+        const beforeReached = new Set(
+            (before[type]?.reached || []).map(item => item.milestone)
+        );
+        const afterReached = after[type]?.reached || [];
+
+        afterReached.forEach(item => {
+            if (beforeReached.has(item.milestone)) return;
+            events.push({
+                type,
+                milestone: item.milestone,
+                scope,
+                year,
+                delay: startDelay + events.length * 600
             });
-        }
+        });
     });
 
-    newAchievements.forEach((ach, i) => {
-        setTimeout(() => {
-            const message = scope === 'year'
-                ? `${MILESTONE_ICONS[ach.type]} ${MILESTONE_LABELS[ach.type]} ${year}: ${ach.milestone.toLocaleString('de-AT')} ${MILESTONE_UNITS[ach.type]} in diesem Jahr erreicht!`
-                : `${MILESTONE_ICONS[ach.type]} ${MILESTONE_LABELS[ach.type]}: ${ach.milestone.toLocaleString('de-AT')} ${MILESTONE_UNITS[ach.type]} erreicht!`;
-            showAchievementToast(message);
-        }, startDelay + i * 600);
-    });
-
-    return newAchievements.length;
+    return events;
 }
 
+function showNewMilestoneNotifications(lifetimeEvents = [], yearEvents = []) {
+    const mergedByKey = new Map();
+
+    [...lifetimeEvents, ...yearEvents].forEach(event => {
+        const key = event.type + ':' + event.milestone;
+        let merged = mergedByKey.get(key);
+
+        if (!merged) {
+            merged = {
+                type: event.type,
+                milestone: event.milestone,
+                scopes: new Set(),
+                years: new Set(),
+                delay: event.delay || 0
+            };
+            mergedByKey.set(key, merged);
+        }
+
+        merged.scopes.add(event.scope);
+        if (event.scope === 'year' && event.year !== null && event.year !== undefined) {
+            merged.years.add(Number(event.year));
+        }
+        merged.delay = Math.min(merged.delay, event.delay || 0);
+    });
+
+    [...mergedByKey.values()].forEach(event => {
+        setTimeout(() => {
+            const amount = event.milestone.toLocaleString('de-AT');
+            const unit = MILESTONE_UNITS[event.type];
+            const label = MILESTONE_LABELS[event.type];
+            const icon = MILESTONE_ICONS[event.type];
+            const years = [...event.years].sort((a, b) => a - b);
+            const hasLifetime = event.scopes.has('lifetime');
+            let message;
+
+            if (hasLifetime && years.length) {
+                message = icon + ' ' + label + ': ' + amount + ' ' + unit + ' erreicht (Gesamt + Jahr ' + years.join(', ') + ').';
+            } else if (years.length) {
+                message = icon + ' ' + label + ' ' + years.join(', ') + ': ' + amount + ' ' + unit + ' in diesem Jahr erreicht!';
+            } else {
+                message = icon + ' ' + label + ': ' + amount + ' ' + unit + ' erreicht!';
+            }
+
+            showAchievementToast(message);
+        }, event.delay);
+    });
+
+    return mergedByKey.size;
+}
 function showAchievementToast(message) {
     const container = getToastContainer();
 
@@ -13513,11 +13561,16 @@ gipfelDetails: (gipfelDetails || []).map(g => ({
     tablePage = 1;
     autoSaveDataFileIfLinked();
 
-    const lifetimeAchCount = checkAndShowNewMilestones(milestonesBefore, computeMilestones(data), { scope: 'lifetime' });
+    const lifetimeMilestoneEvents = collectNewMilestoneEvents(
+        milestonesBefore,
+        computeMilestones(data),
+        { scope: 'lifetime' }
+    );
     checkAndTriggerRecordConfetti(toursBeforeSave, entry, { scope: 'lifetime', delay: 300 });
     recomputeAndSyncAchievements();
 
     const entryYear = getYearFromDate(entry.date);
+    let yearMilestoneEvents = [];
     if (entryYear) {
         const yearToursBefore = toursBeforeSave.filter(t => getYearFromDate(t.date) === entryYear);
         const yearToursAfter  = data.filter(t => getYearFromDate(t.date) === entryYear);
@@ -13525,11 +13578,15 @@ gipfelDetails: (gipfelDetails || []).map(g => ({
         const yearMilestonesBefore = computeMilestones(yearToursBefore);
         const yearMilestonesAfter  = computeMilestones(yearToursAfter);
 
-        checkAndShowNewMilestones(yearMilestonesBefore, yearMilestonesAfter, {
-            scope: 'year',
-            year: entryYear,
-            startDelay: lifetimeAchCount * 600 + 400
-        });
+        yearMilestoneEvents = collectNewMilestoneEvents(
+            yearMilestonesBefore,
+            yearMilestonesAfter,
+            {
+                scope: 'year',
+                year: entryYear,
+                startDelay: lifetimeMilestoneEvents.length * 600 + 400
+            }
+        );
 
         checkAndTriggerRecordConfetti(yearToursBefore, entry, {
             scope: 'year',
@@ -13537,6 +13594,10 @@ gipfelDetails: (gipfelDetails || []).map(g => ({
             delay: 900
         });
     }
+
+    // Ein Meilenstein, der gleichzeitig Gesamt- und Jahresschwelle erreicht,
+    // erzeugt nur eine Toast-Meldung mit beiden Kontexten.
+    showNewMilestoneNotifications(lifetimeMilestoneEvents, yearMilestoneEvents);
 
     // Tabelle aktualisieren
     loadData();
