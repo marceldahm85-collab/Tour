@@ -618,8 +618,6 @@
 @keyframes bergwelt-height-climb { to { stroke-dashoffset: 0; } }
 @media (prefers-reduced-motion: reduce) {
     #wrapped-view .bergwelt-height-trail { animation: none; stroke-dashoffset: 0; }
-    #wrapped-view .bergwelt-live-milestone,
-    #wrapped-view .bergwelt-live-milestone-track > span { animation:none;transition:none; }
 }
 
 
@@ -913,40 +911,6 @@
 #wrapped-view .bergwelt-level-overview-ring strong small { font-size:.72rem;opacity:.65; }
 #wrapped-view .bergwelt-level-overview-ring > div > span { margin-top:4px;font-size:.55rem;font-weight:850;letter-spacing:.12em;opacity:.72; }
 #wrapped-view .bergwelt-level-stats { margin-bottom:23px; }
-
-#wrapped-view .bergwelt-live-milestones { margin:18px 0 23px; }
-#wrapped-view .bergwelt-live-milestones-heading { display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:11px; }
-#wrapped-view .bergwelt-live-milestones-heading > div > span { display:block;font-size:.64rem;font-weight:900;letter-spacing:.14em;color:var(--accent-color,currentColor); }
-#wrapped-view .bergwelt-live-milestones-heading h3 { margin:5px 0 0;font-size:1.12rem; }
-#wrapped-view .bergwelt-live-milestones-heading > p { max-width:27em;margin:0;font-size:.72rem;line-height:1.4;opacity:.68;text-align:right; }
-#wrapped-view .bergwelt-live-milestones-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr));gap:9px; }
-#wrapped-view .bergwelt-live-milestone { min-width:0;padding:12px;border:1px solid color-mix(in srgb,var(--accent-color,currentColor) 20%,transparent);border-radius:16px;background:linear-gradient(145deg,color-mix(in srgb,var(--accent-color,currentColor) 7%,transparent),color-mix(in srgb,currentColor 2%,transparent));animation:bergwelt-live-milestone-in .45s cubic-bezier(.2,.75,.25,1) both; }
-#wrapped-view .bergwelt-live-milestone:nth-child(2) { animation-delay:45ms; }
-#wrapped-view .bergwelt-live-milestone:nth-child(3) { animation-delay:90ms; }
-#wrapped-view .bergwelt-live-milestone:nth-child(4) { animation-delay:135ms; }
-#wrapped-view .bergwelt-live-milestone:nth-child(5) { animation-delay:180ms; }
-#wrapped-view .bergwelt-live-milestone.is-complete { border-color:color-mix(in srgb,var(--accent-color,currentColor) 45%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent-color,currentColor) 9%,transparent),0 5px 18px color-mix(in srgb,var(--accent-color,currentColor) 7%,transparent); }
-#wrapped-view .bergwelt-live-milestone.has-no-data { opacity:.7; }
-#wrapped-view .bergwelt-live-milestone-top { display:flex;align-items:center;gap:9px;min-width:0; }
-#wrapped-view .bergwelt-live-milestone-icon { flex:0 0 35px;display:grid;place-items:center;width:35px;height:35px;border-radius:11px;background:color-mix(in srgb,var(--accent-color,currentColor) 12%,transparent);font-size:1.05rem; }
-#wrapped-view .bergwelt-live-milestone-title { display:flex;flex:1;flex-direction:column;gap:4px;min-width:0; }
-#wrapped-view .bergwelt-live-milestone-title > strong { font-size:.8rem;line-height:1.2; }
-#wrapped-view .bergwelt-live-milestone-title > small { font-size:.64rem;line-height:1.25;opacity:.68; }
-#wrapped-view .bergwelt-live-milestone-value { display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex:0 0 auto;max-width:46%; }
-#wrapped-view .bergwelt-live-milestone-value > strong { font-size:1.02rem;line-height:1.05;font-variant-numeric:tabular-nums;overflow-wrap:anywhere; }
-#wrapped-view .bergwelt-live-milestone-value > small { font-size:.6rem;opacity:.67; }
-#wrapped-view .bergwelt-live-milestone-track { height:6px;margin-top:12px; }
-#wrapped-view .bergwelt-live-milestone-track > span { transform-origin:left center;animation:bergwelt-live-milestone-fill .75s cubic-bezier(.2,.75,.25,1) both; }
-#wrapped-view .bergwelt-live-milestone-meta { display:flex;align-items:start;justify-content:space-between;gap:8px;margin-top:7px;font-size:.63rem;line-height:1.35; }
-#wrapped-view .bergwelt-live-milestone-meta > span { min-width:0;opacity:.7; }
-#wrapped-view .bergwelt-live-milestone-meta > strong { flex:0 0 auto;color:var(--accent-color,currentColor);font-size:.66rem;font-variant-numeric:tabular-nums; }
-@keyframes bergwelt-live-milestone-in { from { opacity:0;transform:translateY(8px); } to { opacity:1;transform:translateY(0); } }
-@keyframes bergwelt-live-milestone-fill { from { transform:scaleX(0); } to { transform:scaleX(1); } }
-@media (max-width:460px) {
-    #wrapped-view .bergwelt-live-milestones-heading { display:block; }
-    #wrapped-view .bergwelt-live-milestones-heading > p { margin-top:6px;text-align:left; }
-    #wrapped-view .bergwelt-live-milestones-grid { grid-template-columns:minmax(0,1fr); }
-}
 
 #wrapped-view .bergwelt-level-badge-heading { display:flex;align-items:end;justify-content:space-between;gap:10px;margin:22px 0 11px; }
 #wrapped-view .bergwelt-level-badge-heading h3,#wrapped-view .bergwelt-level-specialization-heading h3 { margin:5px 0 0;font-size:1.12rem; }
@@ -1313,16 +1277,5 @@
 
 
 @media (prefers-reduced-motion: reduce) {
-    #wrapped-view .bergwelt-live-milestone,
-    #wrapped-view .bergwelt-live-milestone-track > span { animation:none;transition:none; }
 }
 
-
-/* Live-Meilensteine öffnen die gemeinsame Detailansicht. */
-#wrapped-view .bergwelt-live-milestone[role="button"] {
-    cursor: pointer;
-}
-#wrapped-view .bergwelt-live-milestone[role="button"]:focus-visible {
-    outline: 2px solid var(--accent-color, currentColor);
-    outline-offset: 3px;
-}
