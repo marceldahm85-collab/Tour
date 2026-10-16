@@ -224,7 +224,7 @@
                 const targetProgress = careerAscent === null ? 0 : Math.max(0, Math.min(100, total / m.height * 100));
                 const active = selectedHeightMilestone === m.height;
                 return '<button type="button" class="bergwelt-height-milestone' + (reached ? ' is-reached' : '') + (active ? ' is-selected' : '') + '" data-bergwelt-height-milestone="' + m.height + '" aria-expanded="' + active + '" aria-controls="bergwelt-height-moment">' +
-                    '<span class="bergwelt-height-milestone-mark" aria-hidden="true">' + (reached ? '✦' : String(i + 1).padStart(2, '0')) + '</span>' +
+                    '<span class="bergwelt-height-milestone-mark' + (reached ? ' is-reached' : '') + '" aria-hidden="true">' + heightIcons[i] + '<span>' + String(i + 1).padStart(2, '0') + '</span></span>' +
                     '<span class="bergwelt-height-milestone-copy"><strong>' + escapeHTML(m.name) + '</strong><small>' + (reached ? 'Vergleichsmarke erreicht' : careerAscent === null ? 'Keine Aufstiegsdaten' : fmt(remaining) + ' hm bis zur Marke') + '</small></span>' +
                     '<span class="bergwelt-height-milestone-value"><strong>' + fmt(m.height) + '</strong><small>' + (m.height <= 26544 ? 'm' : 'hm') + '</small></span>' +
                     '<span class="bergwelt-height-milestone-bar" aria-hidden="true"><span style="width:' + targetProgress + '%"></span></span>' +
@@ -302,7 +302,20 @@
         });
         const earnedCount = levels.filter(level => level.current).length;
         const overviewProgress = earnedCount / definitions.length * 100;
-        const badgeIcons = ['🏔️', '⛰️', '⌚', '⚡', '🧭'];
+        const badgeIcons = [
+            '<svg viewBox="0 0 64 64" focusable="false"><path class="bw-badge-shield" d="M32 3 55 12v17c0 15-9 25-23 32C18 54 9 44 9 29V12Z"/><path class="bw-badge-line" d="m15 39 12-17 8 10 6-8 9 15Z"/><path class="bw-badge-highlight" d="m27 22 5 7 3-4 6 7H24Z"/><path class="bw-badge-line" d="M19 44h26"/></svg>',
+            '<svg viewBox="0 0 64 64" focusable="false"><path class="bw-badge-shield" d="M32 3 55 12v17c0 15-9 25-23 32C18 54 9 44 9 29V12Z"/><path class="bw-badge-line" d="m14 41 12-17 7 9 7-13 11 21Z"/><path class="bw-badge-highlight" d="m26 24 7 9 7-13 4 8-5 1-6 9-8-10Z"/></svg>',
+            '<svg viewBox="0 0 64 64" focusable="false"><path class="bw-badge-shield" d="M32 3 55 12v17c0 15-9 25-23 32C18 54 9 44 9 29V12Z"/><circle class="bw-badge-line" cx="32" cy="31" r="15"/><path class="bw-badge-highlight" d="M32 19 35 28 44 31 35 34 32 43 29 34 20 31 29 28Z"/><circle class="bw-badge-line" cx="32" cy="31" r="4"/></svg>',
+            '<svg viewBox="0 0 64 64" focusable="false"><path class="bw-badge-shield" d="M32 3 55 12v17c0 15-9 25-23 32C18 54 9 44 9 29V12Z"/><path class="bw-badge-line" d="m36 13-17 22h11l-3 16 18-25H34Z"/><path class="bw-badge-highlight" d="m36 13-6 17h8l-7 13 14-17H34Z"/></svg>',
+            '<svg viewBox="0 0 64 64" focusable="false"><path class="bw-badge-shield" d="M32 3 55 12v17c0 15-9 25-23 32C18 54 9 44 9 29V12Z"/><circle class="bw-badge-line" cx="32" cy="30" r="15"/><path class="bw-badge-line" d="M20 39 29 29l6 6 9-12"/><path class="bw-badge-highlight" d="m38 23 6 0-1 6Z"/><path class="bw-badge-line" d="M24 47h16"/></svg>'
+        ];
+        const heightIcons = [
+            '<svg viewBox="0 0 64 64" focusable="false"><path d="M7 49 25 19l9 15 7-10 16 25Z"/><path d="m19 29 6-10 9 15-5-4-4 2Z" class="bw-height-snow"/></svg>',
+            '<svg viewBox="0 0 64 64" focusable="false"><path d="M6 49 22 24l8 12 10-21 18 34Z"/><path d="m34 23 6-8 7 18-7-5-4 2Z" class="bw-height-snow"/></svg>',
+            '<svg viewBox="0 0 64 64" focusable="false"><path d="m4 49 13-20 8 10 9-22 9 18 7-10 11 24Z"/><path d="m29 25 5-8 6 13-6-4-3 2Z" class="bw-height-snow"/></svg>',
+            '<svg viewBox="0 0 64 64" focusable="false"><path d="M7 49 24 21l9 15 8-12 16 25Z"/><path d="M40 8v18m-1-17h12l-6 5 6 5H39" class="bw-height-flag"/></svg>',
+            '<svg viewBox="0 0 64 64" focusable="false"><path d="M7 49 24 21l9 15 8-12 16 25Z"/><path d="m20 13 4 5 8-8 8 8 4-5-2 12H22Z" class="bw-height-crown"/></svg>'
+        ];
         const levelDigits = level => level.name === 'Ausdauer-Alpinist' || level.name === 'Steilheits-Profi' ? 1 : 0;
         panel.innerHTML = intro('Dein Bergprofil · ' + getYear(), 'Dein Bergsteiger-Level', 'Deine Touren formen fünf Spezialisierungen. Mit jedem erreichten Schwellenwert schaltest du einen neuen Rang frei – ausschließlich anhand deiner gespeicherten Daten.') +
             '<section class="bergwelt-level-overview">' +
@@ -327,7 +340,7 @@
                     ? (l.next ? 'Nächster Rang: ' + l.next[1] : 'Höchster Rang erreicht')
                     : l.value === null ? 'Wartet auf Daten' : l.next ? 'Noch zu verdienen' : 'Noch kein Rang';
                 return '<article class="bergwelt-level-badge' + (unlocked ? ' is-unlocked' : ' is-locked') + '">' +
-                    '<div class="bergwelt-level-badge-emblem" aria-hidden="true"><span>' + badgeIcons[i] + '</span><i>' + (unlocked ? '✓' : '·') + '</i></div>' +
+                    '<div class="bergwelt-level-badge-emblem" aria-hidden="true"><span class="bergwelt-badge-art">' + badgeIcons[i] + '</span><i>' + (unlocked ? '✓' : '·') + '</i></div>' +
                     '<div class="bergwelt-level-badge-body"><span class="bergwelt-level-badge-name">' + escapeHTML(l.name) + '</span><strong>' + escapeHTML(badgeTitle) + '</strong><small>' + escapeHTML(badgeStatus) + '</small>' +
                     (unlocked ? '<span class="bergwelt-level-badge-value">' + valueText + '</span>' : l.value === null ? '<span class="bergwelt-level-badge-value">Keine gültigen Werte</span>' : '<span class="bergwelt-level-badge-value">' + fmt(Math.max(0, l.next[0] - l.value), levelDigits(l)) + ' ' + l.unit + ' bis zum Rang</span>') +
                     '</div></article>';
