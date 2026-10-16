@@ -1279,3 +1279,115 @@
 @media (prefers-reduced-motion: reduce) {
 }
 
+
+
+/* Bergwelt: illustrierte Abzeichen statt einfacher Emoji-Kacheln. */
+#wrapped-view .bergwelt-level-badge-emblem {
+    flex-basis: 58px;
+    width: 58px;
+    height: 66px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    filter: none;
+    opacity: .7;
+    overflow: visible;
+}
+#wrapped-view .bergwelt-level-badge-emblem .bergwelt-badge-art,
+#wrapped-view .bergwelt-level-badge-emblem svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+#wrapped-view .bergwelt-level-badge-emblem .bw-badge-shield {
+    fill: color-mix(in srgb, var(--accent-color, currentColor) 13%, var(--ui-card-bg, #111));
+    stroke: color-mix(in srgb, var(--accent-color, currentColor) 52%, currentColor);
+    stroke-width: 1.8;
+    stroke-linejoin: round;
+}
+#wrapped-view .bergwelt-level-badge-emblem .bw-badge-line {
+    fill: none;
+    stroke: var(--accent-color, currentColor);
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+#wrapped-view .bergwelt-level-badge-emblem .bw-badge-highlight {
+    fill: color-mix(in srgb, var(--accent-color, currentColor) 72%, white);
+    stroke: none;
+}
+#wrapped-view .bergwelt-level-badge.is-unlocked .bergwelt-level-badge-emblem {
+    opacity: 1;
+    filter: drop-shadow(0 3px 5px color-mix(in srgb, var(--accent-color, currentColor) 22%, transparent));
+}
+#wrapped-view .bergwelt-level-badge.is-unlocked .bergwelt-level-badge-emblem .bw-badge-shield {
+    fill: linear-gradient(145deg, var(--accent-color, currentColor), color-mix(in srgb, var(--accent-color, currentColor) 20%, #101820));
+}
+#wrapped-view .bergwelt-level-badge-emblem > i {
+    right: 0;
+    bottom: 2px;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--ui-card-bg, var(--glass-bg, currentColor));
+    box-shadow: 0 2px 7px color-mix(in srgb, currentColor 20%, transparent);
+}
+#wrapped-view .bergwelt-level-badge-body { align-self: center; }
+#wrapped-view .bergwelt-height-milestone-mark {
+    position: relative;
+    width: 42px;
+    height: 46px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    opacity: .74;
+    overflow: visible;
+}
+#wrapped-view .bergwelt-height-milestone-mark > svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: color-mix(in srgb, var(--accent-color, currentColor) 13%, var(--ui-card-bg, #111));
+    stroke: var(--accent-color, currentColor);
+    stroke-width: 2.3;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+#wrapped-view .bergwelt-height-milestone-mark .bw-height-snow {
+    fill: color-mix(in srgb, var(--accent-color, currentColor) 70%, white);
+    stroke: none;
+}
+#wrapped-view .bergwelt-height-milestone-mark .bw-height-flag,
+#wrapped-view .bergwelt-height-milestone-mark .bw-height-crown {
+    fill: color-mix(in srgb, var(--accent-color, currentColor) 65%, white);
+    stroke: var(--accent-color, currentColor);
+    stroke-width: 2;
+}
+#wrapped-view .bergwelt-height-milestone-mark > span {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    display: grid;
+    place-items: center;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--accent-color, currentColor) 45%, currentColor);
+    background: var(--ui-card-bg, #111);
+    color: inherit;
+    font-size: .55rem;
+    font-weight: 900;
+    line-height: 1;
+}
+#wrapped-view .bergwelt-height-milestone-mark.is-reached {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent-color, currentColor) 35%, transparent));
+}
+@media (max-width: 420px) {
+    #wrapped-view .bergwelt-level-badge-emblem { flex-basis: 48px; width: 48px; height: 56px; }
+    #wrapped-view .bergwelt-height-milestone-mark { width: 34px; height: 39px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    #wrapped-view .bergwelt-level-badge-emblem,
+    #wrapped-view .bergwelt-height-milestone-mark { transition: none; }
+}
