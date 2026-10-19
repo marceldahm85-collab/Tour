@@ -1,13 +1,13 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Der PDF-Magazin-Renderer wird direkt über index.html geladen.
-const CACHE_NAME = 'bergtouren-cache-v102';
+const CACHE_NAME = 'bergtouren-cache-v103';
 
 const APP_SHELL = [
   './',
   './index.html',
-  './app-main.js?v=dashboard-milestone-wow13',
-  './bergwelt.css?v=26',
-  './bergwelt.js?v=28',
+  './app-main-20261019.js?v=1',
+  './bergwelt-badges-20261019.css?v=1',
+  './bergwelt-badges-20261019.js?v=1',
   './styles.css',
   './styles-overrides.css',
   './manifest.json',
@@ -68,7 +68,7 @@ self.addEventListener('fetch', (event) => {
 
   const requestUrl = new URL(event.request.url);
   const isCriticalAppAsset = requestUrl.origin === self.location.origin &&
-    /\/(?:index\.html|app-main\.js|bergwelt\.js|bergwelt\.css)$/.test(requestUrl.pathname);
+    /\/(?:index\.html|app-main(?:-20261019)?\.js|bergwelt(?:-badges-20261019)?\.(?:js|css))$/.test(requestUrl.pathname);
 
   // App-Einstieg und kritische Module netzwerkzuerst laden. Bei Offline-Betrieb
   // wird auf die im aktuellen Cache gespeicherte Datei zurückgegriffen.
