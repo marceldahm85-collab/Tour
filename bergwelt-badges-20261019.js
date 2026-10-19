@@ -2,8 +2,8 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix4') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261019-fix4';
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix5') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261019-fix5';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
@@ -157,19 +157,27 @@
         const yearAscent = sumKnown(entries, ascentValue);
         const careerAscent = sumKnown(allEntries, ascentValue);
         const total = careerAscent ?? 0;
+        // Karriere-Höhenmarken: bekannte Gipfelhöhen plus langfristige Lebenszeitziele.
+        // Bei 30.000–50.000 hm/Jahr sind 250.000 und 500.000 hm echte Mehrjahresziele.
         const milestones = [
             { name: 'Großglockner', height: 3798 },
             { name: 'Everest', height: 8848 },
             { name: 'Drei Everest-Höhen', height: 26544 },
-            { name: '50.000 Höhenmeter', height: 50000 },
-            { name: '100.000 Höhenmeter', height: 100000 }
+            { name: '250.000 Höhenmeter', height: 250000 },
+            { name: '500.000 Höhenmeter', height: 500000 }
         ];
+        // Höhenwelt-Illustrationen mit eigenen Motiven, klar getrennt von Level.
         const heightIcons = [
-            '<svg viewBox="0 0 64 64" focusable="false"><path d="M7 49 25 19l9 15 7-10 16 25Z"/><path d="m19 29 6-10 9 15-5-4-4 2Z" class="bw-height-snow"/></svg>',
-            '<svg viewBox="0 0 64 64" focusable="false"><path d="M6 49 22 24l8 12 10-21 18 34Z"/><path d="m34 23 6-8 7 18-7-5-4 2Z" class="bw-height-snow"/></svg>',
-            '<svg viewBox="0 0 64 64" focusable="false"><path d="m4 49 13-20 8 10 9-22 9 18 7-10 11 24Z"/><path d="m29 25 5-8 6 13-6-4-3 2Z" class="bw-height-snow"/></svg>',
-            '<svg viewBox="0 0 64 64" focusable="false"><path d="M7 49 24 21l9 15 8-12 16 25Z"/><path d="M40 8v18m-1-17h12l-6 5 6 5H39" class="bw-height-flag"/></svg>',
-            '<svg viewBox="0 0 64 64" focusable="false"><path d="M7 49 24 21l9 15 8-12 16 25Z"/><path d="m20 13 4 5 8-8 8 8 4-5-2 12H22Z" class="bw-height-crown"/></svg>'
+            // Großglockner: schroffer Felsgrat mit goldenem Gipfelkreuz.
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" focusable="false"><rect width="64" height="64" rx="13" fill="#fff"/><path d="M7 52 18 36l6 5 12-25 7 13 5-5 9 28Z" fill="#8c979f" stroke="#48565f" stroke-width="1.7" stroke-linejoin="round"/><path d="m26 29 10-13 5 10-5-3-3 4-2-2Z" fill="#f6fbff" stroke="#48565f" stroke-width="1.2" stroke-linejoin="round"/><path d="m15 47 9-6 5 5 7-7 7 6 7-3 7 7H10Z" fill="#657783" stroke="#48565f" stroke-width="1.4" stroke-linejoin="round"/><path d="M36 6v13m-4-9h8" fill="none" stroke="#d49a28" stroke-width="2.2" stroke-linecap="round"/><circle cx="36" cy="6" r="2.1" fill="#f5c84c"/></svg>',
+            // Everest: Eisgipfel mit orange-roter Expeditionsflagge.
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" focusable="false"><rect width="64" height="64" rx="13" fill="#fff"/><path d="M7 52 17 39l7 3 14-27 8 14 4-4 8 27Z" fill="#b8d8ed" stroke="#477ca2" stroke-width="1.7" stroke-linejoin="round"/><path d="m30 24 8-9 5 9-5-3-3 3-2-2Z" fill="#fff" stroke="#477ca2" stroke-width="1.2" stroke-linejoin="round"/><path d="m15 43 9 2 5-8 8 10 8-9 10 7 3 7H7Z" fill="#e4f1fa" stroke="#477ca2" stroke-width="1.4" stroke-linejoin="round"/><path d="M39 15V6" stroke="#506a83" stroke-width="1.5" stroke-linecap="round"/><path d="M39 6h11l-4 4 4 4H39Z" fill="#ee765c" stroke="#9d4434" stroke-width="1.2" stroke-linejoin="round"/></svg>',
+            // Drei Everest-Höhen: mehrlagige Berglandschaft mit 3×-Markierung.
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" focusable="false"><rect width="64" height="64" rx="13" fill="#fff"/><path d="M7 49 17 34l6 7 8-15 10 23Z" fill="#bdd3bc" stroke="#50785a" stroke-width="1.3" stroke-linejoin="round"/><path d="m27 49 11-21 5 6 6-11 9 26Z" fill="#88b3c4" stroke="#386d80" stroke-width="1.5" stroke-linejoin="round"/><path d="m32 36 6-8 3 6-4-2-2 2Z M46 29l3-6 5 8-4-3-2 1Z" fill="#fff" stroke="#386d80" stroke-width="1.1" stroke-linejoin="round"/><circle cx="15" cy="17" r="9" fill="#f3cc62" stroke="#987b35" stroke-width="1.2"/><text x="15" y="20.5" font-size="10" font-weight="800" text-anchor="middle" fill="#443b24">3×</text><path d="M24 16h12" stroke="#987b35" stroke-width="1.4" stroke-dasharray="2 2" stroke-linecap="round"/></svg>',
+            // 250.000 hm: topografische Höhenlinien und goldener Höhenmarker.
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" focusable="false"><rect width="64" height="64" rx="13" fill="#fff"/><path d="M7 46c4-7 11-10 17-7 7 4 8 10 16 8s12-8 17-4v10H7Z" fill="#b7d9c0" stroke="#3e805b" stroke-width="1.4" stroke-linejoin="round"/><path d="M9 41c7-9 14-13 21-9 7 4 9 9 15 5 4-3 8-5 13-3M15 32c7-7 13-9 18-5 5 4 8 5 13 1 3-2 6-3 9-2M21 24c5-4 9-5 13-2 4 2 6 2 9 0" fill="none" stroke="#3e805b" stroke-width="1.6" stroke-linecap="round"/><path d="M31 8v13" stroke="#bb8731" stroke-width="2" stroke-linecap="round"/><path d="M31 8c-4 4-4 7 0 9 4-2 4-5 0-9Z" fill="#f2c85b" stroke="#9e742f" stroke-width="1.2"/><circle cx="31" cy="21" r="2.2" fill="#f2c85b" stroke="#9e742f" stroke-width="1.2"/></svg>',
+            // 500.000 hm: goldene Lebenszeitmedaille mit Bergrelief und Sternen.
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" focusable="false"><rect width="64" height="64" rx="13" fill="#fff"/><path d="M21 6h9l4 13-8 4Z" fill="#d76f4f" stroke="#a54d35" stroke-width="1.2" stroke-linejoin="round"/><path d="M34 19 38 6h8l-5 17Z" fill="#6b9cc6" stroke="#47789f" stroke-width="1.2" stroke-linejoin="round"/><circle cx="32" cy="38" r="19" fill="#f2c85b" stroke="#a77724" stroke-width="2"/><circle cx="32" cy="38" r="14.5" fill="#ffe9a0" stroke="#c08a2e" stroke-width="1.3"/><path d="M17 43 25 32l5 5 6-9 11 15Z" fill="#91b1bf" stroke="#4f6d77" stroke-width="1.4" stroke-linejoin="round"/><path d="m26 34 4 3 6-9 4 5-4-2-3 3-2-1Z" fill="#fff" stroke="#4f6d77" stroke-width="1"/><path d="m17 26 1.6 3.7 4 .3-3 2.6.9 3.9-3.5-2.1-3.4 2.1.8-3.9-3-2.6 4-.3Z M49 23l1.3 3 3.2.3-2.4 2.1.7 3.1-2.8-1.7-2.7 1.7.6-3.1-2.3-2.1 3.1-.3Z" fill="#e6ae36" stroke="#a77724" stroke-width=".8" stroke-linejoin="round"/></svg>'
         ];
         const next = careerAscent === null ? null : (milestones.find(m => m.height > total) || null);
         // Fortschritt bedeutet hier: gesammelte Höhenmeter im Verhältnis zum nächsten Ziel.
@@ -178,8 +186,8 @@
             ? Math.max(0, Math.min(100, total / next.height * 100))
             : 100;
         const comparison = careerAscent === null ? 'Für deine gespeicherten Touren liegen keine gültigen Aufstiegswerte vor.' :
-            total >= 100000 ? 'Du hast die Marke von 100.000 Höhenmetern überschritten – eine außergewöhnliche persönliche Leistung.' :
-            total >= 50000 ? 'Du hast bereits mehr als 50.000 Höhenmeter gesammelt. Die nächste große Marke wartet.' :
+            total >= 500000 ? 'Du hast die Lebenszeitmarke von 500.000 Höhenmetern überschritten – ein außergewöhnlicher Langzeiterfolg.' :
+            total >= 250000 ? 'Du hast bereits 250.000 Höhenmeter gesammelt. Die nächste Lebenszeitmarke liegt bei einer halben Million Höhenmetern.' :
             total >= 26544 ? 'Dein kumulierter Aufstieg entspricht mindestens drei Everest-Höhen.' :
             total >= 8848 ? 'Dein kumulierter Aufstieg entspricht mindestens einer Everest-Höhe.' :
             total >= 3798 ? 'Dein kumulierter Aufstieg übertrifft die Höhe des Großglockners.' :
@@ -234,7 +242,7 @@
                 const targetProgress = careerAscent === null ? 0 : Math.max(0, Math.min(100, total / m.height * 100));
                 const active = selectedHeightMilestone === m.height;
                 return '<button type="button" class="bergwelt-height-milestone' + (reached ? ' is-reached' : '') + (active ? ' is-selected' : '') + '" data-bergwelt-height-milestone="' + m.height + '" aria-expanded="' + active + '" aria-controls="bergwelt-height-moment">' +
-                    '<span class="bergwelt-height-milestone-mark' + (reached ? ' is-reached' : '') + '" aria-hidden="true">' + heightIcons[i] + '<span>' + String(i + 1).padStart(2, '0') + '</span></span>' +
+                    '<span class="bergwelt-height-milestone-mark' + (reached ? ' is-reached' : '') + '" aria-hidden="true">' + heightIcons[i] + '</span>' +
                     '<span class="bergwelt-height-milestone-copy"><strong>' + escapeHTML(m.name) + '</strong><small>' + (reached ? 'Vergleichsmarke erreicht' : careerAscent === null ? 'Keine Aufstiegsdaten' : fmt(remaining) + ' hm bis zur Marke') + '</small></span>' +
                     '<span class="bergwelt-height-milestone-value"><strong>' + fmt(m.height) + '</strong><small>' + (m.height <= 26544 ? 'm' : 'hm') + '</small></span>' +
                     '<span class="bergwelt-height-milestone-bar" aria-hidden="true"><span style="width:' + targetProgress + '%"></span></span>' +
