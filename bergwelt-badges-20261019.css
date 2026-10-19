@@ -1654,3 +1654,34 @@
         min-width: 52px !important;
     }
 }
+
+
+/* Höhenwelt SVG polish: retain icon detail on narrow screens */
+#wrapped-view .bergwelt-height-milestones .bergwelt-height-milestone-mark {
+    width: 60px !important;
+    height: 60px !important;
+    min-width: 60px !important;
+    flex: 0 0 60px !important;
+}
+#wrapped-view .bergwelt-height-milestones .bergwelt-height-milestone-mark > svg {
+    width: 60px !important;
+    height: 60px !important;
+    max-width: 100%;
+    max-height: 100%;
+    shape-rendering: geometricPrecision;
+}
+@media (max-width: 480px) {
+    #wrapped-view .bergwelt-height-milestones .bergwelt-height-milestone {
+        grid-template-columns: 60px minmax(0, 1fr) auto 14px !important;
+        column-gap: 7px !important;
+    }
+    #wrapped-view .bergwelt-height-milestones .bergwelt-height-milestone-mark {
+        width: 60px !important;
+        height: 60px !important;
+        min-width: 60px !important;
+    }
+    #wrapped-view .bergwelt-height-milestones .bergwelt-height-milestone-mark > svg {
+        width: 60px !important;
+        height: 60px !important;
+    }
+}
