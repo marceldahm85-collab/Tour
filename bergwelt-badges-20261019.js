@@ -1,6 +1,9 @@
 (function () {
     'use strict';
-    if (window.__BERGWELT_MODULE_READY__) return;
+    // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
+    // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix1') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261019-fix1';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
