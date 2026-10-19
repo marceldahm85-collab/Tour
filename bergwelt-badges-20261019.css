@@ -1533,3 +1533,71 @@
         height: 46px !important;
     }
 }
+
+
+/* Originalillustrationen der fünf Bergwelt-Abzeichen */
+#wrapped-view .bergwelt-badge-art {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+#wrapped-view .bergwelt-badge-art svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+#wrapped-view .bergwelt-level-badge .bergwelt-level-badge-emblem {
+    flex: 0 0 68px !important;
+    width: 68px !important;
+    height: 68px !important;
+    min-width: 68px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 15px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    overflow: visible !important;
+}
+#wrapped-view .bergwelt-level-badge.is-unlocked .bergwelt-level-badge-emblem,
+#wrapped-view .bergwelt-level-badge.is-locked .bergwelt-level-badge-emblem {
+    opacity: 1 !important;
+    filter: none !important;
+}
+#wrapped-view .bergwelt-level-badge-emblem > i {
+    display: none !important;
+}
+#wrapped-view .bergwelt-level-emblem {
+    flex: 0 0 58px !important;
+    width: 58px !important;
+    height: 58px !important;
+    min-width: 58px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 13px !important;
+    background: transparent !important;
+    opacity: 1 !important;
+    filter: none !important;
+    overflow: visible !important;
+}
+#wrapped-view .bergwelt-level-card.has-rank .bergwelt-level-emblem,
+#wrapped-view .bergwelt-level-card.has-no-data .bergwelt-level-emblem {
+    opacity: 1 !important;
+    filter: none !important;
+}
+@media (max-width: 560px) {
+    #wrapped-view .bergwelt-level-badge .bergwelt-level-badge-emblem {
+        flex-basis: 58px !important;
+        width: 58px !important;
+        height: 58px !important;
+        min-width: 58px !important;
+    }
+    #wrapped-view .bergwelt-level-emblem {
+        flex-basis: 50px !important;
+        width: 50px !important;
+        height: 50px !important;
+        min-width: 50px !important;
+    }
+}
