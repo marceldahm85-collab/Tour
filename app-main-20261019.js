@@ -34342,12 +34342,12 @@ const endHold = () => {
         if (!document.querySelector('link[data-bergwelt-badge-styles="20261019-fix1"]')) {
             const styleLink = document.createElement('link');
             styleLink.rel = 'stylesheet';
-            styleLink.href = './bergwelt-badges-20261019.css?v=2';
+            styleLink.href = './bergwelt-badges-20261019.css?v=3';
             styleLink.dataset.bergweltBadgeStyles = '20261019-fix1';
             document.head.appendChild(styleLink);
         }
         const script = document.createElement('script');
-        script.src = './bergwelt-badges-20261019.js?v=2';
+        script.src = './bergwelt-badges-20261019.js?v=3';
         script.onload = () => {
             window.__BERGWELT_BADGE_LOADING__ = false;
             window.__BERGWELT_LOADING__ = false;
