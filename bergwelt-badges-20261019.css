@@ -2052,3 +2052,16 @@ body.green #bergwelt-height-detail-modal .bergwelt-height-gauge > span {
     margin: 0;
     box-sizing: border-box;
 }
+
+
+/* Tourbuch-Fläche soll außerhalb der Sicherungs-View dieselbe Theme-Oberfläche behalten. */
+#wrapped-view #bergwelt-tourbuch-panel #pdf-export-card {
+    background: var(--ui-card-bg, color-mix(in srgb, currentColor 4%, transparent));
+    border: 1px solid var(--ui-card-border, color-mix(in srgb, currentColor 14%, transparent));
+    border-radius: 16px;
+    color: var(--text-main, currentColor);
+    box-shadow: var(--shadow-soft, 0 6px 18px color-mix(in srgb, currentColor 4%, transparent));
+}
+#wrapped-view #bergwelt-tourbuch-panel #pdf-export-card .filter-simple-title {
+    color: var(--text-main, currentColor);
+}
