@@ -19579,7 +19579,7 @@ function renderAchievementsView() {
 
     container.innerHTML = `
         <svg class="achievement-puzzle-defs" aria-hidden="true" focusable="false" width="1" height="1">
-            <defs>${categories.map((_, index) => '<clipPath id="achievement-puzzle-clip-' + index + '" clipPathUnits="objectBoundingBox"><path d="' + buildAchievementPuzzleClipPath(index, categories.length) + '"></path></clipPath>').join('')}</defs>
+            <defs>${categories.map((_, index) => '<clipPath id="achievement-puzzle-clip-' + index + '" clipPathUnits="objectBoundingBox"><path d="' + buildAchievementPuzzleClipPath(index, categories.length, 5) + '"></path></clipPath>').join('')}</defs>
         </svg>
         <div class="achievement-category-grid achievement-puzzle-grid" aria-label="Achievement-Puzzle">
             ${categories.map(([catId, cat], index) => {
@@ -19590,7 +19590,7 @@ function renderAchievementsView() {
                 const stateClass = isComplete ? 'complete' : categoryUnlocked > 0 ? 'started' : 'empty';
                 return `
                     <button type="button"
-                        class="achievement-category-tile achievement-puzzle-tile ${stateClass}" style="--tile-index:${index}; z-index:${(Math.floor(index / 5) + (index % 5)) % 2 === 0 ? 2 : 1}"
+                        class="achievement-category-tile achievement-puzzle-tile ${stateClass}" style="clip-path:url(#achievement-puzzle-clip-${index}); -webkit-clip-path:url(#achievement-puzzle-clip-${index}); --tile-index:${index}; z-index:${(Math.floor(index / 5) + (index % 5)) % 2 === 0 ? 2 : 1}"
                         data-category-id="${catId}"
                         aria-label="${escapeHtmlAttribute(cat.label)}: ${categoryUnlocked} von ${categoryTotal} erreicht. Achievement-Liste öffnen">
                         <span class="achievement-puzzle-tile-top">
@@ -19657,7 +19657,7 @@ function openAchievementCategoryModal(categoryId, resultsInput = null) {
                     tourMarkup = '<span class="achievement-row-tour">–</span>';
                 }
 
-                const sublineMarkup = catId === 'consistency'
+                const sublineMarkup = categoryId === 'consistency'
                     ? (isUnlocked ? escapeHtml(r.unlockedPeriod || '–') : escapeHtml(progressLabel))
                     : (isUnlocked
                         ? (r.unlockedTour || r.unlockedAt
