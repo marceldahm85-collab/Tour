@@ -2065,3 +2065,24 @@ body.green #bergwelt-height-detail-modal .bergwelt-height-gauge > span {
 #wrapped-view #bergwelt-tourbuch-panel #pdf-export-card .filter-simple-title {
     color: var(--text-main, currentColor);
 }
+
+
+/* Höhenwelt: schlankere Marken; der Balken beginnt neben dem Symbol. */
+#wrapped-view .bergwelt-height-milestone {
+    grid-template-rows: auto 4px !important;
+    column-gap: 8px !important;
+    row-gap: 2px !important;
+    padding: 8px 10px 7px !important;
+}
+#wrapped-view .bergwelt-height-milestone-bar {
+    grid-column: 2 / -1 !important;
+    grid-row: 2 !important;
+    align-self: start !important;
+    margin-top: 0 !important;
+}
+@media (max-width: 560px) {
+    #wrapped-view .bergwelt-height-milestone {
+        column-gap: 7px !important;
+        padding: 7px 8px 6px !important;
+    }
+}
