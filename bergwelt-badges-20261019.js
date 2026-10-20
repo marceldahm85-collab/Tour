@@ -2,7 +2,7 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix10') return;
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix11') return;
     window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261019-fix10';
     window.__BERGWELT_MODULE_READY__ = true;
 
@@ -275,7 +275,42 @@
             .filter(value => value !== null && Number.isFinite(value));
         const maxAscentRate = validAscentRates.length ? Math.max(...validAscentRates) : null;
 
-                // "difficulty" ist das tatsächliche Feld für die gespeicherte Tourart.
+        // Rangtouren werden chronologisch zugeordnet, damit jede erreichte Stufe
+        // auf die Tour verweist, mit der sie erstmals freigeschaltet wurde.
+        const chronologicalEntries = entries.map((entry, index) => ({ entry, index }))
+            .sort((a, b) => {
+                const dateA = parseTourDate(a.entry.date)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+                const dateB = parseTourDate(b.entry.date)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+                return dateA - dateB ||
+                    (Number(a.entry.tourDay || 0) - Number(b.entry.tourDay || 0)) ||
+                    (a.index - b.index);
+            })
+            .map(item => item.entry);
+        const cumulativeTourFor = (getter, threshold) => {
+            let total = 0;
+            for (const entry of chronologicalEntries) {
+                const value = getter(entry);
+                if (value === null || value === undefined || !Number.isFinite(value)) continue;
+                total += value;
+                if (total >= threshold) return entry;
+            }
+            return null;
+        };
+        const steepTourFor = threshold => chronologicalEntries.find(entry => {
+            const value = ascentRateValue(entry);
+            return value !== null && Number.isFinite(value) && value >= threshold;
+        }) || null;
+        const activityTourFor = threshold => {
+            const seenTypes = new Set();
+            for (const entry of chronologicalEntries) {
+                const type = String(entry.difficulty || '').trim().toLocaleLowerCase();
+                if (type && type !== 'mehrtägig') seenTypes.add(type);
+                if (seenTypes.size >= threshold) return entry;
+            }
+            return null;
+        };
+
+        // "difficulty" ist das tatsächliche Feld für die gespeicherte Tourart.
         // "Mehrtägig" beschreibt die Tourstruktur, keinen eigenen Aktivitätstyp.
         const activityTypes = new Set(entries
             .map(e => String(e.difficulty || '').trim().toLocaleLowerCase())
@@ -286,27 +321,32 @@
         const definitions = [
             {
                 name: 'Höhenmeter-Spezialist', value: asc, unit: 'hm',
-                tiers: [[5000, 'Höhenmeter-Sammler'], [10000, 'Bergauf unterwegs'], [15000, 'Höhenmeter-Spezialist'], [20000, 'Höhenprofi'], [25000, 'Höhenlegende']],
+                tiers: [[5000, 'Höhenmeter-Sammler'], [10000, 'Bergauf unterwegs'], [15000, 'Höhenmeter-Spezialist'], [25000, 'Höhenprofi'], [35000, 'Höhenlegende']],
+                rankTourFor: threshold => cumulativeTourFor(ascentValue, threshold),
                 detail: 'Kumulierte Aufstiegshöhen im ausgewählten Jahr.'
             },
             {
                 name: 'Gipfelsammler', value: peakCount, unit: 'Gipfel',
                 tiers: [[5, 'Gipfel entdeckt'], [10, 'Gipfelsammler'], [15, 'Gipfeljäger'], [25, 'Gipfelkenner'], [35, 'Gipfellegende']],
+                rankTourFor: threshold => cumulativeTourFor(peaksValue, threshold),
                 detail: 'Summe der gespeicherten Gipfelangaben im ausgewählten Jahr.'
             },
             {
                 name: 'Ausdauer-Alpinist', value: mins === null ? null : mins / 60, unit: 'h',
                 tiers: [[25, 'Ausdauer-Einsteiger'], [50, 'Ausdauerstark'], [100, 'Ausdauer-Alpinist'], [150, 'Langstrecken-Profi'], [200, 'Ausdauerlegende']],
+                rankTourFor: threshold => cumulativeTourFor(minutesValue, threshold * 60),
                 detail: 'Gespeicherte Gehzeit im ausgewählten Jahr.'
             },
             {
                 name: 'Steilheits-Profi', value: maxAscentRate, unit: 'hm/h',
-                tiers: [[100, 'Vertikal unterwegs'], [200, 'Starker Aufstieg'], [300, 'Aufstiegs-Profi'], [400, 'Vertikal-Elite'], [500, 'Vertikallegende']],
+                tiers: [[300, 'Vertikal unterwegs'], [350, 'Starker Aufstieg'], [400, 'Aufstiegs-Profi'], [500, 'Vertikal-Elite'], [600, 'Vertikallegende']],
+                rankTourFor: threshold => steepTourFor(threshold),
                 detail: 'Höchster Aufstieg pro Stunde bei einer einzelnen Tour – dieselbe Zeit- und Rundtour-Logik wie in Stats/Highlights (standardmäßig halbe Gehzeit; bei aktivierter Option volle Gehzeit).'
             },
             {
                 name: 'Vielseitiger Wanderer', value: activityCount, unit: 'Typen',
                 tiers: [[1, 'Erster Stil'], [2, 'Abwechslungsreich'], [3, 'Vielseitiger Wanderer'], [4, 'Allrounder'], [5, 'Bergwelt-Allrounder']],
+                rankTourFor: threshold => activityTourFor(threshold),
                 detail: 'Unterschiedliche Aktivitätstypen, die in den Tourdaten tatsächlich gespeichert sind.'
             }
         ];
@@ -318,7 +358,9 @@
             const pct = def.value === null ? null : next
                 ? Math.max(0, Math.min(100, (def.value - previousThreshold) / (next[0] - previousThreshold) * 100))
                 : 100;
-            return { ...def, current, next, pct };
+            const rankTours = def.tiers.map(tier => typeof def.rankTourFor === 'function' ? def.rankTourFor(tier[0]) : null);
+            const { rankTourFor, ...levelDefinition } = def;
+            return { ...levelDefinition, current, next, pct, rankTours };
         });
         const earnedCount = levels.filter(level => level.current).length;
         // Die fünf Original-Abzeichen: farbige, eigenständige Illustrationen
@@ -352,9 +394,17 @@
             const rankRows = l.tiers.map((tier, index) => {
                 const reached = index <= currentIndex;
                 const isNext = index === nextIndex;
+                const rankTour = l.rankTours?.[index];
+                const rankTourName = rankTour ? String(rankTour.tourname || rankTour.name || 'Tour ohne Titel').trim() : '';
+                const parsedRankTourDate = rankTour ? parseTourDate(rankTour.date) : null;
+                const rankTourDate = rankTour ? (parsedRankTourDate ? parsedRankTourDate.toLocaleDateString('de-AT') : String(rankTour.date || '').trim()) : '';
+                const rankTourLabel = [rankTourName, rankTourDate].filter(Boolean).join(' · ');
+                const tourButton = rankTour
+                    ? '<button type="button" class="bergwelt-level-modal-rank-tour" data-level-tour-index="' + i + '" data-level-tier-index="' + index + '" aria-label="Tour ansehen: ' + escapeHTML(rankTourLabel) + '"><span>⛰ ' + escapeHTML(rankTourLabel) + '</span><span>Details ansehen ↗</span></button>'
+                    : '';
                 return '<li class="bergwelt-level-modal-rank-row' + (reached ? ' is-reached' : '') + (isNext ? ' is-next' : '') + '">' +
                     '<span class="bergwelt-level-modal-rank-number">' + (index + 1) + '</span>' +
-                    '<span class="bergwelt-level-modal-rank-copy"><strong>' + escapeHTML(tier[1]) + '</strong><small>' + fmt(tier[0], levelDigits(l)) + ' ' + escapeHTML(l.unit) + '</small></span>' +
+                    '<span class="bergwelt-level-modal-rank-copy"><strong>' + escapeHTML(tier[1]) + '</strong><small>' + fmt(tier[0], levelDigits(l)) + ' ' + escapeHTML(l.unit) + '</small>' + tourButton + '</span>' +
                     '<span class="bergwelt-level-modal-rank-status">' + (reached ? 'Erreicht' : isNext ? 'Als Nächstes' : 'Offen') + '</span>' +
                 '</li>';
             }).join('');
@@ -438,6 +488,21 @@
             card.addEventListener('click', () => openLevelModal(card.dataset.levelDetailIndex, card));
         });
         modal.addEventListener('click', event => {
+            const tourButton = event.target.closest('[data-level-tour-index][data-level-tier-index]');
+            if (tourButton) {
+                const selectedLevel = levels[Number(tourButton.dataset.levelTourIndex)];
+                const selectedTour = selectedLevel?.rankTours?.[Number(tourButton.dataset.levelTierIndex)];
+                if (!selectedTour) return;
+                closeLevelModal();
+                if (typeof window.openTourDetail === 'function') {
+                    window.openTourDetail(selectedTour, { returnModalId: 'bergwelt-level-detail-modal' });
+                } else {
+                    modal.classList.remove('hidden');
+                    modal.setAttribute('aria-hidden', 'false');
+                    document.body.classList.add('modal-open');
+                }
+                return;
+            }
             if (event.target === modal.querySelector('[data-level-detail-close="backdrop"]') ||
                 event.target.closest('[data-level-detail-close="button"]')) closeLevelModal();
         });
