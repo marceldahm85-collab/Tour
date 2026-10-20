@@ -1449,3 +1449,40 @@
         height: 44px;
     }
 }
+
+
+/* Höhenwelt: Fortschritts-Kreis im ausgewählten Gipfelmoment themeübergreifend kontrastreich darstellen. */
+#wrapped-view .bergwelt-height-moment .bergwelt-height-gauge {
+    flex: 0 0 54px;
+    width: 54px;
+    height: 54px;
+    box-sizing: border-box;
+    padding: 5px;
+    border: 1px solid color-mix(in srgb, var(--accent-color, #4b8b75) 48%, var(--text-main, #fff));
+    background: conic-gradient(
+        var(--accent-color, #4b8b75) 0 var(--moment-progress, 0%),
+        color-mix(in srgb, var(--text-main, #fff) 24%, var(--ui-card-bg, #20252b)) var(--moment-progress, 0%) 100%
+    );
+    box-shadow:
+        0 0 0 2px color-mix(in srgb, var(--ui-card-bg, #20252b) 90%, transparent),
+        0 0 12px color-mix(in srgb, var(--accent-color, #4b8b75) 24%, transparent);
+}
+#wrapped-view .bergwelt-height-moment .bergwelt-height-gauge > span {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    border: 1px solid color-mix(in srgb, var(--text-main, #fff) 18%, var(--ui-card-bg, #20252b));
+    background: var(--ui-card-bg, #20252b);
+    color: var(--text-main, #fff);
+    text-shadow: 0 1px 2px color-mix(in srgb, #000 35%, transparent);
+}
+#wrapped-view .bergwelt-height-moment.is-achieved .bergwelt-height-gauge {
+    background: conic-gradient(var(--accent-color, #4b8b75) 0 100%);
+}
+@media (max-width: 420px) {
+    #wrapped-view .bergwelt-height-moment .bergwelt-height-gauge {
+        flex-basis: 50px;
+        width: 50px;
+        height: 50px;
+    }
+}
