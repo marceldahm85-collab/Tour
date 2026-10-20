@@ -34343,7 +34343,7 @@ const endHold = () => {
         if (!document.querySelector('link[data-bergwelt-badge-styles="20261019-fix14"]')) {
             const styleLink = document.createElement('link');
             styleLink.rel = 'stylesheet';
-            styleLink.href = './bergwelt-badges-20261019.css?v=16';
+            styleLink.href = './bergwelt-badges-20261019.css?v=17';
             styleLink.dataset.bergweltBadgeStyles = '20261019-fix14';
             document.head.appendChild(styleLink);
         }
