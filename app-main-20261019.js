@@ -19659,7 +19659,11 @@ function openAchievementCategoryModal(categoryId, resultsInput = null) {
 
                 const sublineMarkup = catId === 'consistency'
                     ? (isUnlocked ? escapeHtml(r.unlockedPeriod || '–') : escapeHtml(progressLabel))
-                    : (isUnlocked ? tourMarkup + '<time class="achievement-row-date">' + dateLabel + '</time>' : escapeHtml(progressLabel));
+                    : (isUnlocked
+                        ? (r.unlockedTour || r.unlockedAt
+                            ? tourMarkup + '<time class="achievement-row-date">' + dateLabel + '</time>'
+                            : '–')
+                        : escapeHtml(progressLabel));
 
                 return `
                     <article class="achievement-inline-row ${isUnlocked ? 'is-unlocked' : 'is-locked'}">
