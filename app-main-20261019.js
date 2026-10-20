@@ -19552,6 +19552,13 @@ function buildAchievementPuzzleClipPath(index, total, columns = 3) {
 
     return 'M 0.05 0.05 ' + edge.top[top] + ' ' + edge.right[right] + ' ' + edge.bottom[bottom] + ' ' + edge.left[left] + ' Z';
 }
+function getAchievementPuzzleLayout() {
+    const landscape = window.matchMedia('(max-width: 1024px) and (orientation: landscape)').matches;
+    const columns = landscape ? 5 : 3;
+    const total = Object.keys(ACHIEVEMENT_CATEGORIES).length;
+    return { landscape, columns, rows: Math.ceil(total / columns) };
+}
+
 function renderAchievementsView() {
     const container = document.getElementById('achievements-categories');
     const summaryValue = document.getElementById('achievements-summary-value');
@@ -19559,6 +19566,9 @@ function renderAchievementsView() {
 
     const results = computeAllAchievements(getAchievementsFilteredTours());
     const categories = Object.entries(ACHIEVEMENT_CATEGORIES);
+    const puzzleLayout = getAchievementPuzzleLayout();
+    const puzzleColumns = puzzleLayout.columns;
+    const puzzleRows = puzzleLayout.rows;
     const allBadges = getAllAchievementBadgeDefs();
     const unlockedCount = allBadges.filter(badge => results[badge.id]?.unlocked).length;
     const totalCount = allBadges.length;
@@ -19579,7 +19589,7 @@ function renderAchievementsView() {
 
     container.innerHTML = `
         <svg class="achievement-puzzle-defs" aria-hidden="true" focusable="false" width="1" height="1">
-            <defs>${categories.map((_, index) => '<clipPath id="achievement-puzzle-clip-' + index + '" clipPathUnits="objectBoundingBox"><path d="' + buildAchievementPuzzleClipPath(index, categories.length, 5) + '"></path></clipPath>').join('')}</defs>
+            <defs>${categories.map((_, index) => '<clipPath id="achievement-puzzle-clip-' + index + '" clipPathUnits="objectBoundingBox"><path d="' + buildAchievementPuzzleClipPath(index, categories.length, puzzleColumns) + '"></path></clipPath>').join('')}</defs>
         </svg>
         <div class="achievement-category-grid achievement-puzzle-grid" aria-label="Achievement-Puzzle">
             ${categories.map(([catId, cat], index) => {
@@ -19590,7 +19600,7 @@ function renderAchievementsView() {
                 const stateClass = isComplete ? 'complete' : categoryUnlocked > 0 ? 'started' : 'empty';
                 return `
                     <button type="button"
-                        class="achievement-category-tile achievement-puzzle-tile ${stateClass}" style="clip-path:url(#achievement-puzzle-clip-${index}); -webkit-clip-path:url(#achievement-puzzle-clip-${index}); --tile-index:${index}; z-index:${(Math.floor(index / 5) + (index % 5)) % 2 === 0 ? 2 : 1}"
+                        class="achievement-category-tile achievement-puzzle-tile ${stateClass}" style="clip-path:url(#achievement-puzzle-clip-${index}); -webkit-clip-path:url(#achievement-puzzle-clip-${index}); --tile-index:${index}; --photo-x:${(index % puzzleColumns) / Math.max(1, puzzleColumns - 1) * 100}%; --photo-y:${Math.floor(index / puzzleColumns) / Math.max(1, puzzleRows - 1) * 100}%; z-index:${(Math.floor(index / puzzleColumns) + (index % puzzleColumns)) % 2 === 0 ? 2 : 1}"
                         data-category-id="${catId}"
                         aria-label="${escapeHtmlAttribute(cat.label)}: ${categoryUnlocked} von ${categoryTotal} erreicht. Achievement-Liste öffnen">
                         <span class="achievement-puzzle-tile-top">
@@ -19714,6 +19724,15 @@ function openAchievementTourById(tourId) {
 }
 
 function initAchievementsUI() {
+    let previousPuzzleLandscape = getAchievementPuzzleLayout().landscape;
+    const refreshPuzzleForOrientation = () => {
+        const nextLandscape = getAchievementPuzzleLayout().landscape;
+        if (nextLandscape === previousPuzzleLandscape) return;
+        previousPuzzleLandscape = nextLandscape;
+        if (currentView === 'achievements') renderAchievementsView();
+    };
+    window.addEventListener('resize', refreshPuzzleForOrientation, { passive: true });
+    window.addEventListener('orientationchange', refreshPuzzleForOrientation);
     document.getElementById('achievement-category-close')?.addEventListener('click', closeAchievementCategoryModal);
 
     document.querySelector('#achievement-category-modal .modal-backdrop')?.addEventListener('click', closeAchievementCategoryModal);
