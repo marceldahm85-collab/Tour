@@ -2,8 +2,8 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix7') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261019-fix7';
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix8') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261019-fix8';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
@@ -321,42 +321,56 @@
         const earnedCount = levels.filter(level => level.current).length;
         // Die fünf Original-Abzeichen: farbige, eigenständige Illustrationen
         // auf weißem, abgerundetem Quadrat – identisch in Galerie und Entwicklung.
+        // Fünf bewusst klare Illustrationen: jede Geometrie hat eine erkennbare Funktion.
         const badgeIcons = [
-            // Höhenmeter-Spezialist: gestaffelte Bergflanken, Schneekanten und Höhenlinien.
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" focusable="false"><rect width="72" height="72" rx="15" fill="#fff"/><circle cx="36" cy="36" r="25" fill="#bfe4e4" stroke="#355c68" stroke-width="2.2"/><path d="M12.8 37.5 25 21.8l8 9.3 8.6-14.2 17.5 23.6v7.9c-13.3 12.1-30.2 12.5-46.3 1.2Z" fill="#6c9eaa" stroke="#244e5d" stroke-width="1.8" stroke-linejoin="round"/><path d="m19 30 6-8.2 4 4.7-4.4-.9-2.5 3.8-1.2-2.5Z M34.2 29l7.4-12.1 6.2 8.4-5.9-3.3-3 3.8-2.3-1.6Z" fill="#f8ffff" stroke="#244e5d" stroke-width="1.3" stroke-linejoin="round"/><path d="M12.8 40.2 23.4 32l8.9 15.7 7.5-11.3 20.1 8.8v5c-13.3 12.1-30.2 12.5-46.3 1.2Z" fill="#2e6e83" stroke="#244e5d" stroke-width="1.7" stroke-linejoin="round"/><path d="M12.8 43.5 22 39l8.4 14.5 7.8-8.3 8.3 5.3 5.3-3.4 6.1 4.2c-13.4 9.1-30.4 9.2-45.1.1Z" fill="#9db53f" stroke="#345d35" stroke-width="1.7" stroke-linejoin="round"/><path d="m18 45 6.5 2.8 2.1 5.5m4.6-1.4 6.2-2.7 3.1 5.2m-1-12.1 5.8 2.4 2.2 4.3" fill="none" stroke="#31596a" stroke-width="1.2" stroke-linecap="round"/><path d="m24 44 3.8 9.6m11.7-8.2-1.3 11.1" fill="none" stroke="#e8df72" stroke-width="1.6" stroke-linecap="round"/></svg>',
-            // Gipfelsammler: mehrere helle, blau umrandete Gipfel mit kleiner Gipfelflagge.
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" focusable="false"><rect width="72" height="72" rx="15" fill="#fff"/><path d="M10 49 22 34l7.1 8.7 11.8-17.4L61 49Z" fill="#e7f2ff" stroke="#668bb7" stroke-width="1.45" stroke-linejoin="round"/><path d="m22 34 4.2 5.2-4.5-1.2-3 3.9-1.5-1.7Z M40.9 25.3l6.3 8.8-5.9-3.1-3 3.4-2-1.2Z" fill="#fff" stroke="#668bb7" stroke-width="1.2" stroke-linejoin="round"/><path d="M31 49 42 32l5.5 7.2 5.1-7.7L63 49Z" fill="#c8e2fb" stroke="#668bb7" stroke-width="1.4" stroke-linejoin="round"/><path d="M47.8 33.1 52 27l3.9 5.2" fill="#fff" stroke="#668bb7" stroke-width="1.1" stroke-linejoin="round"/><path d="M49.1 29.1V11.8" stroke="#567ca8" stroke-width="1.6" stroke-linecap="round"/><path d="M49.3 12.4h8l-3.2 3.3 3.1 3.2h-7.9Z" fill="#7da7d4" stroke="#567ca8" stroke-width="1.2" stroke-linejoin="round"/><path d="M12 49h50" stroke="#668bb7" stroke-width="1.4" stroke-linecap="round"/></svg>',
-            // Ausdauer-Alpinist: dunkelgrüner Kompassring, alpine Silhouette und dynamische Nadel.
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" focusable="false"><rect width="72" height="72" rx="15" fill="#fff"/><circle cx="36" cy="36" r="25" fill="#fff" stroke="#215b3d" stroke-width="1.8"/><circle cx="36" cy="36" r="20.7" fill="none" stroke="#538663" stroke-width="1.2"/><path d="M16.5 31.5 24 20.8l3.5 5.1 5.7-9.1 7.2 10.4 3.7-5.2 10.1 12.2" fill="none" stroke="#225b3d" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="m20 30 4-7.3 3.3 7.3m4.1-4.3 3.8-7.1 3.7 7.1m5.5-.2 3.7-4.7 5.1 8.1" fill="#a9c7a9" stroke="#225b3d" stroke-width="1.1" stroke-linejoin="round"/><path d="M27 30.4 22.6 23l-4.4 7.4m26.5 0-4.3-7.6-4.1 7.6" fill="none" stroke="#225b3d" stroke-width="1.3" stroke-linecap="round"/><circle cx="36" cy="40" r="14.5" fill="#e5f0e8" stroke="#225b3d" stroke-width="1.8"/><circle cx="36" cy="40" r="10.3" fill="none" stroke="#4a8a66" stroke-width="1.2" stroke-dasharray="2 2"/><path d="m37.9 29.7-7.2 12.2 8.9-2.2 2.5-9.2-4.2-.8Z" fill="#4c8a75" stroke="#215b3d" stroke-width="1.1" stroke-linejoin="round"/><path d="m37.9 29.7-1.7 10 6-9.2-4.3-.8Z" fill="#b7d6e8" stroke="#215b3d" stroke-width="1"/><path d="m30.7 41.9 6.1-1.6 2.8 7.8-8.9-6.2Z" fill="#f4faf3" stroke="#215b3d" stroke-width="1.1" stroke-linejoin="round"/><path d="M36 13v4m0 36v4m-23-21h4m38 0h4" stroke="#215b3d" stroke-width="1.4" stroke-linecap="round"/></svg>',
-            // Steilheits-Profi: gelbe Sonnenscheibe, dunkle steile Felsflanke und Blitz.
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" focusable="false"><rect width="72" height="72" rx="15" fill="#fff"/><circle cx="36" cy="36" r="26" fill="#ffd43b"/><path d="M13 55.5 15.5 45l6.2-2.4 1.2-8.4 6.7 1.7 3.1-11.2 5.8 4.1 2.2-9.1 5.2 5.2 3.2-2.9 1.9 12.3 5.7 3.5 2.8 17.7Z" fill="#292c2d" stroke="#181a1c" stroke-width="1.8" stroke-linejoin="round"/><path d="m17 54 3.5-8.2 5.3 1.2 2.6-10.4 3.9-1.2 4.9-10.4 2.2 12.5-5.5 6.6-1.1 10.1Z" fill="#55595a" stroke="#181a1c" stroke-width="1.1" stroke-linejoin="round"/><path d="m42.5 25.5-8.2 14.2h5.4l-4.2 14.1 12.3-19.2h-6.1l2.9-9.1Z" fill="#ffdf4f" stroke="#272727" stroke-width="1.5" stroke-linejoin="round"/><path d="m47.6 33.3 4.9 3.2 1.6 13.7m-31.2-6.1 4.6-1.7" fill="none" stroke="#929596" stroke-width="1.4" stroke-linecap="round"/></svg>',
-            // Vielseitiger Wanderer: gelber Wegweiserpfosten mit blauen, roten und orangefarbenen Routen.
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" focusable="false"><rect width="72" height="72" rx="15" fill="#fff"/><path d="M33.4 13h6.8v52h-6.8z" fill="#f7c342" stroke="#25292d" stroke-width="2" stroke-linejoin="round"/><path d="M31.8 8.5h10v5.1h-10z M32.8 4.5h8v4h-8z" fill="#f7c342" stroke="#25292d" stroke-width="1.8" stroke-linejoin="round"/><path d="M33.4 20.3H17l-8.4 7.5 8.4 7.6h16.4Z" fill="#5e9de3" stroke="#25292d" stroke-width="2" stroke-linejoin="round"/><path d="M39.9 31.7h16.3l8.3 7.6-8.3 7.5H39.9Z" fill="#f0785c" stroke="#25292d" stroke-width="2" stroke-linejoin="round"/><path d="M33.4 43.2H17.2l-8.4 7.4 8.4 7.5h16.2Z" fill="#f3a24f" stroke="#25292d" stroke-width="2" stroke-linejoin="round"/><path d="M27.5 27.8h-8.4m-2.7 0 2.8-2.7m-2.8 2.7 2.8 2.7m27.1 11.1h8.2m2.8 0-2.8-2.7m2.8 2.7-2.8 2.7m-22.8 7.9h-8.5m-2.7 0 2.7-2.7m-2.7 2.7 2.7 2.7" fill="none" stroke="#23292e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+            // Höhenmeter-Spezialist: gestaffelte Bergflanken, echte Schneekappen und Höhenlinien.
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" focusable="false"><rect width="72" height="72" rx="15" fill="#fff"/><circle cx="36" cy="36" r="25" fill="#c3e7e8" stroke="#355c68" stroke-width="2"/><path d="M12 42 23 26 31 34 43 17 59 39 59 49 13 49Z" fill="#709eaa" stroke="#244e5d" stroke-width="1.6" stroke-linejoin="round"/><path d="m17.5 34 5.5-8 5.2 6.8-4.1-1.7-2.6 2.1-1.4-1.3ZM35.3 28.5 43 17l6.6 9.2-5.4-3.1-2.6 3.1-2.4-1.4Z" fill="#f8ffff" stroke="#355c68" stroke-width="1.1" stroke-linejoin="round"/><path d="M12.5 43.5 23.5 35 32 49 39 37 59.5 45V51c-13.2 10.2-32.1 10.2-47 0Z" fill="#2e6e83" stroke="#244e5d" stroke-width="1.4" stroke-linejoin="round"/><path d="M13 49.5 22 44l8.8 12.3 7.8-7.9 8.8 5.2 5-3.4 6.1 3.8c-13.8 7.9-31.5 8-45.5.2Z" fill="#9eb844" stroke="#345d35" stroke-width="1.4" stroke-linejoin="round"/><path d="m18.8 49 5.4 1.9m4.8 1.6 5.1-2.7m8.5-.1 4.4 2.2m-17.7 2.2 2.3 2.9m7.8-8.6-.8 6.7" fill="none" stroke="#e8df82" stroke-width="1.2" stroke-linecap="round"/></svg>',
+            // Gipfelsammler: drei klar unterscheidbare Gipfel und eine Flagge am höchsten Punkt.
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" focusable="false"><rect width="72" height="72" rx="15" fill="#fff"/><path d="M9 50 22 34 30 43 39 29 52 50Z" fill="#e7f2ff" stroke="#668bb7" stroke-width="1.45" stroke-linejoin="round"/><path d="M24 50 42 23 61 50Z" fill="#c8e2fb" stroke="#668bb7" stroke-width="1.5" stroke-linejoin="round"/><path d="m38.7 28 3.3-5 4 6-3.5-1.6-1.8 1.8Z" fill="#fff" stroke="#668bb7" stroke-width="1.05" stroke-linejoin="round"/><path d="m16 41.5 6-7.5 4.6 5.2-4-1.4-2.1 2.3-1.7-1.2Z" fill="#fff" stroke="#668bb7" stroke-width="1" stroke-linejoin="round"/><path d="M42 23V11" stroke="#567ca8" stroke-width="1.6" stroke-linecap="round"/><path d="M42.3 11.5H55l-4.1 3.8 4.1 3.8H42.3Z" fill="#7da7d4" stroke="#567ca8" stroke-width="1.2" stroke-linejoin="round"/><path d="M11 50h51" stroke="#668bb7" stroke-width="1.4" stroke-linecap="round"/></svg>',
+            // Ausdauer-Alpinist: sauberer Kompassring; Bergsilhouette oben, Richtungsnadel im eigenen Zifferblatt.
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" focusable="false"><rect width="72" height="72" rx="15" fill="#fff"/><circle cx="36" cy="36" r="25" fill="#f8fcf8" stroke="#215b3d" stroke-width="1.9"/><circle cx="36" cy="36" r="20.5" fill="none" stroke="#5b916b" stroke-width="1.2"/><path d="M36 12v4m0 40v4M12 36h4m40 0h4M19 19l2.8 2.8m28.4 28.4L53 53M53 19l-2.8 2.8M21.8 50.2 19 53" fill="none" stroke="#215b3d" stroke-width="1.35" stroke-linecap="round"/><path d="M17.5 31.5 25 21.5 29.5 27 34 19.5 41 30 45 24.5 54.5 34" fill="#b5d2b5" stroke="#286344" stroke-width="1.35" stroke-linejoin="round"/><path d="M23 34 28 29.5 33 34.5 37 29.5 42 35" fill="none" stroke="#286344" stroke-width="1.1" stroke-linecap="round"/><circle cx="36" cy="43" r="11.3" fill="#e5f1e7" stroke="#286344" stroke-width="1.5"/><circle cx="36" cy="43" r="7.5" fill="none" stroke="#679875" stroke-width="1" stroke-dasharray="1.8 1.8"/><path d="m37.5 33.4-7.2 12.2 7.1-2.2 4.8-9.1-4.7-.9Z" fill="#2b805b" stroke="#215b3d" stroke-width="1.1" stroke-linejoin="round"/><path d="m37.5 33.4-.1 10 4.8-9.1Z" fill="#c5dfeb"/><circle cx="36" cy="43" r="1.7" fill="#fff" stroke="#215b3d" stroke-width="1"/></svg>',
+            // Steilheits-Profi: steile, kantige Felswand und getrennt lesbarer gelber Blitz.
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" focusable="false"><rect width="72" height="72" rx="15" fill="#fff"/><circle cx="36" cy="36" r="26" fill="#ffd43b"/><path d="M12 56 15.5 45 22 42.5 23.5 34 30 35.8 33.4 25.5 39.2 29.5 42 19.8 47 25 50.6 22.6 52.2 34.3 57.4 38.2 60 56Z" fill="#292c2d" stroke="#181a1c" stroke-width="1.7" stroke-linejoin="round"/><path d="m17.3 54 3.3-8.1 5.6 1.5 2.5-9.2 4-1.7 3-7.1-1.2 10.4-4.4 5.1-1.4 9.1Z" fill="#53595b" stroke="#181a1c" stroke-width="1.1" stroke-linejoin="round"/><path d="m43 25.4-8.3 14.1h5.6l-4.1 14 12.6-19.2h-6.4l2.8-8.9Z" fill="#ffdf4f" stroke="#242628" stroke-width="1.5" stroke-linejoin="round"/><path d="m48.8 33.6 3.3 3.6 1.2 9.8" fill="none" stroke="#9b9fa0" stroke-width="1.2" stroke-linecap="round"/></svg>',
+            // Vielseitiger Wanderer: ein gerader Wegweiserpfosten, drei getrennte Pfeile in verschiedene Richtungen.
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" focusable="false"><rect width="72" height="72" rx="15" fill="#fff"/><path d="M33.6 12h5.5v53h-5.5Z" fill="#f5c442" stroke="#25292d" stroke-width="1.8" stroke-linejoin="round"/><path d="M32.2 11.8h8.3" stroke="#25292d" stroke-width="2.1" stroke-linecap="round"/><circle cx="36.4" cy="8.2" r="3.2" fill="#f5c442" stroke="#25292d" stroke-width="1.6"/><path d="M34 18H17.5L8.7 25.4l8.8 7.4H34Z" fill="#5e9de3" stroke="#25292d" stroke-width="1.8" stroke-linejoin="round"/><path d="M39.1 29.3h16.2l8.7 7.3-8.7 7.5H39.1Z" fill="#ef795f" stroke="#25292d" stroke-width="1.8" stroke-linejoin="round"/><path d="M34 40.5H17.5l-8.8 7.4 8.8 7.4H34Z" fill="#f2a34f" stroke="#25292d" stroke-width="1.8" stroke-linejoin="round"/><path d="M27.5 25.5h-8.1m-2.3 0 2.4-2.1m-2.4 2.1 2.4 2.1m27 11.1h8m2.5 0-2.5-2.1m2.5 2.1-2.5 2.1m-29.7 9.2h-5.8m-2.3 0 2.4-2.1m-2.4 2.1 2.4 2.1" fill="none" stroke="#fff" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         ];
-
 
         const levelDigits = level => level.name === 'Ausdauer-Alpinist' || level.name === 'Steilheits-Profi' ? 1 : 0;
 
-        // Gemeinsame Vorlage: genau dieser Entwicklungsabschnitt wird beim Klick im Modal angezeigt.
         const renderDevelopmentCard = (l, i) => {
-            const valueText = l.value === null ? '– ' + l.unit : fmt(l.value, levelDigits(l)) + ' ' + l.unit;
             const currentIndex = l.current ? l.tiers.indexOf(l.current) : -1;
+            const valueText = l.value === null ? '– ' + l.unit : fmt(l.value, levelDigits(l)) + ' ' + l.unit;
             const tierText = l.value === null ? 'Noch nicht bestimmbar' : l.current ? l.current[1] : 'Dein erster Rang wartet';
             const goalText = l.value === null
                 ? 'Es fehlen gültige Daten für diese Spezialisierung.'
                 : l.next
                     ? fmt(Math.max(0, l.next[0] - l.value), levelDigits(l)) + ' ' + l.unit + ' bis ' + l.next[1] + ' (' + fmt(l.next[0], levelDigits(l)) + ' ' + l.unit + ')'
-                    : 'Höchster definierter Rang freigeschaltet – weitere Fortschritte werden weiterhin gezählt.';
-            const rankSteps = l.tiers.map((tier, index) => {
+                    : 'Alle fünf Rangstufen sind erreicht. Weitere Fortschritte werden weiterhin gezählt.';
+            const nextIndex = l.next ? l.tiers.indexOf(l.next) : -1;
+            const rankRows = l.tiers.map((tier, index) => {
                 const reached = index <= currentIndex;
-                const nextStep = l.next && index === l.tiers.indexOf(l.next);
-                return '<span class="bergwelt-level-rank-step' + (reached ? ' is-reached' : '') + (nextStep ? ' is-next' : '') + '" title="' + escapeHTML(tier[1]) + '" aria-label="Rang ' + (index + 1) + ': ' + escapeHTML(tier[1]) + '"></span>';
+                const isNext = index === nextIndex;
+                return '<li class="bergwelt-level-modal-rank-row' + (reached ? ' is-reached' : '') + (isNext ? ' is-next' : '') + '">' +
+                    '<span class="bergwelt-level-modal-rank-number">' + (index + 1) + '</span>' +
+                    '<span class="bergwelt-level-modal-rank-copy"><strong>' + escapeHTML(tier[1]) + '</strong><small>' + fmt(tier[0], levelDigits(l)) + ' ' + escapeHTML(l.unit) + '</small></span>' +
+                    '<span class="bergwelt-level-modal-rank-status">' + (reached ? 'Erreicht' : isNext ? 'Als Nächstes' : 'Offen') + '</span>' +
+                '</li>';
             }).join('');
-            return '<article class="bergwelt-level bergwelt-level-card' + (l.value === null ? ' has-no-data' : '') + (l.current ? ' has-rank' : '') + '">' +
-                '<div class="bergwelt-level-top"><div class="bergwelt-level-title-wrap"><span class="bergwelt-level-emblem" aria-hidden="true">' + badgeIcons[i] + '</span><div><strong>' + escapeHTML(l.name) + '</strong><small>' + escapeHTML(tierText) + '</small></div></div><div class="bergwelt-level-value-wrap"><strong>' + valueText + '</strong><span>' + (currentIndex >= 0 ? 'RANG ' + (currentIndex + 1) + ' / 5' : l.value === null ? 'DATEN FEHLEN' : 'NOCH OFFEN') + '</span></div></div>' +
-                '<div class="bergwelt-level-rank-steps" aria-label="' + (currentIndex + 1) + ' von 5 Rängen erreicht">' + rankSteps + '</div>' +
-                (l.pct === null ? '<p class="bergwelt-level-goal">' + goalText + '</p>' : '<div class="bergwelt-track bergwelt-level-progress-track" role="progressbar" aria-label="Fortschritt zur nächsten Stufe für ' + escapeHTML(l.name) + '" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(l.pct) + '"><span style="width:' + l.pct + '%"></span></div><div class="bergwelt-level-progress-meta"><span>' + (l.next ? 'Fortschritt zur nächsten Stufe' : 'Alle Stufen abgeschlossen') + '</span><strong>' + fmt(l.pct) + ' %</strong></div><p class="bergwelt-level-goal">' + goalText + '</p>') +
-                '<p class="bergwelt-level-detail">' + escapeHTML(l.detail) + '</p></article>';
+            return '<section class="bergwelt-level-modal-detail">' +
+                '<div class="bergwelt-level-modal-hero"><div class="bergwelt-level-modal-icon" aria-hidden="true">' + badgeIcons[i] + '</div>' +
+                    '<div class="bergwelt-level-modal-hero-copy"><span class="bergwelt-level-modal-kicker">DEINE ENTWICKLUNG</span><h3>' + escapeHTML(l.name) + '</h3><p>' + escapeHTML(tierText) + '</p></div></div>' +
+                '<div class="bergwelt-level-modal-metrics">' +
+                    '<div class="bergwelt-level-modal-metric"><span>Dein Wert</span><strong>' + valueText + '</strong></div>' +
+                    '<div class="bergwelt-level-modal-metric"><span>Aktueller Rang</span><strong>' + (currentIndex >= 0 ? (currentIndex + 1) + ' von 5' : 'Noch offen') + '</strong></div>' +
+                '</div>' +
+                '<section class="bergwelt-level-modal-progress">' +
+                    '<div class="bergwelt-level-modal-progress-head"><div><span>' + (l.next ? 'NÄCHSTER RANG' : l.value === null ? 'FORTSCHRITT' : 'RANGZIEL') + '</span><strong>' + escapeHTML(l.next ? l.next[1] : l.value === null ? 'Noch nicht bestimmbar' : 'Alle Rangstufen erreicht') + '</strong></div><b>' + (l.pct === null ? '–' : fmt(l.pct) + ' %') + '</b></div>' +
+                    '<div class="bergwelt-level-modal-progress-track" role="progressbar" aria-label="Fortschritt für ' + escapeHTML(l.name) + '" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + (l.pct === null ? 0 : Math.round(l.pct)) + '"><span style="width:' + (l.pct === null ? 0 : l.pct) + '%"></span></div>' +
+                    '<p>' + escapeHTML(goalText) + '</p>' +
+                '</section>' +
+                '<section class="bergwelt-level-modal-ranks"><h4>Rangstufen</h4><ol>' + rankRows + '</ol></section>' +
+                '<p class="bergwelt-level-modal-explanation">' + escapeHTML(l.detail) + '</p>' +
+            '</section>';
         };
         const developmentCards = levels.map(renderDevelopmentCard);
 
@@ -378,7 +392,6 @@
             }).join('') +
             '</div>';
 
-        // Modal liegt außerhalb des scrollenden Panels, damit es mobil nicht abgeschnitten wird.
         const oldLevelModal = document.getElementById('bergwelt-level-detail-modal');
         if (oldLevelModal) oldLevelModal.remove();
         const modal = document.createElement('div');
@@ -408,12 +421,12 @@
             if (lastTrigger && lastTrigger.isConnected) lastTrigger.focus({ preventScroll: true });
         };
         const openLevelModal = (index, trigger) => {
+            const level = levels[Number(index)];
             const detail = developmentCards[Number(index)];
-            if (!detail) return;
+            if (!detail || !level) return;
             lastTrigger = trigger;
-            modalBody.innerHTML =
-                '<div class="bergwelt-level-detail-intro"><span>DEINE ENTWICKLUNG</span><h3>Fortschritt je Spezialisierung</h3><p>Hier siehst du den zugehörigen Entwicklungsabschnitt.</p></div>' +
-                detail;
+            modal.querySelector('#bergwelt-level-detail-title').textContent = level.name;
+            modalBody.innerHTML = detail;
             modal.classList.remove('hidden');
             modal.setAttribute('aria-hidden', 'false');
             document.body.classList.add('modal-open');
