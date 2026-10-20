@@ -6407,3 +6407,9 @@ body.summit {
         text-align: center !important;
     }
 }
+
+
+/* Green-Theme: Achievements-Gesamtzahl in der passenden Akzentfarbe hervorheben. */
+body.green #achievements-view .achievements-summary-main strong {
+    color: var(--accent, #72d6a3) !important;
+}
