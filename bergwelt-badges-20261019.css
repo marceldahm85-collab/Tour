@@ -1685,3 +1685,66 @@
         height: 60px !important;
     }
 }
+
+
+/* Level: Erfolgs-Abzeichen sind als ganze Karten anklickbar */
+#wrapped-view .bergwelt-level-badge {
+    appearance: none;
+    -webkit-appearance: none;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    font-family: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+#wrapped-view .bergwelt-level-badge:hover {
+    border-color: color-mix(in srgb, var(--accent-color, currentColor) 48%, transparent);
+    transform: translateY(-1px);
+}
+#wrapped-view .bergwelt-level-badge:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--accent-color, currentColor) 70%, white);
+    outline-offset: 3px;
+}
+#wrapped-view .bergwelt-level-badge-body { text-align: left; }
+#bergwelt-level-detail-modal .modal-card {
+    width: min(620px, calc(100vw - 32px));
+    max-height: min(84vh, 760px);
+}
+#bergwelt-level-detail-modal .bergwelt-level-detail-intro { margin: 0 0 14px; }
+#bergwelt-level-detail-modal .bergwelt-level-detail-intro > span {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--accent-color, currentColor);
+    font-size: .7rem;
+    font-weight: 850;
+    letter-spacing: .11em;
+}
+#bergwelt-level-detail-modal .bergwelt-level-detail-intro h3 {
+    margin: 0 0 6px;
+    font-size: 1.1rem;
+    line-height: 1.2;
+}
+#bergwelt-level-detail-modal .bergwelt-level-detail-intro p {
+    margin: 0;
+    font-size: .82rem;
+    line-height: 1.45;
+    opacity: .75;
+}
+#bergwelt-level-detail-modal .bergwelt-level-detail-body .bergwelt-level {
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+#bergwelt-level-detail-modal .bergwelt-level-detail-body .bergwelt-level-top { align-items: center; }
+@media (max-width: 560px) {
+    #bergwelt-level-detail-modal .modal-card {
+        width: 100%;
+        max-height: 88svh;
+        border-radius: 22px 22px 0 0;
+        padding-bottom: calc(18px + env(safe-area-inset-bottom));
+    }
+    #wrapped-view .bergwelt-level-badge:hover { transform: none; }
+}
