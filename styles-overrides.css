@@ -6158,3 +6158,14 @@ body.summit {
 #achievements-view .achievement-puzzle-tile:nth-child(n+7):nth-child(-n+9) { --puzzle-y: 50%; }
 #achievements-view .achievement-puzzle-tile:nth-child(n+10):nth-child(-n+12) { --puzzle-y: 75.77%; }
 #achievements-view .achievement-puzzle-tile:nth-child(n+13) { --puzzle-y: 101.55%; }
+
+
+/* Panorama-Ausrichtung trotz der überlappenden Puzzle-Konturen beibehalten. */
+#achievements-view .achievement-puzzle-tile:nth-child(3n+1) { --puzzle-x: -3.19%; }
+#achievements-view .achievement-puzzle-tile:nth-child(3n+2) { --puzzle-x: 103.19%; }
+#achievements-view .achievement-puzzle-tile:nth-child(3n) { --puzzle-x: 209.57%; }
+#achievements-view .achievement-puzzle-tile:nth-child(-n+3) { --puzzle-y: -1.55%; }
+#achievements-view .achievement-puzzle-tile:nth-child(n+4):nth-child(-n+6) { --puzzle-y: 50%; }
+#achievements-view .achievement-puzzle-tile:nth-child(n+7):nth-child(-n+9) { --puzzle-y: 101.55%; }
+#achievements-view .achievement-puzzle-tile:nth-child(n+10):nth-child(-n+12) { --puzzle-y: 153.09%; }
+#achievements-view .achievement-puzzle-tile:nth-child(n+13) { --puzzle-y: 204.64%; }
