@@ -6065,3 +6065,77 @@ body.summit {
     #achievement-category-modal .achievement-row-tour { font-size:.64rem; }
     #achievement-category-modal .achievement-row-date { font-size:.61rem; }
 }
+
+
+/* Achievement-Puzzle: echte, gegeneinander passende Puzzle-Konturen statt Kreispins. */
+#achievements-view #achievements-categories { position: relative; }
+#achievements-view .achievement-puzzle-defs {
+    position: absolute;
+    left: -2px;
+    top: -2px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+#achievements-view .achievement-puzzle-grid {
+    gap: 2px !important;
+    padding: 4px 3px 7px !important;
+    background: rgba(7, 24, 37, .42);
+    border-radius: 10px;
+}
+#achievements-view .achievement-puzzle-tile {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    filter: drop-shadow(0 0 1.2px rgba(244, 250, 255, .95)) drop-shadow(0 3px 5px rgba(0, 0, 0, .30)) !important;
+}
+#achievements-view .achievement-puzzle-tile::before,
+#achievements-view .achievement-puzzle-tile::after {
+    content: none !important;
+    display: none !important;
+}
+#achievements-view .achievement-puzzle-tile.started {
+    box-shadow: none !important;
+    filter: drop-shadow(0 0 1.5px rgba(255, 221, 143, .98)) drop-shadow(0 3px 5px rgba(0, 0, 0, .30)) !important;
+}
+#achievements-view .achievement-puzzle-tile.complete {
+    box-shadow: none !important;
+    filter: drop-shadow(0 0 1.7px rgba(132, 246, 187, .98)) drop-shadow(0 0 5px rgba(132, 246, 187, .22)) drop-shadow(0 3px 5px rgba(0, 0, 0, .30)) !important;
+}
+
+/* Achievement-Listen kompakter: Tour und Datum direkt unter dem Achievement-Namen. */
+#achievements-view .achievement-inline-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+    row-gap: 2px;
+    padding: 7px 10px;
+}
+#achievements-view .achievement-row-meta { display: none !important; }
+#achievements-view .achievement-row-copy small.achievement-row-subline {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 5px;
+    min-width: 0;
+    text-align: left;
+}
+#achievements-view .achievement-row-subline .achievement-row-tour {
+    display: inline;
+    max-width: 100%;
+    font-size: .64rem;
+    line-height: 1.2;
+    text-align: left;
+    overflow-wrap: anywhere;
+}
+#achievements-view .achievement-row-subline button.achievement-row-tour-link {
+    display: inline;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    text-align: left;
+}
+#achievements-view .achievement-row-subline .achievement-row-date {
+    display: inline-block;
+    font-size: .62rem;
+    white-space: nowrap;
+}
