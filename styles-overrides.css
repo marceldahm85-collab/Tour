@@ -6189,32 +6189,37 @@ body.summit {
 #achievements-view .achievement-puzzle-tile:nth-child(n+13) { --puzzle-y: 100%; }
 
 
-/* Final Achievement-Fotopuzzle: ein echtes Alpenfoto, gemeinsam über 15 Kacheln. */
+/* Achievement-Fotopuzzle: 15 Kacheln zeigen gemeinsam ein durchgehendes Alpenfoto.
+   Die Form wird auf der Kachel selbst per SVG-clipPath gebildet. */
 #achievements-view .achievement-puzzle-grid {
     grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
     grid-auto-rows: minmax(76px, auto) !important;
-    gap: 3px !important;
+    gap: 0 !important;
     padding: 4px !important;
     overflow: visible !important;
+    isolation: isolate;
 }
 #achievements-view .achievement-puzzle-tile {
-    clip-path: none !important;
-    -webkit-clip-path: none !important;
+    clip-path: var(--unused-clip-path, none);
+    -webkit-clip-path: var(--unused-clip-path, none);
     min-width: 0 !important;
     min-height: 76px !important;
     padding: 7px 5px 6px !important;
-    border: 1px solid rgba(245,250,255,.85) !important;
-    border-radius: 7px !important;
-    overflow: hidden !important;
-    background-image: linear-gradient(155deg,rgba(7,20,34,.16),rgba(7,20,34,.38)),url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1800&q=85") !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+    color: #fff !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,.9) !important;
+    background-color: #254b5c !important;
+    background-image: linear-gradient(155deg,rgba(7,20,34,.10),rgba(7,20,34,.43)),url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1800&q=85") !important;
     background-size: 100% 100%, 500% 300% !important;
     background-repeat: no-repeat, no-repeat !important;
     background-position: center, var(--photo-x, 0%) var(--photo-y, 0%) !important;
-    filter: none !important;
+    filter: drop-shadow(0 0 1.5px rgba(244,250,255,.98)) drop-shadow(0 3px 5px rgba(0,0,0,.35)) !important;
     transform: none !important;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
 }
-#achievements-view .achievement-puzzle-tile::before,
-#achievements-view .achievement-puzzle-tile::after { display: none !important; content: none !important; }
 #achievements-view .achievement-puzzle-tile:nth-child(5n+1) { --photo-x: 0%; }
 #achievements-view .achievement-puzzle-tile:nth-child(5n+2) { --photo-x: 25%; }
 #achievements-view .achievement-puzzle-tile:nth-child(5n+3) { --photo-x: 50%; }
@@ -6225,11 +6230,11 @@ body.summit {
 #achievements-view .achievement-puzzle-tile:nth-child(n+11):nth-child(-n+15) { --photo-y: 100%; }
 #achievements-view .achievement-puzzle-tile-label strong { font-size: clamp(7px, 2vw, 10px) !important; }
 #achievements-view .achievement-puzzle-tile-state { min-width: 17px !important; min-height: 17px !important; font-size: 8px !important; }
+#achievements-view .achievement-puzzle-tile:focus-visible { outline: 3px solid var(--accent,#f9d77e) !important; outline-offset: 2px; }
 @media (max-width: 380px) {
   #achievements-view .achievement-puzzle-grid { grid-auto-rows: minmax(68px, auto) !important; }
   #achievements-view .achievement-puzzle-tile { min-height: 68px !important; padding: 5px 3px !important; }
 }
-
 
 /* Das Tourenbuch gehört zur Bergwelt, nicht in die Sicherungsansicht. */
 #backup-view #pdf-export-card { display: none !important; }
