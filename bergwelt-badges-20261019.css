@@ -1853,3 +1853,38 @@
         gap:4px;
     }
 }
+
+
+/* Level-Dialog: Schließen-Aktion mit dauerhaft hohem Kontrast, auch im Green-Theme. */
+#bergwelt-level-detail-modal .modal-header button[data-level-detail-close="button"] {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 42px !important;
+    width: 42px !important;
+    min-width: 42px !important;
+    height: 42px !important;
+    padding: 0 !important;
+    border: 2px solid #d5a52a !important;
+    border-radius: 50% !important;
+    background: #ffe38a !important;
+    color: #173322 !important;
+    -webkit-text-fill-color: #173322 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .28) !important;
+    font-size: 20px !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    text-shadow: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    cursor: pointer;
+}
+#bergwelt-level-detail-modal .modal-header button[data-level-detail-close="button"]:hover {
+    background: #fff0b8 !important;
+    color: #102719 !important;
+    -webkit-text-fill-color: #102719 !important;
+}
+#bergwelt-level-detail-modal .modal-header button[data-level-detail-close="button"]:focus-visible {
+    outline: 3px solid #fff !important;
+    outline-offset: 2px !important;
+}
