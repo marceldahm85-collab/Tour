@@ -6200,8 +6200,6 @@ body.summit {
     isolation: isolate;
 }
 #achievements-view .achievement-puzzle-tile {
-    clip-path: var(--unused-clip-path, none);
-    -webkit-clip-path: var(--unused-clip-path, none);
     min-width: 0 !important;
     min-height: 76px !important;
     padding: 7px 5px 6px !important;
@@ -6228,6 +6226,20 @@ body.summit {
 #achievements-view .achievement-puzzle-tile:nth-child(-n+5) { --photo-y: 0%; }
 #achievements-view .achievement-puzzle-tile:nth-child(n+6):nth-child(-n+10) { --photo-y: 50%; }
 #achievements-view .achievement-puzzle-tile:nth-child(n+11):nth-child(-n+15) { --photo-y: 100%; }
+/* Zustandsfarben dürfen das Foto nicht mehr mit einem Hintergrund-Shorthand verdecken.
+   Die spezifischeren Statusselektoren bekommen ausdrücklich dieselben Bildausschnitte. */
+#achievements-view .achievement-category-tile.achievement-puzzle-tile.complete,
+#achievements-view .achievement-category-tile.achievement-puzzle-tile.started,
+#achievements-view .achievement-category-tile.achievement-puzzle-tile.empty {
+    background-color: #254b5c !important;
+    background-image: linear-gradient(155deg,rgba(7,20,34,.10),rgba(7,20,34,.43)),url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1800&q=85") !important;
+    background-size: 100% 100%, 500% 300% !important;
+    background-repeat: no-repeat, no-repeat !important;
+    background-position: center, var(--photo-x, 0%) var(--photo-y, 0%) !important;
+}
+#achievements-view .achievement-category-tile.achievement-puzzle-tile.empty {
+    opacity: 1 !important;
+}
 #achievements-view .achievement-puzzle-tile-label strong { font-size: clamp(7px, 2vw, 10px) !important; }
 #achievements-view .achievement-puzzle-tile-state { min-width: 17px !important; min-height: 17px !important; font-size: 8px !important; }
 #achievements-view .achievement-puzzle-tile:focus-visible { outline: 3px solid var(--accent,#f9d77e) !important; outline-offset: 2px; }
