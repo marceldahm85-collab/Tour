@@ -2,8 +2,8 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix16') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261019-fix16';
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261020-fix17') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261020-fix17';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
