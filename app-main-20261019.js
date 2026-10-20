@@ -19637,9 +19637,6 @@ function openAchievementCategoryModal(categoryId, resultsInput = null) {
                 const unlockDate = r.unlockedAt ? new Date(r.unlockedAt) : null;
                 const dateLabel = unlockDate && !Number.isNaN(unlockDate.getTime())
                     ? unlockDate.toLocaleDateString('de-AT') : '–';
-                const sublineMarkup = catId === 'consistency'
-                    ? (isUnlocked ? escapeHtml(r.unlockedPeriod || '–') : escapeHtml(progressLabel))
-                    : (isUnlocked ? tourMarkup + '<time class="achievement-row-date">' + dateLabel + '</time>' : escapeHtml(progressLabel));
 
                 let progressLabel = 'Noch nicht erreicht';
                 const target = Number(r.progressTarget);
@@ -19659,6 +19656,10 @@ function openAchievementCategoryModal(categoryId, resultsInput = null) {
                 } else if (isUnlocked) {
                     tourMarkup = '<span class="achievement-row-tour">–</span>';
                 }
+
+                const sublineMarkup = catId === 'consistency'
+                    ? (isUnlocked ? escapeHtml(r.unlockedPeriod || '–') : escapeHtml(progressLabel))
+                    : (isUnlocked ? tourMarkup + '<time class="achievement-row-date">' + dateLabel + '</time>' : escapeHtml(progressLabel));
 
                 return `
                     <article class="achievement-inline-row ${isUnlocked ? 'is-unlocked' : 'is-locked'}">
