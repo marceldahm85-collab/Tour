@@ -1888,3 +1888,42 @@
     outline: 3px solid #fff !important;
     outline-offset: 2px !important;
 }
+
+
+/* Höhenwelt – Kontrastfix für den Fortschrittsring.
+   Diese Datei wird von index.html tatsächlich geladen (bergwelt-badges-20261019.css). */
+#wrapped-view .bergwelt-height-moment .bergwelt-height-gauge {
+    background: conic-gradient(
+        color-mix(in srgb, var(--accent, #a87800) 78%, white) 0 var(--moment-progress, 0%),
+        color-mix(in srgb, var(--text-main, #fff) 18%, var(--ui-card-bg, #20252b)) var(--moment-progress, 0%) 100%
+    ) !important;
+    border: 1px solid color-mix(in srgb, var(--accent, #a87800) 65%, white);
+    box-shadow:
+        0 0 0 2px color-mix(in srgb, var(--ui-card-bg, #20252b) 92%, transparent),
+        0 0 14px color-mix(in srgb, var(--accent, #a87800) 36%, transparent);
+}
+#wrapped-view .bergwelt-height-moment .bergwelt-height-gauge > span {
+    background: var(--ui-card-bg, #102016) !important;
+    border: 1px solid color-mix(in srgb, var(--text-main, #fff) 22%, var(--ui-card-bg, #102016));
+    color: var(--text-main, #fff) !important;
+}
+/* Green: explizite Waldgrün-Farben, unabhängig von Fallbacks anderer Themes. */
+body.green #wrapped-view .bergwelt-height-moment .bergwelt-height-gauge {
+    background: conic-gradient(
+        #52b788 0 var(--moment-progress, 0%),
+        rgba(82, 183, 136, 0.22) var(--moment-progress, 0%) 100%
+    ) !important;
+    border-color: #74d6a3;
+    box-shadow:
+        0 0 0 2px rgba(3, 20, 11, 0.95),
+        0 0 14px rgba(82, 183, 136, 0.38);
+}
+body.green #wrapped-view .bergwelt-height-moment .bergwelt-height-gauge > span {
+    background: #082a18 !important;
+    border-color: rgba(116, 214, 163, 0.72);
+    color: #f2fff7 !important;
+}
+#wrapped-view .bergwelt-height-moment.is-achieved .bergwelt-height-gauge,
+body.green #wrapped-view .bergwelt-height-moment.is-achieved .bergwelt-height-gauge {
+    background: conic-gradient(var(--accent, #52b788) 0 100%) !important;
+}
