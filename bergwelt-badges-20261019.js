@@ -2,8 +2,8 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix13') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261019-fix13';
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix14') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261019-fix14';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
@@ -152,9 +152,7 @@
         root.classList.remove('bergwelt-mode');
     }
     function renderHoehenwelt() {
-        const entries = yearTours();
         const allEntries = getTours();
-        const yearAscent = sumKnown(entries, ascentValue);
         const careerAscent = sumKnown(allEntries, ascentValue);
         const total = careerAscent ?? 0;
         // Karriere-Höhenmarken: bekannte Gipfelhöhen plus langfristige Lebenszeitziele.
@@ -181,55 +179,24 @@
             // 5 · 500.000 hm: hochwertige goldene Medaille mit zwei Bändern, Bergrelief und Sternen.
             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" focusable="false"><defs><linearGradient id="hwMedalGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0a7"/><stop offset=".47" stop-color="#edbe4b"/><stop offset="1" stop-color="#b67b24"/></linearGradient><linearGradient id="hwMedalFace" x1="0" y1="0" x2="0.8" y2="1"><stop offset="0" stop-color="#fff4c5"/><stop offset="1" stop-color="#f0cf70"/></linearGradient></defs><rect width="64" height="64" rx="13" fill="#fff"/><path d="M20 5.5h9.5l4 14.8-8.5 3.1Z" fill="#df7058" stroke="#a74b38" stroke-width="1.25" stroke-linejoin="round"/><path d="M35 20.3 39 5.5h9.2l-5.8 18.1Z" fill="#6f9fc8" stroke="#426e99" stroke-width="1.25" stroke-linejoin="round"/><path d="m22.8 17.9 4.1 4.9 4.2-1.5 1.9 3.5-7.8 2.7Z" fill="#f4a18b" opacity=".75"/><circle cx="32.2" cy="40" r="19.1" fill="url(#hwMedalGold)" stroke="#9f6d20" stroke-width="1.8"/><circle cx="32.2" cy="40" r="15.1" fill="url(#hwMedalFace)" stroke="#c28d2e" stroke-width="1.2"/><circle cx="32.2" cy="40" r="12.1" fill="none" stroke="#d6a23d" stroke-width=".9"/><path d="m17.8 44.9 7.7-10.6 4.8 4.6 5.9-8.5 10.9 14.5Z" fill="#8eacb9" stroke="#4d6b77" stroke-width="1.25" stroke-linejoin="round"/><path d="m25.5 34.3 4.8 4.6-4-.6-1.7 2-1.1-1.7Zm10.7-3.9 10.9 14.5-7.2-5.1-3 1.9-2.7-3.2Z" fill="#f9fcff" stroke="#4d6b77" stroke-width="1" stroke-linejoin="round"/><path d="m16.5 21.6 1.6 3.4 3.7.3-2.8 2.4.8 3.5-3.3-1.9-3.2 1.9.7-3.5-2.7-2.4 3.7-.3Z M49.7 18.9l1.1 2.3 2.5.2-1.9 1.6.5 2.4-2.2-1.3-2.2 1.3.5-2.4-1.9-1.6 2.5-.2Z" fill="#f3ce61" stroke="#a97924" stroke-width=".8" stroke-linejoin="round"/><path d="M20.5 56.5h23" stroke="#d4a13a" stroke-width="1.3" stroke-linecap="round"/></svg>'
         ];
-        const next = careerAscent === null ? null : (milestones.find(m => m.height > total) || null);
-        // Fortschritt bedeutet hier: gesammelte Höhenmeter im Verhältnis zum nächsten Ziel.
-        // Dadurch stimmt der Wert mit den Prozentangaben in den einzelnen Höhenmarken überein.
-        const progress = careerAscent === null ? 0 : next
-            ? Math.max(0, Math.min(100, total / next.height * 100))
-            : 100;
         const selectedMilestone = milestones.find(m => m.height === selectedHeightMilestone) || null;
         const milestoneMoment = selectedMilestone ? (() => {
             const reached = careerAscent !== null && total >= selectedMilestone.height;
             const remaining = careerAscent === null ? null : Math.max(0, selectedMilestone.height - total);
             const targetProgress = careerAscent === null ? 0 : Math.max(0, Math.min(100, total / selectedMilestone.height * 100));
-            const detailCopy = careerAscent === null
-                ? 'Für diesen Vergleich fehlen gültige gespeicherte Aufstiegswerte. Sobald Werte vorhanden sind, wird der Fortschritt hier berechnet.'
-                : reached
-                    ? 'Deine gespeicherte Aufstiegssumme liegt bereits über diesem Vergleichswert. Das ist ein rechnerischer Höhenvergleich – keine Aussage über eine konkrete Besteigung.'
-                    : 'Du hast bereits ' + fmt(targetProgress, 1) + ' % des Vergleichswerts gesammelt. Es fehlen noch ' + fmt(remaining) + ' hm. Jede weitere gespeicherte Tour lässt deinen Fortschritt wachsen.';
             return '<section class="bergwelt-height-moment ' + (reached ? 'is-achieved' : 'is-in-progress') + '" id="bergwelt-height-moment" aria-live="polite">' +
                 '<div class="bergwelt-height-moment-top"><div><span class="bergwelt-height-moment-kicker">' + (reached ? '✦ DEIN GIPFELMOMENT' : 'DEIN NÄCHSTES ZIEL') + '</span><h3>' + escapeHTML(selectedMilestone.name) + '</h3></div>' +
                     '<button type="button" class="bergwelt-height-moment-close" data-bergwelt-height-milestone-close aria-label="Gipfelmoment schließen">×</button></div>' +
-                '<p class="bergwelt-height-moment-copy">' + detailCopy + '</p>' +
                 '<div class="bergwelt-height-moment-details">' +
                     '<div><span>DEIN AUFSTIEG</span><strong>' + fmtKnown(careerAscent) + '<small> hm</small></strong></div>' +
                     '<div><span>VERGLEICHSWERT</span><strong>' + fmt(selectedMilestone.height) + '<small> ' + (selectedMilestone.height <= 26544 ? 'm' : 'hm') + '</small></strong></div>' +
                     '<div><span>' + (reached ? 'DARÜBER' : 'NOCH OFFEN') + '</span><strong>' + (careerAscent === null ? '–' : reached ? '+' + fmt(total - selectedMilestone.height) : fmt(remaining)) + '<small> hm</small></strong></div>' +
                 '</div>' +
-                '<div class="bergwelt-height-moment-footer"><div class="bergwelt-height-gauge" style="--moment-progress:' + targetProgress + '%"><span>' + (careerAscent === null ? '–' : reached ? '✓' : fmt(targetProgress, 0) + '%') + '</span></div>' +
-                    '<div><strong>' + (careerAscent === null ? 'Fortschritt offen' : reached ? 'Vergleichsmarke erreicht' : 'Weiter bergauf') + '</strong><small>' + (careerAscent === null ? 'Keine Schätzung bei fehlenden Daten' : reached ? fmt(total / selectedMilestone.height, 1) + '× des Vergleichswerts gesammelt' : fmt(remaining) + ' hm bis zum Ziel') + '</small></div></div>' +
+                '<div class="bergwelt-height-moment-footer"><div class="bergwelt-height-gauge" style="--moment-progress:' + targetProgress + '%"><span>' + (careerAscent === null ? '–' : reached ? '✓' : fmt(targetProgress, 0) + '%') + '</span></div></div>' +
             '</section>';
         })() : '';
         panel.innerHTML = intro('Dein persönlicher Berg · ' + getYear(), 'Höhenwelt', '') +
-            '<div class="bergwelt-height-hero">' +
-                '<div class="bergwelt-height-visual" role="img" aria-label="Symbolischer Berg mit Fortschritt zur nächsten Höhenmarke">' +
-                    '<svg viewBox="0 0 600 230" class="bergwelt-height-mountain" aria-hidden="true">' +
-                        '<defs><linearGradient id="bergwelt-mountain-fill" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="var(--accent-color, #4b8b75)" stop-opacity=".42"/><stop offset="100%" stop-color="var(--accent-color, #4b8b75)" stop-opacity=".04"/></linearGradient></defs>' +
-                        '<path class="bergwelt-height-silhouette" d="M0 210 L85 155 L132 176 L230 58 L280 105 L350 28 L410 96 L456 66 L535 158 L600 128 L600 230 L0 230 Z"/>' +
-                        '<path class="bergwelt-height-ridge" d="M85 155 L132 176 L230 58 L280 105 L350 28 L410 96 L456 66 L535 158"/>' +
-                        '<path class="bergwelt-height-trail" style="stroke-dashoffset:' + (520 * (1 - progress / 100)) + '" d="M25 208 C100 198 125 175 155 164 S210 122 230 108 S285 100 305 79 S345 67 350 45"/>' +
-                        '<circle class="bergwelt-height-summit" cx="350" cy="45" r="7"/>' +
-                    '</svg>' +
-                    '<div class="bergwelt-height-overlay"><span>Dein kumulierter Aufstieg</span><strong>' + fmtKnown(careerAscent) + ' <small>hm</small></strong></div>' +
-                '</div>' +
-                '<div class="bergwelt-height-progress"><div class="bergwelt-height-progress-label"><span>' + (careerAscent === null ? 'Fortschritt nicht verfügbar' : next ? 'Anteil der nächsten Höhenmarke · ' + next.name : 'Alle bisherigen Höhenmarken erreicht') + '</span><strong>' + (careerAscent === null ? '–' : fmt(progress, 0) + '%') + '</strong></div><div class="bergwelt-track"><span style="width:' + progress + '%"></span></div>' +
-                    '<p class="bergwelt-footnote">' + (careerAscent === null ? 'Es fehlen gültige Aufstiegswerte.' : next ? 'Du hast ' + fmt(progress, 0) + ' % der nächsten Marke gesammelt. Noch ' + fmt(Math.max(0, next.height - total)) + ' hm bis ' + next.name + ' (' + fmt(next.height) + ' hm).' : 'Die nächste Vergleichsstufe ist erreicht. Deine persönliche Höhenwelt wächst weiter.') + '</p></div>' +
-            '</div>' +
-            '<div class="bergwelt-grid">' +
-                statCard('Aufstieg im Jahr ' + getYear(), fmtKnown(yearAscent), 'hm') +
-                statCard('Touren insgesamt', fmtKnown(allEntries.length ? uniqueTourCount(allEntries) : null), '') +
-            '</div>' +
-            '<div class="bergwelt-height-milestone-heading"><div><span>DEINE HÖHENMARKEN</span><h3>Wähle deinen Gipfelmoment</h3></div><p>Tippe eine Marke an, um deinen Fortschritt zu erleben.</p></div>' +
+            '<div class="bergwelt-height-milestone-heading"><div><span>DEINE HÖHENMARKEN</span></div></div>' +
             '<div class="bergwelt-height-milestones" aria-label="Interaktive Höhenmarken">' +
             milestones.map((m, i) => {
                 const reached = careerAscent !== null && total >= m.height;
