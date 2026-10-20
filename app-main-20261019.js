@@ -19437,7 +19437,7 @@ function buildAchievementPuzzleClipPath(index, total, columns = 3) {
     const row = Math.floor(index / columns);
     const col = index % columns;
     const opposite = mode => mode === 'tab' ? 'socket' : mode === 'socket' ? 'tab' : 'flat';
-    const seam = (r, c, axis) => ((r + c + (axis === 'vertical' ? 1 : 0)) % 2 === 0 ? 'tab' : 'socket');
+    const seam = (r, c, axis) => ((r + c) % 2 === 0 ? 'tab' : 'socket');
 
     const top = row === 0 ? 'flat' : opposite(seam(row - 1, col, 'vertical'));
     const right = col + 1 >= columns || index + 1 >= total ? 'flat' : seam(row, col, 'horizontal');
@@ -19448,22 +19448,22 @@ function buildAchievementPuzzleClipPath(index, total, columns = 3) {
         top: {
             flat: 'L 0.95 0.05',
             tab: 'L 0.32 0.05 C 0.37 0.05 0.37 0.00 0.43 0.00 C 0.49 0.00 0.51 0.00 0.57 0.00 C 0.63 0.00 0.63 0.05 0.68 0.05 L 0.95 0.05',
-            socket: 'L 0.32 0.05 C 0.37 0.05 0.37 0.15 0.43 0.15 C 0.49 0.15 0.51 0.15 0.57 0.15 C 0.63 0.15 0.63 0.05 0.68 0.05 L 0.95 0.05'
+            socket: 'L 0.32 0.05 C 0.37 0.05 0.37 0.11 0.43 0.11 C 0.49 0.11 0.51 0.11 0.57 0.11 C 0.63 0.11 0.63 0.05 0.68 0.05 L 0.95 0.05'
         },
         right: {
             flat: 'L 0.95 0.95',
             tab: 'L 0.95 0.32 C 0.95 0.37 1.00 0.37 1.00 0.43 C 1.00 0.49 1.00 0.51 1.00 0.57 C 1.00 0.63 0.95 0.63 0.95 0.68 L 0.95 0.95',
-            socket: 'L 0.95 0.32 C 0.95 0.37 0.85 0.37 0.85 0.43 C 0.85 0.49 0.85 0.51 0.85 0.57 C 0.85 0.63 0.95 0.63 0.95 0.68 L 0.95 0.95'
+            socket: 'L 0.95 0.32 C 0.95 0.37 0.89 0.37 0.89 0.43 C 0.89 0.49 0.89 0.51 0.89 0.57 C 0.89 0.63 0.95 0.63 0.95 0.68 L 0.95 0.95'
         },
         bottom: {
             flat: 'L 0.05 0.95',
             tab: 'L 0.68 0.95 C 0.63 0.95 0.63 1.00 0.57 1.00 C 0.51 1.00 0.49 1.00 0.43 1.00 C 0.37 1.00 0.37 0.95 0.32 0.95 L 0.05 0.95',
-            socket: 'L 0.68 0.95 C 0.63 0.95 0.63 0.85 0.57 0.85 C 0.51 0.85 0.49 0.85 0.43 0.85 C 0.37 0.85 0.37 0.95 0.32 0.95 L 0.05 0.95'
+            socket: 'L 0.68 0.95 C 0.63 0.95 0.63 0.89 0.57 0.89 C 0.51 0.89 0.49 0.89 0.43 0.89 C 0.37 0.89 0.37 0.95 0.32 0.95 L 0.05 0.95'
         },
         left: {
             flat: 'L 0.05 0.05',
             tab: 'L 0.05 0.68 C 0.05 0.63 0.00 0.63 0.00 0.57 C 0.00 0.51 0.00 0.49 0.00 0.43 C 0.00 0.37 0.05 0.37 0.05 0.32 L 0.05 0.05',
-            socket: 'L 0.05 0.68 C 0.05 0.63 0.15 0.63 0.15 0.57 C 0.15 0.51 0.15 0.49 0.15 0.43 C 0.15 0.37 0.05 0.37 0.05 0.32 L 0.05 0.05'
+            socket: 'L 0.05 0.68 C 0.05 0.63 0.11 0.63 0.11 0.57 C 0.11 0.51 0.11 0.49 0.11 0.43 C 0.11 0.37 0.05 0.37 0.05 0.32 L 0.05 0.05'
         }
     };
 
@@ -19507,7 +19507,7 @@ function renderAchievementsView() {
                 const stateClass = isComplete ? 'complete' : categoryUnlocked > 0 ? 'started' : 'empty';
                 return `
                     <button type="button"
-                        class="achievement-category-tile achievement-puzzle-tile ${stateClass}" style="clip-path:url(#achievement-puzzle-clip-${index})"
+                        class="achievement-category-tile achievement-puzzle-tile ${stateClass}" style="clip-path:url(#achievement-puzzle-clip-${index}); z-index:${(Math.floor(index / 3) + (index % 3)) % 2 === 0 ? 2 : 1}"
                         data-category-id="${catId}"
                         aria-label="${escapeHtmlAttribute(cat.label)}: ${categoryUnlocked} von ${categoryTotal} erreicht. Achievement-Liste öffnen">
                         <span class="achievement-puzzle-tile-top">
