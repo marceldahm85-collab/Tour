@@ -1927,3 +1927,15 @@ body.green #wrapped-view .bergwelt-height-moment .bergwelt-height-gauge > span {
 body.green #wrapped-view .bergwelt-height-moment.is-achieved .bergwelt-height-gauge {
     background: conic-gradient(var(--accent, #52b788) 0 100%) !important;
 }
+
+
+/* Kompakte Höhenwelt: den alleinstehenden Fortschrittsring mittig ausrichten
+   und seine Kreis-Darstellung trotz der bisherigen Footer-Regel beibehalten. */
+#wrapped-view .bergwelt-height-moment-footer {
+    justify-content: center;
+}
+#wrapped-view .bergwelt-height-moment-footer > .bergwelt-height-gauge {
+    display: grid;
+    flex-direction: initial;
+    min-width: 0;
+}
