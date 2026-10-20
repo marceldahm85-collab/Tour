@@ -470,6 +470,14 @@
         let lastTrigger = null;
         const closeLevelModal = (preserveForReturn = false) => {
             if (modal.classList.contains('hidden')) return;
+            const card = modal.querySelector('.modal-card');
+            const backdrop = modal.querySelector('.modal-backdrop');
+            card?.classList.remove('is-dragging', 'is-closing');
+            if (card) {
+                card.style.transform = '';
+                card.style.touchAction = '';
+            }
+            if (backdrop) backdrop.style.opacity = '';
             modal.classList.add('hidden');
             modal.setAttribute('aria-hidden', preserveForReturn ? 'false' : 'true');
             if (!document.querySelector('.modal:not(.hidden)')) document.body.classList.remove('modal-open');
