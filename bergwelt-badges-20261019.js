@@ -2,8 +2,8 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix11') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261019-fix10';
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix12') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261019-fix12';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
@@ -463,6 +463,9 @@
                 '<div class="modal-body bergwelt-level-detail-body"></div>' +
             '</div>';
         document.body.appendChild(modal);
+        if (typeof window.__tourAttachModalSwipeDown === 'function') {
+            window.__tourAttachModalSwipeDown(modal, () => closeLevelModal());
+        }
         const modalBody = modal.querySelector('.bergwelt-level-detail-body');
         let lastTrigger = null;
         const closeLevelModal = (preserveForReturn = false) => {
