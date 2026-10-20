@@ -2,8 +2,8 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix12') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261019-fix12';
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix13') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261019-fix13';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
@@ -131,7 +131,7 @@
         <header class="bergwelt-intro">
             <p class="bergwelt-eyebrow">${eyebrow}</p>
             <h2 class="bergwelt-heading">${heading}</h2>
-            <p class="bergwelt-copy">${copy}</p>
+            ${copy ? '<p class="bergwelt-copy">' + copy + '</p>' : ''}
         </header>`;
     const empty = text => '<div class="bergwelt-empty">' + text + '</div>';
     // Verbindet den Jahresrückblick mit der Expedition zu einem klaren Erlebnisablauf.
@@ -187,13 +187,6 @@
         const progress = careerAscent === null ? 0 : next
             ? Math.max(0, Math.min(100, total / next.height * 100))
             : 100;
-        const comparison = careerAscent === null ? 'Für deine gespeicherten Touren liegen keine gültigen Aufstiegswerte vor.' :
-            total >= 500000 ? 'Du hast die Lebenszeitmarke von 500.000 Höhenmetern überschritten – ein außergewöhnlicher Langzeiterfolg.' :
-            total >= 250000 ? 'Du hast bereits 250.000 Höhenmeter gesammelt. Die nächste Lebenszeitmarke liegt bei einer halben Million Höhenmetern.' :
-            total >= 26544 ? 'Dein kumulierter Aufstieg entspricht mindestens drei Everest-Höhen.' :
-            total >= 8848 ? 'Dein kumulierter Aufstieg entspricht mindestens einer Everest-Höhe.' :
-            total >= 3798 ? 'Dein kumulierter Aufstieg übertrifft die Höhe des Großglockners.' :
-            'Jeder gespeicherte Höhenmeter zählt. Deine persönliche Bergwelt wächst mit jeder Tour.';
         const selectedMilestone = milestones.find(m => m.height === selectedHeightMilestone) || null;
         const milestoneMoment = selectedMilestone ? (() => {
             const reached = careerAscent !== null && total >= selectedMilestone.height;
@@ -217,7 +210,7 @@
                     '<div><strong>' + (careerAscent === null ? 'Fortschritt offen' : reached ? 'Vergleichsmarke erreicht' : 'Weiter bergauf') + '</strong><small>' + (careerAscent === null ? 'Keine Schätzung bei fehlenden Daten' : reached ? fmt(total / selectedMilestone.height, 1) + '× des Vergleichswerts gesammelt' : fmt(remaining) + ' hm bis zum Ziel') + '</small></div></div>' +
             '</section>';
         })() : '';
-        panel.innerHTML = intro('Dein persönlicher Berg · ' + getYear(), 'Höhenwelt', 'Nicht nur ein Jahreswert: Hier wächst deine persönliche Höhenwelt mit allen gespeicherten Touren. Die Jahresleistung bleibt separat sichtbar.') +
+        panel.innerHTML = intro('Dein persönlicher Berg · ' + getYear(), 'Höhenwelt', '') +
             '<div class="bergwelt-height-hero">' +
                 '<div class="bergwelt-height-visual" role="img" aria-label="Symbolischer Berg mit Fortschritt zur nächsten Höhenmarke">' +
                     '<svg viewBox="0 0 600 230" class="bergwelt-height-mountain" aria-hidden="true">' +
@@ -251,8 +244,7 @@
                     '<span class="bergwelt-height-milestone-chevron" aria-hidden="true">' + (active ? '⌃' : '›') + '</span>' +
                 '</button>';
             }).join('') +
-            '</div>' + milestoneMoment +
-            '<p class="bergwelt-footnote">' + escapeHTML(comparison) + ' Alle Summen beruhen ausschließlich auf gespeicherten Aufstiegswerten. Die Höhenmarken sind Vergleichswerte; sie behaupten keine konkrete Besteigung.</p>';
+            '</div>' + milestoneMoment;
     }
     function renderLevel() {
         const entries = yearTours();
@@ -421,12 +413,11 @@
                     '<p>' + escapeHTML(goalText) + '</p>' +
                 '</section>' +
                 '<section class="bergwelt-level-modal-ranks"><h4>Rangstufen</h4><ol>' + rankRows + '</ol></section>' +
-                '<p class="bergwelt-level-modal-explanation">' + escapeHTML(l.detail) + '</p>' +
             '</section>';
         };
         const developmentCards = levels.map(renderDevelopmentCard);
 
-        panel.innerHTML = intro('Deine Erfolge · ' + getYear(), 'Dein Bergsteiger-Level', 'Tippe ein Abzeichen an, um deinen aktuellen Rang und den Fortschritt bis zur nächsten Stufe anzusehen.') +
+        panel.innerHTML = intro('Deine Erfolge · ' + getYear(), 'Dein Bergsteiger-Level', '') +
             '<div class="bergwelt-level-badge-heading"><div><span>DEINE ERFOLGE</span><h3>Abzeichen-Galerie</h3></div><span class="bergwelt-level-badge-count">' + earnedCount + ' / 5 freigeschaltet</span></div>' +
             '<div class="bergwelt-level-badges">' +
             levels.map((l, i) => {
