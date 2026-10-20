@@ -2,8 +2,8 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix9') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261019-fix9';
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix10') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261019-fix10';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
@@ -259,21 +259,23 @@
         const asc = sumKnown(entries, ascentValue);
         const mins = sumKnown(entries, minutesValue);
         const peakCount = sumKnown(entries, peaksValue);
-        // Exakt wie Stats/Highlights: Aufstieg bleibt unverändert.
-        // Standardmäßig zählt für hm/km nur die halbe Strecke; mit
-        // useFullDistanceForGradient wird die volle Strecke verwendet.
-        const steepnessValue = entry => {
+
+        // Exakt die hm/h-Logik der Stats/Highlights:
+        // Aufstieg geteilt durch die zur Rundtour-Option passende Zeit.
+        const ascentRateValue = entry => {
             const ascent = ascentValue(entry);
-            const fullDistance = distanceValue(entry);
-            if (ascent === null || fullDistance === null || fullDistance <= 0) return null;
-            const adjustedDistance = entry.useFullDistanceForGradient ? fullDistance : fullDistance / 2;
-            return adjustedDistance > 0 ? ascent / adjustedDistance : null;
+            const durationMinutes = minutesValue(entry);
+            if (ascent === null || durationMinutes === null || durationMinutes <= 0) return null;
+            const hours = durationMinutes / 60;
+            const adjustedHours = entry.useFullDistanceForGradient ? hours : hours / 2;
+            return adjustedHours > 0 ? ascent / adjustedHours : null;
         };
-        const validSteepness = entries
-            .map(steepnessValue)
+        const validAscentRates = entries
+            .map(ascentRateValue)
             .filter(value => value !== null && Number.isFinite(value));
-        const maxSteepness = validSteepness.length ? Math.max(...validSteepness) : null;
-        // "difficulty" ist das tatsächliche Feld für die gespeicherte Tourart.
+        const maxAscentRate = validAscentRates.length ? Math.max(...validAscentRates) : null;
+
+                // "difficulty" ist das tatsächliche Feld für die gespeicherte Tourart.
         // "Mehrtägig" beschreibt die Tourstruktur, keinen eigenen Aktivitätstyp.
         const activityTypes = new Set(entries
             .map(e => String(e.difficulty || '').trim().toLocaleLowerCase())
@@ -284,23 +286,23 @@
         const definitions = [
             {
                 name: 'Höhenmeter-Spezialist', value: asc, unit: 'hm',
-                tiers: [[1000, 'Höhenmeter-Sammler'], [3000, 'Bergauf unterwegs'], [5000, 'Höhenmeter-Spezialist'], [10000, 'Höhenprofi'], [20000, 'Höhenlegende']],
+                tiers: [[5000, 'Höhenmeter-Sammler'], [10000, 'Bergauf unterwegs'], [15000, 'Höhenmeter-Spezialist'], [20000, 'Höhenprofi'], [25000, 'Höhenlegende']],
                 detail: 'Kumulierte Aufstiegshöhen im ausgewählten Jahr.'
             },
             {
                 name: 'Gipfelsammler', value: peakCount, unit: 'Gipfel',
-                tiers: [[1, 'Gipfel entdeckt'], [5, 'Gipfelsammler'], [10, 'Gipfeljäger'], [25, 'Gipfelkenner'], [50, 'Gipfellegende']],
+                tiers: [[5, 'Gipfel entdeckt'], [10, 'Gipfelsammler'], [15, 'Gipfeljäger'], [25, 'Gipfelkenner'], [35, 'Gipfellegende']],
                 detail: 'Summe der gespeicherten Gipfelangaben im ausgewählten Jahr.'
             },
             {
                 name: 'Ausdauer-Alpinist', value: mins === null ? null : mins / 60, unit: 'h',
-                tiers: [[5, 'Ausdauer-Einsteiger'], [15, 'Ausdauerstark'], [25, 'Ausdauer-Alpinist'], [50, 'Langstrecken-Profi'], [100, 'Ausdauerlegende']],
+                tiers: [[25, 'Ausdauer-Einsteiger'], [50, 'Ausdauerstark'], [100, 'Ausdauer-Alpinist'], [150, 'Langstrecken-Profi'], [200, 'Ausdauerlegende']],
                 detail: 'Gespeicherte Gehzeit im ausgewählten Jahr.'
             },
             {
-                name: 'Steilheits-Profi', value: maxSteepness, unit: 'hm/km',
-                tiers: [[100, 'Steile Wege'], [150, 'Steilheits-Kenner'], [200, 'Steilheits-Profi'], [250, 'Extrem steil'], [300, 'Steilheitslegende']],
-                detail: 'Höchste Steigung einer einzelnen Tour – nach derselben Rundtour-Logik wie in Stats/Highlights (standardmäßig halbe Strecke; bei aktivierter Option volle Strecke).'
+                name: 'Steilheits-Profi', value: maxAscentRate, unit: 'hm/h',
+                tiers: [[100, 'Vertikal unterwegs'], [200, 'Starker Aufstieg'], [300, 'Aufstiegs-Profi'], [400, 'Vertikal-Elite'], [500, 'Vertikallegende']],
+                detail: 'Höchster Aufstieg pro Stunde bei einer einzelnen Tour – dieselbe Zeit- und Rundtour-Logik wie in Stats/Highlights (standardmäßig halbe Gehzeit; bei aktivierter Option volle Gehzeit).'
             },
             {
                 name: 'Vielseitiger Wanderer', value: activityCount, unit: 'Typen',
