@@ -19590,7 +19590,7 @@ function renderAchievementsView() {
                 const stateClass = isComplete ? 'complete' : categoryUnlocked > 0 ? 'started' : 'empty';
                 return `
                     <button type="button"
-                        class="achievement-category-tile achievement-puzzle-tile ${stateClass}" style="clip-path:url(#achievement-puzzle-clip-${index}); z-index:${(Math.floor(index / 3) + (index % 3)) % 2 === 0 ? 2 : 1}"
+                        class="achievement-category-tile achievement-puzzle-tile ${stateClass}" style="--tile-index:${index}; z-index:${(Math.floor(index / 5) + (index % 5)) % 2 === 0 ? 2 : 1}"
                         data-category-id="${catId}"
                         aria-label="${escapeHtmlAttribute(cat.label)}: ${categoryUnlocked} von ${categoryTotal} erreicht. Achievement-Liste öffnen">
                         <span class="achievement-puzzle-tile-top">
