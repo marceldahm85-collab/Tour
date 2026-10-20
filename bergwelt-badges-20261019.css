@@ -1934,8 +1934,8 @@ body.green #wrapped-view .bergwelt-height-moment.is-achieved .bergwelt-height-ga
 #wrapped-view .bergwelt-height-moment-footer {
     justify-content: center;
 }
-#wrapped-view .bergwelt-height-moment-footer > .bergwelt-height-gauge {
-    display: grid;
+#wrapped-view .bergwelt-height-moment-footer > div.bergwelt-height-gauge {
+    display: grid !important;
     flex-direction: initial;
     min-width: 0;
 }
