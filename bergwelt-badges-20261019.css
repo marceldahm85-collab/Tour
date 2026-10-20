@@ -1939,3 +1939,116 @@ body.green #wrapped-view .bergwelt-height-moment.is-achieved .bergwelt-height-ga
     flex-direction: initial;
     min-width: 0;
 }
+
+
+/* Höhenmarken-Dialog: gleiche Modalhülle wie der Rest der App, mit klar lesbaren Werten. */
+#bergwelt-height-detail-modal .bergwelt-height-moment {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    animation: none;
+}
+#bergwelt-height-detail-modal .bergwelt-height-moment-details {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+#bergwelt-height-detail-modal .bergwelt-height-moment-details > div {
+    min-width: 0;
+    padding: 10px 8px;
+    border: 1px solid color-mix(in srgb, var(--text-main, #fff) 14%, transparent);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--text-main, #fff) 5%, transparent);
+}
+#bergwelt-height-detail-modal .bergwelt-height-moment-details span {
+    display: block;
+    font-size: .58rem;
+    font-weight: 850;
+    letter-spacing: .04em;
+    line-height: 1.3;
+    opacity: .72;
+}
+#bergwelt-height-detail-modal .bergwelt-height-moment-details strong {
+    display: block;
+    margin-top: 6px;
+    font-size: clamp(.92rem, 3.8vw, 1.2rem);
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+#bergwelt-height-detail-modal .bergwelt-height-moment-details strong small {
+    font-size: .62em;
+    font-weight: 650;
+    opacity: .8;
+}
+#bergwelt-height-detail-modal .bergwelt-height-moment-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 14px;
+    padding-top: 13px;
+    border-top: 1px solid color-mix(in srgb, var(--text-main, #fff) 12%, transparent);
+}
+#bergwelt-height-detail-modal .bergwelt-height-gauge {
+    display: grid;
+    place-items: center;
+    flex: 0 0 54px;
+    width: 54px;
+    height: 54px;
+    padding: 5px;
+    box-sizing: border-box;
+    border: 1px solid color-mix(in srgb, var(--accent, #52b788) 70%, white);
+    border-radius: 50%;
+    background: conic-gradient(
+        var(--accent, #52b788) 0 var(--moment-progress, 0%),
+        color-mix(in srgb, var(--text-main, #fff) 22%, #102016) var(--moment-progress, 0%) 100%
+    );
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ui-card-bg, #102016) 90%, transparent),
+        0 0 14px color-mix(in srgb, var(--accent, #52b788) 30%, transparent);
+}
+#bergwelt-height-detail-modal .bergwelt-height-gauge > span {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    border: 1px solid color-mix(in srgb, var(--text-main, #fff) 22%, var(--ui-card-bg, #102016));
+    border-radius: 50%;
+    background: var(--ui-card-bg, #102016);
+    color: var(--text-main, #fff);
+    font-size: .74rem;
+    font-weight: 900;
+    text-shadow: 0 1px 2px rgba(0,0,0,.65);
+}
+body.green #bergwelt-height-detail-modal .bergwelt-height-gauge {
+    border-color: #74d6a3;
+    background: conic-gradient(#52b788 0 var(--moment-progress, 0%), rgba(82,183,136,.22) var(--moment-progress, 0%) 100%);
+}
+body.green #bergwelt-height-detail-modal .bergwelt-height-gauge > span {
+    background: #082a18;
+    border-color: rgba(116,214,163,.72);
+    color: #f2fff7;
+}
+#bergwelt-height-detail-modal .bergwelt-height-moment.is-achieved .bergwelt-height-gauge {
+    background: conic-gradient(var(--accent, #52b788) 0 100%);
+}
+@media (max-width: 420px) {
+    #bergwelt-height-detail-modal .bergwelt-height-moment-details { gap: 5px; }
+    #bergwelt-height-detail-modal .bergwelt-height-moment-details > div { padding: 9px 6px; }
+    #bergwelt-height-detail-modal .bergwelt-height-moment-details span { font-size: .52rem; }
+}
+
+/* Tourbuch als eigene Bergwelt-Seite: die originale Exportkarte bleibt funktionsfähig. */
+#wrapped-view #bergwelt-tourbuch-panel:not([hidden]) {
+    padding-top: 12px;
+}
+#wrapped-view #bergwelt-tourbuch-panel #pdf-export-card {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    box-sizing: border-box;
+}
