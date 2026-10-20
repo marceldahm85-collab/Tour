@@ -6250,7 +6250,8 @@ body.summit {
 
 /* Das Tourenbuch gehört zur Bergwelt, nicht in die Sicherungsansicht. */
 
-/* Achievement-Fotopuzzle – engere Konturen, gemeinsames Alpenmotiv und mehr Innenabstand. */
+/* Achievement-Fotopuzzle – Foto nur auf den einzelnen Puzzleteilen,
+   vorstehende Konturen bleiben mit demselben Foto gefüllt. */
 #achievements-view {
     overflow-y: auto !important;
     overflow-x: hidden !important;
@@ -6270,8 +6271,7 @@ body.summit {
     margin-bottom: 14px !important;
     box-sizing: border-box !important;
 }
-/* Gemeinsames Foto hinter allen Kacheln: Aussparungen zeigen nicht mehr
-   die Fortschrittsbalken benachbarter Stücke, sondern das Alpenmotiv. */
+/* Keine Bildfläche am Grid: Jede Kachel besitzt ihren eigenen Bildausschnitt. */
 #achievements-view .achievement-puzzle-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     grid-auto-rows: minmax(88px, auto) !important;
@@ -6279,11 +6279,7 @@ body.summit {
     padding: 2px !important;
     overflow: visible !important;
     isolation: isolate;
-    background-color: #254b5c !important;
-    background-image: url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1800&q=85") !important;
-    background-size: 100% 100% !important;
-    background-repeat: no-repeat !important;
-    background-position: center !important;
+    background: transparent !important;
 }
 #achievements-view .achievement-puzzle-tile {
     min-width: 0 !important;
@@ -6296,11 +6292,14 @@ body.summit {
     text-shadow: 0 1px 3px rgba(0,0,0,.92) !important;
     background-color: #254b5c !important;
     background-image: linear-gradient(155deg,rgba(7,20,34,.10),rgba(7,20,34,.43)),url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1800&q=85") !important;
-    background-size: 100% 100%, 300% 500% !important;
+    /* Mit scale(1.08) vorgerenderte Bildfläche so bemessen, dass die Ausschnitte
+       trotz Überlappung exakt von Kachel zu Kachel weiterlaufen. */
+    background-size: 285.185% 470.37% !important;
     background-repeat: no-repeat, no-repeat !important;
     background-position: center, var(--photo-x, 0%) var(--photo-y, 0%) !important;
     filter: drop-shadow(0 0 0.8px rgba(244,250,255,.96)) drop-shadow(0 2px 3px rgba(0,0,0,.32)) !important;
-    transform: none !important;
+    transform: scale(1.08) !important;
+    transform-origin: center center !important;
     position: relative;
     -webkit-tap-highlight-color: transparent;
 }
@@ -6309,13 +6308,15 @@ body.summit {
 #achievements-view .achievement-category-tile.achievement-puzzle-tile.empty {
     background-color: #254b5c !important;
     background-image: linear-gradient(155deg,rgba(7,20,34,.10),rgba(7,20,34,.43)),url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1800&q=85") !important;
-    background-size: 100% 100%, 300% 500% !important;
+    background-size: 285.185% 470.37% !important;
     background-repeat: no-repeat, no-repeat !important;
     background-position: center, var(--photo-x, 0%) var(--photo-y, 0%) !important;
+    transform: scale(1.08) !important;
 }
 #achievements-view .achievement-category-tile.achievement-puzzle-tile.empty { opacity: 1 !important; }
 #achievements-view .achievement-puzzle-tile-label strong { font-size: clamp(7px, 2vw, 10px) !important; }
 #achievements-view .achievement-puzzle-tile-state { min-width: 17px !important; min-height: 17px !important; font-size: 8px !important; }
+#achievements-view .achievement-puzzle-tile:active { transform: scale(1.04) !important; }
 #achievements-view .achievement-puzzle-tile:focus-visible { outline: 3px solid var(--accent,#f9d77e) !important; outline-offset: 2px; }
 
 @media (max-width: 1024px) and (orientation: landscape) {
@@ -6324,7 +6325,7 @@ body.summit {
     #achievements-view .achievement-puzzle-grid {
         grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
         grid-auto-rows: minmax(58px, auto) !important;
-        background-size: 100% 100% !important;
+        background: transparent !important;
     }
     #achievements-view .achievement-puzzle-tile,
     #achievements-view .achievement-category-tile.achievement-puzzle-tile.complete,
@@ -6332,13 +6333,21 @@ body.summit {
     #achievements-view .achievement-category-tile.achievement-puzzle-tile.empty {
         min-height: 58px !important;
         padding: 6px 7px !important;
-        background-size: 100% 100%, 500% 300% !important;
+        background-size: 470.37% 285.185% !important;
         background-position: center, var(--photo-x, 0%) var(--photo-y, 0%) !important;
+        transform: scale(1.08) !important;
     }
+    #achievements-view .achievement-puzzle-tile:active { transform: scale(1.04) !important; }
 }
 @media (max-width: 380px) and (orientation: portrait) {
     #achievements-view .achievement-puzzle-grid { grid-auto-rows: minmax(82px, auto) !important; }
-    #achievements-view .achievement-puzzle-tile { min-height: 82px !important; padding: 7px 6px 8px !important; }
+    #achievements-view .achievement-puzzle-tile,
+    #achievements-view .achievement-category-tile.achievement-puzzle-tile.complete,
+    #achievements-view .achievement-category-tile.achievement-puzzle-tile.started,
+    #achievements-view .achievement-category-tile.achievement-puzzle-tile.empty {
+        min-height: 82px !important;
+        padding: 7px 6px 8px !important;
+    }
 }
 @media (prefers-reduced-motion: reduce) {
     #achievements-view .achievement-puzzle-tile { transition: none !important; }
