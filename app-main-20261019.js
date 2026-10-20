@@ -19432,32 +19432,16 @@ function getAchievementsFilteredTours() {
 }
 
 function renderAchievementsView() {
-    const container =
-        document.getElementById('achievements-categories');
-
-    const summaryValue =
-        document.getElementById('achievements-summary-value');
-
+    const container = document.getElementById('achievements-categories');
+    const summaryValue = document.getElementById('achievements-summary-value');
     if (!container) return;
 
-    const results =
-        computeAllAchievements(
-            getAchievementsFilteredTours()
-        );
-
-    const allBadges =
-        getAllAchievementBadgeDefs();
-
-    const unlockedCount =
-        allBadges.filter(
-            badge => results[badge.id]?.unlocked
-        ).length;
-
+    const results = computeAllAchievements(getAchievementsFilteredTours());
+    const categories = Object.entries(ACHIEVEMENT_CATEGORIES);
+    const allBadges = getAllAchievementBadgeDefs();
+    const unlockedCount = allBadges.filter(badge => results[badge.id]?.unlocked).length;
     const totalCount = allBadges.length;
-
-    const totalPercent = totalCount > 0
-        ? Math.round((unlockedCount / totalCount) * 100)
-        : 0;
+    const totalPercent = totalCount > 0 ? Math.round(unlockedCount / totalCount * 100) : 0;
 
     if (summaryValue) {
         summaryValue.innerHTML = `
@@ -19465,102 +19449,113 @@ function renderAchievementsView() {
                 <strong>${unlockedCount}</strong>
                 <span>von ${totalCount} Achievements freigeschaltet</span>
             </div>
-
-            <div class="achievements-summary-percent">
-                ${totalPercent}%
-            </div>
-
+            <div class="achievements-summary-percent">${totalPercent}%</div>
             <div class="achievements-progress-track">
-                <span
-                    class="achievements-progress-bar"
-                    style="width:${totalPercent}%">
-                </span>
+                <span class="achievements-progress-bar" style="width:${totalPercent}%"></span>
             </div>
         `;
     }
 
-    container.innerHTML =
-        Object.entries(ACHIEVEMENT_CATEGORIES)
-            .map(([catId, cat]) => {
-                const categoryTotal =
-                    cat.badges.length;
+    const categoryData = categories.map(([catId, cat]) => {
+        const categoryTotal = cat.badges.length;
+        const categoryUnlocked = cat.badges.filter(badge => results[badge.id]?.unlocked).length;
+        const categoryPercent = categoryTotal ? Math.round(categoryUnlocked / categoryTotal * 100) : 0;
+        const isComplete = categoryUnlocked === categoryTotal;
+        const stateClass = isComplete ? 'complete' : categoryUnlocked > 0 ? 'started' : 'empty';
 
-                const categoryUnlocked =
-                    cat.badges.filter(
-                        badge => results[badge.id]?.unlocked
-                    ).length;
+        const rows = cat.badges.map(badge => {
+            const r = results[badge.id] || {};
+            const isUnlocked = !!r.unlocked;
+            const name = badge.nameFn ? badge.nameFn(badge.threshold) : badge.id;
+            const unlockDate = r.unlockedAt ? new Date(r.unlockedAt) : null;
+            const dateLabel = unlockDate && !Number.isNaN(unlockDate.getTime())
+                ? unlockDate.toLocaleDateString('de-AT') : 'Datum nicht gespeichert';
 
-                const categoryPercent =
-                    categoryTotal > 0
-                        ? Math.round(
-                            (categoryUnlocked / categoryTotal) * 100
-                        )
-                        : 0;
+            let progressLabel = 'Noch nicht erreicht';
+            const target = Number(r.progressTarget);
+            const current = Number(r.progressCurrent);
+            if (!isUnlocked && Number.isFinite(target) && target > 0) {
+                progressLabel = `Fortschritt ${Math.round(Number.isFinite(current) ? current : 0).toLocaleString('de-AT')} / ${target.toLocaleString('de-AT')}`;
+            }
 
-                const isComplete =
-                    categoryUnlocked === categoryTotal;
+            let tourMarkup;
+            if (!isUnlocked) {
+                tourMarkup = '<span class="achievement-row-tour achievement-row-pending">Noch offen</span>';
+            } else if (r.unlockedTourId) {
+                tourMarkup = `
+                    <button type="button" class="achievement-row-tour achievement-row-tour-link"
+                        data-achievement-tour-id="${escapeHtmlAttribute(r.unlockedTourId)}"
+                        title="Zugehörige Tour öffnen">${escapeHtml(r.unlockedTour || 'Zugehörige Tour')}</button>`;
+            } else {
+                tourMarkup = `<span class="achievement-row-tour">${escapeHtml(r.unlockedTour || 'Keine Tour zugeordnet')}</span>`;
+            }
 
-                const isStarted =
-                    categoryUnlocked > 0;
-
-                const stateClass = isComplete
-                    ? 'complete'
-                    : isStarted
-                        ? 'started'
-                        : 'empty';
-
-                return `
-                    <button
-                        type="button"
-                        class="
-                            achievement-category-tile
-                            ${stateClass}
-                        "
-                        data-category-id="${catId}">
-
-                        <span class="achievement-category-tile-top">
-                            <span class="achievement-category-tile-icon">
-                                ${cat.icon}
-                            </span>
-
-                            <span class="achievement-category-tile-state">
-                                ${
-                                    isComplete
-                                        ? '✓'
-                                        : `${categoryPercent}%`
-                                }
-                            </span>
+            return `
+                <article class="achievement-inline-row ${isUnlocked ? 'is-unlocked' : 'is-locked'}">
+                    <div class="achievement-row-main">
+                        <span class="achievement-row-icon" aria-hidden="true">${isUnlocked ? badge.icon : '🔒'}</span>
+                        <span class="achievement-row-copy">
+                            <strong>${escapeHtml(name)}</strong>
+                            <small>${isUnlocked ? 'Freigeschaltet' : escapeHtml(progressLabel)}</small>
                         </span>
+                    </div>
+                    <div class="achievement-row-meta">
+                        ${tourMarkup}
+                        <time class="achievement-row-date">${isUnlocked ? dateLabel : '—'}</time>
+                    </div>
+                </article>`;
+        }).join('');
 
-                        <span class="achievement-category-tile-label">
-                            ${cat.label}
+        return {catId,cat,categoryTotal,categoryUnlocked,categoryPercent,isComplete,stateClass,rows};
+    });
+
+    container.innerHTML = `
+        <div class="achievement-category-grid achievement-puzzle-grid" aria-label="Achievement-Puzzle">
+            ${categoryData.map(item => `
+                <button type="button"
+                    class="achievement-category-tile achievement-puzzle-tile ${item.stateClass}"
+                    data-achievement-scroll-target="achievement-section-${item.catId}"
+                    aria-controls="achievement-section-${item.catId}"
+                    aria-label="${escapeHtmlAttribute(item.cat.label)}: ${item.categoryUnlocked} von ${item.categoryTotal} erreicht. Zur Übersicht springen">
+                    <span class="achievement-puzzle-tile-top">
+                        <span class="achievement-puzzle-tile-label">
+                            <span class="achievement-puzzle-tile-icon" aria-hidden="true">${item.cat.icon}</span>
+                            <strong>${escapeHtml(item.cat.label)}</strong>
                         </span>
+                        <span class="achievement-puzzle-tile-state">${item.isComplete ? '✓' : `${item.categoryPercent}%`}</span>
+                    </span>
+                    <span class="achievement-puzzle-tile-count">${item.categoryUnlocked}/${item.categoryTotal} erreicht</span>
+                    <span class="achievement-category-progress-track">
+                        <span class="achievement-category-progress-bar" style="width:${item.categoryPercent}%"></span>
+                    </span>
+                </button>`).join('')}
+        </div>
+        <div class="achievement-inline-catalog" aria-label="Alle einzelnen Achievements">
+            ${categoryData.map(item => `
+                <section class="achievement-category-section" id="achievement-section-${item.catId}">
+                    <header class="achievement-category-section-header">
+                        <div class="achievement-category-section-title">
+                            <span aria-hidden="true">${item.cat.icon}</span>
+                            <h3>${escapeHtml(item.cat.label)}</h3>
+                        </div>
+                        <span class="achievement-category-section-count">${item.categoryUnlocked}/${item.categoryTotal}</span>
+                    </header>
+                    <div class="achievement-category-section-progress" aria-hidden="true">
+                        <span style="width:${item.categoryPercent}%"></span>
+                    </div>
+                    <div class="achievement-inline-rows">${item.rows}</div>
+                </section>`).join('')}
+        </div>`;
 
-                        <span class="achievement-category-tile-count">
-                            ${categoryUnlocked}/${categoryTotal}
-                        </span>
-
-                        <span class="achievement-category-progress-track">
-                            <span
-                                class="achievement-category-progress-bar"
-                                style="width:${categoryPercent}%">
-                            </span>
-                        </span>
-                    </button>
-                `;
-            })
-            .join('');
-
-    container
-        .querySelectorAll('.achievement-category-tile')
-        .forEach(tile => {
-            tile.addEventListener('click', () => {
-                openAchievementCategoryModal(
-                    tile.dataset.categoryId,
-                    results
-                );
-            });
+    container.querySelectorAll('[data-achievement-scroll-target]').forEach(tile => {
+        tile.addEventListener('click', () => {
+            const target = document.getElementById(tile.dataset.achievementScrollTarget);
+            target?.scrollIntoView({behavior:'smooth',block:'start'});
         });
+    });
+    container.querySelectorAll('[data-achievement-tour-id]').forEach(button => {
+        button.addEventListener('click', () => openAchievementTourById(button.dataset.achievementTourId, false));
+    });
 }
 
 function openAchievementCategoryModal(categoryId, resultsInput = null) {
@@ -19609,7 +19604,7 @@ function findTourById(tourId) {
     ) || null;
 }
 
-function openAchievementTourById(tourId) {
+function openAchievementTourById(tourId, returnToAchievementDetail = true) {
     const tour = findTourById(tourId);
 
     if (!tour) {
@@ -19631,9 +19626,11 @@ function openAchievementTourById(tourId) {
         .getElementById('achievement-category-modal')
         ?.classList.add('hidden');
 
-    openTourDetail(tour, {
-        returnModalId: 'achievement-detail-modal'
-    });
+    if (returnToAchievementDetail) {
+        openTourDetail(tour, { returnModalId: 'achievement-detail-modal' });
+    } else {
+        openTourDetail(tour);
+    }
 }
 
 function openAchievementDetailModal(badgeId, resultsInput = null) {
@@ -22689,85 +22686,29 @@ function updateContrastCheckerDisplay(settings) {
 }
 
 function initThemeEditorAccordions(view) {
-    const groups = Array.from(
-        view.querySelectorAll('[data-theme-editor-accordion]')
-    );
+    const groups = Array.from(view.querySelectorAll('[data-theme-editor-accordion]'));
     if (!groups.length) return;
-
-    // Bei erneutem Öffnen der Ansicht keine Listener doppelt anlegen
-    // und den durch den Nutzer gewählten Zustand nicht zurücksetzen.
+    // Alle Bereiche starten auf jedem Gerät geschlossen. Ab dann gilt die Auswahl des Benutzers.
     if (view.dataset.themeEditorAccordionsInitialized === 'true') return;
     view.dataset.themeEditorAccordionsInitialized = 'true';
 
     const syncExpandedState = group => {
         const summary = group.querySelector(':scope > summary');
-        if (summary) {
-            summary.setAttribute('aria-expanded', group.open ? 'true' : 'false');
-        }
+        if (summary) summary.setAttribute('aria-expanded', group.open ? 'true' : 'false');
     };
 
     groups.forEach(group => {
+        group.open = false;
         const summary = group.querySelector(':scope > summary');
         if (!summary) return;
-
-        summary.setAttribute('aria-expanded', group.open ? 'true' : 'false');
-
-        // Der komplette Kopfbereich schaltet den Abschnitt auf Touch-Geräten
-        // zuverlässig um; das native Umschalten wird dabei ersetzt.
+        summary.setAttribute('aria-expanded', 'false');
         summary.addEventListener('click', event => {
             event.preventDefault();
             group.open = !group.open;
             syncExpandedState(group);
         });
-
         group.addEventListener('toggle', () => syncExpandedState(group));
     });
-
-    const portraitMode = window.matchMedia(
-        '(max-width: 768px) and (orientation: portrait) and (pointer: coarse)'
-    );
-    let portraitOpenState = null;
-
-    const setPortraitDefaults = () => {
-        groups.forEach(group => {
-            group.open = group.dataset.themeEditorDefaultOpen === 'true';
-            syncExpandedState(group);
-        });
-    };
-
-    if (portraitMode.matches) {
-        setPortraitDefaults();
-    } else {
-        groups.forEach(group => {
-            group.open = true;
-            syncExpandedState(group);
-        });
-    }
-
-    const handleLayoutChange = event => {
-        if (event.matches) {
-            if (portraitOpenState && portraitOpenState.length === groups.length) {
-                groups.forEach((group, index) => {
-                    group.open = Boolean(portraitOpenState[index]);
-                    syncExpandedState(group);
-                });
-            } else {
-                setPortraitDefaults();
-            }
-        } else {
-            portraitOpenState = groups.map(group => group.open);
-            groups.forEach(group => {
-                group.open = true;
-                syncExpandedState(group);
-            });
-        }
-    };
-
-    if (typeof portraitMode.addEventListener === 'function') {
-        portraitMode.addEventListener('change', handleLayoutChange);
-    } else if (typeof portraitMode.addListener === 'function') {
-        portraitMode.addListener(handleLayoutChange);
-    }
 }
 
 let themeEditorInitialized = false;
@@ -34334,21 +34275,21 @@ const endHold = () => {
     // Bergwelt bleibt ein optionales Modul und wird erst beim Öffnen geladen.
     function loadBergweltModule() {
         window.__bergweltGetTours = () => appStorage.get('touren') || [];
-        if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix16' || window.__BERGWELT_BADGE_LOADING__) {
+        if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261020-fix17' || window.__BERGWELT_BADGE_LOADING__) {
             window.__bergweltRender?.();
             return;
         }
         window.__BERGWELT_BADGE_LOADING__ = true;
         window.__BERGWELT_LOADING__ = true;
-        if (!document.querySelector('link[data-bergwelt-badge-styles="20261019-fix16"]')) {
+        if (!document.querySelector('link[data-bergwelt-badge-styles="20261020-fix17"]')) {
             const styleLink = document.createElement('link');
             styleLink.rel = 'stylesheet';
-            styleLink.href = './bergwelt-badges-20261019.css?v=19';
-            styleLink.dataset.bergweltBadgeStyles = '20261019-fix16';
+            styleLink.href = './bergwelt-badges-20261019.css?v=20';
+            styleLink.dataset.bergweltBadgeStyles = '20261020-fix17';
             document.head.appendChild(styleLink);
         }
         const script = document.createElement('script');
-        script.src = './bergwelt-badges-20261019.js?v=18';
+        script.src = './bergwelt-badges-20261019.js?v=19';
         script.onload = () => {
             window.__BERGWELT_BADGE_LOADING__ = false;
             window.__BERGWELT_LOADING__ = false;
