@@ -2,8 +2,8 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix15') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261019-fix15';
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix16') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261019-fix16';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
@@ -201,7 +201,6 @@
             '</section>';
         })() : '';
         panel.innerHTML = intro('', 'Höhenwelt', '') +
-            '<div class="bergwelt-height-milestone-heading"><div><span>DEINE HÖHENMARKEN</span></div></div>' +
             '<div class="bergwelt-height-milestones" aria-label="Interaktive Höhenmarken">' +
             milestones.map((m, i) => {
                 const reached = careerAscent !== null && total >= m.height;
@@ -449,7 +448,6 @@
         const developmentCards = levels.map(renderDevelopmentCard);
 
         panel.innerHTML = intro('Deine Erfolge · ' + getYear(), 'Dein Bergsteiger-Level', '') +
-            '<div class="bergwelt-level-badge-heading"><div><span>DEINE ERFOLGE</span><h3>Abzeichen-Galerie</h3></div><span class="bergwelt-level-badge-count">' + earnedCount + ' / 5 freigeschaltet</span></div>' +
             '<div class="bergwelt-level-badges">' +
             levels.map((l, i) => {
                 const valueText = l.value === null ? '– ' + l.unit : fmt(l.value, levelDigits(l)) + ' ' + l.unit;
