@@ -2,21 +2,26 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix14') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261019-fix14';
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix15') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261019-fix15';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
     const tabs = document.getElementById('bergwelt-tabs');
     const panel = document.getElementById('bergwelt-panel');
-    if (!root || !tabs || !panel) return;
+    const tourbookPanel = document.getElementById('bergwelt-tourbuch-panel');
+    const tourbookCard = document.getElementById('pdf-export-card');
+    if (!root || !tabs || !panel || !tourbookPanel) return;
     root.classList.add('bergwelt-ready');
+    if (tourbookCard && tourbookCard.parentNode !== tourbookPanel) {
+        tourbookPanel.appendChild(tourbookCard);
+    }
 
     const tabNames = {
         erlebnis: 'Erlebnis',
         hoehenwelt: 'Höhenwelt',
         level: 'Level',
-        tour: 'Tour erleben'
+        tourbuch: 'Tourbuch'
     };
     let activeTab = 'erlebnis';
     let experienceMode = 'momente';
@@ -129,7 +134,7 @@
         </article>`;
     const intro = (eyebrow, heading, copy) => `
         <header class="bergwelt-intro">
-            <p class="bergwelt-eyebrow">${eyebrow}</p>
+            ${eyebrow ? '<p class="bergwelt-eyebrow">' + eyebrow + '</p>' : ''}
             <h2 class="bergwelt-heading">${heading}</h2>
             ${copy ? '<p class="bergwelt-copy">' + copy + '</p>' : ''}
         </header>`;
@@ -184,9 +189,7 @@
             const reached = careerAscent !== null && total >= selectedMilestone.height;
             const remaining = careerAscent === null ? null : Math.max(0, selectedMilestone.height - total);
             const targetProgress = careerAscent === null ? 0 : Math.max(0, Math.min(100, total / selectedMilestone.height * 100));
-            return '<section class="bergwelt-height-moment ' + (reached ? 'is-achieved' : 'is-in-progress') + '" id="bergwelt-height-moment" aria-live="polite">' +
-                '<div class="bergwelt-height-moment-top"><div><span class="bergwelt-height-moment-kicker">' + (reached ? '✦ DEIN GIPFELMOMENT' : 'DEIN NÄCHSTES ZIEL') + '</span><h3>' + escapeHTML(selectedMilestone.name) + '</h3></div>' +
-                    '<button type="button" class="bergwelt-height-moment-close" data-bergwelt-height-milestone-close aria-label="Gipfelmoment schließen">×</button></div>' +
+            return '<section class="bergwelt-height-moment ' + (reached ? 'is-achieved' : 'is-in-progress') + '">' +
                 '<div class="bergwelt-height-moment-details">' +
                     '<div><span>DEIN AUFSTIEG</span><strong>' + fmtKnown(careerAscent) + '<small> hm</small></strong></div>' +
                     '<div><span>VERGLEICHSWERT</span><strong>' + fmt(selectedMilestone.height) + '<small> ' + (selectedMilestone.height <= 26544 ? 'm' : 'hm') + '</small></strong></div>' +
@@ -195,7 +198,7 @@
                 '<div class="bergwelt-height-moment-footer"><div class="bergwelt-height-gauge" style="--moment-progress:' + targetProgress + '%"><span>' + (careerAscent === null ? '–' : reached ? '✓' : fmt(targetProgress, 0) + '%') + '</span></div></div>' +
             '</section>';
         })() : '';
-        panel.innerHTML = intro('Dein persönlicher Berg · ' + getYear(), 'Höhenwelt', '') +
+        panel.innerHTML = intro('', 'Höhenwelt', '') +
             '<div class="bergwelt-height-milestone-heading"><div><span>DEINE HÖHENMARKEN</span></div></div>' +
             '<div class="bergwelt-height-milestones" aria-label="Interaktive Höhenmarken">' +
             milestones.map((m, i) => {
@@ -203,7 +206,7 @@
                 const remaining = careerAscent === null ? null : Math.max(0, m.height - total);
                 const targetProgress = careerAscent === null ? 0 : Math.max(0, Math.min(100, total / m.height * 100));
                 const active = selectedHeightMilestone === m.height;
-                return '<button type="button" class="bergwelt-height-milestone' + (reached ? ' is-reached' : '') + (active ? ' is-selected' : '') + '" data-bergwelt-height-milestone="' + m.height + '" aria-expanded="' + active + '" aria-controls="bergwelt-height-moment">' +
+                return '<button type="button" class="bergwelt-height-milestone' + (reached ? ' is-reached' : '') + (active ? ' is-selected' : '') + '" data-bergwelt-height-milestone="' + m.height + '" aria-pressed="' + active + '" aria-haspopup="dialog" aria-controls="bergwelt-height-detail-modal">' +
                     '<span class="bergwelt-height-milestone-mark' + (reached ? ' is-reached' : '') + '" aria-hidden="true">' + heightIcons[i] + '</span>' +
                     '<span class="bergwelt-height-milestone-copy"><strong>' + escapeHTML(m.name) + '</strong><small>' + (reached ? 'Vergleichsmarke erreicht' : careerAscent === null ? 'Keine Aufstiegsdaten' : fmt(remaining) + ' hm bis zur Marke') + '</small></span>' +
                     '<span class="bergwelt-height-milestone-value"><strong>' + fmt(m.height) + '</strong><small>' + (m.height <= 26544 ? 'm' : 'hm') + '</small></span>' +
@@ -211,7 +214,66 @@
                     '<span class="bergwelt-height-milestone-chevron" aria-hidden="true">' + (active ? '⌃' : '›') + '</span>' +
                 '</button>';
             }).join('') +
-            '</div>' + milestoneMoment;
+            '</div>';
+
+        const staleHeightModal = document.getElementById('bergwelt-height-detail-modal');
+        if (staleHeightModal) staleHeightModal.remove();
+        if (openModal && selectedMilestone) {
+            const modal = document.createElement('div');
+            modal.id = 'bergwelt-height-detail-modal';
+            modal.className = 'modal hidden';
+            modal.setAttribute('role', 'dialog');
+            modal.setAttribute('aria-modal', 'true');
+            modal.setAttribute('aria-hidden', 'true');
+            modal.setAttribute('aria-labelledby', 'bergwelt-height-detail-title');
+            modal.innerHTML =
+                '<div class="modal-backdrop" data-height-detail-close="backdrop"></div>' +
+                '<div class="modal-card">' +
+                    '<div class="modal-header">' +
+                        '<div class="modal-title" id="bergwelt-height-detail-title">' + escapeHTML(selectedMilestone.name) + '</div>' +
+                        '<button type="button" class="toggle-btn" data-height-detail-close="button" aria-label="Höhenmarke schließen">✕</button>' +
+                    '</div>' +
+                    '<div class="modal-body bergwelt-height-detail-body">' + milestoneMoment + '</div>' +
+                '</div>';
+            document.body.appendChild(modal);
+            const trigger = panel.querySelector('[data-bergwelt-height-milestone="' + selectedMilestone.height + '"]');
+            const closeHeightModal = () => {
+                const card = modal.querySelector('.modal-card');
+                const backdrop = modal.querySelector('.modal-backdrop');
+                card?.classList.remove('is-dragging', 'is-closing');
+                if (card) {
+                    card.style.transform = '';
+                    card.style.touchAction = '';
+                }
+                if (backdrop) backdrop.style.opacity = '';
+                modal.classList.add('hidden');
+                modal.setAttribute('aria-hidden', 'true');
+                selectedHeightMilestone = null;
+                panel.querySelectorAll('[data-bergwelt-height-milestone]').forEach(button => {
+                    button.classList.remove('is-selected');
+                    button.setAttribute('aria-pressed', 'false');
+                });
+                if (!document.querySelector('.modal:not(.hidden)')) document.body.classList.remove('modal-open');
+                if (trigger && trigger.isConnected) trigger.focus({ preventScroll: true });
+            };
+            if (typeof window.__tourAttachModalSwipeDown === 'function') {
+                window.__tourAttachModalSwipeDown(modal, closeHeightModal);
+            }
+            modal.addEventListener('click', event => {
+                if (event.target === modal.querySelector('[data-height-detail-close="backdrop"]') ||
+                    event.target.closest('[data-height-detail-close="button"]')) closeHeightModal();
+            });
+            modal.addEventListener('keydown', event => {
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    closeHeightModal();
+                }
+            });
+            modal.classList.remove('hidden');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('modal-open');
+            modal.querySelector('[data-height-detail-close="button"]')?.focus({ preventScroll: true });
+        }
     }
     function renderLevel() {
         const entries = yearTours();
