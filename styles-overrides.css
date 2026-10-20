@@ -5943,3 +5943,93 @@ body.summit {
 #wrapped-view.bergwelt-ready:not(.wrapped-is-fullscreen) {
     background: transparent !important;
 }
+
+
+
+/* Achievements: ein gemeinsames Alpenmotiv als Puzzle und alle Details inline. */
+#achievements-view { overflow-y:auto !important; overscroll-behavior-y:contain; touch-action:pan-y; }
+#achievements-view .achievements-inner { height:auto !important; min-height:100%; padding-bottom:32px; }
+#achievements-view .achievements-overview-summary { margin-bottom:14px; }
+#achievements-view #achievements-categories { display:flex; flex-direction:column; gap:18px; width:100%; min-width:0; }
+#achievements-view .achievement-puzzle-grid { grid-template-columns:repeat(3,minmax(0,1fr)); grid-auto-rows:minmax(66px,auto); gap:5px; padding:4px 2px 8px; overflow:visible; }
+#achievements-view .achievement-puzzle-tile {
+ position:relative; isolation:isolate; z-index:0; display:flex; flex-direction:column; align-items:stretch; justify-content:space-between;
+ gap:5px; width:100%; min-width:0; min-height:72px; padding:9px 7px 8px; border:0; border-radius:10px; overflow:visible;
+ color:#fff !important; text-align:left; background-color:#19384a !important;
+ background-image:linear-gradient(155deg,rgba(7,20,34,.26),rgba(7,20,34,.78)),url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20900%201500%22%20preserveAspectRatio%3D%22none%22%3E%0A%3Cdefs%3E%3ClinearGradient%20id%3D%22sky%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23142b45%22%2F%3E%3Cstop%20offset%3D%22.45%22%20stop-color%3D%22%234487a3%22%2F%3E%3Cstop%20offset%3D%22.72%22%20stop-color%3D%22%23e8b27b%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23f6dcb5%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22ridge%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23cfdee3%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23547e8d%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22forest%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23386365%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23102d37%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%0A%3Crect%20width%3D%22900%22%20height%3D%221500%22%20fill%3D%22url%28%23sky%29%22%2F%3E%3Ccircle%20cx%3D%22680%22%20cy%3D%22210%22%20r%3D%22100%22%20fill%3D%22%23ffe7ad%22%2F%3E%3Ccircle%20cx%3D%22680%22%20cy%3D%22210%22%20r%3D%22138%22%20fill%3D%22%23ffe7ad%22%20opacity%3D%22.13%22%2F%3E%0A%3Cpath%20d%3D%22M0%20560%20L104%20414%20189%20461%20300%20294%20390%20412%20507%20228%20614%20398%20735%20282%20900%20456%20V840%20H0Z%22%20fill%3D%22%23d8e8ec%22%2F%3E%0A%3Cpath%20d%3D%22M0%20620%20L104%20414%20143%20465%20189%20461%20300%20294%20354%20378%20390%20412%20507%20228%20559%20338%20614%20398%20675%20342%20735%20282%20787%20378%20900%20456%20V920%20H0Z%22%20fill%3D%22url%28%23ridge%29%22%2F%3E%0A%3Cpath%20d%3D%22M270%20340%20L300%20294%20338%20350%20311%20337%20298%20353%20285%20337Z%20M473%20294%20L507%20228%20551%20320%20520%20299%20500%20315%20489%20297Z%20M704%20322%20L735%20282%20771%20346%20744%20331%20731%20344%20720%20330Z%22%20fill%3D%22%23fff%22%2F%3E%0A%3Cpath%20d%3D%22M0%20795%20L114%20655%20207%20713%20304%20610%20407%20755%20527%20608%20631%20750%20744%20640%20900%20755%20V1100%20H0Z%22%20fill%3D%22%232b5663%22%2F%3E%0A%3Cpath%20d%3D%22M0%20965%20L145%20835%20253%20928%20365%20820%20486%20956%20616%20840%20741%20935%20900%20849%20V1500%20H0Z%22%20fill%3D%22url%28%23forest%29%22%2F%3E%0A%3Cpath%20d%3D%22M0%201080%20Q150%20990%20277%201075%20T546%201062%20T900%201033%20V1500%20H0Z%22%20fill%3D%22%232d6771%22%2F%3E%0A%3Cpath%20d%3D%22M0%201260%20Q150%201192%20274%201250%20T515%201228%20T900%201212%20V1500%20H0Z%22%20fill%3D%22%23173d49%22%2F%3E%0A%3Cg%20fill%3D%22%23102b35%22%3E%3Cpath%20d%3D%22M42%201220%20l37%20-92%2037%2092%20h-20%20l29%2052%20h-92%20l29%20-52Z%22%2F%3E%3Cpath%20d%3D%22M143%201296%20l28%20-73%2029%2073%20h-16%20l24%2044%20h-73%20l24%20-44Z%22%2F%3E%3Cpath%20d%3D%22M760%201186%20l39%20-105%2040%20105%20h-22%20l32%2056%20h-99%20l32%20-56Z%22%2F%3E%3Cpath%20d%3D%22M824%201297%20l28%20-76%2029%2076%20h-16%20l25%2045%20h-75%20l25%20-45Z%22%2F%3E%3C%2Fg%3E%0A%3Cpath%20d%3D%22M452%201500%20C468%201418%20375%201389%20431%201318%20S534%201263%20485%201190%20S390%201119%20433%201055%20S500%201006%20469%20944%22%20fill%3D%22none%22%20stroke%3D%22%23f8d28b%22%20stroke-width%3D%2212%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M452%201500%20C468%201418%20375%201389%20431%201318%20S534%201263%20485%201190%20S390%201119%20433%201055%20S500%201006%20469%20944%22%20fill%3D%22none%22%20stroke%3D%22%23fff3c9%22%20stroke-width%3D%223%22%20stroke-dasharray%3D%2210%2014%22%20stroke-linecap%3D%22round%22%2F%3E%0A%3Cg%20transform%3D%22translate%28465%20951%29%22%3E%3Ccircle%20cy%3D%22-25%22%20r%3D%2210%22%20fill%3D%22%23fbd27f%22%2F%3E%3Cpath%20d%3D%22M0%20-13%20L-3%2017%20M-2%20-2%20L-20%208%20M-2%20-2%20L13%206%20M-3%2017%20L-16%2038%20M-3%2017%20L13%2033%22%20fill%3D%22none%22%20stroke%3D%22%23fbd27f%22%20stroke-width%3D%228%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M-8%20-14%20L7%20-9%20L11%208%20L-13%206Z%22%20fill%3D%22%23f0f5ed%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") !important;
+ background-repeat:no-repeat,no-repeat !important; background-size:100% 100%,300% 500% !important;
+ background-position:center,var(--puzzle-x,50%) var(--puzzle-y,50%) !important;
+ box-shadow:inset 0 0 0 2px rgba(246,251,255,.9),inset 0 -10px 15px rgba(5,18,28,.22),0 4px 9px rgba(0,0,0,.18);
+ text-shadow:0 1px 3px rgba(0,0,0,.85); cursor:pointer; transition:transform .16s ease,filter .16s ease; -webkit-tap-highlight-color:transparent;
+}
+#achievements-view .achievement-puzzle-tile.started { box-shadow:inset 0 0 0 2px rgba(255,221,143,.98),inset 0 -10px 15px rgba(5,18,28,.22),0 4px 9px rgba(0,0,0,.18); }
+#achievements-view .achievement-puzzle-tile.complete { box-shadow:inset 0 0 0 2px rgba(132,246,187,.98),inset 0 -10px 15px rgba(5,18,28,.22),0 0 0 1px rgba(132,246,187,.32),0 4px 9px rgba(0,0,0,.18); }
+#achievements-view .achievement-puzzle-tile:active { transform:scale(.975); filter:brightness(1.12); }
+#achievements-view .achievement-puzzle-tile:focus-visible { outline:3px solid var(--accent,#f9d77e); outline-offset:2px; }
+#achievements-view .achievement-puzzle-tile::before,#achievements-view .achievement-puzzle-tile::after {
+ content:""; position:absolute; z-index:3; width:13px; height:13px; border:2px solid rgba(247,252,255,.92); border-radius:50%;
+ background:rgba(192,222,229,.34); box-shadow:inset 0 1px 2px rgba(255,255,255,.42),0 1px 3px rgba(0,0,0,.28); pointer-events:none;
+}
+#achievements-view .achievement-puzzle-tile::before { top:50%; right:-7px; transform:translateY(-50%); }
+#achievements-view .achievement-puzzle-tile::after { left:50%; bottom:-7px; transform:translateX(-50%); }
+#achievements-view .achievement-puzzle-tile:nth-child(3n)::before,#achievements-view .achievement-puzzle-tile:nth-child(n+13)::after { display:none; }
+#achievements-view .achievement-puzzle-tile:nth-child(3n+1) { z-index:1; --puzzle-x:0%; }
+#achievements-view .achievement-puzzle-tile:nth-child(3n+2) { --puzzle-x:50%; }
+#achievements-view .achievement-puzzle-tile:nth-child(3n) { --puzzle-x:100%; }
+#achievements-view .achievement-puzzle-tile:nth-child(-n+3) { --puzzle-y:0%; }
+#achievements-view .achievement-puzzle-tile:nth-child(n+4):nth-child(-n+6) { --puzzle-y:25%; }
+#achievements-view .achievement-puzzle-tile:nth-child(n+7):nth-child(-n+9) { --puzzle-y:50%; }
+#achievements-view .achievement-puzzle-tile:nth-child(n+10):nth-child(-n+12) { --puzzle-y:75%; }
+#achievements-view .achievement-puzzle-tile:nth-child(n+13) { --puzzle-y:100%; }
+#achievements-view .achievement-puzzle-tile-top { display:flex; align-items:flex-start; justify-content:space-between; gap:4px; min-width:0; }
+#achievements-view .achievement-puzzle-tile-label { display:flex; align-items:flex-start; gap:4px; min-width:0; }
+#achievements-view .achievement-puzzle-tile-icon { flex:0 0 auto; font-size:13px; line-height:1.15; }
+#achievements-view .achievement-puzzle-tile-label strong { font-size:clamp(8px,2.25vw,10px); line-height:1.2; font-weight:850; overflow-wrap:anywhere; }
+#achievements-view .achievement-puzzle-tile-state { display:grid; flex:0 0 auto; place-items:center; min-width:22px; min-height:21px; padding:2px 4px; border-radius:999px; color:#102b34; background:rgba(248,252,244,.94); text-shadow:none; font-size:9px; font-weight:950; line-height:1; }
+#achievements-view .achievement-puzzle-tile-count { align-self:flex-start; font-size:8px; font-weight:750; opacity:.98; }
+#achievements-view .achievement-puzzle-tile .achievement-category-progress-track { display:block; width:100%; height:3px; margin-top:auto; overflow:hidden; border-radius:99px; background:rgba(255,255,255,.32); }
+#achievements-view .achievement-puzzle-tile .achievement-category-progress-bar { display:block; height:100%; border-radius:inherit; background:#fff0bb; box-shadow:0 0 8px rgba(255,240,187,.7); }
+#achievements-view .achievement-inline-catalog { display:flex; flex-direction:column; gap:12px; padding-bottom:12px; }
+#achievements-view .achievement-category-section { min-width:0; border:1px solid var(--ui-card-border,rgba(128,128,128,.28)); border-radius:15px; overflow:hidden; background:var(--ui-card-bg,rgba(128,128,128,.06)); color:var(--text-main,currentColor); scroll-margin-top:12px; }
+#achievements-view .achievement-category-section-header { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 12px 8px; }
+#achievements-view .achievement-category-section-title { display:flex; align-items:center; gap:8px; min-width:0; }
+#achievements-view .achievement-category-section-title>span { flex:0 0 auto; font-size:20px; }
+#achievements-view .achievement-category-section-title h3 { min-width:0; margin:0; font-size:.91rem; line-height:1.25; font-weight:850; }
+#achievements-view .achievement-category-section-count { flex:0 0 auto; padding:4px 8px; border-radius:999px; background:color-mix(in srgb,var(--accent,currentColor) 15%,transparent); font-size:.72rem; font-weight:850; font-variant-numeric:tabular-nums; }
+#achievements-view .achievement-category-section-progress { height:3px; overflow:hidden; background:color-mix(in srgb,currentColor 10%,transparent); }
+#achievements-view .achievement-category-section-progress>span { display:block; height:100%; background:var(--accent,currentColor); box-shadow:0 0 8px color-mix(in srgb,var(--accent,currentColor) 45%,transparent); }
+#achievements-view .achievement-inline-rows { display:flex; flex-direction:column; }
+#achievements-view .achievement-inline-row { display:grid; grid-template-columns:minmax(0,1fr) minmax(108px,40%); align-items:center; column-gap:10px; min-width:0; padding:9px 11px; border-top:1px solid color-mix(in srgb,var(--ui-card-border,currentColor) 68%,transparent); }
+#achievements-view .achievement-inline-row.is-unlocked { background:color-mix(in srgb,#36a96b 5%,transparent); }
+#achievements-view .achievement-row-main { display:flex; align-items:center; gap:8px; min-width:0; }
+#achievements-view .achievement-row-icon { display:grid; flex:0 0 30px; place-items:center; width:30px; height:30px; border:1px solid color-mix(in srgb,currentColor 14%,transparent); border-radius:9px; background:color-mix(in srgb,currentColor 5%,transparent); font-size:16px; }
+#achievements-view .is-unlocked .achievement-row-icon { border-color:color-mix(in srgb,#23985a 40%,transparent); background:color-mix(in srgb,#23985a 12%,transparent); }
+#achievements-view .achievement-row-copy { display:flex; flex-direction:column; gap:3px; min-width:0; }
+#achievements-view .achievement-row-copy strong { font-size:.79rem; line-height:1.25; font-weight:800; overflow-wrap:anywhere; }
+#achievements-view .achievement-row-copy small { font-size:.64rem; line-height:1.25; opacity:.68; }
+#achievements-view .achievement-row-meta { display:flex; flex-direction:column; align-items:flex-end; justify-content:center; gap:4px; min-width:0; text-align:right; }
+#achievements-view .achievement-row-tour { display:block; max-width:100%; padding:0; border:0; color:var(--text-main,currentColor); background:transparent; font:inherit; font-size:.68rem; font-weight:750; line-height:1.25; text-align:right; overflow-wrap:anywhere; }
+#achievements-view button.achievement-row-tour-link { width:auto; max-width:100%; cursor:pointer; text-decoration:underline; text-decoration-color:color-mix(in srgb,var(--accent,currentColor) 60%,transparent); text-underline-offset:2px; }
+#achievements-view .achievement-row-tour-link:focus-visible { outline:2px solid var(--accent,currentColor); outline-offset:2px; border-radius:3px; }
+#achievements-view .achievement-row-pending { opacity:.55; }
+#achievements-view .achievement-row-date { font-size:.65rem; line-height:1.2; opacity:.68; font-variant-numeric:tabular-nums; white-space:nowrap; }
+@media (max-width:560px) {
+ #achievements-view .achievement-puzzle-grid { gap:3px; grid-auto-rows:minmax(61px,auto); padding-inline:0; }
+ #achievements-view .achievement-puzzle-tile { min-height:66px; padding:8px 5px 7px; border-radius:8px; }
+ #achievements-view .achievement-puzzle-tile::before,#achievements-view .achievement-puzzle-tile::after { width:11px; height:11px; }
+ #achievements-view .achievement-puzzle-tile::before { right:-6px; } #achievements-view .achievement-puzzle-tile::after { bottom:-6px; }
+ #achievements-view .achievement-puzzle-tile-label strong { font-size:8px; } #achievements-view .achievement-puzzle-tile-icon { font-size:11px; }
+ #achievements-view .achievement-puzzle-tile-count { font-size:7px; } #achievements-view .achievement-puzzle-tile-state { min-width:18px; min-height:18px; font-size:8px; }
+ #achievements-view .achievement-inline-row { grid-template-columns:minmax(0,1fr) minmax(102px,42%); column-gap:7px; padding:8px; }
+ #achievements-view .achievement-row-icon { flex-basis:26px; width:26px; height:26px; font-size:14px; }
+ #achievements-view .achievement-row-copy strong { font-size:.74rem; } #achievements-view .achievement-row-tour { font-size:.64rem; } #achievements-view .achievement-row-date { font-size:.61rem; }
+}
+@media (max-width:1024px) and (orientation:landscape) and (pointer:coarse) {
+ #achievements-view .achievement-puzzle-grid { grid-template-columns:repeat(5,minmax(0,1fr)); grid-auto-rows:minmax(58px,auto); gap:3px; }
+ #achievements-view .achievement-puzzle-tile:nth-child(5n+1) { --puzzle-x:0%; } #achievements-view .achievement-puzzle-tile:nth-child(5n+2) { --puzzle-x:25%; }
+ #achievements-view .achievement-puzzle-tile:nth-child(5n+3) { --puzzle-x:50%; } #achievements-view .achievement-puzzle-tile:nth-child(5n+4) { --puzzle-x:75%; } #achievements-view .achievement-puzzle-tile:nth-child(5n) { --puzzle-x:100%; }
+ #achievements-view .achievement-puzzle-tile:nth-child(-n+5) { --puzzle-y:0%; } #achievements-view .achievement-puzzle-tile:nth-child(n+6):nth-child(-n+10) { --puzzle-y:50%; } #achievements-view .achievement-puzzle-tile:nth-child(n+11) { --puzzle-y:100%; }
+ #achievements-view .achievement-puzzle-tile:nth-child(5n)::before,#achievements-view .achievement-puzzle-tile:nth-child(n+11)::after { display:none; }
+}
+@media (prefers-reduced-motion:reduce) { #achievements-view .achievement-puzzle-tile { transition:none; } }
+
