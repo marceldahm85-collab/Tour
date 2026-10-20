@@ -1451,33 +1451,35 @@
 }
 
 
-/* Höhenwelt: Fortschritts-Kreis im ausgewählten Gipfelmoment themeübergreifend kontrastreich darstellen. */
+/* Höhenwelt: Fortschrittsring nutzt die tatsächlichen Theme-Akzentfarben (--accent).
+   Wichtig: --accent-color ist in der App nicht die verbindliche Theme-Farbvariable. */
 #wrapped-view .bergwelt-height-moment .bergwelt-height-gauge {
     flex: 0 0 54px;
     width: 54px;
     height: 54px;
     box-sizing: border-box;
     padding: 5px;
-    border: 1px solid color-mix(in srgb, var(--accent-color, #4b8b75) 48%, var(--text-main, #fff));
+    border: 1px solid color-mix(in srgb, var(--accent, #52b788) 70%, white);
     background: conic-gradient(
-        var(--accent-color, #4b8b75) 0 var(--moment-progress, 0%),
-        color-mix(in srgb, var(--text-main, #fff) 24%, var(--ui-card-bg, #20252b)) var(--moment-progress, 0%) 100%
-    );
+        var(--accent, #52b788) 0 var(--moment-progress, 0%),
+        color-mix(in srgb, var(--text-main, #fff) 24%, #102016) var(--moment-progress, 0%) 100%
+    ) !important;
     box-shadow:
-        0 0 0 2px color-mix(in srgb, var(--ui-card-bg, #20252b) 90%, transparent),
-        0 0 12px color-mix(in srgb, var(--accent-color, #4b8b75) 24%, transparent);
+        0 0 0 2px color-mix(in srgb, var(--ui-card-bg, #102016) 90%, transparent),
+        0 0 12px color-mix(in srgb, var(--accent, #52b788) 30%, transparent);
 }
 #wrapped-view .bergwelt-height-moment .bergwelt-height-gauge > span {
     width: 100%;
     height: 100%;
     box-sizing: border-box;
-    border: 1px solid color-mix(in srgb, var(--text-main, #fff) 18%, var(--ui-card-bg, #20252b));
-    background: var(--ui-card-bg, #20252b);
+    border: 1px solid color-mix(in srgb, var(--text-main, #fff) 22%, var(--ui-card-bg, #102016));
+    background: var(--ui-card-bg, #102016);
     color: var(--text-main, #fff);
-    text-shadow: 0 1px 2px color-mix(in srgb, #000 35%, transparent);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .65);
 }
+/* Bei erreichter Marke muss auch der vollständige Ring den Theme-Akzent behalten. */
 #wrapped-view .bergwelt-height-moment.is-achieved .bergwelt-height-gauge {
-    background: conic-gradient(var(--accent-color, #4b8b75) 0 100%);
+    background: conic-gradient(var(--accent, #52b788) 0 100%) !important;
 }
 @media (max-width: 420px) {
     #wrapped-view .bergwelt-height-moment .bergwelt-height-gauge {
