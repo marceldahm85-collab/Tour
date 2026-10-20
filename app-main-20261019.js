@@ -19456,105 +19456,36 @@ function renderAchievementsView() {
         `;
     }
 
-    const categoryData = categories.map(([catId, cat]) => {
-        const categoryTotal = cat.badges.length;
-        const categoryUnlocked = cat.badges.filter(badge => results[badge.id]?.unlocked).length;
-        const categoryPercent = categoryTotal ? Math.round(categoryUnlocked / categoryTotal * 100) : 0;
-        const isComplete = categoryUnlocked === categoryTotal;
-        const stateClass = isComplete ? 'complete' : categoryUnlocked > 0 ? 'started' : 'empty';
-
-        const rows = cat.badges.map(badge => {
-            const r = results[badge.id] || {};
-            const isUnlocked = !!r.unlocked;
-            const name = badge.nameFn ? badge.nameFn(badge.threshold) : badge.id;
-            const unlockDate = r.unlockedAt ? new Date(r.unlockedAt) : null;
-            const dateLabel = unlockDate && !Number.isNaN(unlockDate.getTime())
-                ? unlockDate.toLocaleDateString('de-AT') : 'Datum nicht gespeichert';
-
-            let progressLabel = 'Noch nicht erreicht';
-            const target = Number(r.progressTarget);
-            const current = Number(r.progressCurrent);
-            if (!isUnlocked && Number.isFinite(target) && target > 0) {
-                progressLabel = `Fortschritt ${Math.round(Number.isFinite(current) ? current : 0).toLocaleString('de-AT')} / ${target.toLocaleString('de-AT')}`;
-            }
-
-            let tourMarkup;
-            if (!isUnlocked) {
-                tourMarkup = '<span class="achievement-row-tour achievement-row-pending">Noch offen</span>';
-            } else if (r.unlockedTourId) {
-                tourMarkup = `
-                    <button type="button" class="achievement-row-tour achievement-row-tour-link"
-                        data-achievement-tour-id="${escapeHtmlAttribute(r.unlockedTourId)}"
-                        title="Zugehörige Tour öffnen">${escapeHtml(r.unlockedTour || 'Zugehörige Tour')}</button>`;
-            } else {
-                tourMarkup = `<span class="achievement-row-tour">${escapeHtml(r.unlockedTour || 'Keine Tour zugeordnet')}</span>`;
-            }
-
-            return `
-                <article class="achievement-inline-row ${isUnlocked ? 'is-unlocked' : 'is-locked'}">
-                    <div class="achievement-row-main">
-                        <span class="achievement-row-icon" aria-hidden="true">${isUnlocked ? badge.icon : '🔒'}</span>
-                        <span class="achievement-row-copy">
-                            <strong>${escapeHtml(name)}</strong>
-                            <small>${isUnlocked ? 'Freigeschaltet' : escapeHtml(progressLabel)}</small>
-                        </span>
-                    </div>
-                    <div class="achievement-row-meta">
-                        ${tourMarkup}
-                        <time class="achievement-row-date">${isUnlocked ? dateLabel : '—'}</time>
-                    </div>
-                </article>`;
-        }).join('');
-
-        return {catId,cat,categoryTotal,categoryUnlocked,categoryPercent,isComplete,stateClass,rows};
-    });
-
     container.innerHTML = `
         <div class="achievement-category-grid achievement-puzzle-grid" aria-label="Achievement-Puzzle">
-            ${categoryData.map(item => `
-                <button type="button"
-                    class="achievement-category-tile achievement-puzzle-tile ${item.stateClass}"
-                    data-achievement-scroll-target="achievement-section-${item.catId}"
-                    aria-controls="achievement-section-${item.catId}"
-                    aria-label="${escapeHtmlAttribute(item.cat.label)}: ${item.categoryUnlocked} von ${item.categoryTotal} erreicht. Zur Übersicht springen">
-                    <span class="achievement-puzzle-tile-top">
-                        <span class="achievement-puzzle-tile-label">
-                            <span class="achievement-puzzle-tile-icon" aria-hidden="true">${item.cat.icon}</span>
-                            <strong>${escapeHtml(item.cat.label)}</strong>
+            ${categories.map(([catId, cat]) => {
+                const categoryTotal = cat.badges.length;
+                const categoryUnlocked = cat.badges.filter(badge => results[badge.id]?.unlocked).length;
+                const categoryPercent = categoryTotal ? Math.round(categoryUnlocked / categoryTotal * 100) : 0;
+                const isComplete = categoryUnlocked === categoryTotal;
+                const stateClass = isComplete ? 'complete' : categoryUnlocked > 0 ? 'started' : 'empty';
+                return `
+                    <button type="button"
+                        class="achievement-category-tile achievement-puzzle-tile ${stateClass}"
+                        data-category-id="${catId}"
+                        aria-label="${escapeHtmlAttribute(cat.label)}: ${categoryUnlocked} von ${categoryTotal} erreicht. Achievement-Liste öffnen">
+                        <span class="achievement-puzzle-tile-top">
+                            <span class="achievement-puzzle-tile-label">
+                                <span class="achievement-puzzle-tile-icon" aria-hidden="true">${cat.icon}</span>
+                                <strong>${escapeHtml(cat.label)}</strong>
+                            </span>
+                            <span class="achievement-puzzle-tile-state">${isComplete ? '✓' : `${categoryPercent}%`}</span>
                         </span>
-                        <span class="achievement-puzzle-tile-state">${item.isComplete ? '✓' : `${item.categoryPercent}%`}</span>
-                    </span>
-                    <span class="achievement-puzzle-tile-count">${item.categoryUnlocked}/${item.categoryTotal} erreicht</span>
-                    <span class="achievement-category-progress-track">
-                        <span class="achievement-category-progress-bar" style="width:${item.categoryPercent}%"></span>
-                    </span>
-                </button>`).join('')}
-        </div>
-        <div class="achievement-inline-catalog" aria-label="Alle einzelnen Achievements">
-            ${categoryData.map(item => `
-                <section class="achievement-category-section" id="achievement-section-${item.catId}">
-                    <header class="achievement-category-section-header">
-                        <div class="achievement-category-section-title">
-                            <span aria-hidden="true">${item.cat.icon}</span>
-                            <h3>${escapeHtml(item.cat.label)}</h3>
-                        </div>
-                        <span class="achievement-category-section-count">${item.categoryUnlocked}/${item.categoryTotal}</span>
-                    </header>
-                    <div class="achievement-category-section-progress" aria-hidden="true">
-                        <span style="width:${item.categoryPercent}%"></span>
-                    </div>
-                    <div class="achievement-inline-rows">${item.rows}</div>
-                </section>`).join('')}
+                        <span class="achievement-puzzle-tile-count">${categoryUnlocked}/${categoryTotal} erreicht</span>
+                        <span class="achievement-category-progress-track">
+                            <span class="achievement-category-progress-bar" style="width:${categoryPercent}%"></span>
+                        </span>
+                    </button>`;
+            }).join('')}
         </div>`;
 
-    container.querySelectorAll('[data-achievement-scroll-target]').forEach(tile => {
-        tile.addEventListener('click', () => {
-            const target = document.getElementById(tile.dataset.achievementScrollTarget);
-            target?.scrollIntoView({behavior:'smooth',block:'start'});
-        });
-    });
-    container.querySelectorAll('[data-achievement-tour-id]').forEach(button => {
-        button.addEventListener('click', () => openAchievementTourById(button.dataset.achievementTourId, false));
+    container.querySelectorAll('.achievement-puzzle-tile').forEach(tile => {
+        tile.addEventListener('click', () => openAchievementCategoryModal(tile.dataset.categoryId, results));
     });
 }
 
@@ -19570,25 +19501,58 @@ function openAchievementCategoryModal(categoryId, resultsInput = null) {
 
     title.textContent = `${cat.icon} ${cat.label}`;
 
-    badgesContainer.innerHTML = cat.badges.map(badge => {
-        const r = results[badge.id] || {};
-        const isUnlocked = !!r.unlocked;
-        const name = badge.nameFn ? badge.nameFn(badge.threshold) : badge.id;
+    badgesContainer.innerHTML = `
+        <div class="achievement-modal-list-intro">
+            <span>${cat.badges.filter(badge => results[badge.id]?.unlocked).length} von ${cat.badges.length} erreicht</span>
+            <span class="achievement-modal-list-key"><span class="achievement-modal-key-dot is-unlocked"></span>Freigeschaltet</span>
+        </div>
+        <div class="achievement-inline-rows achievement-modal-inline-rows">
+            ${cat.badges.map(badge => {
+                const r = results[badge.id] || {};
+                const isUnlocked = !!r.unlocked;
+                const name = badge.nameFn ? badge.nameFn(badge.threshold) : badge.id;
+                const unlockDate = r.unlockedAt ? new Date(r.unlockedAt) : null;
+                const dateLabel = unlockDate && !Number.isNaN(unlockDate.getTime())
+                    ? unlockDate.toLocaleDateString('de-AT') : 'Kein Datum gespeichert';
 
-        return `
-            <button type="button"
-                class="achievement-badge ${isUnlocked ? 'unlocked' : 'locked'}"
-                data-badge-id="${badge.id}">
-                <span class="achievement-badge-icon">${isUnlocked ? badge.icon : '🔒'}</span>
-                <span class="achievement-badge-name">${isUnlocked ? name : '???'}</span>
-            </button>
-        `;
-    }).join('');
+                let progressLabel = 'Noch nicht erreicht';
+                const target = Number(r.progressTarget);
+                const current = Number(r.progressCurrent);
+                if (!isUnlocked && Number.isFinite(target) && target > 0) {
+                    progressLabel = `Fortschritt ${Math.round(Number.isFinite(current) ? current : 0).toLocaleString('de-AT')} / ${target.toLocaleString('de-AT')}`;
+                }
 
-    badgesContainer.querySelectorAll('.achievement-badge').forEach(btn => {
-        btn.addEventListener('click', () => {
-            openAchievementDetailModal(btn.dataset.badgeId, results);
-        });
+                let tourMarkup;
+                if (!isUnlocked) {
+                    tourMarkup = '<span class="achievement-row-tour achievement-row-pending">Noch offen</span>';
+                } else if (r.unlockedTourId) {
+                    tourMarkup = `
+                        <button type="button" class="achievement-row-tour achievement-row-tour-link"
+                            data-achievement-tour-id="${escapeHtmlAttribute(r.unlockedTourId)}"
+                            title="Zugehörige Tour öffnen">${escapeHtml(r.unlockedTour || 'Zugehörige Tour')}</button>`;
+                } else {
+                    tourMarkup = `<span class="achievement-row-tour">${escapeHtml(r.unlockedTour || 'Keine Tour zugeordnet')}</span>`;
+                }
+
+                return `
+                    <article class="achievement-inline-row ${isUnlocked ? 'is-unlocked' : 'is-locked'}">
+                        <div class="achievement-row-main">
+                            <span class="achievement-row-icon" aria-hidden="true">${isUnlocked ? badge.icon : '🔒'}</span>
+                            <span class="achievement-row-copy">
+                                <strong>${escapeHtml(name)}</strong>
+                                <small>${isUnlocked ? 'Freigeschaltet' : escapeHtml(progressLabel)}</small>
+                            </span>
+                        </div>
+                        <div class="achievement-row-meta">
+                            ${tourMarkup}
+                            <time class="achievement-row-date">${isUnlocked ? dateLabel : '—'}</time>
+                        </div>
+                    </article>`;
+            }).join('')}
+        </div>`;
+
+    badgesContainer.querySelectorAll('[data-achievement-tour-id]').forEach(button => {
+        button.addEventListener('click', () => openAchievementTourById(button.dataset.achievementTourId));
     });
 
     modal.classList.remove('hidden');
@@ -19604,138 +19568,27 @@ function findTourById(tourId) {
     ) || null;
 }
 
-function openAchievementTourById(tourId, returnToAchievementDetail = true) {
+function openAchievementTourById(tourId) {
     const tour = findTourById(tourId);
-
     if (!tour) {
-        showToast(
-            'Die zugehörige Tour wurde nicht gefunden.',
-            {
-                type: 'error',
-                duration: 2500
-            }
-        );
+        showToast('Die zugehörige Tour wurde nicht gefunden.', { type: 'error', duration: 2500 });
         return;
     }
-
-    document
-        .getElementById('achievement-detail-modal')
-        ?.classList.add('hidden');
-
-    document
-        .getElementById('achievement-category-modal')
-        ?.classList.add('hidden');
-
-    if (returnToAchievementDetail) {
-        openTourDetail(tour, { returnModalId: 'achievement-detail-modal' });
-    } else {
-        openTourDetail(tour);
-    }
-}
-
-function openAchievementDetailModal(badgeId, resultsInput = null) {
-    const results = resultsInput || computeAllAchievements();
-    const badge = getAllAchievementBadgeDefs().find(b => b.id === badgeId);
-    if (!badge) return;
-
-    const r = results[badgeId] || {};
-    const isUnlocked = !!r.unlocked;
-    const name = badge.nameFn ? badge.nameFn(badge.threshold) : badge.id;
-    const cat = ACHIEVEMENT_CATEGORIES[badge.categoryId];
-
-    const modal = document.getElementById('achievement-detail-modal');
-    const title = document.getElementById('achievement-detail-title');
-    const body = document.getElementById('achievement-detail-body');
-    if (!modal || !title || !body) return;
-
-    title.textContent = isUnlocked ? name : 'Noch gesperrt';
-
-    let bodyHtml = '';
-
-    if (isUnlocked) {
-        bodyHtml += `<div class="achievement-detail-icon">${badge.icon}</div>`;
-        if (r.unlockedAt) {
-            const d = new Date(r.unlockedAt);
-            if (!isNaN(d.getTime())) {
-                bodyHtml += `<p>Freigeschaltet am ${d.toLocaleDateString('de-AT')}</p>`;
-            }
-        }
-        if (r.unlockedTour) {
-    const tourLabel =
-        `${r.unlockedTour}${r.unlockedAt ? ` · ${new Date(r.unlockedAt).toLocaleDateString('de-AT')}` : ''}`;
-
-    if (r.unlockedTourId) {
-        bodyHtml += `
-            <div class="achievement-detail-tour-section">
-                <div class="achievement-detail-tour-label">
-                    Erreicht durch
-                </div>
-
-                <button
-                    type="button"
-                    class="achievement-detail-tour-link"
-                    data-achievement-tour-id="${escapeHtmlAttribute(r.unlockedTourId)}">
-
-                    <span>🥾</span>
-                    <span>${escapeHtml(tourLabel)}</span>
-                    <span class="achievement-detail-tour-arrow">›</span>
-                </button>
-            </div>
-        `;
-    } else {
-        bodyHtml += `
-            <p>
-                Erreicht durch:
-                ${escapeHtml(tourLabel)}
-            </p>
-        `;
-    }
-}
-        if (r.recordCount) {
-            bodyHtml += `<p>${r.recordCount}× erreicht</p>`;
-        }
-    } else {
-        bodyHtml += `<div class="achievement-detail-icon locked">🔒</div>`;
-        bodyHtml += `<p>Dieses Achievement ist noch nicht freigeschaltet.</p>`;
-        if (r.progressTarget && !badge.isRecordCounter) {
-            bodyHtml += `<p>Fortschritt: ${Math.round(r.progressCurrent || 0).toLocaleString('de-AT')} / ${r.progressTarget.toLocaleString('de-AT')}</p>`;
-        }
-    }
-
-    body.innerHTML = bodyHtml;
-
-body
-    .querySelectorAll('[data-achievement-tour-id]')
-    .forEach(button => {
-        button.addEventListener('click', () => {
-            openAchievementTourById(
-                button.dataset.achievementTourId
-            );
-        });
-    });
-
-    modal.classList.remove('hidden');
+    document.getElementById('achievement-category-modal')?.classList.add('hidden');
+    openTourDetail(tour);
 }
 
 function initAchievementsUI() {
-    document.getElementById('achievement-detail-close')?.addEventListener('click', () => {
-        document.getElementById('achievement-detail-modal')?.classList.add('hidden');
-    });
-
-    document.querySelector('#achievement-detail-modal .modal-backdrop')?.addEventListener('click', () => {
-        document.getElementById('achievement-detail-modal')?.classList.add('hidden');
-    });
-
     document.getElementById('achievement-category-close')?.addEventListener('click', () => {
-    document.getElementById('achievement-category-modal')?.classList.add('hidden');
-});
+        document.getElementById('achievement-category-modal')?.classList.add('hidden');
+    });
 
-document.querySelector('#achievement-category-modal .modal-backdrop')?.addEventListener('click', () => {
-    document.getElementById('achievement-category-modal')?.classList.add('hidden');
-});
+    document.querySelector('#achievement-category-modal .modal-backdrop')?.addEventListener('click', () => {
+        document.getElementById('achievement-category-modal')?.classList.add('hidden');
+    });
 
-    document.getElementById('achievements-year-select')?.addEventListener('change', (e) => {
-        achievementsYearFilter = e.target.value;
+    document.getElementById('achievements-year-select')?.addEventListener('change', event => {
+        achievementsYearFilter = event.target.value;
         renderAchievementsView();
     });
 
@@ -19746,6 +19599,7 @@ document.querySelector('#achievement-category-modal .modal-backdrop')?.addEventL
         renderAchievementsView();
     });
 }
+
 
 function openMilestoneModal(type, yearFilter = dashYearFilter) {
     const modal   = document.getElementById('milestone-modal');
