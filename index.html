@@ -2812,7 +2812,7 @@ if ('serviceWorker' in navigator) {
         return pdfMagazinePromise;
     }
 
-    // Beim Öffnen von „Sicherung & Buch“ bereits im Hintergrund laden.
+    // Beim Öffnen von „Sicherung“ den PDF-Renderer im Hintergrund laden.
     document.getElementById('backup-toggle')?.addEventListener('click', () => {
         ensurePdfMagazineLoaded().catch(error => {
             console.warn('[PDF] Renderer wird bei Bedarf erneut geladen:', error);
