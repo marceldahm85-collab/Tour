@@ -2,8 +2,8 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix8') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261019-fix8';
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix9') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261019-fix9';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
@@ -358,7 +358,7 @@
             }).join('');
             return '<section class="bergwelt-level-modal-detail">' +
                 '<div class="bergwelt-level-modal-hero"><div class="bergwelt-level-modal-icon" aria-hidden="true">' + badgeIcons[i] + '</div>' +
-                    '<div class="bergwelt-level-modal-hero-copy"><span class="bergwelt-level-modal-kicker">DEINE ENTWICKLUNG</span><h3>' + escapeHTML(l.name) + '</h3><p>' + escapeHTML(tierText) + '</p></div></div>' +
+                    '<div class="bergwelt-level-modal-hero-copy"><span class="bergwelt-level-modal-kicker">SPEZIALISIERUNG</span><h3>' + escapeHTML(l.name) + '</h3><p>' + escapeHTML(tierText) + '</p></div></div>' +
                 '<div class="bergwelt-level-modal-metrics">' +
                     '<div class="bergwelt-level-modal-metric"><span>Dein Wert</span><strong>' + valueText + '</strong></div>' +
                     '<div class="bergwelt-level-modal-metric"><span>Aktueller Rang</span><strong>' + (currentIndex >= 0 ? (currentIndex + 1) + ' von 5' : 'Noch offen') + '</strong></div>' +
@@ -425,7 +425,7 @@
             const detail = developmentCards[Number(index)];
             if (!detail || !level) return;
             lastTrigger = trigger;
-            modal.querySelector('#bergwelt-level-detail-title').textContent = level.name;
+            modal.querySelector('#bergwelt-level-detail-title').textContent = 'Deine Entwicklung';
             modalBody.innerHTML = detail;
             modal.classList.remove('hidden');
             modal.setAttribute('aria-hidden', 'false');
