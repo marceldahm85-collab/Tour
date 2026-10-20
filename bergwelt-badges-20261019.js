@@ -465,12 +465,12 @@
         document.body.appendChild(modal);
         const modalBody = modal.querySelector('.bergwelt-level-detail-body');
         let lastTrigger = null;
-        const closeLevelModal = () => {
+        const closeLevelModal = (preserveForReturn = false) => {
             if (modal.classList.contains('hidden')) return;
             modal.classList.add('hidden');
-            modal.setAttribute('aria-hidden', 'true');
+            modal.setAttribute('aria-hidden', preserveForReturn ? 'false' : 'true');
             if (!document.querySelector('.modal:not(.hidden)')) document.body.classList.remove('modal-open');
-            if (lastTrigger && lastTrigger.isConnected) lastTrigger.focus({ preventScroll: true });
+            if (!preserveForReturn && lastTrigger && lastTrigger.isConnected) lastTrigger.focus({ preventScroll: true });
         };
         const openLevelModal = (index, trigger) => {
             const level = levels[Number(index)];
@@ -493,7 +493,7 @@
                 const selectedLevel = levels[Number(tourButton.dataset.levelTourIndex)];
                 const selectedTour = selectedLevel?.rankTours?.[Number(tourButton.dataset.levelTierIndex)];
                 if (!selectedTour) return;
-                closeLevelModal();
+                closeLevelModal(true);
                 if (typeof window.openTourDetail === 'function') {
                     window.openTourDetail(selectedTour, { returnModalId: 'bergwelt-level-detail-modal' });
                 } else {
