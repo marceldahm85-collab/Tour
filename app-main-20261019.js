@@ -34334,21 +34334,21 @@ const endHold = () => {
     // Bergwelt bleibt ein optionales Modul und wird erst beim Öffnen geladen.
     function loadBergweltModule() {
         window.__bergweltGetTours = () => appStorage.get('touren') || [];
-        if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix12' || window.__BERGWELT_BADGE_LOADING__) {
+        if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261019-fix13' || window.__BERGWELT_BADGE_LOADING__) {
             window.__bergweltRender?.();
             return;
         }
         window.__BERGWELT_BADGE_LOADING__ = true;
         window.__BERGWELT_LOADING__ = true;
-        if (!document.querySelector('link[data-bergwelt-badge-styles="20261019-fix12"]')) {
+        if (!document.querySelector('link[data-bergwelt-badge-styles="20261019-fix13"]')) {
             const styleLink = document.createElement('link');
             styleLink.rel = 'stylesheet';
             styleLink.href = './bergwelt-badges-20261019.css?v=15';
-            styleLink.dataset.bergweltBadgeStyles = '20261019-fix12';
+            styleLink.dataset.bergweltBadgeStyles = '20261019-fix13';
             document.head.appendChild(styleLink);
         }
         const script = document.createElement('script');
-        script.src = './bergwelt-badges-20261019.js?v=14';
+        script.src = './bergwelt-badges-20261019.js?v=15';
         script.onload = () => {
             window.__BERGWELT_BADGE_LOADING__ = false;
             window.__BERGWELT_LOADING__ = false;
