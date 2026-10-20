@@ -19014,6 +19014,65 @@ function getAllAchievementBadgeDefs() {
     return Object.values(ACHIEVEMENT_CATEGORIES).flatMap(cat => cat.badges);
 }
 
+function getAchievementConsistencyMilestone(entries, threshold, fullYear = false) {
+    const dated = (Array.isArray(entries) ? entries : [])
+        .map((entry, index) => ({ entry, index, date: parseTourDateValue(entry?.date) }))
+        .filter(item => item.date)
+        .sort((a, b) => a.date - b.date || a.index - b.index);
+
+    const firstTourByMonth = new Map();
+    const activeMonthsByYear = new Map();
+
+    dated.forEach(item => {
+        const year = item.date.getFullYear();
+        const month = item.date.getMonth() + 1;
+        const key = year + '-' + String(month).padStart(2, '0');
+
+        if (!firstTourByMonth.has(key)) firstTourByMonth.set(key, item);
+        if (!activeMonthsByYear.has(year)) activeMonthsByYear.set(year, new Set());
+        activeMonthsByYear.get(year).add(month);
+    });
+
+    let reachedMonthKey = null;
+
+    if (fullYear) {
+        const completeYear = [...activeMonthsByYear.entries()]
+            .filter(([, months]) => months.size === 12)
+            .map(([year]) => year)
+            .sort((a, b) => a - b)[0];
+
+        if (completeYear !== undefined) {
+            reachedMonthKey = completeYear + '-12';
+        }
+    } else {
+        const monthKeys = [...firstTourByMonth.keys()].sort();
+        let streak = 0;
+        let previousOrdinal = null;
+
+        for (const key of monthKeys) {
+            const [year, month] = key.split('-').map(Number);
+            const ordinal = year * 12 + month - 1;
+            streak = previousOrdinal !== null && ordinal === previousOrdinal + 1 ? streak + 1 : 1;
+            previousOrdinal = ordinal;
+
+            if (streak >= threshold) {
+                reachedMonthKey = key;
+                break;
+            }
+        }
+    }
+
+    const reached = reachedMonthKey ? firstTourByMonth.get(reachedMonthKey) : null;
+    if (!reached) return null;
+
+    return {
+        id: reached.entry.id || null,
+        date: reached.entry.date || null,
+        tourname: reached.entry.tourname || null,
+        period: new Intl.DateTimeFormat('de-AT', { month: 'long', year: 'numeric' }).format(reached.date)
+    };
+}
+
 function computeLongestMonthStreak(entries) {
     const monthSet = new Set();
 
@@ -19185,14 +19244,21 @@ progressCurrent: peakFirstSeen.size,
 }
         });
     });
-    ACHIEVEMENT_CATEGORIES.peakHeight.badges.forEach(badge => {
-        const match = peakHeightEvents.find(p => p.height >= badge.threshold);
+    const maxPeakHeight = peakHeightEvents.reduce((max, event) => Math.max(max, event.height), 0);
+    ACHIEVEMENT_CATEGORIES.peakHeight.badges.forEach((badge, badgeIndex, badges) => {
+        const nextThreshold = badges[badgeIndex + 1]?.threshold ?? null;
+        const reachedAny = peakHeightEvents.some(event => event.height >= badge.threshold);
+        const tierTour = peakHeightEvents.find(event =>
+            event.height >= badge.threshold &&
+            (nextThreshold === null || event.height < nextThreshold)
+        );
+
         results[badge.id] = {
-            unlocked: !!match,
-            unlockedAt: match?.date || null,
-            unlockedTour: match?.tourname || null,
-            unlockedTourId: match?.id || null,
-            progressCurrent: peakHeightEvents.length ? Math.max(...peakHeightEvents.map(p => p.height)) : 0,
+            unlocked: reachedAny,
+            unlockedAt: tierTour?.date || null,
+            unlockedTour: tierTour?.tourname || null,
+            unlockedTourId: tierTour?.id || null,
+            progressCurrent: maxPeakHeight,
             progressTarget: badge.threshold
         };
     });
@@ -19261,92 +19327,109 @@ unlockedTourId: match?.id || null,
 
     const longestStreak = computeLongestMonthStreak(allTours);
     ACHIEVEMENT_CATEGORIES.consistency.badges.forEach(badge => {
-        if (badge.isFullYear) {
-            const achieved = computeFullYearActive(allTours);
-            results[badge.id] = {
-                unlocked: achieved,
-                unlockedAt: null,
-                unlockedTour: null,
-                progressCurrent: achieved ? 1 : 0,
-                progressTarget: 1
-            };
-        } else {
-            results[badge.id] = {
-                unlocked: longestStreak >= badge.threshold,
-                unlockedAt: null,
-                unlockedTour: null,
-                progressCurrent: longestStreak,
-                progressTarget: badge.threshold
-            };
-        }
+        const milestone = getAchievementConsistencyMilestone(
+            allTours,
+            badge.threshold || 1,
+            !!badge.isFullYear
+        );
+        const achieved = !!milestone;
+
+        results[badge.id] = {
+            unlocked: achieved,
+            unlockedAt: milestone?.date || null,
+            unlockedTour: null,
+            unlockedTourId: null,
+            unlockedPeriod: milestone?.period || null,
+            progressCurrent: badge.isFullYear
+                ? (computeFullYearActive(allTours) ? 1 : 0)
+                : longestStreak,
+            progressTarget: badge.isFullYear ? 1 : badge.threshold
+        };
     });
 
-    const maxDistanceTour = sortedByDate.reduce((max, e) => {
-        const d = parseFloat(String(e.strecke || '').replace(',', '.')) || 0;
-        return d > (max?.val || 0)
-    ? {
-        val: d,
-        id: e.id,
-        date: e.date,
-        tourname: e.tourname
-    }
-    : max;
-    }, null);
-    ACHIEVEMENT_CATEGORIES.longestTour.badges.forEach(badge => {
-        const reached = maxDistanceTour && maxDistanceTour.val >= badge.threshold ? maxDistanceTour : null;
+    const distanceEvents = sortedByDate.map(entry => ({
+        id: entry.id || null,
+        date: entry.date || null,
+        tourname: entry.tourname || null,
+        val: parseFloat(String(entry.strecke || '').replace(',', '.')) || 0
+    })).filter(event => event.val > 0);
+    const maxDistance = distanceEvents.reduce((max, event) => Math.max(max, event.val), 0);
+
+    ACHIEVEMENT_CATEGORIES.longestTour.badges.forEach((badge, badgeIndex, badges) => {
+        const nextThreshold = badges[badgeIndex + 1]?.threshold ?? null;
+        const tierTour = distanceEvents.find(event =>
+            event.val >= badge.threshold &&
+            (nextThreshold === null || event.val < nextThreshold)
+        );
         results[badge.id] = {
-            unlocked: !!reached,
-            unlockedAt: reached?.date || null,
-            unlockedTour: reached?.tourname || null,
-unlockedTourId: reached?.id || null,
-            progressCurrent: maxDistanceTour?.val || 0,
+            unlocked: maxDistance >= badge.threshold,
+            unlockedAt: tierTour?.date || null,
+            unlockedTour: tierTour?.tourname || null,
+            unlockedTourId: tierTour?.id || null,
+            progressCurrent: maxDistance,
             progressTarget: badge.threshold
         };
     });
 
-    const maxAscentTour = sortedByDate.reduce((max, e) => {
-        const a = parseFloat(String(e.aufstieg || '').replace(',', '.')) || 0;
-        return a > (max?.val || 0)
-    ? {
-        val: a,
-        id: e.id,
-        date: e.date,
-        tourname: e.tourname
-    }
-    : max;
-    }, null);
-    ACHIEVEMENT_CATEGORIES.dailyAscent.badges.forEach(badge => {
-        const reached = maxAscentTour && maxAscentTour.val >= badge.threshold ? maxAscentTour : null;
+    const ascentEvents = sortedByDate.map(entry => ({
+        id: entry.id || null,
+        date: entry.date || null,
+        tourname: entry.tourname || null,
+        val: parseFloat(String(entry.aufstieg || '').replace(',', '.')) || 0
+    })).filter(event => event.val > 0);
+    const maxAscent = ascentEvents.reduce((max, event) => Math.max(max, event.val), 0);
+
+    ACHIEVEMENT_CATEGORIES.dailyAscent.badges.forEach((badge, badgeIndex, badges) => {
+        const nextThreshold = badges[badgeIndex + 1]?.threshold ?? null;
+        const tierTour = ascentEvents.find(event =>
+            event.val >= badge.threshold &&
+            (nextThreshold === null || event.val < nextThreshold)
+        );
         results[badge.id] = {
-            unlocked: !!reached,
-            unlockedAt: reached?.date || null,
-            unlockedTour: reached?.tourname || null,
-unlockedTourId: reached?.id || null,
-            progressCurrent: maxAscentTour?.val || 0,
+            unlocked: maxAscent >= badge.threshold,
+            unlockedAt: tierTour?.date || null,
+            unlockedTour: tierTour?.tourname || null,
+            unlockedTourId: tierTour?.id || null,
+            progressCurrent: maxAscent,
             progressTarget: badge.threshold
         };
     });
 
     const { records: perfRecords, maxScore } = computePerformanceRecordHistory(allTours);
-    ACHIEVEMENT_CATEGORIES.performance.badges.forEach(badge => {
+    const performanceEvents = sortedByDate.map(entry => {
+        const performance = calculatePerformanceIndex(entry);
+        const score = performance && Number.isFinite(performance.score) ? performance.score : null;
+        return {
+            id: entry.id || null,
+            date: entry.date || null,
+            tourname: entry.tourname || null,
+            score
+        };
+    }).filter(event => event.score !== null);
+
+    ACHIEVEMENT_CATEGORIES.performance.badges.forEach((badge, badgeIndex, badges) => {
         if (badge.isRecordCounter) {
             const lastRecord = perfRecords[perfRecords.length - 1];
             results[badge.id] = {
                 unlocked: perfRecords.length > 0,
                 unlockedAt: lastRecord?.date || null,
                 unlockedTour: lastRecord?.tourname || null,
-unlockedTourId: lastRecord?.id || lastRecord?.entry?.id || null,
-recordCount: perfRecords.length,
+                unlockedTourId: lastRecord?.id || lastRecord?.entry?.id || null,
+                recordCount: perfRecords.length,
                 isCounterType: true
             };
         } else {
-            const reached = perfRecords.find(r => r.score >= badge.threshold);
+            const nextThreshold = badges[badgeIndex + 1]?.threshold ?? null;
+            const tierTour = performanceEvents.find(event =>
+                event.score >= badge.threshold &&
+                (nextThreshold === null || event.score < nextThreshold)
+            );
             results[badge.id] = {
-                unlocked: !!reached,
-                unlockedAt: reached?.date || null,
-                unlockedTour: reached?.tourname || null,
-unlockedTourId: reached?.id || reached?.entry?.id || null,
-progressCurrent: maxScore,
+                unlocked: maxScore >= badge.threshold,
+                unlockedAt: tierTour?.date || null,
+                unlockedTour: tierTour?.tourname || null,
+                unlockedTourId: tierTour?.id || null,
+                progressCurrent: maxScore,
                 progressTarget: badge.threshold
             };
         }
@@ -19554,6 +19637,9 @@ function openAchievementCategoryModal(categoryId, resultsInput = null) {
                 const unlockDate = r.unlockedAt ? new Date(r.unlockedAt) : null;
                 const dateLabel = unlockDate && !Number.isNaN(unlockDate.getTime())
                     ? unlockDate.toLocaleDateString('de-AT') : '–';
+                const sublineMarkup = catId === 'consistency'
+                    ? (isUnlocked ? escapeHtml(r.unlockedPeriod || '–') : escapeHtml(progressLabel))
+                    : (isUnlocked ? tourMarkup + '<time class="achievement-row-date">' + dateLabel + '</time>' : escapeHtml(progressLabel));
 
                 let progressLabel = 'Noch nicht erreicht';
                 const target = Number(r.progressTarget);
@@ -19580,7 +19666,7 @@ function openAchievementCategoryModal(categoryId, resultsInput = null) {
                             <span class="achievement-row-icon" aria-hidden="true">${isUnlocked ? badge.icon : '🔒'}</span>
                             <span class="achievement-row-copy">
                                 <strong>${escapeHtml(name)}</strong>
-                                <small class="achievement-row-subline">${isUnlocked ? tourMarkup + '<time class="achievement-row-date">' + dateLabel + '</time>' : escapeHtml(progressLabel)}</small>
+                                <small class="achievement-row-subline">${sublineMarkup}</small>
                             </span>
                         </div>
                     </article>`;
