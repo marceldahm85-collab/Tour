@@ -6249,4 +6249,93 @@ body.summit {
 }
 
 /* Das Tourenbuch gehört zur Bergwelt, nicht in die Sicherungsansicht. */
+
+/* Achievement-Fotopuzzle – Hochformat 3x5, Querformat 5x3.
+   Der sichtbare Fortschrittskopf erhält im Querformat Luft zum oberen View-Rand. */
+#achievements-view {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+    scroll-padding-top: 14px;
+}
+#achievements-view .achievements-inner {
+    width: 100% !important;
+    height: auto !important;
+    min-height: max-content !important;
+    overflow: visible !important;
+    padding-top: 2px !important;
+    padding-bottom: 32px !important;
+}
+#achievements-view .achievements-overview-summary {
+    margin-top: 8px !important;
+    margin-bottom: 14px !important;
+    box-sizing: border-box !important;
+}
+#achievements-view .achievement-puzzle-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-auto-rows: minmax(76px, auto) !important;
+    gap: 0 !important;
+    padding: 4px !important;
+    overflow: visible !important;
+    isolation: isolate;
+}
+#achievements-view .achievement-puzzle-tile {
+    min-width: 0 !important;
+    min-height: 76px !important;
+    padding: 7px 5px 6px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+    color: #fff !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,.9) !important;
+    background-color: #254b5c !important;
+    background-image: linear-gradient(155deg,rgba(7,20,34,.10),rgba(7,20,34,.43)),url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1800&q=85") !important;
+    background-size: 300% 500% !important;
+    background-repeat: no-repeat, no-repeat !important;
+    background-position: center, var(--photo-x, 0%) var(--photo-y, 0%) !important;
+    filter: drop-shadow(0 0 1.5px rgba(244,250,255,.98)) drop-shadow(0 3px 5px rgba(0,0,0,.35)) !important;
+    transform: none !important;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+}
+#achievements-view .achievement-category-tile.achievement-puzzle-tile.complete,
+#achievements-view .achievement-category-tile.achievement-puzzle-tile.started,
+#achievements-view .achievement-category-tile.achievement-puzzle-tile.empty {
+    background-color: #254b5c !important;
+    background-image: linear-gradient(155deg,rgba(7,20,34,.10),rgba(7,20,34,.43)),url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1800&q=85") !important;
+    background-size: 300% 500% !important;
+    background-repeat: no-repeat, no-repeat !important;
+    background-position: center, var(--photo-x, 0%) var(--photo-y, 0%) !important;
+}
+#achievements-view .achievement-category-tile.achievement-puzzle-tile.empty { opacity: 1 !important; }
+#achievements-view .achievement-puzzle-tile-label strong { font-size: clamp(7px, 2vw, 10px) !important; }
+#achievements-view .achievement-puzzle-tile-state { min-width: 17px !important; min-height: 17px !important; font-size: 8px !important; }
+#achievements-view .achievement-puzzle-tile:focus-visible { outline: 3px solid var(--accent,#f9d77e) !important; outline-offset: 2px; }
+
+@media (max-width: 1024px) and (orientation: landscape) {
+    #achievements-view { padding-top: 14px !important; }
+    #achievements-view .achievements-inner { padding-top: 0 !important; }
+    #achievements-view .achievement-puzzle-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+        grid-auto-rows: minmax(58px, auto) !important;
+    }
+    #achievements-view .achievement-puzzle-tile,
+    #achievements-view .achievement-category-tile.achievement-puzzle-tile.complete,
+    #achievements-view .achievement-category-tile.achievement-puzzle-tile.started,
+    #achievements-view .achievement-category-tile.achievement-puzzle-tile.empty {
+        min-height: 58px !important;
+        padding: 5px 4px !important;
+        background-size: 500% 300% !important;
+        background-position: center, var(--photo-x, 0%) var(--photo-y, 0%) !important;
+    }
+}
+@media (max-width: 380px) and (orientation: portrait) {
+    #achievements-view .achievement-puzzle-grid { grid-auto-rows: minmax(68px, auto) !important; }
+    #achievements-view .achievement-puzzle-tile { min-height: 68px !important; padding: 5px 3px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+    #achievements-view .achievement-puzzle-tile { transition: none !important; }
+}
+
+/* Das Tourenbuch gehört zur Bergwelt, nicht in die Sicherungsansicht. */
 #backup-view #pdf-export-card { display: none !important; }
