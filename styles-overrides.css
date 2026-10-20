@@ -6139,3 +6139,22 @@ body.summit {
     font-size: .62rem;
     white-space: nowrap;
 }
+
+
+/* Puzzle-Überlappung: Tabs greifen sichtbar in die passenden Aussparungen. */
+#achievements-view .achievement-puzzle-tile {
+    transform: scale(1.12) !important;
+    transform-origin: center;
+    background-size: 100% 100%, 267.8571% 446.4286% !important;
+}
+#achievements-view .achievement-puzzle-tile:active {
+    transform: scale(1.06) !important;
+}
+#achievements-view .achievement-puzzle-tile:nth-child(3n+1) { --puzzle-x: -3.19%; }
+#achievements-view .achievement-puzzle-tile:nth-child(3n+2) { --puzzle-x: 50%; }
+#achievements-view .achievement-puzzle-tile:nth-child(3n) { --puzzle-x: 103.19%; }
+#achievements-view .achievement-puzzle-tile:nth-child(-n+3) { --puzzle-y: -1.55%; }
+#achievements-view .achievement-puzzle-tile:nth-child(n+4):nth-child(-n+6) { --puzzle-y: 24.23%; }
+#achievements-view .achievement-puzzle-tile:nth-child(n+7):nth-child(-n+9) { --puzzle-y: 50%; }
+#achievements-view .achievement-puzzle-tile:nth-child(n+10):nth-child(-n+12) { --puzzle-y: 75.77%; }
+#achievements-view .achievement-puzzle-tile:nth-child(n+13) { --puzzle-y: 101.55%; }
