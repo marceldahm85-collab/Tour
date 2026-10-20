@@ -1806,3 +1806,50 @@
     #bergwelt-level-detail-modal .bergwelt-level-modal-rank-number { width:25px;height:25px; }
 }
 @media (prefers-reduced-motion:reduce) { #bergwelt-level-detail-modal .bergwelt-level-modal-progress-track > span { transition:none; } }
+
+/* Direkter Weg von jeder erreichten Level-Stufe zur auslösenden Tour. */
+#bergwelt-level-detail-modal .bergwelt-level-modal-rank-tour {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    width:100%;
+    min-width:0;
+    margin-top:7px;
+    padding:7px 9px;
+    border:1px solid color-mix(in srgb,var(--accent-color,currentColor) 28%,transparent);
+    border-radius:9px;
+    background:color-mix(in srgb,var(--accent-color,currentColor) 6%,transparent);
+    color:inherit;
+    font:inherit;
+    text-align:left;
+    cursor:pointer;
+}
+#bergwelt-level-detail-modal .bergwelt-level-modal-rank-tour > span:first-child {
+    min-width:0;
+    font-size:.7rem;
+    line-height:1.35;
+    overflow-wrap:anywhere;
+}
+#bergwelt-level-detail-modal .bergwelt-level-modal-rank-tour > span:last-child {
+    flex:0 0 auto;
+    color:var(--accent-color,currentColor);
+    font-size:.68rem;
+    line-height:1.25;
+    font-weight:800;
+    white-space:nowrap;
+}
+#bergwelt-level-detail-modal .bergwelt-level-modal-rank-tour:focus-visible {
+    outline:2px solid var(--accent-color,currentColor);
+    outline-offset:2px;
+}
+#bergwelt-level-detail-modal .bergwelt-level-modal-rank-tour:hover {
+    background:color-mix(in srgb,var(--accent-color,currentColor) 12%,transparent);
+}
+@media (max-width:560px) {
+    #bergwelt-level-detail-modal .bergwelt-level-modal-rank-tour {
+        align-items:flex-start;
+        flex-direction:column;
+        gap:4px;
+    }
+}
