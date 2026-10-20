@@ -6033,3 +6033,35 @@ body.summit {
 }
 @media (prefers-reduced-motion:reduce) { #achievements-view .achievement-puzzle-tile { transition:none; } }
 
+
+
+/* Ein Achievement-Modal: alle Stufen einer Kategorie mit Tour und Datum rechts. */
+#achievement-category-modal .modal-card {
+    display:flex; flex-direction:column; width:min(760px,calc(100vw - 24px)); max-width:760px; max-height:min(88dvh,900px); min-height:0;
+}
+#achievement-category-modal .modal-header { flex:0 0 auto; }
+#achievement-category-modal .modal-body {
+    flex:1 1 auto; min-height:0; max-height:none; overflow-y:auto; overscroll-behavior:contain; padding:0 12px 12px;
+}
+#achievement-category-modal #achievement-category-badges { display:block; }
+#achievement-category-modal .achievement-modal-list-intro {
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px 12px;
+    padding:11px 2px 9px; font-size:.73rem; font-weight:800; opacity:.86;
+}
+#achievement-category-modal .achievement-modal-list-key { display:inline-flex; align-items:center; gap:5px; font-weight:650; }
+#achievement-category-modal .achievement-modal-key-dot { display:inline-block; width:8px; height:8px; border-radius:50%; }
+#achievement-category-modal .achievement-modal-key-dot.is-unlocked { background:#2fba79; box-shadow:0 0 7px rgba(47,186,121,.5); }
+#achievement-category-modal .achievement-modal-inline-rows { border:1px solid var(--ui-card-border,rgba(128,128,128,.24)); border-radius:13px; overflow:hidden; }
+#achievement-category-modal .achievement-inline-row { grid-template-columns:minmax(0,1fr) minmax(128px,40%); padding:10px 9px; gap:10px; }
+#achievement-category-modal .achievement-row-copy strong { font-size:.82rem; }
+#achievement-category-modal .achievement-row-copy small { font-size:.68rem; }
+#achievement-category-modal .achievement-row-tour { font-size:.72rem; }
+#achievement-category-modal .achievement-row-date { font-size:.66rem; }
+@media (max-width:560px) {
+    #achievement-category-modal .modal-card { width:calc(100vw - 16px); max-height:90dvh; }
+    #achievement-category-modal .modal-body { padding:0 8px 8px; }
+    #achievement-category-modal .achievement-inline-row { grid-template-columns:minmax(0,1fr) minmax(104px,42%); gap:7px; padding:8px 7px; }
+    #achievement-category-modal .achievement-row-copy strong { font-size:.75rem; }
+    #achievement-category-modal .achievement-row-tour { font-size:.64rem; }
+    #achievement-category-modal .achievement-row-date { font-size:.61rem; }
+}
