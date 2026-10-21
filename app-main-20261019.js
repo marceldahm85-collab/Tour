@@ -34383,7 +34383,7 @@ const endHold = () => {
     // Bergwelt bleibt ein optionales Modul und wird erst beim Öffnen geladen.
     function loadBergweltModule() {
         window.__bergweltGetTours = () => appStorage.get('touren') || [];
-        if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261020-fix17' || window.__BERGWELT_BADGE_LOADING__) {
+        if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261021-year-filter' || window.__BERGWELT_BADGE_LOADING__) {
             window.__bergweltRender?.();
             return;
         }
@@ -34397,7 +34397,7 @@ const endHold = () => {
             document.head.appendChild(styleLink);
         }
         const script = document.createElement('script');
-        script.src = './bergwelt-badges-20261019.js?v=19';
+        script.src = './bergwelt-badges-20261019.js?v=20';
         script.onload = () => {
             window.__BERGWELT_BADGE_LOADING__ = false;
             window.__BERGWELT_LOADING__ = false;
