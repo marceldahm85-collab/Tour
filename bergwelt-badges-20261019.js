@@ -24,6 +24,19 @@
         tourbuch: 'Tourbuch'
     };
     let activeTab = 'erlebnis';
+
+    // Teilen und Vollbild gehören ausschließlich zum Erlebnis-Bereich.
+    const shareButton = document.getElementById('wrapped-share-btn');
+    const fullscreenButton = document.getElementById('wrapped-fullscreen-btn');
+    const syncExperienceActions = () => {
+        const visible = activeTab === 'erlebnis';
+        [shareButton, fullscreenButton].forEach(button => {
+            if (!button) return;
+            button.hidden = !visible;
+            button.style.display = visible ? '' : 'none';
+        });
+    };
+    syncExperienceActions();
     let selectedHeightMilestone = null;
 
     const getTours = () => {
@@ -570,6 +583,7 @@
         const button = event.target.closest('[data-bergwelt-tab]');
         if (!button) return;
         activeTab = button.dataset.bergweltTab;
+        syncExperienceActions();
         selectedHeightMilestone = null;
         tabs.querySelectorAll('[data-bergwelt-tab]').forEach(tab => {
             const active = tab === button;
@@ -583,6 +597,7 @@
     });
     document.getElementById('wrapped-toggle')?.addEventListener('click', () => {
         activeTab = 'erlebnis';
+        syncExperienceActions();
         selectedHeightMilestone = null;
         tabs.querySelectorAll('[data-bergwelt-tab]').forEach(tab => {
             const active = tab.dataset.bergweltTab === 'erlebnis';
