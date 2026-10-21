@@ -21489,3 +21489,13 @@ body.wrapped-mobile-fullscreen-active {
         gap: 9px;
     }
 }
+
+
+/* Tourbuch: Layout, Farbgestaltung und Sortierung bleiben außerhalb des
+   einklappbaren Optionsbereichs permanent sichtbar. */
+#pdf-export-card .pdf-book-export-controls {
+    margin: 12px 0 14px;
+}
+#pdf-export-card .pdf-book-export-controls .pdf-book-design-grid {
+    margin-top: 0;
+}
