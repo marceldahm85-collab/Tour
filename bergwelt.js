@@ -767,7 +767,6 @@
         const button = event.target.closest('[data-bergwelt-tab]');
         if (!button) return;
         activeTab = button.dataset.bergweltTab;
-        syncExperienceActions();
         experienceMode = 'momente';
         tabs.querySelectorAll('[data-bergwelt-tab]').forEach(tab => {
             const active = tab === button;
@@ -781,7 +780,6 @@
     });
     document.getElementById('wrapped-toggle')?.addEventListener('click', () => {
         activeTab = 'erlebnis';
-        syncExperienceActions();
         experienceMode = 'momente';
         tabs.querySelectorAll('[data-bergwelt-tab]').forEach(tab => {
             const active = tab.dataset.bergweltTab === 'erlebnis';
