@@ -34963,48 +34963,92 @@ function toggleWrappedFullscreen() {
     const el = document.getElementById('wrapped-view');
     if (!el || !document.getElementById('bergwelt-tabs')?.querySelector('[data-bergwelt-tab="erlebnis"]')?.classList.contains('is-active')) return;
     const browserFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
-    const cssFullscreen = el.classList.contains('wrapped-mobile-fullscreen');
+    const mobileClassActive = el.classList.contains('wrapped-mobile-fullscreen');
 
-    if (browserFullscreen || cssFullscreen) {
+    if (browserFullscreen) {
+        // Den nativen Vollbildmodus beenden und die CSS-Klassen erst im
+        // fullscreenchange-Event zurücksetzen. Kein sofortiges Re-Enable.
         wrappedFullscreenFallbackActive = false;
         clearTimeout(wrappedFullscreenHideTimer);
-        el.classList.remove('wrapped-mobile-fullscreen', 'wrapped-controls-hidden');
-        if (document.exitFullscreen && document.fullscreenElement) document.exitFullscreen().catch(() => {});
-        else if (document.webkitExitFullscreen && document.webkitFullscreenElement) document.webkitExitFullscreen();
+        if (document.exitFullscreen && document.fullscreenElement) {
+            document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen && document.webkitFullscreenElement) {
+            document.webkitExitFullscreen();
+        }
+        return;
+    }
+
+    if (mobileClassActive) {
+        // CSS-Fallback (z. B. iOS ohne Fullscreen API) direkt beenden.
+        wrappedFullscreenFallbackActive = false;
+        clearTimeout(wrappedFullscreenHideTimer);
+        el.classList.remove('wrapped-mobile-fullscreen', 'wrapped-controls-hidden', 'wrapped-is-fullscreen');
+        document.body.classList.remove('wrapped-mobile-fullscreen-active');
         updateWrappedFullscreenState();
         return;
     }
 
-    if (isWrappedMobileFullscreen()) {
-        wrappedFullscreenFallbackActive = true;
+    const mobile = isWrappedMobileFullscreen();
+    if (mobile) {
+        wrappedFullscreenFallbackActive = false;
         el.classList.add('wrapped-mobile-fullscreen');
         el.classList.remove('wrapped-controls-hidden');
         document.body.classList.add('wrapped-mobile-fullscreen-active');
         scheduleWrappedFullscreenControlsHide();
     }
 
+    const useCssFallback = () => {
+        wrappedFullscreenFallbackActive = mobile;
+        updateWrappedFullscreenState();
+    };
+
     if (el.requestFullscreen) {
         el.requestFullscreen().then(() => {
+            wrappedFullscreenFallbackActive = false;
             updateWrappedFullscreenState();
         }).catch(() => {
-            updateWrappedFullscreenState();
+            useCssFallback();
         });
     } else if (el.webkitRequestFullscreen) {
-        try { el.webkitRequestFullscreen(); } catch (_) {}
-        updateWrappedFullscreenState();
+        try {
+            const result = el.webkitRequestFullscreen();
+            if (result && typeof result.then === 'function') {
+                result.then(() => {
+                    wrappedFullscreenFallbackActive = false;
+                    updateWrappedFullscreenState();
+                }).catch(useCssFallback);
+            } else {
+                // Safari/WebKit kann den Aufruf ohne Promise ausführen.
+                setTimeout(() => {
+                    const active = !!(document.fullscreenElement || document.webkitFullscreenElement);
+                    if (active) {
+                        wrappedFullscreenFallbackActive = false;
+                        updateWrappedFullscreenState();
+                    } else {
+                        useCssFallback();
+                    }
+                }, 0);
+            }
+        } catch (_) {
+            useCssFallback();
+        }
     } else {
-        updateWrappedFullscreenState();
+        useCssFallback();
     }
 }
 
 function exitWrappedFullscreenIfActive() {
     const el = document.getElementById('wrapped-view');
     clearTimeout(wrappedFullscreenHideTimer);
-    el?.classList.remove('wrapped-mobile-fullscreen', 'wrapped-controls-hidden');
-    document.body.classList.remove('wrapped-mobile-fullscreen-active');
     wrappedFullscreenFallbackActive = false;
-    if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
-    else if (document.webkitFullscreenElement && document.webkitExitFullscreen) document.webkitExitFullscreen();
+    const browserFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    if (browserFullscreen) {
+        if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        else if (document.webkitFullscreenElement && document.webkitExitFullscreen) document.webkitExitFullscreen();
+        return;
+    }
+    el?.classList.remove('wrapped-mobile-fullscreen', 'wrapped-controls-hidden', 'wrapped-is-fullscreen');
+    document.body.classList.remove('wrapped-mobile-fullscreen-active');
     updateWrappedFullscreenState();
 }
 
@@ -35012,7 +35056,8 @@ function updateWrappedFullscreenState() {
     const el = document.getElementById('wrapped-view');
     const btn = document.getElementById('wrapped-fullscreen-btn');
     const browserFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
-    const isFullscreen = browserFullscreen || !!el?.classList.contains('wrapped-mobile-fullscreen');
+    const cssFullscreen = !!(wrappedFullscreenFallbackActive && el?.classList.contains('wrapped-mobile-fullscreen'));
+    const isFullscreen = browserFullscreen || cssFullscreen;
 
     el?.classList.toggle('wrapped-is-fullscreen', isFullscreen);
     if (btn) btn.textContent = isFullscreen ? '✕' : '⛶';
