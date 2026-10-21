@@ -2310,12 +2310,12 @@ body.green #bergwelt-height-detail-modal .bergwelt-height-gauge > span {
 
 /* Hell: Himmelblau und kühles Blau passend zur hellen Oberflächenpalette. */
 body:not(.dark):not(.green):not(.summit) #wrapped-view .bergwelt-height-year-donut-section {
-    --height-chart-bg: #f0f7fc;
-    --height-chart-text: #18344a;
-    --height-chart-muted: #466174;
-    --height-chart-accent: #197bb7;
-    --height-chart-rest: #d1e3ef;
-    --height-chart-border: #b7d1e2;
+    --height-chart-bg: #fff8e6;
+    --height-chart-text: #3d3014;
+    --height-chart-muted: #715d33;
+    --height-chart-accent: #946200;
+    --height-chart-rest: #f0dfad;
+    --height-chart-border: #d4b45b;
 }
 /* Dark: dunkles Weinrot und Korallrot passend zum roten Dark-Theme. */
 body.dark #wrapped-view .bergwelt-height-year-donut-section {
