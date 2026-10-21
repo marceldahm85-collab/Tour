@@ -21353,30 +21353,29 @@ body.wrapped-mobile-fullscreen-active {
     padding: 8px 10px;
     border: 1px solid var(--ui-card-border, rgba(128,128,128,.25));
     border-radius: 9px;
-    background: var(--ui-input-bg, var(--ui-card-bg, transparent));
+    background: var(--ui-card-bg, transparent);
     color: var(--text-main, currentColor);
     cursor: pointer;
     list-style: none;
     -webkit-tap-highlight-color: transparent;
-    font: inherit;
-    font-size: .76rem;
-    line-height: 1.2;
+    font-family: var(--app-font);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: normal;
     transition: border-color .16s ease, color .16s ease;
 }
 #pdf-export-card .pdf-book-options > summary::-webkit-details-marker { display: none; }
 #pdf-export-card .pdf-book-options > summary::after {
-    content: "⌄";
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 18px;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    color: var(--accent, currentColor);
-    font-size: 1rem;
-    line-height: 1;
-    transition: transform .18s ease, background .18s ease;
+    content: "";
+    display: block;
+    flex: 0 0 0;
+    width: 0;
+    height: 0;
+    margin-left: 8px;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid var(--text-soft, currentColor);
+    transition: transform .18s ease;
 }
 @media (hover: hover) and (pointer: fine) {
     #pdf-export-card .pdf-book-options:not([open]) > summary:hover {
@@ -21392,7 +21391,7 @@ body.wrapped-mobile-fullscreen-active {
 #pdf-export-card .pdf-book-options[open] > summary {
     border: 1px solid var(--ui-card-border, rgba(128,128,128,.25));
     border-radius: 9px;
-    background: var(--ui-input-bg, var(--ui-card-bg, transparent));
+    background: var(--ui-card-bg, transparent);
 }
 #pdf-export-card .pdf-book-options[open] > summary::after {
     transform: rotate(180deg);
@@ -21451,10 +21450,12 @@ body.wrapped-mobile-fullscreen-active {
     padding: 8px 10px;
     border: 1px solid var(--ui-card-border, rgba(128,128,128,.25));
     border-radius: 9px;
-    background: var(--ui-input-bg, var(--ui-card-bg, transparent));
+    background: var(--ui-card-bg, transparent);
     color: var(--text-main, currentColor);
-    font: inherit;
-    font-size: .76rem;
+    font-family: var(--app-font);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: normal;
 }
 #pdf-export-card .pdf-book-options-note {
     margin: 9px 0 0;
@@ -21472,7 +21473,7 @@ body.wrapped-mobile-fullscreen-active {
         flex-wrap: nowrap;
         gap: 8px;
         padding: 8px 10px;
-        font-size: .76rem;
+        font-size: 12px;
     }
     #pdf-export-card .pdf-book-option-grid {
         grid-template-columns: minmax(0, 1fr);
@@ -21516,10 +21517,12 @@ body.wrapped-mobile-fullscreen-active {
     padding: 8px 10px;
     border: 1px solid var(--ui-card-border, rgba(128,128,128,.25));
     border-radius: 9px;
-    background: var(--ui-input-bg, var(--ui-card-bg, transparent));
+    background: var(--ui-card-bg, transparent);
     color: var(--text-main, currentColor);
-    font: inherit;
-    font-size: .76rem;
+    font-family: var(--app-font);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: normal;
 }
 #pdf-export-card .pdf-book-cover-toggle {
     margin-top: 10px;
