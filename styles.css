@@ -21336,8 +21336,8 @@ body.wrapped-mobile-fullscreen-active {
 #pdf-export-card select,
 #pdf-export-card .pdf-book-options > summary {
     box-sizing: border-box;
+    height: 40px;
     min-height: 40px;
-    height: auto;
     padding: 8px 10px;
     border: 1px solid var(--ui-card-border, rgba(128,128,128,.25));
     border-radius: 9px;
@@ -21486,6 +21486,7 @@ body.wrapped-mobile-fullscreen-active {
 @media (max-width: 768px) and (orientation: portrait) and (pointer: coarse) {
     #pdf-export-card select,
     #pdf-export-card .pdf-book-options > summary {
+        height: 28px;
         min-height: 28px;
         padding: 4px 6px;
         font-size: 10px;
