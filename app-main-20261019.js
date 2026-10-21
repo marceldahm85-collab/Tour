@@ -22381,7 +22381,8 @@ const THEME_EDITOR_SOFT_SELECTORS = [
     '#map-view .map-year-filter-wrap select', '#map-view .map-year-filter-wrap .mob-sel-btn',
     '#map-view .map-mode-btn', '#map-view #map-quick-filters .quick-filter-btn',
     '#backup-view .backup-status-panel', '#backup-view .backup-status-item',
-    '#backup-view .backup-info-card', '#backup-view .backup-file-status'
+    '#backup-view .backup-info-card', '#backup-view .backup-file-status',
+    '#pdf-export-card select', '#pdf-export-card .pdf-book-options > summary'
 ];
 
 function themeEditorPrefixFor(themeKey) {
@@ -22498,6 +22499,9 @@ function buildThemeEditorLiveCss() {
 
         css += `${bigSelectors} { background: ${bigGradient} !important; box-shadow: ${shadow} !important; border-radius: ${radius}px !important; backdrop-filter: blur(${blur}px) !important; -webkit-backdrop-filter: blur(${blur}px) !important; }\n`;
         css += `${softSelectors} { background: ${softGradient} !important; border-radius: ${softRadius}px !important; }\n`;
+        // Tourbuch-Controls folgen exakt der Themeeditor-Vorlage für Dropdowns:
+        // weicher Verlauf, derselbe Radius sowie die eingestellte Textfarbe/Schrift.
+        css += `${prefix} #pdf-export-card select, ${prefix} #pdf-export-card .pdf-book-options > summary { color: ${settings.textMain} !important; font-family: var(--app-font) !important; }\n`;
 
         // Die Diagramm-Tabs nutzen einen gleitenden Akzentmarker. Die Tabs
         // dürfen diesen Marker nicht mit dem weicheren Theme-Flächenverlauf
