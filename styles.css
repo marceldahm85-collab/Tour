@@ -21482,14 +21482,28 @@ body.wrapped-mobile-fullscreen-active {
     }
 }
 
-/* Auf Smartphones dieselbe kompakte Typografie wie im Themeeditor. */
+/* Native Selects werden unter 768px durch .mob-sel-btn ersetzt.
+   Diese Regel betrifft deshalb nur das unsichtbare Original-Select. */
 @media (max-width: 768px) and (orientation: portrait) and (pointer: coarse) {
-    #pdf-export-card select,
-    #pdf-export-card .pdf-book-options > summary {
+    #pdf-export-card select {
         height: 28px;
         min-height: 28px;
         padding: 4px 6px;
         font-size: 10px;
+    }
+}
+
+/* Geschlossenes Accordion auf schmalen Layouts exakt wie der sichtbare
+   Mobile-Select-Trigger: gleiche Schriftbasis, Innenabstände und natürliche Höhe.
+   Die globale Schriftgrößen-Skalierung kann beide danach identisch skalieren. */
+@media (max-width: 768px) {
+    #pdf-export-card .pdf-book-options > summary {
+        height: auto;
+        min-height: 0;
+        padding: 10px 12px;
+        font-size: 13px;
+        line-height: normal;
+        box-sizing: border-box;
     }
 }
 
