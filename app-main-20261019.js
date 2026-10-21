@@ -35117,12 +35117,13 @@ function showWrappedFullscreenControls() {
 function toggleWrappedFullscreen() {
     const el = document.getElementById('wrapped-view');
     if (!el || !document.getElementById('bergwelt-tabs')?.querySelector('[data-bergwelt-tab="erlebnis"]')?.classList.contains('is-active')) return;
-    const browserFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
-    const mobileClassActive = el.classList.contains('wrapped-mobile-fullscreen');
 
+    const browserFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    const cssFullscreenActive = el.classList.contains('wrapped-mobile-fullscreen');
+
+    // Falls ein älterer Zustand oder ein externer Auslöser echtes Browser-Vollbild
+    // aktiviert hat, dieses nur beenden. Die Bergwelt startet es selbst nicht mehr.
     if (browserFullscreen) {
-        // Den nativen Vollbildmodus beenden und die CSS-Klassen erst im
-        // fullscreenchange-Event zurücksetzen. Kein sofortiges Re-Enable.
         wrappedFullscreenFallbackActive = false;
         clearTimeout(wrappedFullscreenHideTimer);
         if (document.exitFullscreen && document.fullscreenElement) {
@@ -35133,8 +35134,7 @@ function toggleWrappedFullscreen() {
         return;
     }
 
-    if (mobileClassActive) {
-        // CSS-Fallback (z. B. iOS ohne Fullscreen API) direkt beenden.
+    if (cssFullscreenActive) {
         wrappedFullscreenFallbackActive = false;
         clearTimeout(wrappedFullscreenHideTimer);
         el.classList.remove('wrapped-mobile-fullscreen', 'wrapped-controls-hidden', 'wrapped-is-fullscreen');
@@ -35143,58 +35143,15 @@ function toggleWrappedFullscreen() {
         return;
     }
 
-    const mobile = isWrappedMobileFullscreen();
-    if (mobile) {
-        // Auf Mobilgeräten bewusst kein natives Fullscreen API aufrufen:
-        // Chrome zeigt dabei eine nicht unterdrückbare Systemmeldung zum Beenden.
-        // Die CSS-Vollbildansicht nutzt stattdessen den Viewport der installierten App.
-        wrappedFullscreenFallbackActive = true;
-        el.classList.add('wrapped-mobile-fullscreen');
-        el.classList.remove('wrapped-controls-hidden');
-        document.body.classList.add('wrapped-mobile-fullscreen-active');
-        updateWrappedFullscreenState();
-        scheduleWrappedFullscreenControlsHide();
-        return;
-    }
-
-    const useCssFallback = () => {
-        wrappedFullscreenFallbackActive = mobile;
-        updateWrappedFullscreenState();
-    };
-
-    if (el.requestFullscreen) {
-        el.requestFullscreen().then(() => {
-            wrappedFullscreenFallbackActive = false;
-            updateWrappedFullscreenState();
-        }).catch(() => {
-            useCssFallback();
-        });
-    } else if (el.webkitRequestFullscreen) {
-        try {
-            const result = el.webkitRequestFullscreen();
-            if (result && typeof result.then === 'function') {
-                result.then(() => {
-                    wrappedFullscreenFallbackActive = false;
-                    updateWrappedFullscreenState();
-                }).catch(useCssFallback);
-            } else {
-                // Safari/WebKit kann den Aufruf ohne Promise ausführen.
-                setTimeout(() => {
-                    const active = !!(document.fullscreenElement || document.webkitFullscreenElement);
-                    if (active) {
-                        wrappedFullscreenFallbackActive = false;
-                        updateWrappedFullscreenState();
-                    } else {
-                        useCssFallback();
-                    }
-                }, 0);
-            }
-        } catch (_) {
-            useCssFallback();
-        }
-    } else {
-        useCssFallback();
-    }
+    // Bewusst ausschließlich app-interner CSS-Vollbildmodus.
+    // Die Fullscreen API wird nicht aufgerufen, da Chrome sonst eine
+    // nicht unterdrückbare Systemmeldung zum Beenden einblendet.
+    wrappedFullscreenFallbackActive = true;
+    el.classList.add('wrapped-mobile-fullscreen');
+    el.classList.remove('wrapped-controls-hidden');
+    document.body.classList.add('wrapped-mobile-fullscreen-active');
+    updateWrappedFullscreenState();
+    scheduleWrappedFullscreenControlsHide();
 }
 
 function exitWrappedFullscreenIfActive() {
