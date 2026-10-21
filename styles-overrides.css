@@ -6434,3 +6434,15 @@ body.green #achievements-view .achievements-overview-summary {
 body.green #achievements-view .achievements-summary-main strong {
     color: #72d6a3 !important;
 }
+
+/* Kontrast-Check im Themeeditor nimmt die volle Breite der darüberliegenden Bereiche ein.
+   Geschlossene Accordions dürfen hier nicht auf ihre Inhaltsbreite schrumpfen. */
+#theme-view details.theme-editor-contrast-section {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+#theme-view details.theme-editor-contrast-section:not([open]) {
+    align-self: stretch !important;
+    width: 100% !important;
+}
