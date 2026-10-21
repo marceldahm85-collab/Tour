@@ -2,8 +2,8 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261021-height-year-navigation-final') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261021-height-year-navigation-final';
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261021-theme-tourbuch-level-review') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261021-theme-tourbuch-level-review';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
@@ -597,6 +597,7 @@
         if (staleLevelModal) staleLevelModal.remove();
         if (staleHeightModal) staleHeightModal.remove();
         if (!document.querySelector('.modal:not(.hidden)')) document.body.classList.remove('modal-open');
+        root.classList.toggle('bergwelt-active-tourbuch', activeTab === 'tourbuch');
         if (activeTab === 'erlebnis') return renderMomente();
         root.classList.add('bergwelt-mode');
         tourbookPanel.hidden = true;
