@@ -21327,3 +21327,123 @@ body.wrapped-mobile-fullscreen-active {
         transition: none !important;
     }
 }
+
+
+/* Tourbuch-Exportoptionen: kompakte, einklappbare Konfiguration. */
+#pdf-export-card .pdf-book-options {
+    margin: 14px 0 12px;
+    border: 1px solid var(--ui-card-border, rgba(128,128,128,.26));
+    border-radius: 12px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--ui-card-bg, currentColor) 92%, transparent);
+}
+#pdf-export-card .pdf-book-options > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 44px;
+    padding: 10px 12px;
+    cursor: pointer;
+    list-style: none;
+    font-size: .88rem;
+    font-weight: 800;
+}
+#pdf-export-card .pdf-book-options > summary::-webkit-details-marker { display: none; }
+#pdf-export-card .pdf-book-options > summary::after {
+    content: "⌄";
+    flex: 0 0 auto;
+    font-size: 1.1rem;
+    color: var(--accent-color, currentColor);
+    transition: transform .18s ease;
+}
+#pdf-export-card .pdf-book-options[open] > summary::after { transform: rotate(180deg); }
+#pdf-export-card .pdf-book-options-subtitle {
+    margin-left: auto;
+    color: var(--text-muted, currentColor);
+    opacity: .65;
+    font-size: .7rem;
+    font-weight: 600;
+    text-align: right;
+}
+#pdf-export-card .pdf-book-options-body {
+    padding: 0 12px 12px;
+    border-top: 1px solid var(--ui-card-border, rgba(128,128,128,.2));
+}
+#pdf-export-card .pdf-book-option-group {
+    min-width: 0;
+    margin: 12px 0 0;
+    padding: 0;
+    border: 0;
+}
+#pdf-export-card .pdf-book-option-group legend,
+#pdf-export-card .pdf-book-sort > label {
+    display: block;
+    margin: 0 0 7px;
+    color: var(--accent-color, currentColor);
+    font-size: .76rem;
+    font-weight: 850;
+}
+#pdf-export-card .pdf-book-option-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px 12px;
+}
+#pdf-export-card .pdf-book-option-grid label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    min-width: 0;
+    color: var(--text-main, currentColor);
+    font-size: .76rem;
+    line-height: 1.35;
+    cursor: pointer;
+}
+#pdf-export-card .pdf-book-option-grid input[type="checkbox"] {
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+    min-height: 16px;
+    margin: 1px 0 0;
+    accent-color: var(--accent-color, #4f9272);
+}
+#pdf-export-card .pdf-book-sort { margin-top: 14px; }
+#pdf-export-card #pdf-book-opt-sort {
+    display: block;
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 10px;
+    border: 1px solid var(--ui-card-border, rgba(128,128,128,.25));
+    border-radius: 9px;
+    background: var(--ui-input-bg, var(--ui-card-bg, transparent));
+    color: var(--text-main, currentColor);
+    font: inherit;
+    font-size: .78rem;
+}
+#pdf-export-card .pdf-book-options-note {
+    margin: 9px 0 0;
+    color: var(--text-muted, currentColor);
+    opacity: .68;
+    font-size: .68rem;
+    line-height: 1.4;
+}
+#pdf-export-card .pdf-book-options :focus-visible {
+    outline: 2px solid var(--accent-color, currentColor);
+    outline-offset: 2px;
+}
+@media (max-width: 520px) {
+    #pdf-export-card .pdf-book-options > summary {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+    #pdf-export-card .pdf-book-options-subtitle {
+        margin-left: 0;
+    }
+    #pdf-export-card .pdf-book-option-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 9px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    #pdf-export-card .pdf-book-options > summary::after { transition: none; }
+}
