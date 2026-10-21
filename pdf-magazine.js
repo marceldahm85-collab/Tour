@@ -407,9 +407,12 @@
             h += 4 + wrap(doc, d.notes, inner, 7.0, 'italic').length * 2.7;
         }
 
-        // Definierte untere Innenkante verhindert, dass der letzte Inhalt zu dicht am Kartenrand sitzt.
-        var bottomPad = (kind === 'feature' && d.photo) ? 3.0 : 1.2;
-        return Math.max(38, h + bottomPad);
+        // Sicherheitsreserve gleicht kleine Abweichungen zwischen der Vorabmessung
+        // und dem tatsächlich gezeichneten Inhalt aus (Schriftmetriken, Zeilenumbrüche,
+        // Trennlinien und Innenabstände). Bei langen Karten wächst sie proportional.
+        var bottomPad = (kind === 'feature' && d.photo) ? 4.0 : 2.5;
+        var safety = Math.max(3.5, h * 0.06);
+        return Math.max(40, h + bottomPad + safety);
     }
 
     var measureDoc = null;
@@ -620,8 +623,16 @@
             draw(doc, [224,224,219]); doc.setLineWidth(0.25); doc.line(x + pad, cursor, x + w - pad, cursor); cursor += 4;
             cursor = addWrap(doc, d.notes, x + pad, cursor, inner, 7.0, 'italic', [118,118,112], 2.7);
         }
-        // Die tatsächlich benötigte Höhe als letzte Absicherung zurückgeben.
-        return Math.max(h, cursor - y + 1);
+        // Die Vorabmessung ist bewusst konservativ. Falls die Zeichenhöhe sie
+        // dennoch überschreitet, mindestens die reale Höhe zurückmelden, damit
+        // die nachfolgende Karte nicht auf Grundlage einer zu kleinen Höhe platziert wird.
+        var actualHeight = cursor - y + 2;
+        if (actualHeight > h) {
+            console.warn('PDF-Tourkarte benötigt mehr Höhe als vorab gemessen:', d.title, {
+                measured: h, actual: actualHeight
+            });
+        }
+        return Math.max(h, actualHeight);
     }
 
     function addHeader(doc, label, colors) {
