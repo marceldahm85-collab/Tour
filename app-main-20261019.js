@@ -35145,11 +35145,16 @@ function toggleWrappedFullscreen() {
 
     const mobile = isWrappedMobileFullscreen();
     if (mobile) {
-        wrappedFullscreenFallbackActive = false;
+        // Auf Mobilgeräten bewusst kein natives Fullscreen API aufrufen:
+        // Chrome zeigt dabei eine nicht unterdrückbare Systemmeldung zum Beenden.
+        // Die CSS-Vollbildansicht nutzt stattdessen den Viewport der installierten App.
+        wrappedFullscreenFallbackActive = true;
         el.classList.add('wrapped-mobile-fullscreen');
         el.classList.remove('wrapped-controls-hidden');
         document.body.classList.add('wrapped-mobile-fullscreen-active');
+        updateWrappedFullscreenState();
         scheduleWrappedFullscreenControlsHide();
+        return;
     }
 
     const useCssFallback = () => {
