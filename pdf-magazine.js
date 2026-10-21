@@ -168,26 +168,86 @@
         } catch (_) {}
         return [];
     }
-    function dataFor(e, profile) {
-        var m = metrics(e, profile), p = perf(e), cs = cats(e), extras = [];
+    function getExportOptions() {
+        function checked(name, fallback) {
+            var el = document.getElementById('pdf-book-opt-' + name);
+            return el ? !!el.checked : fallback;
+        }
+        var sortEl = document.getElementById('pdf-book-opt-sort');
+        var allowedSorts = ['default', 'date-asc', 'date-desc', 'distance-desc', 'ascent-desc', 'performance-desc'];
+        var sort = sortEl && allowedSorts.indexOf(sortEl.value) >= 0 ? sortEl.value : 'default';
+        return {
+            photos: checked('photos', true),
+            peaks: checked('peaks', true),
+            performance: checked('performance', true),
+            secondary: checked('secondary', true),
+            startProfile: checked('start-profile', true),
+            notes: checked('notes', true),
+            extras: checked('extras', true),
+            milestones: checked('milestones', true),
+            sort: sort
+        };
+    }
+
+    function parseSortDate(value) {
+        var raw = st(value);
+        var match = raw.match(/^(\\d{4})-(\\d{2})-(\\d{2})/);
+        if (match) return Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+        match = raw.match(/^(\\d{1,2})[./](\\d{1,2})[./](\\d{4})$/);
+        if (match) return Date.UTC(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
+        var parsed = Date.parse(raw);
+        return Number.isFinite(parsed) ? parsed : null;
+    }
+
+    function sortTourEntries(entries, mode) {
+        if (!mode || mode === 'default') return entries;
+        function numeric(value) {
+            var parsed = parseFloat(String(value == null ? '' : value).replace(/\\s/g, '').replace(',', '.'));
+            return Number.isFinite(parsed) ? parsed : null;
+        }
+        var direction = mode === 'date-asc' ? 1 : -1;
+        var prepared = entries.map(function(entry, index) {
+            var value = null;
+            if (mode === 'date-asc' || mode === 'date-desc') value = parseSortDate(entry.date);
+            else if (mode === 'distance-desc') value = numeric(entry.strecke);
+            else if (mode === 'ascent-desc') value = numeric(entry.aufstieg);
+            else if (mode === 'performance-desc') {
+                var result = perf(entry);
+                value = result ? numeric(result.score) : null;
+            }
+            return { entry: entry, index: index, value: value };
+        });
+        prepared.sort(function(a, b) {
+            if (a.value == null && b.value == null) return a.index - b.index;
+            if (a.value == null) return 1;
+            if (b.value == null) return -1;
+            var delta = (a.value - b.value) * direction;
+            return delta || a.index - b.index;
+        });
+        return prepared.map(function(item) { return item.entry; });
+    }
+
+    function dataFor(e, profile, options) {
+        options = options || getExportOptions();
+        var m = metrics(e, profile), p = options.performance ? perf(e) : null, cs = cats(e), extras = [];
         var stats = [
             e.strecke ? [f1(e.strecke) + ' km', 'Strecke'] : null,
             e.aufstieg ? [fi(e.aufstieg) + ' hm', 'Aufstieg'] : null,
             e.zeit ? [st(e.zeit) + ' h', 'Gehzeit'] : null,
             m.steps ? [fi(m.steps) + ' Schritte', 'Schritte'] : null
         ].filter(Boolean);
-        var secondary = [
+        var secondary = options.secondary ? [
             m.speed != null ? f1(m.speed) + ' km/h Ø Speed' : null,
             m.gradient != null ? fi(m.gradient) + ' hm/km Ø Steigung' : null,
             m.ascentRate != null ? fi(m.ascentRate) + ' hm/h Ø Anstieg' : null
-        ].filter(Boolean);
-        var peaks = Array.isArray(e.gipfelDetails) ? e.gipfelDetails.filter(function (g) {
+        ].filter(Boolean) : [];
+        var peaks = options.peaks && Array.isArray(e.gipfelDetails) ? e.gipfelDetails.filter(function (g) {
             return g && (g.name || g.hoehe);
         }).map(function (g) {
             return (g.name || 'Unbenannt') + ' · ' + (g.hoehe || '–') + ' m';
         }) : [];
 
-        if (e.ferrataStrecke || e.ferrataHm || e.ferrataZeit) extras.push([
+        if (options.extras && (e.ferrataStrecke || e.ferrataHm || e.ferrataZeit)) extras.push([
             'Klettersteig',
             [
                 e.ferrataStrecke ? f1(e.ferrataStrecke) + ' km' : null,
@@ -195,7 +255,7 @@
                 e.ferrataZeit ? st(e.ferrataZeit) + ' h' : null
             ].filter(Boolean).join(' · ')
         ]);
-        if (e.bikeStrecke || e.bikeHm || e.bikeZeit) extras.push([
+        if (options.extras && (e.bikeStrecke || e.bikeHm || e.bikeZeit)) extras.push([
             'Rad',
             [
                 e.bikeStrecke ? f1(e.bikeStrecke) + ' km' : null,
@@ -203,8 +263,8 @@
                 e.bikeZeit ? st(e.bikeZeit) + ' h' : null
             ].filter(Boolean).join(' · ')
         ]);
-        var startingPoint = e.ausgangspunkt || '';
-        if (e.tourGroup) extras.push([
+        var startingPoint = options.startProfile ? (e.ausgangspunkt || '') : '';
+        if (options.extras && e.tourGroup) extras.push([
             'Begleitung / Tourgruppe',
             e.tourGroup + (e.tourDay && e.tourDayCount ? ' · Tag ' + e.tourDay + '/' + e.tourDayCount : '')
         ]);
@@ -235,15 +295,15 @@
             startingPoint: startingPoint,
             pText: pText,
             complexity: complexity,
-            photo: !!e.imageData,
+            photo: options.photos && !!e.imageData,
             title: e.tourname || 'Unbenannte Tour',
             date: typeof window.pdfExportFormatDate === 'function' ? window.pdfExportFormatDate(e.date) : (e.date || '–'),
             difficulty: difficulty(e),
             region: e.region || '–',
             isBig: big(e),
             fullGradient: !!e.useFullDistanceForGradient,
-            profile: m.profile && m.profile !== '–' ? m.profile : '',
-            notes: e.notes || ''
+            profile: options.startProfile && m.profile && m.profile !== '–' ? m.profile : '',
+            notes: options.notes ? (e.notes || '') : ''
         };
     }
 
@@ -552,7 +612,7 @@
         }
     }
 
-    async function cover(doc, entries, stats, label, colors, rep) {
+    async function cover(doc, entries, stats, label, colors, rep, options) {
         fill(doc, [255,255,253]); doc.rect(0,0,210,297,'F');
         if (rep) {
             try {
@@ -562,17 +622,18 @@
                 text(doc, [34,34,32]); doc.setFontSize(23); doc.text(st('Tourenbuch ' + label), M + 15, 141);
                 text(doc, [118,118,112]); doc.setFont(undefined, 'normal'); doc.setFontSize(7.1);
                 doc.text(st(entries.length + ' gespeicherte Touren · erstellt am ' + new Date().toLocaleDateString('de-AT')), M + 15, 149);
-                coverStats(doc, stats, 164, colors, entries);
+                coverStats(doc, stats, 164, colors, entries, options);
                 return;
             } catch (_) {}
         }
         rule(doc, M, 30, 7, colors.accent, 55);
         text(doc, [35,35,32]); doc.setFont(undefined, 'bold'); doc.setFontSize(25); doc.text(st('Tourenbuch ' + label), M + 13, 53);
         text(doc, [120,120,114]); doc.setFont(undefined, 'normal'); doc.setFontSize(9); doc.text('Persönliche Bergstatistik und Tourenchronik', M + 13, 62);
-        coverStats(doc, stats, 82, colors, entries);
+        coverStats(doc, stats, 82, colors, entries, options);
     }
 
-    function buildCoverHighlights(entries) {
+    function buildCoverHighlights(entries, options) {
+        options = options || getExportOptions();
         var longest = null, biggestAsc = null, fastest = null, mostSteps = null;
         var bestPerf = null, highestPeak = null;
 
@@ -587,7 +648,7 @@
             if (asc > 0 && (!biggestAsc || asc > biggestAsc.value)) biggestAsc = { value: asc, entry: entry };
             if (steps > 0 && (!mostSteps || steps > mostSteps.value)) mostSteps = { value: steps, entry: entry };
 
-            if (dist > 0 && entry.zeit && entry.zeit.includes(':')) {
+            if (options.secondary && dist > 0 && entry.zeit && entry.zeit.includes(':')) {
                 var parts = entry.zeit.split(':').map(Number);
                 var mins = parts[0] * 60 + parts[1];
                 if (Number.isFinite(mins) && mins > 0) {
@@ -596,7 +657,7 @@
                 }
             }
 
-            if (typeof window.calculatePerformanceIndex === 'function') {
+            if (options.performance && typeof window.calculatePerformanceIndex === 'function') {
                 var perf = window.calculatePerformanceIndex(entry);
                 if (perf && Number.isFinite(Number(perf.score)) &&
                     (!bestPerf || Number(perf.score) > bestPerf.value)) {
@@ -630,7 +691,7 @@
         ].filter(Boolean);
     }
 
-    function coverStats(doc, stats, y, colors, entries) {
+    function coverStats(doc, stats, y, colors, entries, options) {
         var items = [
             ['Touren', fi(stats.totalTours)],
             ['Strecke', fi(stats.totalDistance) + ' km'],
@@ -647,7 +708,7 @@
         });
         text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(8.1); doc.text('MEINE HIGHLIGHTS',M,y+39);
 
-        var highlights = buildCoverHighlights(entries || []);
+        var highlights = buildCoverHighlights(entries || [], options);
         var gapX = 4, colCount = 3, colW = (CW - gapX * 2) / colCount;
         highlights.slice(0, 6).forEach(function(item, i) {
             var col = i % colCount, row = Math.floor(i / colCount);
@@ -683,7 +744,8 @@
         return fi(value);
     }
 
-    function buildYearHighlights(entries) {
+    function buildYearHighlights(entries, options) {
+        options = options || getExportOptions();
         var longest = null, biggestAsc = null, bestPerf = null, highestPeak = null;
 
         entries.forEach(function (entry) {
@@ -693,7 +755,7 @@
             if (dist > 0 && (!longest || dist > longest.value)) longest = { value: dist, entry: entry };
             if (asc > 0 && (!biggestAsc || asc > biggestAsc.value)) biggestAsc = { value: asc, entry: entry };
 
-            var perf = typeof window.calculatePerformanceIndex === 'function'
+            var perf = options.performance && typeof window.calculatePerformanceIndex === 'function'
                 ? window.calculatePerformanceIndex(entry)
                 : null;
             if (perf && Number.isFinite(Number(perf.score)) &&
@@ -720,7 +782,8 @@
         return { longest: longest, biggestAsc: biggestAsc, bestPerf: bestPerf, highestPeak: highestPeak };
     }
 
-    function summary(doc, entries, stats, label, colors) {
+    function summary(doc, entries, stats, label, colors, options) {
+        options = options || getExportOptions();
         addHeader(doc, label, colors);
         text(doc,[35,35,32]); doc.setFont(undefined,'bold'); doc.setFontSize(19); doc.text('Saisonbilanz',M,36);
         text(doc,colors.accent); doc.setFontSize(8); doc.text(st(fi(stats.totalTours)+' Touren · '+f1(stats.totalDistance)+' km · '+fi(stats.totalAscent)+' hm'),M,43);
@@ -732,7 +795,9 @@
             ['Ø Speed', stats.avgSpeed > 0 ? f1(stats.avgSpeed)+' km/h' : '–'],
             ['Ø Steigung', stats.avgGradient > 0 ? fi(stats.avgGradient)+' hm/km' : '–'],
             ['Ø Anstieg/h', stats.avgAscentPerHour > 0 ? fi(stats.avgAscentPerHour)+' hm/h' : '–']
-        ];
+        ].filter(function(item) {
+            return options.secondary || ['Ø Speed', 'Ø Steigung', 'Ø Anstieg/h'].indexOf(item[0]) === -1;
+        });
 
         var gap=5,w=(CW-gap*2)/3;
         items.forEach(function(it,i){
@@ -747,7 +812,9 @@
             ['Gipfel 2500–2999 m',fi(stats.peaks2500)],
             ['Gipfel ab 3000 m',fi(stats.peaks3000)],
             ['Ø Leistungsindex',Number.isFinite(Number(stats.avgPerformanceIndex)) ? fi(stats.avgPerformanceIndex)+' / 100' : '–']
-        ];
+        ].filter(function(row) {
+            return options.performance || row[0] !== 'Ø Leistungsindex';
+        });
         var y=117;
         text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(8.4); doc.text('WEITERE KENNZAHLEN',M,y); y+=6;
         extra.forEach(function(row,i){
@@ -756,7 +823,7 @@
             text(doc,[38,38,35]); doc.setFont(undefined,'bold'); doc.text(row[1],x+66,yy,{align:'right'});
         });
 
-        if (typeof window.computeMilestones === 'function') {
+        if (options.milestones && typeof window.computeMilestones === 'function') {
             var ms=window.computeMilestones(entries);
             var defs=[
                 ['Strecke','dist'],
@@ -802,7 +869,8 @@
         }
     }
 
-    function yearsPage(doc, from, to, colors) {
+    function yearsPage(doc, from, to, colors, options) {
+        options = options || getExportOptions();
         var label=from+'–'+to;
         addHeader(doc,label,colors);
         text(doc,[35,35,32]); doc.setFont(undefined,'bold'); doc.setFontSize(19); doc.text('Jahresrückblick',M,36);
@@ -818,7 +886,7 @@
         var gap=6, cardW=(CW-gap)/2, cardH=53, top=49;
         years.forEach(function(item,i){
             var col=i%2, row=Math.floor(i/2), x=M+col*(cardW+gap), y=top+row*(cardH+gap);
-            var s=item.stats, h=buildYearHighlights(item.entries);
+            var s=item.stats, h=buildYearHighlights(item.entries, options);
 
             fill(doc,[249,248,244]); doc.roundedRect(x,y,cardW,cardH,3,3,'F');
             rule(doc,x,y,18,colors.accent,1.2);
@@ -832,7 +900,7 @@
             text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(6.1); doc.text('DURCHSCHNITT',x+5,y+29);
             text(doc,[85,85,81]); doc.setFont(undefined,'normal'); doc.setFontSize(6.0);
             var avgLine='Ø '+f1(s.avgDistance)+' km/Tour · '+fi(s.avgAscent)+' hm/Tour';
-            if(Number.isFinite(Number(s.avgPerformanceIndex))) avgLine += ' · PI '+fi(s.avgPerformanceIndex);
+            if(options.performance && Number.isFinite(Number(s.avgPerformanceIndex))) avgLine += ' · PI '+fi(s.avgPerformanceIndex);
             doc.text(st(avgLine),x+5,y+34);
 
             text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(6.1); doc.text('HIGHLIGHTS',x+5,y+41);
@@ -856,9 +924,10 @@
         return d.photo ? 'split' : 'compact';
     }
 
-    async function renderTours(doc, entries, from, to, colors) {
+    async function renderTours(doc, entries, from, to, colors, options) {
+        options = options || getExportOptions();
         var profile=typeof window.buildTourProfileAnalysis==='function'?window.buildTourProfileAnalysis(entries):null;
-        var ds=entries.map(function(e){return dataFor(e,profile);});
+        var ds=entries.map(function(e){return dataFor(e,profile,options);});
         var colGap=5,colW=(CW-colGap)/2,colY=[28,28],seed=0;
         doc.addPage(); addHeader(doc,from===to?String(from):from+'–'+to,colors);
         function page(){
@@ -881,21 +950,23 @@
 
     async function generate(from,to){
         await ensurePdfLibraries();
+        var options = getExportOptions();
         var js=window.jspdf.jsPDF, doc=new js({unit:'mm',format:'a4'}), colors=tc();
         var entries=window.getToursInYearRange(from,to), label=from===to?String(from):from+'–'+to;
-        if (typeof window.loadTourImagesForEntries === 'function') {
+        entries = sortTourEntries(entries, options.sort);
+        if (options.photos && typeof window.loadTourImagesForEntries === 'function') {
             await window.loadTourImagesForEntries(entries);
         }
         if(typeof window.showToast==='function') window.showToast('Magazin-Tourenbuch wird erstellt…',{type:'info',duration:2500});
         if(!entries.length){
-            await cover(doc,[],{totalTours:0,totalDistance:0,totalAscent:0,totalPeaks:0,totalSteps:0,totalTimeText:'0:00',bigTours:0},label,colors,null);
+            await cover(doc,[],{totalTours:0,totalDistance:0,totalAscent:0,totalPeaks:0,totalSteps:0,totalTimeText:'0:00',bigTours:0},label,colors,null,options);
             footer(doc,label); save(doc,from,to); return;
         }
-        var stats=window.computeStatsSummary(entries), rep=typeof window.getPdfRepresentativePhoto==='function'?window.getPdfRepresentativePhoto(entries):entries.find(function(e){return e.imageData;})||null;
-        await cover(doc,entries,stats,label,colors,rep);
-        doc.addPage(); summary(doc,entries,stats,label,colors);
-        if(from!==to){ doc.addPage(); yearsPage(doc,from,to,colors); }
-        await renderTours(doc,entries,from,to,colors);
+        var stats=window.computeStatsSummary(entries), rep=options.photos ? (typeof window.getPdfRepresentativePhoto==='function'?window.getPdfRepresentativePhoto(entries):entries.find(function(e){return e.imageData;})||null) : null;
+        await cover(doc,entries,stats,label,colors,rep,options);
+        doc.addPage(); summary(doc,entries,stats,label,colors,options);
+        if(from!==to){ doc.addPage(); yearsPage(doc,from,to,colors,options); }
+        await renderTours(doc,entries,from,to,colors,options);
         footer(doc,label); save(doc,from,to);
     }
 
