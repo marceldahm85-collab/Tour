@@ -19503,10 +19503,59 @@ function populateAchievementsYearSelect() {
     if (!select) return;
 
     const years = getWrappedAvailableYears();
-    select.innerHTML = `<option value="all">Gesamt (alle Jahre)</option>` +
+    select.innerHTML = `<option value="all">Alle Jahre</option>` +
         years.map(y => `<option value="${y}">${y}</option>`).join('');
 
     select.value = achievementsYearFilter;
+    updateAchievementsYearButtons();
+}
+
+function updateAchievementsYearButtons() {
+    const select = document.getElementById('achievements-year-select');
+    const prevBtn = document.getElementById('achievements-year-prev-btn');
+    const nextBtn = document.getElementById('achievements-year-next-btn');
+    if (!select || !prevBtn || !nextBtn) return;
+
+    const years = getWrappedAvailableYears();
+    if (!years.length) {
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        return;
+    }
+
+    if (select.value === 'all') {
+        prevBtn.disabled = false;
+        nextBtn.disabled = false;
+        return;
+    }
+
+    const index = years.indexOf(Number(select.value));
+    prevBtn.disabled = index < 0 || index >= years.length - 1;
+    nextBtn.disabled = index < 0 || index <= 0;
+}
+
+function shiftAchievementsYear(direction) {
+    const select = document.getElementById('achievements-year-select');
+    if (!select) return;
+
+    const years = getWrappedAvailableYears();
+    if (!years.length) return;
+
+    const current = select.value;
+    let nextValue;
+
+    if (current === 'all') {
+        nextValue = direction === 'next' ? years[0] : years[years.length - 1];
+    } else {
+        const index = years.indexOf(Number(current));
+        if (index < 0) return;
+        const nextIndex = direction === 'next' ? index - 1 : index + 1;
+        if (nextIndex < 0 || nextIndex >= years.length) return;
+        nextValue = years[nextIndex];
+    }
+
+    select.value = String(nextValue);
+    select.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
 function getAchievementsFilteredTours() {
@@ -19739,7 +19788,16 @@ function initAchievementsUI() {
 
     document.getElementById('achievements-year-select')?.addEventListener('change', event => {
         achievementsYearFilter = event.target.value;
+        updateAchievementsYearButtons();
         renderAchievementsView();
+    });
+
+    document.getElementById('achievements-year-prev-btn')?.addEventListener('click', () => {
+        shiftAchievementsYear('prev');
+    });
+
+    document.getElementById('achievements-year-next-btn')?.addEventListener('click', () => {
+        shiftAchievementsYear('next');
     });
 
     document.getElementById('achievements-toggle')?.addEventListener('click', () => {
@@ -34098,7 +34156,7 @@ function populateWrappedYearSelect() {
     const years =
         getWrappedAvailableYears();
 
-    select.innerHTML = years.map(year =>
+    select.innerHTML = '<option value="all">Alle Jahre</option>' + years.map(year =>
         `<option value="${year}" ${
             year === wrappedCurrentYear
                 ? 'selected'
@@ -34293,6 +34351,10 @@ const endHold = () => {
     });
 
     document.getElementById('wrapped-year-select').addEventListener('change', e => {
+        if (e.target.value === 'all') {
+            window.__bergweltRender?.();
+            return;
+        }
         openWrappedView(Number(e.target.value));
         window.__bergweltRender?.();
     });
