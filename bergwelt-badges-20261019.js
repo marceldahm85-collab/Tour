@@ -2,8 +2,8 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261020-fix17') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261020-fix17';
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261021-year-filter') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261021-year-filter';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
@@ -84,9 +84,16 @@
     const dateYear = entry => typeof window.__tourDataRules?.yearFromDate === 'function' ? window.__tourDataRules.yearFromDate(entry?.date) : parseTourDate(entry?.date)?.getFullYear() ?? null;
     const fmt = (n, digits = 0) => Number(n || 0).toLocaleString('de-AT', { maximumFractionDigits: digits, minimumFractionDigits: digits });
     const escapeHTML = value => String(value ?? '').replace(/[&<>\"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;' }[ch]));
-    const getYear = () => Number(document.getElementById('wrapped-year-select')?.value) || new Date().getFullYear();
-    const yearTours = () => getTours().filter(e => dateYear(e) === getYear());
+    const getYear = () => {
+        const selected = document.getElementById('wrapped-year-select')?.value;
+        return selected === 'all' ? 'all' : (Number(selected) || new Date().getFullYear());
+    };
+    const getYearLabel = () => getYear() === 'all' ? 'Alle Jahre' : String(getYear());
+    const yearTours = () => getYear() === 'all'
+        ? getTours()
+        : getTours().filter(e => dateYear(e) === getYear());
     const getSeasonHighlightForEntry = entry => {
+        if (getYear() === 'all') return null;
         if (!entry || typeof window.buildWrappedSlideData !== 'function') return null;
         try {
             const slides = window.buildWrappedSlideData(getYear());
@@ -460,7 +467,7 @@
         };
         const developmentCards = levels.map(renderDevelopmentCard);
 
-        panel.innerHTML = intro('Deine Erfolge · ' + getYear(), 'Dein Bergsteiger-Level', '') +
+        panel.innerHTML = intro('Deine Erfolge · ' + getYearLabel(), 'Dein Bergsteiger-Level', '') +
             '<div class="bergwelt-level-badges">' +
             levels.map((l, i) => {
                 const valueText = l.value === null ? '– ' + l.unit : fmt(l.value, levelDigits(l)) + ' ' + l.unit;
