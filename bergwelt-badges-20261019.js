@@ -2,8 +2,8 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261021-year-filter') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261021-year-filter';
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261021-height-year-contribution') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261021-height-year-contribution';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
@@ -179,8 +179,15 @@
         root.classList.add('bergwelt-mode');
     }
     function renderHoehenwelt(openModal = false) {
+        const selectedYear = getYear();
+        const yearEntries = yearTours();
         const allEntries = getTours();
+        const yearAscent = sumKnown(yearEntries, ascentValue);
         const careerAscent = sumKnown(allEntries, ascentValue);
+        const yearShare = yearAscent === null || careerAscent === null || careerAscent <= 0
+            ? null
+            : Math.max(0, Math.min(100, yearAscent / careerAscent * 100));
+        const yearLabel = selectedYear === 'all' ? 'Alle Jahre' : String(selectedYear);
         const total = careerAscent ?? 0;
         // Karriere-Höhenmarken: bekannte Gipfelhöhen plus langfristige Lebenszeitziele.
         // Bei 30.000–50.000 hm/Jahr sind 250.000 und 500.000 hm echte Mehrjahresziele.
@@ -221,7 +228,14 @@
             '</section>';
         })() : '';
         panel.innerHTML = intro('', 'Höhenwelt', '') +
-            '<div class="bergwelt-height-milestones" aria-label="Interaktive Höhenmarken">' +
+            '<section class="bergwelt-height-year-contribution" aria-label="Beitrag ' + escapeHTML(yearLabel) + ' zur Lebenszeit-Aufstiegssumme">' +
+                '<div class="bergwelt-height-year-contribution-head">' +
+                    '<div class="bergwelt-height-year-contribution-value"><span>' + (selectedYear === 'all' ? 'GESAMTER ZEITRAUM' : 'BEITRAG ' + selectedYear) + '</span><strong>' + fmtKnown(yearAscent) + '<small> hm</small></strong></div>' +
+                    '<div class="bergwelt-height-year-contribution-share"><strong>' + (yearShare === null ? '–' : fmt(yearShare, 1) + ' %') + '</strong><span>der Lebenszeit-Aufstiegssumme</span></div>' +
+                '</div>' +
+                '<div class="bergwelt-height-year-contribution-track" role="progressbar" aria-label="Anteil des gewählten Zeitraums am Lebenszeit-Aufstieg" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + (yearShare === null ? 0 : Math.round(yearShare)) + '"><span style="width:' + (yearShare === null ? 0 : yearShare) + '%"></span></div>' +
+            '</section>' +
+            '<div class="bergwelt-height-milestones" aria-label="Interaktive Höhenmarken">'
             milestones.map((m, i) => {
                 const reached = careerAscent !== null && total >= m.height;
                 const remaining = careerAscent === null ? null : Math.max(0, m.height - total);
@@ -600,7 +614,7 @@
         render();
     });
     document.getElementById('wrapped-year-select')?.addEventListener('change', () => {
-        if (activeTab === 'level') render();
+        if (activeTab === 'level' || activeTab === 'hoehenwelt') render();
     });
     document.getElementById('wrapped-toggle')?.addEventListener('click', () => {
         activeTab = 'erlebnis';
