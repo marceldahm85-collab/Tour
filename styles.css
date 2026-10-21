@@ -21331,23 +21331,35 @@ body.wrapped-mobile-fullscreen-active {
 
 /* Tourbuch-Exportoptionen: kompakte, einklappbare Konfiguration. */
 #pdf-export-card .pdf-book-options {
-    margin: 14px 0 12px;
+    margin: 12px 0;
     border: 1px solid var(--ui-card-border, rgba(128,128,128,.26));
-    border-radius: 12px;
+    border-radius: 9px;
     overflow: hidden;
-    background: color-mix(in srgb, var(--ui-card-bg, currentColor) 92%, transparent);
+    background: var(--ui-input-bg, var(--ui-card-bg, transparent));
+    box-shadow: none;
+    transition: background .16s ease, border-color .16s ease;
 }
 #pdf-export-card .pdf-book-options > summary {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    min-height: 44px;
-    padding: 10px 12px;
+    min-height: 40px;
+    padding: 8px 10px;
     cursor: pointer;
     list-style: none;
-    font-size: .88rem;
+    color: var(--text-main, currentColor);
+    font-size: .78rem;
     font-weight: 800;
+    line-height: 1.3;
+    transition: background .16s ease, color .16s ease;
+}
+#pdf-export-card .pdf-book-options > summary:hover {
+    background: var(--ui-card-bg-interactive, var(--ui-card-bg, transparent));
+}
+#pdf-export-card .pdf-book-options[open] > summary {
+    border-bottom: 1px solid var(--ui-card-border, rgba(128,128,128,.2));
+    background: var(--ui-card-bg-interactive, var(--ui-card-bg, transparent));
 }
 #pdf-export-card .pdf-book-options > summary::-webkit-details-marker { display: none; }
 #pdf-export-card .pdf-book-options > summary::after {
@@ -21367,8 +21379,8 @@ body.wrapped-mobile-fullscreen-active {
     text-align: right;
 }
 #pdf-export-card .pdf-book-options-body {
-    padding: 0 12px 12px;
-    border-top: 1px solid var(--ui-card-border, rgba(128,128,128,.2));
+    padding: 0 10px 10px;
+    background: var(--ui-section-bg, transparent);
 }
 #pdf-export-card .pdf-book-option-group {
     min-width: 0;
@@ -21433,11 +21445,10 @@ body.wrapped-mobile-fullscreen-active {
 }
 @media (max-width: 520px) {
     #pdf-export-card .pdf-book-options > summary {
-        flex-wrap: wrap;
-        justify-content: flex-start;
-    }
-    #pdf-export-card .pdf-book-options-subtitle {
-        margin-left: 0;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: .76rem;
     }
     #pdf-export-card .pdf-book-option-grid {
         grid-template-columns: minmax(0, 1fr);
