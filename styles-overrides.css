@@ -6436,13 +6436,4 @@ body.green #achievements-view .achievements-summary-main strong {
 }
 
 
-/* Green-Theme: Accordion optisch an die dauerhaft sichtbaren Dropdowns angleichen.
-   Die theme-spezifischen Oberflächenfarben kommen ausschließlich aus den UI-Variablen. */
-body.green #pdf-export-card .pdf-book-options {
-    background: var(--ui-input-bg, var(--ui-card-bg, transparent)) !important;
-    border-color: var(--ui-card-border, rgba(82,183,136,0.24)) !important;
-    box-shadow: none !important;
-}
-body.green #pdf-export-card .pdf-book-options > summary {
-    color: var(--text-main) !important;
-}
+/* Tourbuch-Accordion nutzt die gemeinsamen Theme-Variablen aus styles.css. */
