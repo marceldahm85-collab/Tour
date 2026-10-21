@@ -21408,8 +21408,7 @@ body.wrapped-mobile-fullscreen-active {
     padding: 0;
     border: 0;
 }
-#pdf-export-card .pdf-book-option-group legend,
-#pdf-export-card .pdf-book-sort > label {
+#pdf-export-card .pdf-book-option-group legend {
     display: block;
     margin: 0 0 7px;
     color: var(--accent, currentColor);
@@ -21439,7 +21438,12 @@ body.wrapped-mobile-fullscreen-active {
     margin: 1px 0 0;
     accent-color: var(--accent, #4f9272);
 }
-#pdf-export-card .pdf-book-sort { margin-top: 14px; }
+#pdf-export-card .pdf-book-sort {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 14px;
+}
 #pdf-export-card #pdf-book-opt-sort {
     display: block;
     width: 100%;
@@ -21447,10 +21451,10 @@ body.wrapped-mobile-fullscreen-active {
     padding: 8px 10px;
     border: 1px solid var(--ui-card-border, rgba(128,128,128,.25));
     border-radius: 9px;
-    background: var(--ui-card-bg, transparent);
+    background: var(--ui-input-bg, var(--ui-card-bg, transparent));
     color: var(--text-main, currentColor);
     font: inherit;
-    font-size: .78rem;
+    font-size: .76rem;
 }
 #pdf-export-card .pdf-book-options-note {
     margin: 9px 0 0;
@@ -21496,7 +21500,10 @@ body.wrapped-mobile-fullscreen-active {
     gap: 6px;
     min-width: 0;
 }
-#pdf-export-card .pdf-book-design-field > label {
+#pdf-export-card .pdf-book-design-field > label,
+#pdf-export-card .pdf-book-sort > label {
+    display: block;
+    margin: 0;
     color: var(--text-main, currentColor);
     font-size: .74rem;
     font-weight: 750;
