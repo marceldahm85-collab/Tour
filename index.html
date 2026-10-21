@@ -2318,6 +2318,42 @@
                 </div>
             </div>
 
+            <details id="pdf-book-options" class="pdf-book-options">
+                <summary><span>⚙️ PDF individuell gestalten</span><span class="pdf-book-options-subtitle">Inhalte &amp; Sortierung</span></summary>
+                <div class="pdf-book-options-body">
+                    <fieldset class="pdf-book-option-group">
+                        <legend>Tourkarten</legend>
+                        <div class="pdf-book-option-grid">
+                            <label><input type="checkbox" id="pdf-book-opt-photos" data-pdf-book-option="photos" checked> Tourfotos und Titelbild</label>
+                            <label><input type="checkbox" id="pdf-book-opt-peaks" data-pdf-book-option="peaks" checked> Gipfellisten auf Tourkarten</label>
+                            <label><input type="checkbox" id="pdf-book-opt-performance" data-pdf-book-option="performance" checked> Leistungsindex</label>
+                            <label><input type="checkbox" id="pdf-book-opt-secondary" data-pdf-book-option="secondary" checked> Zusatzkennzahlen (Speed, Steigung, Anstieg/h)</label>
+                            <label><input type="checkbox" id="pdf-book-opt-start-profile" data-pdf-book-option="start-profile" checked> Ausgangspunkt und Tourprofil</label>
+                            <label><input type="checkbox" id="pdf-book-opt-notes" data-pdf-book-option="notes" checked> Persönliche Notizen</label>
+                            <label><input type="checkbox" id="pdf-book-opt-extras" data-pdf-book-option="extras" checked> Klettersteig, Rad und Begleitung</label>
+                        </div>
+                    </fieldset>
+                    <fieldset class="pdf-book-option-group">
+                        <legend>Saisonbilanz</legend>
+                        <div class="pdf-book-option-grid">
+                            <label><input type="checkbox" id="pdf-book-opt-milestones" data-pdf-book-option="milestones" checked> Meilensteinübersicht mit Fortschrittsbalken</label>
+                        </div>
+                    </fieldset>
+                    <div class="pdf-book-sort">
+                        <label for="pdf-book-opt-sort">Touren sortieren</label>
+                        <select id="pdf-book-opt-sort" data-pdf-book-option="sort">
+                            <option value="default">Wie bisher (Standardreihenfolge)</option>
+                            <option value="date-asc">Datum: älteste zuerst</option>
+                            <option value="date-desc">Datum: neueste zuerst</option>
+                            <option value="distance-desc">Längste Strecke zuerst</option>
+                            <option value="ascent-desc">Größter Aufstieg zuerst</option>
+                            <option value="performance-desc">Höchster Leistungsindex zuerst</option>
+                        </select>
+                    </div>
+                    <p class="pdf-book-options-note">Die Auswahl wird auf diesem Gerät gespeichert. Alle Inhalte sind standardmäßig aktiviert.</p>
+                </div>
+            </details>
+
             <button
                 type="button"
                 class="save-btn"
@@ -2569,7 +2605,7 @@
     </div>
 </div>
 
-<script src="./app-main-20261019.js?v=35" defer></script>
+<script src="./app-main-20261019.js?v=36" defer></script>
 
 
 
@@ -2781,7 +2817,7 @@ if ('serviceWorker' in navigator) {
 
         pdfMagazinePromise = new Promise((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = './pdf-magazine.js';
+            script.src = './pdf-magazine.js?v=2';
             script.async = true;
             script.dataset.lazyPdfMagazine = 'true';
 
