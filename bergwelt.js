@@ -68,9 +68,16 @@
     const dateYear = entry => typeof window.__tourDataRules?.yearFromDate === 'function' ? window.__tourDataRules.yearFromDate(entry?.date) : parseTourDate(entry?.date)?.getFullYear() ?? null;
     const fmt = (n, digits = 0) => Number(n || 0).toLocaleString('de-AT', { maximumFractionDigits: digits, minimumFractionDigits: digits });
     const escapeHTML = value => String(value ?? '').replace(/[&<>\"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;' }[ch]));
-    const getYear = () => Number(document.getElementById('wrapped-year-select')?.value) || new Date().getFullYear();
-    const yearTours = () => getTours().filter(e => dateYear(e) === getYear());
+    const getYear = () => {
+        const selected = document.getElementById('wrapped-year-select')?.value;
+        return selected === 'all' ? 'all' : (Number(selected) || new Date().getFullYear());
+    };
+    const getYearLabel = () => getYear() === 'all' ? 'Alle Jahre' : String(getYear());
+    const yearTours = () => getYear() === 'all'
+        ? getTours()
+        : getTours().filter(e => dateYear(e) === getYear());
     const getSeasonHighlightForEntry = entry => {
+        if (getYear() === 'all') return null;
         if (!entry || typeof window.buildWrappedSlideData !== 'function') return null;
         try {
             const slides = window.buildWrappedSlideData(getYear());
@@ -205,7 +212,7 @@
                     '<div><strong>' + (careerAscent === null ? 'Fortschritt offen' : reached ? 'Vergleichsmarke erreicht' : 'Weiter bergauf') + '</strong><small>' + (careerAscent === null ? 'Keine Schätzung bei fehlenden Daten' : reached ? fmt(total / selectedMilestone.height, 1) + '× des Vergleichswerts gesammelt' : fmt(remaining) + ' hm bis zum Ziel') + '</small></div></div>' +
             '</section>';
         })() : '';
-        panel.innerHTML = intro('Dein persönlicher Berg · ' + getYear(), 'Höhenwelt', 'Nicht nur ein Jahreswert: Hier wächst deine persönliche Höhenwelt mit allen gespeicherten Touren. Die Jahresleistung bleibt separat sichtbar.') +
+        panel.innerHTML = intro('Dein persönlicher Berg · ' + getYearLabel(), 'Höhenwelt', 'Nicht nur ein Jahreswert: Hier wächst deine persönliche Höhenwelt mit allen gespeicherten Touren. Die Jahresleistung bleibt separat sichtbar.') +
             '<div class="bergwelt-height-hero">' +
                 '<div class="bergwelt-height-visual" role="img" aria-label="Symbolischer Berg mit Fortschritt zur nächsten Höhenmarke">' +
                     '<svg viewBox="0 0 600 230" class="bergwelt-height-mountain" aria-hidden="true">' +
@@ -221,7 +228,7 @@
                     '<p class="bergwelt-footnote">' + (careerAscent === null ? 'Es fehlen gültige Aufstiegswerte.' : next ? 'Du hast ' + fmt(progress, 0) + ' % der nächsten Marke gesammelt. Noch ' + fmt(Math.max(0, next.height - total)) + ' hm bis ' + next.name + ' (' + fmt(next.height) + ' hm).' : 'Die nächste Vergleichsstufe ist erreicht. Deine persönliche Höhenwelt wächst weiter.') + '</p></div>' +
             '</div>' +
             '<div class="bergwelt-grid">' +
-                statCard('Aufstieg im Jahr ' + getYear(), fmtKnown(yearAscent), 'hm') +
+                statCard(getYear() === 'all' ? 'Aufstieg gesamt' : 'Aufstieg im Jahr ' + getYear(), fmtKnown(yearAscent), 'hm') +
                 statCard('Touren insgesamt', fmtKnown(allEntries.length ? uniqueTourCount(allEntries) : null), '') +
             '</div>' +
             '<div class="bergwelt-height-milestone-heading"><div><span>DEINE HÖHENMARKEN</span><h3>Wähle deinen Gipfelmoment</h3></div><p>Tippe eine Marke an, um deinen Fortschritt zu erleben.</p></div>' +
@@ -324,7 +331,7 @@
         ];
 
         const levelDigits = level => level.name === 'Ausdauer-Alpinist' || level.name === 'Steilheits-Profi' ? 1 : 0;
-        panel.innerHTML = intro('Dein Bergprofil · ' + getYear(), 'Dein Bergsteiger-Level', 'Deine Touren formen fünf Spezialisierungen. Mit jedem erreichten Schwellenwert schaltest du einen neuen Rang frei – ausschließlich anhand deiner gespeicherten Daten.') +
+        panel.innerHTML = intro('Dein Bergprofil · ' + getYearLabel(), 'Dein Bergsteiger-Level', 'Deine Touren formen fünf Spezialisierungen. Mit jedem erreichten Schwellenwert schaltest du einen neuen Rang frei – ausschließlich anhand deiner gespeicherten Daten.') +
             '<section class="bergwelt-level-overview">' +
                 '<div class="bergwelt-level-overview-copy"><span class="bergwelt-level-kicker">DEIN PROFIL</span><h3>Jede Tour zählt.</h3><p>Fünf Wege, deinen persönlichen Bergstil zu entdecken.</p>' +
                     '<div class="bergwelt-level-overview-status"><strong>' + earnedCount + ' von 5</strong><span>Spezialisierungen mit Rang</span></div></div>' +
@@ -387,8 +394,8 @@
         });
         if (!entries.length) {
             panel.innerHTML = experienceStoryRail() +
-                intro('Deine Erinnerung · ' + getYear(), 'Tour erleben', 'Der Jahresrückblick bleibt dein Einstieg. Hier beginnt die Expedition durch deine gespeicherten Touren.') +
-                empty('Für ' + getYear() + ' sind keine Touren gespeichert.');
+                intro('Deine Erinnerung · ' + getYearLabel(), 'Tour erleben', 'Der Jahresrückblick bleibt dein Einstieg. Hier beginnt die Expedition durch deine gespeicherten Touren.') +
+                empty(getYear() === 'all' ? 'Es sind keine Touren gespeichert.' : 'Für ' + getYear() + ' sind keine Touren gespeichert.');
             return;
         }
         if (!entries.some((e, i) => String(e.id ?? i) === selectedTourId)) selectedTourId = String(entries[0].id ?? 0);
@@ -453,7 +460,7 @@
             : '';
 
         panel.innerHTML = experienceStoryRail() +
-            intro('Dein Bergabenteuer · ' + getYear(), 'Tour erleben', 'Aus den Momenten deiner Saison wird eine persönliche Expedition. Wähle eine gespeicherte Tour; Etappen und Kennzahlen stammen ausschließlich aus deinen Tourdaten.') +
+            intro('Dein Bergabenteuer · ' + getYearLabel(), 'Tour erleben', 'Aus den Momenten deiner Saison wird eine persönliche Expedition. Wähle eine gespeicherte Tour; Etappen und Kennzahlen stammen ausschließlich aus deinen Tourdaten.') +
             '<div class="bergwelt-tour-row"><select class="bergwelt-select" id="bergwelt-tour-select" aria-label="Gespeicherte Tour auswählen">' +
             entries.map((item, i) => {
                 const stage = item.tourDay && item.tourDayCount ? ' · Etappe ' + item.tourDay + '/' + item.tourDayCount : '';
@@ -776,6 +783,13 @@
         render();
     });
     document.getElementById('wrapped-year-select')?.addEventListener('change', () => {
+        const select = document.getElementById('wrapped-year-select');
+        if (select?.value === 'all' && activeTab === 'erlebnis' && experienceMode === 'momente') {
+            const fallbackYear = Array.from(select.options).find(option => option.value !== 'all')?.value;
+            select.value = String(wrappedCurrentYear || fallbackYear || new Date().getFullYear());
+            window.showToast?.('Der Jahresrückblick ist an ein einzelnes Jahr gebunden.', { type: 'info', duration: 3000 });
+            return;
+        }
         if (activeTab !== 'erlebnis' || experienceMode === 'tour') render();
     });
     document.getElementById('wrapped-toggle')?.addEventListener('click', () => {
