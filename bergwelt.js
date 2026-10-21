@@ -18,18 +18,6 @@
     let activeTab = 'erlebnis';
     let experienceMode = 'momente';
 
-    // Teilen und Vollbild gehören ausschließlich zum Erlebnis-Bereich.
-    const shareButton = document.getElementById('wrapped-share-btn');
-    const fullscreenButton = document.getElementById('wrapped-fullscreen-btn');
-    const syncExperienceActions = () => {
-        const visible = activeTab === 'erlebnis';
-        [shareButton, fullscreenButton].forEach(button => {
-            if (!button) return;
-            button.hidden = !visible;
-            button.style.display = visible ? '' : 'none';
-        });
-    };
-    syncExperienceActions();
     let selectedTourId = '';
     let selectedHeightMilestone = null;
     let animationRun = 0;
@@ -767,7 +755,6 @@
     });
     document.getElementById('wrapped-open-tour-btn')?.addEventListener('click', () => {
         activeTab = 'erlebnis';
-        syncExperienceActions();
         experienceMode = 'tour';
         tabs.querySelectorAll('[data-bergwelt-tab]').forEach(tab => {
             const active = tab.dataset.bergweltTab === 'erlebnis';
