@@ -34931,41 +34931,118 @@ function renderWrappedOutroSlide(ctx, w, h, colors, data) {
     ctx.fillText('...volle Kraft nach vorn! 🏔️⛰️', w / 2, 1100);
 }
 
+let wrappedFullscreenHideTimer = null;
+let wrappedFullscreenFallbackActive = false;
+
+function isWrappedMobileFullscreen() {
+    return window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(max-width: 768px)').matches;
+}
+
+function wrappedFullscreenControlsVisible() {
+    const el = document.getElementById('wrapped-view');
+    return !el?.classList.contains('wrapped-controls-hidden');
+}
+
+function scheduleWrappedFullscreenControlsHide() {
+    clearTimeout(wrappedFullscreenHideTimer);
+    const el = document.getElementById('wrapped-view');
+    if (!el?.classList.contains('wrapped-mobile-fullscreen') || !wrappedFullscreenControlsVisible()) return;
+    wrappedFullscreenHideTimer = setTimeout(() => {
+        el.classList.add('wrapped-controls-hidden');
+    }, 3000);
+}
+
+function showWrappedFullscreenControls() {
+    const el = document.getElementById('wrapped-view');
+    if (!el?.classList.contains('wrapped-mobile-fullscreen')) return;
+    el.classList.remove('wrapped-controls-hidden');
+    scheduleWrappedFullscreenControlsHide();
+}
+
 function toggleWrappedFullscreen() {
     const el = document.getElementById('wrapped-view');
-    const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
+    if (!el || !document.getElementById('bergwelt-tabs')?.querySelector('[data-bergwelt-tab="erlebnis"]')?.classList.contains('is-active')) return;
+    const browserFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    const cssFullscreen = el.classList.contains('wrapped-mobile-fullscreen');
 
-    if (!isFullscreen) {
-        if (el.requestFullscreen) {
-            el.requestFullscreen().catch(() => {});
-        } else if (el.webkitRequestFullscreen) {
-            el.webkitRequestFullscreen();
-        }
+    if (browserFullscreen || cssFullscreen) {
+        wrappedFullscreenFallbackActive = false;
+        clearTimeout(wrappedFullscreenHideTimer);
+        el.classList.remove('wrapped-mobile-fullscreen', 'wrapped-controls-hidden');
+        if (document.exitFullscreen && document.fullscreenElement) document.exitFullscreen().catch(() => {});
+        else if (document.webkitExitFullscreen && document.webkitFullscreenElement) document.webkitExitFullscreen();
+        updateWrappedFullscreenState();
+        return;
+    }
+
+    if (isWrappedMobileFullscreen()) {
+        wrappedFullscreenFallbackActive = true;
+        el.classList.add('wrapped-mobile-fullscreen');
+        el.classList.remove('wrapped-controls-hidden');
+        document.body.classList.add('wrapped-mobile-fullscreen-active');
+        scheduleWrappedFullscreenControlsHide();
+    }
+
+    if (el.requestFullscreen) {
+        el.requestFullscreen().then(() => {
+            updateWrappedFullscreenState();
+        }).catch(() => {
+            updateWrappedFullscreenState();
+        });
+    } else if (el.webkitRequestFullscreen) {
+        try { el.webkitRequestFullscreen(); } catch (_) {}
+        updateWrappedFullscreenState();
     } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen().catch(() => {});
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        }
+        updateWrappedFullscreenState();
     }
 }
 
 function exitWrappedFullscreenIfActive() {
-    if (document.fullscreenElement || document.webkitFullscreenElement) {
-        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
-        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-    }
+    const el = document.getElementById('wrapped-view');
+    clearTimeout(wrappedFullscreenHideTimer);
+    el?.classList.remove('wrapped-mobile-fullscreen', 'wrapped-controls-hidden');
+    document.body.classList.remove('wrapped-mobile-fullscreen-active');
+    wrappedFullscreenFallbackActive = false;
+    if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+    else if (document.webkitFullscreenElement && document.webkitExitFullscreen) document.webkitExitFullscreen();
+    updateWrappedFullscreenState();
 }
 
 function updateWrappedFullscreenState() {
     const el = document.getElementById('wrapped-view');
     const btn = document.getElementById('wrapped-fullscreen-btn');
-    const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    const browserFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    const isFullscreen = browserFullscreen || !!el?.classList.contains('wrapped-mobile-fullscreen');
 
-    el.classList.toggle('wrapped-is-fullscreen', isFullscreen);
+    el?.classList.toggle('wrapped-is-fullscreen', isFullscreen);
     if (btn) btn.textContent = isFullscreen ? '✕' : '⛶';
+    if (!isFullscreen) {
+        clearTimeout(wrappedFullscreenHideTimer);
+        el?.classList.remove('wrapped-controls-hidden', 'wrapped-mobile-fullscreen');
+        document.body.classList.remove('wrapped-mobile-fullscreen-active');
+        wrappedFullscreenFallbackActive = false;
+    } else if (isWrappedMobileFullscreen()) {
+        el?.classList.add('wrapped-mobile-fullscreen');
+        document.body.classList.add('wrapped-mobile-fullscreen-active');
+        scheduleWrappedFullscreenControlsHide();
+    }
 }
 
 document.addEventListener('fullscreenchange', updateWrappedFullscreenState);
 document.addEventListener('webkitfullscreenchange', updateWrappedFullscreenState);
+
+// Im mobilen Vollbildmodus zeigt die erste Berührung nur die Bedienelemente;
+// sie löst dadurch nicht versehentlich einen Folienwechsel aus.
+document.getElementById('wrapped-view')?.addEventListener('pointerdown', event => {
+    const el = document.getElementById('wrapped-view');
+    if (!el?.classList.contains('wrapped-mobile-fullscreen')) return;
+    if (el.classList.contains('wrapped-controls-hidden')) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        showWrappedFullscreenControls();
+        return;
+    }
+    scheduleWrappedFullscreenControlsHide();
+}, true);
 
