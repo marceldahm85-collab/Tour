@@ -2,8 +2,8 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261021-theme-tourbuch-level-review') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261021-theme-tourbuch-level-review';
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261021-lifetime-level-yellow-light') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261021-lifetime-level-yellow-light';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
@@ -325,6 +325,7 @@
     }
     function renderLevel() {
         const entries = yearTours();
+        const allYears = getYear() === 'all';
         const asc = sumKnown(entries, ascentValue);
         const mins = sumKnown(entries, minutesValue);
         const peakCount = sumKnown(entries, peaksValue);
@@ -390,19 +391,25 @@
         const definitions = [
             {
                 name: 'Höhenmeter-Spezialist', value: asc, unit: 'hm',
-                tiers: [[5000, 'Höhenmeter-Sammler'], [10000, 'Bergauf unterwegs'], [15000, 'Höhenmeter-Spezialist'], [25000, 'Höhenprofi'], [35000, 'Höhenlegende']],
+                tiers: allYears
+                    ? [[50000, 'Höhenmeter-Sammler'], [100000, 'Bergauf unterwegs'], [200000, 'Höhenmeter-Spezialist'], [350000, 'Höhenprofi'], [500000, 'Höhenlegende']]
+                    : [[5000, 'Höhenmeter-Sammler'], [10000, 'Bergauf unterwegs'], [15000, 'Höhenmeter-Spezialist'], [25000, 'Höhenprofi'], [35000, 'Höhenlegende']],
                 rankTourFor: threshold => cumulativeTourFor(ascentValue, threshold),
                 detail: 'Kumulierte Aufstiegshöhen im ausgewählten Jahr.'
             },
             {
                 name: 'Gipfelsammler', value: peakCount, unit: 'Gipfel',
-                tiers: [[5, 'Gipfel entdeckt'], [10, 'Gipfelsammler'], [15, 'Gipfeljäger'], [25, 'Gipfelkenner'], [35, 'Gipfellegende']],
+                tiers: allYears
+                    ? [[25, 'Gipfel entdeckt'], [50, 'Gipfelsammler'], [100, 'Gipfeljäger'], [200, 'Gipfelkenner'], [350, 'Gipfellegende']]
+                    : [[5, 'Gipfel entdeckt'], [10, 'Gipfelsammler'], [15, 'Gipfeljäger'], [25, 'Gipfelkenner'], [35, 'Gipfellegende']],
                 rankTourFor: threshold => cumulativeTourFor(peaksValue, threshold),
                 detail: 'Summe der gespeicherten Gipfelangaben im ausgewählten Jahr.'
             },
             {
                 name: 'Ausdauer-Alpinist', value: mins === null ? null : mins / 60, unit: 'h',
-                tiers: [[25, 'Ausdauer-Einsteiger'], [50, 'Ausdauerstark'], [100, 'Ausdauer-Alpinist'], [150, 'Langstrecken-Profi'], [200, 'Ausdauerlegende']],
+                tiers: allYears
+                    ? [[100, 'Ausdauer-Einsteiger'], [250, 'Ausdauerstark'], [500, 'Ausdauer-Alpinist'], [1000, 'Langstrecken-Profi'], [2000, 'Ausdauerlegende']]
+                    : [[25, 'Ausdauer-Einsteiger'], [50, 'Ausdauerstark'], [100, 'Ausdauer-Alpinist'], [150, 'Langstrecken-Profi'], [200, 'Ausdauerlegende']],
                 rankTourFor: threshold => cumulativeTourFor(minutesValue, threshold * 60),
                 detail: 'Gespeicherte Gehzeit im ausgewählten Jahr.'
             },
