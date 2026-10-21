@@ -6437,3 +6437,33 @@ body.green #achievements-view .achievements-summary-main strong {
 
 
 /* Tourbuch-Accordion nutzt die gemeinsamen Theme-Variablen aus styles.css. */
+
+
+/* Gemeinsame Bedienfeld-Optik: Themeeditor und Tourbuch verwenden dieselben Werte. */
+#theme-view .theme-editor-card select,
+#pdf-export-card .pdf-book-design-field select,
+#pdf-export-card #pdf-book-opt-sort,
+#pdf-export-card .pdf-book-options > summary {
+    box-sizing: border-box;
+    min-height: 40px;
+    height: auto;
+    padding: 8px 10px;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 12px;
+    line-height: 1.25;
+}
+
+#pdf-export-card .pdf-book-options > summary {
+    font-weight: 400;
+    border: 1px solid var(--ui-card-border, rgba(128,128,128,.25));
+    background: var(--ui-input-bg, var(--ui-card-bg, transparent));
+    color: var(--text-main, currentColor);
+}
+
+@media (max-width: 520px) {
+    #pdf-export-card .pdf-book-options > summary {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+}
