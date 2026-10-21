@@ -4507,15 +4507,24 @@ body.summit .plan-season-card {
 .achievements-year-filter-wrap {
     width: 100%;
     margin: 0 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .achievements-year-filter-wrap select {
-    width: 100%;
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
     height: 38px;
     padding: 6px 10px;
     border-radius: 10px;
     font-size: 13px;
     box-sizing: border-box;
+}
+
+.achievements-year-filter-wrap .dash-year-arrow-btn {
+    flex: 0 0 auto;
 }
 
 @media (max-width: 768px), (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
