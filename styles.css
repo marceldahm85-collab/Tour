@@ -19749,7 +19749,8 @@ body.dark select,
 body.dark textarea,
 body.dark #filter-view input:not([type="checkbox"]),
 body.dark #filter-view select,
-body.dark .mob-sel-btn {
+body.dark .mob-sel-btn,
+body.dark #pdf-export-card .pdf-book-options > summary {
     background: rgba(29,47,67,0.92) !important;
     color: #f3f7fb !important;
     border-color: rgba(211,229,245,0.30) !important;
@@ -19858,7 +19859,8 @@ body.green select,
 body.green textarea,
 body.green #filter-view input:not([type="checkbox"]),
 body.green #filter-view select,
-body.green .mob-sel-btn {
+body.green .mob-sel-btn,
+body.green #pdf-export-card .pdf-book-options > summary {
     background: rgba(11,51,29,0.92) !important;
     color: #f6fff9 !important;
     border-color: rgba(114,214,163,0.34) !important;
@@ -19964,7 +19966,8 @@ body.summit select,
 body.summit textarea,
 body.summit #filter-view input:not([type="checkbox"]),
 body.summit #filter-view select,
-body.summit .mob-sel-btn {
+body.summit .mob-sel-btn,
+body.summit #pdf-export-card .pdf-book-options > summary {
     background: rgba(36,51,59,0.92) !important;
     color: #f7fbff !important;
     border-color: rgba(210,232,245,0.32) !important;
@@ -21385,7 +21388,7 @@ body.wrapped-mobile-fullscreen-active {
     margin-left: 8px;
     border-left: 4px solid transparent;
     border-right: 4px solid transparent;
-    border-top: 5px solid var(--text-soft, currentColor);
+    border-top: 5px solid var(--accent, currentColor);
     transition: transform .18s ease;
 }
 @media (hover: hover) and (pointer: fine) {
