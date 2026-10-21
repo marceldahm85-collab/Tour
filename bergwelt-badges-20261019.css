@@ -2086,3 +2086,80 @@ body.green #bergwelt-height-detail-modal .bergwelt-height-gauge > span {
         padding: 7px 8px 6px !important;
     }
 }
+
+
+/* Höhenwelt: Jahresbeitrag sichtbar machen, Lebenszeit-Höhenmarken bleiben davon unberührt. */
+#wrapped-view .bergwelt-height-year-contribution {
+    margin: 10px 0 16px;
+    padding: 12px 14px 10px;
+    border: 1px solid color-mix(in srgb, var(--accent-color, currentColor) 27%, transparent);
+    border-radius: 16px;
+    background: linear-gradient(120deg, color-mix(in srgb, var(--accent-color, currentColor) 9%, transparent), color-mix(in srgb, var(--ui-card-bg, #111) 94%, transparent));
+}
+#wrapped-view .bergwelt-height-year-contribution-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(100px, auto);
+    align-items: center;
+    gap: 12px;
+}
+#wrapped-view .bergwelt-height-year-contribution-value,
+#wrapped-view .bergwelt-height-year-contribution-share {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+#wrapped-view .bergwelt-height-year-contribution-value > span {
+    color: var(--accent-color, currentColor);
+    font-size: .64rem;
+    font-weight: 850;
+    letter-spacing: .1em;
+}
+#wrapped-view .bergwelt-height-year-contribution-value > strong {
+    font-size: clamp(1.35rem, 5vw, 1.9rem);
+    line-height: 1.05;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
+#wrapped-view .bergwelt-height-year-contribution-value > strong small {
+    margin-left: 3px;
+    font-size: .72rem;
+    font-weight: 600;
+    opacity: .72;
+}
+#wrapped-view .bergwelt-height-year-contribution-share {
+    align-items: flex-end;
+    text-align: right;
+}
+#wrapped-view .bergwelt-height-year-contribution-share > strong {
+    color: var(--accent-color, currentColor);
+    font-size: 1.15rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+}
+#wrapped-view .bergwelt-height-year-contribution-share > span {
+    max-width: 11em;
+    font-size: .65rem;
+    line-height: 1.3;
+    opacity: .74;
+}
+#wrapped-view .bergwelt-height-year-contribution-track {
+    height: 5px;
+    margin-top: 10px;
+    overflow: hidden;
+    border-radius: 99px;
+    background: color-mix(in srgb, currentColor 12%, transparent);
+}
+#wrapped-view .bergwelt-height-year-contribution-track > span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--accent-color, currentColor);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--accent-color, currentColor) 40%, transparent);
+    transition: width .45s ease;
+}
+@media (max-width: 380px) {
+    #wrapped-view .bergwelt-height-year-contribution { padding: 10px 11px 9px; }
+    #wrapped-view .bergwelt-height-year-contribution-head { grid-template-columns: minmax(0, 1fr) minmax(88px, auto); gap: 8px; }
+    #wrapped-view .bergwelt-height-year-contribution-share > span { max-width: 9em; }
+}
