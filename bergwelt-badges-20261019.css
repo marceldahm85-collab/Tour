@@ -2092,9 +2092,10 @@ body.green #bergwelt-height-detail-modal .bergwelt-height-gauge > span {
 #wrapped-view .bergwelt-height-year-contribution {
     margin: 10px 0 16px;
     padding: 12px 14px 10px;
-    border: 1px solid color-mix(in srgb, var(--accent-color, currentColor) 27%, transparent);
+    border: 1px solid var(--bergwelt-surface-border, color-mix(in srgb, currentColor 14%, transparent));
     border-radius: 16px;
-    background: linear-gradient(120deg, color-mix(in srgb, var(--accent-color, currentColor) 9%, transparent), color-mix(in srgb, var(--ui-card-bg, #111) 94%, transparent));
+    background: var(--bergwelt-surface, color-mix(in srgb, currentColor 4%, transparent));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-color, currentColor) 3%, transparent);
 }
 #wrapped-view .bergwelt-height-year-contribution-head {
     display: grid;
@@ -2263,4 +2264,88 @@ body.green #bergwelt-height-detail-modal .bergwelt-height-gauge > span {
     #wrapped-view .bergwelt-height-year-donut-section { gap: 12px; padding: 11px; }
     #wrapped-view .bergwelt-height-year-donut { flex-basis: 100px; width: 100px; height: 100px; }
     #wrapped-view .bergwelt-height-year-donut-hole { width: 72px; height: 72px; }
+}
+
+
+/* Höhenwelt: kontrastfeste Diagrammfarben unabhängig vom Theme-Editor. */
+#wrapped-view .bergwelt-height-year-donut-section {
+    --height-chart-bg: #f2f7f4;
+    --height-chart-text: #1b3025;
+    --height-chart-muted: #42584a;
+    --height-chart-accent: #167447;
+    --height-chart-rest: #d3e1d7;
+    --height-chart-border: #bfd3c5;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin: -4px 0 20px;
+    padding: 14px 15px;
+    border: 1px solid var(--height-chart-border);
+    border-radius: 17px;
+    background: var(--height-chart-bg);
+    color: var(--height-chart-text);
+    box-shadow: 0 8px 22px rgba(19, 45, 31, .12);
+}
+#wrapped-view .bergwelt-height-year-donut {
+    background: conic-gradient(
+        var(--height-chart-accent) 0 var(--height-year-share, 0%),
+        var(--height-chart-rest) var(--height-year-share, 0%) 100%
+    );
+    filter: drop-shadow(0 3px 12px color-mix(in srgb, var(--height-chart-accent) 18%, transparent));
+}
+#wrapped-view .bergwelt-height-year-donut-hole {
+    border-color: var(--height-chart-border);
+    background: var(--height-chart-bg);
+    color: var(--height-chart-text);
+}
+#wrapped-view .bergwelt-height-year-donut-hole > strong { color: var(--height-chart-accent); }
+#wrapped-view .bergwelt-height-year-donut-hole > span { color: var(--height-chart-muted); opacity: 1; }
+#wrapped-view .bergwelt-height-year-donut-dot { background: var(--height-chart-rest); }
+#wrapped-view .bergwelt-height-year-donut-dot.is-selected-year {
+    background: var(--height-chart-accent);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--height-chart-accent) 55%, transparent);
+}
+#wrapped-view .bergwelt-height-year-donut-legend-item strong { color: var(--height-chart-text); }
+#wrapped-view .bergwelt-height-year-donut-legend-item small { color: var(--height-chart-muted); opacity: 1; }
+
+/* Helles Theme */
+body:not(.dark):not(.green):not(.summit) #wrapped-view .bergwelt-height-year-donut-section {
+    --height-chart-bg: #f2f7f4;
+    --height-chart-text: #1b3025;
+    --height-chart-muted: #42584a;
+    --height-chart-accent: #167447;
+    --height-chart-rest: #d3e1d7;
+    --height-chart-border: #bfd3c5;
+}
+/* Dark Theme */
+body.dark #wrapped-view .bergwelt-height-year-donut-section {
+    --height-chart-bg: #17211b;
+    --height-chart-text: #f0f8f2;
+    --height-chart-muted: #bdcec2;
+    --height-chart-accent: #73e7a0;
+    --height-chart-rest: #43594a;
+    --height-chart-border: #496653;
+}
+/* Green Theme: dauerhaft dunkle Fläche statt heller Editor-Verläufe */
+body.green #wrapped-view .bergwelt-height-year-donut-section {
+    --height-chart-bg: #13281e;
+    --height-chart-text: #f2fff6;
+    --height-chart-muted: #c1dac9;
+    --height-chart-accent: #8af2a9;
+    --height-chart-rest: #355544;
+    --height-chart-border: #4a765b;
+}
+/* Summit Theme */
+body.summit #wrapped-view .bergwelt-height-year-donut-section {
+    --height-chart-bg: #172a3a;
+    --height-chart-text: #f2f8ff;
+    --height-chart-muted: #c4d5e5;
+    --height-chart-accent: #7bd6ff;
+    --height-chart-rest: #40596d;
+    --height-chart-border: #4d7189;
+}
+#wrapped-view .wrapped-header .dash-year-arrow-btn:disabled {
+    opacity: .34 !important;
+    filter: grayscale(1);
+    cursor: default !important;
 }
