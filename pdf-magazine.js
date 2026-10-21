@@ -191,9 +191,9 @@
 
     function parseSortDate(value) {
         var raw = st(value);
-        var match = raw.match(/^(\\d{4})-(\\d{2})-(\\d{2})/);
+        var match = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
         if (match) return Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
-        match = raw.match(/^(\\d{1,2})[./](\\d{1,2})[./](\\d{4})$/);
+        match = raw.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})$/);
         if (match) return Date.UTC(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
         var parsed = Date.parse(raw);
         return Number.isFinite(parsed) ? parsed : null;
@@ -202,7 +202,7 @@
     function sortTourEntries(entries, mode) {
         if (!mode || mode === 'default') return entries;
         function numeric(value) {
-            var parsed = parseFloat(String(value == null ? '' : value).replace(/\\s/g, '').replace(',', '.'));
+            var parsed = parseFloat(String(value == null ? '' : value).replace(/\s/g, '').replace(',', '.'));
             return Number.isFinite(parsed) ? parsed : null;
         }
         var direction = mode === 'date-asc' ? 1 : -1;
