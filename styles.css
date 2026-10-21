@@ -21224,7 +21224,9 @@ body[data-font="cursive"] .app-title {
     background: #000 !important;
     box-sizing: border-box !important;
 }
-#wrapped-view.wrapped-mobile-fullscreen .bergwelt-side-nav,
+#wrapped-view.wrapped-mobile-fullscreen .bergwelt-side-nav {
+    display: contents !important;
+}
 #wrapped-view.wrapped-mobile-fullscreen .bergwelt-tabs,
 #wrapped-view.wrapped-mobile-fullscreen .bergwelt-panel,
 #wrapped-view.wrapped-mobile-fullscreen #bergwelt-tourbuch-panel {
