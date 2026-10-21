@@ -34426,21 +34426,21 @@ const endHold = () => {
     // Bergwelt bleibt ein optionales Modul und wird erst beim Öffnen geladen.
     function loadBergweltModule() {
         window.__bergweltGetTours = () => appStorage.get('touren') || [];
-        if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261021-theme-tourbuch-level-review' || window.__BERGWELT_BADGE_LOADING__) {
+        if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261021-lifetime-level-yellow-light' || window.__BERGWELT_BADGE_LOADING__) {
             window.__bergweltRender?.();
             return;
         }
         window.__BERGWELT_BADGE_LOADING__ = true;
         window.__BERGWELT_LOADING__ = true;
-        if (!document.querySelector('link[data-bergwelt-badge-styles="20261021-theme-tourbuch-level-review"]')) {
+        if (!document.querySelector('link[data-bergwelt-badge-styles="20261021-lifetime-level-yellow-light"]')) {
             const styleLink = document.createElement('link');
             styleLink.rel = 'stylesheet';
-            styleLink.href = './bergwelt-badges-20261019.css?v=24';
-            styleLink.dataset.bergweltBadgeStyles = '20261021-theme-tourbuch-level-review';
+            styleLink.href = './bergwelt-badges-20261019.css?v=25';
+            styleLink.dataset.bergweltBadgeStyles = '20261021-lifetime-level-yellow-light';
             document.head.appendChild(styleLink);
         }
         const script = document.createElement('script');
-        script.src = './bergwelt-badges-20261019.js?v=24';
+        script.src = './bergwelt-badges-20261019.js?v=25';
         script.onload = () => {
             window.__BERGWELT_BADGE_LOADING__ = false;
             window.__BERGWELT_LOADING__ = false;
