@@ -35077,11 +35077,22 @@ document.addEventListener('fullscreenchange', updateWrappedFullscreenState);
 document.addEventListener('webkitfullscreenchange', updateWrappedFullscreenState);
 
 // Im mobilen Vollbildmodus zeigt die erste Berührung nur die Bedienelemente;
-// sie löst dadurch nicht versehentlich einen Folienwechsel aus.
-document.getElementById('wrapped-view')?.addEventListener('pointerdown', event => {
+// der dabei vom Browser nachgelieferte click darf keine Folie wechseln.
+let wrappedSuppressRevealClick = false;
+let wrappedSuppressRevealClickTimer = null;
+
+const wrappedViewForFullscreen = document.getElementById('wrapped-view');
+
+wrappedViewForFullscreen?.addEventListener('pointerdown', event => {
     const el = document.getElementById('wrapped-view');
     if (!el?.classList.contains('wrapped-mobile-fullscreen')) return;
     if (el.classList.contains('wrapped-controls-hidden')) {
+        wrappedSuppressRevealClick = true;
+        clearTimeout(wrappedSuppressRevealClickTimer);
+        // Schutz vor Browsern, die nach pointerdown keinen click liefern.
+        wrappedSuppressRevealClickTimer = setTimeout(() => {
+            wrappedSuppressRevealClick = false;
+        }, 1000);
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
@@ -35089,5 +35100,30 @@ document.getElementById('wrapped-view')?.addEventListener('pointerdown', event =
         return;
     }
     scheduleWrappedFullscreenControlsHide();
+}, true);
+
+// Der touchend-Handler der Präsentation darf die Einblende-Berührung nicht
+// als Wischgeste interpretieren und eine andere Folie öffnen.
+wrappedViewForFullscreen?.addEventListener('touchend', event => {
+    if (!wrappedSuppressRevealClick) return;
+    if (!event.target.closest?.('#wrapped-stage')) return;
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+}, true);
+
+// Mobile Browser erzeugen nach einer Berührung oft zusätzlich ein click-Event.
+// Dieses wird einmalig an der Wurzel abgefangen, bevor es die Tap-Zonen erreicht.
+wrappedViewForFullscreen?.addEventListener('click', event => {
+    if (!wrappedSuppressRevealClick) return;
+    wrappedSuppressRevealClick = false;
+    clearTimeout(wrappedSuppressRevealClickTimer);
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+}, true);
+
+wrappedViewForFullscreen?.addEventListener('pointercancel', () => {
+    wrappedSuppressRevealClick = false;
+    clearTimeout(wrappedSuppressRevealClickTimer);
 }, true);
 
