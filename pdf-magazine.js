@@ -379,7 +379,12 @@
         }
 
         if (d.peaks.length) {
-            h += 9.2 + Math.min(d.peaks.length, kind === 'compact' ? 4 : 7) * 3.6;
+            var maxPeaks = kind === 'compact' ? 4 : 7;
+            var shownPeaks = Math.min(d.peaks.length, maxPeaks);
+            // peaksBlock ergänzt bei mehr Gipfeln eine eigene Zeile „+ X weitere“.
+            // Diese Zeile muss auch in der Vorabmessung berücksichtigt werden.
+            var overflowLine = d.peaks.length > maxPeaks ? 3.6 : 0;
+            h += 9.2 + shownPeaks * 3.6 + overflowLine;
         }
 
         if (d.extras.length) {
