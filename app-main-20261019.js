@@ -27622,7 +27622,49 @@ function setPdfExportRangeMode(mode) {
     document.getElementById('pdf-export-range-panel')?.classList.toggle('is-hidden', pdfExportRangeMode !== 'range');
 }
 
+const PDF_BOOK_OPTIONS_STORAGE_KEY = 'tourbook-pdf-options-v1';
+
+function initPdfBookOptions() {
+    const controls = [...document.querySelectorAll('[data-pdf-book-option]')];
+    if (!controls.length) return;
+
+    const validSorts = new Set(['default', 'date-asc', 'date-desc', 'distance-desc', 'ascent-desc', 'performance-desc']);
+    let saved = {};
+    try {
+        saved = JSON.parse(localStorage.getItem(PDF_BOOK_OPTIONS_STORAGE_KEY) || '{}') || {};
+    } catch (_) {
+        saved = {};
+    }
+
+    controls.forEach(control => {
+        const key = control.dataset.pdfBookOption;
+        if (Object.prototype.hasOwnProperty.call(saved, key)) {
+            if (control.type === 'checkbox' && typeof saved[key] === 'boolean') {
+                control.checked = saved[key];
+            } else if (control.tagName === 'SELECT' && typeof saved[key] === 'string') {
+                const allowed = key === 'sort' ? validSorts : new Set([...control.options].map(option => option.value));
+                if (allowed.has(saved[key])) control.value = saved[key];
+            }
+        }
+
+        if (control.dataset.pdfBookOptionBound === 'true') return;
+        control.dataset.pdfBookOptionBound = 'true';
+        control.addEventListener('change', () => {
+            const current = {};
+            controls.forEach(item => {
+                current[item.dataset.pdfBookOption] = item.type === 'checkbox' ? item.checked : item.value;
+            });
+            try {
+                localStorage.setItem(PDF_BOOK_OPTIONS_STORAGE_KEY, JSON.stringify(current));
+            } catch (_) {
+                // PDF-Einstellungen bleiben auch ohne verfügbaren Webspeicher bedienbar.
+            }
+        });
+    });
+}
+
 function initPdfExportFeature() {
+    initPdfBookOptions();
     populatePdfExportYearSelects();
 
     document.querySelectorAll('[data-pdf-range-mode]').forEach(btn => {
