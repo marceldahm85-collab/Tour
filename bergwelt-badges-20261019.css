@@ -2308,23 +2308,23 @@ body.green #bergwelt-height-detail-modal .bergwelt-height-gauge > span {
 #wrapped-view .bergwelt-height-year-donut-legend-item strong { color: var(--height-chart-text); }
 #wrapped-view .bergwelt-height-year-donut-legend-item small { color: var(--height-chart-muted); opacity: 1; }
 
-/* Helles Theme */
+/* Hell: Himmelblau und kühles Blau passend zur hellen Oberflächenpalette. */
 body:not(.dark):not(.green):not(.summit) #wrapped-view .bergwelt-height-year-donut-section {
-    --height-chart-bg: #f2f7f4;
-    --height-chart-text: #1b3025;
-    --height-chart-muted: #42584a;
-    --height-chart-accent: #167447;
-    --height-chart-rest: #d3e1d7;
-    --height-chart-border: #bfd3c5;
+    --height-chart-bg: #f0f7fc;
+    --height-chart-text: #18344a;
+    --height-chart-muted: #466174;
+    --height-chart-accent: #197bb7;
+    --height-chart-rest: #d1e3ef;
+    --height-chart-border: #b7d1e2;
 }
-/* Dark Theme */
+/* Dark: dunkles Weinrot und Korallrot passend zum roten Dark-Theme. */
 body.dark #wrapped-view .bergwelt-height-year-donut-section {
-    --height-chart-bg: #17211b;
-    --height-chart-text: #f0f8f2;
-    --height-chart-muted: #bdcec2;
-    --height-chart-accent: #73e7a0;
-    --height-chart-rest: #43594a;
-    --height-chart-border: #496653;
+    --height-chart-bg: #25181d;
+    --height-chart-text: #fff2f3;
+    --height-chart-muted: #e0c2c6;
+    --height-chart-accent: #ff737f;
+    --height-chart-rest: #59363d;
+    --height-chart-border: #764951;
 }
 /* Green Theme: dauerhaft dunkle Fläche statt heller Editor-Verläufe */
 body.green #wrapped-view .bergwelt-height-year-donut-section {
@@ -2348,4 +2348,16 @@ body.summit #wrapped-view .bergwelt-height-year-donut-section {
     opacity: .34 !important;
     filter: grayscale(1);
     cursor: default !important;
+}
+
+/* Tourbuch verwendet keine Jahresfilter: Dropdown und Pfeile ganz ausblenden. */
+#wrapped-view.bergwelt-active-tourbuch .wrapped-header > .wrapped-year-select,
+#wrapped-view.bergwelt-active-tourbuch .wrapped-header > .mob-sel-wrap,
+#wrapped-view.bergwelt-active-tourbuch .wrapped-header > #wrapped-year-prev-btn,
+#wrapped-view.bergwelt-active-tourbuch .wrapped-header > #wrapped-year-next-btn {
+    display: none !important;
+}
+#wrapped-view.bergwelt-ready.bergwelt-active-tourbuch .bergwelt-side-nav > .wrapped-header {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: 34px !important;
 }
