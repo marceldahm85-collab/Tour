@@ -22382,7 +22382,11 @@ const THEME_EDITOR_SOFT_SELECTORS = [
     '#map-view .map-mode-btn', '#map-view #map-quick-filters .quick-filter-btn',
     '#backup-view .backup-status-panel', '#backup-view .backup-status-item',
     '#backup-view .backup-info-card', '#backup-view .backup-file-status',
-    '#pdf-export-card select', '#pdf-export-card .pdf-book-options > summary'
+    '#pdf-export-card select', '#pdf-export-card .pdf-book-options > summary',
+    '#theme-view .theme-editor-card select',
+    '#theme-view details[data-theme-editor-accordion] > summary',
+    '#theme-view .theme-editor-col', '#theme-view .theme-editor-panel',
+    '#theme-view .theme-editor-contrast-row'
 ];
 
 function themeEditorPrefixFor(themeKey) {
@@ -22499,9 +22503,9 @@ function buildThemeEditorLiveCss() {
 
         css += `${bigSelectors} { background: ${bigGradient} !important; box-shadow: ${shadow} !important; border-radius: ${radius}px !important; backdrop-filter: blur(${blur}px) !important; -webkit-backdrop-filter: blur(${blur}px) !important; }\n`;
         css += `${softSelectors} { background: ${softGradient} !important; border-radius: ${softRadius}px !important; }\n`;
-        // Tourbuch-Controls folgen exakt der Themeeditor-Vorlage für Dropdowns:
-        // weicher Verlauf, derselbe Radius sowie die eingestellte Textfarbe/Schrift.
-        css += `${prefix} #pdf-export-card select, ${prefix} #pdf-export-card .pdf-book-options > summary { color: ${settings.textMain} !important; font-family: var(--app-font) !important; }\n`;
+        // Tourbuch und Themeeditor selbst verwenden dieselben Editor-Einstellungen
+        // für Verlauf/Radius; diese Regel ergänzt die eingestellte Textfarbe und App-Schrift.
+        css += `${prefix} #pdf-export-card select, ${prefix} #pdf-export-card .pdf-book-options > summary, ${prefix} #theme-view .theme-editor-card select, ${prefix} #theme-view details[data-theme-editor-accordion] > summary { color: ${settings.textMain} !important; font-family: var(--app-font) !important; }\n`;
 
         // Die Diagramm-Tabs nutzen einen gleitenden Akzentmarker. Die Tabs
         // dürfen diesen Marker nicht mit dem weicheren Theme-Flächenverlauf
