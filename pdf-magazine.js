@@ -379,12 +379,22 @@
         }
 
         if (d.peaks.length) {
-            var maxPeaks = kind === 'compact' ? 4 : 7;
-            var shownPeaks = Math.min(d.peaks.length, maxPeaks);
-            // peaksBlock ergänzt bei mehr Gipfeln eine eigene Zeile „+ X weitere“.
-            // Diese Zeile muss auch in der Vorabmessung berücksichtigt werden.
-            var overflowLine = d.peaks.length > maxPeaks ? 3.6 : 0;
-            h += 9.2 + shownPeaks * 3.6 + overflowLine;
+            if (d.peaks.length >= 5) {
+                var peakColW = (inner - 5) / 2;
+                var peakLeft = d.peaks.filter(function (_, i) { return i % 2 === 0; });
+                var peakRight = d.peaks.filter(function (_, i) { return i % 2 === 1; });
+                var peakLeftH = peakLeft.reduce(function (sum, p) {
+                    return sum + wrap(doc, '• ' + p, peakColW, 6.7, 'normal').length * 3.6;
+                }, 0);
+                var peakRightH = peakRight.reduce(function (sum, p) {
+                    return sum + wrap(doc, '• ' + p, peakColW, 6.7, 'normal').length * 3.6;
+                }, 0);
+                h += 9.2 + Math.max(peakLeftH, peakRightH);
+            } else {
+                h += 9.2 + d.peaks.reduce(function (sum, p) {
+                    return sum + wrap(doc, '• ' + p, inner, 6.7, 'normal').length * 3.6;
+                }, 0);
+            }
         }
 
         if (d.extras.length) {
@@ -446,18 +456,32 @@
         return y + Math.ceil(Math.min(d.stats.length, cols * 2) / cols) * 11;
     }
 
-    function peaksBlock(doc, d, x, y, max, colors) {
+    function peaksBlock(doc, d, x, y, max, colors, w) {
         if (!d.peaks.length) return y;
         text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(6.5); doc.text('GIPFEL', x, y); y += 4;
-        var shown = d.peaks.slice(0, max);
-        shown.forEach(function (p, i) {
-            text(doc, [70,70,66]); doc.setFont(undefined, 'normal'); doc.setFontSize(6.7); doc.text(st('• ' + p), x, y + i * 3.6);
-        });
-        if (d.peaks.length > shown.length) {
-            text(doc, [135,135,130]); doc.setFontSize(6.3); doc.text(st('+ ' + (d.peaks.length - shown.length) + ' weitere'), x, y + shown.length * 3.6);
-            return y + (shown.length + 1) * 3.6;
+        text(doc, [70,70,66]); doc.setFont(undefined, 'normal'); doc.setFontSize(6.7);
+        if (d.peaks.length >= 5) {
+            var gap = 5, colW = (w - gap) / 2;
+            var left = d.peaks.filter(function (_, i) { return i % 2 === 0; });
+            var right = d.peaks.filter(function (_, i) { return i % 2 === 1; });
+            function drawColumn(items, colX) {
+                var cy = y;
+                items.forEach(function (p) {
+                    var lines = wrap(doc, '• ' + p, colW, 6.7, 'normal');
+                    doc.text(lines, colX, cy);
+                    cy += lines.length * 3.6;
+                });
+                return cy;
+            }
+            return Math.max(drawColumn(left, x), drawColumn(right, x + colW + gap));
         }
-        return y + shown.length * 3.6;
+        var cy = y;
+        d.peaks.forEach(function (p) {
+            var lines = wrap(doc, '• ' + p, w, 6.7, 'normal');
+            doc.text(lines, x, cy);
+            cy += lines.length * 3.6;
+        });
+        return cy;
     }
 
     function drawPerf(doc, d, x, y, w, colors) {
@@ -558,7 +582,7 @@
 
         if (d.peaks.length) {
             draw(doc, [224,224,219]); doc.setLineWidth(0.25); doc.line(x + pad, cursor, x + w - pad, cursor); cursor += 3.2;
-            cursor = peaksBlock(doc, d, x + pad, cursor, kind === 'compact' ? 4 : 7, colors) + 2;
+            cursor = peaksBlock(doc, d, x + pad, cursor, kind === 'compact' ? 4 : 7, colors, inner) + 2;
         }
 
         if (d.extras.length) {
