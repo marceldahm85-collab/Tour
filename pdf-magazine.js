@@ -174,10 +174,17 @@
             return el ? !!el.checked : fallback;
         }
         var sortEl = document.getElementById('pdf-book-opt-sort');
+        var layoutEl = document.getElementById('pdf-book-opt-layout');
+        var styleEl = document.getElementById('pdf-book-opt-style');
         var allowedSorts = ['default', 'date-asc', 'date-desc', 'distance-desc', 'ascent-desc', 'performance-desc'];
+        var allowedLayouts = ['magazine', 'compact', 'detail'];
+        var allowedStyles = ['theme', 'alpine', 'mono'];
         var sort = sortEl && allowedSorts.indexOf(sortEl.value) >= 0 ? sortEl.value : 'default';
+        var layout = layoutEl && allowedLayouts.indexOf(layoutEl.value) >= 0 ? layoutEl.value : 'magazine';
+        var style = styleEl && allowedStyles.indexOf(styleEl.value) >= 0 ? styleEl.value : 'theme';
         return {
             photos: checked('photos', true),
+            coverPhoto: checked('cover-photo', true),
             peaks: checked('peaks', true),
             performance: checked('performance', true),
             secondary: checked('secondary', true),
@@ -185,8 +192,34 @@
             notes: checked('notes', true),
             extras: checked('extras', true),
             milestones: checked('milestones', true),
-            sort: sort
+            sort: sort,
+            layout: layout,
+            style: style
         };
+    }
+
+    function colorsForExport(base, style) {
+        if (style === 'alpine') {
+            return {
+                top: [35, 65, 48],
+                bottom: [132, 157, 122],
+                accent: [61, 101, 68],
+                accent2: [188, 139, 74],
+                topHex: '#234130',
+                bottomHex: '#849d7a'
+            };
+        }
+        if (style === 'mono') {
+            return {
+                top: [39, 43, 45],
+                bottom: [113, 118, 120],
+                accent: [63, 70, 72],
+                accent2: [125, 129, 130],
+                topHex: '#272b2d',
+                bottomHex: '#717678'
+            };
+        }
+        return base;
     }
 
     function parseSortDate(value) {
@@ -296,6 +329,7 @@
             pText: pText,
             complexity: complexity,
             photo: options.photos && !!e.imageData,
+            layout: options.layout || 'magazine',
             title: e.tourname || 'Unbenannte Tour',
             date: typeof window.pdfExportFormatDate === 'function' ? window.pdfExportFormatDate(e.date) : (e.date || '–'),
             difficulty: difficulty(e),
@@ -328,8 +362,8 @@
         if (kind === 'feature' && d.photo) {
             h += 53;
         } else if (kind === 'split' && d.photo) {
-            // Foto und Statistik stehen nebeneinander.
-            h += 45;
+            // Im Kompaktlayout sinkt die Bildhöhe, so passen mehr Karten auf eine Seite.
+            h += d.layout === 'compact' ? 34 : 45;
         } else {
             h += wrap(
                 doc,
@@ -487,9 +521,10 @@
             } catch (_) {}
         } else if (kind === 'split' && d.photo) {
             var pw = Math.min(50, w * 0.34);
-            try { doc.addImage(await crop(d.e.imageData, 700, Math.max(1, Math.round(700 * 43 / pw)), 0.84), 'JPEG', x + pad, cursor, pw, 43, undefined, 'FAST'); } catch (_) {}
+            var photoH = d.layout === 'compact' ? 31 : 43;
+            try { doc.addImage(await crop(d.e.imageData, 700, Math.max(1, Math.round(700 * photoH / pw)), 0.84), 'JPEG', x + pad, cursor, pw, photoH, undefined, 'FAST'); } catch (_) {}
             statGrid(doc, d, x + pw + pad * 2, cursor, w - pw - pad * 3, 2, colors);
-            cursor = Math.max(cursor + 23, cursor + 43) + 2;
+            cursor = Math.max(cursor + 23, cursor + photoH) + 2;
         }
 
         if (!(kind === 'split' && d.photo)) {
@@ -918,9 +953,7 @@
 
 
     function kindFor(d){
-        // Alle Tourkarten bleiben konsequent in zwei gleich breiten Spalten.
-        // Fotos werden dabei immer als Split-Karte dargestellt, damit kein
-        // Inhalt nur wegen des Layouttyps verloren geht.
+        // Magazin und Kompakt behalten zwei Spalten; Detail zeigt eine breite Karte je Zeile.
         return d.photo ? 'split' : 'compact';
     }
 
@@ -928,33 +961,39 @@
         options = options || getExportOptions();
         var profile=typeof window.buildTourProfileAnalysis==='function'?window.buildTourProfileAnalysis(entries):null;
         var ds=entries.map(function(e){return dataFor(e,profile,options);});
-        var colGap=5,colW=(CW-colGap)/2,colY=[28,28],seed=0;
+        var detail=options.layout === 'detail';
+        var colGap=detail?0:5,colW=detail?CW:(CW-colGap)/2,colY=detail?[28]:[28,28];
         doc.addPage(); addHeader(doc,from===to?String(from):from+'–'+to,colors);
         function page(){
-            doc.addPage(); addHeader(doc,from===to?String(from):from+'–'+to,colors); colY=[28,28]; seed++;
+            doc.addPage(); addHeader(doc,from===to?String(from):from+'–'+to,colors); colY=detail?[28]:[28,28];
         }
         for(var i=0;i<ds.length;i++){
-            var d=ds[i], actual=kindFor(d);
-            var h=measure(getMeasureDoc(),d,colW,actual), col=colY[0]<=colY[1]?0:1;
+            var d=ds[i], actual=detail?'feature':kindFor(d);
+            var h=measure(getMeasureDoc(),d,colW,actual);
+            var col=detail?0:(colY[0]<=colY[1]?0:1);
             if(colY[col]+h>SAFE_BOTTOM){
-                var other=1-col;
-                if(colY[other]+h<=SAFE_BOTTOM) col=other;
-                else { page(); col=0; }
+                if(detail){
+                    page();
+                    col=0;
+                } else {
+                    var other=1-col;
+                    if(colY[other]+h<=SAFE_BOTTOM) col=other;
+                    else { page(); col=0; }
+                }
             }
             var x=M+col*(colW+colGap), y=colY[col];
             var drawnH = await drawTour(doc,d,x,y,colW,actual,colors);
             colY[col]=y+drawnH+GAP;
-
         }
     }
 
     async function generate(from,to){
         await ensurePdfLibraries();
         var options = getExportOptions();
-        var js=window.jspdf.jsPDF, doc=new js({unit:'mm',format:'a4'}), colors=tc();
+        var js=window.jspdf.jsPDF, doc=new js({unit:'mm',format:'a4'}), colors=colorsForExport(tc(), options.style);
         var entries=window.getToursInYearRange(from,to), label=from===to?String(from):from+'–'+to;
         entries = sortTourEntries(entries, options.sort);
-        if (options.photos && typeof window.loadTourImagesForEntries === 'function') {
+        if ((options.photos || options.coverPhoto) && typeof window.loadTourImagesForEntries === 'function') {
             await window.loadTourImagesForEntries(entries);
         }
         if(typeof window.showToast==='function') window.showToast('Magazin-Tourenbuch wird erstellt…',{type:'info',duration:2500});
@@ -962,7 +1001,7 @@
             await cover(doc,[],{totalTours:0,totalDistance:0,totalAscent:0,totalPeaks:0,totalSteps:0,totalTimeText:'0:00',bigTours:0},label,colors,null,options);
             footer(doc,label); save(doc,from,to); return;
         }
-        var stats=window.computeStatsSummary(entries), rep=options.photos ? (typeof window.getPdfRepresentativePhoto==='function'?window.getPdfRepresentativePhoto(entries):entries.find(function(e){return e.imageData;})||null) : null;
+        var stats=window.computeStatsSummary(entries), rep=options.coverPhoto ? (typeof window.getPdfRepresentativePhoto==='function'?window.getPdfRepresentativePhoto(entries):entries.find(function(e){return e.imageData;})||null) : null;
         await cover(doc,entries,stats,label,colors,rep,options);
         doc.addPage(); summary(doc,entries,stats,label,colors,options);
         if(from!==to){ doc.addPage(); yearsPage(doc,from,to,colors,options); }
