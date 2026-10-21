@@ -2584,8 +2584,10 @@
 <div id="achievements-view" class="view">
     <div class="achievements-inner dashboard-inner">
 
-        <div class="achievements-year-filter-wrap">
-            <select id="achievements-year-select"></select>
+        <div class="dash-year-filter-wrap achievements-year-filter-wrap">
+            <select id="achievements-year-select" aria-label="Achievement-Jahr auswählen"></select>
+            <button type="button" id="achievements-year-prev-btn" class="dash-year-arrow-btn" aria-label="Vorheriges Jahr">◀</button>
+            <button type="button" id="achievements-year-next-btn" class="dash-year-arrow-btn" aria-label="Nächstes Jahr">▶</button>
         </div>
 
         <div class="achievements-overview-summary" id="achievements-summary-value">0 / 0 freigeschaltet</div>
