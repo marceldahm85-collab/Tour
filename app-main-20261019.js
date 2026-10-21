@@ -34165,6 +34165,35 @@ function populateWrappedYearSelect() {
     ).join('');
 
     select.value = String(wrappedCurrentYear);
+    updateWrappedYearButtons(years);
+}
+
+function updateWrappedYearButtons(availableYears = null) {
+    const select = document.getElementById('wrapped-year-select');
+    const prevBtn = document.getElementById('wrapped-year-prev-btn');
+    const nextBtn = document.getElementById('wrapped-year-next-btn');
+    if (!select || !prevBtn || !nextBtn) return;
+
+    const years = (availableYears || getWrappedAvailableYears())
+        .map(Number)
+        .filter(Number.isFinite)
+        .sort((a, b) => b - a);
+
+    if (!years.length) {
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        return;
+    }
+
+    if (select.value === 'all') {
+        prevBtn.disabled = false;
+        nextBtn.disabled = false;
+        return;
+    }
+
+    const index = years.indexOf(Number(select.value));
+    prevBtn.disabled = index < 0 || index >= years.length - 1;
+    nextBtn.disabled = index < 0 || index <= 0;
 }
 
 function renderWrappedProgressBar() {
@@ -34351,6 +34380,7 @@ const endHold = () => {
     });
 
     document.getElementById('wrapped-year-select').addEventListener('change', e => {
+        updateWrappedYearButtons();
         if (e.target.value === 'all') {
             window.__bergweltRender?.();
             return;
@@ -34362,14 +34392,27 @@ const endHold = () => {
     function shiftWrappedYear(direction) {
         const select = document.getElementById('wrapped-year-select');
         if (!select) return;
-        const years = getWrappedAvailableYears();
-        if (!years.length) return;
-        const current = Number(select.value) || wrappedCurrentYear || years[0];
-        let index = years.indexOf(current);
-        if (index < 0) index = 0;
-        const nextIndex = Math.max(0, Math.min(years.length - 1, index + (direction === 'next' ? -1 : 1)));
-        if (years[nextIndex] === current) return;
-        select.value = String(years[nextIndex]);
+        const years = getWrappedAvailableYears().map(Number).sort((a, b) => b - a);
+        if (!years.length) {
+            updateWrappedYearButtons(years);
+            return;
+        }
+
+        let newYear;
+        if (select.value === 'all' || select.value === 'past') {
+            // Wie im Dashboard: rechts zum neuesten, links zum ältesten Jahr.
+            newYear = direction === 'next' ? years[0] : years[years.length - 1];
+        } else {
+            const current = Number(select.value);
+            const index = years.indexOf(current);
+            if (index < 0) return;
+            const nextIndex = direction === 'next' ? index - 1 : index + 1;
+            if (nextIndex < 0 || nextIndex >= years.length) return;
+            newYear = years[nextIndex];
+        }
+
+        if (String(newYear) === select.value) return;
+        select.value = String(newYear);
         select.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
@@ -34383,21 +34426,21 @@ const endHold = () => {
     // Bergwelt bleibt ein optionales Modul und wird erst beim Öffnen geladen.
     function loadBergweltModule() {
         window.__bergweltGetTours = () => appStorage.get('touren') || [];
-        if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261021-height-year-contribution-chart' || window.__BERGWELT_BADGE_LOADING__) {
+        if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261021-height-year-navigation-final' || window.__BERGWELT_BADGE_LOADING__) {
             window.__bergweltRender?.();
             return;
         }
         window.__BERGWELT_BADGE_LOADING__ = true;
         window.__BERGWELT_LOADING__ = true;
-        if (!document.querySelector('link[data-bergwelt-badge-styles="20261021-height-year-contribution-chart"]')) {
+        if (!document.querySelector('link[data-bergwelt-badge-styles="20261021-height-year-navigation-final"]')) {
             const styleLink = document.createElement('link');
             styleLink.rel = 'stylesheet';
-            styleLink.href = './bergwelt-badges-20261019.css?v=22';
-            styleLink.dataset.bergweltBadgeStyles = '20261021-height-year-contribution-chart';
+            styleLink.href = './bergwelt-badges-20261019.css?v=23';
+            styleLink.dataset.bergweltBadgeStyles = '20261021-height-year-navigation-final';
             document.head.appendChild(styleLink);
         }
         const script = document.createElement('script');
-        script.src = './bergwelt-badges-20261019.js?v=22';
+        script.src = './bergwelt-badges-20261019.js?v=23';
         script.onload = () => {
             window.__BERGWELT_BADGE_LOADING__ = false;
             window.__BERGWELT_LOADING__ = false;
