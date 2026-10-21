@@ -2319,18 +2319,42 @@
             </div>
 
             <details id="pdf-book-options" class="pdf-book-options">
-                <summary><span>⚙️ PDF individuell gestalten</span><span class="pdf-book-options-subtitle">Inhalte &amp; Sortierung</span></summary>
+                <summary><span>⚙️ PDF individuell gestalten</span><span class="pdf-book-options-subtitle">Layout, Farben &amp; Inhalte</span></summary>
                 <div class="pdf-book-options-body">
                     <fieldset class="pdf-book-option-group">
                         <legend>Tourkarten</legend>
                         <div class="pdf-book-option-grid">
-                            <label><input type="checkbox" id="pdf-book-opt-photos" data-pdf-book-option="photos" checked> Tourfotos und Titelbild</label>
+                            <label><input type="checkbox" id="pdf-book-opt-photos" data-pdf-book-option="photos" checked> Tourfotos auf den Tourkarten</label>
                             <label><input type="checkbox" id="pdf-book-opt-peaks" data-pdf-book-option="peaks" checked> Gipfellisten auf Tourkarten</label>
                             <label><input type="checkbox" id="pdf-book-opt-performance" data-pdf-book-option="performance" checked> Leistungsindex</label>
                             <label><input type="checkbox" id="pdf-book-opt-secondary" data-pdf-book-option="secondary" checked> Zusatzkennzahlen (Speed, Steigung, Anstieg/h)</label>
                             <label><input type="checkbox" id="pdf-book-opt-start-profile" data-pdf-book-option="start-profile" checked> Ausgangspunkt und Tourprofil</label>
                             <label><input type="checkbox" id="pdf-book-opt-notes" data-pdf-book-option="notes" checked> Persönliche Notizen</label>
                             <label><input type="checkbox" id="pdf-book-opt-extras" data-pdf-book-option="extras" checked> Klettersteig, Rad und Begleitung</label>
+                        </div>
+                    </fieldset>
+                    <fieldset class="pdf-book-option-group">
+                        <legend>Layout &amp; Gestaltung</legend>
+                        <div class="pdf-book-design-grid">
+                            <div class="pdf-book-design-field">
+                                <label for="pdf-book-opt-layout">Seitenlayout</label>
+                                <select id="pdf-book-opt-layout" data-pdf-book-option="layout">
+                                    <option value="magazine">Magazin (Standard)</option>
+                                    <option value="compact">Kompakt (mehr Touren pro Seite)</option>
+                                    <option value="detail">Detail (eine Tourenkarte pro Zeile)</option>
+                                </select>
+                            </div>
+                            <div class="pdf-book-design-field">
+                                <label for="pdf-book-opt-style">Farbgestaltung</label>
+                                <select id="pdf-book-opt-style" data-pdf-book-option="style">
+                                    <option value="theme">App-Theme (aktuelle Themefarben)</option>
+                                    <option value="alpine">Alpine Natur (Waldgrün &amp; Sand)</option>
+                                    <option value="mono">Monochrom (Graustufen)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="pdf-book-option-grid pdf-book-cover-toggle">
+                            <label><input type="checkbox" id="pdf-book-opt-cover-photo" data-pdf-book-option="cover-photo" checked> Foto auf dem Titelblatt</label>
                         </div>
                     </fieldset>
                     <fieldset class="pdf-book-option-group">
@@ -2350,7 +2374,6 @@
                             <option value="performance-desc">Höchster Leistungsindex zuerst</option>
                         </select>
                     </div>
-                    <p class="pdf-book-options-note">Die Auswahl wird auf diesem Gerät gespeichert. Alle Inhalte sind standardmäßig aktiviert.</p>
                 </div>
             </details>
 
@@ -2817,7 +2840,7 @@ if ('serviceWorker' in navigator) {
 
         pdfMagazinePromise = new Promise((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = './pdf-magazine.js?v=3';
+            script.src = './pdf-magazine.js?v=4';
             script.async = true;
             script.dataset.lazyPdfMagazine = 'true';
 
