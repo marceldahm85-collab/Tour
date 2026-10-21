@@ -121,7 +121,7 @@
 
 
 
-<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="./styles.css?v=2">
 <link rel="stylesheet" href="./styles-overrides.css?v=36">
 
 </head>
@@ -2319,7 +2319,7 @@
             </div>
 
             <details id="pdf-book-options" class="pdf-book-options">
-                <summary><span>⚙️ PDF individuell gestalten</span><span class="pdf-book-options-subtitle">Layout, Farben &amp; Inhalte</span></summary>
+                <summary>⚙️ Tourbuch individualisieren</summary>
                 <div class="pdf-book-options-body">
                     <fieldset class="pdf-book-option-group">
                         <legend>Tourkarten</legend>
@@ -2335,24 +2335,6 @@
                     </fieldset>
                     <fieldset class="pdf-book-option-group">
                         <legend>Layout &amp; Gestaltung</legend>
-                        <div class="pdf-book-design-grid">
-                            <div class="pdf-book-design-field">
-                                <label for="pdf-book-opt-layout">Seitenlayout</label>
-                                <select id="pdf-book-opt-layout" data-pdf-book-option="layout">
-                                    <option value="magazine">Magazin (Standard)</option>
-                                    <option value="compact">Kompakt (mehr Touren pro Seite)</option>
-                                    <option value="detail">Detail (eine Tourenkarte pro Zeile)</option>
-                                </select>
-                            </div>
-                            <div class="pdf-book-design-field">
-                                <label for="pdf-book-opt-style">Farbgestaltung</label>
-                                <select id="pdf-book-opt-style" data-pdf-book-option="style">
-                                    <option value="theme">App-Theme (aktuelle Themefarben)</option>
-                                    <option value="alpine">Alpine Natur (Waldgrün &amp; Sand)</option>
-                                    <option value="mono">Monochrom (Graustufen)</option>
-                                </select>
-                            </div>
-                        </div>
                         <div class="pdf-book-option-grid pdf-book-cover-toggle">
                             <label><input type="checkbox" id="pdf-book-opt-cover-photo" data-pdf-book-option="cover-photo" checked> Foto auf dem Titelblatt</label>
                         </div>
@@ -2363,19 +2345,40 @@
                             <label><input type="checkbox" id="pdf-book-opt-milestones" data-pdf-book-option="milestones" checked> Meilensteinübersicht mit Fortschrittsbalken</label>
                         </div>
                     </fieldset>
-                    <div class="pdf-book-sort">
-                        <label for="pdf-book-opt-sort">Touren sortieren</label>
-                        <select id="pdf-book-opt-sort" data-pdf-book-option="sort">
-                            <option value="default">Wie bisher (Standardreihenfolge)</option>
-                            <option value="date-asc">Datum: älteste zuerst</option>
-                            <option value="date-desc">Datum: neueste zuerst</option>
-                            <option value="distance-desc">Längste Strecke zuerst</option>
-                            <option value="ascent-desc">Größter Aufstieg zuerst</option>
-                            <option value="performance-desc">Höchster Leistungsindex zuerst</option>
+                </div>
+            </details>
+
+            <div class="pdf-book-export-controls" aria-label="PDF-Ausgabeoptionen">
+                <div class="pdf-book-design-grid">
+                    <div class="pdf-book-design-field">
+                        <label for="pdf-book-opt-layout">Seitenlayout</label>
+                        <select id="pdf-book-opt-layout" data-pdf-book-option="layout">
+                            <option value="magazine">Magazin (Standard)</option>
+                            <option value="compact">Kompakt (mehr Touren pro Seite)</option>
+                            <option value="detail">Detail (eine Tourenkarte pro Zeile)</option>
+                        </select>
+                    </div>
+                    <div class="pdf-book-design-field">
+                        <label for="pdf-book-opt-style">Farbgestaltung</label>
+                        <select id="pdf-book-opt-style" data-pdf-book-option="style">
+                            <option value="theme">App-Theme (aktuelle Themefarben)</option>
+                            <option value="alpine">Alpine Natur (Waldgrün &amp; Sand)</option>
+                            <option value="mono">Monochrom (Graustufen)</option>
                         </select>
                     </div>
                 </div>
-            </details>
+                <div class="pdf-book-sort">
+                    <label for="pdf-book-opt-sort">Touren sortieren</label>
+                    <select id="pdf-book-opt-sort" data-pdf-book-option="sort">
+                        <option value="default">Wie bisher (Standardreihenfolge)</option>
+                        <option value="date-asc">Datum: älteste zuerst</option>
+                        <option value="date-desc">Datum: neueste zuerst</option>
+                        <option value="distance-desc">Längste Strecke zuerst</option>
+                        <option value="ascent-desc">Größter Aufstieg zuerst</option>
+                        <option value="performance-desc">Höchster Leistungsindex zuerst</option>
+                    </select>
+                </div>
+            </div>
 
             <button
                 type="button"
