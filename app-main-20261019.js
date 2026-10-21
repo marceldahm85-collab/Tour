@@ -34383,21 +34383,21 @@ const endHold = () => {
     // Bergwelt bleibt ein optionales Modul und wird erst beim Öffnen geladen.
     function loadBergweltModule() {
         window.__bergweltGetTours = () => appStorage.get('touren') || [];
-        if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261021-height-year-contribution' || window.__BERGWELT_BADGE_LOADING__) {
+        if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261021-height-year-contribution-chart' || window.__BERGWELT_BADGE_LOADING__) {
             window.__bergweltRender?.();
             return;
         }
         window.__BERGWELT_BADGE_LOADING__ = true;
         window.__BERGWELT_LOADING__ = true;
-        if (!document.querySelector('link[data-bergwelt-badge-styles="20261021-height-year-contribution"]')) {
+        if (!document.querySelector('link[data-bergwelt-badge-styles="20261021-height-year-contribution-chart"]')) {
             const styleLink = document.createElement('link');
             styleLink.rel = 'stylesheet';
-            styleLink.href = './bergwelt-badges-20261019.css?v=21';
-            styleLink.dataset.bergweltBadgeStyles = '20261021-height-year-contribution';
+            styleLink.href = './bergwelt-badges-20261019.css?v=22';
+            styleLink.dataset.bergweltBadgeStyles = '20261021-height-year-contribution-chart';
             document.head.appendChild(styleLink);
         }
         const script = document.createElement('script');
-        script.src = './bergwelt-badges-20261019.js?v=21';
+        script.src = './bergwelt-badges-20261019.js?v=22';
         script.onload = () => {
             window.__BERGWELT_BADGE_LOADING__ = false;
             window.__BERGWELT_LOADING__ = false;
