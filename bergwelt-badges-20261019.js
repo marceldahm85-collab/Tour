@@ -673,7 +673,7 @@
     }
     const chooseYearSegment = segment => {
         const year = String(segment?.dataset?.bergweltYearSegment ?? '');
-        if (!/^\\d{4}$/.test(year)) return;
+        if (!year || !Number.isInteger(Number(year)) || Number(year) < 1000) return;
         const select = document.getElementById('wrapped-year-select');
         if (!select || !Array.from(select.options).some(option => option.value === year)) return;
         if (select.value === year) return;
