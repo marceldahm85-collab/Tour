@@ -246,7 +246,7 @@
                 // prüfen, ob das neue sichtbare Modal bereits der vorherige
                 // Verlaufsschritt war. Dann zurückspringen statt einen doppelten
                 // Verlaufseintrag anzulegen (z. B. Tourdetail -> Tourliste).
-                if (opened && state.previousModalId !== top.id) {
+                if (opened && (state.previousModalId !== top.id || top.id === 'tour-detail-modal')) {
                     pushAppHistoryEntry('modal', currentViewName(), top.id);
                 } else {
                     requestHistoryBack();
