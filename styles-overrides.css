@@ -5694,8 +5694,8 @@ body.green #theme-view .theme-editor-contrast-row {
     #theme-view details.theme-editor-col:not([open]),
     #theme-view details.theme-editor-panel:not([open]),
     #theme-view details.theme-editor-contrast-section:not([open]) {
-        height: 58px !important;
-        min-height: 58px !important;
+        height: 38px !important;
+        min-height: 38px !important;
         padding: 0 !important;
         margin: 0 !important;
         box-sizing: border-box !important;
