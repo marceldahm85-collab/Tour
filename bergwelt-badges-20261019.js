@@ -671,13 +671,33 @@
         else if (activeTab === 'level') renderLevel();
         else if (activeTab === 'tourbuch') renderTourbuch();
     }
+    const chooseYearSegment = segment => {
+        const year = String(segment?.dataset?.bergweltYearSegment ?? '');
+        if (!/^\\d{4}$/.test(year)) return;
+        const select = document.getElementById('wrapped-year-select');
+        if (!select || !Array.from(select.options).some(option => option.value === year)) return;
+        if (select.value === year) return;
+        select.value = year;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+    };
     panel.addEventListener('click', event => {
+        const yearSegment = event.target.closest('[data-bergwelt-year-segment]');
+        if (yearSegment) {
+            chooseYearSegment(yearSegment);
+            return;
+        }
         const milestoneButton = event.target.closest('[data-bergwelt-height-milestone]');
         if (!milestoneButton) return;
         const height = Number(milestoneButton.dataset.bergweltHeightMilestone);
         if (!Number.isFinite(height) || height <= 0) return;
         selectedHeightMilestone = height;
         renderHoehenwelt(true);
+    });
+    panel.addEventListener('keydown', event => {
+        const yearSegment = event.target.closest('[data-bergwelt-year-segment]');
+        if (!yearSegment || (event.key !== 'Enter' && event.key !== ' ')) return;
+        event.preventDefault();
+        chooseYearSegment(yearSegment);
     });
     tabs.addEventListener('click', event => {
         const button = event.target.closest('[data-bergwelt-tab]');
