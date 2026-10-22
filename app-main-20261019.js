@@ -27955,6 +27955,117 @@ document.getElementById('planned-peaks-next')?.addEventListener('click', () => {
 
 // ─── Dashboard Stat Modal ────────────────────────────────────────────────────
 
+// Eigene Verlaufsebene für Unteransichten innerhalb des Dashboard-Stat-Modals.
+// Diese Ansichten verwenden dieselbe Modal-ID, sind für Android-Zurück aber
+// trotzdem eigenständige Schritte (z. B. Monatsübersicht -> Touren des Monats).
+const dashboardStatHistoryViews = new Map();
+let dashboardStatHistorySequence = 0;
+let dashboardStatHistoryRestoreInProgress = false;
+let dashboardStatOverviewContext = null;
+
+function pushDashboardStatSubviewHistory(kind, details = {}) {
+    if (dashboardStatHistoryRestoreInProgress) return;
+
+    const modal = document.getElementById('dash-stat-modal');
+    if (!modal || modal.classList.contains('hidden') || !window.history?.pushState) return;
+
+    try {
+        const currentState = history.state && typeof history.state === 'object'
+            ? history.state
+            : {};
+        const isAppState = currentState.__bergTourenTrackerHistory === true;
+        const currentViewName = typeof currentView === 'string' ? currentView : 'dashboard';
+
+        // Falls der Modal-Observer beim sehr schnellen Tippen noch keinen
+        // Eintrag angelegt hat, zuerst die Übersichtsseite im Verlauf sichern.
+        if (!isAppState || currentState.modalId !== 'dash-stat-modal') {
+            const nextSequence = (Number(currentState.bergTourenHistorySequence) || 0) + 1;
+            history.pushState({
+                ...currentState,
+                __bergTourenTrackerHistory: true,
+                appView: currentState.appView || currentViewName,
+                modalId: 'dash-stat-modal',
+                previousModalId: isAppState ? (currentState.modalId || null) : null,
+                previousAppView: isAppState ? (currentState.appView || currentViewName) : currentViewName,
+                appNavigationKind: 'modal',
+                bergTourenHistorySequence: nextSequence
+            }, '', location.href);
+        }
+
+        const baseState = history.state && typeof history.state === 'object'
+            ? history.state
+            : {};
+        const screenId = 'dash-stat-screen-' + (++dashboardStatHistorySequence);
+        dashboardStatHistoryViews.set(screenId, { kind, ...details });
+
+        history.pushState({
+            ...baseState,
+            __bergTourenTrackerHistory: true,
+            appView: baseState.appView || currentViewName,
+            modalId: 'dash-stat-modal',
+            previousModalId: 'dash-stat-modal',
+            appNavigationKind: 'modal-subview',
+            dashStatScreenId: screenId,
+            bergTourenHistorySequence: (Number(baseState.bergTourenHistorySequence) || 0) + 1
+        }, '', location.href);
+    } catch (error) {
+        console.warn('Dashboard-Unteransicht konnte nicht im Verlauf gespeichert werden.', error);
+    }
+}
+
+function backDashboardStatSubview(type, tours) {
+    const state = history.state;
+    if (state?.modalId === 'dash-stat-modal' && state.dashStatScreenId) {
+        history.back();
+        return;
+    }
+    openDashStatModal(type, tours);
+}
+
+// Wird von app-navigation-history.js nach einem echten Verlaufsschritt aufgerufen.
+// Die Daten bleiben im Arbeitsspeicher; in history.state liegt nur eine kleine ID.
+window.__bergTourenHandleDashStatHistoryPop = function (state) {
+    const modal = document.getElementById('dash-stat-modal');
+    if (!modal || modal.classList.contains('hidden') || state?.modalId !== 'dash-stat-modal') return;
+
+    const savedView = state.dashStatScreenId
+        ? dashboardStatHistoryViews.get(state.dashStatScreenId)
+        : null;
+
+    dashboardStatHistoryRestoreInProgress = true;
+    try {
+        if (savedView?.kind === 'month') {
+            showDashMonthTours(
+                savedView.type,
+                savedView.monthIndex,
+                savedView.tours,
+                savedView.backTitle
+            );
+        } else if (savedView?.kind === 'sorted') {
+            showDashAllSorted(
+                savedView.type,
+                savedView.tours,
+                savedView.backTitle
+            );
+        } else if (savedView?.kind === 'peak-tier') {
+            showDashPeakTier(
+                savedView.minH,
+                savedView.maxH,
+                savedView.tours,
+                savedView.tierTitle,
+                savedView.backTitle
+            );
+        } else if (dashboardStatOverviewContext) {
+            openDashStatModal(
+                dashboardStatOverviewContext.type,
+                dashboardStatOverviewContext.tours
+            );
+        }
+    } finally {
+        dashboardStatHistoryRestoreInProgress = false;
+    }
+};
+
 function closeDashStatModal() {
     const modal = document.getElementById('dash-stat-modal');
     if (!modal) return;
@@ -27967,6 +28078,8 @@ function openDashStatModal(type, tours) {
     const titleEl = document.getElementById('ds-title');
     const bodyEl  = document.getElementById('ds-body');
     if (!modal || !titleEl || !bodyEl) return;
+
+    dashboardStatOverviewContext = { type, tours };
 
     const MN = ['Jän','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
     const n  = tours.length;
@@ -28430,6 +28543,14 @@ function showDashPeakTier(
         return;
     }
 
+    pushDashboardStatSubviewHistory('peak-tier', {
+        minH,
+        maxH,
+        tours: allTours,
+        tierTitle,
+        backTitle
+    });
+
 
     const peakOccurrences = [];
 
@@ -28554,7 +28675,7 @@ function showDashPeakTier(
             'click',
             () => {
 
-                openDashStatModal(
+                backDashboardStatSubview(
                     'gipfel',
                     allTours
                 );
@@ -28601,6 +28722,11 @@ function showDashAllSorted(type, allTours, backTitle) {
     const titleEl = document.getElementById('ds-title');
     const bodyEl  = document.getElementById('ds-body');
     if (!titleEl || !bodyEl) return;
+    pushDashboardStatSubviewHistory('sorted', {
+        type,
+        tours: allTours,
+        backTitle
+    });
 
     // Gipfel:
     // gleiche Gipfel zusammenfassen
@@ -28727,7 +28853,7 @@ function showDashAllSorted(type, allTours, backTitle) {
                 'click',
                 () => {
 
-                    openDashStatModal(
+                    backDashboardStatSubview(
                         type,
                         allTours
                     );
@@ -28890,7 +29016,7 @@ function showDashAllSorted(type, allTours, backTitle) {
                     </li>`).join('')}
         </ul>`;
 
-    document.getElementById('ds-back')?.addEventListener('click', () => openDashStatModal(type, allTours));
+    document.getElementById('ds-back')?.addEventListener('click', () => backDashboardStatSubview(type, allTours));
 
     bodyEl.querySelectorAll('[data-allentry]').forEach(el => {
         const idx   = parseInt(el.dataset.allentry);
@@ -28923,6 +29049,12 @@ function showDashMonthTours(type, mi, allTours, backTitle) {
     const titleEl = document.getElementById('ds-title');
     const bodyEl  = document.getElementById('ds-body');
     if (!titleEl || !bodyEl) return;
+    pushDashboardStatSubviewHistory('month', {
+        type,
+        monthIndex: mi,
+        tours: allTours,
+        backTitle
+    });
 
     // ── Gipfel: Peaks des Monats anzeigen ──────────────────────
     if (type === 'gipfel') {
@@ -29064,7 +29196,7 @@ function showDashMonthTours(type, mi, allTours, backTitle) {
                 'click',
                 () => {
 
-                    openDashStatModal(
+                    backDashboardStatSubview(
                         type,
                         allTours
                     );
@@ -29226,7 +29358,7 @@ case 'steps': {
         </ul>`;
 
     document.getElementById('ds-back')?.addEventListener('click', () => {
-        openDashStatModal(type, allTours);
+        backDashboardStatSubview(type, allTours);
     });
 
     bodyEl.querySelectorAll('[data-msentry]').forEach(el => {
