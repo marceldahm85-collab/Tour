@@ -365,6 +365,13 @@
                     restoringFromBack = false;
                 }
             }
+
+            // Einige Dashboard-Drilldowns wechseln den Inhalt innerhalb derselben
+            // Modal-ID. Der Modal-Observer erkennt das nicht; die App stellt den
+            // gespeicherten Unterbildschirm deshalb hier explizit wieder her.
+            if (typeof window.__bergTourenHandleDashStatHistoryPop === 'function') {
+                window.__bergTourenHandleDashStatHistoryPop(state);
+            }
         });
 
         // Die vorhandene Navigation bleibt unverändert; ihre View-Wechsel
