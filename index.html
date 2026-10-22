@@ -122,7 +122,7 @@
 
 
 <link rel="stylesheet" href="./styles.css?v=12">
-<link rel="stylesheet" href="./styles-overrides.css?v=44">
+<link rel="stylesheet" href="./styles-overrides.css?v=45">
 
 </head>
 <body>
@@ -370,12 +370,6 @@
 
 <div id="dashboard-view" class="view">
     <div class="dashboard-inner">
-        <div class="dash-customize-row">
-            <div class="dash-customize-heading">Dashboard</div>
-            <button type="button" id="dash-customize-btn" class="dash-customize-btn" aria-label="Dashboard anpassen">
-                <span aria-hidden="true">⚙</span> Anpassen
-            </button>
-        </div>
         <div class="dash-year-filter-wrap">
     <select id="dash-year-select">
         <option value="all">Alle Jahre</option>
@@ -2577,6 +2571,11 @@
                 </details>
             </div>
 
+            <details class="theme-editor-panel dashboard-editor-section" data-theme-editor-accordion="dashboard">
+                <summary class="theme-editor-panel-title">📊 Dashboard-Aufbau</summary>
+                <div class="dashboard-editor-inline-body" id="dashboard-editor-body"></div>
+            </details>
+
             <details class="theme-editor-panel theme-editor-contrast-section" data-theme-editor-accordion="contrast">
                 <summary class="theme-editor-panel-title">🔍 Kontrast-Check</summary>
                 <div id="theme-editor-contrast-panel" class="theme-editor-contrast-panel"></div>
@@ -2639,7 +2638,7 @@
     </div>
 </div>
 
-<script src="./app-main-20261019.js?v=51" defer></script>
+<script src="./app-main-20261019.js?v=52" defer></script>
 <script src="./app-navigation-history.js?v=2" defer></script>
 
 
@@ -2680,24 +2679,6 @@
       </button>
     </div>
   </div>
-</div>
-
-<div id="dashboard-editor-modal" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modal-backdrop" data-dashboard-editor-close="1"></div>
-    <div class="modal-card dashboard-editor-card">
-        <div class="modal-header">
-            <div class="modal-title">Dashboard anpassen</div>
-            <div class="modal-header-actions">
-                <button type="button" class="toggle-btn" id="dashboard-editor-close" aria-label="Schließen">✕</button>
-            </div>
-        </div>
-        <div class="modal-body" id="dashboard-editor-body"></div>
-        <div class="modal-actions dashboard-editor-actions">
-            <button type="button" class="save-btn dashboard-editor-secondary" id="dashboard-editor-reset">Standard</button>
-            <button type="button" class="save-btn dashboard-editor-secondary" id="dashboard-editor-cancel">Abbrechen</button>
-            <button type="button" class="save-btn" id="dashboard-editor-save">Übernehmen</button>
-        </div>
-    </div>
 </div>
 
 <div id="image-lightbox" class="image-lightbox hidden" role="dialog" aria-modal="true" aria-hidden="true">
