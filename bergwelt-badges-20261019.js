@@ -2,7 +2,7 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261022-year-ascent-donut') return;
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261022-year-ascent-donut-theme-colors') return;
     window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261022-year-ascent-donut';
     window.__BERGWELT_MODULE_READY__ = true;
 
@@ -274,7 +274,7 @@
                         : ' data-bergwelt-year-segment="' + item.year + '" role="button" tabindex="0" aria-pressed="' + isSelected + '" aria-label="Jahr ' + item.year + ', ' + fmt(item.ascent) + ' Höhenmeter. Antippen, um das Jahr auszuwählen"';
                     return '<path class="bergwelt-height-years-segment' + (isSelected ? ' is-selected' : '') + '"' +
                         yearAttributes +
-                        ' d="' + path + '" fill="var(--accent-color, currentColor)" fill-opacity="' + fillOpacity + '"></path>';
+                        ' d="' + path + '" fill="' + (isSelected ? 'var(--accent-color, currentColor)' : 'currentColor') + '" fill-opacity="' + fillOpacity + '"></path>';
                 }).join('');
             })()
             : '';
@@ -317,8 +317,7 @@
                     '<div class="bergwelt-height-years-chart-center"><strong>' + fmtKnown(careerAscent) + '</strong><span>hm Gesamtaufstieg</span></div>' +
                 '</div>' +
             '</section>';
-        panel.innerHTML = intro('', 'Höhenwelt', '') +
-            milestoneMarkup +
+        panel.innerHTML = milestoneMarkup +
             selectedYearDonutMarkup +
             annualChartMarkup;
 
