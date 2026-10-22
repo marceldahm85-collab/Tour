@@ -1571,56 +1571,76 @@ function calculatePerformanceIndex(entry) {
 /* =========================================================
    Haptisches Feedback
    ========================================================= */
+const HAPTIC_FEEDBACK_STORAGE_KEY = 'bergTourenHaptics';
 
-function hapticFeedback(duration = 12) {
-
-    if (!('vibrate' in navigator)) {
-        return;
+function isHapticFeedbackEnabled() {
+    try {
+        return localStorage.getItem(HAPTIC_FEEDBACK_STORAGE_KEY) !== 'off';
+    } catch (_) {
+        return true;
     }
-
-    navigator.vibrate(duration);
 }
 
+function hapticFeedback(duration = 12) {
+    if (!isHapticFeedbackEnabled()) return;
+    if (typeof navigator === 'undefined' || typeof navigator.vibrate !== 'function') return;
 
-/* Texte und Zahlen */
-document.addEventListener('input', (e) => {
+    try {
+        navigator.vibrate(duration);
+    } catch (_) {
+        // Nicht unterstützte oder blockierte Vibration darf keine Aktion stören.
+    }
+}
 
-    const input = e.target;
+function initHapticFeedbackSetting() {
+    const toggle = document.getElementById('haptic-feedback-toggle');
+    if (!toggle) return;
 
-    if (!(input instanceof HTMLInputElement) &&
-        !(input instanceof HTMLTextAreaElement)) {
+    toggle.checked = isHapticFeedbackEnabled();
+    if (toggle.dataset.hapticBound === 'true') return;
+    toggle.dataset.hapticBound = 'true';
+
+    toggle.addEventListener('change', () => {
+        try {
+            localStorage.setItem(
+                HAPTIC_FEEDBACK_STORAGE_KEY,
+                toggle.checked ? 'on' : 'off'
+            );
+        } catch (_) {
+            // Die Einstellung bleibt dann nur für die aktuelle Sitzung wirksam.
+        }
+    });
+}
+
+/* Bewusste Aktionen: kurze Rückmeldung; niemals bei jedem Tastendruck. */
+document.addEventListener('click', event => {
+    if (!event.isTrusted || !(event.target instanceof Element)) return;
+
+    const tile = event.target.closest('.dash-stat-tile, .chart-stat-tile');
+    if (tile) {
+        hapticFeedback(15);
         return;
     }
 
-    const allowedTypes = [
-        'text',
-        'number',
-        'search',
-        'tel',
-        'email'
-    ];
+    const control = event.target.closest('button:not(:disabled), [role="button"], summary');
+    if (!control || control.getAttribute('aria-disabled') === 'true') return;
 
-    if (
-        input instanceof HTMLInputElement &&
-        !allowedTypes.includes(input.type)
-    ) {
-        return;
-    }
-
-    hapticFeedback(8);
+    hapticFeedback(10);
 });
 
+document.addEventListener('change', event => {
+    if (!event.isTrusted) return;
+    const target = event.target;
 
-/* Dashboard- und Diagramm-Kacheln */
-document.addEventListener('click', (e) => {
+    if (target instanceof HTMLSelectElement) {
+        hapticFeedback(10);
+        return;
+    }
 
-    const tile = e.target.closest(
-        '.dash-stat-tile, .chart-stat-tile'
-    );
-
-    if (!tile) return;
-
-    hapticFeedback(15);
+    if (target instanceof HTMLInputElement &&
+        ['checkbox', 'radio', 'range'].includes(target.type)) {
+        hapticFeedback(10);
+    }
 });
 
 // ─── Schrittberechnung ────────────────────────────────────────────────
@@ -23067,6 +23087,7 @@ function initThemeEditor() {
     if (!view) return;
 
     initThemeEditorAccordions(view);
+    initHapticFeedbackSetting();
     initThemeEditorFontSelector();
     initThemeEditorFontSizeSelector();
 
