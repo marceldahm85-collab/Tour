@@ -282,6 +282,26 @@
 
         historyReady = true;
 
+        // Der bestehende Startbildschirm-Kurzbefehl ruft nach dem View-Wechsel
+        // replaceState({}, ...) auf, um ?action=... zu entfernen. Ein leerer
+        // State darf dabei unseren App-Verlauf nicht wieder löschen.
+        const originalHistoryReplaceState = history.replaceState.bind(history);
+        history.replaceState = function (state, title, url) {
+            const isEmptyState = state && typeof state === 'object' &&
+                Object.keys(state).length === 0;
+            let nextState = state;
+
+            if (historyReady && isEmptyState && isAppState(history.state)) {
+                nextState = {
+                    ...history.state,
+                    appView: currentViewName(),
+                    modalId: topmostModal()?.id || null
+                };
+            }
+
+            return originalHistoryReplaceState(nextState, title, url);
+        };
+
         const observer = new MutationObserver(processModalMutations);
         observer.observe(document.body, {
             subtree: true,
@@ -325,6 +345,23 @@
 
             goToView = function (...args) {
                 const before = currentViewName();
+
+                // PWA-Icon-Kurzbefehle tragen ?action=... beim Start in der URL.
+                // Den Parameter vor dem ersten internen View-Eintrag entfernen,
+                // damit Zurück nicht versehentlich denselben Kurzbefehl neu startet.
+                if (!restoringFromBack && new URLSearchParams(location.search).has('action')) {
+                    const state = history.state && typeof history.state === 'object'
+                        ? history.state
+                        : {};
+                    originalHistoryReplaceState({
+                        ...state,
+                        [HISTORY_FLAG]: true,
+                        appView: before,
+                        modalId: null,
+                        appNavigationKind: 'view'
+                    }, '', location.pathname + location.hash);
+                }
+
                 const result = originalGoToView.apply(this, args);
                 const after = currentViewName();
 
