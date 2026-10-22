@@ -1,0 +1,362 @@
+/* =========================================================
+   Native Android/Browser Back Navigation
+   - The Back button closes the topmost open dialog first.
+   - Internal view changes are kept in browser history.
+   - Existing modal close handlers are reused wherever possible.
+   ========================================================= */
+(() => {
+    'use strict';
+
+    if (window.__bergTourenBackNavigationInitialized) return;
+    window.__bergTourenBackNavigationInitialized = true;
+
+    const HISTORY_FLAG = '__bergTourenTrackerHistory';
+    let historyReady = false;
+    let restoringFromBack = false;
+    let historyBackPending = false;
+    let sequence = 0;
+
+    function isAppState(state) {
+        return Boolean(state && state[HISTORY_FLAG] === true);
+    }
+
+    function currentViewName() {
+        return typeof currentView === 'string' ? currentView : 'dashboard';
+    }
+
+    function isKnownView(view) {
+        return typeof view === 'string' &&
+            typeof viewOrder !== 'undefined' &&
+            Array.isArray(viewOrder) &&
+            viewOrder.includes(view);
+    }
+
+    function getVisibleModals() {
+        const candidates = Array.from(document.querySelectorAll(
+            '.modal:not(.hidden), .image-lightbox:not(.hidden), ' +
+            '[role="dialog"][aria-modal="true"]:not(.hidden)'
+        ));
+
+        return candidates
+            .filter((element) => {
+                if (element.hidden || element.classList.contains('hidden')) return false;
+                const style = window.getComputedStyle(element);
+                return style.display !== 'none' &&
+                    style.visibility !== 'hidden' &&
+                    element.getClientRects().length > 0;
+            })
+            .map((element) => {
+                if (!element.id) {
+                    element.id = 'berg-touren-dialog-' + (++sequence);
+                }
+                return element;
+            })
+            .sort((a, b) => {
+                const zA = Number.parseInt(window.getComputedStyle(a).zIndex, 10) || 0;
+                const zB = Number.parseInt(window.getComputedStyle(b).zIndex, 10) || 0;
+                if (zA !== zB) return zA - zB;
+                const relation = a.compareDocumentPosition(b);
+                if (relation & Node.DOCUMENT_POSITION_FOLLOWING) return -1;
+                if (relation & Node.DOCUMENT_POSITION_PRECEDING) return 1;
+                return 0;
+            });
+    }
+
+    function topmostModal() {
+        const modals = getVisibleModals();
+        return modals.length ? modals[modals.length - 1] : null;
+    }
+
+    function pushAppHistoryEntry(kind, view, modalId = null) {
+        if (!historyReady || restoringFromBack) return;
+
+        try {
+            const oldState = history.state && typeof history.state === 'object'
+                ? history.state
+                : {};
+            sequence = Math.max(sequence, Number(oldState.bergTourenHistorySequence) || 0) + 1;
+
+            history.pushState({
+                ...oldState,
+                [HISTORY_FLAG]: true,
+                appView: view,
+                modalId: modalId || null,
+                appNavigationKind: kind,
+                bergTourenHistorySequence: sequence
+            }, '', location.href);
+        } catch (error) {
+            // Ein nicht verfügbarer History-Eintrag darf die App-Navigation
+            // nicht blockieren. Der sichtbare Schließen-Button bleibt nutzbar.
+            console.warn('Zurück-Navigation konnte keinen Verlaufseintrag anlegen.', error);
+        }
+    }
+
+    function requestHistoryBack() {
+        if (historyBackPending) return;
+        const state = history.state;
+        if (!isAppState(state) || !state.modalId) return;
+
+        historyBackPending = true;
+        try {
+            history.back();
+        } catch (error) {
+            historyBackPending = false;
+            console.warn('Modal-Verlauf konnte nicht zurückgesetzt werden.', error);
+        }
+    }
+
+    function closeTopmostModal(modal) {
+        if (!modal) return;
+
+        // Wenn vorhanden, immer den vorgesehenen Schließen-Button verwenden:
+        // so bleiben Aufräumarbeiten der jeweiligen Modal-Funktion erhalten.
+        const closeButton = modal.querySelector(
+            'button[id$="-close"], ' +
+            'button[aria-label="Schließen"], ' +
+            'button[aria-label="Modal schließen"], ' +
+            'button[aria-label="Bild schließen"], ' +
+            'button[aria-label="Close"]'
+        );
+
+        if (closeButton && !closeButton.disabled) {
+            closeButton.click();
+            return;
+        }
+
+        // Fallback für vorhandene Dialoge ohne erkennbaren Close-Button.
+        const closersById = {
+            'tour-detail-modal': () => {
+                if (typeof closeTourDetail === 'function') closeTourDetail();
+            },
+            'image-lightbox': () => {
+                if (typeof closeImageLightbox === 'function') closeImageLightbox();
+            },
+            'achievement-category-modal': () => {
+                if (typeof closeAchievementCategoryModal === 'function') closeAchievementCategoryModal();
+            },
+            'compare-modal': () => {
+                if (typeof closeCompareModal === 'function') closeCompareModal();
+            },
+            'month-stats-modal': () => {
+                if (typeof closeMonthStatsModal === 'function') closeMonthStatsModal();
+            },
+            'stats-chart-modal': () => {
+                if (typeof closeStatsChartModal === 'function') closeStatsChartModal();
+            },
+            'tour-list-modal': () => {
+                if (typeof closeTourListModal === 'function') closeTourListModal();
+            },
+            'milestone-modal': () => {
+                if (typeof closeMilestoneModal === 'function') closeMilestoneModal();
+            },
+            'dash-stat-modal': () => {
+                if (typeof closeDashStatModal === 'function') closeDashStatModal();
+            }
+        };
+
+        const closer = closersById[modal.id];
+        if (closer) {
+            closer();
+            return;
+        }
+
+        const backdrop = modal.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.click();
+            return;
+        }
+
+        // Letzter generischer Fallback für zusätzliche Dialoge, die später
+        // ergänzt werden. Bei bekannten Modalen wird dieser Weg nicht benutzt.
+        modal.classList.add('hidden');
+        modal.setAttribute('aria-hidden', 'true');
+        if (!getVisibleModals().some((openModal) => openModal !== modal)) {
+            document.body.classList.remove('modal-open');
+        }
+    }
+
+    function hasModalOpening(records) {
+        return records.some((record) => {
+            if (record.type === 'attributes') {
+                const oldClasses = String(record.oldValue || '').split(/\s+/);
+                return oldClasses.includes('hidden') &&
+                    !record.target.classList.contains('hidden');
+            }
+            if (record.type === 'childList') {
+                return Array.from(record.addedNodes).some((node) => {
+                    if (node.nodeType !== Node.ELEMENT_NODE) return false;
+                    return node.matches?.(
+                        '.modal:not(.hidden), .image-lightbox:not(.hidden), ' +
+                        '[role="dialog"][aria-modal="true"]:not(.hidden)'
+                    ) || Boolean(node.querySelector?.(
+                        '.modal:not(.hidden), .image-lightbox:not(.hidden), ' +
+                        '[role="dialog"][aria-modal="true"]:not(.hidden)'
+                    ));
+                });
+            }
+            return false;
+        });
+    }
+
+    function processModalMutations(records) {
+        const relevant = records.some((record) => {
+            if (record.type === 'attributes') {
+                return record.target.matches?.(
+                    '.modal, .image-lightbox, [role="dialog"][aria-modal="true"]'
+                );
+            }
+            return record.type === 'childList' &&
+                Array.from(record.addedNodes).some((node) =>
+                    node.nodeType === Node.ELEMENT_NODE &&
+                    (node.matches?.(
+                        '.modal, .image-lightbox, [role="dialog"][aria-modal="true"]'
+                    ) || node.querySelector?.(
+                        '.modal, .image-lightbox, [role="dialog"][aria-modal="true"]'
+                    ))
+                );
+        });
+        if (!relevant || !historyReady || restoringFromBack) return;
+
+        const visible = getVisibleModals();
+        const top = visible.length ? visible[visible.length - 1] : null;
+        const state = history.state;
+        const opened = hasModalOpening(records);
+
+        if (top) {
+            if (isAppState(state) && state.modalId === top.id) return;
+
+            // Wird ein weiteres Modal über einem bestehenden geöffnet, bekommt
+            // es einen eigenen Verlaufseintrag. Beim Zurückgehen schließt damit
+            // nur die oberste Ebene.
+            if (opened || !isAppState(state) || !state.modalId ||
+                visible.some((modal) => modal.id === state.modalId)) {
+                pushAppHistoryEntry('modal', currentViewName(), top.id);
+                return;
+            }
+
+            // Das zuletzt eingetragene Modal wurde manuell geschlossen.
+            // Einen Schritt zurückgehen, statt einen veralteten Modal-Eintrag
+            // im Verlauf stehenzulassen.
+            requestHistoryBack();
+            return;
+        }
+
+        // Manuelles Schließen über ✕, Zurück-Wischgeste oder Hintergrund:
+        // den dazugehörigen History-Eintrag automatisch entfernen.
+        if (isAppState(state) && state.modalId) requestHistoryBack();
+    }
+
+    function initializeHistory() {
+        if (!window.history || typeof window.history.pushState !== 'function') return;
+
+        const oldState = history.state && typeof history.state === 'object'
+            ? history.state
+            : {};
+        history.replaceState({
+            ...oldState,
+            [HISTORY_FLAG]: true,
+            appView: currentViewName(),
+            modalId: null,
+            appNavigationKind: 'view',
+            bergTourenHistorySequence: Number(oldState.bergTourenHistorySequence) || 0
+        }, '', location.href);
+
+        historyReady = true;
+
+        const observer = new MutationObserver(processModalMutations);
+        observer.observe(document.body, {
+            subtree: true,
+            childList: true,
+            attributes: true,
+            attributeOldValue: true,
+            attributeFilter: ['class']
+        });
+
+        window.addEventListener('popstate', (event) => {
+            historyBackPending = false;
+
+            const state = event.state;
+            const isKnownState = isAppState(state);
+            const expectedModalId = isKnownState ? (state.modalId || null) : null;
+            const activeModal = topmostModal();
+
+            // Bei Android-Zurück zuerst nur den obersten Dialog schließen.
+            // Wenn ein übergeordnetes Modal offen ist, bleibt es erhalten.
+            if (activeModal && (!isKnownState || activeModal.id !== expectedModalId)) {
+                closeTopmostModal(activeModal);
+            }
+
+            // Ohne offenes Modal führt Zurück zur zuvor besuchten App-Ansicht.
+            if (isKnownState && isKnownView(state.appView) &&
+                currentViewName() !== state.appView) {
+                restoringFromBack = true;
+                try {
+                    goToView(state.appView, false);
+                } finally {
+                    restoringFromBack = false;
+                }
+            }
+        });
+
+        // Die vorhandene Navigation bleibt unverändert; ihre View-Wechsel
+        // ergänzen lediglich Einträge im Browser-Verlauf.
+        if (typeof goToView === 'function' && !window.__bergTourenOriginalGoToView) {
+            const originalGoToView = goToView;
+            window.__bergTourenOriginalGoToView = originalGoToView;
+
+            goToView = function (...args) {
+                const before = currentViewName();
+                const result = originalGoToView.apply(this, args);
+                const after = currentViewName();
+
+                if (before !== after && historyReady && !restoringFromBack) {
+                    const modal = topmostModal();
+                    pushAppHistoryEntry('view', after, modal?.id || null);
+                }
+                return result;
+            };
+        }
+
+        // App-Icon-Kurzbefehle sollen ebenfalls einen sauberen Verlauf haben.
+        // Der bestehende Handler entfernt selbst den Query-Parameter; diese
+        // Hülle entfernt ihn vorher und stellt danach den App-Zustand wieder her.
+        if (typeof handleAppShortcutLaunch === 'function' &&
+            !window.__bergTourenOriginalShortcutHandler) {
+            const originalShortcutHandler = handleAppShortcutLaunch;
+            window.__bergTourenOriginalShortcutHandler = originalShortcutHandler;
+
+            handleAppShortcutLaunch = function (...args) {
+                const hasAction = new URLSearchParams(location.search).has('action');
+
+                if (hasAction) {
+                    history.replaceState({
+                        ...(history.state && typeof history.state === 'object' ? history.state : {}),
+                        [HISTORY_FLAG]: true,
+                        appView: currentViewName(),
+                        modalId: null,
+                        appNavigationKind: 'view'
+                    }, '', location.pathname + location.hash);
+                }
+
+                const result = originalShortcutHandler.apply(this, args);
+
+                if (hasAction) {
+                    const state = history.state && typeof history.state === 'object'
+                        ? history.state
+                        : {};
+                    history.replaceState({
+                        ...state,
+                        [HISTORY_FLAG]: true,
+                        appView: currentViewName(),
+                        modalId: null,
+                        appNavigationKind: 'view'
+                    }, '', location.pathname + location.hash);
+                }
+
+                return result;
+            };
+        }
+    }
+
+    initializeHistory();
+})();
