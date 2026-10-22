@@ -4922,7 +4922,19 @@ const highlightCategoryHtml =
         }
     }
 
-    await loadTourImageData(entry);
+    // Das Quellmodal ist bereits geschlossen. Während das Bild aus IndexedDB
+    // geladen wird, darf die Zurück-Navigation diese kurze modal-freie Phase
+    // nicht als bewusstes Schließen interpretieren.
+    window.__tourDetailOpeningCount =
+        (Number(window.__tourDetailOpeningCount) || 0) + 1;
+    try {
+        await loadTourImageData(entry);
+    } finally {
+        window.__tourDetailOpeningCount = Math.max(
+            0,
+            (Number(window.__tourDetailOpeningCount) || 1) - 1
+        );
+    }
     currentDetailEntry = JSON.parse(JSON.stringify(entry));
     currentDetailType = 'saved';
 
