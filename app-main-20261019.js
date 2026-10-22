@@ -7506,10 +7506,16 @@ tlBody.innerHTML =
         if (!entry) return;
         el.addEventListener('click', () => {
             closeTourListModal();
+            // Die Etappenliste soll bei Zurück (inkl. Android-Systemtaste)
+            // samt gewählter Mehrtagestour wiederhergestellt werden.
             if (sourceType === 'planned') {
-                openPlannedTourDetail(entry);
+                openPlannedTourDetail(entry, {
+                    returnModalId: 'tour-list-modal'
+                });
             } else {
-                openTourDetail(entry);
+                openTourDetail(entry, {
+                    returnModalId: 'tour-list-modal'
+                });
             }
         });
     });
