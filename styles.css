@@ -12387,6 +12387,12 @@ body.summit
         5px;
 }
 
+/* Zusätzlicher Abstand zwischen Koordinaten-Accordion und Notizen. */
+#app-view
+.form-details + .form-group {
+    margin-top: 8px;
+}
+
 /* =========================================================
    Tourbild – kompakte Dateianzeige
    ========================================================= */
