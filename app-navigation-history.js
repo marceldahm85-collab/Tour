@@ -320,6 +320,11 @@
         });
 
         window.addEventListener('popstate', (event) => {
+            // Unterscheiden, ob wir selbst nach einem manuellen Modal-Schließen
+            // zurückspringen oder ob Android/der Browser zurück navigiert.
+            // Nur beim echten Zurück-Schritt muss ein vorheriges, inzwischen
+            // ausgeblendetes Modal wiederhergestellt werden.
+            const wasHistoryBackPending = historyBackPending;
             historyBackPending = false;
 
             const state = event.state;
@@ -331,6 +336,23 @@
             // Wenn ein übergeordnetes Modal offen ist, bleibt es erhalten.
             if (activeModal && (!isKnownState || activeModal.id !== expectedModalId)) {
                 closeTopmostModal(activeModal);
+            }
+
+            // Zwischenmodale werden oft ausgeblendet, statt im DOM entfernt zu
+            // werden. Beim System-Zurück muss deshalb das Modal des vorherigen
+            // Verlaufseintrags wieder sichtbar werden (auch bei mehreren Ebenen).
+            // Ein von der App selbst ausgelöstes history.back() nach bewusstem
+            // Schließen soll dagegen kein übergeordnetes Modal erneut öffnen.
+            if (isKnownState && expectedModalId && !wasHistoryBackPending) {
+                const expectedModal = document.getElementById(expectedModalId);
+                if (expectedModal) {
+                    expectedModal.hidden = false;
+                    expectedModal.classList.remove('hidden');
+                    if (expectedModal.hasAttribute('aria-hidden')) {
+                        expectedModal.setAttribute('aria-hidden', 'false');
+                    }
+                    document.body.classList.add('modal-open');
+                }
             }
 
             // Ohne offenes Modal führt Zurück zur zuvor besuchten App-Ansicht.
