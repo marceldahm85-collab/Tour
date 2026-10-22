@@ -231,6 +231,14 @@
         if (!relevant || !historyReady || restoringFromBack) return;
 
         const visible = getVisibleModals();
+
+        // openTourDetail lädt ein ausgelagertes Bild asynchron. In dieser
+        // Übergangsphase kann das Quellmodal schon geschlossen sein, bevor
+        // das Tourdetail sichtbar wird. Das ist kein echter Modal-Schließvorgang.
+        if (!visible.length && (Number(window.__tourDetailOpeningCount) || 0) > 0) {
+            return;
+        }
+
         const top = visible.length ? visible[visible.length - 1] : null;
         const state = history.state;
         const opened = hasModalOpening(records);
