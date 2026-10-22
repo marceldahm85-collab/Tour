@@ -122,7 +122,7 @@
 
 
 <link rel="stylesheet" href="./styles.css?v=12">
-<link rel="stylesheet" href="./styles-overrides.css?v=52">
+<link rel="stylesheet" href="./styles-overrides.css?v=53">
 
 </head>
 <body>
@@ -2571,6 +2571,15 @@
                 </details>
 
                 <details class="theme-editor-panel" data-theme-editor-accordion="secondary">
+                    <summary class="theme-editor-panel-title">☀️ App-Helligkeit</summary>
+                    <div class="form-group">
+                        <label for="te-app-brightness">Helligkeit der App: <span id="te-app-brightness-value">50</span>%</label>
+                        <input type="range" id="te-app-brightness" min="0" max="100" step="1" value="50">
+                        <small>50 % = unverändert. Niedrigere Werte dunkeln die App ab, höhere Werte hellen sie auf. Wird für jedes Theme separat gespeichert.</small>
+                    </div>
+                </details>
+
+                <details class="theme-editor-panel" data-theme-editor-accordion="secondary">
                     <summary class="theme-editor-panel-title">📳 Bedienung & Feedback</summary>
                     <div class="haptic-feedback-setting">
                         <label class="haptic-feedback-toggle" for="haptic-feedback-toggle">
@@ -2651,7 +2660,7 @@
     </div>
 </div>
 
-<script src="./app-main-20261019.js?v=57" defer></script>
+<script src="./app-main-20261019.js?v=58" defer></script>
 <script src="./app-navigation-history.js?v=2" defer></script>
 
 
