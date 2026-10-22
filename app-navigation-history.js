@@ -81,6 +81,8 @@
                 [HISTORY_FLAG]: true,
                 appView: view,
                 modalId: modalId || null,
+                previousModalId: isAppState(oldState) ? (oldState.modalId || null) : null,
+                previousAppView: isAppState(oldState) ? (oldState.appView || currentViewName()) : currentViewName(),
                 appNavigationKind: kind,
                 bergTourenHistorySequence: sequence
             }, '', location.href);
@@ -107,6 +109,17 @@
 
     function closeTopmostModal(modal) {
         if (!modal) return;
+
+        // Die Tourdetail-Ansicht besitzt einen eigenen Zurück-Button. Wenn
+        // sie aus einer Liste/einem anderen Modal geöffnet wurde, soll Android-
+        // Zurück genau diesen Rückweg nutzen und nicht den ganzen Dialog schließen.
+        if (modal.id === 'tour-detail-modal') {
+            const detailBackButton = document.getElementById('td-back');
+            if (detailBackButton && !detailBackButton.hidden) {
+                detailBackButton.click();
+                return;
+            }
+        }
 
         // Wenn vorhanden, immer den vorgesehenen Schließen-Button verwenden:
         // so bleiben Aufräumarbeiten der jeweiligen Modal-Funktion erhalten.
@@ -225,19 +238,25 @@
         if (top) {
             if (isAppState(state) && state.modalId === top.id) return;
 
-            // Wird ein weiteres Modal über einem bestehenden geöffnet, bekommt
-            // es einen eigenen Verlaufseintrag. Beim Zurückgehen schließt damit
-            // nur die oberste Ebene.
-            if (opened || !isAppState(state) || !state.modalId ||
-                visible.some((modal) => modal.id === state.modalId)) {
-                pushAppHistoryEntry('modal', currentViewName(), top.id);
+            const currentModalIsVisible = isAppState(state) && state.modalId &&
+                visible.some((modal) => modal.id === state.modalId);
+
+            if (isAppState(state) && state.modalId && !currentModalIsVisible) {
+                // Wenn das zuvor geöffnete Modal gerade in ein anderes wechselt,
+                // prüfen, ob das neue sichtbare Modal bereits der vorherige
+                // Verlaufsschritt war. Dann zurückspringen statt einen doppelten
+                // Verlaufseintrag anzulegen (z. B. Tourdetail -> Tourliste).
+                if (opened && state.previousModalId !== top.id) {
+                    pushAppHistoryEntry('modal', currentViewName(), top.id);
+                } else {
+                    requestHistoryBack();
+                }
                 return;
             }
 
-            // Das zuletzt eingetragene Modal wurde manuell geschlossen.
-            // Einen Schritt zurückgehen, statt einen veralteten Modal-Eintrag
-            // im Verlauf stehenzulassen.
-            requestHistoryBack();
+            // Neues Modal oder eine zusätzliche Dialogebene über einem weiterhin
+            // sichtbaren Modal: eigenen Verlaufseintrag anlegen.
+            pushAppHistoryEntry('modal', currentViewName(), top.id);
             return;
         }
 
