@@ -373,45 +373,6 @@
             };
         }
 
-        // App-Icon-Kurzbefehle sollen ebenfalls einen sauberen Verlauf haben.
-        // Der bestehende Handler entfernt selbst den Query-Parameter; diese
-        // Hülle entfernt ihn vorher und stellt danach den App-Zustand wieder her.
-        if (typeof handleAppShortcutLaunch === 'function' &&
-            !window.__bergTourenOriginalShortcutHandler) {
-            const originalShortcutHandler = handleAppShortcutLaunch;
-            window.__bergTourenOriginalShortcutHandler = originalShortcutHandler;
-
-            handleAppShortcutLaunch = function (...args) {
-                const hasAction = new URLSearchParams(location.search).has('action');
-
-                if (hasAction) {
-                    history.replaceState({
-                        ...(history.state && typeof history.state === 'object' ? history.state : {}),
-                        [HISTORY_FLAG]: true,
-                        appView: currentViewName(),
-                        modalId: null,
-                        appNavigationKind: 'view'
-                    }, '', location.pathname + location.hash);
-                }
-
-                const result = originalShortcutHandler.apply(this, args);
-
-                if (hasAction) {
-                    const state = history.state && typeof history.state === 'object'
-                        ? history.state
-                        : {};
-                    history.replaceState({
-                        ...state,
-                        [HISTORY_FLAG]: true,
-                        appView: currentViewName(),
-                        modalId: null,
-                        appNavigationKind: 'view'
-                    }, '', location.pathname + location.hash);
-                }
-
-                return result;
-            };
-        }
     }
 
     initializeHistory();
