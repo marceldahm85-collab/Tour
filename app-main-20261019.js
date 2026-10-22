@@ -22118,10 +22118,10 @@ const THEME_EDITOR_FONT_PRESETS = {
 const THEME_EDITOR_KEY = 'themeEditorSettings_v1';
 
 const defaultThemeEditorSettings = {
-    light:  { topColor: '#9de3f9', bottomColor: '#9ad8b6', transition: 55, intensity: 90, textMain: '#17251d', textSoft: '#405248', accent: '#0f8a6c', accent2: '#e0a52e', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#c9e8d8', shadowIntensity: 50, bgBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#9de3f9', navBottomColor: '#9ad8b6', chartColorStart: '#6fbf73', chartColorMid: '#a8d86a', chartColorEnd: '#f9d77e' },
-    dark:   { topColor: '#912a34', bottomColor: '#0a121d', transition: 55, intensity: 88, textMain: '#f3f7fb', textSoft: '#c2cfdb', accent: '#d45c5c', accent2: '#4e0a0a', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#4a1c22', shadowIntensity: 50, bgBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#912a34', navBottomColor: '#0a121d', chartColorStart: '#000000', chartColorMid: '#3b0000', chartColorEnd: '#7a0d0d' },
-    green:  { topColor: '#26a352', bottomColor: '#010c07', transition: 55, intensity: 88, textMain: '#f2fff7', textSoft: '#c9e5d4', accent: '#52b788', accent2: '#2d6a4f', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#0e3d20', shadowIntensity: 50, bgBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#26a352', navBottomColor: '#010c07', chartColorStart: '#0d2418', chartColorMid: '#1b4332', chartColorEnd: '#52b788' },
-    summit: { topColor: '#3aa0ff', bottomColor: '#161d22', transition: 55, intensity: 88, textMain: '#f4faff', textSoft: '#d0dce4', accent: '#63b7ff', accent2: '#176fc1', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#1f4560', shadowIntensity: 50, bgBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#3aa0ff', navBottomColor: '#161d22', chartColorStart: '#111513', chartColorMid: '#454e49', chartColorEnd: '#63b7ff' }
+    light:  { topColor: '#9de3f9', bottomColor: '#9ad8b6', transition: 55, intensity: 90, textMain: '#17251d', textSoft: '#405248', accent: '#0f8a6c', accent2: '#e0a52e', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#c9e8d8', shadowIntensity: 50, bgBrightness: 50, appBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#9de3f9', navBottomColor: '#9ad8b6', chartColorStart: '#6fbf73', chartColorMid: '#a8d86a', chartColorEnd: '#f9d77e' },
+    dark:   { topColor: '#912a34', bottomColor: '#0a121d', transition: 55, intensity: 88, textMain: '#f3f7fb', textSoft: '#c2cfdb', accent: '#d45c5c', accent2: '#4e0a0a', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#4a1c22', shadowIntensity: 50, bgBrightness: 50, appBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#912a34', navBottomColor: '#0a121d', chartColorStart: '#000000', chartColorMid: '#3b0000', chartColorEnd: '#7a0d0d' },
+    green:  { topColor: '#26a352', bottomColor: '#010c07', transition: 55, intensity: 88, textMain: '#f2fff7', textSoft: '#c9e5d4', accent: '#52b788', accent2: '#2d6a4f', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#0e3d20', shadowIntensity: 50, bgBrightness: 50, appBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#26a352', navBottomColor: '#010c07', chartColorStart: '#0d2418', chartColorMid: '#1b4332', chartColorEnd: '#52b788' },
+    summit: { topColor: '#3aa0ff', bottomColor: '#161d22', transition: 55, intensity: 88, textMain: '#f4faff', textSoft: '#d0dce4', accent: '#63b7ff', accent2: '#176fc1', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#1f4560', shadowIntensity: 50, bgBrightness: 50, appBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#3aa0ff', navBottomColor: '#161d22', chartColorStart: '#111513', chartColorMid: '#454e49', chartColorEnd: '#63b7ff' }
 };
 
 function getThemeEditorFontName() {
@@ -22761,6 +22761,33 @@ function applyThemeEditorBackgroundBrightness(settings) {
     el.style.opacity = String(opacity.toFixed(2));
 }
 
+function createThemeEditorAppBrightnessLayer() {
+    let el = document.getElementById('theme-editor-app-brightness-layer');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'theme-editor-app-brightness-layer';
+        el.className = 'theme-editor-app-brightness-layer';
+        document.body.appendChild(el);
+    }
+    return el;
+}
+
+function applyThemeEditorAppBrightness(settings) {
+    const el = createThemeEditorAppBrightnessLayer();
+    const value = Math.max(0, Math.min(100, Number(settings.appBrightness ?? 50)));
+    const diff = value - 50;
+    if (Math.abs(diff) < 1) {
+        el.style.opacity = '0';
+        return;
+    }
+    // Die App-Helligkeit ist eine visuelle Simulation; die Gerätehelligkeit
+    // selbst kann eine Web-App nicht zuverlässig steuern.
+    const maxOpacity = diff > 0 ? 0.18 : 0.30;
+    const opacity = Math.min(maxOpacity, (Math.abs(diff) / 50) * maxOpacity);
+    el.style.backgroundColor = diff > 0 ? '#ffffff' : '#000000';
+    el.style.opacity = opacity.toFixed(2);
+}
+
 function getThemeEditorStyleEl() {
     let el = document.getElementById('theme-editor-live-style');
     if (!el) {
@@ -22909,6 +22936,7 @@ function applyThemeEditorSettingsToDom() {
 
     getThemeEditorStyleEl().textContent = buildThemeEditorLiveCss();
     applyThemeEditorBackgroundBrightness(settings);
+    applyThemeEditorAppBrightness(settings);
 }
 
 function fillThemeEditorForm(themeKey) {
@@ -22935,6 +22963,8 @@ function fillThemeEditorForm(themeKey) {
     document.getElementById('te-shadow-value').textContent = settings.shadowIntensity;
     document.getElementById('te-bg-brightness').value = settings.bgBrightness;
     document.getElementById('te-bg-brightness-value').textContent = settings.bgBrightness;
+    document.getElementById('te-app-brightness').value = settings.appBrightness ?? 50;
+    document.getElementById('te-app-brightness-value').textContent = settings.appBrightness ?? 50;
     document.getElementById('te-radius').value = settings.radius;
     document.getElementById('te-radius-value').textContent = settings.radius;
     document.getElementById('te-blur').value = settings.blurIntensity;
@@ -22975,6 +23005,7 @@ function readThemeEditorFormIntoSettings(themeKey) {
         midColor: document.getElementById('te-mid-color').value,
         shadowIntensity: Number(document.getElementById('te-shadow').value),
         bgBrightness: Number(document.getElementById('te-bg-brightness').value),
+        appBrightness: Number(document.getElementById('te-app-brightness').value),
         radius: Number(document.getElementById('te-radius').value),
         blurIntensity: Number(document.getElementById('te-blur').value),
         navTopColor: document.getElementById('te-nav-top-color').value,
@@ -23097,7 +23128,7 @@ function initThemeEditor() {
         'te-intensity', 'te-text-main', 'te-text-soft',
         'te-accent', 'te-accent2', 'te-border',
         'te-direction', 'te-mid-enabled', 'te-mid-color',
-        'te-shadow', 'te-bg-brightness',
+        'te-shadow', 'te-bg-brightness', 'te-app-brightness',
         'te-radius', 'te-blur',
         'te-nav-top-color', 'te-nav-bottom-color',
         'te-chart-color-start', 'te-chart-color-mid', 'te-chart-color-end'
@@ -23136,6 +23167,9 @@ function initThemeEditor() {
             }
             if (id === 'te-bg-brightness') {
                 document.getElementById('te-bg-brightness-value').textContent = el.value;
+            }
+            if (id === 'te-app-brightness') {
+                document.getElementById('te-app-brightness-value').textContent = el.value;
             }
             if (id === 'te-radius') {
                 document.getElementById('te-radius-value').textContent = el.value;
@@ -34878,7 +34912,7 @@ const endHold = () => {
             document.head.appendChild(styleLink);
         }
         const script = document.createElement('script');
-        script.src = './bergwelt-badges-20261019.js?v=27';
+        script.src = './bergwelt-badges-20261019.js?v=28';
         script.onload = () => {
             window.__BERGWELT_BADGE_LOADING__ = false;
             window.__BERGWELT_LOADING__ = false;
