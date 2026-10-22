@@ -2350,6 +2350,83 @@ body.summit #wrapped-view .bergwelt-height-year-donut-section {
     cursor: default !important;
 }
 
+
+/* Jahresvergleich: dieselbe Palette wie das obere Jahresanteils-Ringdiagramm. */
+#wrapped-view .bergwelt-height-years-chart-section {
+    --height-chart-bg: #f2f7f4;
+    --height-chart-text: #1b3025;
+    --height-chart-muted: #42584a;
+    --height-chart-accent: #167447;
+    --height-chart-rest: #d3e1d7;
+    --height-chart-border: #bfd3c5;
+    color: var(--height-chart-text);
+    border-color: var(--height-chart-border);
+    background: var(--height-chart-bg);
+    box-shadow: 0 8px 22px rgba(19, 45, 31, .12);
+}
+#wrapped-view .bergwelt-height-years-chart-section .bergwelt-height-years-chart-heading > span {
+    color: var(--height-chart-muted);
+    opacity: 1;
+}
+#wrapped-view .bergwelt-height-years-chart-section .bergwelt-height-years-chart-center > strong {
+    color: var(--height-chart-accent);
+}
+#wrapped-view .bergwelt-height-years-chart-section .bergwelt-height-years-chart-center > span {
+    color: var(--height-chart-muted);
+    opacity: 1;
+}
+#wrapped-view .bergwelt-height-years-chart-section .bergwelt-height-years-segment {
+    stroke: var(--height-chart-bg);
+}
+#wrapped-view .bergwelt-height-years-chart-section .bergwelt-height-years-segment:hover,
+#wrapped-view .bergwelt-height-years-chart-section .bergwelt-height-years-segment:focus-visible {
+    stroke: var(--height-chart-accent);
+}
+#wrapped-view .bergwelt-height-years-chart-section .bergwelt-height-years-segment.is-selected {
+    filter: drop-shadow(0 0 4px color-mix(in srgb, var(--height-chart-accent) 45%, transparent));
+}
+#wrapped-view .bergwelt-height-years-chart-section .bergwelt-height-years-chart circle {
+    stroke: var(--height-chart-rest);
+    stroke-opacity: 1;
+}
+
+/* Hell */
+body:not(.dark):not(.green):not(.summit) #wrapped-view .bergwelt-height-years-chart-section {
+    --height-chart-bg: #fff8e6;
+    --height-chart-text: #3d3014;
+    --height-chart-muted: #715d33;
+    --height-chart-accent: #946200;
+    --height-chart-rest: #f0dfad;
+    --height-chart-border: #d4b45b;
+}
+/* Dark */
+body.dark #wrapped-view .bergwelt-height-years-chart-section {
+    --height-chart-bg: #25181d;
+    --height-chart-text: #fff2f3;
+    --height-chart-muted: #e0c2c6;
+    --height-chart-accent: #ff737f;
+    --height-chart-rest: #59363d;
+    --height-chart-border: #764951;
+}
+/* Green */
+body.green #wrapped-view .bergwelt-height-years-chart-section {
+    --height-chart-bg: #13281e;
+    --height-chart-text: #f2fff6;
+    --height-chart-muted: #c1dac9;
+    --height-chart-accent: #8af2a9;
+    --height-chart-rest: #355544;
+    --height-chart-border: #4a765b;
+}
+/* Summit */
+body.summit #wrapped-view .bergwelt-height-years-chart-section {
+    --height-chart-bg: #172a3a;
+    --height-chart-text: #f2f8ff;
+    --height-chart-muted: #c4d5e5;
+    --height-chart-accent: #7bd6ff;
+    --height-chart-rest: #40596d;
+    --height-chart-border: #4d7189;
+}
+
 /* Tourbuch verwendet keine Jahresfilter: Dropdown und Pfeile ganz ausblenden. */
 #wrapped-view.bergwelt-active-tourbuch .wrapped-header > .wrapped-year-select,
 #wrapped-view.bergwelt-active-tourbuch .wrapped-header > .mob-sel-wrap,
