@@ -6619,3 +6619,28 @@ body.green #achievements-view .achievements-summary-main strong {
         font-size: 10px;
     }
 }
+
+
+/* Dashboard-Aufbau: auch geschlossen die volle Breite der Theme-Editor-Gruppen nutzen. */
+#theme-view details.theme-editor-panel.dashboard-editor-section {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+#theme-view details.theme-editor-panel.dashboard-editor-section:not([open]) {
+    align-self: stretch !important;
+    width: 100% !important;
+}
+
+/* Green-Theme: Dashboard-Editor-Buttons wie die grün akzentuierte Achievements-Übersicht gestalten. */
+body.green #theme-view .dashboard-editor-move-btn,
+body.green #theme-view .dashboard-editor-actions .dashboard-editor-secondary {
+    background: linear-gradient(135deg, rgba(114, 214, 163, 0.20), rgba(35, 134, 83, 0.14)) !important;
+    border-color: rgba(114, 214, 163, 0.62) !important;
+    color: #e6f8ed !important;
+    box-shadow: inset 0 1px 0 rgba(220, 255, 235, 0.08), 0 3px 10px rgba(35, 134, 83, 0.12) !important;
+}
+body.green #theme-view .dashboard-editor-move-btn:not(:disabled):active,
+body.green #theme-view .dashboard-editor-actions .dashboard-editor-secondary:active {
+    background: linear-gradient(135deg, rgba(114, 214, 163, 0.30), rgba(35, 134, 83, 0.24)) !important;
+}
