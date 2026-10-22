@@ -6446,3 +6446,21 @@ body.green #achievements-view .achievements-summary-main strong {
     align-self: stretch !important;
     width: 100% !important;
 }
+
+
+/* Tourdetail Top-3: Die Metallanimation darf den mobilen Slide-up nicht
+   verdrängen. Beide Animationen laufen unabhängig nebeneinander. */
+@media (max-width: 768px) and (prefers-reduced-motion: no-preference),
+       (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) and (prefers-reduced-motion: no-preference) {
+    .modal:not(.hidden) .modal-card.highlight-modal-gold:not(.is-dragging),
+    .modal:not(.hidden) .modal-card.highlight-modal-silver:not(.is-dragging),
+    .modal:not(.hidden) .modal-card.highlight-modal-bronze:not(.is-dragging) {
+        animation-name: modalSlideUp, metal-tone-breathe-strong !important;
+        animation-duration: 680ms, 3.4s !important;
+        animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1), linear !important;
+        animation-delay: 0s, 0s !important;
+        animation-iteration-count: 1, infinite !important;
+        animation-direction: normal, normal !important;
+        animation-fill-mode: forwards, both !important;
+    }
+}
