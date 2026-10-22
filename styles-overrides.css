@@ -6695,3 +6695,12 @@ body.green #theme-view .haptic-feedback-toggle {
     #theme-view .haptic-feedback-toggle { gap: 8px; padding: 9px; }
     #theme-view .haptic-feedback-copy small { font-size: 10px; }
 }
+
+
+/* Tour speichern: Abstand zwischen aufeinanderfolgenden Eingabebereichen. */
+@media (orientation: portrait), (pointer: fine) {
+    #app-view .save-form-column
+    > :not(.form-section-title) + :not(.form-section-title) {
+        margin-top: 8px;
+    }
+}
