@@ -2,8 +2,8 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261021-lifetime-level-yellow-light') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261021-lifetime-level-yellow-light';
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261022-year-ascent-donut') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261022-year-ascent-donut';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
@@ -227,42 +227,100 @@
                 '<div class="bergwelt-height-moment-footer"><div class="bergwelt-height-gauge" style="--moment-progress:' + targetProgress + '%"><span>' + (careerAscent === null ? '–' : reached ? '✓' : fmt(targetProgress, 0) + '%') + '</span></div></div>' +
             '</section>';
         })() : '';
-        panel.innerHTML = intro('', 'Höhenwelt', '') +
-            (selectedYear === 'all'
-                ?             '<div class="bergwelt-height-milestones" aria-label="Interaktive Höhenmarken">' +
-            milestones.map((m, i) => {
-                const reached = careerAscent !== null && total >= m.height;
-                const remaining = careerAscent === null ? null : Math.max(0, m.height - total);
-                const targetProgress = careerAscent === null ? 0 : Math.max(0, Math.min(100, total / m.height * 100));
-                const active = selectedHeightMilestone === m.height;
-                return '<button type="button" class="bergwelt-height-milestone' + (reached ? ' is-reached' : '') + (active ? ' is-selected' : '') + '" data-bergwelt-height-milestone="' + m.height + '" aria-pressed="' + active + '" aria-haspopup="dialog" aria-controls="bergwelt-height-detail-modal">' +
-                    '<span class="bergwelt-height-milestone-mark' + (reached ? ' is-reached' : '') + '" aria-hidden="true">' + heightIcons[i] + '</span>' +
-                    '<span class="bergwelt-height-milestone-copy"><strong>' + escapeHTML(m.name) + '</strong><small>' + (reached ? 'Vergleichsmarke erreicht' : careerAscent === null ? 'Keine Aufstiegsdaten' : fmt(remaining) + ' hm bis zur Marke') + '</small></span>' +
-                    '<span class="bergwelt-height-milestone-value"><strong>' + fmt(m.height) + '</strong><small>' + (m.height <= 26544 ? 'm' : 'hm') + '</small></span>' +
-                    '<span class="bergwelt-height-milestone-bar" aria-hidden="true"><span style="width:' + targetProgress + '%"></span></span>' +
-                    '<span class="bergwelt-height-milestone-chevron" aria-hidden="true">' + (active ? '⌃' : '›') + '</span>' +
-                '</button>';
-            }).join('') +
+        const annualAscentMap = new Map();
+        let undatedAscent = 0;
+        allEntries.forEach(entry => {
+            const value = ascentValue(entry);
+            if (value === null || !Number.isFinite(value) || value <= 0) return;
+            const year = dateYear(entry);
+            if (Number.isInteger(year)) {
+                annualAscentMap.set(year, (annualAscentMap.get(year) || 0) + value);
+            } else {
+                undatedAscent += value;
+            }
+        });
+        const annualAscentData = Array.from(annualAscentMap, ([year, ascent]) => ({ year, ascent }))
+            .sort((a, b) => a.year - b.year);
+        if (undatedAscent > 0) annualAscentData.push({ year: null, ascent: undatedAscent });
+        const annualChartTotal = annualAscentData.reduce((sum, item) => sum + item.ascent, 0);
+        const donutPoint = (radius, angle) => ({
+            x: 120 + radius * Math.cos(angle),
+            y: 120 + radius * Math.sin(angle)
+        });
+        const annualChartSegments = annualAscentData.length && annualChartTotal > 0
+            ? (() => {
+                let angle = -Math.PI / 2;
+                const maxGap = Math.min(0.025, (Math.PI * 2 / annualAscentData.length) * 0.12);
+                return annualAscentData.map((item, index) => {
+                    const sliceAngle = item.ascent / annualChartTotal * Math.PI * 2;
+                    const gap = Math.min(maxGap, sliceAngle * 0.18);
+                    const startAngle = angle + gap / 2;
+                    const endAngle = angle + sliceAngle - gap / 2;
+                    angle += sliceAngle;
+                    if (endAngle <= startAngle) return '';
+                    const outerStart = donutPoint(104, startAngle);
+                    const outerEnd = donutPoint(104, endAngle);
+                    const innerEnd = donutPoint(68, endAngle);
+                    const innerStart = donutPoint(68, startAngle);
+                    const largeArc = endAngle - startAngle > Math.PI ? 1 : 0;
+                    const isSelected = selectedYear !== 'all' && item.year !== null && item.year === selectedYear;
+                    const fillOpacity = isSelected ? '1' : (0.18 + (index % 5) * 0.045).toFixed(2);
+                    const path = 'M ' + outerStart.x.toFixed(3) + ' ' + outerStart.y.toFixed(3) +
+                        ' A 104 104 0 ' + largeArc + ' 1 ' + outerEnd.x.toFixed(3) + ' ' + outerEnd.y.toFixed(3) +
+                        ' L ' + innerEnd.x.toFixed(3) + ' ' + innerEnd.y.toFixed(3) +
+                        ' A 68 68 0 ' + largeArc + ' 0 ' + innerStart.x.toFixed(3) + ' ' + innerStart.y.toFixed(3) + ' Z';
+                    const yearAttributes = item.year === null
+                        ? ' role="img" aria-label="Touren ohne Jahreszuordnung: ' + fmt(item.ascent) + ' Höhenmeter"'
+                        : ' data-bergwelt-year-segment="' + item.year + '" role="button" tabindex="0" aria-pressed="' + isSelected + '" aria-label="Jahr ' + item.year + ', ' + fmt(item.ascent) + ' Höhenmeter. Antippen, um das Jahr auszuwählen"';
+                    return '<path class="bergwelt-height-years-segment' + (isSelected ? ' is-selected' : '') + '"' +
+                        yearAttributes +
+                        ' d="' + path + '" fill="var(--accent-color, currentColor)" fill-opacity="' + fillOpacity + '"></path>';
+                }).join('');
+            })()
+            : '';
+        const milestoneMarkup = selectedYear === 'all'
+            ? '<div class="bergwelt-height-milestones" aria-label="Interaktive Höhenmarken">' +
+                milestones.map((m, i) => {
+                    const reached = careerAscent !== null && total >= m.height;
+                    const remaining = careerAscent === null ? null : Math.max(0, m.height - total);
+                    const targetProgress = careerAscent === null ? 0 : Math.max(0, Math.min(100, total / m.height * 100));
+                    const active = selectedHeightMilestone === m.height;
+                    return '<button type="button" class="bergwelt-height-milestone' + (reached ? ' is-reached' : '') + (active ? ' is-selected' : '') + '" data-bergwelt-height-milestone="' + m.height + '" aria-pressed="' + active + '" aria-haspopup="dialog" aria-controls="bergwelt-height-detail-modal">' +
+                        '<span class="bergwelt-height-milestone-mark' + (reached ? ' is-reached' : '') + '" aria-hidden="true">' + heightIcons[i] + '</span>' +
+                        '<span class="bergwelt-height-milestone-copy"><strong>' + escapeHTML(m.name) + '</strong><small>' + (reached ? 'Vergleichsmarke erreicht' : careerAscent === null ? 'Keine Aufstiegsdaten' : fmt(remaining) + ' hm bis zur Marke') + '</small></span>' +
+                        '<span class="bergwelt-height-milestone-value"><strong>' + fmt(m.height) + '</strong><small>' + (m.height <= 26544 ? 'm' : 'hm') + '</small></span>' +
+                        '<span class="bergwelt-height-milestone-bar" aria-hidden="true"><span style="width:' + targetProgress + '%"></span></span>' +
+                        '<span class="bergwelt-height-milestone-chevron" aria-hidden="true">' + (active ? '⌃' : '›') + '</span>' +
+                    '</button>';
+                }).join('') +
             '</div>'
-                :             '<section class="bergwelt-height-year-contribution" aria-label="Beitrag ' + escapeHTML(yearLabel) + ' zur Lebenszeit-Aufstiegssumme">' +
-                '<div class="bergwelt-height-year-contribution-head">' +
-                    '<div class="bergwelt-height-year-contribution-value"><span>' + (selectedYear === 'all' ? 'GESAMTER ZEITRAUM' : 'BEITRAG ' + selectedYear) + '</span><strong>' + fmtKnown(yearAscent) + '<small> hm</small></strong></div>' +
-                    '<div class="bergwelt-height-year-contribution-share"><strong>' + (yearShare === null ? '–' : fmt(yearShare, 1) + ' %') + '</strong><span>der Lebenszeit-Aufstiegssumme</span></div>' +
+            : '';
+        const selectedYearDonutMarkup = selectedYear === 'all'
+            ? ''
+            : '<section class="bergwelt-height-year-donut-section" aria-label="Anteil des Jahres ' + escapeHTML(yearLabel) + ' an deiner gesamten Aufstiegssumme">' +
+                '<div class="bergwelt-height-year-donut" role="img" aria-label="' + escapeHTML(yearLabel + ': ' + (yearShare === null ? 'Anteil nicht verfügbar' : fmt(yearShare, 1) + ' Prozent der gesamten Aufstiegssumme')) + '" style="--height-year-share:' + (yearShare === null ? 0 : yearShare) + '%">' +
+                    '<div class="bergwelt-height-year-donut-hole"><strong>' + (yearShare === null ? '–' : fmt(yearShare, 1) + '<small>%</small>') + '</strong><span>im Jahr ' + escapeHTML(yearLabel) + '</span></div>' +
                 '</div>' +
-                '<div class="bergwelt-height-year-contribution-track" role="progressbar" aria-label="Anteil des gewählten Zeitraums am Lebenszeit-Aufstieg" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + (yearShare === null ? 0 : Math.round(yearShare)) + '"><span style="width:' + (yearShare === null ? 0 : yearShare) + '%"></span></div>' +
-            '</section>' +
-            (selectedYear === 'all' ? '' :
-                '<section class="bergwelt-height-year-donut-section" aria-label="Anteil des Jahres ' + escapeHTML(yearLabel) + ' an deiner gesamten Aufstiegssumme">' +
-                    '<div class="bergwelt-height-year-donut" role="img" aria-label="' + escapeHTML(yearLabel + ': ' + (yearShare === null ? 'Anteil nicht verfügbar' : fmt(yearShare, 1) + ' Prozent der gesamten Aufstiegssumme')) + '" style="--height-year-share:' + (yearShare === null ? 0 : yearShare) + '%">' +
-                        '<div class="bergwelt-height-year-donut-hole"><strong>' + (yearShare === null ? '–' : fmt(yearShare, 1) + '<small>%</small>') + '</strong><span>im Jahr ' + escapeHTML(yearLabel) + '</span></div>' +
-                    '</div>' +
-                    '<div class="bergwelt-height-year-donut-legend">' +
-                        '<div class="bergwelt-height-year-donut-legend-item"><span class="bergwelt-height-year-donut-dot is-selected-year"></span><div><strong>' + escapeHTML(yearLabel) + ' · ' + fmtKnown(yearAscent) + ' hm</strong><small>Aufstieg im gewählten Jahr</small></div></div>' +
-                        '<div class="bergwelt-height-year-donut-legend-item"><span class="bergwelt-height-year-donut-dot"></span><div><strong>Übrige Tourhistorie</strong><small>' + (yearAscent === null || careerAscent === null ? 'Anteil nicht bestimmbar' : fmt(Math.max(0, careerAscent - yearAscent)) + ' hm') + '</small></div></div>' +
-                    '</div>' +
-                '</section>'
-            )
-            );
+                '<div class="bergwelt-height-year-donut-legend">' +
+                    '<div class="bergwelt-height-year-donut-legend-item"><span class="bergwelt-height-year-donut-dot is-selected-year"></span><div><strong>' + escapeHTML(yearLabel) + ' · ' + fmtKnown(yearAscent) + ' hm</strong></div></div>' +
+                    '<div class="bergwelt-height-year-donut-legend-item"><span class="bergwelt-height-year-donut-dot"></span><div><strong>Übrige Tourhistorie</strong><small>' + (yearAscent === null || careerAscent === null ? 'Anteil nicht bestimmbar' : fmt(Math.max(0, careerAscent - yearAscent)) + ' hm') + '</small></div></div>' +
+                '</div>' +
+            '</section>';
+        const annualChartMarkup =
+            '<section class="bergwelt-height-years-chart-section" aria-label="Jahresvergleich des gesamten Aufstiegs">' +
+                '<div class="bergwelt-height-years-chart-heading"><strong>Aufstieg nach Jahren</strong><span>Tippe ein Segment an, um das Jahr auszuwählen.</span></div>' +
+                '<div class="bergwelt-height-years-chart-visual">' +
+                    '<svg class="bergwelt-height-years-chart" viewBox="0 0 240 240" role="group" aria-label="Kreisdiagramm aller Jahresanteile am Gesamtaufstieg">' +
+                        '<circle cx="120" cy="120" r="86" fill="none" stroke="currentColor" stroke-opacity=".14" stroke-width="36"></circle>' +
+                        annualChartSegments +
+                    '</svg>' +
+                    '<div class="bergwelt-height-years-chart-center"><strong>' + fmtKnown(careerAscent) + '</strong><span>hm Gesamtaufstieg</span></div>' +
+                '</div>' +
+            '</section>';
+        panel.innerHTML = intro('', 'Höhenwelt', '') +
+            milestoneMarkup +
+            selectedYearDonutMarkup +
+            annualChartMarkup;
 
         const staleHeightModal = document.getElementById('bergwelt-height-detail-modal');
         if (staleHeightModal) staleHeightModal.remove();
