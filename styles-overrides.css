@@ -6464,3 +6464,155 @@ body.green #achievements-view .achievements-summary-main strong {
         animation-fill-mode: forwards, both !important;
     }
 }
+
+
+/* Dashboard-Editor: kompakter Einstieg, klare Listen und große Touch-Ziele. */
+.dash-customize-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 0;
+}
+.dash-customize-heading {
+    color: var(--text-main);
+    font-size: 14px;
+    font-weight: 850;
+    letter-spacing: .2px;
+}
+.dash-customize-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 38px;
+    padding: 7px 12px;
+    border: 1px solid var(--theme-surface-border, rgba(255,255,255,.2));
+    border-radius: 11px;
+    background: var(--theme-surface-soft-top, rgba(255,255,255,.1));
+    color: var(--theme-surface-text, var(--text-main));
+    font: inherit;
+    font-size: 12px;
+    font-weight: 750;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.dashboard-editor-card {
+    width: min(100%, 620px);
+    max-height: min(88vh, 900px);
+}
+.dashboard-editor-intro {
+    margin: 0 0 16px;
+    color: var(--text-soft, var(--text-main));
+    font-size: 12px;
+    line-height: 1.45;
+}
+.dashboard-editor-group {
+    margin: 0 0 18px;
+}
+.dashboard-editor-group:last-child {
+    margin-bottom: 0;
+}
+.dashboard-editor-group-title {
+    margin: 0 0 8px;
+    color: var(--accent, var(--text-main));
+    font-size: 12px;
+    font-weight: 850;
+    letter-spacing: .25px;
+}
+.dashboard-editor-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.dashboard-editor-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 7px 8px;
+    border: 1px solid var(--theme-surface-border, rgba(128,128,128,.24));
+    border-radius: 11px;
+    background: var(--theme-surface-soft-bottom, rgba(128,128,128,.06));
+}
+.dashboard-editor-item-main {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    min-height: 38px;
+    cursor: pointer;
+}
+.dashboard-editor-item-main input[type="checkbox"] {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    min-height: 18px;
+    margin: 0;
+    accent-color: var(--accent, #4f9272);
+}
+.dashboard-editor-item-icon {
+    flex: 0 0 24px;
+    text-align: center;
+    font-size: 19px;
+}
+.dashboard-editor-item-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.dashboard-editor-item-title {
+    color: var(--theme-surface-text, var(--text-main));
+    font-size: 12px;
+    font-weight: 750;
+}
+.dashboard-editor-item-description {
+    color: var(--text-soft, var(--text-main));
+    font-size: 10px;
+    line-height: 1.25;
+}
+.dashboard-editor-move {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.dashboard-editor-move-btn {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    padding: 0;
+    border: 1px solid var(--theme-surface-border, rgba(128,128,128,.24));
+    border-radius: 9px;
+    background: var(--theme-surface-top, rgba(128,128,128,.08));
+    color: var(--theme-surface-text, var(--text-main));
+    font-size: 17px;
+    font-weight: 800;
+    cursor: pointer;
+}
+.dashboard-editor-move-btn:disabled {
+    opacity: .28;
+    cursor: default;
+}
+.dashboard-editor-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+.dashboard-editor-actions .save-btn {
+    flex: 1 1 auto;
+    min-height: 42px;
+    font-size: 12px;
+}
+.dashboard-editor-actions .dashboard-editor-secondary {
+    background: var(--theme-surface-soft-bottom, rgba(128,128,128,.08));
+    border: 1px solid var(--theme-surface-border, rgba(128,128,128,.24));
+    color: var(--theme-surface-text, var(--text-main));
+}
+@media (max-width: 420px) {
+    .dash-customize-heading { font-size: 13px; }
+    .dash-customize-btn { padding: 7px 9px; font-size: 11px; }
+    .dashboard-editor-actions .save-btn { flex-basis: 30%; padding-inline: 8px; }
+}
