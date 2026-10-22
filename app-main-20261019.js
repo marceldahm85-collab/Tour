@@ -39,6 +39,7 @@ checkAchievementsWeeklyBanner();
 
 initStatsPeakDrilldown();
 initTourDetailModal();
+initDashboardEditor();
 initImageLightbox();
 
 initStatsPeaksInteractions();
@@ -19961,6 +19962,247 @@ function getMonthlyTrendData(tours, months = 6) {
 
 
 
+// =========================================================
+// Dashboard-Editor: Sichtbarkeit und Reihenfolge
+// =========================================================
+const DASHBOARD_EDITOR_DEFAULT_TILE_ORDER = [
+    'steps', 'gipfel', 'bigTours', 'strecke', 'aufstieg',
+    'gehzeit', 'speed', 'steigung', 'anstieg'
+];
+const DASHBOARD_EDITOR_TILE_META = [
+    { id: 'touren', label: 'Touren', icon: '🥾', fixed: true },
+    { id: 'steps', label: 'Schritte', icon: '👣' },
+    { id: 'gipfel', label: 'Gipfel', icon: '🏔️' },
+    { id: 'bigTours', label: 'Big Tours', icon: '💪🏼' },
+    { id: 'strecke', label: 'Strecke', icon: '📏' },
+    { id: 'aufstieg', label: 'Aufstieg', icon: '⛰️' },
+    { id: 'gehzeit', label: 'Gehzeit', icon: '⏱️' },
+    { id: 'speed', label: 'Ø Speed', icon: '💨' },
+    { id: 'steigung', label: 'Ø Steigung', icon: '📐' },
+    { id: 'anstieg', label: 'Ø Anstieg', icon: '⬆️' }
+];
+const DASHBOARD_EDITOR_DEFAULT_SECTION_ORDER = ['recent', 'milestones'];
+const DASHBOARD_EDITOR_SECTION_META = [
+    { id: 'recent', label: 'Letzte Touren', description: 'Die fünf zuletzt absolvierten Touren' },
+    { id: 'milestones', label: 'Meilensteine', description: 'Deine persönlichen Fortschrittsziele' }
+];
+let dashboardEditorDraft = null;
+
+function getDefaultDashboardEditorPreferences() {
+    return {
+        version: 1,
+        tileOrder: [...DASHBOARD_EDITOR_DEFAULT_TILE_ORDER],
+        hiddenTiles: [],
+        sectionOrder: [...DASHBOARD_EDITOR_DEFAULT_SECTION_ORDER],
+        hiddenSections: []
+    };
+}
+
+function normalizeDashboardEditorPreferences(value) {
+    const defaults = getDefaultDashboardEditorPreferences();
+    const source = value && typeof value === 'object' ? value : {};
+    const validTileIds = DASHBOARD_EDITOR_TILE_META
+        .filter(tile => !tile.fixed)
+        .map(tile => tile.id);
+    const validSectionIds = DASHBOARD_EDITOR_SECTION_META.map(section => section.id);
+    const uniqueValid = (items, validIds) => [...new Set(
+        (Array.isArray(items) ? items : []).filter(id => validIds.includes(id))
+    )];
+
+    const tileOrder = uniqueValid(source.tileOrder, validTileIds);
+    const sectionOrder = uniqueValid(source.sectionOrder, validSectionIds);
+
+    return {
+        version: 1,
+        tileOrder: [...tileOrder, ...defaults.tileOrder.filter(id => !tileOrder.includes(id))],
+        hiddenTiles: uniqueValid(source.hiddenTiles, DASHBOARD_EDITOR_TILE_META.map(tile => tile.id)),
+        sectionOrder: [...sectionOrder, ...defaults.sectionOrder.filter(id => !sectionOrder.includes(id))],
+        hiddenSections: uniqueValid(source.hiddenSections, validSectionIds)
+    };
+}
+
+function getDashboardEditorPreferences() {
+    return normalizeDashboardEditorPreferences(appStorage.get('dashboardPreferences'));
+}
+
+function moveDashboardEditorItem(items, id, direction) {
+    const index = items.indexOf(id);
+    const nextIndex = index + direction;
+    if (index < 0 || nextIndex < 0 || nextIndex >= items.length) return;
+    [items[index], items[nextIndex]] = [items[nextIndex], items[index]];
+}
+
+function renderDashboardEditorListItems(items, orderKey, hiddenKey, metadata, fixedIds = []) {
+    const hidden = dashboardEditorDraft[hiddenKey];
+    const order = dashboardEditorDraft[orderKey];
+    return items.map(item => {
+        const fixed = fixedIds.includes(item.id);
+        const position = fixed ? -1 : order.indexOf(item.id);
+        const disabledUp = fixed || position <= 0;
+        const disabledDown = fixed || position < 0 || position >= order.length - 1;
+        return `
+            <div class="dashboard-editor-item" data-editor-item="${item.id}">
+                <label class="dashboard-editor-item-main" for="dashboard-editor-${orderKey}-${item.id}">
+                    <input
+                        type="checkbox"
+                        id="dashboard-editor-${orderKey}-${item.id}"
+                        data-editor-visible="${hiddenKey}"
+                        data-editor-id="${item.id}"
+                        ${hidden.includes(item.id) ? '' : 'checked'}>
+                    <span class="dashboard-editor-item-icon" aria-hidden="true">${item.icon || '▧'}</span>
+                    <span class="dashboard-editor-item-text">
+                        <span class="dashboard-editor-item-title">${item.label}</span>
+                        ${item.description ? `<span class="dashboard-editor-item-description">${item.description}</span>` : ''}
+                        ${fixed ? '<span class="dashboard-editor-item-description">Bleibt neben der Jahresauswahl</span>' : ''}
+                    </span>
+                </label>
+                <div class="dashboard-editor-move">
+                    <button type="button" class="dashboard-editor-move-btn" data-editor-move="${orderKey}" data-editor-id="${item.id}" data-editor-direction="-1" aria-label="${item.label} nach oben" ${disabledUp ? 'disabled' : ''}>↑</button>
+                    <button type="button" class="dashboard-editor-move-btn" data-editor-move="${orderKey}" data-editor-id="${item.id}" data-editor-direction="1" aria-label="${item.label} nach unten" ${disabledDown ? 'disabled' : ''}>↓</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderDashboardEditor() {
+    const body = document.getElementById('dashboard-editor-body');
+    if (!body || !dashboardEditorDraft) return;
+
+    const tileMetaById = new Map(DASHBOARD_EDITOR_TILE_META.map(item => [item.id, item]));
+    const orderedTiles = [
+        tileMetaById.get('touren'),
+        ...dashboardEditorDraft.tileOrder.map(id => tileMetaById.get(id))
+    ].filter(Boolean);
+    const sectionMetaById = new Map(DASHBOARD_EDITOR_SECTION_META.map(item => [item.id, item]));
+    const orderedSections = dashboardEditorDraft.sectionOrder
+        .map(id => sectionMetaById.get(id))
+        .filter(Boolean);
+
+    body.innerHTML = `
+        <p class="dashboard-editor-intro">Lege fest, was auf deinem Dashboard sichtbar ist und welche Kennzahlen zuerst erscheinen. Deine Auswahl bleibt auf diesem Gerät gespeichert.</p>
+        <section class="dashboard-editor-group">
+            <h3 class="dashboard-editor-group-title">Statistik-Kacheln</h3>
+            <div class="dashboard-editor-list">
+                ${renderDashboardEditorListItems(
+                    orderedTiles,
+                    'tileOrder',
+                    'hiddenTiles',
+                    DASHBOARD_EDITOR_TILE_META,
+                    ['touren']
+                )}
+            </div>
+        </section>
+        <section class="dashboard-editor-group">
+            <h3 class="dashboard-editor-group-title">Dashboard-Bereiche</h3>
+            <div class="dashboard-editor-list">
+                ${renderDashboardEditorListItems(
+                    orderedSections,
+                    'sectionOrder',
+                    'hiddenSections',
+                    DASHBOARD_EDITOR_SECTION_META
+                )}
+            </div>
+        </section>
+    `;
+}
+
+function openDashboardEditor() {
+    const modal = document.getElementById('dashboard-editor-modal');
+    if (!modal) return;
+    dashboardEditorDraft = normalizeDashboardEditorPreferences(getDashboardEditorPreferences());
+    renderDashboardEditor();
+    modal.setAttribute('aria-hidden', 'false');
+    modal.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+}
+
+function closeDashboardEditor() {
+    const modal = document.getElementById('dashboard-editor-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden', 'true');
+    dashboardEditorDraft = null;
+    const otherVisibleModal = document.querySelector(
+        '.modal:not(.hidden), .image-lightbox:not(.hidden), [role="dialog"][aria-modal="true"]:not(.hidden)'
+    );
+    if (!otherVisibleModal) document.body.classList.remove('modal-open');
+}
+
+function applyDashboardEditorPreferences() {
+    const preferences = getDashboardEditorPreferences();
+    const inner = document.querySelector('#dashboard-view .dashboard-inner');
+    const recent = document.getElementById('dash-recent-section');
+    const milestones = document.getElementById('dash-milestones-section');
+    const sections = { recent, milestones };
+
+    DASHBOARD_EDITOR_SECTION_META.forEach(section => {
+        const element = sections[section.id];
+        if (element) {
+            element.style.display = preferences.hiddenSections.includes(section.id) ? 'none' : '';
+        }
+    });
+
+    preferences.sectionOrder.forEach(id => {
+        const element = sections[id];
+        if (inner && element) inner.appendChild(element);
+    });
+}
+
+function applyDashboardEditorPreferencesToRenderedView() {
+    applyDashboardEditorPreferences();
+}
+
+function initDashboardEditor() {
+    const openButton = document.getElementById('dash-customize-btn');
+    const modal = document.getElementById('dashboard-editor-modal');
+    const body = document.getElementById('dashboard-editor-body');
+
+    openButton?.addEventListener('click', openDashboardEditor);
+    document.getElementById('dashboard-editor-close')?.addEventListener('click', closeDashboardEditor);
+    document.getElementById('dashboard-editor-cancel')?.addEventListener('click', closeDashboardEditor);
+    modal?.addEventListener('click', event => {
+        if (event.target.matches('[data-dashboard-editor-close="1"]')) closeDashboardEditor();
+    });
+
+    body?.addEventListener('change', event => {
+        const input = event.target.closest('[data-editor-visible]');
+        if (!input || !dashboardEditorDraft) return;
+        const key = input.dataset.editorVisible;
+        const id = input.dataset.editorId;
+        if (!['hiddenTiles', 'hiddenSections'].includes(key)) return;
+
+        if (input.checked) {
+            dashboardEditorDraft[key] = dashboardEditorDraft[key].filter(item => item !== id);
+        } else if (!dashboardEditorDraft[key].includes(id)) {
+            dashboardEditorDraft[key].push(id);
+        }
+    });
+
+    body?.addEventListener('click', event => {
+        const button = event.target.closest('[data-editor-move]');
+        if (!button || button.disabled || !dashboardEditorDraft) return;
+        const key = button.dataset.editorMove;
+        const id = button.dataset.editorId;
+        const direction = Number(button.dataset.editorDirection);
+        if (!['tileOrder', 'sectionOrder'].includes(key)) return;
+        moveDashboardEditorItem(dashboardEditorDraft[key], id, direction);
+        renderDashboardEditor();
+    });
+
+    document.getElementById('dashboard-editor-reset')?.addEventListener('click', () => {
+        dashboardEditorDraft = getDefaultDashboardEditorPreferences();
+        renderDashboardEditor();
+    });
+
+    document.getElementById('dashboard-editor-save')?.addEventListener('click', () => {
+        if (!dashboardEditorDraft) return;
+        appStorage.set('dashboardPreferences', normalizeDashboardEditorPreferences(dashboardEditorDraft));
+        closeDashboardEditor();
+        renderDashboard();
+    });
+}
+
 function renderDashboard() {
     const allTours   = appStorage.get('touren')       || [];
     const allPlanned = appStorage.get('plannedTours') || [];
@@ -20092,61 +20334,56 @@ function quickStats(tours) {
         const yearFilterWrap =
             document.querySelector('.dash-year-filter-wrap');
 
-        /*
-         * Die beim vorherigen Rendern nach oben verschobene
-         * Touren-Kachel entfernen.
-         *
-         * Dadurch bleibt beim erneuten renderDashboard()
-         * niemals eine alte Kachel übrig.
-         */
+        const dashboardPreferences = getDashboardEditorPreferences();
+
+        // Entferne die bisher oben neben der Jahresauswahl platzierte Touren-Kachel,
+        // damit renderDashboard() sie unabhängig von den gespeicherten Einstellungen neu aufbauen kann.
         yearFilterWrap
             ?.querySelectorAll('[data-tile-type="touren"]')
             .forEach(tile => tile.remove());
 
-        /*
-         * Dashboard-Kacheln wie bisher neu erzeugen.
-         * Die Touren-Kachel erhält ihren Wert weiterhin aus:
-         *
-         *     stats.count
-         */
-        statGrid.innerHTML = tiles.map(t => `
-            <div
-                class="dash-stat-tile"
-                data-tile-type="${t.type}"
-                style="cursor:pointer;">
-
-                <span class="dash-stat-icon">${t.icon}</span>
-
+        const renderTile = tile => `
+            <div class="dash-stat-tile" data-tile-type="${tile.type}" style="cursor:pointer;">
+                <span class="dash-stat-icon">${tile.icon}</span>
                 <div class="dash-stat-texts">
-                    <span class="dash-stat-value">${t.value}</span>
-                    <span class="dash-stat-label">${t.label}</span>
+                    <span class="dash-stat-value">${tile.value}</span>
+                    <span class="dash-stat-label">${tile.label}</span>
                 </div>
             </div>
-        `).join('');
+        `;
 
-        /*
-         * Klick-Handler setzen, solange alle neuen Kacheln
-         * noch in statGrid liegen.
-         */
+        const tileById = new Map(tiles.map(tile => [tile.type, tile]));
+        const isTileVisible = id => !dashboardPreferences.hiddenTiles.includes(id);
+        const orderedGridTiles = dashboardPreferences.tileOrder
+            .map(id => tileById.get(id))
+            .filter(tile => tile && isTileVisible(tile.type));
+
+        statGrid.innerHTML = orderedGridTiles.map(renderTile).join('');
+        statGrid.style.display = orderedGridTiles.length ? '' : 'none';
+
         statGrid
             .querySelectorAll('[data-tile-type]')
             .forEach(tile => {
                 tile.addEventListener('click', () => {
-                    openDashStatModal(
-                        tile.dataset.tileType,
-                        filteredForYear
-                    );
+                    openDashStatModal(tile.dataset.tileType, filteredForYear);
                 });
             });
 
-        /*
-         * Danach dieselbe bereits erzeugte Touren-Kachel
-         * lediglich verschieben – nicht neu erzeugen.
-         */
-        const tourTile =
-            statGrid.querySelector('[data-tile-type="touren"]');
-
-        if (tourTile && yearFilterWrap) {
+        // Die Touren-Kachel bleibt neben dem Jahresfilter, kann aber ausgeblendet werden.
+        const tourTileData = tileById.get('touren');
+        if (tourTileData && yearFilterWrap && isTileVisible('touren')) {
+            const tourTile = document.createElement('div');
+            tourTile.className = 'dash-stat-tile';
+            tourTile.dataset.tileType = 'touren';
+            tourTile.style.cursor = 'pointer';
+            tourTile.innerHTML = `
+                <span class="dash-stat-icon">${tourTileData.icon}</span>
+                <div class="dash-stat-texts">
+                    <span class="dash-stat-value">${tourTileData.value}</span>
+                    <span class="dash-stat-label">${tourTileData.label}</span>
+                </div>
+            `;
+            tourTile.addEventListener('click', () => openDashStatModal('touren', filteredForYear));
             yearFilterWrap.appendChild(tourTile);
         }
     }
@@ -20403,6 +20640,7 @@ ${msTileHTML('steps')}
      * nachdem das Dashboard vollständig gerendert wurde.
      */
 
+    applyDashboardEditorPreferencesToRenderedView();
     markDerivedViewClean('dashboard');
 }
 
