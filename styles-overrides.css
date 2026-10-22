@@ -4022,6 +4022,16 @@ body.summit .plan-season-card {
     cursor: pointer;
 }
 
+.theme-editor-app-brightness-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    background: #000;
+    opacity: 0;
+    transition: opacity 0.18s ease, background-color 0.18s ease;
+}
+
 .theme-editor-brightness-layer {
     position: fixed;
     inset: 0;
