@@ -2,7 +2,7 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261022-year-ascent-donut-theme-colors') return;
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261022-app-brightness-shared-chart-palette') return;
     window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261022-year-ascent-donut';
     window.__BERGWELT_MODULE_READY__ = true;
 
@@ -264,7 +264,7 @@
                     const innerStart = donutPoint(68, startAngle);
                     const largeArc = endAngle - startAngle > Math.PI ? 1 : 0;
                     const isSelected = selectedYear !== 'all' && item.year !== null && item.year === selectedYear;
-                    const fillOpacity = isSelected ? '1' : (0.18 + (index % 5) * 0.045).toFixed(2);
+                    const fillOpacity = '1';
                     const path = 'M ' + outerStart.x.toFixed(3) + ' ' + outerStart.y.toFixed(3) +
                         ' A 104 104 0 ' + largeArc + ' 1 ' + outerEnd.x.toFixed(3) + ' ' + outerEnd.y.toFixed(3) +
                         ' L ' + innerEnd.x.toFixed(3) + ' ' + innerEnd.y.toFixed(3) +
@@ -274,7 +274,7 @@
                         : ' data-bergwelt-year-segment="' + item.year + '" role="button" tabindex="0" aria-pressed="' + isSelected + '" aria-label="Jahr ' + item.year + ', ' + fmt(item.ascent) + ' Höhenmeter. Antippen, um das Jahr auszuwählen"';
                     return '<path class="bergwelt-height-years-segment' + (isSelected ? ' is-selected' : '') + '"' +
                         yearAttributes +
-                        ' d="' + path + '" fill="' + (isSelected ? 'var(--accent-color, currentColor)' : 'currentColor') + '" fill-opacity="' + fillOpacity + '"></path>';
+                        ' d="' + path + '" fill="' + (isSelected ? 'var(--height-chart-accent, var(--accent-color, currentColor))' : 'var(--height-chart-rest, currentColor)') + '" fill-opacity="' + fillOpacity + '"></path>';
                 }).join('');
             })()
             : '';
