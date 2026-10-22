@@ -11856,8 +11856,14 @@ input[data-height] {
 
 
 #app-view
-.form-section-title:first-child {
+.save-form-left > .form-section-title:first-child {
     margin-top: 0;
+}
+
+/* Weitere Angaben folgt im mobilen Layout auf den linken Formularbereich. */
+#app-view
+.save-form-right > .form-section-title:first-child {
+    margin-top: 8px;
 }
 
 
