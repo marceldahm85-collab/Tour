@@ -6955,6 +6955,12 @@ function formatStageValueForType(e, type) {
             return e.aufstieg ? e.aufstieg + ' hm' : '–';
         case 'gehzeit':
             return e.zeit ? e.zeit + ' h' : '–';
+        case 'steps': {
+            const steps = Number(calculateEntrySteps(e)) || 0;
+            return steps > 0
+                ? Math.round(steps).toLocaleString('de-AT') + ' Schritte'
+                : '–';
+        }
         case 'speed': {
             const d = parseFloat(String(e.strecke || '').replace(',', '.')) || 0;
             if (!e.zeit || !e.zeit.includes(':')) return '–';
