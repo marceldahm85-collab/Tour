@@ -20080,7 +20080,8 @@ function renderDashboardEditor() {
         .filter(Boolean);
 
     body.innerHTML = `
-        <p class="dashboard-editor-intro">Lege fest, was auf deinem Dashboard sichtbar ist und welche Kennzahlen zuerst erscheinen. Deine Auswahl bleibt auf diesem Gerät gespeichert.</p>
+        <p class="dashboard-editor-intro">Wähle aus, welche Kennzahlen und Bereiche auf deinem Dashboard erscheinen und ordne sie nach deinen Prioritäten. Die Änderungen werden erst mit „Übernehmen“ gespeichert.</p>
+
         <section class="dashboard-editor-group">
             <h3 class="dashboard-editor-group-title">Statistik-Kacheln</h3>
             <div class="dashboard-editor-list">
@@ -20093,6 +20094,7 @@ function renderDashboardEditor() {
                 )}
             </div>
         </section>
+
         <section class="dashboard-editor-group">
             <h3 class="dashboard-editor-group-title">Dashboard-Bereiche</h3>
             <div class="dashboard-editor-list">
@@ -20104,29 +20106,13 @@ function renderDashboardEditor() {
                 )}
             </div>
         </section>
+
+        <div class="dashboard-editor-actions">
+            <button type="button" class="save-btn dashboard-editor-secondary" id="dashboard-editor-reset">Standard</button>
+            <button type="button" class="save-btn dashboard-editor-secondary" id="dashboard-editor-cancel">Verwerfen</button>
+            <button type="button" class="save-btn" id="dashboard-editor-save">Übernehmen</button>
+        </div>
     `;
-}
-
-function openDashboardEditor() {
-    const modal = document.getElementById('dashboard-editor-modal');
-    if (!modal) return;
-    dashboardEditorDraft = normalizeDashboardEditorPreferences(getDashboardEditorPreferences());
-    renderDashboardEditor();
-    modal.setAttribute('aria-hidden', 'false');
-    modal.classList.remove('hidden');
-    document.body.classList.add('modal-open');
-}
-
-function closeDashboardEditor() {
-    const modal = document.getElementById('dashboard-editor-modal');
-    if (!modal) return;
-    modal.classList.add('hidden');
-    modal.setAttribute('aria-hidden', 'true');
-    dashboardEditorDraft = null;
-    const otherVisibleModal = document.querySelector(
-        '.modal:not(.hidden), .image-lightbox:not(.hidden), [role="dialog"][aria-modal="true"]:not(.hidden)'
-    );
-    if (!otherVisibleModal) document.body.classList.remove('modal-open');
 }
 
 function applyDashboardEditorPreferences() {
@@ -20154,20 +20140,29 @@ function applyDashboardEditorPreferencesToRenderedView() {
 }
 
 function initDashboardEditor() {
-    const openButton = document.getElementById('dash-customize-btn');
-    const modal = document.getElementById('dashboard-editor-modal');
+    const accordion = document.querySelector(
+        '#theme-view details[data-theme-editor-accordion="dashboard"]'
+    );
     const body = document.getElementById('dashboard-editor-body');
+    if (!accordion || !body) return;
 
-    openButton?.addEventListener('click', openDashboardEditor);
-    document.getElementById('dashboard-editor-close')?.addEventListener('click', closeDashboardEditor);
-    document.getElementById('dashboard-editor-cancel')?.addEventListener('click', closeDashboardEditor);
-    modal?.addEventListener('click', event => {
-        if (event.target.matches('[data-dashboard-editor-close="1"]')) closeDashboardEditor();
+    accordion.addEventListener('toggle', () => {
+        if (accordion.open) {
+            // Jede Öffnung beginnt mit den zuletzt gespeicherten Einstellungen.
+            dashboardEditorDraft = normalizeDashboardEditorPreferences(
+                getDashboardEditorPreferences()
+            );
+            renderDashboardEditor();
+        } else {
+            // Nicht gespeicherte Änderungen beim Schließen verwerfen.
+            dashboardEditorDraft = null;
+        }
     });
 
-    body?.addEventListener('change', event => {
+    body.addEventListener('change', event => {
         const input = event.target.closest('[data-editor-visible]');
         if (!input || !dashboardEditorDraft) return;
+
         const key = input.dataset.editorVisible;
         const id = input.dataset.editorId;
         if (!['hiddenTiles', 'hiddenSections'].includes(key)) return;
@@ -20179,27 +20174,47 @@ function initDashboardEditor() {
         }
     });
 
-    body?.addEventListener('click', event => {
-        const button = event.target.closest('[data-editor-move]');
-        if (!button || button.disabled || !dashboardEditorDraft) return;
-        const key = button.dataset.editorMove;
-        const id = button.dataset.editorId;
-        const direction = Number(button.dataset.editorDirection);
+    body.addEventListener('click', event => {
+        const button = event.target.closest('button');
+        if (!button || !dashboardEditorDraft) return;
+
+        if (button.id === 'dashboard-editor-reset') {
+            dashboardEditorDraft = getDefaultDashboardEditorPreferences();
+            renderDashboardEditor();
+            return;
+        }
+
+        if (button.id === 'dashboard-editor-cancel') {
+            dashboardEditorDraft = normalizeDashboardEditorPreferences(
+                getDashboardEditorPreferences()
+            );
+            renderDashboardEditor();
+            return;
+        }
+
+        if (button.id === 'dashboard-editor-save') {
+            appStorage.set(
+                'dashboardPreferences',
+                normalizeDashboardEditorPreferences(dashboardEditorDraft)
+            );
+            renderDashboard();
+            dashboardEditorDraft = normalizeDashboardEditorPreferences(
+                getDashboardEditorPreferences()
+            );
+            renderDashboardEditor();
+            return;
+        }
+
+        const moveButton = button.closest('[data-editor-move]');
+        if (!moveButton || moveButton.disabled) return;
+
+        const key = moveButton.dataset.editorMove;
+        const id = moveButton.dataset.editorId;
+        const direction = Number(moveButton.dataset.editorDirection);
         if (!['tileOrder', 'sectionOrder'].includes(key)) return;
+
         moveDashboardEditorItem(dashboardEditorDraft[key], id, direction);
         renderDashboardEditor();
-    });
-
-    document.getElementById('dashboard-editor-reset')?.addEventListener('click', () => {
-        dashboardEditorDraft = getDefaultDashboardEditorPreferences();
-        renderDashboardEditor();
-    });
-
-    document.getElementById('dashboard-editor-save')?.addEventListener('click', () => {
-        if (!dashboardEditorDraft) return;
-        appStorage.set('dashboardPreferences', normalizeDashboardEditorPreferences(dashboardEditorDraft));
-        closeDashboardEditor();
-        renderDashboard();
     });
 }
 
