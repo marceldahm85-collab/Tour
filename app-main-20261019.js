@@ -35118,23 +35118,7 @@ function toggleWrappedFullscreen() {
     const el = document.getElementById('wrapped-view');
     if (!el || !document.getElementById('bergwelt-tabs')?.querySelector('[data-bergwelt-tab="erlebnis"]')?.classList.contains('is-active')) return;
 
-    const browserFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
-    const cssFullscreenActive = el.classList.contains('wrapped-mobile-fullscreen');
-
-    // Falls ein älterer Zustand oder ein externer Auslöser echtes Browser-Vollbild
-    // aktiviert hat, dieses nur beenden. Die Bergwelt startet es selbst nicht mehr.
-    if (browserFullscreen) {
-        wrappedFullscreenFallbackActive = false;
-        clearTimeout(wrappedFullscreenHideTimer);
-        if (document.exitFullscreen && document.fullscreenElement) {
-            document.exitFullscreen().catch(() => {});
-        } else if (document.webkitExitFullscreen && document.webkitFullscreenElement) {
-            document.webkitExitFullscreen();
-        }
-        return;
-    }
-
-    if (cssFullscreenActive) {
+    if (el.classList.contains('wrapped-mobile-fullscreen')) {
         wrappedFullscreenFallbackActive = false;
         clearTimeout(wrappedFullscreenHideTimer);
         el.classList.remove('wrapped-mobile-fullscreen', 'wrapped-controls-hidden', 'wrapped-is-fullscreen');
@@ -35143,9 +35127,9 @@ function toggleWrappedFullscreen() {
         return;
     }
 
-    // Bewusst ausschließlich app-interner CSS-Vollbildmodus.
-    // Die Fullscreen API wird nicht aufgerufen, da Chrome sonst eine
-    // nicht unterdrückbare Systemmeldung zum Beenden einblendet.
+    // Ausschließlich app-interner CSS-Vollbildmodus.
+    // Die Fullscreen API wird für die Bergwelt bewusst nicht verwendet,
+    // damit Chrome keine eigene Meldung zum Verlassen des Vollbilds einblendet.
     wrappedFullscreenFallbackActive = true;
     el.classList.add('wrapped-mobile-fullscreen');
     el.classList.remove('wrapped-controls-hidden');
@@ -35158,12 +35142,6 @@ function exitWrappedFullscreenIfActive() {
     const el = document.getElementById('wrapped-view');
     clearTimeout(wrappedFullscreenHideTimer);
     wrappedFullscreenFallbackActive = false;
-    const browserFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
-    if (browserFullscreen) {
-        if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
-        else if (document.webkitFullscreenElement && document.webkitExitFullscreen) document.webkitExitFullscreen();
-        return;
-    }
     el?.classList.remove('wrapped-mobile-fullscreen', 'wrapped-controls-hidden', 'wrapped-is-fullscreen');
     document.body.classList.remove('wrapped-mobile-fullscreen-active');
     updateWrappedFullscreenState();
@@ -35172,9 +35150,7 @@ function exitWrappedFullscreenIfActive() {
 function updateWrappedFullscreenState() {
     const el = document.getElementById('wrapped-view');
     const btn = document.getElementById('wrapped-fullscreen-btn');
-    const browserFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
-    const cssFullscreen = !!(wrappedFullscreenFallbackActive && el?.classList.contains('wrapped-mobile-fullscreen'));
-    const isFullscreen = browserFullscreen || cssFullscreen;
+    const isFullscreen = !!(wrappedFullscreenFallbackActive && el?.classList.contains('wrapped-mobile-fullscreen'));
 
     el?.classList.toggle('wrapped-is-fullscreen', isFullscreen);
     if (btn) btn.textContent = isFullscreen ? '✕' : '⛶';
@@ -35183,15 +35159,8 @@ function updateWrappedFullscreenState() {
         el?.classList.remove('wrapped-controls-hidden', 'wrapped-mobile-fullscreen');
         document.body.classList.remove('wrapped-mobile-fullscreen-active');
         wrappedFullscreenFallbackActive = false;
-    } else if (isWrappedMobileFullscreen()) {
-        el?.classList.add('wrapped-mobile-fullscreen');
-        document.body.classList.add('wrapped-mobile-fullscreen-active');
-        scheduleWrappedFullscreenControlsHide();
     }
 }
-
-document.addEventListener('fullscreenchange', updateWrappedFullscreenState);
-document.addEventListener('webkitfullscreenchange', updateWrappedFullscreenState);
 
 // Im mobilen Vollbildmodus zeigt die erste Berührung nur die Bedienelemente;
 // der dabei vom Browser nachgelieferte click darf keine Folie wechseln.
