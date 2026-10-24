@@ -22656,7 +22656,7 @@ const THEME_EDITOR_SOFT_SELECTORS = [
     '#filter-view input:not([type="checkbox"])', '#filter-view select', '#filter-view textarea',
     '.mob-sel-btn', '.dash-year-filter-wrap select', '.dash-year-filter-wrap .mob-sel-btn',
     '.dash-year-filter-wrap .dash-year-arrow-btn',
-    '.chart-tabs', '.stats-section-btn',
+    '.top-main-nav', '.chart-tabs', '.stats-section-btn',
     '.filter-section-nav-btn', '.plan-section-btn', '.map-mode-toggle', '.map-mode-btn',
     '.quick-filter-btn', '.tour-page-btn', '.yc-metric-btn', '.yc-year-toggle-btn',
     '.compare-mode-toggle', '.compare-mode-btn', '.checklist-mode-toggle', '.checklist-mode-btn',
@@ -22839,15 +22839,19 @@ function buildThemeEditorLiveCss() {
         css += `${prefix} #chart-tabs .tab-sliding-highlight { background: var(--accent-gradient) !important; border-radius: ${softRadius}px !important; }\n`;
         css += `${prefix} #wrapped-view .bergwelt-tab.is-active { background: var(--accent-gradient) !important; color: var(--accent-text-color, var(--text-main)) !important; border-color: var(--accent) !important; }\n`;
 
-        /* Kein Sammel-Hintergrund für die Hauptnavigation: Buttons bleiben einzeln gestaltet. */
-        css += `${prefix} .top-main-nav { background: transparent !important; background-image: none !important; border: 0 !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }\n`;
+        const navGradient = themeEditorBuildGradient({
+            ...settings,
+            topColor: settings.navTopColor || settings.topColor,
+            bottomColor: settings.navBottomColor || settings.bottomColor
+        }, settings.intensity);
+        css += `${prefix} .top-main-nav { background: ${navGradient} !important; }\n`;
 
+        /* Den durchgehenden Balken nicht auf .accordion-header legen. */
         css += `@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {\n`;
-        css += `${prefix} .accordion-header { background: ${bigGradient} !important; }\n`;
+        css += `${prefix} .accordion-header { background: transparent !important; background-image: none !important; }\n`;
         css += `}\n`;
-
         css += `@media (max-width: 768px) and (orientation: portrait) and (pointer: coarse) {\n`;
-        css += `${prefix} .accordion-header { background: ${bigGradient} !important; }\n`;
+        css += `${prefix} .accordion-header { background: transparent !important; background-image: none !important; }\n`;
         css += `}\n`;
     });
 
