@@ -20374,25 +20374,7 @@ body:not(.dark):not(.green):not(.summit) {
     --light-nav-text: #12382c;
 }
 
-/* ---------------------------------------------------------
-   Stats: Jahressteuerung und seitliche Bereichsnavigation
-   --------------------------------------------------------- */
-
-body:not(.dark):not(.green):not(.summit)
-#chart-view .stats-year-filter-wrap,
-body:not(.dark):not(.green):not(.summit)
-#chart-view .stats-section-switch {
-    background:
-        linear-gradient(
-            180deg,
-            var(--light-nav-top) 0%,
-            var(--light-nav-bottom) 100%
-        ) !important;
-
-    border: 1px solid var(--light-nav-border) !important;
-    border-radius: 12px !important;
-    padding: 5px !important;
-}
+/* Stats-Wrapper-Flächen werden zentral in styles-overrides.css neutralisiert. */
 
 /* Falls die Navigation selbst keine eigene Fläche besitzt,
    bekommen die einzelnen Schaltflächen trotzdem Farbe. */
