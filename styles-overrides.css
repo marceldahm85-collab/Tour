@@ -7421,3 +7421,108 @@ body.summit {
 @media (prefers-reduced-motion: reduce) {
     body .parallax, body .leaves-layer { animation: none !important; }
 }
+
+
+/* Alpine background correction: image belongs to each scrolling view,
+   not to the fixed viewport/body. The hiker image is framed toward the right
+   with the sunlit valley visible, closer to the supplied Bergwelt reference. */
+body {
+    background-color: var(--alpine-background, #10201e) !important;
+    background-image: none !important;
+    background-attachment: scroll !important;
+}
+body.dark,
+body.green,
+body.summit {
+    background-color: var(--alpine-background) !important;
+    background-image: none !important;
+    background-attachment: scroll !important;
+}
+#dashboard-view,
+#app-view,
+#chart-view,
+#tour-view,
+#map-view,
+#filter-view,
+#backup-view,
+#theme-view,
+#achievements-view,
+#wrapped-view {
+    background-color: var(--alpine-background, #10201e) !important;
+    background-image:
+        linear-gradient(180deg,
+            rgba(2, 11, 16, .02) 0%,
+            rgba(2, 14, 18, .08) 14%,
+            rgba(2, 17, 20, .34) 30%,
+            rgba(3, 24, 24, .76) 53%,
+            rgba(3, 24, 24, .95) 76%,
+            var(--alpine-background, #10201e) 100%),
+        linear-gradient(90deg, rgba(1, 10, 15, .24), transparent 82%),
+        url("https://www.news.uzh.ch/dam/jcr%3A31d6c4e7-f62d-4d47-b561-c34bcc92a461/uzh_news_1680.jpg") !important;
+    background-repeat: no-repeat !important;
+    background-size: 100% 100%, 100% 100%, 100% auto !important;
+    background-position: center top, center top, 58% top !important;
+    background-attachment: scroll !important;
+}
+body.dark #dashboard-view,
+body.dark #app-view,
+body.dark #chart-view,
+body.dark #tour-view,
+body.dark #map-view,
+body.dark #filter-view,
+body.dark #backup-view,
+body.dark #theme-view,
+body.dark #achievements-view,
+body.dark #wrapped-view {
+    background-image:
+        linear-gradient(180deg, rgba(8, 5, 10, .08) 0%, rgba(20, 8, 11, .20) 20%, rgba(28, 9, 12, .64) 48%, rgba(28, 9, 12, .93) 75%, var(--alpine-background) 100%),
+        linear-gradient(90deg, rgba(8, 6, 10, .34), transparent 82%),
+        url("https://www.news.uzh.ch/dam/jcr%3A31d6c4e7-f62d-4d47-b561-c34bcc92a461/uzh_news_1680.jpg") !important;
+}
+body.green #dashboard-view,
+body.green #app-view,
+body.green #chart-view,
+body.green #tour-view,
+body.green #map-view,
+body.green #filter-view,
+body.green #backup-view,
+body.green #theme-view,
+body.green #achievements-view,
+body.green #wrapped-view {
+    background-image:
+        linear-gradient(180deg, rgba(2, 13, 14, .02) 0%, rgba(2, 19, 17, .18) 20%, rgba(3, 31, 24, .58) 48%, rgba(3, 37, 27, .92) 75%, var(--alpine-background) 100%),
+        linear-gradient(90deg, rgba(1, 13, 12, .24), transparent 82%),
+        url("https://www.news.uzh.ch/dam/jcr%3A31d6c4e7-f62d-4d47-b561-c34bcc92a461/uzh_news_1680.jpg") !important;
+}
+body.summit #dashboard-view,
+body.summit #app-view,
+body.summit #chart-view,
+body.summit #tour-view,
+body.summit #map-view,
+body.summit #filter-view,
+body.summit #backup-view,
+body.summit #theme-view,
+body.summit #achievements-view,
+body.summit #wrapped-view {
+    background-image:
+        linear-gradient(180deg, rgba(4, 11, 22, .05) 0%, rgba(7, 17, 31, .24) 22%, rgba(9, 24, 42, .68) 50%, rgba(9, 24, 42, .94) 76%, var(--alpine-background) 100%),
+        linear-gradient(90deg, rgba(3, 10, 20, .30), transparent 82%),
+        url("https://www.news.uzh.ch/dam/jcr%3A31d6c4e7-f62d-4d47-b561-c34bcc92a461/uzh_news_1680.jpg") !important;
+}
+@media (max-width: 700px) {
+    #dashboard-view,
+    #app-view,
+    #chart-view,
+    #tour-view,
+    #map-view,
+    #filter-view,
+    #backup-view,
+    #theme-view,
+    #achievements-view,
+    #wrapped-view {
+        background-size: 100% 100%, 100% 100%, auto 62vh !important;
+        background-position: center top, center top, 62% top !important;
+        background-repeat: no-repeat !important;
+        background-attachment: scroll !important;
+    }
+}
