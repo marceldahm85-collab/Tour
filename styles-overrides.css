@@ -7110,12 +7110,8 @@ body.summit {
     box-shadow: inset 0 -2px 0 var(--accent) !important;
 }
 
-/* Light: kein zusätzlicher Rahmen um die Jahresauswahl. */
-body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap select,
-body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap .mob-sel-btn {
-    border-color: transparent !important;
-    box-shadow: none !important;
-}
+/* Keine Light-Sonderregel für einzelne Jahres-Controls:
+   Border und Schatten kommen einheitlich aus den Theme-Variablen in styles.css. */
 
 /* STATS – letzte Korrektur: Light-Steuerungen auf dieselbe Höhe bringen
    und die Fremdfläche hinter den fünf Bereichsbuttons themeübergreifend entfernen. */
