@@ -549,16 +549,35 @@ function getWrappedThemeColors() {
     return palettes[theme] || palettes.light;
 }
 
-function drawWrappedBackground(ctx, w, h, photoImg) {
+// Cinematic alpine fallback: echte Bergfotografie für die Einstiegskarte.
+const WRAPPED_ALPINE_HERO_URL = 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=82';
+let wrappedAlpineHeroImage = null;
+let wrappedAlpineHeroLoading = false;
+function ensureWrappedAlpineHero() {
+    if (wrappedAlpineHeroImage || wrappedAlpineHeroLoading || typeof Image === 'undefined') return;
+    wrappedAlpineHeroLoading = true;
+    const image = new Image();
+    image.crossOrigin = 'anonymous';
+    image.onload = () => {
+        wrappedAlpineHeroImage = image;
+        wrappedAlpineHeroLoading = false;
+        // Aktualisiert nur die aktuell sichtbare Einstiegsfolie nach dem Laden.
+        if (wrappedSlides?.[wrappedSlideIndex]?.key === 'intro') renderWrappedSlide(wrappedSlideIndex);
+    };
+    image.onerror = () => { wrappedAlpineHeroLoading = false; };
+    image.src = WRAPPED_ALPINE_HERO_URL;
+}
+function drawWrappedBackground(ctx, w, h, photoImg, slideKey) {
     const colors = getWrappedThemeColors();
+    const heroImage = photoImg || (slideKey === 'intro' ? wrappedAlpineHeroImage : null);
+    if (!photoImg && slideKey === 'intro' && !wrappedAlpineHeroImage) ensureWrappedAlpineHero();
 
-    if (photoImg) {
-        drawWrappedCoverImage(ctx, photoImg, w, h);
-
+    if (heroImage) {
+        drawWrappedCoverImage(ctx, heroImage, w, h);
         const overlay = ctx.createLinearGradient(0, 0, 0, h);
-        overlay.addColorStop(0, 'rgba(0,0,0,0.55)');
-        overlay.addColorStop(0.5, 'rgba(0,0,0,0.30)');
-        overlay.addColorStop(1, 'rgba(0,0,0,0.65)');
+        overlay.addColorStop(0, 'rgba(5,12,18,0.30)');
+        overlay.addColorStop(0.42, 'rgba(5,12,18,0.22)');
+        overlay.addColorStop(1, 'rgba(3,8,12,0.82)');
         ctx.fillStyle = overlay;
         ctx.fillRect(0, 0, w, h);
     } else {
@@ -568,7 +587,6 @@ function drawWrappedBackground(ctx, w, h, photoImg) {
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, w, h);
     }
-
     return colors;
 }
 
@@ -680,7 +698,7 @@ function renderWrappedSlide(index) {
     const slide = wrappedSlides[index];
     if (!slide) return;
 
-    const colors = drawWrappedBackground(ctx, w, h, slide.photoImg || null);
+    const colors = drawWrappedBackground(ctx, w, h, slide.photoImg || null, slide.key);
 
     switch (slide.key) {
         case 'intro': renderWrappedIntroSlide(ctx, w, h, colors, slide.data); break;
@@ -702,12 +720,72 @@ function renderWrappedSlide(index) {
 }
 
 function renderWrappedIntroSlide(ctx, w, h, colors, data) {
-    drawWrappedCenteredTitle(ctx, `Dein Jahr ${data.year}`, 400, 90, colors.text, w);
-    drawWrappedBigNumber(ctx, data.tourCount, 'Touren', 900, colors.text, w);
-    setWrappedFont(ctx, 42);
-    ctx.fillStyle = colors.text;
+    // Filmischer Titelaufbau mit goldener Kontur und dezentem Bergsteiger-Emblem.
+    const center = w / 2;
+    const accent = '#e7bd61';
+    ctx.save();
     ctx.textAlign = 'center';
-    ctx.fillText('Stolzer Blick zurück... 🏔️', w / 2, 1050);
+    ctx.shadowColor = 'rgba(0,0,0,0.48)';
+    ctx.shadowBlur = 24;
+    ctx.fillStyle = 'rgba(8,16,20,0.38)';
+    ctx.beginPath();
+    ctx.roundRect(w * 0.10, h * 0.19, w * 0.80, h * 0.49, 38);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(231,189,97,0.55)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(w * 0.10, h * 0.19, w * 0.80, h * 0.49, 38);
+    ctx.stroke();
+
+    // Eigenständiges, vektorisiertes Gipfelabzeichen.
+    const badgeY = h * 0.285;
+    const radius = 76;
+    const gradient = ctx.createLinearGradient(center-radius, badgeY-radius, center+radius, badgeY+radius);
+    gradient.addColorStop(0, '#fff0b2');
+    gradient.addColorStop(0.5, '#d9a441');
+    gradient.addColorStop(1, '#80521c');
+    ctx.fillStyle = 'rgba(7,15,19,0.72)';
+    ctx.beginPath(); ctx.arc(center, badgeY, radius+8, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = accent; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(center, badgeY, radius+8, 0, Math.PI*2); ctx.stroke();
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.moveTo(center-radius*0.72, badgeY+radius*0.42);
+    ctx.lineTo(center-radius*0.18, badgeY-radius*0.45);
+    ctx.lineTo(center+radius*0.10, badgeY-radius*0.05);
+    ctx.lineTo(center+radius*0.40, badgeY-radius*0.58);
+    ctx.lineTo(center+radius*0.78, badgeY+radius*0.42);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#fff9e8';
+    ctx.beginPath();
+    ctx.moveTo(center-radius*0.18, badgeY-radius*0.45);
+    ctx.lineTo(center-radius*0.03, badgeY-radius*0.20);
+    ctx.lineTo(center+radius*0.10, badgeY-radius*0.05);
+    ctx.lineTo(center+radius*0.01, badgeY-radius*0.16);
+    ctx.lineTo(center-radius*0.10, badgeY-radius*0.10);
+    ctx.closePath(); ctx.fill();
+
+    setWrappedFont(ctx, 32, 'bold');
+    ctx.fillStyle = accent;
+    ctx.fillText('DEIN ALPINES JAHR', center, h*0.405);
+    setWrappedFont(ctx, 100, 'bold');
+    ctx.fillStyle = '#fffaf0';
+    ctx.fillText(String(data.year), center, h*0.475);
+    ctx.strokeStyle = 'rgba(231,189,97,0.8)';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(w*0.29,h*0.50); ctx.lineTo(w*0.71,h*0.50); ctx.stroke();
+
+    setWrappedFont(ctx, 142, 'bold');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(String(data.tourCount), center, h*0.585);
+    setWrappedFont(ctx, 42, 'normal');
+    ctx.fillStyle = '#f5d88c';
+    ctx.fillText(data.tourCount === 1 ? 'TOUR' : 'TOUREN', center, h*0.625);
+    setWrappedFont(ctx, 34, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.94)';
+    ctx.fillText('Dein Jahr. Deine Gipfel. Deine Geschichte.', center, h*0.725);
+    ctx.restore();
 }
 
 function renderWrappedDistanceSlide(ctx, w, h, colors, data) {
