@@ -7204,3 +7204,50 @@ body:not(.dark):not(.green):not(.summit) #chart-view > #stats-section-switch.sta
     border: 0 !important;
     box-shadow: none !important;
 }
+
+
+/* MAPVIEW – Sammelcontainer und Jahresfilter in allen Themes transparent halten.
+   Die Light-Theme-Regeln haben eine höhere Spezifität als frühere Einzel-Overrides. */
+#map-view .map-view-inner,
+body.dark #map-view .map-view-inner,
+body.green #map-view .map-view-inner,
+body.summit #map-view .map-view-inner,
+body:not(.dark):not(.green):not(.summit) #map-view .map-view-inner {
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-color: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+#map-view .map-view-inner::before,
+#map-view .map-view-inner::after,
+body:not(.dark):not(.green):not(.summit) #map-view .map-view-inner::before,
+body:not(.dark):not(.green):not(.summit) #map-view .map-view-inner::after {
+    content: none !important;
+    display: none !important;
+    background: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Höhere Spezifität und spätere Position überschreiben auch alte Theme-Editor-Regeln. */
+body:not(.dark):not(.green):not(.summit) #map-view > .map-view-inner > .map-year-filter-wrap,
+body.dark #map-view > .map-view-inner > .map-year-filter-wrap,
+body.green #map-view > .map-view-inner > .map-year-filter-wrap,
+body.summit #map-view > .map-view-inner > .map-year-filter-wrap {
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-color: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+    padding: 0 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
