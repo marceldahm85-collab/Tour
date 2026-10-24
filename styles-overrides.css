@@ -7113,36 +7113,15 @@ body.summit {
 /* Keine Light-Sonderregel für einzelne Jahres-Controls:
    Border und Schatten kommen einheitlich aus den Theme-Variablen in styles.css. */
 
-/* STATS – letzte Korrektur: Light-Steuerungen auf dieselbe Höhe bringen
-   und die Fremdfläche hinter den fünf Bereichsbuttons themeübergreifend entfernen. */
+/* STATS – Light verwendet dieselbe mobile Control-Höhe wie die anderen Themes. */
 body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > select,
 body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > .mob-sel-wrap,
 body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > .mob-sel-wrap > .mob-sel-btn,
 body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > .dash-year-arrow-btn {
-    height: 36px !important;
-    min-height: 36px !important;
-    max-height: 36px !important;
+    height: var(--dash-control-height, 41px) !important;
+    min-height: var(--dash-control-height, 41px) !important;
+    max-height: var(--dash-control-height, 41px) !important;
     box-sizing: border-box !important;
-}
-
-body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > .mob-sel-wrap {
-    padding: 0 !important;
-}
-
-body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > .dash-year-arrow-btn {
-    padding: 0 !important;
-    line-height: 1 !important;
-}
-
-@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
-    body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > select,
-    body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > .mob-sel-wrap,
-    body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > .mob-sel-wrap > .mob-sel-btn,
-    body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > .dash-year-arrow-btn {
-        height: 36px !important;
-        min-height: 36px !important;
-        max-height: 36px !important;
-    }
 }
 
 /* Der Switch-Container soll keine eigene Karte mehr bilden – nur die Buttons bleiben sichtbar. */
@@ -7201,6 +7180,3 @@ body:not(.dark):not(.green):not(.summit) #chart-view > #stats-section-switch.sta
 
 
 
-/* Hauptnavigation: nur den durchgehenden Header-Balken entfernen; der abgerundete Container und die Buttons bleiben erhalten. */
-.accordion-header { background: transparent !important; background-image: none !important; }
-.accordion-header::before, .accordion-header::after { background: transparent !important; background-image: none !important; box-shadow: none !important; }
