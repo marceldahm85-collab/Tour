@@ -6707,3 +6707,65 @@ body.green #theme-view .haptic-feedback-toggle {
         margin-top: 8px;
     }
 }
+
+
+/* =========================================================
+   /* PREMIUM ALPINE — zentrale Design-Tokens (Grundlage; noch ohne globale Komponenten-Overrides). */
+   Semantische Design-Grundlage für schrittweise Modernisierung.
+   Diese Variablen ändern allein noch keine bestehenden Komponenten.
+   ========================================================= */
+:root {
+    --premium-surface-1: rgba(255, 255, 255, 0.72);
+    --premium-surface-2: rgba(255, 255, 255, 0.48);
+    --premium-border: rgba(69, 91, 79, 0.16);
+    --premium-border-strong: rgba(69, 91, 79, 0.28);
+    --premium-shadow-card: 0 8px 24px rgba(35, 52, 43, 0.10);
+    --premium-shadow-hover: 0 12px 30px rgba(35, 52, 43, 0.15);
+    --premium-accent-wash: rgba(249, 215, 126, 0.14);
+    --premium-focus-ring: 0 0 0 3px rgba(185, 143, 49, 0.24);
+    --premium-radius-card: 16px;
+    --premium-radius-control: 11px;
+    --premium-card-gap: 12px;
+    --premium-motion-fast: 150ms;
+    --premium-motion-standard: 220ms;
+}
+
+body.dark {
+    --premium-surface-1: rgba(23, 29, 37, 0.88);
+    --premium-surface-2: rgba(30, 37, 47, 0.72);
+    --premium-border: rgba(220, 230, 242, 0.10);
+    --premium-border-strong: rgba(220, 230, 242, 0.18);
+    --premium-shadow-card: 0 10px 28px rgba(0, 0, 0, 0.30);
+    --premium-shadow-hover: 0 14px 34px rgba(0, 0, 0, 0.40);
+    --premium-accent-wash: rgba(122, 13, 13, 0.16);
+    --premium-focus-ring: 0 0 0 3px rgba(173, 66, 66, 0.30);
+}
+
+body.green {
+    --premium-surface-1: rgba(5, 19, 11, 0.88);
+    --premium-surface-2: rgba(10, 30, 19, 0.76);
+    --premium-border: rgba(114, 214, 163, 0.18);
+    --premium-border-strong: rgba(114, 214, 163, 0.34);
+    --premium-shadow-card: 0 10px 28px rgba(0, 0, 0, 0.38);
+    --premium-shadow-hover: 0 14px 34px rgba(0, 0, 0, 0.48);
+    --premium-accent-wash: rgba(82, 183, 136, 0.15);
+    --premium-focus-ring: 0 0 0 3px rgba(114, 214, 163, 0.28);
+}
+
+body.summit {
+    --premium-surface-1: rgba(25, 37, 45, 0.90);
+    --premium-surface-2: rgba(36, 51, 59, 0.78);
+    --premium-border: rgba(210, 232, 245, 0.20);
+    --premium-border-strong: rgba(210, 232, 245, 0.34);
+    --premium-shadow-card: 0 10px 28px rgba(0, 0, 0, 0.30);
+    --premium-shadow-hover: 0 14px 34px rgba(0, 0, 0, 0.40);
+    --premium-accent-wash: rgba(114, 194, 255, 0.15);
+    --premium-focus-ring: 0 0 0 3px rgba(114, 194, 255, 0.28);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --premium-motion-fast: 0ms;
+        --premium-motion-standard: 0ms;
+    }
+}
