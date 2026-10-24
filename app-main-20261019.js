@@ -34907,12 +34907,12 @@ const endHold = () => {
         if (!document.querySelector('link[data-bergwelt-badge-styles="20261022-year-ascent-donut"]')) {
             const styleLink = document.createElement('link');
             styleLink.rel = 'stylesheet';
-            styleLink.href = './bergwelt-badges-20261019.css?v=26';
+            styleLink.href = './bergwelt-badges-20261019.css?v=1';
             styleLink.dataset.bergweltBadgeStyles = '20261022-year-ascent-donut';
             document.head.appendChild(styleLink);
         }
         const script = document.createElement('script');
-        script.src = './bergwelt-badges-20261019.js?v=28';
+        script.src = './bergwelt-badges-20261019.js?v=1';
         script.onload = () => {
             window.__BERGWELT_BADGE_LOADING__ = false;
             window.__BERGWELT_LOADING__ = false;
