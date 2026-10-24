@@ -7634,3 +7634,53 @@ body.summit #wrapped-view {
         background-position: center top, center top, 58% top !important;
     }
 }
+
+
+/* Fixed alpine backdrop: the image stays stationary while app views swipe. */
+body {
+    position: relative;
+    background-color: var(--alpine-background, #10201e) !important;
+    background-image: none !important;
+    background-attachment: fixed !important;
+}
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: var(--alpine-background, #10201e);
+    background-image:
+        linear-gradient(180deg, rgba(3, 12, 16, .05) 0%, rgba(3, 12, 16, .05) 80%, rgba(3, 20, 21, .22) 86%, rgba(3, 25, 24, .54) 91%, rgba(3, 25, 24, .82) 97%, var(--alpine-background, #10201e) 100%),
+        linear-gradient(90deg, rgba(1, 10, 15, .18), transparent 84%),
+        url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2000&q=90");
+    background-repeat: no-repeat;
+    background-position: center top, center top, 58% top;
+    background-size: 100% 100%, 100% 100%, auto 100svh;
+}
+body.dark::before {
+    background-image:
+        linear-gradient(180deg, rgba(7, 5, 10, .06) 0%, rgba(7, 5, 10, .06) 80%, rgba(23, 8, 12, .24) 86%, rgba(28, 9, 13, .56) 91%, rgba(28, 9, 13, .84) 97%, var(--alpine-background, #1c090d) 100%),
+        linear-gradient(90deg, rgba(8, 6, 10, .22), transparent 84%),
+        url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2000&q=90");
+}
+body.green::before {
+    background-image:
+        linear-gradient(180deg, rgba(2, 13, 14, .04) 0%, rgba(2, 13, 14, .04) 80%, rgba(2, 25, 19, .20) 86%, rgba(3, 34, 25, .52) 91%, rgba(3, 37, 27, .82) 97%, var(--alpine-background, #03251b) 100%),
+        linear-gradient(90deg, rgba(1, 13, 12, .18), transparent 84%),
+        url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2000&q=90");
+}
+body.summit::before {
+    background-image:
+        linear-gradient(180deg, rgba(4, 11, 22, .05) 0%, rgba(4, 11, 22, .05) 80%, rgba(7, 17, 31, .24) 86%, rgba(9, 24, 42, .56) 91%, rgba(9, 24, 42, .84) 97%, var(--alpine-background, #09182a) 100%),
+        linear-gradient(90deg, rgba(3, 10, 20, .24), transparent 84%),
+        url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2000&q=90");
+}
+#dashboard-view, #app-view, #chart-view, #tour-view, #map-view,
+#filter-view, #backup-view, #theme-view, #achievements-view, #wrapped-view {
+    background-image: none !important;
+    background-color: transparent !important;
+}
+@media (max-width: 700px) {
+    body::before { background-size: 100% 100%, 100% 100%, auto 100svh; }
+}
