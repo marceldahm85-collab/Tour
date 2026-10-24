@@ -176,16 +176,12 @@
             panel.hidden = true;
             root.classList.remove('bergwelt-mode');
             root.classList.add('bergwelt-story-playing');
-            const back = root.querySelector('[data-back-to-bergwelt]');
-            if (back) back.hidden = false;
             return;
         }
 
         root.classList.remove('bergwelt-story-playing');
         root.classList.add('bergwelt-mode');
         panel.hidden = false;
-        const back = root.querySelector('[data-back-to-bergwelt]');
-        if (back) back.hidden = true;
 
         const entries = yearTours();
         const allEntries = getTours();
@@ -813,17 +809,6 @@
         });
         render();
     });
-    const storyBack = document.createElement('button');
-    storyBack.type = 'button';
-    storyBack.className = 'bergwelt-story-back';
-    storyBack.dataset.backToBergwelt = '';
-    storyBack.textContent = '← Zur Bergwelt';
-    storyBack.hidden = true;
-    storyBack.addEventListener('click', () => {
-        showOriginalStory = false;
-        renderMomente();
-    });
-    root.appendChild(storyBack);
         window.__bergweltRender = render;
     render();
 })();
