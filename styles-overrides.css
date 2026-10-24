@@ -7160,3 +7160,41 @@ body.summit #chart-view .stats-section-switch {
     padding: 0 !important;
 }
 
+/* STATS – harte Bereinigung der äußeren Navigations-Container.
+   Die HTML-Wrapper bleiben für Layout und Bedienlogik bestehen, werden aber
+   in keinem Theme als sichtbare Karte gerendert. */
+#chart-view > .dash-year-filter-wrap.stats-year-filter-wrap,
+#chart-view > #stats-section-switch.stats-section-switch {
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-color: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+    padding: 0 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+#chart-view > .dash-year-filter-wrap.stats-year-filter-wrap::before,
+#chart-view > .dash-year-filter-wrap.stats-year-filter-wrap::after,
+#chart-view > #stats-section-switch.stats-section-switch::before,
+#chart-view > #stats-section-switch.stats-section-switch::after {
+    content: none !important;
+    display: none !important;
+    background: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Light: auch die alten Theme-Regeln dürfen keinen Sammelrahmen erzeugen. */
+body:not(.dark):not(.green):not(.summit) #chart-view > .dash-year-filter-wrap.stats-year-filter-wrap,
+body:not(.dark):not(.green):not(.summit) #chart-view > #stats-section-switch.stats-section-switch {
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
