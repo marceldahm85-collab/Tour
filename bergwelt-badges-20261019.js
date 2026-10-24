@@ -2,8 +2,8 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261024-cinematic-bergwelt-hero') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261024-cinematic-bergwelt-hero';
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261024-cinematic-bergwelt-hero-tab') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261024-cinematic-bergwelt-hero-tab';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
@@ -18,12 +18,13 @@
     }
 
     const tabNames = {
+        bergwelt: 'Bergwelt',
         erlebnis: 'Erlebnis',
         hoehenwelt: 'Höhenwelt',
         level: 'Level',
         tourbuch: 'Tourbuch'
     };
-    let activeTab = 'erlebnis';
+    let activeTab = 'bergwelt';
 
     // Teilen und Vollbild gehören ausschließlich zum Erlebnis-Bereich.
     const shareButton = document.getElementById('wrapped-share-btn');
@@ -741,7 +742,8 @@
         if (staleHeightModal) staleHeightModal.remove();
         if (!document.querySelector('.modal:not(.hidden)')) document.body.classList.remove('modal-open');
         root.classList.toggle('bergwelt-active-tourbuch', activeTab === 'tourbuch');
-        if (activeTab === 'erlebnis') return renderMomente();
+        if (activeTab === 'bergwelt') { showOriginalStory = false; return renderMomente(); }
+        if (activeTab === 'erlebnis') { showOriginalStory = true; return renderMomente(); }
         root.classList.add('bergwelt-mode');
         tourbookPanel.hidden = true;
         panel.hidden = false;
@@ -786,6 +788,7 @@
         const button = event.target.closest('[data-bergwelt-tab]');
         if (!button) return;
         activeTab = button.dataset.bergweltTab;
+        showOriginalStory = activeTab === 'erlebnis';
         syncExperienceActions();
         selectedHeightMilestone = null;
         tabs.querySelectorAll('[data-bergwelt-tab]').forEach(tab => {
@@ -799,11 +802,12 @@
         if (activeTab === 'level' || activeTab === 'hoehenwelt') render();
     });
     document.getElementById('wrapped-toggle')?.addEventListener('click', () => {
-        activeTab = 'erlebnis';
+        activeTab = 'bergwelt';
+        showOriginalStory = false;
         syncExperienceActions();
         selectedHeightMilestone = null;
         tabs.querySelectorAll('[data-bergwelt-tab]').forEach(tab => {
-            const active = tab.dataset.bergweltTab === 'erlebnis';
+            const active = tab.dataset.bergweltTab === 'bergwelt';
             tab.classList.toggle('is-active', active);
             tab.setAttribute('aria-selected', String(active));
         });
