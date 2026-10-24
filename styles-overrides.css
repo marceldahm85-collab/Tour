@@ -6948,3 +6948,43 @@ body.summit {
         transition: none !important;
     }
 }
+
+/* PREMIUM ALPINE — Hauptnavigation: klare Zustände ohne Layoutänderung.
+   Ergänzt die vorhandenen Theme-Regeln; Navigation und View-Logik bleiben unverändert. */
+.top-main-nav .top-nav-btn.view-active,
+.top-main-nav .top-nav-btn.more-view-active {
+    box-shadow:
+        inset 0 0 0 1px var(--premium-border-strong, var(--accent)),
+        0 0 8px var(--premium-accent-wash, transparent);
+}
+
+.top-main-nav .top-nav-btn:focus-visible,
+#more-menu .more-menu-item:focus-visible {
+    position: relative;
+    z-index: 2;
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    body:not(.touch-mode) .top-main-nav .top-nav-btn:not(.view-active):not(.more-view-active):not(.top-nav-save):hover {
+        background: var(--premium-accent-wash, var(--accent-soft));
+    }
+
+    body:not(.touch-mode) #more-menu .more-menu-item:hover {
+        background: var(--premium-accent-wash, var(--accent-soft));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .top-main-nav .top-nav-btn,
+    .top-main-nav .more-dot,
+    #more-menu .more-menu-item {
+        transition: none !important;
+    }
+
+    .top-main-nav .top-nav-btn:active,
+    .top-main-nav .top-nav-save:active {
+        transform: none !important;
+    }
+}
