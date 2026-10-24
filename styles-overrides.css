@@ -6988,3 +6988,83 @@ body.summit {
         transform: none !important;
     }
 }
+
+/* PREMIUM ALPINE — Schritt 4: Stats und Diagramme visuell angleichen.
+   Nur Oberflächen und Zustände; Daten, Diagrammoptionen und Layout bleiben unverändert. */
+#chart-view .chart-card,
+#chart-view .stats-chart-block,
+#chart-view .stats-analysis-section,
+#chart-view .stats-structure-section {
+    border: 1px solid var(--premium-border) !important;
+    border-radius: var(--premium-radius-card) !important;
+    box-shadow: var(--premium-shadow-card) !important;
+    transition:
+        border-color var(--premium-motion-standard) ease,
+        box-shadow var(--premium-motion-standard) ease;
+}
+
+#chart-view .chart-stat-tile {
+    border-color: var(--premium-border) !important;
+    border-radius: var(--premium-radius-control) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+#chart-view .stats-section-btn,
+#chart-view .chart-tab {
+    border-radius: var(--premium-radius-control);
+    transition:
+        border-color var(--premium-motion-fast) ease,
+        box-shadow var(--premium-motion-fast) ease,
+        background-color var(--premium-motion-fast) ease,
+        transform var(--premium-motion-fast) ease;
+}
+
+#chart-view .stats-section-btn.active,
+#chart-view .chart-tab.active {
+    box-shadow:
+        inset 0 0 0 1px var(--premium-border-strong),
+        inset 3px 0 0 var(--accent),
+        0 3px 10px var(--premium-accent-wash);
+}
+
+#chart-view .stats-section-btn:focus-visible,
+#chart-view .chart-tab:focus-visible,
+#chart-view .stats-year-filter-wrap select:focus-visible,
+#chart-view .stats-year-filter-wrap .mob-sel-btn:focus-visible,
+#chart-view .stats-year-filter-wrap .dash-year-arrow-btn:focus-visible {
+    outline: 2px solid var(--accent) !important;
+    outline-offset: 2px;
+    box-shadow: var(--premium-focus-ring);
+}
+
+#chart-view .chart-title {
+    border-bottom: 1px solid var(--premium-border);
+    padding-bottom: 7px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    body:not(.touch-mode) #chart-view .stats-section-btn:not(.active):hover,
+    body:not(.touch-mode) #chart-view .chart-tab:not(.active):hover {
+        border-color: var(--premium-border-strong) !important;
+        box-shadow: inset 0 0 0 1px var(--premium-border);
+    }
+
+    body:not(.touch-mode) #chart-view .chart-card:hover,
+    body:not(.touch-mode) #chart-view .stats-chart-block:hover,
+    body:not(.touch-mode) #chart-view .stats-analysis-section:hover,
+    body:not(.touch-mode) #chart-view .stats-structure-section:hover {
+        border-color: var(--premium-border-strong) !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #chart-view .chart-card,
+    #chart-view .stats-chart-block,
+    #chart-view .stats-analysis-section,
+    #chart-view .stats-structure-section,
+    #chart-view .stats-section-btn,
+    #chart-view .chart-tab {
+        transition: none !important;
+    }
+}
+
