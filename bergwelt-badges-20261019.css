@@ -2788,3 +2788,93 @@ body.summit #wrapped-view .bergwelt-height-years-chart-section {
 @media (prefers-reduced-motion: reduce) {
     #wrapped-view .bergwelt-cinematic-primary { scroll-behavior: auto; }
 }
+
+
+/* Referenzdesign 2026: Panorama mit persönlichem Wanderer-Motiv und weichem
+   Übergang in die jeweilige Themefläche. Bewusst auf die Bergwelt begrenzt. */
+#wrapped-view.bergwelt-mode {
+    --bw-surface-rgb: 3, 27, 25;
+    --bw-gold: #edc878;
+    background: rgb(var(--bw-surface-rgb));
+    color: #f8f2e6;
+}
+body.dark #wrapped-view.bergwelt-mode { --bw-surface-rgb: 20, 8, 10; }
+body.green #wrapped-view.bergwelt-mode { --bw-surface-rgb: 3, 35, 26; }
+body.summit #wrapped-view.bergwelt-mode { --bw-surface-rgb: 9, 20, 34; }
+#wrapped-view.bergwelt-mode .bergwelt-panel:not([hidden]) {
+    max-width: 920px;
+    background: linear-gradient(180deg, transparent 0, rgba(var(--bw-surface-rgb), .35) 30px, rgb(var(--bw-surface-rgb)) 240px);
+    padding-bottom: max(28px, env(safe-area-inset-bottom));
+}
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-hero {
+    min-height: clamp(500px, 72dvh, 700px);
+    border-radius: 0;
+    background-image: url("https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=1500&q=88");
+    background-position: 57% 42%;
+    box-shadow: none;
+}
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-hero::before {
+    background:
+        linear-gradient(180deg, rgba(3,13,18,.08) 0%, rgba(3,13,18,.02) 25%, rgba(3,16,20,.26) 43%, rgba(var(--bw-surface-rgb),.86) 76%, rgb(var(--bw-surface-rgb)) 100%),
+        linear-gradient(90deg, rgba(2,13,16,.64) 0%, rgba(2,13,16,.36) 43%, rgba(2,13,16,.02) 100%);
+}
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-hero-shade {
+    border: 0;
+    border-radius: 0;
+    box-shadow: inset 0 -24px 60px rgba(var(--bw-surface-rgb),.25);
+}
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-hero-content {
+    padding: clamp(30px, 7vw, 58px) clamp(20px, 5.5vw, 42px) 26px;
+}
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-hero h2 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2.55rem, 10vw, 4.7rem);
+    line-height: .98;
+    letter-spacing: -.04em;
+}
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-hero h2 em { color: #f1ca7b; }
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-kicker { letter-spacing: .17em; }
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-stats { max-width: 560px; }
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-stat {
+    border-color: rgba(238,211,153,.24);
+    border-radius: 10px;
+    background: rgba(3,20,22,.36);
+    backdrop-filter: blur(8px);
+}
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-primary {
+    max-width: 440px;
+    border-radius: 999px;
+    background: rgba(2,23,23,.58);
+    border-color: rgba(237,200,120,.54);
+}
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-lower {
+    position: relative;
+    margin-top: -10px;
+    padding: 24px clamp(14px, 4vw, 28px) 8px;
+    background: rgb(var(--bw-surface-rgb));
+}
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-section-heading h3 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 600;
+    letter-spacing: -.025em;
+}
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-highlight {
+    border-color: rgba(237,200,120,.22);
+    border-radius: 15px;
+    background: linear-gradient(150deg, rgba(13,45,41,.78), rgba(var(--bw-surface-rgb),.94));
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+}
+body.dark #wrapped-view.bergwelt-mode .bergwelt-cinematic-highlight { background: linear-gradient(150deg, rgba(66,24,27,.72), rgba(var(--bw-surface-rgb),.96)); }
+body.summit #wrapped-view.bergwelt-mode .bergwelt-cinematic-highlight { background: linear-gradient(150deg, rgba(23,48,70,.78), rgba(var(--bw-surface-rgb),.96)); }
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-footer-stats > span {
+    border-top-color: rgba(237,200,120,.18);
+}
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-image-caption { top: 22px; right: 20px; }
+@media (max-width: 420px) {
+    #wrapped-view.bergwelt-mode .bergwelt-cinematic-hero {
+        min-height: clamp(500px, 76dvh, 650px);
+        background-position: 58% center;
+    }
+    #wrapped-view.bergwelt-mode .bergwelt-cinematic-hero-content { padding-left: 18px; padding-right: 18px; }
+    #wrapped-view.bergwelt-mode .bergwelt-cinematic-lower { padding-left: 14px; padding-right: 14px; }
+}
