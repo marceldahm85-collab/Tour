@@ -7068,3 +7068,52 @@ body.summit {
     }
 }
 
+/* PREMIUM ALPINE — Stats: verschachtelte Flächen reduzieren.
+   Die Inhalte stehen ruhiger auf dem Seitenhintergrund; nur aktive Auswahl bleibt akzentuiert. */
+#chart-view .stats-year-filter-wrap,
+#chart-view .stats-section-switch,
+#chart-view .chart-tabs {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+#chart-view .stats-year-filter-wrap,
+#chart-view .stats-section-switch {
+    padding: 0 !important;
+}
+
+#chart-view .chart-card,
+#chart-view .stats-chart-block,
+#chart-view .stats-analysis-section,
+#chart-view .stats-structure-section {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+#chart-view .chart-card::before {
+    display: none !important;
+}
+
+#chart-view .chart-title {
+    border-bottom-color: var(--premium-border) !important;
+}
+
+#chart-view .stats-section-btn,
+#chart-view .chart-tab {
+    box-shadow: none;
+}
+
+#chart-view .stats-section-btn.active,
+#chart-view .chart-tab.active {
+    box-shadow: inset 0 -2px 0 var(--accent) !important;
+}
+
+/* Light: kein zusätzlicher Rahmen um die Jahresauswahl. */
+body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap select,
+body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap .mob-sel-btn {
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
