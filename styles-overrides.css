@@ -7119,9 +7119,9 @@ body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > s
 body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > .mob-sel-wrap,
 body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > .mob-sel-wrap > .mob-sel-btn,
 body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > .dash-year-arrow-btn {
-    height: 34px !important;
-    min-height: 34px !important;
-    max-height: 34px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
     box-sizing: border-box !important;
 }
 
@@ -7199,3 +7199,8 @@ body:not(.dark):not(.green):not(.summit) #chart-view > #stats-section-switch.sta
     padding: 0 !important;
 }
 
+
+
+/* Hauptnavigation: nur den durchgehenden Header-Balken entfernen; der abgerundete Container und die Buttons bleiben erhalten. */
+.accordion-header { background: transparent !important; background-image: none !important; }
+.accordion-header::before, .accordion-header::after { background: transparent !important; background-image: none !important; box-shadow: none !important; }
