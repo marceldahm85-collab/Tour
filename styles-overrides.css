@@ -7251,3 +7251,58 @@ body.summit #map-view > .map-view-inner > .map-year-filter-wrap {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
 }
+
+
+/* MAPVIEW: Nur die eigentlichen Controls erhalten eine Fläche.
+   Sammelcontainer bleiben in allen Themes transparent. */
+#map-view,
+#map-view .map-view-inner,
+#map-view .map-year-filter-wrap,
+#map-view .map-mode-toggle,
+#map-view #map-quick-filters,
+body.dark #map-view .map-view-inner,
+body.green #map-view .map-view-inner,
+body.summit #map-view .map-view-inner,
+body:not(.dark):not(.green):not(.summit) #map-view .map-view-inner,
+body.dark #map-view .map-year-filter-wrap,
+body.green #map-view .map-year-filter-wrap,
+body.summit #map-view .map-year-filter-wrap,
+body:not(.dark):not(.green):not(.summit) #map-view .map-year-filter-wrap,
+body.dark #map-view .map-mode-toggle,
+body.green #map-view .map-mode-toggle,
+body.summit #map-view .map-mode-toggle,
+body:not(.dark):not(.green):not(.summit) #map-view .map-mode-toggle,
+body.dark #map-view #map-quick-filters,
+body.green #map-view #map-quick-filters,
+body.summit #map-view #map-quick-filters,
+body:not(.dark):not(.green):not(.summit) #map-view #map-quick-filters {
+    background: transparent !important;
+    background-image: none !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+#map-view .map-year-filter-wrap,
+#map-view .map-mode-toggle,
+#map-view #map-quick-filters {
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: 0 !important;
+}
+
+#map-view .map-view-inner::before,
+#map-view .map-view-inner::after,
+#map-view .map-year-filter-wrap::before,
+#map-view .map-year-filter-wrap::after,
+#map-view .map-mode-toggle::before,
+#map-view .map-mode-toggle::after,
+#map-view #map-quick-filters::before,
+#map-view #map-quick-filters::after {
+    content: none !important;
+    display: none !important;
+    background: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
