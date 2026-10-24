@@ -6874,7 +6874,7 @@ body.summit {
    Nur Darstellung: Inhalte, Reihenfolge, Klicks und Meilenstein-Höhen bleiben erhalten.
    ========================================================= */
 #dashboard-view .dashboard-inner {
-    gap: 14px;
+    gap: 8px;
 }
 
 #dashboard-view .dash-section {
@@ -6890,7 +6890,7 @@ body.summit {
 
 #dashboard-view .dash-section-title {
     position: relative;
-    padding: 11px 13px 9px;
+    padding: 8px 12px 6px;
     border-bottom: 1px solid var(--premium-border);
     background: linear-gradient(
         90deg,
@@ -6906,7 +6906,7 @@ body.summit {
 }
 
 #dashboard-view .dash-section-body {
-    padding: 9px 10px 10px;
+    padding: 6px 9px 7px;
 }
 
 #dashboard-view .dash-tour-list li {
