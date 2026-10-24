@@ -6769,3 +6769,67 @@ body.summit {
         --premium-motion-standard: 0ms;
     }
 }
+
+
+/* =========================================================
+   /* PREMIUM ALPINE — Dashboard-Karten, erste sichtbare Anwendung. */
+   Nur visuelle Veredelung der Dashboard-Karten; keine Layout- oder Datenlogik.
+   ========================================================= */
+#dashboard-view .dash-stat-tile,
+#dashboard-view .dash-milestone-tile {
+    border: 1px solid var(--premium-border) !important;
+    border-radius: var(--premium-radius-card) !important;
+    box-shadow: var(--premium-shadow-card) !important;
+    background:
+        linear-gradient(
+            145deg,
+            var(--premium-surface-1) 0%,
+            var(--premium-surface-2) 100%
+        ) !important;
+    overflow: hidden;
+    isolation: isolate;
+    transition:
+        border-color var(--premium-motion-standard) ease,
+        box-shadow var(--premium-motion-standard) ease,
+        transform var(--premium-motion-fast) ease;
+}
+
+#dashboard-view .dash-stat-tile::before,
+#dashboard-view .dash-milestone-tile::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: var(--accent-gradient);
+    opacity: 0.72;
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+#dashboard-view .dash-stat-tile:focus-visible,
+#dashboard-view .dash-milestone-tile:focus-visible {
+    outline: none;
+    border-color: var(--premium-border-strong) !important;
+    box-shadow: var(--premium-focus-ring), var(--premium-shadow-card) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    body:not(.touch-mode) #dashboard-view .dash-stat-tile:hover,
+    body:not(.touch-mode) #dashboard-view .dash-milestone-tile:hover {
+        border-color: var(--premium-border-strong) !important;
+        box-shadow: var(--premium-shadow-hover) !important;
+        transform: translateY(-2px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #dashboard-view .dash-stat-tile,
+    #dashboard-view .dash-milestone-tile {
+        transition: none;
+    }
+
+    body:not(.touch-mode) #dashboard-view .dash-stat-tile:hover,
+    body:not(.touch-mode) #dashboard-view .dash-milestone-tile:hover {
+        transform: none;
+    }
+}
