@@ -7684,3 +7684,16 @@ body.summit::before {
 @media (max-width: 700px) {
     body::before { background-size: 100% 100%, 100% 100%, auto 100svh; }
 }
+
+
+/* Fixed backdrop stacking correction: keep it above the body canvas but behind every view. */
+body::before {
+    z-index: 0 !important;
+}
+#dashboard-view, #app-view, #chart-view, #tour-view, #map-view,
+#filter-view, #backup-view, #theme-view, #achievements-view, #wrapped-view {
+    position: relative;
+    z-index: 1;
+    background: transparent !important;
+    background-image: none !important;
+}
