@@ -7117,3 +7117,46 @@ body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap .mo
     box-shadow: none !important;
 }
 
+/* STATS – letzte Korrektur: Light-Steuerungen auf dieselbe Höhe bringen
+   und die Fremdfläche hinter den fünf Bereichsbuttons themeübergreifend entfernen. */
+body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > select,
+body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > .mob-sel-wrap,
+body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > .mob-sel-wrap > .mob-sel-btn,
+body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > .dash-year-arrow-btn {
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+    box-sizing: border-box !important;
+}
+
+body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > .mob-sel-wrap {
+    padding: 0 !important;
+}
+
+body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > .dash-year-arrow-btn {
+    padding: 0 !important;
+    line-height: 1 !important;
+}
+
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > select,
+    body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > .mob-sel-wrap,
+    body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > .mob-sel-wrap > .mob-sel-btn,
+    body:not(.dark):not(.green):not(.summit) #chart-view .stats-year-filter-wrap > .dash-year-arrow-btn {
+        height: 36px !important;
+        min-height: 36px !important;
+        max-height: 36px !important;
+    }
+}
+
+/* Der Switch-Container soll keine eigene Karte mehr bilden – nur die Buttons bleiben sichtbar. */
+body:not(.dark):not(.green):not(.summit) #chart-view .stats-section-switch,
+body.dark #chart-view .stats-section-switch,
+body.green #chart-view .stats-section-switch,
+body.summit #chart-view .stats-section-switch {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
