@@ -7526,3 +7526,111 @@ body.summit #wrapped-view {
         background-attachment: scroll !important;
     }
 }
+
+
+/* Alpine panorama framing v25:
+   one complete screen-height image, with the theme fade restricted to its
+   lower quarter. The background scrolls with the view, never with the browser. */
+#dashboard-view,
+#app-view,
+#chart-view,
+#tour-view,
+#map-view,
+#filter-view,
+#backup-view,
+#theme-view,
+#achievements-view,
+#wrapped-view {
+    background-repeat: no-repeat !important;
+    background-attachment: scroll !important;
+    background-position: center top, center top, center top !important;
+    background-size: 100% 100svh, 100% 100svh, auto 100svh !important;
+    background-image:
+        linear-gradient(180deg,
+            rgba(3, 12, 16, .05) 0%,
+            rgba(3, 12, 16, .05) 66%,
+            rgba(3, 20, 21, .22) 76%,
+            rgba(3, 25, 24, .54) 86%,
+            rgba(3, 25, 24, .82) 94%,
+            var(--alpine-background, #10201e) 100%),
+        linear-gradient(90deg, rgba(1, 10, 15, .18), transparent 84%),
+        url("https://www.news.uzh.ch/dam/jcr%3A31d6c4e7-f62d-4d47-b561-c34bcc92a461/uzh_news_1680.jpg") !important;
+}
+body.dark #dashboard-view,
+body.dark #app-view,
+body.dark #chart-view,
+body.dark #tour-view,
+body.dark #map-view,
+body.dark #filter-view,
+body.dark #backup-view,
+body.dark #theme-view,
+body.dark #achievements-view,
+body.dark #wrapped-view {
+    background-image:
+        linear-gradient(180deg,
+            rgba(7, 5, 10, .06) 0%,
+            rgba(7, 5, 10, .06) 66%,
+            rgba(23, 8, 12, .24) 76%,
+            rgba(28, 9, 13, .56) 86%,
+            rgba(28, 9, 13, .84) 94%,
+            var(--alpine-background, #1c090d) 100%),
+        linear-gradient(90deg, rgba(8, 6, 10, .22), transparent 84%),
+        url("https://www.news.uzh.ch/dam/jcr%3A31d6c4e7-f62d-4d47-b561-c34bcc92a461/uzh_news_1680.jpg") !important;
+}
+body.green #dashboard-view,
+body.green #app-view,
+body.green #chart-view,
+body.green #tour-view,
+body.green #map-view,
+body.green #filter-view,
+body.green #backup-view,
+body.green #theme-view,
+body.green #achievements-view,
+body.green #wrapped-view {
+    background-image:
+        linear-gradient(180deg,
+            rgba(2, 13, 14, .04) 0%,
+            rgba(2, 13, 14, .04) 66%,
+            rgba(2, 25, 19, .20) 76%,
+            rgba(3, 34, 25, .52) 86%,
+            rgba(3, 37, 27, .82) 94%,
+            var(--alpine-background, #03251b) 100%),
+        linear-gradient(90deg, rgba(1, 13, 12, .18), transparent 84%),
+        url("https://www.news.uzh.ch/dam/jcr%3A31d6c4e7-f62d-4d47-b561-c34bcc92a461/uzh_news_1680.jpg") !important;
+}
+body.summit #dashboard-view,
+body.summit #app-view,
+body.summit #chart-view,
+body.summit #tour-view,
+body.summit #map-view,
+body.summit #filter-view,
+body.summit #backup-view,
+body.summit #theme-view,
+body.summit #achievements-view,
+body.summit #wrapped-view {
+    background-image:
+        linear-gradient(180deg,
+            rgba(4, 11, 22, .05) 0%,
+            rgba(4, 11, 22, .05) 66%,
+            rgba(7, 17, 31, .24) 76%,
+            rgba(9, 24, 42, .56) 86%,
+            rgba(9, 24, 42, .84) 94%,
+            var(--alpine-background, #09182a) 100%),
+        linear-gradient(90deg, rgba(3, 10, 20, .24), transparent 84%),
+        url("https://www.news.uzh.ch/dam/jcr%3A31d6c4e7-f62d-4d47-b561-c34bcc92a461/uzh_news_1680.jpg") !important;
+}
+@media (max-width: 700px) {
+    #dashboard-view,
+    #app-view,
+    #chart-view,
+    #tour-view,
+    #map-view,
+    #filter-view,
+    #backup-view,
+    #theme-view,
+    #achievements-view,
+    #wrapped-view {
+        background-size: 100% 100svh, 100% 100svh, auto 100svh !important;
+        background-position: center top, center top, 58% top !important;
+    }
+}
