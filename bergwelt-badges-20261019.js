@@ -2,8 +2,8 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261022-app-brightness-shared-chart-palette') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261022-app-brightness-shared-chart-palette';
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261024-cinematic-bergwelt-hero') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261024-cinematic-bergwelt-hero';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
@@ -38,6 +38,7 @@
     };
     syncExperienceActions();
     let selectedHeightMilestone = null;
+    let showOriginalStory = false;
 
     const getTours = () => {
         try {
@@ -169,9 +170,87 @@
     };
 
     function renderMomente() {
-        panel.hidden = true;
         tourbookPanel.hidden = true;
-        root.classList.remove('bergwelt-mode');
+        if (showOriginalStory) {
+            panel.hidden = true;
+            root.classList.remove('bergwelt-mode');
+            root.classList.add('bergwelt-story-playing');
+            const back = root.querySelector('[data-back-to-bergwelt]');
+            if (back) back.hidden = false;
+            return;
+        }
+
+        root.classList.remove('bergwelt-story-playing');
+        root.classList.add('bergwelt-mode');
+        panel.hidden = false;
+        const back = root.querySelector('[data-back-to-bergwelt]');
+        if (back) back.hidden = true;
+
+        const entries = yearTours();
+        const allEntries = getTours();
+        const known = getter => entries.map(getter).filter(value => value !== null && value !== undefined && Number.isFinite(value));
+        const totalDistance = sumKnown(entries, distanceValue);
+        const totalAscent = sumKnown(entries, ascentValue);
+        const totalMinutes = sumKnown(entries, minutesValue);
+        const totalPeaks = sumKnown(entries, peaksValue);
+        const bestAscent = entries.filter(entry => ascentValue(entry) !== null).sort((a, b) => ascent(b) - ascent(a))[0] || null;
+        const longestTour = entries.filter(entry => distanceValue(entry) !== null).sort((a, b) => distance(b) - distance(a))[0] || null;
+        const mostPeaks = entries.filter(entry => peaksValue(entry) !== null).sort((a, b) => peaks(b) - peaks(a))[0] || null;
+        const yearLabel = getYearLabel();
+        const formatHours = value => value === null ? '–' : (value / 60).toLocaleString('de-AT', { maximumFractionDigits: 1 }) + ' h';
+        const tourTitle = entry => escapeHTML(entry?.tourname || entry?.name || 'Tour ohne Titel');
+        const tourMeta = entry => [entry?.region, entry?.date].filter(Boolean).map(escapeHTML).join(' · ');
+        const icon = (name) => {
+            const paths = {
+                mountain: '<path d="m3 20 7-12 4 7 3-4 4 9H3Z"/><path d="m8 12 2 2 2-2"/>',
+                route: '<circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h2a4 4 0 0 0 4-4v-1a4 4 0 0 1 4-4"/>',
+                summit: '<path d="m3 20 7-13 4 6 3-4 4 11H3Z"/><path d="M10 7V3m-2 2h4"/>',
+                time: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
+            };
+            return '<svg class="bergwelt-cinematic-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + (paths[name] || paths.mountain) + '</svg>';
+        };
+        const metric = (label, value, unit, symbol) =>
+            '<div class="bergwelt-cinematic-stat">' + icon(symbol) +
+                '<span class="bergwelt-cinematic-stat-copy"><small>' + label + '</small><strong>' + value + '<i>' + unit + '</i></strong></span></div>';
+        const highlightCard = (label, entry, value, unit, symbol, modifier) =>
+            '<article class="bergwelt-cinematic-highlight ' + modifier + '">' +
+                '<span class="bergwelt-cinematic-highlight-icon">' + icon(symbol) + '</span>' +
+                '<span class="bergwelt-cinematic-highlight-label">' + label + '</span>' +
+                '<strong>' + (entry ? tourTitle(entry) : 'Noch keine Daten') + '</strong>' +
+                '<span class="bergwelt-cinematic-highlight-value">' + (entry ? fmt(value) + ' ' + unit : '–') + '</span>' +
+                (entry && tourMeta(entry) ? '<span class="bergwelt-cinematic-highlight-meta">' + tourMeta(entry) + '</span>' : '') +
+            '</article>';
+
+        panel.innerHTML =
+            '<section class="bergwelt-cinematic-hero" aria-labelledby="bergwelt-cinematic-title">' +
+                '<div class="bergwelt-cinematic-hero-shade"></div>' +
+                '<div class="bergwelt-cinematic-hero-content">' +
+                    '<p class="bergwelt-cinematic-kicker"><span></span> DEIN ALPINES JAHR</p>' +
+                    '<h2 id="bergwelt-cinematic-title">Deine<br><em>Bergwelt.</em></h2>' +
+                    '<p class="bergwelt-cinematic-subtitle">' + yearLabel + ' · Deine Wege. Deine Gipfel. Deine Geschichte.</p>' +
+                    '<div class="bergwelt-cinematic-stats">' +
+                        metric('Touren', fmt(uniqueTourCount(entries)), '', 'route') +
+                        metric('Strecke', fmtKnown(totalDistance), ' km', 'mountain') +
+                        metric('Aufstieg', fmtKnown(totalAscent), ' hm', 'summit') +
+                    '</div>' +
+                    '<button type="button" class="bergwelt-cinematic-primary" data-start-bergwelt-story>' +
+                        '<span class="bergwelt-cinematic-play">▶</span><span><strong>Dein Jahr erleben</strong><small>Die persönliche Touren-Story starten</small></span><span class="bergwelt-cinematic-arrow">↗</span>' +
+                    '</button>' +
+                '</div>' +
+                '<div class="bergwelt-cinematic-image-caption">ALPINE MOMENTS <span>✦</span> ' + yearLabel.toUpperCase() + '</div>' +
+            '</section>' +
+            '<section class="bergwelt-cinematic-lower">' +
+                '<div class="bergwelt-cinematic-section-heading"><div><p class="bergwelt-cinematic-kicker">DEINE HIGHLIGHTS</p><h3>Spuren im Gebirge</h3></div><span class="bergwelt-cinematic-section-mark">✦</span></div>' +
+                '<div class="bergwelt-cinematic-highlight-grid">' +
+                    highlightCard('GRÖSSTER AUFSTIEG', bestAscent, bestAscent ? ascent(bestAscent) : 0, 'hm', 'summit', 'is-gold') +
+                    highlightCard('LÄNGSTE STRECKE', longestTour, longestTour ? distance(longestTour) : 0, 'km', 'route', 'is-blue') +
+                '</div>' +
+                '<div class="bergwelt-cinematic-footer-stats">' +
+                    '<span>' + icon('time') + '<span><small>Gehzeit</small><strong>' + formatHours(totalMinutes) + '</strong></span></span>' +
+                    '<span>' + icon('mountain') + '<span><small>Gipfel</small><strong>' + fmtKnown(totalPeaks) + '</strong></span></span>' +
+                '</div>' +
+                (mostPeaks ? '<p class="bergwelt-cinematic-note">Deine gipfelreichste Tour: <strong>' + tourTitle(mostPeaks) + '</strong> · ' + fmt(peaks(mostPeaks)) + ' Gipfel</p>' : '') +
+            '</section>';
     }
     function renderTourbuch() {
         panel.hidden = true;
@@ -680,6 +759,11 @@
         select.dispatchEvent(new Event('change', { bubbles: true }));
     };
     panel.addEventListener('click', event => {
+        if (event.target.closest('[data-start-bergwelt-story]')) {
+            showOriginalStory = true;
+            renderMomente();
+            return;
+        }
         const yearSegment = event.target.closest('[data-bergwelt-year-segment]');
         if (yearSegment) {
             chooseYearSegment(yearSegment);
@@ -725,6 +809,17 @@
         });
         render();
     });
-    window.__bergweltRender = render;
+    const storyBack = document.createElement('button');
+    storyBack.type = 'button';
+    storyBack.className = 'bergwelt-story-back';
+    storyBack.dataset.backToBergwelt = '';
+    storyBack.textContent = '← Zur Bergwelt';
+    storyBack.hidden = true;
+    storyBack.addEventListener('click', () => {
+        showOriginalStory = false;
+        renderMomente();
+    });
+    root.appendChild(storyBack);
+        window.__bergweltRender = render;
     render();
 })();
