@@ -22640,7 +22640,6 @@ const THEME_EDITOR_BIG_SELECTORS = [
     '.stats-structure-section', '.chart-card', '.compare-box', '.compare-period-card',
     '.compare-list-card', '.tour-compare-pick-card', '.tour-compare-result',
     '.backup-status-panel', '.backup-info-card', '.backup-file-status', '.mob-sel-sheet',
-    '#map-view .map-view-inner', '#map-view .map-year-filter-wrap', '#map-view .map-mode-toggle',
     '#backup-view .backup-card', '#backup-view .backup-view-inner',
     '#wrapped-view .bergwelt-side-nav'
 ];
@@ -22657,7 +22656,7 @@ const THEME_EDITOR_SOFT_SELECTORS = [
     '.mob-sel-btn', '.dash-year-filter-wrap select', '.dash-year-filter-wrap .mob-sel-btn',
     '.dash-year-filter-wrap .dash-year-arrow-btn',
     '.top-main-nav', '.chart-tabs', '.stats-section-btn',
-    '.filter-section-nav-btn', '.plan-section-btn', '.map-mode-toggle', '.map-mode-btn',
+    '.filter-section-nav-btn', '.plan-section-btn', '.map-mode-btn',
     '.quick-filter-btn', '.tour-page-btn', '.yc-metric-btn', '.yc-year-toggle-btn',
     '.compare-mode-toggle', '.compare-mode-btn', '.checklist-mode-toggle', '.checklist-mode-btn',
     '.dash-year-arrow-btn',
