@@ -2772,23 +2772,6 @@ body.summit #wrapped-view .bergwelt-height-years-chart-section {
 #wrapped-view .bergwelt-cinematic-footer-stats small { color: var(--text-muted, #aeb8be); font-size: .7rem; }
 #wrapped-view .bergwelt-cinematic-footer-stats strong { color: var(--text-color, inherit); font-size: .95rem; font-weight: 800; }
 #wrapped-view .bergwelt-cinematic-note { margin: 8px 0 0; padding: 12px 14px; border-left: 2px solid #d5ad61; color: var(--text-muted, #aeb8be); font-size: .75rem; line-height: 1.5; }
-#wrapped-view .bergwelt-story-back {
-    position: absolute;
-    z-index: 30;
-    top: max(12px, env(safe-area-inset-top));
-    left: 12px;
-    min-height: 38px;
-    padding: 8px 13px;
-    border: 1px solid rgba(255,225,166,.5);
-    border-radius: 999px;
-    color: #fff8e9;
-    background: rgba(7,15,21,.7);
-    backdrop-filter: blur(10px);
-    font: inherit;
-    font-size: .8rem;
-    cursor: pointer;
-}
-#wrapped-view .bergwelt-story-back[hidden] { display: none !important; }
 #wrapped-view.bergwelt-story-playing { position: relative; }
 @media (max-width: 390px) {
     #wrapped-view .bergwelt-cinematic-hero { min-height: 430px; background-position: 52% center; }
