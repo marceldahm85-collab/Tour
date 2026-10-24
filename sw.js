@@ -10,7 +10,7 @@ const APP_SHELL = [
   './bergwelt-badges-20261019.css?v=1',
   './bergwelt-badges-20261019.js?v=1',
   './styles.css?v=1',
-  './styles-overrides.css?v=3',
+  './styles-overrides.css?v=4',
   './manifest.json',
   './pdf-magazine.js?v=1',
   './icons/icon-192.png',
