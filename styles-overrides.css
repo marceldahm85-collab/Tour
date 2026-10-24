@@ -7159,8 +7159,13 @@ body.summit #chart-view .stats-section-switch {
 /* STATS – harte Bereinigung der äußeren Navigations-Container.
    Die HTML-Wrapper bleiben für Layout und Bedienlogik bestehen, werden aber
    in keinem Theme als sichtbare Karte gerendert. */
+/* Theme-Editor-Regeln werden zur Laufzeit mit !important angehängt.
+   Die Jahressteuerung erhält deshalb theme-spezifisch höhere Selektorpriorität. */
 #chart-view > .dash-year-filter-wrap.stats-year-filter-wrap,
-#chart-view > #stats-section-switch.stats-section-switch {
+#chart-view > #stats-section-switch.stats-section-switch,
+body.dark #chart-view > .dash-year-filter-wrap.stats-year-filter-wrap,
+body.green #chart-view > .dash-year-filter-wrap.stats-year-filter-wrap,
+body.summit #chart-view > .dash-year-filter-wrap.stats-year-filter-wrap {
     background: transparent !important;
     background-image: none !important;
     border: 0 !important;
