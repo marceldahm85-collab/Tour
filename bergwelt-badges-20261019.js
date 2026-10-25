@@ -2,8 +2,8 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261025-bergwelt-four-highlight-cards') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261025-bergwelt-four-highlight-cards';
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261025-bergwelt-highlight-tour-links') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261025-bergwelt-highlight-tour-links';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
@@ -289,6 +289,44 @@
                 '</div>' +
                 (mostPeaks ? '<p class="bergwelt-cinematic-note">Deine gipfelreichste Tour: <strong>' + tourTitle(mostPeaks) + '</strong> · ' + fmt(peaks(mostPeaks)) + ' Gipfel</p>' : '') +
             '</section>';
+
+        const bindTourDetail = (selector, entry, label) => {
+            const card = panel.querySelector(selector);
+            if (!card || !entry) return;
+
+            card.classList.add('is-clickable');
+            card.tabIndex = 0;
+            card.setAttribute('role', 'button');
+            card.setAttribute('aria-label', 'Tourdetails öffnen: ' + String(entry.tourname || entry.name || label));
+            card.title = 'Tourdetails öffnen';
+
+            const openDetail = () => {
+                if (typeof window.openTourDetail !== 'function') {
+                    console.warn('[Bergwelt] Tourdetail-Funktion ist derzeit nicht verfügbar.');
+                    return;
+                }
+                try {
+                    const result = window.openTourDetail(entry);
+                    if (result && typeof result.catch === 'function') {
+                        result.catch(error => console.error('[Bergwelt] Tourdetail konnte nicht geöffnet werden:', error));
+                    }
+                } catch (error) {
+                    console.error('[Bergwelt] Tourdetail konnte nicht geöffnet werden:', error);
+                }
+            };
+
+            card.addEventListener('click', openDetail);
+            card.addEventListener('keydown', event => {
+                if (event.key !== 'Enter' && event.key !== ' ') return;
+                event.preventDefault();
+                openDetail();
+            });
+        };
+
+        bindTourDetail('.bergwelt-cinematic-highlight.is-peak', highestPeak?.entry, 'Höchster Gipfel');
+        bindTourDetail('.bergwelt-cinematic-highlight.is-blue', longestTour, 'Längste Strecke');
+        bindTourDetail('.bergwelt-cinematic-highlight.is-ascent', bestAscent, 'Größter Aufstieg');
+        bindTourDetail('.bergwelt-cinematic-highlight.is-bigtour', biggestBigTour?.entry, 'Größte Big Tour');
     }
     function renderTourbuch() {
         panel.hidden = true;
