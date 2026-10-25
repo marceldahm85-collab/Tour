@@ -7314,3 +7314,32 @@ body:not(.dark):not(.green):not(.summit) #map-view #map-quick-filters {
     background-image: url("https://images.unsplash.com/photo-1694968537484-d4e1733301b5?auto=format&fit=crop&w=1400&q=85") !important;
     background-position: 65% 44% !important;
 }
+
+
+/* Bergwelt-Feinschliff: Lesbarkeit und weicher Bildauslauf, nur im Hero. */
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-hero::before {
+    background:
+        linear-gradient(180deg,
+            rgba(2,12,17,.07) 0%,
+            rgba(2,12,17,.02) 22%,
+            rgba(2,15,18,.12) 41%,
+            rgba(var(--bw-surface-rgb, 3,27,25),.34) 60%,
+            rgba(var(--bw-surface-rgb, 3,27,25),.76) 80%,
+            rgb(var(--bw-surface-rgb, 3,27,25)) 100%),
+        linear-gradient(90deg,
+            rgba(1,12,15,.62) 0%,
+            rgba(1,12,15,.38) 42%,
+            rgba(1,12,15,.12) 70%,
+            transparent 100%) !important;
+}
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-hero h2 {
+    text-shadow: 0 3px 8px rgba(0,0,0,.48), 0 10px 28px rgba(0,0,0,.34);
+}
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-kicker,
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-subtitle,
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-stat {
+    text-shadow: 0 1px 7px rgba(0,0,0,.48);
+}
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-image-caption {
+    text-shadow: 0 1px 10px rgba(0,0,0,.9);
+}
