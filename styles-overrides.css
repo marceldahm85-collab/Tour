@@ -7440,3 +7440,17 @@ body:not(.dark):not(.green):not(.summit) #map-view #map-quick-filters {
         transition: none;
     }
 }
+
+
+/* TOP-3-Tourdetails: Metallanimation beim Swipe-Schließen zuverlässig stoppen.
+   Höhere Spezifität verhindert, dass animation-name: ... !important aus der
+   Gold-/Silber-/Bronze-Darstellung den Schließzustand überschreibt. */
+#tour-detail-modal .modal-card.is-closing,
+#tour-detail-modal .modal-card.highlight-modal-gold.is-closing,
+#tour-detail-modal .modal-card.highlight-modal-silver.is-closing,
+#tour-detail-modal .modal-card.highlight-modal-bronze.is-closing {
+    animation: none !important;
+    animation-name: none !important;
+    animation-duration: 0s !important;
+    filter: none !important;
+}
