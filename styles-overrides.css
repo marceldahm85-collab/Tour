@@ -7379,3 +7379,40 @@ body:not(.dark):not(.green):not(.summit) #map-view #map-quick-filters {
     color: #fff !important;
     text-shadow: 0 1px 6px rgba(0,0,0,.62);
 }
+
+
+/* Bergwelt-Kacheln: Aufstieg und Big Tour erhalten eigene alpine Motive. */
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-highlight.is-ascent,
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-highlight.is-bigtour {
+    background-size: cover !important;
+    background-repeat: no-repeat !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.14), 0 8px 24px rgba(0,0,0,.22) !important;
+}
+
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-highlight.is-ascent {
+    background-color: #151b20 !important;
+    background-image:
+        linear-gradient(100deg, rgba(5,12,18,.90) 0%, rgba(5,12,18,.68) 56%, rgba(5,12,18,.34) 100%),
+        url("https://images.unsplash.com/photo-1639579419627-f97377f034e7?auto=format&fit=crop&w=1100&q=85") !important;
+    background-position: center 52% !important;
+}
+
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-highlight.is-bigtour {
+    background-color: #111c23 !important;
+    background-image:
+        linear-gradient(100deg, rgba(4,12,20,.90) 0%, rgba(4,12,20,.68) 56%, rgba(4,12,20,.36) 100%),
+        url("https://images.unsplash.com/photo-1760943890190-21709a4688a1?auto=format&fit=crop&w=1100&q=85") !important;
+    background-position: center 48% !important;
+}
+
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-highlight.is-ascent .bergwelt-cinematic-highlight-label,
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-highlight.is-ascent > strong,
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-highlight.is-ascent .bergwelt-cinematic-highlight-value,
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-highlight.is-ascent .bergwelt-cinematic-highlight-meta,
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-highlight.is-bigtour .bergwelt-cinematic-highlight-label,
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-highlight.is-bigtour > strong,
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-highlight.is-bigtour .bergwelt-cinematic-highlight-value,
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-highlight.is-bigtour .bergwelt-cinematic-highlight-meta {
+    color: #fff !important;
+    text-shadow: 0 1px 6px rgba(0,0,0,.62);
+}
