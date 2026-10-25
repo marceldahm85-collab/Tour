@@ -4922,20 +4922,34 @@ function animateModalClose(modal, closeFn) {
     if (!card || !backdrop) { closeFn(); return; }
     if (!isModalSwipeLayout()) { closeFn(); return; }
 
-    // is-closing verhindert, dass modalSlideUp erneut feuert
+    // Doppelte Schließläufe verhindern, solange die Ausblendanimation läuft.
+    if (modal.dataset.swipeClosing === '1') return;
+    modal.dataset.swipeClosing = '1';
+
+    // is-closing stoppt sowohl den Modal-Slide-In als auch die TOP-3-Metallanimation.
     card.classList.add('is-closing');
     card.classList.remove('is-dragging');
 
     const targetY = card.getBoundingClientRect().height + 60;
 
     requestAnimationFrame(() => {
+        if (modal.classList.contains('hidden')) return;
         card.style.transform = `translateY(${targetY}px)`;
         backdrop.style.opacity = '0';
     });
 
     setTimeout(() => {
-        card.classList.remove('is-closing');
-        closeFn();
+        // Das Modal zuerst ausblenden. Würden wir is-closing zuerst entfernen,
+        // könnten TOP-3-Animationen bzw. modalSlideUp für einen Frame neu starten.
+        try {
+            closeFn();
+        } finally {
+            card.classList.remove('is-closing', 'is-dragging');
+            card.style.transform = '';
+            card.style.touchAction = '';
+            backdrop.style.opacity = '';
+            delete modal.dataset.swipeClosing;
+        }
     }, 500);
 }
 
