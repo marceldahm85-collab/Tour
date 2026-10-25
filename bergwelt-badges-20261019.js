@@ -230,9 +230,6 @@
                         metric('Strecke', fmtKnown(totalDistance), ' km', 'mountain') +
                         metric('Aufstieg', fmtKnown(totalAscent), ' hm', 'summit') +
                     '</div>' +
-                    '<button type="button" class="bergwelt-cinematic-primary" data-start-bergwelt-story>' +
-                        '<span class="bergwelt-cinematic-play">▶</span><span><strong>Dein Jahr erleben</strong><small>Die persönliche Touren-Story starten</small></span><span class="bergwelt-cinematic-arrow">↗</span>' +
-                    '</button>' +
                 '</div>' +
                 '<div class="bergwelt-cinematic-image-caption">ALPINE MOMENTS <span>✦</span> ' + yearLabel.toUpperCase() + '</div>' +
             '</section>' +
