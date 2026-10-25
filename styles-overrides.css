@@ -7343,3 +7343,49 @@ body:not(.dark):not(.green):not(.summit) #map-view #map-quick-filters {
 #wrapped-view.bergwelt-mode .bergwelt-cinematic-image-caption {
     text-shadow: 0 1px 10px rgba(0,0,0,.9);
 }
+
+
+/* Bildmotive für zwei Stats-Highlights.
+   Bewusst ausschließlich auf die Kacheln "Längste Strecke" und "Höchster Gipfel" begrenzt. */
+#stats-highlights-page #highlights-content .highlight-group-umfang .highlight-group-list > li:first-child,
+#stats-highlights-page #highlights-content .highlight-group-gipfel .highlight-group-list > li:first-child {
+    min-height: 72px;
+    padding: 12px 12px !important;
+    border-radius: 12px !important;
+    background-size: cover !important;
+    background-repeat: no-repeat !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.12), 0 5px 16px rgba(0,0,0,.14);
+}
+
+#stats-highlights-page #highlights-content .highlight-group-umfang .highlight-group-list > li:first-child {
+    background-color: #07191c !important;
+    background-image:
+        linear-gradient(100deg, rgba(4,14,19,.86) 0%, rgba(4,14,19,.65) 54%, rgba(4,14,19,.38) 100%),
+        url("https://images.unsplash.com/photo-1659675650069-b6534b545aaa?auto=format&fit=crop&w=1100&q=82") !important;
+    background-position: center 56% !important;
+}
+
+#stats-highlights-page #highlights-content .highlight-group-gipfel .highlight-group-list > li:first-child {
+    background-color: #07151d !important;
+    background-image:
+        linear-gradient(100deg, rgba(4,13,20,.86) 0%, rgba(4,13,20,.63) 55%, rgba(4,13,20,.34) 100%),
+        url("https://images.unsplash.com/photo-1773997777095-81da5ab94a9e?auto=format&fit=crop&w=1100&q=82") !important;
+    background-position: center 52% !important;
+}
+
+#stats-highlights-page #highlights-content .highlight-group-umfang .highlight-group-list > li:first-child .highlight-row-label,
+#stats-highlights-page #highlights-content .highlight-group-umfang .highlight-group-list > li:first-child .highlight-row-text,
+#stats-highlights-page #highlights-content .highlight-group-umfang .highlight-group-list > li:first-child .highlight-row-icon,
+#stats-highlights-page #highlights-content .highlight-group-umfang .highlight-group-list > li:first-child .stats-value,
+#stats-highlights-page #highlights-content .highlight-group-gipfel .highlight-group-list > li:first-child .highlight-row-label,
+#stats-highlights-page #highlights-content .highlight-group-gipfel .highlight-group-list > li:first-child .highlight-row-text,
+#stats-highlights-page #highlights-content .highlight-group-gipfel .highlight-group-list > li:first-child .highlight-row-icon,
+#stats-highlights-page #highlights-content .highlight-group-gipfel .highlight-group-list > li:first-child .stats-value {
+    color: #fff !important;
+    text-shadow: 0 1px 5px rgba(0,0,0,.55);
+}
+
+#stats-highlights-page #highlights-content .highlight-group-umfang .highlight-group-list > li:first-child:hover,
+#stats-highlights-page #highlights-content .highlight-group-gipfel .highlight-group-list > li:first-child:hover {
+    filter: brightness(1.06);
+}
