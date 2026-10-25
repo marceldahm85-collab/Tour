@@ -2,7 +2,7 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261024-cinematic-bergwelt-hero-tab') return;
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261025-bergwelt-peak-distance-backgrounds') return;
     window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261024-cinematic-bergwelt-hero-tab';
     window.__BERGWELT_MODULE_READY__ = true;
 
@@ -192,6 +192,17 @@
         const totalPeaks = sumKnown(entries, peaksValue);
         const bestAscent = entries.filter(entry => ascentValue(entry) !== null).sort((a, b) => ascent(b) - ascent(a))[0] || null;
         const longestTour = entries.filter(entry => distanceValue(entry) !== null).sort((a, b) => distance(b) - distance(a))[0] || null;
+        const highestPeak = entries.reduce((best, entry) => {
+            (Array.isArray(entry?.gipfelDetails) ? entry.gipfelDetails : []).forEach(peak => {
+                if (!peak || (!peak.name && !peak.hoehe)) return;
+                const height = parseFloat(String(peak.hoehe ?? '').replace(',', '.'));
+                if (!Number.isFinite(height) || height <= 0) return;
+                if (!best || height > best.height) {
+                    best = { name: peak.name || 'Gipfel ohne Namen', height, entry };
+                }
+            });
+            return best;
+        }, null);
         const mostPeaks = entries.filter(entry => peaksValue(entry) !== null).sort((a, b) => peaks(b) - peaks(a))[0] || null;
         const yearLabel = getYearLabel();
         const formatHours = value => value === null ? '–' : (value / 60).toLocaleString('de-AT', { maximumFractionDigits: 1 }) + ' h';
@@ -217,6 +228,17 @@
                 '<span class="bergwelt-cinematic-highlight-value">' + (entry ? fmt(value) + ' ' + unit : '–') + '</span>' +
                 (entry && tourMeta(entry) ? '<span class="bergwelt-cinematic-highlight-meta">' + tourMeta(entry) + '</span>' : '') +
             '</article>';
+        const highestPeakCard = peak => {
+            const entry = peak?.entry;
+            const meta = entry ? [entry.region, entry.date].filter(Boolean).map(escapeHTML).join(' · ') : '';
+            return '<article class="bergwelt-cinematic-highlight is-peak">' +
+                '<span class="bergwelt-cinematic-highlight-icon">' + icon('mountain') + '</span>' +
+                '<span class="bergwelt-cinematic-highlight-label">HÖCHSTER GIPFEL</span>' +
+                '<strong>' + (peak ? escapeHTML(peak.name) : 'Noch keine Daten') + '</strong>' +
+                '<span class="bergwelt-cinematic-highlight-value">' + (peak ? fmt(peak.height) + ' m' : '–') + '</span>' +
+                (meta ? '<span class="bergwelt-cinematic-highlight-meta">' + meta + '</span>' : '') +
+            '</article>';
+        };
 
         panel.innerHTML =
             '<section class="bergwelt-cinematic-hero" aria-labelledby="bergwelt-cinematic-title">' +
@@ -236,8 +258,9 @@
             '<section class="bergwelt-cinematic-lower">' +
                 '<div class="bergwelt-cinematic-section-heading"><div><p class="bergwelt-cinematic-kicker">DEINE HIGHLIGHTS</p><h3>Spuren im Gebirge</h3></div><span class="bergwelt-cinematic-section-mark">✦</span></div>' +
                 '<div class="bergwelt-cinematic-highlight-grid">' +
-                    highlightCard('GRÖSSTER AUFSTIEG', bestAscent, bestAscent ? ascent(bestAscent) : 0, 'hm', 'summit', 'is-gold') +
+                    highestPeakCard(highestPeak) +
                     highlightCard('LÄNGSTE STRECKE', longestTour, longestTour ? distance(longestTour) : 0, 'km', 'route', 'is-blue') +
+                    highlightCard('GRÖSSTER AUFSTIEG', bestAscent, bestAscent ? ascent(bestAscent) : 0, 'hm', 'summit', 'is-gold') +
                 '</div>' +
                 '<div class="bergwelt-cinematic-footer-stats">' +
                     '<span>' + icon('time') + '<span><small>Gehzeit</small><strong>' + formatHours(totalMinutes) + '</strong></span></span>' +
