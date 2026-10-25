@@ -7416,3 +7416,27 @@ body:not(.dark):not(.green):not(.summit) #map-view #map-quick-filters {
     color: #fff !important;
     text-shadow: 0 1px 6px rgba(0,0,0,.62);
 }
+
+
+/* Bergwelt-Kacheln: Tourdetails öffnen – sichtbar interaktiv, ohne Theme-Farben zu überschreiben. */
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-highlight.is-clickable {
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: transform .16s ease, filter .16s ease, box-shadow .16s ease;
+}
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-highlight.is-clickable:hover {
+    filter: brightness(1.08);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.2), 0 10px 26px rgba(0,0,0,.28) !important;
+}
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-highlight.is-clickable:active {
+    transform: scale(.985);
+}
+#wrapped-view.bergwelt-mode .bergwelt-cinematic-highlight.is-clickable:focus-visible {
+    outline: 2px solid #f1ca7b;
+    outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+    #wrapped-view.bergwelt-mode .bergwelt-cinematic-highlight.is-clickable {
+        transition: none;
+    }
+}
