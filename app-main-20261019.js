@@ -5693,21 +5693,46 @@ function animateModalClose(modal, closeFn) {
     if (modal.dataset.swipeClosing === '1') return;
     modal.dataset.swipeClosing = '1';
 
-    // is-closing stoppt sowohl den Modal-Slide-In als auch die TOP-3-Metallanimation.
+    const isTop3Card = card.matches(
+        '.highlight-modal-gold, .highlight-modal-silver, .highlight-modal-bronze'
+    );
+
+    // Bei TOP-3 läuft zusätzlich ein permanenter Metall-/Leuchteffekt.
+    // Dessen berechneten Zustand und die aktuelle Drag-Position einfrieren,
+    // bevor die Animationen deaktiviert werden. So springt die Karte nicht
+    // kurz an ihre Ausgangsposition zurück.
+    const computedBeforeClose = window.getComputedStyle(card);
+    const startingTransform = computedBeforeClose.transform;
+    const startingFilter = computedBeforeClose.filter;
+    const originalInlineFilter = card.style.getPropertyValue('filter');
+    const originalInlineFilterPriority = card.style.getPropertyPriority('filter');
+
     card.classList.add('is-closing');
     card.classList.remove('is-dragging');
+
+    if (isTop3Card) {
+        if (startingTransform && startingTransform !== 'none') {
+            card.style.transform = startingTransform;
+        }
+        if (startingFilter && startingFilter !== 'none') {
+            // Inline !important hält den letzten Leuchtzustand fest, während
+            // die CSS-Metallanimation für die Schließbewegung gestoppt wird.
+            card.style.setProperty('filter', startingFilter, 'important');
+        }
+    }
 
     const targetY = card.getBoundingClientRect().height + 60;
 
     requestAnimationFrame(() => {
         if (modal.classList.contains('hidden')) return;
+        // Dieselbe CSS-Transition wie bei normalen Tourdetails benutzen.
         card.style.transform = `translateY(${targetY}px)`;
         backdrop.style.opacity = '0';
     });
 
     setTimeout(() => {
-        // Das Modal zuerst ausblenden. Würden wir is-closing zuerst entfernen,
-        // könnten TOP-3-Animationen bzw. modalSlideUp für einen Frame neu starten.
+        // Erst ausblenden, danach Inline-Stile zurücksetzen, damit kein
+        // erneuter sichtbarer Slide-up oder Helligkeitssprung ausgelöst wird.
         try {
             closeFn();
         } finally {
@@ -5715,6 +5740,15 @@ function animateModalClose(modal, closeFn) {
             card.style.transform = '';
             card.style.touchAction = '';
             backdrop.style.opacity = '';
+
+            if (isTop3Card) {
+                if (originalInlineFilter) {
+                    card.style.setProperty('filter', originalInlineFilter, originalInlineFilterPriority);
+                } else {
+                    card.style.removeProperty('filter');
+                }
+            }
+
             delete modal.dataset.swipeClosing;
         }
     }, 500);
