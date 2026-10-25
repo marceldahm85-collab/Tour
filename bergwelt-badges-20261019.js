@@ -2,8 +2,8 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261025-bergwelt-peak-distance-backgrounds') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261024-cinematic-bergwelt-hero-tab';
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261025-bergwelt-four-highlight-cards') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261025-bergwelt-four-highlight-cards';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
@@ -203,6 +203,26 @@
             });
             return best;
         }, null);
+        // Gleiche Definition und Indexformel wie Stats → Highlights → Größte Big Tour:
+        // Einzelne Tour/Etappe ab 10 km und 1.000 hm, mit derselben Zeitkorrektur.
+        const biggestBigTour = entries.reduce((best, entry) => {
+            const dist = distanceValue(entry) ?? 0;
+            const hm = ascentValue(entry) ?? 0;
+            if (dist < 10 || hm < 1000) return best;
+            const baseIndex = 5 * dist + hm / 20;
+            const minutesKnown = minutesValue(entry) ?? 0;
+            let index = baseIndex;
+            if (baseIndex > 0 && minutesKnown > 0) {
+                const referenceHours = dist / 5 + hm / 600;
+                const actualHours = minutesKnown / 60;
+                if (referenceHours > 0 && actualHours > 0) {
+                    const rawFactor = 1 + ((referenceHours / actualHours) - 1) * 0.5;
+                    const timeFactor = Math.max(0.90, Math.min(1.10, rawFactor));
+                    index = baseIndex * timeFactor;
+                }
+            }
+            return !best || index > best.index ? { index, entry } : best;
+        }, null);
         const mostPeaks = entries.filter(entry => peaksValue(entry) !== null).sort((a, b) => peaks(b) - peaks(a))[0] || null;
         const yearLabel = getYearLabel();
         const formatHours = value => value === null ? '–' : (value / 60).toLocaleString('de-AT', { maximumFractionDigits: 1 }) + ' h';
@@ -260,7 +280,8 @@
                 '<div class="bergwelt-cinematic-highlight-grid">' +
                     highestPeakCard(highestPeak) +
                     highlightCard('LÄNGSTE STRECKE', longestTour, longestTour ? distance(longestTour) : 0, 'km', 'route', 'is-blue') +
-                    highlightCard('GRÖSSTER AUFSTIEG', bestAscent, bestAscent ? ascent(bestAscent) : 0, 'hm', 'summit', 'is-gold') +
+                    highlightCard('GRÖSSTER AUFSTIEG', bestAscent, bestAscent ? ascent(bestAscent) : 0, 'hm', 'summit', 'is-ascent') +
+                    highlightCard('GRÖSSTE BIG TOUR', biggestBigTour?.entry || null, biggestBigTour ? biggestBigTour.index : 0, 'Index', 'mountain', 'is-bigtour') +
                 '</div>' +
                 '<div class="bergwelt-cinematic-footer-stats">' +
                     '<span>' + icon('time') + '<span><small>Gehzeit</small><strong>' + formatHours(totalMinutes) + '</strong></span></span>' +
