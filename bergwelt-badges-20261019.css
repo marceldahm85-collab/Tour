@@ -2269,12 +2269,12 @@ body.green #bergwelt-height-detail-modal .bergwelt-height-gauge > span {
 
 /* Höhenwelt: kontrastfeste Diagrammfarben unabhängig vom Theme-Editor. */
 #wrapped-view .bergwelt-height-year-donut-section {
-    --height-chart-bg: #f2f7f4;
-    --height-chart-text: #1b3025;
-    --height-chart-muted: #42584a;
-    --height-chart-accent: #167447;
-    --height-chart-rest: #d3e1d7;
-    --height-chart-border: #bfd3c5;
+    --height-chart-bg: var(--app-surface-card, #111a25);
+    --height-chart-text: var(--app-text-primary, #f3f7fb);
+    --height-chart-muted: var(--app-text-muted, #cbd5df);
+    --height-chart-accent: var(--accent, #ad7d12);
+    --height-chart-rest: color-mix(in srgb, var(--app-text-primary, #f3f7fb) 15%, transparent);
+    --height-chart-border: var(--app-surface-border, rgba(255,255,255,.12));
     display: flex;
     align-items: center;
     gap: 18px;
@@ -2284,7 +2284,7 @@ body.green #bergwelt-height-detail-modal .bergwelt-height-gauge > span {
     border-radius: 17px;
     background: var(--height-chart-bg);
     color: var(--height-chart-text);
-    box-shadow: 0 8px 22px rgba(19, 45, 31, .12);
+    box-shadow: var(--premium-shadow-card, 0 8px 22px rgba(0,0,0,.22));
 }
 #wrapped-view .bergwelt-height-year-donut {
     background: conic-gradient(
@@ -2309,7 +2309,7 @@ body.green #bergwelt-height-detail-modal .bergwelt-height-gauge > span {
 #wrapped-view .bergwelt-height-year-donut-legend-item small { color: var(--height-chart-muted); opacity: 1; }
 
 /* Hell: Himmelblau und kühles Blau passend zur hellen Oberflächenpalette. */
-body:not(.dark):not(.green):not(.summit) #wrapped-view .bergwelt-height-year-donut-section {
+body:not(.dark):not(.green):not(.summit):not(.gold) #wrapped-view .bergwelt-height-year-donut-section {
     --height-chart-bg: #fff8e6;
     --height-chart-text: #3d3014;
     --height-chart-muted: #715d33;
@@ -2353,16 +2353,16 @@ body.summit #wrapped-view .bergwelt-height-year-donut-section {
 
 /* Jahresvergleich: dieselbe Palette wie das obere Jahresanteils-Ringdiagramm. */
 #wrapped-view .bergwelt-height-years-chart-section {
-    --height-chart-bg: #f2f7f4;
-    --height-chart-text: #1b3025;
-    --height-chart-muted: #42584a;
-    --height-chart-accent: #167447;
-    --height-chart-rest: #d3e1d7;
-    --height-chart-border: #bfd3c5;
+    --height-chart-bg: var(--app-surface-card, #111a25);
+    --height-chart-text: var(--app-text-primary, #f3f7fb);
+    --height-chart-muted: var(--app-text-muted, #cbd5df);
+    --height-chart-accent: var(--accent, #ad7d12);
+    --height-chart-rest: color-mix(in srgb, var(--app-text-primary, #f3f7fb) 15%, transparent);
+    --height-chart-border: var(--app-surface-border, rgba(255,255,255,.12));
     color: var(--height-chart-text);
     border-color: var(--height-chart-border);
     background: var(--height-chart-bg);
-    box-shadow: 0 8px 22px rgba(19, 45, 31, .12);
+    box-shadow: var(--premium-shadow-card, 0 8px 22px rgba(0,0,0,.22));
 }
 #wrapped-view .bergwelt-height-years-chart-section .bergwelt-height-years-chart-heading > span {
     color: var(--height-chart-muted);
@@ -2391,7 +2391,7 @@ body.summit #wrapped-view .bergwelt-height-year-donut-section {
 }
 
 /* Hell */
-body:not(.dark):not(.green):not(.summit) #wrapped-view .bergwelt-height-years-chart-section {
+body:not(.dark):not(.green):not(.summit):not(.gold) #wrapped-view .bergwelt-height-years-chart-section {
     --height-chart-bg: #fff8e6;
     --height-chart-text: #3d3014;
     --height-chart-muted: #715d33;
