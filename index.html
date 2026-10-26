@@ -121,8 +121,8 @@
 
 
 
-<link rel="stylesheet" href="./styles.css?v=6">
-<link rel="stylesheet" href="./styles-overrides.css?v=64">
+<link rel="stylesheet" href="./styles.css?v=7">
+<link rel="stylesheet" href="./styles-overrides.css?v=65">
 
 </head>
 <body>
@@ -131,31 +131,16 @@
 /* Sofortige Theme-Wiederherstellung für mobile/PWA-Reloads.
    Dieser Code läuft noch vor DOMContentLoaded und vor IndexedDB. */
 (function () {
-    const validThemes = ['gold', 'dark', 'green', 'summit'];
-    let saved = null;
-
-    try {
-        saved = localStorage.getItem('tourtracker-theme');
-    } catch (error) {
-        console.warn('[Theme Bootstrap] localStorage-Lesen fehlgeschlagen:', error);
-    }
-
-    if (!validThemes.includes(saved) && saved !== 'light') {
-        try {
-            saved = sessionStorage.getItem('tourtracker-theme');
-        } catch (error) {
-            console.warn('[Theme Bootstrap] sessionStorage-Lesen fehlgeschlagen:', error);
-        }
-    }
-
-    // Alte Installationen speichern das Goldtheme noch unter "light".
-    if (saved === 'light' || !validThemes.includes(saved)) saved = 'gold';
-
+    // Ein gemeinsamer dunkler Editor-Modus; alte Theme-Klassen dürfen keine Alt-CSS-Regeln aktivieren.
     document.body.classList.remove('gold', 'dark', 'green', 'summit');
-    if (saved === 'gold') document.body.classList.add('gold');
-    if (saved === 'dark') document.body.classList.add('dark');
-    if (saved === 'green') document.body.classList.add('green');
-    if (saved === 'summit') document.body.classList.add('summit');
+    document.body.classList.add('gold');
+
+    // Die App verwendet nur noch den gemeinsamen Editor-Modus.
+    try {
+        localStorage.setItem('tourtracker-theme', 'gold');
+    } catch (error) {
+        console.warn('[Theme Bootstrap] Vereinheitlichter Modus konnte nicht gespeichert werden:', error);
+    }
 })();
 </script>
 
