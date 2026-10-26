@@ -310,29 +310,31 @@
         'button', 'input[type="color"]', 'input[type="range"]', 'select', 'textarea'
     ];
 
-    function gradientFor(direction, transition, soft) {
+    function gradientFor(direction, transition, accent, soft) {
+        // Die Akzentfarbe ist der feste Startpunkt; Schwarz ist der nicht
+        // editierbare Endpunkt. Der Regler legt fest, wo der Übergang beginnt.
         const t = clamp(transition, 10, 90, 55);
-        const start = soft ? 'var(--app-surface-card, rgba(17,26,37,.74))'
-            : 'var(--app-surface-strong, rgba(25,30,39,.82))';
-        const end = 'var(--app-surface-subtle, rgba(13,21,31,.62))';
-        const before = Math.max(0, t - 16) + '%';
-        const after = Math.min(100, t + 16) + '%';
+        const accentColor = validHex(accent) ? accent : DEFAULT_ACCENT;
+        const start = soft ? blendHex(accentColor, '#000000', 0.32) : accentColor;
+        const end = '#000000';
 
         if (direction === 'radial') {
             return 'radial-gradient(circle at 28% 18%, ' + start + ' 0%, ' +
-                start + ' ' + before + ', ' + end + ' ' + after + ', ' + end + ' 100%)';
+                start + ' ' + t + '%, ' + end + ' 100%)';
         }
         return 'linear-gradient(' + direction + ', ' + start + ' 0%, ' +
-            start + ' ' + before + ', ' + end + ' ' + after + ', ' + end + ' 100%)';
+            start + ' ' + t + '%, ' + end + ' 100%)';
     }
 
     function buildUnifiedLiveCss() {
         const settings = ensureDraft();
-        const scope = 'body.gold';
-        const bigGradient = gradientFor(settings.gradientDirection, settings.transition, false);
-        const softGradient = gradientFor(settings.gradientDirection, settings.transition, true);
+        const viewScope = ':is(body.gold) :is(#dashboard-view, #app-view, #chart-view, #tour-view, #map-view, #filter-view, #backup-view, #theme-view, #achievements-view, #wrapped-view, #more-menu)';
+        const bigGradient = gradientFor(settings.gradientDirection, settings.transition, settings.accent, false);
+        const softGradient = gradientFor(settings.gradientDirection, settings.transition, settings.accent, true);
         const radius = settings.radius + 'px';
-        const selectors = (items) => items.map(item => scope + ' ' + item).join(',\n');
+        const selectors = (items) => items.map(item =>
+            item.startsWith('#') ? 'body.gold ' + item : viewScope + ' ' + item
+        ).join(',\n');
 
         let css = '';
         css += selectors(BIG_SURFACES) + ' { background: ' + bigGradient +
