@@ -8566,12 +8566,12 @@ body.premium-alpine-editor-paused.premium-alpine-editor-paused.dark {
 }
 body.green,
 body.premium-alpine-editor-paused.premium-alpine-editor-paused.green {
-    --accent: #7a0d0d !important;
-    --accent-soft: rgba(122, 13, 13, .30) !important;
-    --accent-gradient: linear-gradient(135deg, #7a0d0d, #4e0a0a) !important;
+    --accent: #174a32 !important;
+    --accent-soft: rgba(23, 74, 50, .30) !important;
+    --accent-gradient: linear-gradient(135deg, #174a32, #0a2b1d) !important;
     --accent-text-color: #ffffff !important;
-    --accordion-glow: rgba(122, 13, 13, .30) !important;
-    --app-surface-border: rgba(190, 82, 91, .34) !important;
+    --accordion-glow: rgba(23, 74, 50, .32) !important;
+    --app-surface-border: rgba(91, 165, 123, .34) !important;
 }
 body.summit,
 body.premium-alpine-editor-paused.premium-alpine-editor-paused.summit {
@@ -9052,4 +9052,69 @@ body:not(.dark):not(.green):not(.summit) {
     background: var(--accent-gradient) !important;
     border-color: var(--accent) !important;
     color: #fff !important;
+}
+
+
+/* PHASE 2 · SCHRITT 1 — LIGHT: NAVIGATION UND DROPDOWNS AN DIE PREMIUM-ALPINE-GLASFLÄCHEN ANGLEICHEN */
+/* Light: top navigation uses the same glass material as the new Dark design,
+   while the warm gold remains the only theme accent. Position and layout stay unchanged. */
+body:not(.dark):not(.green):not(.summit) .top-main-nav {
+    background: linear-gradient(180deg, var(--surface-gradient-soft-top) 0%, var(--surface-gradient-soft-bottom) 100%) !important;
+    background-image: linear-gradient(180deg, var(--surface-gradient-soft-top) 0%, var(--surface-gradient-soft-bottom) 100%) !important;
+    border: 1px solid var(--surface-gradient-border) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .22) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    backdrop-filter: blur(14px) !important;
+    color: var(--surface-gradient-text) !important;
+}
+body:not(.dark):not(.green):not(.summit) .top-main-nav .top-nav-btn {
+    color: var(--app-text-primary, #f3f7fb) !important;
+}
+body:not(.dark):not(.green):not(.summit) .top-main-nav .top-nav-btn.view-active,
+body:not(.dark):not(.green):not(.summit) .top-main-nav .top-nav-btn.more-view-active {
+    background: var(--accent-soft) !important;
+    border: 1px solid color-mix(in srgb, var(--accent) 72%, transparent) !important;
+    color: var(--app-text-primary, #f3f7fb) !important;
+}
+body:not(.dark):not(.green):not(.summit) .top-main-nav .top-nav-save {
+    background: var(--accent-gradient) !important;
+    border-color: var(--accent) !important;
+    color: var(--accent-text-color, #17202a) !important;
+}
+body:not(.dark):not(.green):not(.summit) .top-main-nav .top-nav-save .top-nav-label,
+body:not(.dark):not(.green):not(.summit) .top-main-nav .top-nav-save .top-nav-plus {
+    color: var(--accent-text-color, #17202a) !important;
+}
+
+/* Light: native Dropdowns, ersetzte Mobile-Selects und Jahres-Pfeile erhalten
+   die neue dunkle Glasfläche mit goldener Kontur; IDs überstimmen alte View-Sonderregeln. */
+body:not(.dark):not(.green):not(.summit) :is(#dashboard-view, #chart-view, #map-view, #tour-view, #filter-view, #theme-view, #wrapped-view, #more-menu) :is(select, .mob-sel-btn, .dash-year-arrow-btn) {
+    background: linear-gradient(145deg, rgba(25, 30, 39, .94), rgba(17, 26, 37, .92)) !important;
+    color: #f3f7fb !important;
+    border-color: rgba(184, 134, 40, .52) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045), 0 4px 12px rgba(0, 0, 0, .14) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    backdrop-filter: blur(12px) !important;
+}
+body:not(.dark):not(.green):not(.summit) :is(#dashboard-view, #chart-view, #map-view, #tour-view, #filter-view, #theme-view, #wrapped-view, #more-menu) :is(select, .mob-sel-btn, .dash-year-arrow-btn):focus,
+body:not(.dark):not(.green):not(.summit) :is(#dashboard-view, #chart-view, #map-view, #tour-view, #filter-view, #theme-view, #wrapped-view, #more-menu) :is(select, .mob-sel-btn, .dash-year-arrow-btn):focus-visible {
+    border-color: var(--accent) !important;
+    outline-color: var(--accent) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045), 0 0 0 2px var(--accent-soft) !important;
+}
+body:not(.dark):not(.green):not(.summit) select option {
+    background: #111a25 !important;
+    color: #f3f7fb !important;
+}
+body:not(.dark):not(.green):not(.summit) #more-menu {
+    background: linear-gradient(145deg, rgba(25, 30, 39, .96), rgba(17, 26, 37, .95)) !important;
+    border-color: rgba(184, 134, 40, .44) !important;
+    color: #f3f7fb !important;
+}
+body:not(.dark):not(.green):not(.summit) #more-menu .more-menu-item:hover,
+body:not(.dark):not(.green):not(.summit) #more-menu .more-menu-item:focus-visible,
+body:not(.dark):not(.green):not(.summit) #more-menu .more-theme-option[aria-pressed="true"] {
+    background: var(--accent-soft) !important;
+    border-color: rgba(184, 134, 40, .62) !important;
+    color: #f3f7fb !important;
 }
