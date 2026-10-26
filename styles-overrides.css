@@ -7536,7 +7536,7 @@ body.summit .parallax::before {
    damit die Silhouette des Wanderers im Bildbereich bleibt. */
 @media (max-width: 600px) {
     .parallax {
-        background-position: 100% center !important;
+        background-position: 59% center !important;
     }
 }
 
