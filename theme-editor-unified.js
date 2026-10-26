@@ -31,6 +31,14 @@
         typeof window.initStorage === 'function'
             ? window.initStorage
             : null;
+    const originalGetChartTheme =
+        typeof window.getChartTheme === 'function'
+            ? window.getChartTheme
+            : null;
+    const originalGetWrappedThemeColors =
+        typeof window.getWrappedThemeColors === 'function'
+            ? window.getWrappedThemeColors
+            : null;
     let storageReady = false;
     let draft = null;
     let editorInitialized = false;
@@ -256,6 +264,9 @@
 
     const RADIUS_SURFACES = [
         '.box', '.box-header', '.box-content', '.dash-section', '.filter-simple-card',
+        '[class*="-card"]', '[class*="-tile"]', '[class*="-panel"]',
+        '[class*="-section"]', '[class*="-btn"]', '[class*="-button"]',
+        '[class*="-nav"]', '[class*="-list"] > li',
         '.dash-stat-tile', '.chart-stat-tile', '.dash-milestone-tile', '.chart-card',
         '.stats-analysis-section', '.stats-structure-section', '.compare-box',
         '.compare-period-card', '.compare-list-card', '.tour-compare-pick-card',
@@ -275,11 +286,16 @@
         '.top-main-nav', '.top-main-nav button', '.more-menu-item',
         '.accordion-header', '.tour-form input[type="text"]',
         '.tour-form input[type="number"]', '.tour-form input[type="search"]',
-        '.tour-form input[type="color"]', '.tour-form select', '.tour-form textarea',
+        '.tour-form input[type="color"]', '.tour-form input[type="date"]',
+        '.tour-form input[type="time"]', '.tour-form input[type="email"]',
+        '.tour-form input[type="tel"]', '.tour-form input[type="range"]',
+        '.tour-form select', '.tour-form textarea',
         '#filter-view input[type="text"]', '#filter-view input[type="number"]',
-        '#filter-view input[type="search"]', '#filter-view select', '#filter-view textarea',
+        '#filter-view input[type="search"]', '#filter-view input[type="date"]',
+        '#filter-view input[type="time"]', '#filter-view input[type="email"]',
+        '#filter-view input[type="tel"]', '#filter-view select', '#filter-view textarea',
         '#pdf-export-card select', '#pdf-export-card .pdf-book-options > summary',
-        'button', 'input[type="color"]', 'select', 'textarea'
+        'button', 'input[type="color"]', 'input[type="range"]', 'select', 'textarea'
     ];
 
     function gradientFor(direction, transition, soft) {
@@ -577,6 +593,37 @@
         draft = null;
     };
     window.initThemeEditor = initUnifiedEditor;
+
+    if (originalGetChartTheme) {
+        window.getChartTheme = function () {
+            const previous = originalGetChartTheme.apply(this, arguments) || {};
+            const settings = ensureDraft();
+            return {
+                ...previous,
+                textColor: '#f3f7fb',
+                isDark: true,
+                dotFill: '#121b26',
+                gradientStops: [
+                    [0, blendHex(settings.accent, '#101722', 0.78)],
+                    [0.5, blendHex(settings.accent, '#101722', 0.38)],
+                    [1, settings.accent]
+                ]
+            };
+        };
+    }
+
+    if (originalGetWrappedThemeColors) {
+        window.getWrappedThemeColors = function () {
+            const settings = ensureDraft();
+            return {
+                bg1: '#191e27',
+                bg2: '#0d151f',
+                text: '#f3f7fb',
+                accent: settings.accent
+            };
+        };
+    }
+
     window.hapticFeedback = function (duration) {
         const settings = ensureDraft();
         if (!settings.haptics || !('vibrate' in navigator)) return;
