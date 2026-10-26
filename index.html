@@ -122,7 +122,7 @@
 
 
 <link rel="stylesheet" href="./styles.css?v=9">
-<link rel="stylesheet" href="./styles-overrides.css?v=66">
+<link rel="stylesheet" href="./styles-overrides.css?v=67">
 
 </head>
 <body>
@@ -2373,202 +2373,95 @@
 
 <div id="theme-view" class="view">
     <div class="theme-editor-inner">
-        <section class="filter-simple-card theme-editor-card">
+        <section class="filter-simple-card theme-editor-card" id="theme-editor-settings-card">
             <div class="filter-simple-title">🎨 Editor</div>
-
             <div class="theme-editor-top">
-                <div id="theme-editor-hint">Die Einstellungen gelten für die gesamte App.</div>
+                <div id="theme-editor-hint">Änderungen werden sofort angezeigt. Mit „Speichern“ übernimmst du sie dauerhaft.</div>
             </div>
 
-            <div class="theme-editor-columns">
-                <details class="theme-editor-col theme-editor-col-left" data-theme-editor-accordion="main">
-                    <summary class="theme-editor-column-title">🌄 Hintergrund & Verlauf</summary>
-
-                    <div class="tour-form-row tour-form-row-two">
-                        <div class="form-group">
-                            <label for="te-top-color">Verlauf oben</label>
-                            <input type="color" id="te-top-color">
-                        </div>
-                        <div class="form-group">
-                            <label for="te-bottom-color">Verlauf unten</label>
-                            <input type="color" id="te-bottom-color">
-                        </div>
+            <div class="theme-editor-settings-grid">
+                <div class="theme-editor-option theme-editor-option-wide">
+                    <div class="theme-editor-option-heading">
+                        <label for="te-unified-accent">Akzentfarbe</label>
+                        <small>Gilt auch für die obere Navigation und aktive Elemente.</small>
                     </div>
+                    <input type="color" id="te-unified-accent" value="#ad7d12" aria-label="App-weite Akzentfarbe">
+                </div>
 
-                    <div class="form-group">
-                        <label for="te-direction">Verlaufsrichtung</label>
-                        <select id="te-direction">
-                            <option value="180deg">Oben → Unten</option>
-                            <option value="90deg">Links → Rechts</option>
-                            <option value="135deg">Diagonal ↘</option>
-                            <option value="45deg">Diagonal ↗</option>
-                            <option value="radial">Radial (Lichtquelle oben links)</option>
-                        </select>
+                <div class="theme-editor-option">
+                    <div class="theme-editor-option-heading">
+                        <label for="te-unified-radius">Eckenradius</label>
+                        <span id="te-unified-radius-value">14 px</span>
                     </div>
+                    <input type="range" id="te-unified-radius" min="0" max="28" step="1" value="14">
+                </div>
 
-                    <div class="form-group">
-                        <label for="te-transition">Übergangspunkt: <span id="te-transition-value">55</span>%</label>
-                        <input type="range" id="te-transition" min="10" max="90" step="1">
+                <div class="theme-editor-option">
+                    <div class="theme-editor-option-heading">
+                        <label for="te-font-family">Schriftart</label>
                     </div>
+                    <select id="te-font-family">
+                        <option value="android">Android – Roboto</option>
+                        <option value="system">System – variabel</option>
+                        <option value="rounded">Abgerundet</option>
+                        <option value="serif">Noto Serif</option>
+                        <option value="slab">Slab Serif</option>
+                        <option value="mono">Monospace</option>
+                        <option value="cursive">Handschriftlich</option>
+                        <option value="fantasy">Dekorativ</option>
+                    </select>
+                </div>
 
-                    <div class="tour-form-row tour-form-row-two">
-                        <div class="form-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="te-mid-enabled">
-                                Mittelfarbe verwenden
-                            </label>
-                        </div>
-                        <div class="form-group">
-                            <label for="te-mid-color">Verlauf Mitte</label>
-                            <input type="color" id="te-mid-color">
-                        </div>
+                <div class="theme-editor-option">
+                    <div class="theme-editor-option-heading">
+                        <label for="te-font-size">Schriftgröße</label>
+                        <span id="te-font-size-value">100 %</span>
                     </div>
+                    <input type="range" id="te-font-size" min="80" max="130" step="1" value="100">
+                </div>
 
-                    <div class="form-group">
-                        <label for="te-intensity">Flächenintensität: <span id="te-intensity-value">88</span>%</label>
-                        <input type="range" id="te-intensity" min="40" max="100" step="1">
+                <div class="theme-editor-option">
+                    <label class="theme-editor-haptics-toggle" for="haptic-feedback-toggle">
+                        <input type="checkbox" id="haptic-feedback-toggle" checked>
+                        <span>
+                            <strong>Haptisches Feedback</strong>
+                            <small>Kurze Vibration bei bewussten Aktionen.</small>
+                        </span>
+                    </label>
+                </div>
+
+                <div class="theme-editor-option">
+                    <div class="theme-editor-option-heading">
+                        <label for="te-unified-direction">Verlaufsrichtung</label>
                     </div>
+                    <select id="te-unified-direction">
+                        <option value="180deg">Oben → Unten</option>
+                        <option value="90deg">Links → Rechts</option>
+                        <option value="135deg">Diagonal ↘</option>
+                        <option value="45deg">Diagonal ↗</option>
+                        <option value="radial">Radial – Licht von oben links</option>
+                    </select>
+                </div>
 
-                    <div class="form-group">
-                        <label for="te-border">Randintensität: <span id="te-border-value">34</span>%</label>
-                        <input type="range" id="te-border" min="10" max="70" step="1">
+                <div class="theme-editor-option theme-editor-option-wide">
+                    <div class="theme-editor-option-heading">
+                        <label for="te-unified-transition">Übergangspunkt</label>
+                        <span id="te-unified-transition-value">55 %</span>
                     </div>
-                </details>
-
-                <details class="theme-editor-col theme-editor-col-right" data-theme-editor-accordion="main">
-                    <summary class="theme-editor-column-title">✨ Oberfläche & Text</summary>
-
-                    <div class="form-group">
-                        <label for="te-radius">Eckenradius: <span id="te-radius-value">14</span>px</label>
-                        <input type="range" id="te-radius" min="0" max="28" step="1">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="te-blur">Glasunschärfe: <span id="te-blur-value">10</span>px</label>
-                        <input type="range" id="te-blur" min="0" max="20" step="1">
-                    </div>
-
-                    <div class="tour-form-row tour-form-row-two">
-                        <div class="form-group">
-                            <label for="te-text-main">Textfarbe (Haupt)</label>
-                            <input type="color" id="te-text-main">
-                        </div>
-                        <div class="form-group">
-                            <label for="te-text-soft">Textfarbe (Sekundär)</label>
-                            <input type="color" id="te-text-soft">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="te-accent">Akzentfarbe für die gesamte App</label>
-                        <input type="color" id="te-accent">
-                    </div>
-                    <input type="color" id="te-accent2" hidden aria-hidden="true" tabindex="-1" value="#ad7d12">
-
-                    <div class="form-group">
-                        <label for="te-shadow">Schattentiefe: <span id="te-shadow-value">50</span>%</label>
-                        <input type="range" id="te-shadow" min="0" max="100" step="1">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="te-bg-brightness">Seitenhintergrund-Helligkeit: <span id="te-bg-brightness-value">50</span>%</label>
-                        <input type="range" id="te-bg-brightness" min="0" max="100" step="1">
-                    </div>
-                </details>
+                    <input type="range" id="te-unified-transition" min="10" max="90" step="1" value="55">
+                </div>
             </div>
-
-            <div class="theme-editor-secondary-grid">
-                <details class="theme-editor-panel" data-theme-editor-accordion="secondary">
-                    <summary class="theme-editor-panel-title">🧭 Navigation</summary>
-                    <div class="tour-form-row tour-form-row-two">
-                        <div class="form-group">
-                            <label for="te-nav-top-color">Navigation oben</label>
-                            <input type="color" id="te-nav-top-color">
-                        </div>
-                        <div class="form-group">
-                            <label for="te-nav-bottom-color">Navigation unten</label>
-                            <input type="color" id="te-nav-bottom-color">
-                        </div>
-                    </div>
-                </details>
-
-                <details class="theme-editor-panel" data-theme-editor-accordion="secondary">
-                    <summary class="theme-editor-panel-title">🔤 Schrift</summary>
-                    <div class="form-group">
-                        <label for="te-font-family">App-Schriftart</label>
-                        <select id="te-font-family">
-                            <option value="android">Android – Roboto</option>
-                            <option value="system">System – variabel</option>
-                            <option value="rounded">Abgerundet</option>
-                            <option value="serif">Noto Serif</option>
-                            <option value="slab">Slab Serif</option>
-                            <option value="mono">Monospace</option>
-                            <option value="cursive">Handschriftlich</option>
-                            <option value="fantasy">Dekorativ</option>
-                        </select>
-                    </div>
-                    <div class="form-group theme-editor-font-size-group">
-                        <label for="te-font-size">Globale Schriftgröße: <span id="te-font-size-value">100</span>%</label>
-                        <input type="range" id="te-font-size" min="80" max="130" step="1" value="100">
-                    </div>
-                </details>
-
-                <details class="theme-editor-panel" data-theme-editor-accordion="secondary">
-                    <summary class="theme-editor-panel-title">📊 Diagrammfarben</summary>
-                    <div class="tour-form-row tour-form-row-two">
-                        <div class="form-group">
-                            <label for="te-chart-color-start">Balken unten</label>
-                            <input type="color" id="te-chart-color-start">
-                        </div>
-                        <div class="form-group">
-                            <label for="te-chart-color-mid">Balken Mitte</label>
-                            <input type="color" id="te-chart-color-mid">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="te-chart-color-end">Balken oben (Spitze)</label>
-                        <input type="color" id="te-chart-color-end">
-                    </div>
-                </details>
-
-                <details class="theme-editor-panel" data-theme-editor-accordion="secondary">
-                    <summary class="theme-editor-panel-title">☀️ App-Helligkeit</summary>
-                    <div class="form-group">
-                        <label for="te-app-brightness">Helligkeit der App: <span id="te-app-brightness-value">50</span>%</label>
-                        <input type="range" id="te-app-brightness" min="0" max="100" step="1" value="50">
-                        <small>50 % = unverändert. Niedrigere Werte dunkeln die App ab, höhere Werte hellen sie auf. Wird für jedes Theme separat gespeichert.</small>
-                    </div>
-                </details>
-
-                <details class="theme-editor-panel" data-theme-editor-accordion="secondary">
-                    <summary class="theme-editor-panel-title">📳 Bedienung & Feedback</summary>
-                    <div class="haptic-feedback-setting">
-                        <label class="haptic-feedback-toggle" for="haptic-feedback-toggle">
-                            <input type="checkbox" id="haptic-feedback-toggle" checked>
-                            <span class="haptic-feedback-copy">
-                                <strong>Haptisches Feedback</strong>
-                                <small>Kurze Vibration bei bewussten Aktionen und Auswahländerungen. Beim Tippen in Textfelder bleibt das Smartphone ruhig.</small>
-                            </span>
-                        </label>
-                    </div>
-                </details>
-            </div>
-
-            <details class="theme-editor-panel dashboard-editor-section" data-theme-editor-accordion="dashboard">
-                <summary class="theme-editor-panel-title">📊 Dashboard-Aufbau</summary>
-                <div class="dashboard-editor-inline-body" id="dashboard-editor-body"></div>
-            </details>
-
-            <details class="theme-editor-panel theme-editor-contrast-section" data-theme-editor-accordion="contrast">
-                <summary class="theme-editor-panel-title">🔍 Kontrast-Check</summary>
-                <div id="theme-editor-contrast-panel" class="theme-editor-contrast-panel"></div>
-            </details>
 
             <div class="theme-editor-actions">
                 <button type="button" class="save-btn" id="theme-editor-reset">Zurücksetzen</button>
                 <button type="button" class="save-btn" id="theme-editor-save">Speichern</button>
             </div>
         </section>
+
+        <details class="theme-editor-panel dashboard-editor-section" data-theme-editor-accordion="dashboard">
+            <summary class="theme-editor-panel-title">📊 Dashboard-Aufbau</summary>
+            <div class="dashboard-editor-inline-body" id="dashboard-editor-body"></div>
+        </details>
     </div>
 </div>
 
@@ -2624,6 +2517,7 @@
 
 <script src="./app-main-20261019.js?v=10" defer></script>
 <script src="./theme-editor-surface-compat.js?v=4" defer></script>
+<script src="./theme-editor-unified.js?v=1" defer></script>
 <script src="./app-navigation-history.js?v=1" defer></script>
 
 
