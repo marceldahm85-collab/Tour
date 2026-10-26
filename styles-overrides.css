@@ -8939,3 +8939,123 @@ body .dash-ms-progress-bar {
 :is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .chart-stat-tile.active .chart-stat-icon {
     color: var(--accent-text-color, #ffffff) !important;
 }
+
+
+/* Premium Alpine – einheitliche, halbtransparente Theme-Oberflächen über alle Views. */
+/* Akzentfarben: dunkelrot, dunkelgrün, dunkelblau und Gold. */
+body.dark {
+    --accent: #7a0d0d;
+    --accent-soft: rgba(122, 13, 13, .30);
+    --accent-gradient: linear-gradient(135deg, #7a0d0d 0%, #4e0a0a 100%);
+    --accordion-glow: rgba(122, 13, 13, .30);
+    --surface-gradient-top: rgba(100, 24, 32, .76);
+    --surface-gradient-bottom: rgba(8, 17, 28, .88);
+    --surface-gradient-soft-top: rgba(79, 26, 34, .68);
+    --surface-gradient-soft-bottom: rgba(11, 23, 36, .82);
+    --surface-gradient-border: rgba(196, 91, 99, .32);
+    --surface-gradient-text: #f4f7fb;
+    --theme-surface-top: rgba(100, 24, 32, .76);
+    --theme-surface-bottom: rgba(8, 17, 28, .88);
+    --theme-surface-soft-top: rgba(79, 26, 34, .68);
+    --theme-surface-soft-bottom: rgba(11, 23, 36, .82);
+    --theme-surface-border: rgba(196, 91, 99, .32);
+    --theme-surface-text: #f4f7fb;
+}
+body.green {
+    --accent: #174a32;
+    --accent-soft: rgba(23, 74, 50, .30);
+    --accent-gradient: linear-gradient(135deg, #174a32 0%, #0a2b1d 100%);
+    --accordion-glow: rgba(23, 74, 50, .32);
+    --surface-gradient-top: rgba(25, 79, 54, .76);
+    --surface-gradient-bottom: rgba(4, 19, 13, .89);
+    --surface-gradient-soft-top: rgba(20, 65, 44, .68);
+    --surface-gradient-soft-bottom: rgba(5, 27, 18, .83);
+    --surface-gradient-border: rgba(91, 165, 123, .32);
+    --surface-gradient-text: #f2fff7;
+    --theme-surface-top: rgba(25, 79, 54, .76);
+    --theme-surface-bottom: rgba(4, 19, 13, .89);
+    --theme-surface-soft-top: rgba(20, 65, 44, .68);
+    --theme-surface-soft-bottom: rgba(5, 27, 18, .83);
+    --theme-surface-border: rgba(91, 165, 123, .32);
+    --theme-surface-text: #f2fff7;
+}
+body.summit {
+    --accent: #153b69;
+    --accent-soft: rgba(21, 59, 105, .30);
+    --accent-gradient: linear-gradient(135deg, #153b69 0%, #0b2342 100%);
+    --accordion-glow: rgba(21, 59, 105, .32);
+    --surface-gradient-top: rgba(24, 61, 101, .76);
+    --surface-gradient-bottom: rgba(8, 18, 31, .89);
+    --surface-gradient-soft-top: rgba(20, 51, 84, .68);
+    --surface-gradient-soft-bottom: rgba(10, 25, 41, .83);
+    --surface-gradient-border: rgba(100, 153, 211, .34);
+    --surface-gradient-text: #f3f8ff;
+    --theme-surface-top: rgba(24, 61, 101, .76);
+    --theme-surface-bottom: rgba(8, 18, 31, .89);
+    --theme-surface-soft-top: rgba(20, 51, 84, .68);
+    --theme-surface-soft-bottom: rgba(10, 25, 41, .83);
+    --theme-surface-border: rgba(100, 153, 211, .34);
+    --theme-surface-text: #f3f8ff;
+}
+body:not(.dark):not(.green):not(.summit) {
+    --accent: #b88628;
+    --accent-soft: rgba(184, 134, 40, .24);
+    --accent-gradient: linear-gradient(135deg, #d9b45c 0%, #a87518 100%);
+    --accordion-glow: rgba(184, 134, 40, .26);
+    --surface-gradient-top: rgba(245, 232, 200, .76);
+    --surface-gradient-bottom: rgba(229, 222, 204, .86);
+    --surface-gradient-soft-top: rgba(250, 241, 220, .70);
+    --surface-gradient-soft-bottom: rgba(235, 228, 210, .82);
+    --surface-gradient-border: rgba(157, 115, 34, .34);
+    --surface-gradient-text: #26352e;
+    --theme-surface-top: rgba(245, 232, 200, .76);
+    --theme-surface-bottom: rgba(229, 222, 204, .86);
+    --theme-surface-soft-top: rgba(250, 241, 220, .70);
+    --theme-surface-soft-bottom: rgba(235, 228, 210, .82);
+    --theme-surface-border: rgba(157, 115, 34, .34);
+    --theme-surface-text: #26352e;
+}
+
+/* Einheitliche halbtransparente Flächen; keine Änderung an View-Struktur oder Navigation. */
+.box, .dash-section, .filter-simple-card, .stats-analysis-section,
+.stats-structure-section, .chart-card, .compare-box, .compare-period-card,
+.compare-list-card, .tour-compare-pick-card, .tour-compare-result,
+.backup-status-panel, .backup-info-card, .backup-file-status,
+.stats-list li, .peak-tour-list li, .tour-search-result, .chart-stat-tile,
+.dash-stat-tile, .dash-milestone-tile, .tour-profile-summary-card,
+.development-metric-card, .best-form-card, .activity-summary-card,
+.peak-summary-card, .stats-structure-typical-card, .stats-structure-type-card,
+.stats-structure-burden-card, .backup-status-item {
+    background: linear-gradient(180deg, var(--surface-gradient-top) 0%, var(--surface-gradient-bottom) 100%) !important;
+    border-color: var(--surface-gradient-border) !important;
+    color: var(--surface-gradient-text);
+}
+.stats-list li, .peak-tour-list li, .tour-search-result, .chart-stat-tile,
+.dash-stat-tile, .dash-milestone-tile, .tour-profile-summary-card,
+.development-metric-card, .best-form-card, .activity-summary-card,
+.peak-summary-card, .stats-structure-typical-card, .stats-structure-type-card,
+.stats-structure-burden-card, .backup-status-item {
+    background: linear-gradient(180deg, var(--surface-gradient-soft-top) 0%, var(--surface-gradient-soft-bottom) 100%) !important;
+}
+.box *, .dash-section *, .filter-simple-card *, .stats-analysis-section *,
+.stats-structure-section *, .chart-card *, .compare-box *, .compare-period-card *,
+.compare-list-card *, .tour-compare-pick-card *, .tour-compare-result *,
+.backup-status-panel *, .backup-info-card *, .backup-file-status * {
+    color: inherit;
+}
+/* Hauptnavigation erhält dieselbe themegerechte Akzentwelt wie die Dashboard-Flächen. */
+.top-main-nav {
+    background: linear-gradient(180deg, var(--surface-gradient-soft-top) 0%, var(--surface-gradient-soft-bottom) 100%) !important;
+    border-color: var(--surface-gradient-border) !important;
+    color: var(--surface-gradient-text) !important;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+.top-main-nav button, .top-main-nav a {
+    color: inherit;
+}
+.top-main-nav .active, .top-main-nav [aria-current="page"] {
+    background: var(--accent-gradient) !important;
+    border-color: var(--accent) !important;
+    color: #fff !important;
+}
