@@ -204,6 +204,17 @@
         return normalized;
     }
 
+    function persistSingleSetting(field, value) {
+        const saved = readStored(SETTINGS_KEY);
+        const next = normalizeSettings(
+            saved && typeof saved === 'object' ? saved : migrateLegacySettings()
+        );
+        next[field] = value;
+        const normalized = normalizeSettings(next);
+        writeStored(SETTINGS_KEY, normalized);
+        if (draft) draft[field] = normalized[field];
+    }
+
     function hexToRgb(hex) {
         const clean = String(hex || '').replace('#', '');
         if (!/^[0-9a-f]{6}$/i.test(clean)) return [173, 125, 18];
@@ -537,14 +548,14 @@
             const element = document.getElementById(id);
             if (!element || element.dataset.unifiedEditorSync === 'true') return;
             element.dataset.unifiedEditorSync = 'true';
-            element.addEventListener('input', () => {
+            const field = id === 'te-font-family' ? 'fontFamily' : 'fontSize';
+            const updateFontPreference = () => {
                 draft = readForm();
+                persistSingleSetting(field, draft[field]);
                 applyUnifiedSettings(true);
-            });
-            element.addEventListener('change', () => {
-                draft = readForm();
-                applyUnifiedSettings(true);
-            });
+            };
+            element.addEventListener('input', updateFontPreference);
+            element.addEventListener('change', updateFontPreference);
         });
 
         const haptics = document.getElementById('haptic-feedback-toggle');
