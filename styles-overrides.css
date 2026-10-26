@@ -8236,3 +8236,47 @@ body.summit .top-main-nav [aria-current="page"] {
     background: var(--accent-gradient);
     border-color: var(--accent);
 }
+
+
+/* Final Korrekturen: auch Listen in Modals und freie View-Texte nutzen den gemeinsamen Kontrast. */
+/* Ein geerbter Text darf nicht im Light-Theme auf die frühere dunkle Schrift zurückfallen. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) {
+    color: var(--app-text-primary) !important;
+}
+
+/* Dieselben wiederverwendbaren Listenflächen auch außerhalb des Haupt-View-DOMs. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(
+    .stats-list li, .stats-list li.stats-sub, .peak-tour-list li, .tour-search-result,
+    .chart-stat-tile:not(.active), .stat-card, .dash-stat-tile, .dash-milestone-tile,
+    .dash-tour-list li, .compare-row, .compare-chip, .tour-profile-summary-card,
+    .development-metric-card, .best-form-card, .activity-summary-card, .peak-summary-card,
+    .stats-structure-typical-card, .stats-structure-type-card, .stats-structure-burden-card,
+    .backup-status-item, .plan-overview-tile, .plan-live-preview, .tour-group-insight
+) {
+    background: linear-gradient(180deg, var(--app-surface-card), var(--app-surface-subtle)) !important;
+    border-color: var(--app-surface-border) !important;
+    color: var(--app-text-primary) !important;
+}
+
+/* Freie Textfelder und Diagrammbeschriftungen bleiben themeunabhängig lesbar. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(.stats-label, .stats-value, .chart-x-axis, .chart-y-axis, .chart-axis-label, .chart-legend-label, .slope-toggle-label, .has-peak-label, .text-muted) {
+    color: var(--app-text-primary) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(.chart-x-axis, .chart-y-axis, .chart-axis-label, .chart-legend-label, .text-muted, .stats-analysis-subtitle, .stats-structure-card-meta) {
+    color: var(--app-text-muted) !important;
+    opacity: 1 !important;
+}
+
+/* Pfeile, Checkboxen und dezente Hoverzustände nutzen nur den aktiven Theme-Akzent. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .arrow {
+    border-color: var(--accent) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .box::after {
+    background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--accent) 22%, rgba(255,255,255,.14)) 50%, transparent 100%) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) :is(.top-main-nav .top-nav-btn:not(.view-active):not(.more-view-active), .toggle-btn:not(.view-active), .mob-sel-btn):hover {
+    background-color: var(--accent-soft) !important;
+}
