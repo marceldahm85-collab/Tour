@@ -7441,7 +7441,7 @@ body.dark {
     --theme-palette-option-bg: #111a25;
     --theme-palette-option-text: #f3f7fb;
     --theme-palette-chart-rest: rgba(225, 231, 240, .15);
-    --theme-palette-color-scheme: var(--theme-color-scheme);
+    --theme-palette-color-scheme: dark;
 }
 
 body.green {
@@ -7466,7 +7466,7 @@ body.green {
     --theme-palette-option-bg: #071f12;
     --theme-palette-option-text: #f2faf5;
     --theme-palette-chart-rest: rgba(200, 230, 212, .18);
-    --theme-palette-color-scheme: var(--theme-color-scheme);
+    --theme-palette-color-scheme: dark;
 }
 
 body.summit {
@@ -7491,7 +7491,7 @@ body.summit {
     --theme-palette-option-bg: #172b3b;
     --theme-palette-option-text: #f1f7fc;
     --theme-palette-chart-rest: rgba(225, 231, 240, .15);
-    --theme-palette-color-scheme: var(--theme-color-scheme);
+    --theme-palette-color-scheme: dark;
 }
 
 /* Semantische Variablen: gemeinsame CSS-Regeln, themeabhängige Farbpalette. */
