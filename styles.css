@@ -21028,3 +21028,35 @@ body.wrapped-mobile-fullscreen-active {
 }
 
 
+
+
+/* =========================================================
+   Mehr-Menü im Editor-/Standardmodus: dunkle Oberfläche
+   Entspricht optisch den bisherigen Dark-/Green-/Summit-Menüs.
+   ========================================================= */
+body:not(.dark):not(.green):not(.summit) .more-menu {
+    background: rgba(18,25,34,0.97) !important;
+    color: #f1f5f9 !important;
+    border-color: rgba(255,255,255,0.12) !important;
+    box-shadow:
+        0 18px 50px rgba(0,0,0,0.48),
+        inset 0 1px 1px rgba(255,255,255,0.06) !important;
+}
+
+body:not(.dark):not(.green):not(.summit) .more-menu .more-menu-item,
+body:not(.dark):not(.green):not(.summit) #more-menu #theme-toggle {
+    color: #f1f5f9 !important;
+}
+
+body:not(.dark):not(.green):not(.summit) .more-menu .more-menu-divider {
+    background: rgba(255,255,255,0.10) !important;
+}
+
+body:not(.touch-mode):not(.dark):not(.green):not(.summit) .more-menu .more-menu-item:hover,
+body:not(.dark):not(.green):not(.summit) .more-menu .more-menu-item:active {
+    background: rgba(255,255,255,0.08) !important;
+}
+
+body:not(.dark):not(.green):not(.summit) #more-menu #theme-toggle::after {
+    color: #f1f5f9 !important;
+}
