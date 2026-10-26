@@ -34984,9 +34984,9 @@ function getWrappedThemeColors() {
     const theme = legacyThemeKey === 'light' ? 'gold' : legacyThemeKey;
     const palettes = {
         gold:   { bg1: '#191e27', bg2: '#0d151f', text: '#f3f7fb', accent: '#ad7d12' },
-        dark:   { bg1: '#8e0e00', bg2: '#1f1c2c', text: '#ffffff', accent: '#7a0d0d' },
-        green:  { bg1: '#0b2d19', bg2: '#030f09', text: '#f2faf5', accent: '#174c2d' },
-        summit: { bg1: '#0b2442', bg2: '#091727', text: '#f1f7fc', accent: '#163e68' }
+        dark:   { bg1: '#8e0e00', bg2: '#1f1c2c', text: '#ffffff', accent: '#ff6b6b' },
+        green:  { bg1: '#11998e', bg2: '#0f0f0f', text: '#ffffff', accent: '#38ef7d' },
+        summit: { bg1: '#2980b9', bg2: '#2c3e50', text: '#ffffff', accent: '#f5f5f5' }
     };
     return palettes[theme] || palettes.gold;
 }
