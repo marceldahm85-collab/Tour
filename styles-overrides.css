@@ -7545,3 +7545,156 @@ body.summit .parallax::before {
         background-position: 56% center !important;
     }
 }
+
+
+/* =========================================================
+   PHASE 2 · SCHRITT 1 — Einheitliche, halbtransparente Inhaltsflächen
+   Hintergrundmotiv bleibt unverändert und viewport-fest.
+   Gemeinsame Flächen über alle Views; Akzentfarben je Theme erhalten.
+   ========================================================= */
+
+:root {
+    --app-surface-strong: rgba(255, 255, 255, .80);
+    --app-surface-card: rgba(255, 255, 255, .70);
+    --app-surface-subtle: rgba(255, 255, 255, .54);
+    --app-surface-border: rgba(31, 52, 41, .25);
+    --app-text-primary: #17251d;
+    --app-text-muted: #405248;
+
+    --premium-surface-1: rgba(255,255,255,.78);
+    --premium-surface-2: rgba(244,248,244,.64);
+    --premium-border: rgba(31,52,41,.24);
+    --premium-border-strong: rgba(31,52,41,.38);
+    --premium-shadow-card: 0 10px 28px rgba(10,25,18,.18);
+    --premium-shadow-hover: 0 14px 34px rgba(10,25,18,.25);
+}
+
+body.dark {
+    --app-surface-strong: rgba(17, 29, 43, .82);
+    --app-surface-card: rgba(24, 40, 58, .76);
+    --app-surface-subtle: rgba(18, 32, 48, .68);
+    --app-surface-border: rgba(211, 229, 245, .25);
+    --app-text-primary: #f3f7fb;
+    --app-text-muted: #c2cfdb;
+
+    --glass-bg: var(--app-surface-strong);
+    --glass-border: var(--app-surface-border);
+    --ui-card-bg: var(--app-surface-card);
+    --ui-card-bg-interactive: rgba(38, 59, 82, .86);
+    --ui-section-bg: var(--app-surface-subtle);
+    --ui-card-border: var(--app-surface-border);
+    --year-control-bg: var(--app-surface-strong);
+    --year-control-bg-hover: rgba(42, 63, 87, .90);
+    --year-control-border: var(--app-surface-border);
+
+    --premium-surface-1: rgba(17,29,43,.84);
+    --premium-surface-2: rgba(24,40,58,.72);
+    --premium-border: rgba(211,229,245,.22);
+    --premium-border-strong: rgba(211,229,245,.38);
+    --premium-shadow-card: 0 10px 28px rgba(0,0,0,.30);
+    --premium-shadow-hover: 0 14px 34px rgba(0,0,0,.40);
+}
+
+body.green {
+    --app-surface-strong: rgba(3, 25, 15, .84);
+    --app-surface-card: rgba(8, 42, 24, .78);
+    --app-surface-subtle: rgba(5, 31, 18, .68);
+    --app-surface-border: rgba(114, 214, 163, .32);
+    --app-text-primary: #f6fff9;
+    --app-text-muted: #c9e5d4;
+
+    --glass-bg: var(--app-surface-strong);
+    --glass-border: var(--app-surface-border);
+    --ui-card-bg: var(--app-surface-card);
+    --ui-card-bg-interactive: rgba(14, 66, 38, .86);
+    --ui-section-bg: var(--app-surface-subtle);
+    --ui-card-border: var(--app-surface-border);
+    --year-control-bg: var(--app-surface-strong);
+    --year-control-bg-hover: rgba(14, 66, 38, .90);
+    --year-control-border: var(--app-surface-border);
+
+    --premium-surface-1: rgba(3,25,15,.86);
+    --premium-surface-2: rgba(8,42,24,.72);
+    --premium-border: rgba(114,214,163,.26);
+    --premium-border-strong: rgba(114,214,163,.42);
+    --premium-shadow-card: 0 10px 28px rgba(0,0,0,.34);
+    --premium-shadow-hover: 0 14px 34px rgba(0,0,0,.44);
+}
+
+body.summit {
+    --app-surface-strong: rgba(20, 34, 43, .83);
+    --app-surface-card: rgba(36, 51, 59, .77);
+    --app-surface-subtle: rgba(29, 42, 49, .67);
+    --app-surface-border: rgba(210, 232, 245, .30);
+    --app-text-primary: #f7fbff;
+    --app-text-muted: #d0dce4;
+
+    --glass-bg: var(--app-surface-strong);
+    --glass-border: var(--app-surface-border);
+    --ui-card-bg: var(--app-surface-card);
+    --ui-card-bg-interactive: rgba(51, 72, 83, .87);
+    --ui-section-bg: var(--app-surface-subtle);
+    --ui-card-border: var(--app-surface-border);
+    --year-control-bg: var(--app-surface-strong);
+    --year-control-bg-hover: rgba(51, 72, 83, .90);
+    --year-control-border: var(--app-surface-border);
+
+    --premium-surface-1: rgba(20,34,43,.85);
+    --premium-surface-2: rgba(36,51,59,.73);
+    --premium-border: rgba(210,232,245,.26);
+    --premium-border-strong: rgba(210,232,245,.42);
+    --premium-shadow-card: 0 10px 28px rgba(0,0,0,.28);
+    --premium-shadow-hover: 0 14px 34px rgba(0,0,0,.38);
+}
+
+/* Gemeinsame Oberflächen in Dashboard, Touren, Stats, Suche/Filter und Modals. */
+body .box,
+body .dash-section,
+body .filter-simple-card,
+body .stats-analysis-section,
+body .stats-structure-section,
+body .modal-card {
+    background: var(--app-surface-strong) !important;
+    border-color: var(--app-surface-border) !important;
+    color: var(--app-text-primary);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+}
+
+/* Wiederkehrende Statistik- und Listen-Kacheln behalten eine etwas leichtere Fläche. */
+body .chart-card,
+body .stat-card,
+body .chart-stat-tile,
+body .dash-stat-tile,
+body .dash-milestone-tile,
+body .stats-list li,
+body .peak-tour-list li,
+body .tour-search-result,
+body .compare-row,
+body .compare-period-card,
+body .compare-list-card,
+body .compare-chip {
+    background: var(--app-surface-card) !important;
+    border-color: var(--app-surface-border) !important;
+}
+
+/* Einheitliche Textkontraste in wiederkehrenden Karten; semantische Akzentfarben bleiben erhalten. */
+body .box-header,
+body .box-content,
+body .stats-label,
+body .stats-value,
+body .dash-stat-value,
+body .dash-stat-label,
+body .chart-title,
+body .modal-card {
+    color: var(--app-text-primary);
+}
+
+body .text-muted,
+body .stats-analysis-subtitle,
+body .stats-structure-card-meta,
+body .development-metric-label,
+body .best-form-label {
+    color: var(--app-text-muted);
+    opacity: 1;
+}
