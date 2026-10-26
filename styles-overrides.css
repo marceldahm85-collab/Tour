@@ -8288,3 +8288,197 @@ body.summit .top-main-nav [aria-current="page"] {
         font-size: 10px !important;
     }
 }
+
+
+/* =========================================================
+   Unified Editor – kompakte Bedienelemente und globale Werte
+   ========================================================= */
+#theme-view .theme-editor-inner {
+    width: 100%;
+    max-width: 980px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    gap: 12px;
+}
+#theme-view .theme-editor-card {
+    width: 100%;
+    box-sizing: border-box;
+}
+#theme-view .theme-editor-top {
+    margin: 8px 0 12px;
+}
+#theme-view #theme-editor-hint {
+    color: var(--app-text-muted, #cbd5df);
+    font-size: 12px;
+    line-height: 1.45;
+}
+#theme-view .theme-editor-settings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    align-items: stretch;
+}
+#theme-view .theme-editor-option {
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid var(--app-surface-border, rgba(225,232,242,.14));
+    border-radius: var(--app-radius, 14px);
+    background: linear-gradient(180deg, var(--app-surface-card, rgba(17,26,37,.74)), var(--app-surface-subtle, rgba(13,21,31,.62)));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+}
+#theme-view .theme-editor-option-wide {
+    grid-column: 1 / -1;
+}
+#theme-view .theme-editor-option-heading {
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 5px 8px;
+}
+#theme-view .theme-editor-option label,
+#theme-view .theme-editor-option-heading label {
+    min-width: 0;
+    margin: 0;
+    color: var(--app-text-primary, #f3f7fb);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+#theme-view .theme-editor-option-heading > span {
+    flex: 0 0 auto;
+    color: var(--accent, #ad7d12);
+    font-size: 11px;
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+}
+#theme-view .theme-editor-option-heading small,
+#theme-view .theme-editor-option > small {
+    display: block;
+    width: 100%;
+    color: var(--app-text-muted, #cbd5df);
+    font-size: 10px;
+    line-height: 1.4;
+}
+#theme-view .theme-editor-option input[type="color"] {
+    width: 100%;
+    min-width: 0;
+    height: 38px;
+    padding: 3px;
+    border: 1px solid var(--app-surface-border, rgba(225,232,242,.14));
+    border-radius: var(--app-radius, 14px);
+    background: var(--app-surface-strong, rgba(25,30,39,.82));
+}
+#theme-view .theme-editor-option select {
+    width: 100%;
+    min-width: 0;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 1px solid var(--app-surface-border, rgba(225,232,242,.14));
+    border-radius: var(--app-radius, 14px);
+    background: var(--app-surface-strong, rgba(25,30,39,.82));
+    color: var(--app-text-primary, #f3f7fb);
+    font-family: var(--app-font);
+    font-size: 12px;
+}
+#theme-view .theme-editor-option input[type="range"] {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    accent-color: var(--accent, #ad7d12);
+}
+#theme-view .theme-editor-haptics-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    cursor: pointer;
+}
+#theme-view .theme-editor-haptics-toggle input[type="checkbox"] {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--accent, #ad7d12);
+}
+#theme-view .theme-editor-haptics-toggle > span {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+#theme-view .theme-editor-haptics-toggle strong {
+    color: var(--app-text-primary, #f3f7fb);
+    font-size: 12px;
+    line-height: 1.35;
+}
+#theme-view .theme-editor-haptics-toggle small {
+    color: var(--app-text-muted, #cbd5df);
+    font-size: 10px;
+    line-height: 1.4;
+}
+#theme-view .theme-editor-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+}
+#theme-view .theme-editor-actions .save-btn {
+    min-width: 0;
+    min-height: 40px;
+    border-radius: var(--app-radius, 14px);
+    font-family: var(--app-font);
+    font-size: 12px;
+}
+#theme-view .dashboard-editor-section {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid var(--app-surface-border, rgba(225,232,242,.14));
+    border-radius: var(--app-radius, 14px);
+    background: linear-gradient(180deg, var(--app-surface-card, rgba(17,26,37,.74)), var(--app-surface-subtle, rgba(13,21,31,.62)));
+    color: var(--app-text-primary, #f3f7fb);
+    overflow: hidden;
+}
+#theme-view .dashboard-editor-section > summary {
+    padding: 13px 14px;
+    cursor: pointer;
+}
+#theme-view .dashboard-editor-section[open] > .dashboard-editor-inline-body {
+    padding: 0 12px 12px;
+}
+@media (max-width: 540px) {
+    #theme-view .theme-editor-settings-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+    #theme-view .theme-editor-option {
+        padding: 10px;
+        gap: 7px;
+    }
+    #theme-view .theme-editor-option:nth-child(3),
+    #theme-view .theme-editor-option:nth-child(6) {
+        grid-column: 1 / -1;
+    }
+    #theme-view .theme-editor-option select {
+        font-size: 11px;
+        padding: 8px;
+    }
+    #theme-view .theme-editor-actions {
+        gap: 8px;
+    }
+}
+
+/* Globale Radius-Variable als gemeinsame Basis auch für alte Komponenten,
+   die noch die früheren UI-Radiusvariablen verwenden. */
+:root {
+    --app-radius: 14px;
+    --ui-card-radius: var(--app-radius);
+    --ui-section-radius: var(--app-radius);
+}
