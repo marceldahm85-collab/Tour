@@ -150,20 +150,47 @@
 
     function migrateLegacySettings() {
         const legacy = getLegacyProfile();
-        const profile = legacy.profile || {};
-        const oldDefaultAccent = {
+        const storedProfiles = legacy.stored && typeof legacy.stored === 'object'
+            ? legacy.stored
+            : {};
+        const defaultAccents = {
             light: '#0f8a6c',
             dark: '#d45c5c',
             green: '#52b788',
             summit: '#63b7ff'
-        }[legacy.activeKey] || '#0f8a6c';
+        };
+        const profileOrder = [legacy.activeKey, 'dark', 'light', 'green', 'summit']
+            .filter((key, index, all) => THEME_KEYS.includes(key) && all.indexOf(key) === index);
+        const profileEntries = profileOrder.map(key => ({
+            key,
+            settings: storedProfiles[key] && typeof storedProfiles[key] === 'object'
+                ? storedProfiles[key]
+                : {}
+        }));
+        const profile = profileEntries[0]?.settings || legacy.profile || {};
+        const findLegacyValue = (field, defaultValue) => {
+            const current = profile[field];
+            if (current !== undefined && current !== null && String(current) !== String(defaultValue)) {
+                return current;
+            }
+            const other = profileEntries.find(entry =>
+                entry.settings[field] !== undefined &&
+                entry.settings[field] !== null &&
+                String(entry.settings[field]) !== String(defaultValue)
+            );
+            return other ? other.settings[field] : current;
+        };
 
-        // Einen tatsächlich angepassten alten Akzent übernehmen; die alten
-        // Standardfarben der vier Theme-Profile dagegen nicht weitertragen.
-        const migratedAccent = validHex(profile.accent) &&
-            profile.accent.toLowerCase() !== oldDefaultAccent
-                ? profile.accent
-                : readCurrentPaletteAccent();
+        // Falls die früheren Profile unterschiedliche Einstellungen hatten,
+        // zuerst einen benutzerdefinierten Akzent aus dem aktiven Profil suchen,
+        // danach in den übrigen Profilen. Die alten Standardfarben nicht migrieren.
+        const customAccentEntry = profileEntries.find(entry =>
+            validHex(entry.settings.accent) &&
+            entry.settings.accent.toLowerCase() !== defaultAccents[entry.key]
+        );
+        const migratedAccent = customAccentEntry
+            ? customAccentEntry.settings.accent
+            : readCurrentPaletteAccent();
 
         const oldFont = readStored(FONT_KEY);
         const oldFontSize = readStored(FONT_SIZE_KEY);
@@ -171,12 +198,12 @@
 
         return normalizeSettings({
             accent: migratedAccent,
-            radius: profile.radius,
+            radius: findLegacyValue('radius', 14),
             fontFamily: FONTS.includes(oldFont) ? oldFont : DEFAULTS.fontFamily,
             fontSize: oldFontSize,
             haptics: typeof oldHaptics === 'boolean' ? oldHaptics : DEFAULTS.haptics,
-            gradientDirection: profile.gradientDirection,
-            transition: profile.transition
+            gradientDirection: findLegacyValue('gradientDirection', '180deg'),
+            transition: findLegacyValue('transition', 55)
         });
     }
 
