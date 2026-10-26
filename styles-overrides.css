@@ -8793,3 +8793,149 @@ body #dashboard-view .dash-ms-progress-bar,
 body .dash-ms-progress-bar {
     background: var(--accent-gradient) !important;
 }
+
+
+/* =========================================================
+   PHASE 2 · SCHRITT 1 · SPEZIFITÄT FÜR ALLE THEMES
+   Stellt sicher, dass die gemeinsame Palette auch ältere,
+   spezifischere Theme-Regeln in der gesamten App überstimmt.
+   ========================================================= */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .box,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .dash-section,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .filter-simple-card,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-analysis-section,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-structure-section,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .chart-card,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .compare-box,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .compare-period-card,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .compare-list-card,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .tour-compare-pick-card,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .tour-compare-result,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .backup-status-panel,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .backup-info-card,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .backup-file-status,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .modal-card,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .theme-editor-panel,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .achievement-category-section,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .plan-page-box,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .plan-section-panel {
+    background: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
+    border-color: var(--app-surface-border) !important;
+    color: var(--app-text-primary) !important;
+}
+
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .chart-stat-tile:not(.active),
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stat-card,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .dash-stat-tile,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .dash-milestone-tile,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .dash-tour-list li,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-list li,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .peak-tour-list li,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .tour-search-result,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .compare-row,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .compare-chip,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .tour-profile-summary-card,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .development-metric-card,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .best-form-card,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .activity-summary-card,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .peak-summary-card,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-structure-typical-card,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-structure-type-card,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-structure-burden-card,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .plan-overview-tile,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .plan-live-preview {
+    background: var(--app-surface-card) !important;
+    border-color: var(--app-surface-border) !important;
+    color: var(--app-text-primary) !important;
+}
+
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .box-header,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .box-content,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-label,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-value,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .dash-stat-value,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .dash-stat-label,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .chart-title,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .form-section-title,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-analysis-title,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .development-metric-value,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .best-form-value,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .activity-summary-value,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .peak-summary-value,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .tour-form label,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .plan-view-title {
+    color: var(--app-text-primary) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) small,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .text-muted,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-analysis-subtitle,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-structure-card-meta,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .development-metric-label,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .best-form-label,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .tour-profile-summary-label,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .compare-period-title,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .dash-ms-progress-text {
+    color: var(--app-text-muted) !important;
+    opacity: 1 !important;
+}
+
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) select,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) textarea,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .mob-sel-btn,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .dash-year-arrow-btn {
+    background: var(--app-surface-card) !important;
+    color: var(--app-text-primary) !important;
+    border-color: var(--app-surface-border) !important;
+}
+
+/* Hauptnavigation: aktiver View, Speichern und Theme-Auswahl nutzen den Akzent überall gleich. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-nav-btn.view-active,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-nav-btn.more-view-active {
+    background: var(--accent-soft) !important;
+    border: 1px solid color-mix(in srgb, var(--accent) 72%, transparent) !important;
+    color: var(--app-text-primary) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-nav-btn.view-active .top-nav-label,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-nav-btn.more-view-active .top-nav-label {
+    color: var(--app-text-primary) !important;
+    opacity: 1 !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-nav-save,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) button.save-btn {
+    background: var(--accent-gradient) !important;
+    border-color: var(--accent) !important;
+    color: var(--accent-text-color, #ffffff) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-nav-save .top-nav-label,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-nav-save .top-nav-plus {
+    color: var(--accent-text-color, #ffffff) !important;
+    opacity: 1 !important;
+}
+
+/* Aktive Unter-Navigation und Auswahlflächen behalten ebenfalls die korrekte Theme-Akzentfarbe. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .chart-tab.active,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-section-btn.active,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .filter-section-nav-btn.active,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .plan-section-btn.active,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .tour-search-page-btn.active,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .quick-filter-btn.active,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .map-mode-btn.active,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .compare-mode-btn.active,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .checklist-mode-btn.active,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .yc-metric-btn.active,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .yc-year-toggle-btn.active,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .development-history-range-btn.active,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .toggle-btn.view-active,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .bergwelt-tab.is-active,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .chart-stat-tile.active {
+    background: var(--accent-gradient) !important;
+    border-color: color-mix(in srgb, var(--accent) 70%, rgba(220, 225, 235, .24)) !important;
+    color: var(--accent-text-color, #ffffff) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .chart-stat-tile.active .chart-stat-value,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .chart-stat-tile.active .chart-stat-label,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .chart-stat-tile.active .chart-stat-sub,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .chart-stat-tile.active .chart-stat-icon {
+    color: var(--accent-text-color, #ffffff) !important;
+}
