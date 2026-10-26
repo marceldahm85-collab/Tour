@@ -7398,19 +7398,19 @@ body:not(.dark):not(.green):not(.summit) {
     --theme-palette-accent: #b88620;
     --theme-palette-accent-soft: rgba(184, 134, 32, .22);
     --theme-palette-accent-gradient: linear-gradient(135deg, #e6bd58 0%, #a87517 100%);
-    --theme-palette-accent-text: #211b0d;
+    --theme-palette-accent-text: #171209;
 
     --theme-palette-surface-strong: rgba(255, 255, 255, .76);
-    --theme-palette-surface-card: rgba(255, 255, 255, .60);
-    --theme-palette-surface-subtle: rgba(248, 250, 246, .42);
+    --theme-palette-surface-card: rgba(255, 255, 255, .70);
+    --theme-palette-surface-subtle: rgba(248, 250, 246, .66);
     --theme-palette-cinematic-rgb: 248, 250, 246;
     --theme-palette-border: color-mix(in srgb, var(--theme-palette-accent) 24%, rgba(69, 91, 79, .20));
     --theme-palette-text: #2e4036;
-    --theme-palette-text-muted: #53645a;
+    --theme-palette-text-muted: #2a3b31;
     --theme-palette-shadow: 0 8px 24px rgba(35, 52, 43, .12);
     --theme-palette-shadow-hover: 0 12px 30px rgba(35, 52, 43, .17);
 
-    --theme-palette-control-bg: rgba(255, 255, 255, .58);
+    --theme-palette-control-bg: rgba(255, 255, 255, .66);
     --theme-palette-control-bg-hover: rgba(255, 255, 255, .76);
     --theme-palette-control-border: color-mix(in srgb, var(--theme-palette-accent) 32%, rgba(69, 91, 79, .22));
     --theme-palette-control-shadow: 0 3px 10px rgba(67, 55, 30, .10), inset 0 1px 0 rgba(255, 255, 255, .28);
