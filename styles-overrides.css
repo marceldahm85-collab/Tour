@@ -7939,3 +7939,167 @@ body.premium-alpine-editor-paused #theme-view {
         animation: none !important;
     }
 }
+
+
+/* Ergänzende gemeinsame Regeln für wiederkehrende Controls und Spezialflächen. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(
+    .chart-tabs, .chart-tab:not(.active), .stats-section-btn:not(.active),
+    .filter-section-nav-btn:not(.active), .plan-section-btn:not(.active),
+    .map-mode-toggle, .map-mode-btn:not(.active), .quick-filter-btn:not(.active),
+    .tour-page-btn:not(.active), .yc-metric-btn:not(.active), .yc-year-toggle-btn:not(.active),
+    .compare-mode-toggle, .compare-mode-btn:not(.active),
+    .checklist-mode-toggle, .checklist-mode-btn:not(.active),
+    .toggle-btn:not(.view-active), .slope-toggle:not([aria-pressed="true"]),
+    .gipfel-accordion
+) {
+    background: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
+    border-color: var(--app-surface-border) !important;
+    color: var(--app-text-primary) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(
+    .chart-tab:not(.active), .stats-section-btn:not(.active),
+    .filter-section-nav-btn:not(.active), .plan-section-btn:not(.active),
+    .map-mode-btn:not(.active), .quick-filter-btn:not(.active),
+    .tour-page-btn:not(.active), .yc-metric-btn:not(.active), .yc-year-toggle-btn:not(.active),
+    .compare-mode-btn:not(.active), .checklist-mode-btn:not(.active),
+    .toggle-btn:not(.view-active)
+) {
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(
+    .checklist-mode-btn.active, .slope-toggle[aria-pressed="true"],
+    .toggle-btn.view-active, .edit-btn:focus-visible
+) {
+    background: var(--accent-gradient) !important;
+    border-color: var(--accent) !important;
+    color: var(--accent-text-color) !important;
+}
+
+/* Checklisten und Tour-Formular-Zusatzflächen verwenden ebenfalls die gemeinsame Materialpalette. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(
+    .checklist-section, .checklist-item, .diagram-filter-checkbox, .form-details,
+    .tour-image-preview-wrap, .tour-detail-image-wrap, .stats-chart-block,
+    .plan-season-card, .tour-group-insight, .tour-history-summary > div,
+    .activity-detail-stat-grid > div
+) {
+    background: linear-gradient(180deg, var(--app-surface-card), var(--app-surface-subtle)) !important;
+    border-color: var(--app-surface-border) !important;
+    color: var(--app-text-primary) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(.checklist-section-title, .checklist-item label, .slope-toggle-label, .has-peak-label) {
+    color: var(--app-text-primary) !important;
+}
+
+/* Einzige Änderung an Checkboxen: Zustand und Kontur verwenden den Theme-Akzent. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+input[type="checkbox"]:checked,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+.checklist-item input[type="checkbox"]:checked {
+    accent-color: var(--accent) !important;
+    border-color: var(--accent) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+.has-peak-label input[type="checkbox"],
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+.checklist-item input[type="checkbox"] {
+    accent-color: var(--accent) !important;
+    border-color: var(--app-surface-border) !important;
+}
+
+/* Karteninformationen und Leaflet-Popups bekommen identische Kontraste in allen Themes. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) #map-info-bar {
+    background: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
+    border: 1px solid var(--app-surface-border) !important;
+    color: var(--app-text-primary) !important;
+    opacity: 1 !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) #map-view .leaflet-popup-content-wrapper,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) #map-view .leaflet-popup-tip {
+    background: var(--app-surface-strong) !important;
+    border-color: var(--app-surface-border) !important;
+    color: var(--app-text-primary) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) #map-view .leaflet-popup-content,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) #map-view .leaflet-popup-content * {
+    color: var(--app-text-primary) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) #map-view .leaflet-bar a,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) #map-view .leaflet-control-attribution {
+    background: var(--app-surface-card) !important;
+    border-color: var(--app-surface-border) !important;
+    color: var(--app-text-primary) !important;
+}
+
+/* Chart-Canvas, Tooltip und Titel: dieselbe Oberfläche und Textfarbe. Datenserien bleiben unverändert. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(#chart-view canvas, #diagram-canvas, .chart-canvas-stage, .chart-tooltip) {
+    background: var(--app-surface-card) !important;
+    border-color: var(--app-surface-border) !important;
+    color: var(--app-text-primary) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .chart-tooltip {
+    box-shadow: 0 8px 24px rgba(0,0,0,.28) !important;
+}
+
+/* Titel-/Statusakzente folgen der jeweiligen Theme-Akzentfarbe statt hart codierter Theme-Farben. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .app-title {
+    background: linear-gradient(90deg, var(--app-text-primary), var(--accent), var(--app-text-primary)) !important;
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .gradient-flag {
+    color: var(--accent) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .edit-btn {
+    background: var(--accent-soft) !important;
+    border-color: var(--accent) !important;
+    color: var(--app-text-primary) !important;
+}
+
+/* Map-Cluster erhalten dieselbe abgestufte Akzentlogik unabhängig vom Theme. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .tour-cluster-small,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .tour-cluster-medium,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .tour-cluster-large {
+    background: radial-gradient(circle at 35% 35%, color-mix(in srgb, var(--accent) 76%, white), var(--accent)) !important;
+    border-color: color-mix(in srgb, var(--accent) 72%, white) !important;
+    color: var(--accent-text-color) !important;
+}
+
+/* Höhenwelt-Diagramme verwenden für alle Themes dieselbe Fläche und Textpalette; nur der Akzent ändert sich. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(#wrapped-view .bergwelt-height-year-donut-section, #wrapped-view .bergwelt-height-years-chart-section) {
+    --height-chart-bg: rgba(17, 26, 37, .74) !important;
+    --height-chart-text: #f3f7fb !important;
+    --height-chart-muted: #cbd5df !important;
+    --height-chart-accent: var(--accent) !important;
+    --height-chart-rest: rgba(225, 231, 240, .15) !important;
+    --height-chart-border: var(--app-surface-border) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) #wrapped-view .bergwelt-height-moment .bergwelt-height-gauge,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) #bergwelt-height-detail-modal .bergwelt-height-gauge {
+    background: conic-gradient(
+        var(--accent) 0 var(--moment-progress, 0%),
+        rgba(225, 231, 240, .15) var(--moment-progress, 0%) 100%
+    ) !important;
+    border-color: var(--app-surface-border) !important;
+    box-shadow: 0 0 0 1px var(--app-surface-border) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) #wrapped-view .bergwelt-height-moment .bergwelt-height-gauge > span,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) #bergwelt-height-detail-modal .bergwelt-height-gauge > span {
+    background: var(--app-surface-strong) !important;
+    border-color: var(--app-surface-border) !important;
+    color: var(--app-text-primary) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(#tour-detail-modal, #achievement-category-modal, #compare-modal, #month-stats-modal, #stats-chart-modal, #tour-list-modal, #milestone-modal, #dash-stat-modal) .modal-card {
+    background: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
+    border-color: var(--app-surface-border) !important;
+    color: var(--app-text-primary) !important;
+}
