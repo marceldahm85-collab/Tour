@@ -3201,13 +3201,6 @@ body {
    Farbvariablen pro Theme
    --------------------------------------------------------- */
 
-body:not(.dark):not(.green):not(.summit) 
-
-body.dark 
-
-body.green 
-
-body.summit 
 
 /* ---------------------------------------------------------
    Große Flächen
@@ -3485,11 +3478,6 @@ body.summit
    Theme-Farben
    --------------------------------------------------------- */
 
-body.dark 
-
-body.green 
-
-body.summit 
 
 /* ---------------------------------------------------------
    Große Karten und Bereiche
@@ -5669,13 +5657,7 @@ body.green #theme-view .theme-editor-contrast-row {
 
 /* Achievements: abgeschlossene, begonnene und noch leere Kategorien
    erhalten in jedem Theme eindeutig unterscheidbare Zustände. */
-:root 
 
-body.dark 
-
-body.green 
-
-body.summit 
 
 /* Statuskarten bleiben auch bei Hover im jeweiligen Status-Farbschema. */
 #achievements-view .achievement-category-tile {
@@ -6601,11 +6583,6 @@ body.green #theme-view .haptic-feedback-toggle {
     --premium-motion-standard: 220ms;
 }
 
-body.dark 
-
-body.green 
-
-body.summit 
 
 @media (prefers-reduced-motion: reduce) {
     :root {
