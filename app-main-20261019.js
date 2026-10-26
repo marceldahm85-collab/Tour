@@ -2262,8 +2262,8 @@ function applyAppDataPayload(payload) {
         summit: '⛰️'
     };
 
-    const validThemes = ['gold', 'dark', 'green', 'summit'];
-    let theme = payload.meta.theme === 'light' ? 'gold' : payload.meta.theme;
+    const validThemes = ['gold'];
+    let theme = 'gold';
 
     if (!validThemes.includes(theme)) {
         theme = 'gold';
@@ -2574,8 +2574,8 @@ async function restoreLinkedFileHandleOnStartup() {
                 const file = await handle.getFile();
                 const payload = JSON.parse(await file.text());
                 const importedTheme = payload?.meta?.theme;
-                const fileTheme = importedTheme === 'light' ? 'gold' : importedTheme;
-                const validThemes = ['gold', 'dark', 'green', 'summit'];
+                const fileTheme = 'gold';
+                const validThemes = ['gold'];
 
                 if (payload?.meta?.themeEditorSettings) {
                     appStorage.set(THEME_EDITOR_KEY, payload.meta.themeEditorSettings);
@@ -14546,56 +14546,6 @@ const deltaY =
     Object.values(viewMap).forEach(view => view.classList.remove('no-transition'));
 
     /*
- * Dashboard Theme-Swipe
- */
-if (
-    currentView === 'dashboard' &&
-    hasVerticalThemeIntent &&
-    deltaY >= themeSwipeThresholdPx &&
-    Math.abs(deltaY) > Math.abs(deltaX) * 1.25
-) {
-
-    hasVerticalThemeIntent = false;
-    hasHorizontalIntent = false;
-
-    /*
-     * View sicher wieder exakt in Ausgangsposition setzen.
-     */
-    positionViews(
-        currentIndex,
-        false,
-        0
-    );
-
-    if (typeof window.cycleTheme === 'function') {
-
-        const nextTheme =
-            window.cycleTheme();
-
-        /*
-         * Optionales kurzes Feedback.
-         */
-        const themeNames = {
-            light: 'Hell',
-            dark: 'Dunkel',
-            green: 'Grün',
-            summit: 'Summit'
-        };
-
-        if (typeof showToast === 'function') {
-            showToast(
-                `Theme: ${themeNames[nextTheme] || nextTheme}`,
-                {
-                    duration: 1200
-                }
-            );
-        }
-    }
-
-    return;
-}
-
-    /*
  * Bei vertikalem Scrollen niemals eine View wechseln.
  */
 if (!hasHorizontalIntent) {
@@ -22638,34 +22588,24 @@ function invalidateThemeEditorDraft() {
 
 function getThemeEditorSettings() {
     const saved = appStorage.get(THEME_EDITOR_KEY);
-    const merged = {};
 
-    ['light', 'dark', 'green', 'summit'].forEach(key => {
-        merged[key] = {
-            ...defaultThemeEditorSettings[key],
-            ...(saved && saved[key] ? saved[key] : {})
-        };
-    });
-
-    // Main-navigation surface defaults now follow Gold's dark glass treatment.
-    // Migrate only the former built-in colors; keep deliberate custom colors.
-    const legacyNavDefaults = {
-        dark:   { navTopColor: '#912a34', navBottomColor: '#0a121d' },
-        green:  { navTopColor: '#26a352', navBottomColor: '#010c07' },
-        summit: { navTopColor: '#3aa0ff', navBottomColor: '#161d22' }
+    // Gold bleibt die gemeinsame dunkle Basis. Ältere Installationen können
+    // weiterhin vier gespeicherte Buckets besitzen; ab jetzt wird der bisherige
+    // Gold-Bucket als gemeinsame Quelle verwendet und auf alle Legacy-Keys gelegt.
+    const shared = {
+        ...defaultThemeEditorSettings.light,
+        ...(saved && saved.light && typeof saved.light === 'object' ? saved.light : {})
     };
-    Object.entries(legacyNavDefaults).forEach(([key, oldColors]) => {
-        const stored = saved && saved[key];
-        if (!stored || typeof stored !== 'object') return;
-        if (stored.navTopColor === oldColors.navTopColor) {
-            merged[key].navTopColor = defaultThemeEditorSettings.light.navTopColor;
-        }
-        if (stored.navBottomColor === oldColors.navBottomColor) {
-            merged[key].navBottomColor = defaultThemeEditorSettings.light.navBottomColor;
-        }
-    });
 
-    return merged;
+    // Es gibt nur noch eine Akzentfarbe. Die zweite Verlaufsfarbe folgt ihr.
+    shared.accent2 = shared.accent;
+
+    return {
+        light: { ...shared },
+        dark: { ...shared },
+        green: { ...shared },
+        summit: { ...shared }
+    };
 }
 
 function saveThemeEditorSettings(settings) {
@@ -23051,24 +22991,23 @@ function fillThemeEditorForm(themeKey) {
 
     const hint = document.getElementById('theme-editor-hint');
     if (hint) {
-        hint.textContent = themeKey === themeEditorGetActiveTheme()
-            ? 'Live-Vorschau aktiv – Änderungen werden sofort in der App angezeigt.'
-            : 'Hinweis: Dieses Theme ist gerade nicht aktiv. Wechsle über „Hell/Dunkel/Grün/Summit" im Menü, um die Live-Vorschau zu sehen.';
+        hint.textContent = 'Einheitliche Einstellungen für die gesamte App. Änderungen werden sofort übernommen.';
     }
 }
 
 function readThemeEditorFormIntoSettings(themeKey) {
     const allSettings = getThemeEditorDraftSettings();
+    const accent = document.getElementById('te-accent').value;
 
-    allSettings[themeKey] = {
+    const shared = {
         topColor: document.getElementById('te-top-color').value,
         bottomColor: document.getElementById('te-bottom-color').value,
         transition: Number(document.getElementById('te-transition').value),
         intensity: Number(document.getElementById('te-intensity').value),
         textMain: document.getElementById('te-text-main').value,
         textSoft: document.getElementById('te-text-soft').value,
-        accent: document.getElementById('te-accent').value,
-        accent2: document.getElementById('te-accent2').value,
+        accent,
+        accent2: accent,
         borderOpacity: Number(document.getElementById('te-border').value),
         gradientDirection: document.getElementById('te-direction').value,
         midEnabled: document.getElementById('te-mid-enabled').checked,
@@ -23084,6 +23023,13 @@ function readThemeEditorFormIntoSettings(themeKey) {
         chartColorMid: document.getElementById('te-chart-color-mid').value,
         chartColorEnd: document.getElementById('te-chart-color-end').value
     };
+
+    // Alle noch vorhandenen alten Theme-Keys werden auf denselben
+    // Einstellungsstand synchronisiert. Die aktiven Ansichten nutzen damit
+    // eine einzige gemeinsame Editor-Konfiguration.
+    ['light', 'dark', 'green', 'summit'].forEach(key => {
+        allSettings[key] = { ...shared };
+    });
 
     return allSettings;
 }
@@ -23264,20 +23210,25 @@ function initThemeEditor() {
         const settings = readThemeEditorFormIntoSettings(themeEditorActiveTab);
         saveThemeEditorSettings(settings);
         applyThemeEditorSettingsToDom();
-        showToast('Theme gespeichert ✓', { type: 'success', duration: 2000 });
+        showToast('Editor-Einstellungen gespeichert ✓', { type: 'success', duration: 2000 });
     });
 
     document.getElementById('theme-editor-reset')?.addEventListener('click', () => {
         const allSettings = getThemeEditorDraftSettings();
-        allSettings[themeEditorActiveTab] = { ...defaultThemeEditorSettings[themeEditorActiveTab] };
+        const sharedDefaults = {
+            ...defaultThemeEditorSettings.light,
+            accent2: defaultThemeEditorSettings.light.accent
+        };
+
+        ['light', 'dark', 'green', 'summit'].forEach(key => {
+            allSettings[key] = { ...sharedDefaults };
+        });
+
         saveThemeEditorSettings(allSettings);
-        fillThemeEditorForm(themeEditorActiveTab);
+        fillThemeEditorForm('light');
+        applyThemeEditorSettingsToDom();
 
-        if (themeEditorActiveTab === themeEditorGetActiveTheme()) {
-            applyThemeEditorSettingsToDom();
-        }
-
-        showToast('Theme zurückgesetzt ✓', { type: 'info', duration: 2000 });
+        showToast('Editor-Einstellungen zurückgesetzt ✓', { type: 'info', duration: 2000 });
     });
 
     selectTab(themeEditorGetActiveTheme());
@@ -23828,12 +23779,7 @@ function initTheme() {
         document.querySelectorAll('[data-theme-choice]')
     );
 
-    const THEMES = [
-        'gold',
-        'dark',
-        'green',
-        'summit'
-    ];
+    const THEMES = ['gold'];
 
     const ICONS = {
         gold: '🟡',
