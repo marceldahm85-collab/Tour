@@ -7554,15 +7554,15 @@ body.summit .parallax::before {
    ========================================================= */
 
 :root {
-    --app-surface-strong: rgba(255, 255, 255, .80);
-    --app-surface-card: rgba(255, 255, 255, .70);
-    --app-surface-subtle: rgba(255, 255, 255, .54);
+    --app-surface-strong: rgba(255, 255, 255, .72);
+    --app-surface-card: rgba(255, 255, 255, .59);
+    --app-surface-subtle: rgba(255, 255, 255, .43);
     --app-surface-border: rgba(31, 52, 41, .25);
     --app-text-primary: #17251d;
     --app-text-muted: #405248;
 
-    --premium-surface-1: rgba(255,255,255,.78);
-    --premium-surface-2: rgba(244,248,244,.64);
+    --premium-surface-1: rgba(255,255,255,.70);
+    --premium-surface-2: rgba(244,248,244,.52);
     --premium-border: rgba(31,52,41,.24);
     --premium-border-strong: rgba(31,52,41,.38);
     --premium-shadow-card: 0 10px 28px rgba(10,25,18,.18);
@@ -7570,9 +7570,9 @@ body.summit .parallax::before {
 }
 
 body.dark {
-    --app-surface-strong: rgba(17, 29, 43, .82);
-    --app-surface-card: rgba(24, 40, 58, .76);
-    --app-surface-subtle: rgba(18, 32, 48, .68);
+    --app-surface-strong: rgba(17, 29, 43, .74);
+    --app-surface-card: rgba(24, 40, 58, .64);
+    --app-surface-subtle: rgba(18, 32, 48, .50);
     --app-surface-border: rgba(211, 229, 245, .25);
     --app-text-primary: #f3f7fb;
     --app-text-muted: #c2cfdb;
@@ -7587,8 +7587,8 @@ body.dark {
     --year-control-bg-hover: rgba(42, 63, 87, .90);
     --year-control-border: var(--app-surface-border);
 
-    --premium-surface-1: rgba(17,29,43,.84);
-    --premium-surface-2: rgba(24,40,58,.72);
+    --premium-surface-1: rgba(17,29,43,.75);
+    --premium-surface-2: rgba(24,40,58,.60);
     --premium-border: rgba(211,229,245,.22);
     --premium-border-strong: rgba(211,229,245,.38);
     --premium-shadow-card: 0 10px 28px rgba(0,0,0,.30);
@@ -7596,9 +7596,9 @@ body.dark {
 }
 
 body.green {
-    --app-surface-strong: rgba(3, 25, 15, .84);
-    --app-surface-card: rgba(8, 42, 24, .78);
-    --app-surface-subtle: rgba(5, 31, 18, .68);
+    --app-surface-strong: rgba(3, 25, 15, .75);
+    --app-surface-card: rgba(8, 42, 24, .64);
+    --app-surface-subtle: rgba(5, 31, 18, .50);
     --app-surface-border: rgba(114, 214, 163, .32);
     --app-text-primary: #f6fff9;
     --app-text-muted: #c9e5d4;
@@ -7613,8 +7613,8 @@ body.green {
     --year-control-bg-hover: rgba(14, 66, 38, .90);
     --year-control-border: var(--app-surface-border);
 
-    --premium-surface-1: rgba(3,25,15,.86);
-    --premium-surface-2: rgba(8,42,24,.72);
+    --premium-surface-1: rgba(3,25,15,.76);
+    --premium-surface-2: rgba(8,42,24,.60);
     --premium-border: rgba(114,214,163,.26);
     --premium-border-strong: rgba(114,214,163,.42);
     --premium-shadow-card: 0 10px 28px rgba(0,0,0,.34);
@@ -7622,9 +7622,9 @@ body.green {
 }
 
 body.summit {
-    --app-surface-strong: rgba(20, 34, 43, .83);
-    --app-surface-card: rgba(36, 51, 59, .77);
-    --app-surface-subtle: rgba(29, 42, 49, .67);
+    --app-surface-strong: rgba(20, 34, 43, .75);
+    --app-surface-card: rgba(36, 51, 59, .64);
+    --app-surface-subtle: rgba(29, 42, 49, .49);
     --app-surface-border: rgba(210, 232, 245, .30);
     --app-text-primary: #f7fbff;
     --app-text-muted: #d0dce4;
@@ -7639,8 +7639,8 @@ body.summit {
     --year-control-bg-hover: rgba(51, 72, 83, .90);
     --year-control-border: var(--app-surface-border);
 
-    --premium-surface-1: rgba(20,34,43,.85);
-    --premium-surface-2: rgba(36,51,59,.73);
+    --premium-surface-1: rgba(20,34,43,.76);
+    --premium-surface-2: rgba(36,51,59,.60);
     --premium-border: rgba(210,232,245,.26);
     --premium-border-strong: rgba(210,232,245,.42);
     --premium-shadow-card: 0 10px 28px rgba(0,0,0,.28);
@@ -7657,8 +7657,8 @@ body .modal-card {
     background: var(--app-surface-strong) !important;
     border-color: var(--app-surface-border) !important;
     color: var(--app-text-primary);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
 }
 
 /* Wiederkehrende Statistik- und Listen-Kacheln behalten eine etwas leichtere Fläche. */
@@ -7829,4 +7829,79 @@ body.summit .dash-stat-value,
 body.summit .dash-stat-label,
 body.summit .chart-title {
     color: var(--app-text-primary) !important;
+}
+
+
+/* PHASE 2 · Theme-Editor während der Neugestaltung pausiert.
+   Nur der Editor-Zugang wird ausgeblendet; die normale Theme-Auswahl bleibt aktiv. */
+body.premium-alpine-editor-paused #theme-toggle,
+body.premium-alpine-editor-paused #theme-view {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Das Foto selbst bleibt gestochen scharf; keine Filter auf der Hintergrundebene. */
+body.premium-alpine-editor-paused .parallax {
+    filter: none !important;
+    -webkit-filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Halbtransparente Flächen ohne Glasunschärfe: Motiv bleibt klar erkennbar. */
+body.premium-alpine-editor-paused .box,
+body.premium-alpine-editor-paused .dash-section,
+body.premium-alpine-editor-paused .filter-simple-card,
+body.premium-alpine-editor-paused .stats-analysis-section,
+body.premium-alpine-editor-paused .stats-structure-section,
+body.premium-alpine-editor-paused .modal-card,
+body.premium-alpine-editor-paused .chart-card,
+body.premium-alpine-editor-paused .stat-card,
+body.premium-alpine-editor-paused .chart-stat-tile,
+body.premium-alpine-editor-paused .dash-stat-tile,
+body.premium-alpine-editor-paused .dash-milestone-tile,
+body.premium-alpine-editor-paused .stats-list li,
+body.premium-alpine-editor-paused .peak-tour-list li,
+body.premium-alpine-editor-paused .tour-search-result,
+body.premium-alpine-editor-paused .compare-row,
+body.premium-alpine-editor-paused .compare-period-card,
+body.premium-alpine-editor-paused .compare-list-card,
+body.premium-alpine-editor-paused .compare-chip {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+}
+
+/* Farb- und Flächenwerte aus der bisherigen Editor-Vorschau dürfen während
+   der Pause nicht gegen die zentralen Theme-Farben arbeiten. */
+body.premium-alpine-editor-paused.premium-alpine-editor-paused {
+    --text-main: var(--app-text-primary) !important;
+    --text-soft: var(--app-text-muted) !important;
+}
+body.premium-alpine-editor-paused.premium-alpine-editor-paused:not(.dark):not(.green):not(.summit) {
+    --accent: #a87800 !important;
+    --accent-soft: rgba(168,120,0,.20) !important;
+    --accent-gradient: linear-gradient(135deg, #f4d36d, #b47b00) !important;
+    --accent-text-color: #17251d !important;
+}
+body.premium-alpine-editor-paused.premium-alpine-editor-paused.dark {
+    --accent: #d45c5c !important;
+    --accent-soft: rgba(212,92,92,.25) !important;
+    --accent-gradient: linear-gradient(135deg, #d45c5c, #861f1f) !important;
+    --accent-text-color: #ffffff !important;
+}
+body.premium-alpine-editor-paused.premium-alpine-editor-paused.green {
+    --accent: #72d6a3 !important;
+    --accent-soft: rgba(114,214,163,.25) !important;
+    --accent-gradient: linear-gradient(135deg, #72d6a3, #238653) !important;
+    --accent-text-color: #071a10 !important;
+}
+body.premium-alpine-editor-paused.premium-alpine-editor-paused.summit {
+    --accent: #72c2ff !important;
+    --accent-soft: rgba(114,194,255,.27) !important;
+    --accent-gradient: linear-gradient(135deg, #8bd0ff, #1974c2) !important;
+    --accent-text-color: #061b2c !important;
+}
+body.premium-alpine-editor-paused #theme-editor-brightness-layer {
+    display: none !important;
+    opacity: 0 !important;
 }
