@@ -43,6 +43,8 @@
     let draft = null;
     let editorInitialized = false;
     let updateScheduled = false;
+    let lastAppliedFontFamily = null;
+    let lastAppliedFontSize = null;
 
     function parseStoredValue(value) {
         if (typeof value !== 'string') return value;
@@ -381,11 +383,15 @@
         if (!style.parentNode) document.head.appendChild(style);
 
         // Bestehende Farb-/Formelrenderer nutzen weiterhin diese Funktionen.
-        if (typeof window.applyThemeEditorFont === 'function') {
+        if (lastAppliedFontFamily !== settings.fontFamily &&
+            typeof window.applyThemeEditorFont === 'function') {
             window.applyThemeEditorFont(settings.fontFamily, false);
+            lastAppliedFontFamily = settings.fontFamily;
         }
-        if (typeof window.applyThemeEditorFontSize === 'function') {
+        if (lastAppliedFontSize !== settings.fontSize &&
+            typeof window.applyThemeEditorFontSize === 'function') {
             window.applyThemeEditorFontSize(settings.fontSize, false);
+            lastAppliedFontSize = settings.fontSize;
         }
     }
 
@@ -394,8 +400,10 @@
         if (!document.body || !document.documentElement) return;
         applyPalette(settings);
 
-        if (refreshVisuals) {
+        if (refreshVisuals && !updateScheduled) {
+            updateScheduled = true;
             window.requestAnimationFrame(() => {
+                updateScheduled = false;
                 try {
                     if (typeof window.updateCharts === 'function') window.updateCharts();
                     if (typeof window.redrawAllCanvases === 'function') window.redrawAllCanvases();
@@ -523,7 +531,7 @@
                 const transitionValue = document.getElementById('te-unified-transition-value');
                 if (radiusValue) radiusValue.textContent = draft.radius + ' px';
                 if (transitionValue) transitionValue.textContent = draft.transition + ' %';
-                applyUnifiedSettings(true);
+                applyUnifiedSettings(id === 'te-unified-accent');
             };
             element.addEventListener('input', update);
             element.addEventListener('change', update);
