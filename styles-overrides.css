@@ -7935,14 +7935,19 @@ input[type="checkbox"]:checked,
     color: var(--app-text-primary) !important;
 }
 
-/* Chart-Canvas, Tooltip und Titel: dieselbe Oberfläche und Textfarbe. Datenserien bleiben unverändert. */
+/* Diagrammflächen bleiben transparent. Nur der Tooltip nutzt die Kartenpalette. */
 :is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit))
-:is(#chart-view canvas, #diagram-canvas, .chart-canvas-stage, .chart-tooltip) {
+:is(#chart-view canvas, #diagram-canvas, .chart-canvas-stage) {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit)) .chart-tooltip {
     background: var(--app-surface-card) !important;
     border-color: var(--app-surface-border) !important;
     color: var(--app-text-primary) !important;
-}
-:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit)) .chart-tooltip {
     box-shadow: 0 8px 24px rgba(0,0,0,.28) !important;
 }
 
@@ -8183,5 +8188,29 @@ body.summit .top-main-nav [aria-current="page"] {
 
 #more-menu.more-menu .more-menu-item:active {
     background: rgba(255,255,255,0.08) !important;
+}
+
+/* =========================================================
+   Unerwünschte äußere Kartenflächen entfernen
+   - Diagramm-Canvas und Bühne bleiben vollständig transparent.
+   - Die eigenständigen Seiten Tour speichern und Tour planen
+     behalten ihr ursprüngliches rahmenloses Layout.
+   ========================================================= */
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit)) #app-view .save-page-box,
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit)) #tour-view .plan-section-panel {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: 0 !important;
+    border-color: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit)) #app-view .save-page-box::before,
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit)) #app-view .save-page-box::after,
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit)) #tour-view .plan-section-panel::before,
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit)) #tour-view .plan-section-panel::after {
+    display: none !important;
 }
 
