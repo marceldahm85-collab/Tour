@@ -7547,987 +7547,79 @@ body.summit .parallax::before {
 }
 
 
-/* =========================================================
-   PHASE 2 · SCHRITT 1 — Einheitliche, halbtransparente Inhaltsflächen
-   Hintergrundmotiv bleibt unverändert und viewport-fest.
-   Gemeinsame Flächen über alle Views; Akzentfarben je Theme erhalten.
-   ========================================================= */
-
-:root {
-    --app-surface-strong: rgba(255, 255, 255, .72);
-    --app-surface-card: rgba(255, 255, 255, .59);
-    --app-surface-subtle: rgba(255, 255, 255, .43);
-    --app-surface-border: rgba(31, 52, 41, .25);
-    --app-text-primary: #17251d;
-    --app-text-muted: #405248;
-
-    --premium-surface-1: rgba(255,255,255,.70);
-    --premium-surface-2: rgba(244,248,244,.52);
-    --premium-border: rgba(31,52,41,.24);
-    --premium-border-strong: rgba(31,52,41,.38);
-    --premium-shadow-card: 0 10px 28px rgba(10,25,18,.18);
-    --premium-shadow-hover: 0 14px 34px rgba(10,25,18,.25);
-}
-
-body.dark {
-    --app-surface-strong: rgba(17, 29, 43, .74);
-    --app-surface-card: rgba(24, 40, 58, .64);
-    --app-surface-subtle: rgba(18, 32, 48, .50);
-    --app-surface-border: rgba(211, 229, 245, .25);
-    --app-text-primary: #f3f7fb;
-    --app-text-muted: #c2cfdb;
-
-    --glass-bg: var(--app-surface-strong);
-    --glass-border: var(--app-surface-border);
-    --ui-card-bg: var(--app-surface-card);
-    --ui-card-bg-interactive: rgba(38, 59, 82, .86);
-    --ui-section-bg: var(--app-surface-subtle);
-    --ui-card-border: var(--app-surface-border);
-    --year-control-bg: var(--app-surface-strong);
-    --year-control-bg-hover: rgba(42, 63, 87, .90);
-    --year-control-border: var(--app-surface-border);
-
-    --premium-surface-1: rgba(17,29,43,.75);
-    --premium-surface-2: rgba(24,40,58,.60);
-    --premium-border: rgba(211,229,245,.22);
-    --premium-border-strong: rgba(211,229,245,.38);
-    --premium-shadow-card: 0 10px 28px rgba(0,0,0,.30);
-    --premium-shadow-hover: 0 14px 34px rgba(0,0,0,.40);
-}
-
-body.green {
-    --app-surface-strong: rgba(3, 25, 15, .75);
-    --app-surface-card: rgba(8, 42, 24, .64);
-    --app-surface-subtle: rgba(5, 31, 18, .50);
-    --app-surface-border: rgba(114, 214, 163, .32);
-    --app-text-primary: #f6fff9;
-    --app-text-muted: #c9e5d4;
-
-    --glass-bg: var(--app-surface-strong);
-    --glass-border: var(--app-surface-border);
-    --ui-card-bg: var(--app-surface-card);
-    --ui-card-bg-interactive: rgba(14, 66, 38, .86);
-    --ui-section-bg: var(--app-surface-subtle);
-    --ui-card-border: var(--app-surface-border);
-    --year-control-bg: var(--app-surface-strong);
-    --year-control-bg-hover: rgba(14, 66, 38, .90);
-    --year-control-border: var(--app-surface-border);
-
-    --premium-surface-1: rgba(3,25,15,.76);
-    --premium-surface-2: rgba(8,42,24,.60);
-    --premium-border: rgba(114,214,163,.26);
-    --premium-border-strong: rgba(114,214,163,.42);
-    --premium-shadow-card: 0 10px 28px rgba(0,0,0,.34);
-    --premium-shadow-hover: 0 14px 34px rgba(0,0,0,.44);
-}
-
-body.summit {
-    --app-surface-strong: rgba(20, 34, 43, .75);
-    --app-surface-card: rgba(36, 51, 59, .64);
-    --app-surface-subtle: rgba(29, 42, 49, .49);
-    --app-surface-border: rgba(210, 232, 245, .30);
-    --app-text-primary: #f7fbff;
-    --app-text-muted: #d0dce4;
-
-    --glass-bg: var(--app-surface-strong);
-    --glass-border: var(--app-surface-border);
-    --ui-card-bg: var(--app-surface-card);
-    --ui-card-bg-interactive: rgba(51, 72, 83, .87);
-    --ui-section-bg: var(--app-surface-subtle);
-    --ui-card-border: var(--app-surface-border);
-    --year-control-bg: var(--app-surface-strong);
-    --year-control-bg-hover: rgba(51, 72, 83, .90);
-    --year-control-border: var(--app-surface-border);
-
-    --premium-surface-1: rgba(20,34,43,.76);
-    --premium-surface-2: rgba(36,51,59,.60);
-    --premium-border: rgba(210,232,245,.26);
-    --premium-border-strong: rgba(210,232,245,.42);
-    --premium-shadow-card: 0 10px 28px rgba(0,0,0,.28);
-    --premium-shadow-hover: 0 14px 34px rgba(0,0,0,.38);
-}
-
-/* Gemeinsame Oberflächen in Dashboard, Touren, Stats, Suche/Filter und Modals. */
-body .box,
-body .dash-section,
-body .filter-simple-card,
-body .stats-analysis-section,
-body .stats-structure-section,
-body .modal-card {
-    background: var(--app-surface-strong) !important;
-    border-color: var(--app-surface-border) !important;
-    color: var(--app-text-primary);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-}
-
-/* Wiederkehrende Statistik- und Listen-Kacheln behalten eine etwas leichtere Fläche. */
-body .chart-card,
-body .stat-card,
-body .chart-stat-tile,
-body .dash-stat-tile,
-body .dash-milestone-tile,
-body .stats-list li,
-body .peak-tour-list li,
-body .tour-search-result,
-body .compare-row,
-body .compare-period-card,
-body .compare-list-card,
-body .compare-chip {
-    background: var(--app-surface-card) !important;
-    border-color: var(--app-surface-border) !important;
-}
-
-/* Einheitliche Textkontraste in wiederkehrenden Karten; semantische Akzentfarben bleiben erhalten. */
-body .box-header,
-body .box-content,
-body .stats-label,
-body .stats-value,
-body .dash-stat-value,
-body .dash-stat-label,
-body .chart-title,
-body .modal-card {
-    color: var(--app-text-primary);
-}
-
-body .text-muted,
-body .stats-analysis-subtitle,
-body .stats-structure-card-meta,
-body .development-metric-label,
-body .best-form-label {
-    color: var(--app-text-muted);
-    opacity: 1;
-}
-
-
-/* PHASE 2 · SCHRITT 1 — Spezifitätsausgleich je Theme.
-   Diese nachgelagerten, gleich spezifischen Regeln überschreiben ältere
-   90%-Flächen tatsächlich; das fixierte Alpin-Hintergrundbild bleibt unberührt. */
-
-body:not(.dark):not(.green):not(.summit) .box,
-body:not(.dark):not(.green):not(.summit) .dash-section,
-body:not(.dark):not(.green):not(.summit) .filter-simple-card,
-body:not(.dark):not(.green):not(.summit) .stats-analysis-section,
-body:not(.dark):not(.green):not(.summit) .stats-structure-section,
-body:not(.dark):not(.green):not(.summit) .modal-card {
-    background: var(--app-surface-strong) !important;
-    border-color: var(--app-surface-border) !important;
-}
-
-body.dark .box,
-body.dark .dash-section,
-body.dark .filter-simple-card,
-body.dark .stats-analysis-section,
-body.dark .stats-structure-section,
-body.dark .modal-card {
-    background: var(--app-surface-strong) !important;
-    border-color: var(--app-surface-border) !important;
-}
-
-body.green .box,
-body.green .dash-section,
-body.green .filter-simple-card,
-body.green .stats-analysis-section,
-body.green .stats-structure-section,
-body.green .modal-card {
-    background: var(--app-surface-strong) !important;
-    border-color: var(--app-surface-border) !important;
-}
-
-body.summit .box,
-body.summit .dash-section,
-body.summit .filter-simple-card,
-body.summit .stats-analysis-section,
-body.summit .stats-structure-section,
-body.summit .modal-card {
-    background: var(--app-surface-strong) !important;
-    border-color: var(--app-surface-border) !important;
-}
-
-body:not(.dark):not(.green):not(.summit) .stats-list li,
-body:not(.dark):not(.green):not(.summit) .peak-tour-list li,
-body:not(.dark):not(.green):not(.summit) .tour-search-result,
-body:not(.dark):not(.green):not(.summit) .chart-stat-tile,
-body:not(.dark):not(.green):not(.summit) .dash-stat-tile,
-body:not(.dark):not(.green):not(.summit) .compare-row,
-body:not(.dark):not(.green):not(.summit) .compare-period-card,
-body:not(.dark):not(.green):not(.summit) .compare-list-card,
-body:not(.dark):not(.green):not(.summit) .compare-chip {
-    background: var(--app-surface-card) !important;
-    border-color: var(--app-surface-border) !important;
-}
-
-body.dark .stats-list li,
-body.dark .peak-tour-list li,
-body.dark .tour-search-result,
-body.dark .chart-stat-tile:not(.active),
-body.dark .dash-stat-tile,
-body.dark .compare-row,
-body.dark .compare-period-card,
-body.dark .compare-list-card,
-body.dark .compare-chip {
-    background: var(--app-surface-card) !important;
-    border-color: var(--app-surface-border) !important;
-}
-
-body.green .stats-list li,
-body.green .peak-tour-list li,
-body.green .tour-search-result,
-body.green .chart-stat-tile:not(.active),
-body.green .dash-stat-tile,
-body.green .compare-row,
-body.green .compare-period-card,
-body.green .compare-list-card,
-body.green .compare-chip {
-    background: var(--app-surface-card) !important;
-    border-color: var(--app-surface-border) !important;
-}
-
-body.summit .stats-list li,
-body.summit .peak-tour-list li,
-body.summit .tour-search-result,
-body.summit .chart-stat-tile:not(.active),
-body.summit .dash-stat-tile,
-body.summit .compare-row,
-body.summit .compare-period-card,
-body.summit .compare-list-card,
-body.summit .compare-chip {
-    background: var(--app-surface-card) !important;
-    border-color: var(--app-surface-border) !important;
-}
-
-/* Themeabhängige Textfarben mit ausreichendem Kontrast auf Karten sichern. */
-body:not(.dark):not(.green):not(.summit) .box-header,
-body:not(.dark):not(.green):not(.summit) .box-content,
-body:not(.dark):not(.green):not(.summit) .stats-label,
-body:not(.dark):not(.green):not(.summit) .stats-value,
-body:not(.dark):not(.green):not(.summit) .dash-stat-value,
-body:not(.dark):not(.green):not(.summit) .dash-stat-label,
-body:not(.dark):not(.green):not(.summit) .chart-title {
-    color: var(--app-text-primary) !important;
-}
-
-body.dark .box-header,
-body.dark .box-content,
-body.dark .stats-label,
-body.dark .stats-value,
-body.dark .dash-stat-value,
-body.dark .dash-stat-label,
-body.dark .chart-title,
-body.green .box-header,
-body.green .box-content,
-body.green .stats-label,
-body.green .stats-value,
-body.green .dash-stat-value,
-body.green .dash-stat-label,
-body.green .chart-title,
-body.summit .box-header,
-body.summit .box-content,
-body.summit .stats-label,
-body.summit .stats-value,
-body.summit .dash-stat-value,
-body.summit .dash-stat-label,
-body.summit .chart-title {
-    color: var(--app-text-primary) !important;
-}
-
-
-/* PHASE 2 · Theme-Editor während der Neugestaltung pausiert.
-   Nur der Editor-Zugang wird ausgeblendet; die normale Theme-Auswahl bleibt aktiv. */
-body.premium-alpine-editor-paused #theme-toggle,
-body.premium-alpine-editor-paused #theme-view {
-    display: none !important;
-    visibility: hidden !important;
-}
-
-/* Das Foto selbst bleibt gestochen scharf; keine Filter auf der Hintergrundebene. */
-body.premium-alpine-editor-paused .parallax {
-    filter: none !important;
-    -webkit-filter: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-}
-
-/* Halbtransparente Flächen ohne Glasunschärfe: Motiv bleibt klar erkennbar. */
-body.premium-alpine-editor-paused .box,
-body.premium-alpine-editor-paused .dash-section,
-body.premium-alpine-editor-paused .filter-simple-card,
-body.premium-alpine-editor-paused .stats-analysis-section,
-body.premium-alpine-editor-paused .stats-structure-section,
-body.premium-alpine-editor-paused .modal-card,
-body.premium-alpine-editor-paused .chart-card,
-body.premium-alpine-editor-paused .stat-card,
-body.premium-alpine-editor-paused .chart-stat-tile,
-body.premium-alpine-editor-paused .dash-stat-tile,
-body.premium-alpine-editor-paused .dash-milestone-tile,
-body.premium-alpine-editor-paused .stats-list li,
-body.premium-alpine-editor-paused .peak-tour-list li,
-body.premium-alpine-editor-paused .tour-search-result,
-body.premium-alpine-editor-paused .compare-row,
-body.premium-alpine-editor-paused .compare-period-card,
-body.premium-alpine-editor-paused .compare-list-card,
-body.premium-alpine-editor-paused .compare-chip {
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
-}
-
-/* Farb- und Flächenwerte aus der bisherigen Editor-Vorschau dürfen während
-   der Pause nicht gegen die zentralen Theme-Farben arbeiten. */
-body.premium-alpine-editor-paused.premium-alpine-editor-paused {
-    --text-main: var(--app-text-primary) !important;
-    --text-soft: var(--app-text-muted) !important;
-}
-body.premium-alpine-editor-paused.premium-alpine-editor-paused:not(.dark):not(.green):not(.summit) {
-    --accent: #a87800 !important;
-    --accent-soft: rgba(168,120,0,.20) !important;
-    --accent-gradient: linear-gradient(135deg, #f4d36d, #b47b00) !important;
-    --accent-text-color: #17251d !important;
-}
-body.premium-alpine-editor-paused.premium-alpine-editor-paused.dark {
-    --accent: #d45c5c !important;
-    --accent-soft: rgba(212,92,92,.25) !important;
-    --accent-gradient: linear-gradient(135deg, #d45c5c, #861f1f) !important;
-    --accent-text-color: #ffffff !important;
-}
-body.premium-alpine-editor-paused.premium-alpine-editor-paused.green {
-    --accent: #72d6a3 !important;
-    --accent-soft: rgba(114,214,163,.25) !important;
-    --accent-gradient: linear-gradient(135deg, #72d6a3, #238653) !important;
-    --accent-text-color: #071a10 !important;
-}
-body.premium-alpine-editor-paused.premium-alpine-editor-paused.summit {
-    --accent: #72c2ff !important;
-    --accent-soft: rgba(114,194,255,.27) !important;
-    --accent-gradient: linear-gradient(135deg, #8bd0ff, #1974c2) !important;
-    --accent-text-color: #061b2c !important;
-}
-body.premium-alpine-editor-paused #theme-editor-brightness-layer {
-    display: none !important;
-    opacity: 0 !important;
-}
-
-
-/* Navigation: keine durchgehende Hintergrundbahn hinter den fünf Einzelbuttons.
-   Die Buttons behalten ihre themeabhängigen eigenen Zustände und Akzentflächen. */
-body:not(.dark):not(.green):not(.summit) .top-main-nav,
-body.dark .top-main-nav,
-body.green .top-main-nav,
-body.summit .top-main-nav {
-    background: transparent !important;
-    background-image: none !important;
-    border-color: transparent !important;
-    box-shadow: none !important;
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
-}
 
 
 /* =========================================================
-   PHASE 2 · DASHBOARD — themegerechte Flächen und gut lesbare Texte
-   Nur Dashboard: das feste Alpin-Motiv, Navigation, Layout und Daten bleiben unverändert.
-   ========================================================= */
-#dashboard-view {
-    --premium-surface-1: rgba(247, 250, 247, .80);
-    --premium-surface-2: rgba(230, 241, 234, .70);
-    --premium-border: rgba(44, 88, 67, .30);
-    --premium-border-strong: rgba(44, 88, 67, .46);
-    --premium-shadow-card: 0 10px 26px rgba(10, 25, 18, .18);
-    --premium-shadow-hover: 0 14px 32px rgba(10, 25, 18, .25);
-    --premium-accent-wash: rgba(168, 120, 0, .15);
-    --app-surface-strong: rgba(247, 250, 247, .80);
-    --app-surface-card: rgba(230, 241, 234, .70);
-    --app-surface-subtle: rgba(222, 236, 227, .60);
-    --app-surface-border: rgba(44, 88, 67, .30);
-    --app-text-primary: #17271e;
-    --app-text-muted: #354c41;
-    --text-main: #17271e;
-    --text-soft: #354c41;
-}
-
-body.dark #dashboard-view {
-    --premium-surface-1: rgba(25, 30, 39, .82);
-    --premium-surface-2: rgba(13, 21, 31, .73);
-    --premium-border: rgba(220, 125, 132, .28);
-    --premium-border-strong: rgba(235, 151, 157, .44);
-    --premium-accent-wash: rgba(173, 66, 76, .19);
-    --app-surface-strong: rgba(25, 30, 39, .82);
-    --app-surface-card: rgba(17, 26, 37, .73);
-    --app-surface-subtle: rgba(13, 21, 31, .60);
-    --app-surface-border: rgba(220, 125, 132, .28);
-    --app-text-primary: #f3f7fb;
-    --app-text-muted: #cbd5df;
-    --text-main: #f3f7fb;
-    --text-soft: #cbd5df;
-}
-
-body.green #dashboard-view {
-    --premium-surface-1: rgba(3, 25, 15, .79);
-    --premium-surface-2: rgba(8, 42, 24, .69);
-    --premium-border: rgba(114, 214, 163, .31);
-    --premium-border-strong: rgba(132, 230, 177, .47);
-    --premium-accent-wash: rgba(82, 183, 136, .18);
-    --app-surface-strong: rgba(3, 25, 15, .79);
-    --app-surface-card: rgba(8, 42, 24, .69);
-    --app-surface-subtle: rgba(5, 31, 18, .58);
-    --app-surface-border: rgba(114, 214, 163, .31);
-    --app-text-primary: #f6fff9;
-    --app-text-muted: #d0e8d9;
-    --text-main: #f6fff9;
-    --text-soft: #d0e8d9;
-}
-
-body.summit #dashboard-view {
-    --premium-surface-1: rgba(20, 34, 43, .80);
-    --premium-surface-2: rgba(29, 45, 54, .69);
-    --premium-border: rgba(145, 211, 255, .30);
-    --premium-border-strong: rgba(164, 221, 255, .47);
-    --premium-accent-wash: rgba(114, 194, 255, .18);
-    --app-surface-strong: rgba(20, 34, 43, .80);
-    --app-surface-card: rgba(29, 45, 54, .69);
-    --app-surface-subtle: rgba(20, 34, 43, .57);
-    --app-surface-border: rgba(145, 211, 255, .30);
-    --app-text-primary: #f7fbff;
-    --app-text-muted: #d0dce6;
-    --text-main: #f7fbff;
-    --text-soft: #d0dce6;
-}
-
-/* Dashboard-Flächen beziehen ihre Oberfläche ausschließlich aus den lokalen Tokens. */
-#dashboard-view .dash-section,
-#dashboard-view .dash-stat-tile,
-#dashboard-view .dash-milestone-tile,
-#dashboard-view .dash-tour-list li {
-    border-color: var(--premium-border) !important;
-}
-
-#dashboard-view .dash-section-title,
-#dashboard-view .dash-stat-value,
-#dashboard-view .dash-ms-label,
-#dashboard-view .dash-ms-current.is-empty,
-#dashboard-view .dash-ms-arrow,
-#dashboard-view .dash-tour-list .tour-name {
-    color: var(--app-text-primary) !important;
-    opacity: 1;
-}
-
-#dashboard-view .dash-stat-label,
-#dashboard-view .dash-ms-progress-text,
-#dashboard-view .dash-tour-list .tour-date {
-    color: var(--app-text-muted) !important;
-    opacity: 1;
-}
-
-/* Jahreswahl und Pfeile folgen demselben Theme-Flächenkonzept. */
-#dashboard-view .dash-year-filter-wrap select,
-#dashboard-view .dash-year-filter-wrap .mob-sel-btn,
-#dashboard-view .dash-year-filter-wrap .dash-year-arrow-btn {
-    background: linear-gradient(145deg, var(--premium-surface-1), var(--premium-surface-2)) !important;
-    color: var(--app-text-primary) !important;
-    border-color: var(--premium-border) !important;
-}
-
-#dashboard-view .dash-year-filter-wrap select:focus-visible,
-#dashboard-view .dash-year-filter-wrap .mob-sel-btn:focus-visible,
-#dashboard-view .dash-year-filter-wrap .dash-year-arrow-btn:focus-visible {
-    outline: 2px solid var(--premium-border-strong);
-    outline-offset: 2px;
-}
-
-#dashboard-view .dash-ms-progress-wrap {
-    background: color-mix(in srgb, var(--app-text-muted) 23%, transparent) !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    #dashboard-view .dash-stat-tile,
-    #dashboard-view .dash-milestone-tile,
-    #dashboard-view .dash-tour-list li {
-        transition: none !important;
-    }
-}
-
-
-/* =========================================================
-   PHASE 2 · LIGHT-THEME — warme alpine Stein- und Salbeiflächen
-   Am Referenzmotiv orientiert: mineralische Naturtöne statt weißer Standardkarten.
-   Text bleibt dunkel; das feste Alpin-Hintergrundmotiv und andere Themes bleiben unverändert.
-   ========================================================= */
-body:not(.dark):not(.green):not(.summit) {
-    --app-surface-strong: rgba(216, 205, 180, .84) !important;
-    --app-surface-card: rgba(202, 195, 168, .82) !important;
-    --app-surface-subtle: rgba(191, 190, 164, .80) !important;
-    --app-surface-border: rgba(59, 75, 54, .46) !important;
-    --app-text-primary: #17271d !important;
-    --app-text-muted: #24392b !important;
-
-    --glass-bg: rgba(204, 194, 166, .82) !important;
-    --glass-border: rgba(59, 75, 54, .46) !important;
-    --ui-card-bg: rgba(202, 195, 168, .82) !important;
-    --ui-card-bg-interactive: rgba(218, 207, 180, .90) !important;
-    --ui-card-border: rgba(59, 75, 54, .46) !important;
-    --ui-section-bg: rgba(191, 190, 164, .80) !important;
-    --year-control-bg: rgba(204, 194, 166, .82) !important;
-    --year-control-bg-hover: rgba(220, 209, 181, .92) !important;
-    --year-control-border: rgba(59, 75, 54, .46) !important;
-
-    --premium-surface-1: rgba(216, 205, 180, .84) !important;
-    --premium-surface-2: rgba(202, 195, 168, .82) !important;
-    --premium-border: rgba(59, 75, 54, .42) !important;
-    --premium-border-strong: rgba(59, 75, 54, .62) !important;
-    --premium-shadow-card: 0 10px 28px rgba(22, 31, 22, .22) !important;
-    --premium-shadow-hover: 0 14px 34px rgba(22, 31, 22, .30) !important;
-    --premium-accent-wash: rgba(173, 126, 43, .17) !important;
-
-    /* Kompatibilität mit den bestehenden Light-Komponenten und Bedienelementen. */
-    --light-surface-top: rgba(213, 201, 174, .82) !important;
-    --light-surface-bottom: rgba(180, 188, 155, .80) !important;
-    --light-surface-soft-top: rgba(203, 196, 168, .80) !important;
-    --light-surface-soft-bottom: rgba(166, 179, 145, .78) !important;
-    --light-surface-border: rgba(59, 75, 54, .48) !important;
-    --light-surface-text: #17271d !important;
-    --light-nav-top: rgba(205, 193, 164, .80) !important;
-    --light-nav-bottom: rgba(174, 184, 150, .78) !important;
-    --light-nav-soft-top: rgba(202, 195, 168, .80) !important;
-    --light-nav-soft-bottom: rgba(166, 179, 145, .78) !important;
-
-    --text-main: #17271d !important;
-    --text-soft: #24392b !important;
-    --text-color: #17271d !important;
-    --text-muted: #2c4032 !important;
-}
-
-/* Dashboard definiert eigene lokale Variablen; hier dieselbe Light-Palette erzwingen. */
-body:not(.dark):not(.green):not(.summit) #dashboard-view {
-    --premium-surface-1: rgba(216, 205, 180, .84) !important;
-    --premium-surface-2: rgba(202, 195, 168, .82) !important;
-    --premium-border: rgba(59, 75, 54, .42) !important;
-    --premium-border-strong: rgba(59, 75, 54, .62) !important;
-    --premium-shadow-card: 0 10px 26px rgba(22, 31, 22, .22) !important;
-    --premium-shadow-hover: 0 14px 32px rgba(22, 31, 22, .30) !important;
-    --premium-accent-wash: rgba(173, 126, 43, .17) !important;
-
-    --app-surface-strong: rgba(216, 205, 180, .84) !important;
-    --app-surface-card: rgba(202, 195, 168, .82) !important;
-    --app-surface-subtle: rgba(191, 190, 164, .80) !important;
-    --app-surface-border: rgba(59, 75, 54, .46) !important;
-    --app-text-primary: #17271d !important;
-    --app-text-muted: #24392b !important;
-    --text-main: #17271d !important;
-    --text-soft: #24392b !important;
-}
-
-/* Light-Textkontrast auf den warmen, halbtransparenten Flächen vereinheitlichen. */
-body:not(.dark):not(.green):not(.summit) .box-header,
-body:not(.dark):not(.green):not(.summit) .box-content,
-body:not(.dark):not(.green):not(.summit) .stats-label,
-body:not(.dark):not(.green):not(.summit) .stats-value,
-body:not(.dark):not(.green):not(.summit) .dash-stat-value,
-body:not(.dark):not(.green):not(.summit) .dash-stat-label,
-body:not(.dark):not(.green):not(.summit) .chart-title,
-body:not(.dark):not(.green):not(.summit) .modal-card {
-    color: var(--app-text-primary) !important;
-}
-
-body:not(.dark):not(.green):not(.summit) .text-muted,
-body:not(.dark):not(.green):not(.summit) .stats-analysis-subtitle,
-body:not(.dark):not(.green):not(.summit) .stats-structure-card-meta,
-body:not(.dark):not(.green):not(.summit) .development-metric-label,
-body:not(.dark):not(.green):not(.summit) .best-form-label {
-    color: var(--app-text-muted) !important;
-    opacity: 1;
-}
-
-
-/* =========================================================
-   PHASE 2 · SCHRITT 1 — EIN GEMEINSAMES PREMIUM-ALPINE-FLÄCHENSYSTEM
-   Ein gemeinsames Grunddesign für alle Views und Themes:
-   dunkle, halbtransparente Wald-/Alpin-Glasflächen und helle Texte.
-   Unterschiede zwischen Themes bleiben den Akzenten vorbehalten.
-   Das feste Alpin-Hintergrundmotiv und die Navigation bleiben unverändert.
+   PREMIUM ALPINE — ZENTRALES THEME-SYSTEM
+   Ein gemeinsamer Oberflächen-, Kontroll- und Textstandard für alle Views.
+   Ausschließlich die Akzentfamilie wechselt je Theme.
+   Das bereits vorhandene, viewport-feste Alpin-Hintergrundmotiv bleibt unangetastet.
    ========================================================= */
 
-/* Einheitliche Grundflächen und Kontraste; Theme-Akzentfarben bewusst nicht überschreiben. */
-:root,
-body,
-body:not(.dark):not(.green):not(.summit),
-body.dark,
-body.green,
-body.summit {
-    --theme-surface-top: rgba(12, 48, 37, .76) !important;
-    --theme-surface-bottom: rgba(3, 24, 20, .88) !important;
-    --theme-surface-soft-top: rgba(13, 53, 40, .68) !important;
-    --theme-surface-soft-bottom: rgba(4, 30, 24, .78) !important;
-    --theme-surface-border: rgba(220, 198, 143, .24) !important;
-    --theme-surface-text: #f5f2e8 !important;
+/* Einheitliche Basispalette: dunkle, halbtransparente Schiefer-/Graphitflächen. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) {
+    --app-surface-strong: rgba(25, 30, 39, .82) !important;
+    --app-surface-card: rgba(17, 26, 37, .74) !important;
+    --app-surface-subtle: rgba(13, 21, 31, .62) !important;
+    --app-surface-border: color-mix(in srgb, var(--accent) 36%, rgba(225, 232, 242, .12)) !important;
 
-    --surface-gradient-top: rgba(15, 52, 40, .76) !important;
-    --surface-gradient-bottom: rgba(3, 24, 20, .88) !important;
-    --surface-gradient-soft-top: rgba(12, 48, 37, .68) !important;
-    --surface-gradient-soft-bottom: rgba(4, 28, 23, .80) !important;
-    --surface-gradient-border: rgba(220, 198, 143, .24) !important;
-    --surface-gradient-text: #f5f2e8 !important;
-
-    --app-surface-strong: rgba(4, 29, 23, .78) !important;
-    --app-surface-card: rgba(8, 40, 31, .67) !important;
-    --app-surface-subtle: rgba(4, 25, 20, .52) !important;
-    --app-surface-border: rgba(220, 198, 143, .24) !important;
-    --app-text-primary: #f5f2e8 !important;
-    --app-text-muted: #c9d5cc !important;
-
-    --premium-surface-1: rgba(4, 33, 26, .79) !important;
-    --premium-surface-2: rgba(8, 43, 32, .65) !important;
-    --premium-border: rgba(220, 198, 143, .24) !important;
-    --premium-border-strong: rgba(237, 211, 153, .48) !important;
-    --premium-shadow-card: 0 10px 28px rgba(0, 10, 7, .24) !important;
-    --premium-shadow-hover: 0 14px 34px rgba(0, 10, 7, .34) !important;
-    --premium-accent-wash: var(--accent-soft) !important;
-    --premium-focus-ring: 0 0 0 3px var(--accent-soft) !important;
-
-    --glass-bg: var(--app-surface-strong) !important;
-    --glass-border: var(--app-surface-border) !important;
-    --ui-card-bg: var(--app-surface-card) !important;
-    --ui-card-bg-interactive: rgba(17, 59, 44, .84) !important;
-    --ui-card-border: var(--app-surface-border) !important;
-    --ui-section-bg: var(--app-surface-subtle) !important;
-    --year-control-bg: var(--app-surface-strong) !important;
-    --year-control-bg-hover: rgba(17, 59, 44, .88) !important;
-    --year-control-border: var(--app-surface-border) !important;
-
-    --text-main: #f5f2e8 !important;
-    --text-soft: #c9d5cc !important;
-    --text-color: #f5f2e8 !important;
-    --text-muted: #c9d5cc !important;
-
-    /* Achievement-Kacheln teilen dieselbe Grundfläche; Status-/Fortschrittsakzente nutzen das aktive Theme. */
-    --achievement-tile-complete-bg: linear-gradient(145deg, rgba(13, 62, 45, .94), rgba(4, 29, 23, .98)) !important;
-    --achievement-tile-complete-border: var(--accent) !important;
-    --achievement-tile-complete-chip-bg: color-mix(in srgb, var(--accent) 24%, #08271e) !important;
-    --achievement-tile-complete-text: #f8f4e9 !important;
-    --achievement-tile-complete-glow: var(--accent-soft) !important;
-    --achievement-tile-started-bg: linear-gradient(145deg, rgba(12, 48, 36, .90), rgba(5, 29, 24, .96)) !important;
-    --achievement-tile-started-border: color-mix(in srgb, var(--accent) 62%, rgba(220, 198, 143, .32)) !important;
-    --achievement-tile-started-text: #f1eee3 !important;
-    --achievement-tile-started-glow: color-mix(in srgb, var(--accent) 18%, transparent) !important;
-    --achievement-tile-empty-bg: linear-gradient(145deg, rgba(8, 34, 28, .78), rgba(3, 22, 19, .86)) !important;
-    --achievement-tile-empty-border: rgba(211, 199, 162, .24) !important;
-    --achievement-tile-empty-text: #c4d0c7 !important;
-    --achievement-tile-track: rgba(231, 232, 213, .14) !important;
-}
-
-/* Light verwendet dieselben dunklen Flächen wie Dark, Green und Summit;
-   nur die Akzentfarbe bleibt warm-golden. */
-body:not(.dark):not(.green):not(.summit) {
-    --light-surface-top: rgba(12, 48, 37, .76) !important;
-    --light-surface-bottom: rgba(3, 24, 20, .88) !important;
-    --light-surface-soft-top: rgba(13, 53, 40, .68) !important;
-    --light-surface-soft-bottom: rgba(4, 30, 24, .78) !important;
-    --light-surface-border: rgba(220, 198, 143, .24) !important;
-    --light-surface-text: #f5f2e8 !important;
-    --light-nav-top: rgba(12, 48, 37, .76) !important;
-    --light-nav-bottom: rgba(3, 24, 20, .88) !important;
-    --light-nav-soft-top: rgba(13, 53, 40, .68) !important;
-    --light-nav-soft-bottom: rgba(4, 30, 24, .78) !important;
-}
-
-/* Dashboard hat lokale Theme-Tokens. Diese werden auf dieselbe Oberfläche zurückgeführt. */
-body #dashboard-view,
-body.dark #dashboard-view,
-body.green #dashboard-view,
-body.summit #dashboard-view,
-body:not(.dark):not(.green):not(.summit) #dashboard-view {
-    --app-surface-strong: rgba(4, 29, 23, .78) !important;
-    --app-surface-card: rgba(8, 40, 31, .67) !important;
-    --app-surface-subtle: rgba(4, 25, 20, .52) !important;
-    --app-surface-border: rgba(220, 198, 143, .24) !important;
-    --app-text-primary: #f5f2e8 !important;
-    --app-text-muted: #c9d5cc !important;
-    --premium-surface-1: rgba(4, 33, 26, .79) !important;
-    --premium-surface-2: rgba(8, 43, 32, .65) !important;
-    --premium-border: rgba(220, 198, 143, .24) !important;
-    --premium-border-strong: rgba(237, 211, 153, .48) !important;
-    --premium-shadow-card: 0 10px 28px rgba(0, 10, 7, .24) !important;
-    --premium-shadow-hover: 0 14px 34px rgba(0, 10, 7, .34) !important;
-    --premium-accent-wash: var(--accent-soft) !important;
-    --text-main: #f5f2e8 !important;
-    --text-soft: #c9d5cc !important;
-}
-
-/* Identische Glasflächen für große Inhaltsbereiche in allen Themes. */
-body:is(.dark, .green, .summit) .box,
-body:is(.dark, .green, .summit) .dash-section,
-body:is(.dark, .green, .summit) .filter-simple-card,
-body:is(.dark, .green, .summit) .stats-analysis-section,
-body:is(.dark, .green, .summit) .stats-structure-section,
-body:is(.dark, .green, .summit) .chart-card,
-body:is(.dark, .green, .summit) .compare-box,
-body:is(.dark, .green, .summit) .compare-period-card,
-body:is(.dark, .green, .summit) .compare-list-card,
-body:is(.dark, .green, .summit) .tour-compare-pick-card,
-body:is(.dark, .green, .summit) .tour-compare-result,
-body:is(.dark, .green, .summit) .backup-status-panel,
-body:is(.dark, .green, .summit) .backup-info-card,
-body:is(.dark, .green, .summit) .backup-file-status,
-body:is(.dark, .green, .summit) .modal-card,
-body:is(.dark, .green, .summit) .theme-editor-panel,
-body:is(.dark, .green, .summit) .achievement-category-section,
-body:not(.dark):not(.green):not(.summit) .box,
-body:not(.dark):not(.green):not(.summit) .dash-section,
-body:not(.dark):not(.green):not(.summit) .filter-simple-card,
-body:not(.dark):not(.green):not(.summit) .stats-analysis-section,
-body:not(.dark):not(.green):not(.summit) .stats-structure-section,
-body:not(.dark):not(.green):not(.summit) .chart-card,
-body:not(.dark):not(.green):not(.summit) .compare-box,
-body:not(.dark):not(.green):not(.summit) .compare-period-card,
-body:not(.dark):not(.green):not(.summit) .compare-list-card,
-body:not(.dark):not(.green):not(.summit) .tour-compare-pick-card,
-body:not(.dark):not(.green):not(.summit) .tour-compare-result,
-body:not(.dark):not(.green):not(.summit) .backup-status-panel,
-body:not(.dark):not(.green):not(.summit) .backup-info-card,
-body:not(.dark):not(.green):not(.summit) .backup-file-status,
-body:not(.dark):not(.green):not(.summit) .modal-card,
-body:not(.dark):not(.green):not(.summit) .theme-editor-panel,
-body:not(.dark):not(.green):not(.summit) .achievement-category-section {
-    background: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
-    border-color: var(--app-surface-border) !important;
-    color: var(--app-text-primary) !important;
-}
-
-/* Wiederkehrende Kacheln, Listen und sekundäre Flächen erhalten dieselbe tiefgrüne Glaswirkung. */
-body:is(.dark, .green, .summit) .chart-stat-tile:not(.active),
-body:is(.dark, .green, .summit) .stat-card,
-body:is(.dark, .green, .summit) .dash-stat-tile,
-body:is(.dark, .green, .summit) .dash-milestone-tile,
-body:is(.dark, .green, .summit) .dash-tour-list li,
-body:is(.dark, .green, .summit) .stats-list li,
-body:is(.dark, .green, .summit) .peak-tour-list li,
-body:is(.dark, .green, .summit) .tour-search-result,
-body:is(.dark, .green, .summit) .compare-row,
-body:is(.dark, .green, .summit) .compare-chip,
-body:not(.dark):not(.green):not(.summit) .chart-stat-tile:not(.active),
-body:not(.dark):not(.green):not(.summit) .stat-card,
-body:not(.dark):not(.green):not(.summit) .dash-stat-tile,
-body:not(.dark):not(.green):not(.summit) .dash-milestone-tile,
-body:not(.dark):not(.green):not(.summit) .dash-tour-list li,
-body:not(.dark):not(.green):not(.summit) .stats-list li,
-body:not(.dark):not(.green):not(.summit) .peak-tour-list li,
-body:not(.dark):not(.green):not(.summit) .tour-search-result,
-body:not(.dark):not(.green):not(.summit) .compare-row,
-body:not(.dark):not(.green):not(.summit) .compare-chip {
-    background: var(--app-surface-card) !important;
-    border-color: var(--app-surface-border) !important;
-}
-
-/* Lesbare helle Typografie auf allen Flächen; semantische Statusmeldungen bleiben separat. */
-body:is(.dark, .green, .summit) .box-header,
-body:is(.dark, .green, .summit) .box-content,
-body:is(.dark, .green, .summit) .stats-label,
-body:is(.dark, .green, .summit) .stats-value,
-body:is(.dark, .green, .summit) .dash-stat-value,
-body:is(.dark, .green, .summit) .dash-stat-label,
-body:is(.dark, .green, .summit) .chart-title,
-body:is(.dark, .green, .summit) .theme-editor-panel,
-body:not(.dark):not(.green):not(.summit) .box-header,
-body:not(.dark):not(.green):not(.summit) .box-content,
-body:not(.dark):not(.green):not(.summit) .stats-label,
-body:not(.dark):not(.green):not(.summit) .stats-value,
-body:not(.dark):not(.green):not(.summit) .dash-stat-value,
-body:not(.dark):not(.green):not(.summit) .dash-stat-label,
-body:not(.dark):not(.green):not(.summit) .chart-title,
-body:not(.dark):not(.green):not(.summit) .theme-editor-panel {
-    color: var(--app-text-primary) !important;
-}
-
-body:is(.dark, .green, .summit) .text-muted,
-body:is(.dark, .green, .summit) .stats-analysis-subtitle,
-body:is(.dark, .green, .summit) .stats-structure-card-meta,
-body:is(.dark, .green, .summit) .development-metric-label,
-body:is(.dark, .green, .summit) .best-form-label,
-body:not(.dark):not(.green):not(.summit) .text-muted,
-body:not(.dark):not(.green):not(.summit) .stats-analysis-subtitle,
-body:not(.dark):not(.green):not(.summit) .stats-structure-card-meta,
-body:not(.dark):not(.green):not(.summit) .development-metric-label,
-body:not(.dark):not(.green):not(.summit) .best-form-label {
-    color: var(--app-text-muted) !important;
-    opacity: 1 !important;
-}
-
-/* Eingabefelder, Jahreswahl und Dropdowns teilen die gemeinsame dunkle Oberfläche. */
-body:is(.dark, .green, .summit) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
-body:is(.dark, .green, .summit) select,
-body:is(.dark, .green, .summit) textarea,
-body:is(.dark, .green, .summit) .mob-sel-btn,
-body:is(.dark, .green, .summit) .dash-year-arrow-btn,
-body:not(.dark):not(.green):not(.summit) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
-body:not(.dark):not(.green):not(.summit) select,
-body:not(.dark):not(.green):not(.summit) textarea,
-body:not(.dark):not(.green):not(.summit) .mob-sel-btn,
-body:not(.dark):not(.green):not(.summit) .dash-year-arrow-btn {
-    background: var(--app-surface-card) !important;
-    color: var(--app-text-primary) !important;
-    border-color: var(--app-surface-border) !important;
-}
-
-body select option {
-    background: #08271f !important;
-    color: #f5f2e8 !important;
-}
-
-/* Aktive Auswahlflächen variieren nur mit dem Akzent des Themes. */
-body:is(.dark, .green, .summit) .chart-tab.active,
-body:is(.dark, .green, .summit) .stats-section-btn.active,
-body:is(.dark, .green, .summit) .filter-section-nav-btn.active,
-body:is(.dark, .green, .summit) .plan-section-btn.active,
-body:is(.dark, .green, .summit) .tour-search-page-btn.active,
-body:is(.dark, .green, .summit) .quick-filter-btn.active,
-body:is(.dark, .green, .summit) .map-mode-btn.active,
-body:is(.dark, .green, .summit) .compare-mode-btn.active,
-body:is(.dark, .green, .summit) .checklist-mode-btn.active,
-body:is(.dark, .green, .summit) .yc-metric-btn.active,
-body:is(.dark, .green, .summit) .yc-year-toggle-btn.active,
-body:is(.dark, .green, .summit) .development-history-range-btn.active,
-body:is(.dark, .green, .summit) .toggle-btn.view-active,
-body:is(.dark, .green, .summit) .bergwelt-tab.is-active,
-body:not(.dark):not(.green):not(.summit) .chart-tab.active,
-body:not(.dark):not(.green):not(.summit) .stats-section-btn.active,
-body:not(.dark):not(.green):not(.summit) .filter-section-nav-btn.active,
-body:not(.dark):not(.green):not(.summit) .plan-section-btn.active,
-body:not(.dark):not(.green):not(.summit) .tour-search-page-btn.active,
-body:not(.dark):not(.green):not(.summit) .quick-filter-btn.active,
-body:not(.dark):not(.green):not(.summit) .map-mode-btn.active,
-body:not(.dark):not(.green):not(.summit) .compare-mode-btn.active,
-body:not(.dark):not(.green):not(.summit) .checklist-mode-btn.active,
-body:not(.dark):not(.green):not(.summit) .yc-metric-btn.active,
-body:not(.dark):not(.green):not(.summit) .yc-year-toggle-btn.active,
-body:not(.dark):not(.green):not(.summit) .development-history-range-btn.active,
-body:not(.dark):not(.green):not(.summit) .toggle-btn.view-active,
-body:not(.dark):not(.green):not(.summit) .bergwelt-tab.is-active {
-    background: var(--accent-gradient) !important;
-    color: var(--accent-text-color, #f5f2e8) !important;
-    border-color: color-mix(in srgb, var(--accent) 60%, rgba(220, 198, 143, .34)) !important;
-}
-
-/* Spezifische Auswahlflächen behalten den gemeinsamen Theme-Akzent auch bei ID-Regeln. */
-#chart-view .stats-section-btn.active,
-#chart-view .chart-tab.active,
-#map-view .map-mode-btn.active,
-#map-view #map-quick-filters .quick-filter-btn.active,
-#theme-view #theme-editor-tabs button.active {
-    background: var(--accent-gradient) !important;
-    color: var(--accent-text-color, #f5f2e8) !important;
-    border-color: color-mix(in srgb, var(--accent) 60%, rgba(220, 198, 143, .34)) !important;
-}
-
-/* Dashboard-Fortschrittsbalken übernehmen den gewählten Akzent; die Spur bleibt neutral. */
-#dashboard-view .dash-ms-progress-wrap {
-    background: rgba(231, 232, 213, .15) !important;
-}
-#dashboard-view .dash-ms-progress-bar,
-.dash-ms-progress-bar {
-    background: var(--accent-gradient) !important;
-}
-
-/* Das Foto bleibt in allen Themes identisch. Nur der Kontrastschleier ist jetzt einheitlich. */
-.parallax::before,
-body.dark .parallax::before,
-body.green .parallax::before,
-body.summit .parallax::before {
-    background: linear-gradient(
-        180deg,
-        rgba(7, 16, 22, .17) 0%,
-        rgba(5, 13, 19, .25) 42%,
-        rgba(4, 11, 17, .43) 100%
-    ) !important;
-}
-
-
-/* PHASE 2 · SCHRITT 1 — AKTIVE ELEMENTE MIT AUSREICHENDER SPEZIFITÄT
-   Gewinnt auch gegen ältere theme- und view-spezifische Regeln; Akzent bleibt themeabhängig. */
-body:is(.dark, .green, .summit) #chart-view .stats-section-btn.active,
-body:is(.dark, .green, .summit) #chart-view .chart-tab.active,
-body:is(.dark, .green, .summit) #map-view .map-mode-btn.active,
-body:is(.dark, .green, .summit) #map-view #map-quick-filters .quick-filter-btn.active,
-body:is(.dark, .green, .summit) #theme-view #theme-editor-tabs button.active,
-body:is(.dark, .green, .summit) .chart-stat-tile.active,
-body:not(.dark):not(.green):not(.summit) #chart-view .stats-section-btn.active,
-body:not(.dark):not(.green):not(.summit) #chart-view .chart-tab.active,
-body:not(.dark):not(.green):not(.summit) #map-view .map-mode-btn.active,
-body:not(.dark):not(.green):not(.summit) #map-view #map-quick-filters .quick-filter-btn.active,
-body:not(.dark):not(.green):not(.summit) #theme-view #theme-editor-tabs button.active,
-body:not(.dark):not(.green):not(.summit) .chart-stat-tile.active {
-    background: var(--accent-gradient) !important;
-    color: var(--accent-text-color, #f5f2e8) !important;
-    border-color: color-mix(in srgb, var(--accent) 60%, rgba(220, 198, 143, .34)) !important;
-}
-
-/* Text der aktivierten Statistik-Kacheln bleibt auf dem themeabhängigen Akzent kontrastreich. */
-body:is(.dark, .green, .summit) .chart-stat-tile.active .chart-stat-value,
-body:is(.dark, .green, .summit) .chart-stat-tile.active .chart-stat-label,
-body:is(.dark, .green, .summit) .chart-stat-tile.active .chart-stat-sub,
-body:is(.dark, .green, .summit) .chart-stat-tile.active .chart-stat-icon,
-body:not(.dark):not(.green):not(.summit) .chart-stat-tile.active .chart-stat-value,
-body:not(.dark):not(.green):not(.summit) .chart-stat-tile.active .chart-stat-label,
-body:not(.dark):not(.green):not(.summit) .chart-stat-tile.active .chart-stat-sub,
-body:not(.dark):not(.green):not(.summit) .chart-stat-tile.active .chart-stat-icon {
-    color: var(--accent-text-color, #f5f2e8) !important;
-}
-
-
-/* =========================================================
-   PHASE 2 · SCHRITT 1 · EINHEITLICHE DARK-DASHBOARD-BASIS
-   Graphit-/Schieferflächen aus dem Dark-Dashboard als gemeinsame Basis.
-   Das feste Alpin-Motiv, Navigationsposition, View-Reihenfolge und Layout bleiben unangetastet.
-   ========================================================= */
-
-/* Eine gemeinsame, halbtransparente Flächenfamilie für alle Views. */
-:root,
-body,
-body.dark,
-body.green,
-body.summit,
-body:not(.dark):not(.green):not(.summit) {
-    --theme-surface-top: rgba(25, 30, 39, .86) !important;
-    --theme-surface-bottom: rgba(13, 21, 31, .88) !important;
-    --theme-surface-soft-top: rgba(24, 32, 44, .80) !important;
-    --theme-surface-soft-bottom: rgba(13, 21, 31, .78) !important;
-    --theme-surface-border: var(--app-surface-border) !important;
-    --theme-surface-text: #f3f7fb !important;
-
-    --surface-gradient-top: rgba(25, 30, 39, .86) !important;
-    --surface-gradient-bottom: rgba(13, 21, 31, .88) !important;
-    --surface-gradient-soft-top: rgba(24, 32, 44, .80) !important;
-    --surface-gradient-soft-bottom: rgba(13, 21, 31, .78) !important;
-    --surface-gradient-border: var(--app-surface-border) !important;
-    --surface-gradient-text: #f3f7fb !important;
-
-    --app-surface-strong: rgba(25, 30, 39, .86) !important;
-    --app-surface-card: rgba(17, 26, 37, .78) !important;
-    --app-surface-subtle: rgba(13, 21, 31, .66) !important;
-    --app-surface-border: rgba(180, 190, 205, .22) !important;
-    --app-text-primary: #f3f7fb !important;
-    --app-text-muted: #cbd5df !important;
-
-    --premium-surface-1: rgba(25, 30, 39, .86) !important;
-    --premium-surface-2: rgba(17, 26, 37, .78) !important;
-    --premium-border: var(--app-surface-border) !important;
-    --premium-border-strong: color-mix(in srgb, var(--accent) 64%, rgba(220, 225, 235, .28)) !important;
+    --premium-surface-1: rgba(25, 30, 39, .82) !important;
+    --premium-surface-2: rgba(17, 26, 37, .74) !important;
+    --premium-border: color-mix(in srgb, var(--accent) 36%, rgba(225, 232, 242, .12)) !important;
+    --premium-border-strong: color-mix(in srgb, var(--accent) 68%, rgba(225, 232, 242, .24)) !important;
     --premium-shadow-card: 0 10px 28px rgba(0, 0, 0, .24) !important;
     --premium-shadow-hover: 0 14px 34px rgba(0, 0, 0, .34) !important;
     --premium-accent-wash: var(--accent-soft) !important;
     --premium-focus-ring: 0 0 0 3px var(--accent-soft) !important;
 
-    --glass-bg: var(--app-surface-strong) !important;
-    --glass-border: var(--app-surface-border) !important;
-    --ui-card-bg: var(--app-surface-card) !important;
+    --theme-surface-top: rgba(25, 30, 39, .82) !important;
+    --theme-surface-bottom: rgba(13, 21, 31, .86) !important;
+    --theme-surface-soft-top: rgba(24, 32, 44, .76) !important;
+    --theme-surface-soft-bottom: rgba(13, 21, 31, .74) !important;
+    --theme-surface-border: color-mix(in srgb, var(--accent) 36%, rgba(225, 232, 242, .12)) !important;
+    --theme-surface-text: #f3f7fb !important;
+
+    --surface-gradient-top: rgba(25, 30, 39, .82) !important;
+    --surface-gradient-bottom: rgba(13, 21, 31, .86) !important;
+    --surface-gradient-soft-top: rgba(24, 32, 44, .76) !important;
+    --surface-gradient-soft-bottom: rgba(13, 21, 31, .74) !important;
+    --surface-gradient-border: color-mix(in srgb, var(--accent) 36%, rgba(225, 232, 242, .12)) !important;
+    --surface-gradient-text: #f3f7fb !important;
+
+    --glass-bg: rgba(25, 30, 39, .82) !important;
+    --glass-border: color-mix(in srgb, var(--accent) 36%, rgba(225, 232, 242, .12)) !important;
+    --ui-card-bg: rgba(17, 26, 37, .74) !important;
     --ui-card-bg-interactive: rgba(31, 40, 54, .90) !important;
-    --ui-card-border: var(--app-surface-border) !important;
-    --ui-section-bg: var(--app-surface-subtle) !important;
-    --year-control-bg: var(--app-surface-strong) !important;
-    --year-control-bg-hover: rgba(31, 40, 54, .94) !important;
-    --year-control-border: var(--app-surface-border) !important;
+    --ui-card-border: color-mix(in srgb, var(--accent) 36%, rgba(225, 232, 242, .12)) !important;
+    --ui-section-bg: rgba(13, 21, 31, .62) !important;
+
+    --year-control-bg: rgba(25, 30, 39, .82) !important;
+    --year-control-bg-hover: rgba(31, 40, 54, .92) !important;
+    --year-control-border: color-mix(in srgb, var(--accent) 42%, rgba(225, 232, 242, .12)) !important;
+    --year-control-shadow: 0 3px 12px rgba(0, 0, 0, .22), inset 0 1px 0 rgba(255, 255, 255, .035) !important;
+    --year-option-bg: #111a25 !important;
+    --year-option-text: #f3f7fb !important;
+
+    /* Ältere Light-Komponenten verwenden weiterhin diese Variablen. */
+    --light-surface-top: rgba(25, 30, 39, .82) !important;
+    --light-surface-bottom: rgba(13, 21, 31, .86) !important;
+    --light-surface-soft-top: rgba(24, 32, 44, .76) !important;
+    --light-surface-soft-bottom: rgba(13, 21, 31, .74) !important;
+    --light-surface-border: color-mix(in srgb, var(--accent) 36%, rgba(225, 232, 242, .12)) !important;
+    --light-surface-text: #f3f7fb !important;
+    --light-nav-top: rgba(25, 30, 39, .82) !important;
+    --light-nav-bottom: rgba(13, 21, 31, .86) !important;
+    --light-nav-soft-top: rgba(24, 32, 44, .76) !important;
+    --light-nav-soft-bottom: rgba(13, 21, 31, .74) !important;
+    --light-nav-border: color-mix(in srgb, var(--accent) 36%, rgba(225, 232, 242, .12)) !important;
+    --light-nav-text: #f3f7fb !important;
 
     --text-main: #f3f7fb !important;
     --text-soft: #cbd5df !important;
     --text-color: #f3f7fb !important;
     --text-muted: #cbd5df !important;
+    --app-text-primary: #f3f7fb !important;
+    --app-text-muted: #cbd5df !important;
 
     --achievement-tile-complete-bg: linear-gradient(145deg, rgba(31, 40, 54, .94), rgba(13, 21, 31, .98)) !important;
     --achievement-tile-complete-border: var(--accent) !important;
@@ -8544,761 +7636,306 @@ body:not(.dark):not(.green):not(.summit) {
     --achievement-tile-track: rgba(225, 231, 240, .15) !important;
 }
 
-/* Theme-Akzente: bewusst nur die Akzentfamilie ändern, nicht die Grundflächen. */
-:root,
-body:not(.dark):not(.green):not(.summit),
-body.premium-alpine-editor-paused.premium-alpine-editor-paused:not(.dark):not(.green):not(.summit) {
-    --accent: #ad7d12 !important;
-    --accent-soft: rgba(190, 145, 34, .25) !important;
-    --accent-gradient: linear-gradient(135deg, #e3c45f, #ad7d12) !important;
-    --accent-text-color: #17202a !important;
-    --accordion-glow: rgba(190, 145, 34, .28) !important;
-    --app-surface-border: rgba(190, 145, 34, .34) !important;
-}
-body.dark,
-body.premium-alpine-editor-paused.premium-alpine-editor-paused.dark {
+/* Nur die Akzentfarbe unterscheidet die Themes voneinander. */
+body.dark {
     --accent: #7a0d0d !important;
     --accent-soft: rgba(122, 13, 13, .30) !important;
-    --accent-gradient: linear-gradient(135deg, #7a0d0d, #4e0a0a) !important;
+    --accent-gradient: linear-gradient(135deg, #7a0d0d 0%, #4e0a0a 100%) !important;
     --accent-text-color: #ffffff !important;
     --accordion-glow: rgba(122, 13, 13, .30) !important;
-    --app-surface-border: rgba(190, 82, 91, .34) !important;
-}
-body.green,
-body.premium-alpine-editor-paused.premium-alpine-editor-paused.green {
-    --accent: #174a32 !important;
-    --accent-soft: rgba(23, 74, 50, .30) !important;
-    --accent-gradient: linear-gradient(135deg, #174a32, #0a2b1d) !important;
-    --accent-text-color: #ffffff !important;
-    --accordion-glow: rgba(23, 74, 50, .32) !important;
-    --app-surface-border: rgba(91, 165, 123, .34) !important;
-}
-body.summit,
-body.premium-alpine-editor-paused.premium-alpine-editor-paused.summit {
-    --accent: #173b65 !important;
-    --accent-soft: rgba(35, 76, 121, .34) !important;
-    --accent-gradient: linear-gradient(135deg, #214a78, #0b2444) !important;
-    --accent-text-color: #ffffff !important;
-    --accordion-glow: rgba(35, 76, 121, .30) !important;
-    --app-surface-border: rgba(88, 139, 194, .36) !important;
-}
-
-/* Dashboard hat lokale Tokens; dieselbe Basis gilt deshalb explizit auch dort. */
-body #dashboard-view,
-body.dark #dashboard-view,
-body.green #dashboard-view,
-body.summit #dashboard-view,
-body:not(.dark):not(.green):not(.summit) #dashboard-view {
-    --app-surface-strong: rgba(25, 30, 39, .86) !important;
-    --app-surface-card: rgba(17, 26, 37, .78) !important;
-    --app-surface-subtle: rgba(13, 21, 31, .66) !important;
-    --app-text-primary: #f3f7fb !important;
-    --app-text-muted: #cbd5df !important;
-    --premium-surface-1: rgba(25, 30, 39, .86) !important;
-    --premium-surface-2: rgba(17, 26, 37, .78) !important;
-    --premium-accent-wash: var(--accent-soft) !important;
-    --text-main: #f3f7fb !important;
-    --text-soft: #cbd5df !important;
-}
-
-/* Große Inhaltsflächen in sämtlichen Views: gleiche halbtransparente Schieferflächen. */
-body .box,
-body .dash-section,
-body .filter-simple-card,
-body .stats-analysis-section,
-body .stats-structure-section,
-body .chart-card,
-body .compare-box,
-body .compare-period-card,
-body .compare-list-card,
-body .tour-compare-pick-card,
-body .tour-compare-result,
-body .backup-status-panel,
-body .backup-info-card,
-body .backup-file-status,
-body .modal-card,
-body .theme-editor-panel,
-body .achievement-category-section,
-body .plan-page-box,
-body .plan-section-panel {
-    background: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
-    border-color: var(--app-surface-border) !important;
-    color: var(--app-text-primary) !important;
-}
-
-/* Einzelkacheln, Tabellenzeilen und kompakte Sekundärflächen. */
-body .chart-stat-tile:not(.active),
-body .stat-card,
-body .dash-stat-tile,
-body .dash-milestone-tile,
-body .dash-tour-list li,
-body .stats-list li,
-body .peak-tour-list li,
-body .tour-search-result,
-body .compare-row,
-body .compare-chip,
-body .tour-profile-summary-card,
-body .development-metric-card,
-body .best-form-card,
-body .activity-summary-card,
-body .peak-summary-card,
-body .stats-structure-typical-card,
-body .stats-structure-type-card,
-body .stats-structure-burden-card,
-body .plan-overview-tile,
-body .plan-live-preview,
-body .tour-profile-summary-card {
-    background: var(--app-surface-card) !important;
-    border-color: var(--app-surface-border) !important;
-    color: var(--app-text-primary) !important;
-}
-
-/* Einheitliche Textkontraste; unterstützende Beschriftungen bleiben klar unterscheidbar. */
-body .box-header,
-body .box-content,
-body .stats-label,
-body .stats-value,
-body .dash-stat-value,
-body .dash-stat-label,
-body .chart-title,
-body .form-section-title,
-body .stats-analysis-title,
-body .development-metric-value,
-body .best-form-value,
-body .activity-summary-value,
-body .peak-summary-value,
-body .tour-form label,
-body .plan-view-title {
-    color: var(--app-text-primary) !important;
-}
-body small,
-body .text-muted,
-body .stats-analysis-subtitle,
-body .stats-structure-card-meta,
-body .development-metric-label,
-body .best-form-label,
-body .tour-profile-summary-label,
-body .compare-period-title,
-body .dash-stat-label,
-body .dash-ms-progress-text {
-    color: var(--app-text-muted) !important;
-    opacity: 1 !important;
-}
-
-/* Formulare und Dropdowns bleiben auf der gleichen dunklen, gut lesbaren Basis. */
-body input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
-body select,
-body textarea,
-body .mob-sel-btn,
-body .dash-year-arrow-btn {
-    background: var(--app-surface-card) !important;
-    color: var(--app-text-primary) !important;
-    border-color: var(--app-surface-border) !important;
-}
-body select option {
-    background: #111a25 !important;
-    color: #f3f7fb !important;
-}
-body input::placeholder,
-body textarea::placeholder {
-    color: #cbd5df !important;
-    opacity: 1 !important;
-}
-
-/* Hauptnavigation behält Position, Raster und Abstände. Nur Flächen und Akzent folgen dem Theme. */
-body .top-main-nav {
-    background: transparent !important;
-    background-image: none !important;
-    border-color: transparent !important;
-    box-shadow: none !important;
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
-}
-body .top-nav-btn {
-    color: var(--app-text-primary) !important;
-}
-body .top-nav-btn.view-active,
-body .top-nav-btn.more-view-active {
-    background: var(--accent-soft) !important;
-    border: 1px solid color-mix(in srgb, var(--accent) 72%, transparent) !important;
-    color: var(--app-text-primary) !important;
-}
-body .top-nav-btn.view-active .top-nav-label,
-body .top-nav-btn.more-view-active .top-nav-label {
-    color: var(--app-text-primary) !important;
-    opacity: 1 !important;
-}
-body .top-nav-save,
-body button.save-btn {
-    background: var(--accent-gradient) !important;
-    border-color: var(--accent) !important;
-    color: var(--accent-text-color, #ffffff) !important;
-}
-body .top-nav-save .top-nav-label,
-body .top-nav-save .top-nav-plus {
-    color: var(--accent-text-color, #ffffff) !important;
-    opacity: 1 !important;
-}
-body #more-menu {
-    background: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
-    border-color: var(--app-surface-border) !important;
-    color: var(--app-text-primary) !important;
-}
-body #more-menu .more-menu-item:hover,
-body #more-menu .more-menu-item:focus-visible,
-body #more-menu .more-theme-option[aria-pressed="true"] {
-    background: var(--accent-soft) !important;
-    border-color: color-mix(in srgb, var(--accent) 66%, transparent) !important;
-    color: var(--app-text-primary) !important;
-}
-
-/* Unter-Navigation und aktive Auswahlflächen folgen derselben Akzentfamilie. */
-body .chart-tab.active,
-body .stats-section-btn.active,
-body .filter-section-nav-btn.active,
-body .plan-section-btn.active,
-body .tour-search-page-btn.active,
-body .quick-filter-btn.active,
-body .map-mode-btn.active,
-body .compare-mode-btn.active,
-body .checklist-mode-btn.active,
-body .yc-metric-btn.active,
-body .yc-year-toggle-btn.active,
-body .development-history-range-btn.active,
-body .toggle-btn.view-active,
-body .bergwelt-tab.is-active,
-body #chart-view .stats-section-btn.active,
-body #chart-view .chart-tab.active,
-body #map-view .map-mode-btn.active,
-body #map-view #map-quick-filters .quick-filter-btn.active,
-body #theme-view #theme-editor-tabs button.active,
-body .chart-stat-tile.active {
-    background: var(--accent-gradient) !important;
-    border-color: color-mix(in srgb, var(--accent) 70%, rgba(220, 225, 235, .24)) !important;
-    color: var(--accent-text-color, #ffffff) !important;
-}
-body .chart-stat-tile.active .chart-stat-value,
-body .chart-stat-tile.active .chart-stat-label,
-body .chart-stat-tile.active .chart-stat-sub,
-body .chart-stat-tile.active .chart-stat-icon {
-    color: var(--accent-text-color, #ffffff) !important;
-}
-body :is(input, select, textarea, button):focus-visible {
-    outline-color: var(--accent) !important;
-}
-body #dashboard-view .dash-ms-progress-wrap {
-    background: rgba(225, 231, 240, .15) !important;
-}
-body #dashboard-view .dash-ms-progress-bar,
-body .dash-ms-progress-bar {
-    background: var(--accent-gradient) !important;
-}
-
-
-/* =========================================================
-   PHASE 2 · SCHRITT 1 · SPEZIFITÄT FÜR ALLE THEMES
-   Stellt sicher, dass die gemeinsame Palette auch ältere,
-   spezifischere Theme-Regeln in der gesamten App überstimmt.
-   ========================================================= */
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .box,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .dash-section,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .filter-simple-card,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-analysis-section,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-structure-section,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .chart-card,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .compare-box,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .compare-period-card,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .compare-list-card,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .tour-compare-pick-card,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .tour-compare-result,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .backup-status-panel,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .backup-info-card,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .backup-file-status,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .modal-card,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .theme-editor-panel,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .achievement-category-section,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .plan-page-box,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .plan-section-panel {
-    background: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
-    border-color: var(--app-surface-border) !important;
-    color: var(--app-text-primary) !important;
-}
-
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .chart-stat-tile:not(.active),
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stat-card,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .dash-stat-tile,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .dash-milestone-tile,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .dash-tour-list li,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-list li,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .peak-tour-list li,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .tour-search-result,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .compare-row,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .compare-chip,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .tour-profile-summary-card,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .development-metric-card,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .best-form-card,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .activity-summary-card,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .peak-summary-card,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-structure-typical-card,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-structure-type-card,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-structure-burden-card,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .plan-overview-tile,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .plan-live-preview {
-    background: var(--app-surface-card) !important;
-    border-color: var(--app-surface-border) !important;
-    color: var(--app-text-primary) !important;
-}
-
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .box-header,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .box-content,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-label,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-value,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .dash-stat-value,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .dash-stat-label,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .chart-title,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .form-section-title,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-analysis-title,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .development-metric-value,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .best-form-value,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .activity-summary-value,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .peak-summary-value,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .tour-form label,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .plan-view-title {
-    color: var(--app-text-primary) !important;
-}
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) small,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .text-muted,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-analysis-subtitle,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-structure-card-meta,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .development-metric-label,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .best-form-label,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .tour-profile-summary-label,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .compare-period-title,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .dash-ms-progress-text {
-    color: var(--app-text-muted) !important;
-    opacity: 1 !important;
-}
-
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) select,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) textarea,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .mob-sel-btn,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .dash-year-arrow-btn {
-    background: var(--app-surface-card) !important;
-    color: var(--app-text-primary) !important;
-    border-color: var(--app-surface-border) !important;
-}
-
-/* Hauptnavigation: aktiver View, Speichern und Theme-Auswahl nutzen den Akzent überall gleich. */
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-nav-btn.view-active,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-nav-btn.more-view-active {
-    background: var(--accent-soft) !important;
-    border: 1px solid color-mix(in srgb, var(--accent) 72%, transparent) !important;
-    color: var(--app-text-primary) !important;
-}
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-nav-btn.view-active .top-nav-label,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-nav-btn.more-view-active .top-nav-label {
-    color: var(--app-text-primary) !important;
-    opacity: 1 !important;
-}
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-nav-save,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) button.save-btn {
-    background: var(--accent-gradient) !important;
-    border-color: var(--accent) !important;
-    color: var(--accent-text-color, #ffffff) !important;
-}
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-nav-save .top-nav-label,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-nav-save .top-nav-plus {
-    color: var(--accent-text-color, #ffffff) !important;
-    opacity: 1 !important;
-}
-
-/* Aktive Unter-Navigation und Auswahlflächen behalten ebenfalls die korrekte Theme-Akzentfarbe. */
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .chart-tab.active,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .stats-section-btn.active,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .filter-section-nav-btn.active,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .plan-section-btn.active,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .tour-search-page-btn.active,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .quick-filter-btn.active,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .map-mode-btn.active,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .compare-mode-btn.active,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .checklist-mode-btn.active,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .yc-metric-btn.active,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .yc-year-toggle-btn.active,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .development-history-range-btn.active,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .toggle-btn.view-active,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .bergwelt-tab.is-active,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .chart-stat-tile.active {
-    background: var(--accent-gradient) !important;
-    border-color: color-mix(in srgb, var(--accent) 70%, rgba(220, 225, 235, .24)) !important;
-    color: var(--accent-text-color, #ffffff) !important;
-}
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .chart-stat-tile.active .chart-stat-value,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .chart-stat-tile.active .chart-stat-label,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .chart-stat-tile.active .chart-stat-sub,
-:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .chart-stat-tile.active .chart-stat-icon {
-    color: var(--accent-text-color, #ffffff) !important;
-}
-
-
-/* Premium Alpine – einheitliche, halbtransparente Theme-Oberflächen über alle Views. */
-/* Akzentfarben: dunkelrot, dunkelgrün, dunkelblau und Gold. */
-body.dark {
-    --accent: #7a0d0d;
-    --accent-soft: rgba(122, 13, 13, .30);
-    --accent-gradient: linear-gradient(135deg, #7a0d0d 0%, #4e0a0a 100%);
-    --accordion-glow: rgba(122, 13, 13, .30);
-    --surface-gradient-top: rgba(100, 24, 32, .76);
-    --surface-gradient-bottom: rgba(8, 17, 28, .88);
-    --surface-gradient-soft-top: rgba(79, 26, 34, .68);
-    --surface-gradient-soft-bottom: rgba(11, 23, 36, .82);
-    --surface-gradient-border: rgba(196, 91, 99, .32);
-    --surface-gradient-text: #f4f7fb;
-    --theme-surface-top: rgba(100, 24, 32, .76);
-    --theme-surface-bottom: rgba(8, 17, 28, .88);
-    --theme-surface-soft-top: rgba(79, 26, 34, .68);
-    --theme-surface-soft-bottom: rgba(11, 23, 36, .82);
-    --theme-surface-border: rgba(196, 91, 99, .32);
-    --theme-surface-text: #f4f7fb;
 }
 body.green {
-    --accent: #174a32;
-    --accent-soft: rgba(23, 74, 50, .30);
-    --accent-gradient: linear-gradient(135deg, #174a32 0%, #0a2b1d 100%);
-    --accordion-glow: rgba(23, 74, 50, .32);
-    --surface-gradient-top: rgba(25, 79, 54, .76);
-    --surface-gradient-bottom: rgba(4, 19, 13, .89);
-    --surface-gradient-soft-top: rgba(20, 65, 44, .68);
-    --surface-gradient-soft-bottom: rgba(5, 27, 18, .83);
-    --surface-gradient-border: rgba(91, 165, 123, .32);
-    --surface-gradient-text: #f2fff7;
-    --theme-surface-top: rgba(25, 79, 54, .76);
-    --theme-surface-bottom: rgba(4, 19, 13, .89);
-    --theme-surface-soft-top: rgba(20, 65, 44, .68);
-    --theme-surface-soft-bottom: rgba(5, 27, 18, .83);
-    --theme-surface-border: rgba(91, 165, 123, .32);
-    --theme-surface-text: #f2fff7;
+    --accent: #174a32 !important;
+    --accent-soft: rgba(23, 74, 50, .34) !important;
+    --accent-gradient: linear-gradient(135deg, #205c40 0%, #123a28 100%) !important;
+    --accent-text-color: #f3f7fb !important;
+    --accordion-glow: rgba(23, 74, 50, .34) !important;
 }
 body.summit {
-    --accent: #153b69;
-    --accent-soft: rgba(21, 59, 105, .30);
-    --accent-gradient: linear-gradient(135deg, #153b69 0%, #0b2342 100%);
-    --accordion-glow: rgba(21, 59, 105, .32);
-    --surface-gradient-top: rgba(24, 61, 101, .76);
-    --surface-gradient-bottom: rgba(8, 18, 31, .89);
-    --surface-gradient-soft-top: rgba(20, 51, 84, .68);
-    --surface-gradient-soft-bottom: rgba(10, 25, 41, .83);
-    --surface-gradient-border: rgba(100, 153, 211, .34);
-    --surface-gradient-text: #f3f8ff;
-    --theme-surface-top: rgba(24, 61, 101, .76);
-    --theme-surface-bottom: rgba(8, 18, 31, .89);
-    --theme-surface-soft-top: rgba(20, 51, 84, .68);
-    --theme-surface-soft-bottom: rgba(10, 25, 41, .83);
-    --theme-surface-border: rgba(100, 153, 211, .34);
-    --theme-surface-text: #f3f8ff;
+    --accent: #153b69 !important;
+    --accent-soft: rgba(21, 59, 105, .34) !important;
+    --accent-gradient: linear-gradient(135deg, #153b69 0%, #0b2342 100%) !important;
+    --accent-text-color: #ffffff !important;
+    --accordion-glow: rgba(21, 59, 105, .34) !important;
 }
-body:not(.dark):not(.green):not(.summit) {
-    --accent: #b88628;
-    --accent-soft: rgba(184, 134, 40, .24);
-    --accent-gradient: linear-gradient(135deg, #d9b45c 0%, #a87518 100%);
-    --accordion-glow: rgba(184, 134, 40, .26);
-    --surface-gradient-top: rgba(245, 232, 200, .76);
-    --surface-gradient-bottom: rgba(229, 222, 204, .86);
-    --surface-gradient-soft-top: rgba(250, 241, 220, .70);
-    --surface-gradient-soft-bottom: rgba(235, 228, 210, .82);
-    --surface-gradient-border: rgba(157, 115, 34, .34);
-    --surface-gradient-text: #26352e;
-    --theme-surface-top: rgba(245, 232, 200, .76);
-    --theme-surface-bottom: rgba(229, 222, 204, .86);
-    --theme-surface-soft-top: rgba(250, 241, 220, .70);
-    --theme-surface-soft-bottom: rgba(235, 228, 210, .82);
-    --theme-surface-border: rgba(157, 115, 34, .34);
-    --theme-surface-text: #26352e;
-}
-
-/* Einheitliche halbtransparente Flächen; keine Änderung an View-Struktur oder Navigation. */
-.box, .dash-section, .filter-simple-card, .stats-analysis-section,
-.stats-structure-section, .chart-card, .compare-box, .compare-period-card,
-.compare-list-card, .tour-compare-pick-card, .tour-compare-result,
-.backup-status-panel, .backup-info-card, .backup-file-status,
-.stats-list li, .peak-tour-list li, .tour-search-result, .chart-stat-tile,
-.dash-stat-tile, .dash-milestone-tile, .tour-profile-summary-card,
-.development-metric-card, .best-form-card, .activity-summary-card,
-.peak-summary-card, .stats-structure-typical-card, .stats-structure-type-card,
-.stats-structure-burden-card, .backup-status-item {
-    background: linear-gradient(180deg, var(--surface-gradient-top) 0%, var(--surface-gradient-bottom) 100%) !important;
-    border-color: var(--surface-gradient-border) !important;
-    color: var(--surface-gradient-text);
-}
-.stats-list li, .peak-tour-list li, .tour-search-result, .chart-stat-tile,
-.dash-stat-tile, .dash-milestone-tile, .tour-profile-summary-card,
-.development-metric-card, .best-form-card, .activity-summary-card,
-.peak-summary-card, .stats-structure-typical-card, .stats-structure-type-card,
-.stats-structure-burden-card, .backup-status-item {
-    background: linear-gradient(180deg, var(--surface-gradient-soft-top) 0%, var(--surface-gradient-soft-bottom) 100%) !important;
-}
-/* Hauptnavigation erhält dieselbe themegerechte Akzentwelt wie die Dashboard-Flächen. */
-.top-main-nav {
-    background: linear-gradient(180deg, var(--surface-gradient-soft-top) 0%, var(--surface-gradient-soft-bottom) 100%) !important;
-    border-color: var(--surface-gradient-border) !important;
-    color: var(--surface-gradient-text) !important;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-}
-.top-main-nav button, .top-main-nav a {
-    color: inherit;
-}
-.top-main-nav .active, .top-main-nav [aria-current="page"] {
-    background: var(--accent-gradient) !important;
-    border-color: var(--accent) !important;
-    color: #fff !important;
-}
-
-
-/* PHASE 2 · SCHRITT 1 — LIGHT: NAVIGATION UND DROPDOWNS AN DIE PREMIUM-ALPINE-GLASFLÄCHEN ANGLEICHEN */
-/* Light: top navigation uses the same glass material as the new Dark design,
-   while the warm gold remains the only theme accent. Position and layout stay unchanged. */
-body:not(.dark):not(.green):not(.summit) .top-main-nav {
-    background: linear-gradient(180deg, var(--surface-gradient-soft-top) 0%, var(--surface-gradient-soft-bottom) 100%) !important;
-    background-image: linear-gradient(180deg, var(--surface-gradient-soft-top) 0%, var(--surface-gradient-soft-bottom) 100%) !important;
-    border: 1px solid var(--surface-gradient-border) !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, .22) !important;
-    -webkit-backdrop-filter: blur(14px) !important;
-    backdrop-filter: blur(14px) !important;
-    color: var(--surface-gradient-text) !important;
-}
-body:not(.dark):not(.green):not(.summit) .top-main-nav .top-nav-btn {
-    color: var(--app-text-primary, #f3f7fb) !important;
-}
-body:not(.dark):not(.green):not(.summit) .top-main-nav .top-nav-btn.view-active,
-body:not(.dark):not(.green):not(.summit) .top-main-nav .top-nav-btn.more-view-active {
-    background: var(--accent-soft) !important;
-    border: 1px solid color-mix(in srgb, var(--accent) 72%, transparent) !important;
-    color: var(--app-text-primary, #f3f7fb) !important;
-}
-body:not(.dark):not(.green):not(.summit) .top-main-nav .top-nav-save {
-    background: var(--accent-gradient) !important;
-    border-color: var(--accent) !important;
-    color: var(--accent-text-color, #17202a) !important;
-}
-body:not(.dark):not(.green):not(.summit) .top-main-nav .top-nav-save .top-nav-label,
-body:not(.dark):not(.green):not(.summit) .top-main-nav .top-nav-save .top-nav-plus {
-    color: var(--accent-text-color, #17202a) !important;
-}
-
-/* Light: native Dropdowns, ersetzte Mobile-Selects und Jahres-Pfeile erhalten
-   die neue dunkle Glasfläche mit goldener Kontur; IDs überstimmen alte View-Sonderregeln. */
-body:not(.dark):not(.green):not(.summit) :is(#dashboard-view, #chart-view, #map-view, #tour-view, #filter-view, #theme-view, #wrapped-view, #more-menu) :is(select, .mob-sel-btn, .dash-year-arrow-btn) {
-    background: linear-gradient(145deg, rgba(25, 30, 39, .94), rgba(17, 26, 37, .92)) !important;
-    color: #f3f7fb !important;
-    border-color: rgba(184, 134, 40, .52) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045), 0 4px 12px rgba(0, 0, 0, .14) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    backdrop-filter: blur(12px) !important;
-}
-body:not(.dark):not(.green):not(.summit) :is(#dashboard-view, #chart-view, #map-view, #tour-view, #filter-view, #theme-view, #wrapped-view, #more-menu) :is(select, .mob-sel-btn, .dash-year-arrow-btn):focus,
-body:not(.dark):not(.green):not(.summit) :is(#dashboard-view, #chart-view, #map-view, #tour-view, #filter-view, #theme-view, #wrapped-view, #more-menu) :is(select, .mob-sel-btn, .dash-year-arrow-btn):focus-visible {
-    border-color: var(--accent) !important;
-    outline-color: var(--accent) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045), 0 0 0 2px var(--accent-soft) !important;
-}
-body:not(.dark):not(.green):not(.summit) select option {
-    background: #111a25 !important;
-    color: #f3f7fb !important;
-}
-body:not(.dark):not(.green):not(.summit) #more-menu {
-    background: linear-gradient(145deg, rgba(25, 30, 39, .96), rgba(17, 26, 37, .95)) !important;
-    border-color: rgba(184, 134, 40, .44) !important;
-    color: #f3f7fb !important;
-}
-body:not(.dark):not(.green):not(.summit) #more-menu .more-menu-item:hover,
-body:not(.dark):not(.green):not(.summit) #more-menu .more-menu-item:focus-visible,
-body:not(.dark):not(.green):not(.summit) #more-menu .more-theme-option[aria-pressed="true"] {
-    background: var(--accent-soft) !important;
-    border-color: rgba(184, 134, 40, .62) !important;
-    color: #f3f7fb !important;
-}
-
-
-/* =========================================================
-   PHASE 2 · LIGHT-KORREKTUR: LETZTE REGELN GEWINNEN
-   Die vorherige Light-Palette wurde von späteren gemeinsamen !important-
-   Variablen überschrieben. Light erhält deshalb hier dieselbe Schiefer-
-   Glasbasis wie das Dark-Dashboard, aber mit Goldakzent.
-   ========================================================= */
 body:not(.dark):not(.green):not(.summit) {
     --accent: #ad7d12 !important;
     --accent-soft: rgba(190, 145, 34, .25) !important;
     --accent-gradient: linear-gradient(135deg, #e3c45f 0%, #ad7d12 100%) !important;
     --accent-text-color: #17202a !important;
-
-    --theme-surface-top: rgba(25, 30, 39, .86) !important;
-    --theme-surface-bottom: rgba(13, 21, 31, .88) !important;
-    --theme-surface-soft-top: rgba(24, 32, 44, .80) !important;
-    --theme-surface-soft-bottom: rgba(13, 21, 31, .78) !important;
-    --theme-surface-border: rgba(190, 145, 34, .34) !important;
-    --theme-surface-text: #f3f7fb !important;
-
-    --surface-gradient-top: rgba(25, 30, 39, .86) !important;
-    --surface-gradient-bottom: rgba(13, 21, 31, .88) !important;
-    --surface-gradient-soft-top: rgba(24, 32, 44, .80) !important;
-    --surface-gradient-soft-bottom: rgba(13, 21, 31, .78) !important;
-    --surface-gradient-border: rgba(190, 145, 34, .34) !important;
-    --surface-gradient-text: #f3f7fb !important;
-
-    --app-surface-strong: rgba(25, 30, 39, .86) !important;
-    --app-surface-card: rgba(17, 26, 37, .78) !important;
-    --app-surface-subtle: rgba(13, 21, 31, .66) !important;
-    --app-surface-border: rgba(190, 145, 34, .34) !important;
-    --app-text-primary: #f3f7fb !important;
-    --app-text-muted: #cbd5df !important;
-
-    --premium-surface-1: rgba(25, 30, 39, .86) !important;
-    --premium-surface-2: rgba(17, 26, 37, .78) !important;
-    --premium-border: rgba(190, 145, 34, .34) !important;
-    --premium-border-strong: rgba(190, 145, 34, .62) !important;
-    --premium-accent-wash: rgba(190, 145, 34, .25) !important;
-
-    --glass-bg: rgba(25, 30, 39, .86) !important;
-    --glass-border: rgba(190, 145, 34, .34) !important;
-    --ui-card-bg: rgba(17, 26, 37, .78) !important;
-    --ui-card-bg-interactive: rgba(31, 40, 54, .90) !important;
-    --ui-card-border: rgba(190, 145, 34, .34) !important;
-    --ui-section-bg: rgba(13, 21, 31, .66) !important;
-    --year-control-bg: rgba(25, 30, 39, .86) !important;
-    --year-control-bg-hover: rgba(31, 40, 54, .94) !important;
-    --year-control-border: rgba(190, 145, 34, .34) !important;
-
-    --text-main: #f3f7fb !important;
-    --text-soft: #cbd5df !important;
-    --text-color: #f3f7fb !important;
-    --text-muted: #cbd5df !important;
+    --accordion-glow: rgba(190, 145, 34, .28) !important;
 }
 
-/* Das Dashboard besitzt lokale Tokens, deshalb die gleichen Light-Werte dort erneut setzen. */
-body:not(.dark):not(.green):not(.summit) #dashboard-view {
-    --app-surface-strong: rgba(25, 30, 39, .86) !important;
-    --app-surface-card: rgba(17, 26, 37, .78) !important;
-    --app-surface-subtle: rgba(13, 21, 31, .66) !important;
-    --app-surface-border: rgba(190, 145, 34, .34) !important;
-    --app-text-primary: #f3f7fb !important;
-    --app-text-muted: #cbd5df !important;
-    --premium-surface-1: rgba(25, 30, 39, .86) !important;
-    --premium-surface-2: rgba(17, 26, 37, .78) !important;
-    --premium-border: rgba(190, 145, 34, .34) !important;
-    --premium-border-strong: rgba(190, 145, 34, .62) !important;
-    --premium-accent-wash: rgba(190, 145, 34, .25) !important;
-    --text-main: #f3f7fb !important;
-    --text-soft: #cbd5df !important;
+/* Gemeinsame Hintergrundtönung über dem bereits bestehenden festen Alpin-Foto. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .parallax::before {
+    background: linear-gradient(
+        180deg,
+        rgba(7, 16, 22, .17) 0%,
+        rgba(5, 13, 19, .25) 42%,
+        rgba(4, 11, 17, .43) 100%
+    ) !important;
 }
 
-/* Große Flächen – Light folgt dem Material der anderen Themes, nur mit goldener Kontur. */
-body:not(.dark):not(.green):not(.summit) :is(
+/* Gemeinsame große Inhaltsflächen – keine view-spezifischen Paletten mehr. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(#dashboard-view, #app-view, #chart-view, #tour-view, #map-view, #filter-view, #backup-view, #theme-view, #achievements-view, #wrapped-view, #more-menu)
+:is(
     .box, .dash-section, .filter-simple-card, .stats-analysis-section,
     .stats-structure-section, .chart-card, .compare-box, .compare-period-card,
     .compare-list-card, .tour-compare-pick-card, .tour-compare-result,
     .backup-status-panel, .backup-info-card, .backup-file-status, .modal-card,
     .theme-editor-panel, .achievement-category-section, .plan-page-box,
-    .plan-section-panel
+    .plan-section-panel, .stats-chart-block, .plan-live-preview
 ) {
     background: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
     border-color: var(--app-surface-border) !important;
     color: var(--app-text-primary) !important;
 }
 
-/* Sekundäre Kacheln, Listen und Eingaben bleiben lesbar auf dem festen Alpin-Hintergrund. */
-body:not(.dark):not(.green):not(.summit) :is(
+/* Gemeinsame sekundäre Kacheln, Listen und Statistikflächen. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(#dashboard-view, #app-view, #chart-view, #tour-view, #map-view, #filter-view, #backup-view, #theme-view, #achievements-view, #wrapped-view, #more-menu)
+:is(
     .chart-stat-tile:not(.active), .stat-card, .dash-stat-tile, .dash-milestone-tile,
     .dash-tour-list li, .stats-list li, .peak-tour-list li, .tour-search-result,
     .compare-row, .compare-chip, .tour-profile-summary-card, .development-metric-card,
     .best-form-card, .activity-summary-card, .peak-summary-card,
     .stats-structure-typical-card, .stats-structure-type-card,
-    .stats-structure-burden-card, .plan-overview-tile, .plan-live-preview
+    .stats-structure-burden-card, .backup-status-item, .plan-overview-tile,
+    .plan-live-preview, .tour-history-summary > div, .activity-detail-stat-grid > div
 ) {
-    background: linear-gradient(180deg, var(--surface-gradient-soft-top), var(--surface-gradient-soft-bottom)) !important;
+    background: linear-gradient(180deg, var(--app-surface-card), var(--app-surface-subtle)) !important;
     border-color: var(--app-surface-border) !important;
     color: var(--app-text-primary) !important;
 }
 
-/* Einheitliche Schriftkontraste über alle Views; sekundäre Texte bleiben heller grau. */
-body:not(.dark):not(.green):not(.summit) :is(
-    .box-header, .box-content, .stats-label, .stats-value, .dash-stat-value,
-    .dash-stat-label, .chart-title, .form-section-title, .stats-analysis-title,
-    .development-metric-value, .best-form-value, .activity-summary-value,
-    .peak-summary-value, .tour-form label, .plan-view-title, .theme-editor-panel,
-    .tour-profile-summary-card, .backup-status-panel, .backup-info-card
+/* Zusätzlich die wiederverwendeten Karten außerhalb eines View-Containers vereinheitlichen. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(.modal-card, .compare-row, .compare-period-card, .compare-list-card, .compare-chip, .backup-status-panel, .backup-info-card, .backup-file-status) {
+    background: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
+    border-color: var(--app-surface-border) !important;
+    color: var(--app-text-primary) !important;
+}
+
+/* Gemeinsame Textkontraste in allen vier Themes. Semantische Symbol- und Bildakzente bleiben erhalten. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(#dashboard-view, #app-view, #chart-view, #tour-view, #map-view, #filter-view, #backup-view, #theme-view, #achievements-view, #wrapped-view, #more-menu)
+:is(
+    .box-header, .box-content, .stats-label, .stats-value, .dash-stat-value, .dash-stat-label,
+    .chart-title, .form-section-title, .stats-analysis-title, .development-metric-value,
+    .best-form-value, .activity-summary-value, .peak-summary-value, .tour-form label,
+    .plan-view-title, .tour-profile-summary-card, .backup-status-panel, .backup-info-card,
+    .dash-section-title, .dash-ms-label, .dash-ms-current.is-empty, .dash-ms-arrow,
+    .dash-tour-list .tour-name
 ) {
     color: var(--app-text-primary) !important;
 }
-body:not(.dark):not(.green):not(.summit) :is(
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(#dashboard-view, #app-view, #chart-view, #tour-view, #map-view, #filter-view, #backup-view, #theme-view, #achievements-view, #wrapped-view, #more-menu)
+:is(
     small, .text-muted, .stats-analysis-subtitle, .stats-structure-card-meta,
     .development-metric-label, .best-form-label, .tour-profile-summary-label,
-    .compare-period-title, .dash-ms-progress-text
+    .compare-period-title, .dash-ms-progress-text, .dash-stat-label,
+    .dash-tour-list .tour-date
 ) {
     color: var(--app-text-muted) !important;
     opacity: 1 !important;
 }
 
-/* Hauptnavigation: gleiche Glasfläche wie die Inhaltsboxen, aktive Elemente bleiben gold. */
-body:not(.dark):not(.green):not(.summit) .top-main-nav {
-    background: linear-gradient(180deg, var(--surface-gradient-soft-top), var(--surface-gradient-soft-bottom)) !important;
-    background-image: linear-gradient(180deg, var(--surface-gradient-soft-top), var(--surface-gradient-soft-bottom)) !important;
-    border: 1px solid var(--surface-gradient-border) !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, .22) !important;
-    color: var(--surface-gradient-text) !important;
+/* Jahresauswahl in Dashboard, Stats, Karte, Achievements und Bergwelt: dieselbe Glasfläche. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(#dashboard-view, #app-view, #chart-view, #tour-view, #map-view, #filter-view, #backup-view, #theme-view, #achievements-view, #wrapped-view, #more-menu)
+:is(
+    select, .mob-sel-btn, .dash-year-arrow-btn, .wrapped-year-select,
+    .bergwelt-header-control, .bergwelt-select
+) {
+    background: linear-gradient(145deg, var(--premium-surface-1), var(--premium-surface-2)) !important;
+    color: var(--app-text-primary) !important;
+    border-color: var(--premium-border) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045), 0 4px 12px rgba(0, 0, 0, .14) !important;
+    color-scheme: dark;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(
+    select, .mob-sel-btn, .dash-year-arrow-btn, .wrapped-year-select,
+    .bergwelt-header-control, .bergwelt-select
+) {
+    background: linear-gradient(145deg, var(--premium-surface-1), var(--premium-surface-2)) !important;
+    color: var(--app-text-primary) !important;
+    border-color: var(--premium-border) !important;
+    color-scheme: dark;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(#dashboard-view, #app-view, #chart-view, #tour-view, #map-view, #filter-view, #backup-view, #theme-view, #achievements-view, #wrapped-view, #more-menu)
+:is(select, .mob-sel-btn, .dash-year-arrow-btn, .wrapped-year-select, .bergwelt-header-control, .bergwelt-select):focus,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(#dashboard-view, #app-view, #chart-view, #tour-view, #map-view, #filter-view, #backup-view, #theme-view, #achievements-view, #wrapped-view, #more-menu)
+:is(select, .mob-sel-btn, .dash-year-arrow-btn, .wrapped-year-select, .bergwelt-header-control, .bergwelt-select):focus-visible {
+    outline: 2px solid var(--accent) !important;
+    outline-offset: 2px;
+    border-color: var(--accent) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045), 0 0 0 2px var(--accent-soft) !important;
+}
+
+/* Alle weiteren Formulare folgen derselben Oberfläche – Checkboxen, Radios, Slider und Farbwähler bleiben nativ. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]), select, textarea, .mob-sel-btn, .dash-year-arrow-btn) {
+    background: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
+    color: var(--app-text-primary) !important;
+    border-color: var(--app-surface-border) !important;
+    color-scheme: dark;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]), select, textarea):focus,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]), select, textarea):focus-visible {
+    border-color: var(--accent) !important;
+    outline-color: var(--accent) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) input::placeholder,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) textarea::placeholder {
+    color: var(--app-text-muted) !important;
+    opacity: 1 !important;
+}
+
+/* Browser-Optionsliste der nativen Dropdowns: insbesondere das Light-Jahresdropdown nicht mehr hell abweichend. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+select option,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(#dashboard-view, #app-view, #chart-view, #tour-view, #map-view, #filter-view, #backup-view, #theme-view, #achievements-view, #wrapped-view, #more-menu) select option {
+    background: #111a25 !important;
+    color: #f3f7fb !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) :is(.dash-year-filter-wrap, .stats-year-filter-wrap, .map-year-filter-wrap, .achievements-year-filter-wrap) {
+    color: var(--app-text-primary) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) :is(.mob-sel-sheet, .mob-sel-hdr) {
+    background: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
+    border-color: var(--app-surface-border) !important;
+    color: var(--app-text-primary) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .mob-sel-opt {
+    color: var(--app-text-primary) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .mob-sel-opt.selected {
+    background: var(--accent-soft) !important;
+    border-color: var(--accent) !important;
+    color: var(--app-text-primary) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .mob-sel-opt:active,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .mob-sel-close {
+    background: var(--accent-soft) !important;
+    color: var(--app-text-primary) !important;
+}
+
+/* Tabellen erhalten dieselbe dunkle Fläche und denselben Textkontrast. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(#overview-table, #planned-table) tr,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(#saved-tours-list, #planned-tours-list) .tour-list li {
+    background: linear-gradient(180deg, var(--app-surface-card), var(--app-surface-subtle)) !important;
+    border-color: var(--app-surface-border) !important;
+    color: var(--app-text-primary) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(#overview-table th, #overview-table td, #planned-table th, #planned-table td) {
+    background: transparent !important;
+    color: var(--app-text-primary) !important;
+}
+
+/* Hauptnavigation: einheitliche Glasfläche, mit Theme-Akzent für aktive Ansicht und Speichern. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-main-nav {
+    background: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
+    background-image: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
+    border: 1px solid var(--app-surface-border) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .22), inset 0 1px 0 rgba(255, 255, 255, .045) !important;
+    color: var(--app-text-primary) !important;
     -webkit-backdrop-filter: blur(14px) !important;
     backdrop-filter: blur(14px) !important;
 }
-body:not(.dark):not(.green):not(.summit) .top-main-nav .top-nav-btn {
-    color: #f3f7fb !important;
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-main-nav .top-nav-btn {
+    background: transparent !important;
+    border-color: transparent !important;
+    color: var(--app-text-primary) !important;
 }
-body:not(.dark):not(.green):not(.summit) .top-main-nav .top-nav-btn.view-active,
-body:not(.dark):not(.green):not(.summit) .top-main-nav .top-nav-btn.more-view-active {
-    background: var(--accent-soft) !important;
-    border-color: color-mix(in srgb, var(--accent) 72%, transparent) !important;
-    color: #fff8e7 !important;
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-main-nav .top-nav-btn:is(.view-active, .more-view-active) {
+    background: var(--accent-gradient) !important;
+    border: 1px solid var(--accent) !important;
+    color: var(--accent-text-color) !important;
+    box-shadow: 0 0 12px var(--accent-soft) !important;
 }
-body:not(.dark):not(.green):not(.summit) .top-main-nav .top-nav-save,
-body:not(.dark):not(.green):not(.summit) .top-main-nav button.save-btn {
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-main-nav .top-nav-btn:is(.view-active, .more-view-active) .top-nav-label,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-main-nav .top-nav-btn:is(.view-active, .more-view-active) .top-nav-icon {
+    color: var(--accent-text-color) !important;
+    opacity: 1 !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-main-nav .top-nav-save,
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-main-nav button.save-btn {
     background: var(--accent-gradient) !important;
     border-color: var(--accent) !important;
     color: var(--accent-text-color) !important;
 }
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-main-nav .top-nav-save :is(.top-nav-label, .top-nav-plus),
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-main-nav button.save-btn * {
+    color: var(--accent-text-color) !important;
+}
 
-/* Aktive Unter-Navigation und Auswahlchips: konsistenter Goldakzent in allen Views. */
-body:not(.dark):not(.green):not(.summit) :is(
+/* Der umgebende Header hält das Layout stabil; die Navigation selbst trägt das gemeinsame Material. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .accordion-header {
+    background: transparent !important;
+    border-color: var(--app-surface-border) !important;
+    color: var(--app-text-primary) !important;
+}
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .accordion-header::after {
+    background: linear-gradient(90deg, transparent, var(--accent) 50%, transparent) !important;
+    opacity: .48 !important;
+}
+
+/* Alle aktiven Unter-Navigationen und Filter verwenden dieselbe Akzentlogik. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(
     .chart-tab.active, .stats-section-btn.active, .filter-section-nav-btn.active,
     .plan-section-btn.active, .tour-search-page-btn.active, .quick-filter-btn.active,
     .map-mode-btn.active, .compare-mode-btn.active, .checklist-mode-btn.active,
     .yc-metric-btn.active, .yc-year-toggle-btn.active, .development-history-range-btn.active,
     .toggle-btn.view-active, .bergwelt-tab.is-active, .chart-stat-tile.active,
-    #chart-view .stats-section-btn.active, #chart-view .chart-tab.active,
-    #map-view .map-mode-btn.active, #map-view #map-quick-filters .quick-filter-btn.active,
-    #theme-view #theme-editor-tabs button.active
+    .filter-section-nav-btn[aria-pressed="true"], .quick-filter-btn[aria-pressed="true"]
 ) {
     background: var(--accent-gradient) !important;
-    border-color: color-mix(in srgb, var(--accent) 70%, rgba(220, 225, 235, .24)) !important;
+    border-color: var(--accent) !important;
     color: var(--accent-text-color) !important;
 }
-body:not(.dark):not(.green):not(.summit) .chart-stat-tile.active :is(
-    .chart-stat-value, .chart-stat-label, .chart-stat-sub, .chart-stat-icon
-) {
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit))
+:is(.chart-tab.active, .stats-section-btn.active, .filter-section-nav-btn.active, .plan-section-btn.active, .map-mode-btn.active, .quick-filter-btn.active, .compare-mode-btn.active, .checklist-mode-btn.active, .yc-metric-btn.active, .yc-year-toggle-btn.active, .bergwelt-tab.is-active, .chart-stat-tile.active) * {
     color: var(--accent-text-color) !important;
 }
 
-/* Formulare und Dropdowns: Goldkontur und gut lesbare Werte, ohne die Größe zu verändern. */
-body:not(.dark):not(.green):not(.summit) :is(
-    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
-    select, textarea, .mob-sel-btn, .dash-year-arrow-btn
-) {
-    background: linear-gradient(145deg, rgba(25, 30, 39, .94), rgba(17, 26, 37, .92)) !important;
-    color: #f3f7fb !important;
-    border-color: rgba(190, 145, 34, .52) !important;
+/* Theme-tönung der Bergwelt-Flächen bleibt konsistent; Fotos in den vier Highlight-Kacheln bleiben erhalten. */
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) #wrapped-view.bergwelt-mode {
+    --bw-surface-rgb: 13, 21, 31 !important;
 }
-body:not(.dark):not(.green):not(.summit) select option {
-    background: #111a25 !important;
-    color: #f3f7fb !important;
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) #wrapped-view.bergwelt-mode .bergwelt-panel:not([hidden]),
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) #wrapped-view.bergwelt-mode .bergwelt-cinematic-lower {
+    color: var(--app-text-primary) !important;
 }
-body:not(.dark):not(.green):not(.summit) :is(input, select, textarea, button):focus-visible {
-    outline-color: var(--accent) !important;
+:is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) #wrapped-view.bergwelt-mode .bergwelt-cinematic-lower {
+    background: linear-gradient(180deg, rgba(13, 21, 31, .98), rgba(13, 21, 31, 1)) !important;
+}
+
+/* Theme-Editor bleibt wie in der aktuellen App vorübergehend ausgeblendet. */
+body.premium-alpine-editor-paused #theme-toggle,
+body.premium-alpine-editor-paused #theme-view {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Keine abrupte Bewegung oder Hover-Animation bei reduzierter Bewegung. */
+@media (prefers-reduced-motion: reduce) {
+    :is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-main-nav,
+    :is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .top-nav-btn,
+    :is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .dash-stat-tile,
+    :is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) .dash-milestone-tile {
+        transition: none !important;
+        animation: none !important;
+    }
 }
