@@ -351,10 +351,10 @@
 
     function applyPalette(settings) {
         const accent = settings.accent;
-        const accentDark = blendHex(accent, '#111923', 0.52);
+        const accentDark = '#000000';
         const soft = rgba(accent, 0.24);
         const border = 'color-mix(in srgb, ' + accent + ' 38%, rgba(225,232,242,.14))';
-        const accentGradient = 'linear-gradient(135deg, ' + accent + ' 0%, ' + accentDark + ' 100%)';
+        const accentGradient = 'linear-gradient(135deg, ' + accent + ' 0%, #000000 100%)';
         const accentLuminance = luminance(accent);
         const darkText = '#171209';
         const lightText = '#f8fafc';
@@ -423,9 +423,9 @@
         } catch (_) {}
 
         const settings = ensureDraft();
-        const accentDark = blendHex(settings.accent, '#111923', 0.52);
-        const chartStart = blendHex(settings.accent, '#101722', 0.78);
-        const chartMid = blendHex(settings.accent, '#101722', 0.38);
+        const accentDark = '#000000';
+        const chartStart = blendHex(settings.accent, '#000000', 0.78);
+        const chartMid = blendHex(settings.accent, '#000000', 0.38);
         const result = {};
         const textMain = '#f3f7fb';
         const textSoft = '#cbd5df';
