@@ -19863,21 +19863,16 @@ textarea,
 #filter-view input:not([type="checkbox"]),
 #filter-view select,
 .mob-sel-btn {
-    background:
-    linear-gradient(
-        180deg,
-        rgba(178, 222, 245, 0.96) 0%,
-        rgba(160, 216, 181, 0.97) 100%
-    ) !important;
-
+    background: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
     color: var(--app-text-primary) !important;
-    border-color: rgba(63, 119, 110, 0.30) !important;
+    border-color: var(--app-surface-border) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.035) !important;
 }
 
-/* Platzhalter */
+/* Platzhalter verwenden die gemeinsame Textpalette. */
 input::placeholder,
 textarea::placeholder {
-    color: #4c6f65 !important;
+    color: var(--app-text-muted) !important;
     opacity: 1 !important;
 }
 
@@ -19903,16 +19898,10 @@ body:not(.dark):not(.green):not(.summit):not(.gold) .slope-toggle {
     border-color: var(--app-surface-border) !important;
 }
 
-/* Jahresauswahl */
+/* Jahresauswahl folgt dem gemeinsamen dunklen Editor-Stil. */
 .dash-year-filter-wrap select,
 .dash-year-filter-wrap .mob-sel-btn {
-    background:
-        linear-gradient(
-            180deg,
-            rgba(232, 247, 255, 0.78) 0%,
-            rgba(225, 245, 232, 0.84) 100%
-        ) !important;
-
+    background: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
     color: var(--app-text-primary) !important;
     border-color: var(--app-surface-border) !important;
 }
