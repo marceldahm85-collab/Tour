@@ -7461,7 +7461,7 @@ body:not(.dark):not(.green):not(.summit) #map-view #map-quick-filters {
    bewegt sich daher nicht mit den horizontal wechselnden Views. */
 .parallax {
     background-color: #14232b !important;
-    background-image: url("https://images.unsplash.com/photo-1694968537484-d4e1733301b5?auto=format&fit=crop&w=1400&q=85") !important;
+    background-image: url("./assets/bergwelt-fixed-alpine.webp") !important;
     background-position: 56% center !important;
     background-size: cover !important;
     background-repeat: no-repeat !important;
