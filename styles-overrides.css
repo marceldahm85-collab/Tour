@@ -8280,3 +8280,38 @@ body.summit .top-main-nav [aria-current="page"] {
 :is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) :is(.top-main-nav .top-nav-btn:not(.view-active):not(.more-view-active), .toggle-btn:not(.view-active), .mob-sel-btn):hover {
     background-color: var(--accent-soft) !important;
 }
+
+
+/* Light-Dashboard-Jahresfilter: dieselben zentralen Theme-Variablen wie Dark, Green und Summit. */
+body:not(.dark):not(.green):not(.summit) #dashboard-view .dash-year-filter-wrap > select,
+body:not(.dark):not(.green):not(.summit) #dashboard-view .dash-year-filter-wrap > .mob-sel-wrap .mob-sel-btn,
+body:not(.dark):not(.green):not(.summit) #dashboard-view .dash-year-filter-wrap .mob-sel-btn,
+body:not(.dark):not(.green):not(.summit) #dashboard-view .dash-year-filter-wrap > .dash-year-arrow-btn {
+    background: var(--year-control-bg) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--year-control-border) !important;
+    box-shadow: var(--year-control-shadow) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+body:not(.dark):not(.green):not(.summit) #dashboard-view .dash-year-filter-wrap > select option {
+    background: var(--year-option-bg) !important;
+    color: var(--year-option-text) !important;
+}
+
+body:not(.dark):not(.green):not(.summit) #dashboard-view .dash-year-filter-wrap > select:focus,
+body:not(.dark):not(.green):not(.summit) #dashboard-view .dash-year-filter-wrap .mob-sel-btn:focus-visible,
+body:not(.dark):not(.green):not(.summit) #dashboard-view .dash-year-filter-wrap > .dash-year-arrow-btn:focus-visible {
+    border-color: var(--accent) !important;
+    outline: none !important;
+    box-shadow: var(--year-control-shadow), 0 0 0 2px var(--accent-soft) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    body:not(.dark):not(.green):not(.summit) #dashboard-view .dash-year-filter-wrap .mob-sel-btn:hover,
+    body:not(.dark):not(.green):not(.summit) #dashboard-view .dash-year-filter-wrap > .dash-year-arrow-btn:not(:disabled):hover {
+        background: var(--year-control-bg-hover) !important;
+        border-color: var(--accent) !important;
+    }
+}
