@@ -26,36 +26,10 @@ option {
         system-ui,
         sans-serif;
 
-    --accent: #f9d77e;
-    --accent-soft: rgba(249,215,126,0.25);
-    --accent-gradient: linear-gradient(135deg, #f9d77e, #e0a52e);
 
-    --text-main: #2e4036;
-    --text-soft: #3f5248;
-
-    --glass-bg: rgba(255,255,255,0.25);
-    --glass-border: rgba(255,255,255,0.3);
-
-    --shadow-soft: 0 6px 18px rgba(40,60,50,0.12);
-    --accordion-glow:
-        rgba(249,215,126,0.30);
 }
 
-body.dark {
-    --accent: #7a0d0d;
-    --accent-soft: rgba(122,13,13,0.25);
-    --accent-gradient: linear-gradient(135deg, #7a0d0d, #4e0a0a);
-
-    --text-main: #d6e1f0;
-    --text-soft: #aab6c5;
-
-    --glass-bg: rgba(20,30,40,0.45);
-    --glass-border: rgba(255,255,255,0.08);
-
-    --shadow-soft: 0 8px 22px rgba(0,0,0,0.28);
-    --accordion-glow:
-        rgba(122,13,13,0.32);
-}
+body.dark 
 
 /* =========================================================
    Parallax-Berge: natürlicheres Bergrelief
@@ -5246,16 +5220,7 @@ body.dark .dash-tour-list li {
    Schwarz + Weiß + Grün als Akzent
    ========================= */
 body.green {
-    --accent: #52b788;
-    --accent-soft: rgba(82,183,136,0.28);
-    --accent-gradient: linear-gradient(135deg, #52b788, #2d6a4f);
-    --text-main: #f2faf5;
-    --text-soft: #c8e6d4;
-    --glass-bg: linear-gradient(145deg, rgba(0,5,2,0.88) 0%, rgba(6,34,19,0.84) 48%, rgba(0,4,2,0.90) 100%);
-    --glass-border: rgba(82,183,136,0.22);
-    --shadow-soft: 0 8px 24px rgba(0,0,0,0.58), 0 0 18px rgba(82,183,136,0.055);
-    --accordion-glow:
-        rgba(82,183,136,0.28);
+
 
     background: linear-gradient(
         180deg,
@@ -5891,7 +5856,6 @@ body.green .dash-ms-progress-wrap { background: rgba(82,183,136,0.12); }
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 }
-
 
 
 body.dark .dash-year-filter-wrap select {
@@ -8002,7 +7966,6 @@ body.green .peak-tier-1 {
 }
 
 
-
 /* Silber: klar kühl-bläulich */
 body.green .peak-tier-2 {
     border-left-color: #a9c7d8 !important;
@@ -8016,7 +7979,6 @@ body.green .peak-tier-2 {
 }
 
 
-
 /* Gold: klar gelb und heller als Bronze */
 body.green .peak-tier-3 {
     border-left-color: #ffd23f !important;
@@ -8028,7 +7990,6 @@ body.green .peak-tier-3 {
         rgba(155, 115, 0, 0.20) 100%
     ) !important;
 }
-
 
 
 /* =========================================================
@@ -8048,7 +8009,6 @@ body:not(.dark):not(.green):not(.summit) .peak-tier-1 {
 }
 
 
-
 /* Silber: kühl, hellblau und deutlich heller */
 body:not(.dark):not(.green):not(.summit) .peak-tier-2 {
     border-left-color: #7895aa !important;
@@ -8062,7 +8022,6 @@ body:not(.dark):not(.green):not(.summit) .peak-tier-2 {
 }
 
 
-
 /* Gold: klar gelb und leuchtend */
 body:not(.dark):not(.green):not(.summit) .peak-tier-3 {
     border-left-color: #c79200 !important;
@@ -8074,7 +8033,6 @@ body:not(.dark):not(.green):not(.summit) .peak-tier-3 {
         rgba(190, 145, 0, 0.16) 100%
     ) !important;
 }
-
 
 
 /* =========================================================
@@ -9245,7 +9203,6 @@ body:not(.touch-mode) .more-theme-option:hover{
 }
 
 
-
 @media (max-width: 768px), (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
     .dashboard-inner {
         padding-bottom: 0px;
@@ -9318,24 +9275,7 @@ body:not(.touch-mode) .more-theme-option:hover{
    ========================================================= */
 
 body.summit {
-    --accent: #3aa0ff;
-    --accent-soft: rgba(58,160,255,0.24);
-    --accent-gradient: linear-gradient(
-        135deg,
-        #63b7ff,
-        #176fc1
-    );
-    --accordion-glow:
-        rgba(99,183,255,0.30);
 
-    --text-main: #f4f8f5;
-    --text-soft: #cbd8d0;
-
-    --glass-bg: rgba(20,26,23,0.54);
-    --glass-border: rgba(255,255,255,0.17);
-
-    --shadow-soft:
-        0 8px 24px rgba(0,0,0,0.32);
 
     background:
     linear-gradient(
@@ -9896,8 +9836,6 @@ body.summit:not(.touch-mode) .toggle-btn:hover{
 }
 
 
-
-
 /* aktive Zustände */
 body.summit .checklist-mode-btn.active,
 body.summit .compare-mode-btn.active,
@@ -10000,7 +9938,6 @@ body.summit .chart-tab {
 
     color: #f4f8f5;
 }
-
 
 
 /* =========================================================
@@ -10852,7 +10789,6 @@ body.summit .toast.toast-achievement {
 /* =========================================================
    SUMMIT – Diagrammbalken
    ========================================================= */
-
 
 
 body.summit .chart-bar {
@@ -14225,7 +14161,6 @@ select {
 }
 
 
-
 /* =========================================================
    Sicherungs-View
    ========================================================= */
@@ -14421,7 +14356,6 @@ body.summit .backup-file-status {
 }
 
 
-
 /* =========================================================
    Themes
    ========================================================= */
@@ -14454,7 +14388,6 @@ body.summit
     border-color:
         rgba(255,255,255,0.12);
 }
-
 
 
 /* =========================================================
@@ -16915,7 +16848,6 @@ body.dark .compare-inline-result {
 }
 
 
-
 /* =========================================================
    Dunkle Themes – zentrale Kontrastkorrektur
    ========================================================= */
@@ -17298,7 +17230,6 @@ body.summit .peak-tier-3 {
         filter: none !important;
     }
 }
-
 
 
 /* =========================================================
@@ -17793,35 +17724,18 @@ body.summit .modal-card.highlight-modal-gold {
     --ui-section-radius: 14px;
 
     /* Hell: warmes, leicht cremefarbenes Tageslicht. */
-    --ui-card-border: rgba(245,224,170,0.34);
-    --ui-card-bg: rgba(255,248,229,0.18);
-    --ui-card-bg-interactive: rgba(255,248,229,0.27);
-    --ui-section-bg: rgba(255,245,218,0.11);
+
+
 }
 
 /* Dark: kühle Nacht-/Navy-Flächen. Das dunkle Rot bleibt unverändert. */
-body.dark {
-    --ui-card-border: rgba(145,176,208,0.16);
-    --ui-card-bg: rgba(38,58,80,0.22);
-    --ui-card-bg-interactive: rgba(50,73,99,0.30);
-    --ui-section-bg: rgba(23,38,55,0.19);
-}
+body.dark 
 
 /* Green: schwarzgrüne Flächen mit subtiler Wald-/Glaswirkung. */
-body.green {
-    --ui-card-border: rgba(82,183,136,0.24);
-    --ui-card-bg: rgba(8,42,24,0.38);
-    --ui-card-bg-interactive: rgba(12,58,33,0.48);
-    --ui-section-bg: rgba(5,31,18,0.32);
-}
+body.green 
 
 /* Summit: kühles Stein-/Schnee-/Eisgrau mit blauem Grundcharakter. */
-body.summit {
-    --ui-card-border: rgba(195,220,235,0.20);
-    --ui-card-bg: rgba(180,205,218,0.11);
-    --ui-card-bg-interactive: rgba(190,220,235,0.17);
-    --ui-section-bg: rgba(145,175,188,0.10);
-}
+body.summit 
 
 /* Zahlen in der ganzen App ruhig und spaltenstabil darstellen. */
 body,
@@ -18157,7 +18071,6 @@ body:not(.touch-mode) .tour-detail-back-btn:hover, body:not(.touch-mode) #ds-hea
 }
 
 
-
 /* =========================================================
    Feinschliff v24 – Statistik / Entwicklung / Gipfel
    ========================================================= */
@@ -18447,7 +18360,6 @@ body:not(.dark):not(.green):not(.summit) .development-point-popup-row b {
 }
 
 
-
 /* =========================================================
    Feinschliff v30 – Statistik / Entwicklung / aktive Kacheln
    ========================================================= */
@@ -18645,7 +18557,6 @@ button.activity-summary-card.active {
 }
 
 
-
 /* Update 38 – Statistik-Typografie und Green-Theme-Veredelung */
 @media (max-width: 768px), (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
     #stats-statistics-page .stats-structure-burden-name,
@@ -18658,47 +18569,18 @@ button.activity-summary-card.active {
 }
 
 
-
 /* =========================================================
    Update 39 – Jahressteuerungen an die vier Themes angleichen
    Dashboard / Stats / Karte: nur Optik, keine Größenänderung
    ========================================================= */
 
-:root {
-    --year-control-bg: rgba(255,248,229,0.18);
-    --year-control-bg-hover: rgba(255,248,229,0.27);
-    --year-control-border: rgba(245,224,170,0.34);
-    --year-control-shadow: 0 3px 10px rgba(67,55,30,0.06), inset 0 1px 0 rgba(255,255,255,0.18);
-    --year-option-bg: #f5eedb;
-    --year-option-text: #2e4036;
-}
+:root 
 
-body.dark {
-    --year-control-bg: rgba(38,58,80,0.22);
-    --year-control-bg-hover: rgba(50,73,99,0.30);
-    --year-control-border: rgba(145,176,208,0.16);
-    --year-control-shadow: 0 3px 11px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.035);
-    --year-option-bg: #172637;
-    --year-option-text: #d6e1f0;
-}
+body.dark 
 
-body.green {
-    --year-control-bg: rgba(8,42,24,0.38);
-    --year-control-bg-hover: rgba(12,58,33,0.48);
-    --year-control-border: rgba(82,183,136,0.24);
-    --year-control-shadow: 0 3px 12px rgba(0,8,4,0.28), inset 0 1px 0 rgba(82,183,136,0.045);
-    --year-option-bg: #071f12;
-    --year-option-text: #f2faf5;
-}
+body.green 
 
-body.summit {
-    --year-control-bg: rgba(180,205,218,0.11);
-    --year-control-bg-hover: rgba(190,220,235,0.17);
-    --year-control-border: rgba(195,220,235,0.20);
-    --year-control-shadow: 0 3px 11px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.055);
-    --year-option-bg: #29343a;
-    --year-option-text: #f4f8f5;
-}
+body.summit 
 
 /*
  * Die drei Views verwenden dieselbe Jahressteuerung. Native Selects,
@@ -18745,7 +18627,6 @@ body .dash-year-filter-wrap .mob-sel-btn:active,
 body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
     background: var(--year-control-bg-hover) !important;
 }
-
 
 
 /* =========================================================
@@ -19209,7 +19090,6 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
 }
 
 
-
 /* =========================================================
    MOBILE QUERFORMAT – DASHBOARD JAHRESSTEUERUNG
    Letzte, gezielte Überschreibung:
@@ -19591,26 +19471,7 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
    Gemeinsame Lesbarkeitsvariablen
    --------------------------------------------------------- */
 
-:root {
-    --text-main: #17251d;
-    --text-soft: #405248;
-
-    --accent: #a87800;
-    --accent-soft: rgba(168,120,0,0.20);
-    --accent-gradient: linear-gradient(135deg, #f4d36d, #b47b00);
-
-    --glass-bg: rgba(255,255,255,0.72);
-    --glass-border: rgba(32,55,43,0.22);
-
-    --ui-card-bg: rgba(255,255,255,0.70);
-    --ui-card-bg-interactive: rgba(255,255,255,0.88);
-    --ui-section-bg: rgba(255,255,255,0.58);
-    --ui-card-border: rgba(32,55,43,0.22);
-
-    --year-control-bg: rgba(255,255,255,0.72);
-    --year-control-bg-hover: rgba(255,255,255,0.90);
-    --year-control-border: rgba(32,55,43,0.24);
-}
+:root 
 
 /* ---------------------------------------------------------
    Light Theme
@@ -19692,26 +19553,7 @@ body:not(.dark):not(.green):not(.summit)
    Dark Theme
    --------------------------------------------------------- */
 
-body.dark {
-    --accent: #d45c5c;
-    --accent-soft: rgba(212,92,92,0.25);
-    --accent-gradient: linear-gradient(135deg, #d45c5c, #861f1f);
-
-    --text-main: #f3f7fb;
-    --text-soft: #c2cfdb;
-
-    --glass-bg: rgba(17,29,43,0.90);
-    --glass-border: rgba(211,229,245,0.24);
-
-    --ui-card-bg: rgba(24,40,58,0.86);
-    --ui-card-bg-interactive: rgba(38,59,82,0.94);
-    --ui-section-bg: rgba(18,32,48,0.88);
-    --ui-card-border: rgba(190,215,237,0.26);
-
-    --year-control-bg: rgba(24,40,58,0.90);
-    --year-control-bg-hover: rgba(42,63,87,0.96);
-    --year-control-border: rgba(190,215,237,0.28);
-}
+body.dark 
 
 body.dark,
 body.dark .box,
@@ -19802,26 +19644,7 @@ body.dark .filter-section-nav-btn.active {
    Green Theme
    --------------------------------------------------------- */
 
-body.green {
-    --accent: #72d6a3;
-    --accent-soft: rgba(114,214,163,0.25);
-    --accent-gradient: linear-gradient(135deg, #72d6a3, #238653);
-
-    --text-main: #f6fff9;
-    --text-soft: #c9e5d4;
-
-    --glass-bg: rgba(3,19,11,0.92);
-    --glass-border: rgba(114,214,163,0.34);
-
-    --ui-card-bg: rgba(8,42,24,0.86);
-    --ui-card-bg-interactive: rgba(14,66,38,0.94);
-    --ui-section-bg: rgba(5,31,18,0.90);
-    --ui-card-border: rgba(114,214,163,0.30);
-
-    --year-control-bg: rgba(8,42,24,0.90);
-    --year-control-bg-hover: rgba(14,66,38,0.96);
-    --year-control-border: rgba(114,214,163,0.34);
-}
+body.green 
 
 body.green,
 body.green .box,
@@ -19909,26 +19732,7 @@ body.green .filter-section-nav-btn.active {
    Summit Theme
    --------------------------------------------------------- */
 
-body.summit {
-    --accent: #72c2ff;
-    --accent-soft: rgba(114,194,255,0.27);
-    --accent-gradient: linear-gradient(135deg, #8bd0ff, #1974c2);
-
-    --text-main: #f7fbff;
-    --text-soft: #d0dce4;
-
-    --glass-bg: rgba(25,34,40,0.90);
-    --glass-border: rgba(210,232,245,0.30);
-
-    --ui-card-bg: rgba(36,51,59,0.88);
-    --ui-card-bg-interactive: rgba(51,72,83,0.95);
-    --ui-section-bg: rgba(29,42,49,0.90);
-    --ui-card-border: rgba(210,232,245,0.28);
-
-    --year-control-bg: rgba(36,51,59,0.90);
-    --year-control-bg-hover: rgba(51,72,83,0.96);
-    --year-control-border: rgba(210,232,245,0.30);
-}
+body.summit 
 
 body.summit,
 body.summit .box,
@@ -20117,16 +19921,7 @@ input:disabled {
    Der Seitenhintergrund bleibt unverändert.
    ========================================================= */
 
-body:not(.dark):not(.green):not(.summit) {
-    --light-surface-top: rgba(174, 220, 244, 0.94);
-    --light-surface-bottom: rgba(157, 211, 178, 0.96);
-
-    --light-surface-soft-top: rgba(191, 226, 246, 0.90);
-    --light-surface-soft-bottom: rgba(178, 220, 191, 0.92);
-
-    --light-surface-border: rgba(38, 104, 103, 0.38);
-    --light-surface-text: #12382c;
-}
+body:not(.dark):not(.green):not(.summit) 
 
 /* ---------------------------------------------------------
    Große Flächen und Karten
@@ -20362,17 +20157,7 @@ textarea:focus {
    Seitenhintergrund bleibt unverändert
    ========================================================= */
 
-body:not(.dark):not(.green):not(.summit) {
-
-    --light-nav-top: rgba(157, 211, 239, 0.96);
-    --light-nav-bottom: rgba(137, 198, 163, 0.97);
-
-    --light-nav-soft-top: rgba(181, 222, 244, 0.94);
-    --light-nav-soft-bottom: rgba(163, 215, 181, 0.95);
-
-    --light-nav-border: rgba(38, 104, 103, 0.38);
-    --light-nav-text: #12382c;
-}
+body:not(.dark):not(.green):not(.summit) 
 
 /* Stats-Wrapper-Flächen werden zentral in styles-overrides.css neutralisiert. */
 
@@ -21442,6 +21227,5 @@ body.wrapped-mobile-fullscreen-active {
 #pdf-export-card .pdf-book-export-controls .pdf-book-design-grid {
     margin-top: 0;
 }
-
 
 
