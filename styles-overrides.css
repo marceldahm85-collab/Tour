@@ -7474,6 +7474,7 @@ body.summit {
 /* Semantische Variablen: gemeinsame CSS-Regeln, themeabhängige Farbpalette. */
 :is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold)) {
     --accent: var(--theme-palette-accent) !important;
+    --accent-color: var(--accent) !important;
     --accent-soft: var(--theme-palette-accent-soft) !important;
     --accent-gradient: var(--theme-palette-accent-gradient) !important;
     --accent-text-color: var(--theme-palette-accent-text) !important;
