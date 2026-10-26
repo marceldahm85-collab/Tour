@@ -8437,3 +8437,35 @@ body.summit .parallax::before {
         rgba(4, 11, 17, .43) 100%
     ) !important;
 }
+
+
+/* PHASE 2 · SCHRITT 1 — AKTIVE ELEMENTE MIT AUSREICHENDER SPEZIFITÄT
+   Gewinnt auch gegen ältere theme- und view-spezifische Regeln; Akzent bleibt themeabhängig. */
+body:is(.dark, .green, .summit) #chart-view .stats-section-btn.active,
+body:is(.dark, .green, .summit) #chart-view .chart-tab.active,
+body:is(.dark, .green, .summit) #map-view .map-mode-btn.active,
+body:is(.dark, .green, .summit) #map-view #map-quick-filters .quick-filter-btn.active,
+body:is(.dark, .green, .summit) #theme-view #theme-editor-tabs button.active,
+body:is(.dark, .green, .summit) .chart-stat-tile.active,
+body:not(.dark):not(.green):not(.summit) #chart-view .stats-section-btn.active,
+body:not(.dark):not(.green):not(.summit) #chart-view .chart-tab.active,
+body:not(.dark):not(.green):not(.summit) #map-view .map-mode-btn.active,
+body:not(.dark):not(.green):not(.summit) #map-view #map-quick-filters .quick-filter-btn.active,
+body:not(.dark):not(.green):not(.summit) #theme-view #theme-editor-tabs button.active,
+body:not(.dark):not(.green):not(.summit) .chart-stat-tile.active {
+    background: var(--accent-gradient) !important;
+    color: var(--accent-text-color, #f5f2e8) !important;
+    border-color: color-mix(in srgb, var(--accent) 60%, rgba(220, 198, 143, .34)) !important;
+}
+
+/* Text der aktivierten Statistik-Kacheln bleibt auf dem themeabhängigen Akzent kontrastreich. */
+body:is(.dark, .green, .summit) .chart-stat-tile.active .chart-stat-value,
+body:is(.dark, .green, .summit) .chart-stat-tile.active .chart-stat-label,
+body:is(.dark, .green, .summit) .chart-stat-tile.active .chart-stat-sub,
+body:is(.dark, .green, .summit) .chart-stat-tile.active .chart-stat-icon,
+body:not(.dark):not(.green):not(.summit) .chart-stat-tile.active .chart-stat-value,
+body:not(.dark):not(.green):not(.summit) .chart-stat-tile.active .chart-stat-label,
+body:not(.dark):not(.green):not(.summit) .chart-stat-tile.active .chart-stat-sub,
+body:not(.dark):not(.green):not(.summit) .chart-stat-tile.active .chart-stat-icon {
+    color: var(--accent-text-color, #f5f2e8) !important;
+}
