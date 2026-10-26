@@ -39,6 +39,44 @@
         });
     }
 
+    function softenThemeEditorInlineVariables() {
+        const body = document.body;
+        if (!body) return;
+
+        const capValue = (value, maxAlpha) => String(value || '').replace(
+            /rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)/gi,
+            (match, red, green, blue, alphaText) => {
+                const alpha = Number(alphaText);
+                if (!Number.isFinite(alpha) || alpha <= maxAlpha) return match;
+                return 'rgba(' + red + ', ' + green + ', ' + blue + ', ' + maxAlpha.toFixed(2) + ')';
+            }
+        );
+
+        const strongSurfaceTokens = [
+            '--theme-surface-top', '--theme-surface-bottom',
+            '--surface-gradient-top', '--surface-gradient-bottom',
+            '--light-surface-top', '--light-surface-bottom',
+            '--light-nav-top', '--light-nav-bottom', '--glass-bg'
+        ];
+        const softSurfaceTokens = [
+            '--theme-surface-soft-top', '--theme-surface-soft-bottom',
+            '--surface-gradient-soft-top', '--surface-gradient-soft-bottom',
+            '--light-surface-soft-top', '--light-surface-soft-bottom',
+            '--light-nav-soft-top', '--light-nav-soft-bottom',
+            '--ui-card-bg', '--ui-card-bg-interactive', '--ui-section-bg',
+            '--year-control-bg', '--year-control-bg-hover'
+        ];
+
+        strongSurfaceTokens.forEach(name => {
+            const value = body.style.getPropertyValue(name);
+            if (value) body.style.setProperty(name, capValue(value, 0.78));
+        });
+        softSurfaceTokens.forEach(name => {
+            const value = body.style.getPropertyValue(name);
+            if (value) body.style.setProperty(name, capValue(value, 0.66));
+        });
+    }
+
     const originalBuildCss = window.buildThemeEditorLiveCss;
     if (typeof originalBuildCss === 'function' && !originalBuildCss.__alpineSurfaceCompat) {
         const compatibleBuildCss = function () {
@@ -56,6 +94,7 @@
             if (liveStyle) {
                 liveStyle.textContent = softenThemeEditorSurfaces(liveStyle.textContent);
             }
+            softenThemeEditorInlineVariables();
             return result;
         };
         compatibleApplySettings.__alpineSurfaceCompat = true;
@@ -68,6 +107,7 @@
     if (existingLiveStyle) {
         existingLiveStyle.textContent = softenThemeEditorSurfaces(existingLiveStyle.textContent);
     }
+    softenThemeEditorInlineVariables();
 
     window.__themeEditorSurfaceCompat = PATCH_ID;
 })();
