@@ -3306,7 +3306,6 @@ body {
    Navigationen und Steuerflächen
    --------------------------------------------------------- */
 
-.top-main-nav,
 .chart-tabs,
 .chart-tab,
 .stats-section-btn,
@@ -3663,7 +3662,6 @@ body.summit .mob-sel-btn {
    Navigation und Steuerflächen
    --------------------------------------------------------- */
 
-body.dark .top-main-nav,
 body.dark .chart-tab,
 body.dark .stats-section-btn,
 body.dark .filter-section-nav-btn,
@@ -3680,7 +3678,6 @@ body.dark .checklist-mode-toggle,
 body.dark .checklist-mode-btn,
 body.dark .dash-year-arrow-btn,
 
-body.green .top-main-nav,
 body.green .chart-tab,
 body.green .stats-section-btn,
 body.green .filter-section-nav-btn,
@@ -3697,7 +3694,6 @@ body.green .checklist-mode-toggle,
 body.green .checklist-mode-btn,
 body.green .dash-year-arrow-btn,
 
-body.summit .top-main-nav,
 body.summit .chart-tab,
 body.summit .stats-section-btn,
 body.summit .filter-section-nav-btn,
@@ -7741,20 +7737,22 @@ select option,
     color: var(--app-text-primary) !important;
 }
 
-/* Hauptnavigation: einheitliche Glasfläche, mit Theme-Akzent für aktive Ansicht und Speichern. */
+/* Hauptnavigation: gemeinsame Glasfläche als Fallback.
+   Verlauf, Schatten, Radius und Blur werden vom Theme-Editor überschrieben;
+   Rahmen und Text verwenden direkt dessen aktuelle Theme-Werte. */
 :is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit)) .top-main-nav {
-    background: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
-    background-image: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
-    border: 1px solid var(--app-surface-border) !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, .22), inset 0 1px 0 rgba(255, 255, 255, .045) !important;
-    color: var(--app-text-primary) !important;
-    -webkit-backdrop-filter: blur(14px) !important;
-    backdrop-filter: blur(14px) !important;
+    background: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card));
+    background-image: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card));
+    border: 1px solid var(--theme-surface-border);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .22), inset 0 1px 0 rgba(255, 255, 255, .045);
+    color: var(--theme-surface-text) !important;
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
 }
 :is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit)) .top-main-nav .top-nav-btn {
     background: transparent !important;
     border-color: transparent !important;
-    color: var(--app-text-primary) !important;
+    color: var(--theme-surface-text) !important;
 }
 :is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit)) .top-main-nav .top-nav-btn:is(.view-active, .more-view-active) {
     background: var(--accent-gradient) !important;
@@ -8060,12 +8058,6 @@ body #map-view .map-year-filter-wrap .dash-year-arrow-btn:focus-visible {
     }
 }
 
-/* Hauptnavigation: gleicher Theme-Akzent wie die Dashboard-Basis, keine Änderung der Position. */
-body.dark .top-main-nav,
-body.green .top-main-nav,
-body.summit .top-main-nav {
-    border-color: var(--glass-border);
-}
 body.dark .top-main-nav .active,
 body.dark .top-main-nav button.active,
 body.dark .top-main-nav [aria-current="page"] {
