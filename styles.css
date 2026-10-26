@@ -8958,16 +8958,6 @@ body.green .tour-detail-back-btn {
     background: rgba(0,0,0,0.08);
 }    
 
-body.dark .top-main-nav {
-    background: rgba(15,22,30,0.70);
-    border-color: rgba(255,255,255,0.08);
-
-    box-shadow:
-        0 8px 24px rgba(0,0,0,0.30),
-        inset 0 1px 1px rgba(255,255,255,0.05);
-}
-
-
 body.dark .more-menu {
     background: rgba(18,25,34,0.96);
     border-color: rgba(255,255,255,0.10);
@@ -8985,11 +8975,6 @@ body.dark .more-menu-divider {
 
 body.dark .more-menu-item:active {
     background: rgba(255,255,255,0.08);
-}
-
-body.green .top-main-nav {
-    background: rgba(10,25,18,0.72);
-    border-color: rgba(255,255,255,0.10);
 }
 
 
@@ -19899,7 +19884,6 @@ textarea::placeholder {
    Navigation und Steuerflächen
    --------------------------------------------------------- */
 
-body:not(.dark):not(.green):not(.summit) .top-main-nav,
 body:not(.dark):not(.green):not(.summit) .chart-tab,
 body:not(.dark):not(.green):not(.summit) .quick-filter-btn,
 body:not(.dark):not(.green):not(.summit) .filter-section-nav-btn,
