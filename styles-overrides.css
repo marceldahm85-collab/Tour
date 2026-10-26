@@ -7403,6 +7403,7 @@ body:not(.dark):not(.green):not(.summit) {
     --theme-palette-surface-strong: rgba(255, 255, 255, .76);
     --theme-palette-surface-card: rgba(255, 255, 255, .60);
     --theme-palette-surface-subtle: rgba(248, 250, 246, .42);
+    --theme-palette-cinematic-rgb: 248, 250, 246;
     --theme-palette-border: color-mix(in srgb, var(--theme-palette-accent) 24%, rgba(69, 91, 79, .20));
     --theme-palette-text: #2e4036;
     --theme-palette-text-muted: #53645a;
@@ -7428,6 +7429,7 @@ body.dark {
     --theme-palette-surface-strong: rgba(25, 30, 39, .82);
     --theme-palette-surface-card: rgba(17, 26, 37, .74);
     --theme-palette-surface-subtle: rgba(13, 21, 31, .62);
+    --theme-palette-cinematic-rgb: 13, 21, 31;
     --theme-palette-border: color-mix(in srgb, var(--theme-palette-accent) 36%, rgba(225, 232, 242, .12));
     --theme-palette-text: #f3f7fb;
     --theme-palette-text-muted: #cbd5df;
@@ -7453,6 +7455,7 @@ body.green {
     --theme-palette-surface-strong: rgba(5, 19, 11, .88);
     --theme-palette-surface-card: rgba(10, 30, 19, .76);
     --theme-palette-surface-subtle: rgba(3, 16, 9, .68);
+    --theme-palette-cinematic-rgb: 3, 16, 9;
     --theme-palette-border: color-mix(in srgb, var(--theme-palette-accent) 42%, rgba(82, 183, 136, .18));
     --theme-palette-text: #f2faf5;
     --theme-palette-text-muted: #c8e6d4;
@@ -7478,6 +7481,7 @@ body.summit {
     --theme-palette-surface-strong: rgba(16, 31, 49, .88);
     --theme-palette-surface-card: rgba(21, 42, 63, .78);
     --theme-palette-surface-subtle: rgba(9, 23, 39, .68);
+    --theme-palette-cinematic-rgb: 9, 23, 39;
     --theme-palette-border: color-mix(in srgb, var(--theme-palette-accent) 38%, rgba(145, 190, 224, .20));
     --theme-palette-text: #f1f7fc;
     --theme-palette-text-muted: #c5d5e4;
@@ -7829,14 +7833,18 @@ select option,
 
 /* Theme-tönung der Bergwelt-Flächen bleibt konsistent; Fotos in den vier Highlight-Kacheln bleiben erhalten. */
 :is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) #wrapped-view.bergwelt-mode {
-    --bw-surface-rgb: 13, 21, 31 !important;
+    --bw-surface-rgb: var(--theme-palette-cinematic-rgb) !important;
 }
 :is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) #wrapped-view.bergwelt-mode .bergwelt-panel:not([hidden]),
 :is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) #wrapped-view.bergwelt-mode .bergwelt-cinematic-lower {
     color: var(--app-text-primary) !important;
 }
 :is(body.dark, body.green, body.summit, body:not(.dark):not(.green):not(.summit)) #wrapped-view.bergwelt-mode .bergwelt-cinematic-lower {
-    background: linear-gradient(180deg, rgba(13, 21, 31, .98), rgba(13, 21, 31, 1)) !important;
+    background: linear-gradient(
+        180deg,
+        rgba(var(--theme-palette-cinematic-rgb), .98),
+        rgba(var(--theme-palette-cinematic-rgb), 1)
+    ) !important;
 }
 
 /* Theme-Editor bleibt wie in der aktuellen App vorübergehend ausgeblendet. */
