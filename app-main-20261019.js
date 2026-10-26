@@ -22158,9 +22158,9 @@ const THEME_EDITOR_KEY = 'themeEditorSettings_v1';
 const defaultThemeEditorSettings = {
     // Legacy settings key "light" maps to the user-facing Gold theme.
     light:  { topColor: '#191e27', bottomColor: '#0d151f', transition: 55, intensity: 82, textMain: '#f3f7fb', textSoft: '#cbd5df', accent: '#ad7d12', accent2: '#6e4e0b', borderOpacity: 36, gradientDirection: '180deg', midEnabled: false, midColor: '#151c24', shadowIntensity: 50, bgBrightness: 50, appBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#191e27', navBottomColor: '#0d151f', chartColorStart: '#241a06', chartColorMid: '#6e4e0b', chartColorEnd: '#e3c45f' },
-    dark:   { topColor: '#912a34', bottomColor: '#0a121d', transition: 55, intensity: 88, textMain: '#f3f7fb', textSoft: '#c2cfdb', accent: '#d45c5c', accent2: '#4e0a0a', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#4a1c22', shadowIntensity: 50, bgBrightness: 50, appBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#912a34', navBottomColor: '#0a121d', chartColorStart: '#000000', chartColorMid: '#3b0000', chartColorEnd: '#7a0d0d' },
-    green:  { topColor: '#26a352', bottomColor: '#010c07', transition: 55, intensity: 88, textMain: '#f2fff7', textSoft: '#c9e5d4', accent: '#52b788', accent2: '#2d6a4f', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#0e3d20', shadowIntensity: 50, bgBrightness: 50, appBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#26a352', navBottomColor: '#010c07', chartColorStart: '#0d2418', chartColorMid: '#1b4332', chartColorEnd: '#52b788' },
-    summit: { topColor: '#3aa0ff', bottomColor: '#161d22', transition: 55, intensity: 88, textMain: '#f4faff', textSoft: '#d0dce4', accent: '#63b7ff', accent2: '#176fc1', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#1f4560', shadowIntensity: 50, bgBrightness: 50, appBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#3aa0ff', navBottomColor: '#161d22', chartColorStart: '#111513', chartColorMid: '#454e49', chartColorEnd: '#63b7ff' }
+    dark:   { topColor: '#912a34', bottomColor: '#0a121d', transition: 55, intensity: 88, textMain: '#f3f7fb', textSoft: '#c2cfdb', accent: '#d45c5c', accent2: '#4e0a0a', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#4a1c22', shadowIntensity: 50, bgBrightness: 50, appBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#191e27', navBottomColor: '#0d151f', chartColorStart: '#000000', chartColorMid: '#3b0000', chartColorEnd: '#7a0d0d' },
+    green:  { topColor: '#26a352', bottomColor: '#010c07', transition: 55, intensity: 88, textMain: '#f2fff7', textSoft: '#c9e5d4', accent: '#52b788', accent2: '#2d6a4f', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#0e3d20', shadowIntensity: 50, bgBrightness: 50, appBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#191e27', navBottomColor: '#0d151f', chartColorStart: '#0d2418', chartColorMid: '#1b4332', chartColorEnd: '#52b788' },
+    summit: { topColor: '#3aa0ff', bottomColor: '#161d22', transition: 55, intensity: 88, textMain: '#f4faff', textSoft: '#d0dce4', accent: '#63b7ff', accent2: '#176fc1', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#1f4560', shadowIntensity: 50, bgBrightness: 50, appBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#191e27', navBottomColor: '#0d151f', chartColorStart: '#111513', chartColorMid: '#454e49', chartColorEnd: '#63b7ff' }
 };
 
 function getThemeEditorFontName() {
@@ -22647,6 +22647,24 @@ function getThemeEditorSettings() {
         };
     });
 
+    // Main-navigation surface defaults now follow Gold's dark glass treatment.
+    // Migrate only the former built-in colors; keep deliberate custom colors.
+    const legacyNavDefaults = {
+        dark:   { navTopColor: '#912a34', navBottomColor: '#0a121d' },
+        green:  { navTopColor: '#26a352', navBottomColor: '#010c07' },
+        summit: { navTopColor: '#3aa0ff', navBottomColor: '#161d22' }
+    };
+    Object.entries(legacyNavDefaults).forEach(([key, oldColors]) => {
+        const stored = saved && saved[key];
+        if (!stored || typeof stored !== 'object') return;
+        if (stored.navTopColor === oldColors.navTopColor) {
+            merged[key].navTopColor = defaultThemeEditorSettings.light.navTopColor;
+        }
+        if (stored.navBottomColor === oldColors.navBottomColor) {
+            merged[key].navBottomColor = defaultThemeEditorSettings.light.navBottomColor;
+        }
+    });
+
     return merged;
 }
 
@@ -22770,6 +22788,18 @@ function themeEditorBuildShadow(intensity) {
     return `0 2px ${blur1}px rgba(0,0,0,${opacity1}), 0 ${blur2}px ${blur2 + 12}px ${spread2}px rgba(0,0,0,${opacity2}), inset 0 1px 1px rgba(255,255,255,${glow})`;
 }
 
+// The main navigation keeps Gold's compact glass shadow as its default,
+// while the Theme Editor's shadow slider can still strengthen or soften it.
+function themeEditorBuildNavigationShadow(intensity) {
+    const raw = intensity != null ? Number(intensity) : 50;
+    const pct = Math.max(0, Math.min(100, raw)) / 100;
+    const blur = Math.round(14 + pct * 20);
+    const opacity = (0.08 + pct * 0.28).toFixed(2);
+    const highlight = (0.02 + pct * 0.05).toFixed(2);
+
+    return `0 8px ${blur}px rgba(0,0,0,${opacity}), inset 0 1px 1px rgba(255,255,255,${highlight})`;
+}
+
 function createThemeEditorBrightnessLayer() {
     let el = document.getElementById('theme-editor-brightness-layer');
     if (!el) {
@@ -22882,7 +22912,9 @@ function buildThemeEditorLiveCss() {
             topColor: settings.navTopColor || settings.topColor,
             bottomColor: settings.navBottomColor || settings.bottomColor
         }, settings.intensity);
-        css += `${prefix} .top-main-nav { background: ${navGradient} !important; }\n`;
+        const navBorder = themeEditorHexToRgba(settings.accent, settings.borderOpacity);
+        const navShadow = themeEditorBuildNavigationShadow(settings.shadowIntensity);
+        css += `${prefix} .top-main-nav { background: ${navGradient} !important; border-color: ${navBorder} !important; box-shadow: ${navShadow} !important; backdrop-filter: blur(${blur}px) !important; -webkit-backdrop-filter: blur(${blur}px) !important; }\n`;
 
         /* Den durchgehenden Balken nicht auf .accordion-header legen. */
         css += `@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {\n`;
