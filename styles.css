@@ -7,7 +7,7 @@ body {
     justify-content:center;
     padding:50px 20px;
     overflow-x:hidden;
-    background: linear-gradient(180deg, hsl(200,50%,70%) 0%, hsl(180,40%,70%) 50%, #e6e3df 100%);
+    background: linear-gradient(180deg, hsl(220,40%,20%) 0%, hsl(220,30%,15%) 50%, #0b0f14 100%);
 }
 
 button,
@@ -509,25 +509,25 @@ body:not(.touch-mode) .delete-btn:hover{ transform: scale(1.2); background: rgba
 
 /* ---------------- Load-Button (Tour übernehmen) ---------------- */
 .load-btn {
-    background: rgba(50,150,255,0.2); /* Blaue Variante für neutralen Look */
+    background: var(--accent-soft);
     border: none;
     border-radius: 50%;
     width: 28px;
     height: 28px;
     cursor: pointer;
     font-weight: bold;
-    color: #2196f3;
-    transition: transform 0.2s ease, background 0.2s ease;
+    color: var(--accent);
+    transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 0;
-    margin-right: 4px; /* Abstand zum Delete-Button */
+    margin-right: 4px;
 }
 
 body:not(.touch-mode) .load-btn:hover{
     transform: scale(1.2);
-    background: rgba(50,150,255,0.35);
+    background: var(--accent-gradient); color: var(--accent-text-color);
 }
 
 /* ---------------- Edit-Button (geplante Tour bearbeiten) ---------------- */
@@ -1093,8 +1093,8 @@ body:not(.touch-mode) .chart-bar:hover{
 
 /* Unterschiedliche Farbakzente pro Diagramm */
 #chart-distance .chart-bar {
-    background: linear-gradient(180deg, #4facfe, rgba(79,172,254,0.15));
-    box-shadow: 0 0 8px rgba(79,172,254,0.8);
+    background: linear-gradient(180deg, var(--accent), var(--accent-soft));
+    box-shadow: 0 0 8px var(--accent-soft);
 }
 
 #chart-ascent .chart-bar {
@@ -4139,7 +4139,7 @@ body.green .mob-sel-btn:active {
 }
 
 /* Light */
-body:not(.dark):not(.green):not(.summit) .mob-sel-sheet {
+body:not(.dark):not(.green):not(.summit):not(.gold) .mob-sel-sheet {
     background: rgba(242, 246, 255, 0.98);
     border-top: 1px solid rgba(0, 0, 0, 0.07);
 }
@@ -4168,7 +4168,7 @@ body.green .mob-sel-sheet {
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-body:not(.dark):not(.green):not(.summit) .mob-sel-hdr {
+body:not(.dark):not(.green):not(.summit):not(.gold) .mob-sel-hdr {
     border-bottom-color: rgba(0, 0, 0, 0.07);
 }
 
@@ -4198,7 +4198,7 @@ body.green .mob-sel-hdr {
     -webkit-tap-highlight-color: transparent;
 }
 
-body:not(.dark):not(.green):not(.summit) .mob-sel-close {
+body:not(.dark):not(.green):not(.summit):not(.gold) .mob-sel-close {
     background: rgba(0, 0, 0, 0.08);
 }
 
@@ -4232,7 +4232,7 @@ body.green .mob-sel-close {
     background: rgba(255, 255, 255, 0.10);
 }
 
-body:not(.dark):not(.green):not(.summit) .mob-sel-opt:active {
+body:not(.dark):not(.green):not(.summit):not(.gold) .mob-sel-opt:active {
     background: rgba(0, 0, 0, 0.06);
 }
 
@@ -4247,7 +4247,7 @@ body.green .mob-sel-opt:active {
     background: rgba(255, 255, 255, 0.06);
 }
 
-body:not(.dark):not(.green):not(.summit) .mob-sel-opt.selected {
+body:not(.dark):not(.green):not(.summit):not(.gold) .mob-sel-opt.selected {
     background: rgba(0, 0, 0, 0.04);
 }
 
@@ -7285,7 +7285,7 @@ body:not(.touch-mode).green .yc-metric-arrow-btn:hover{
 }
 
 @media (max-width: 768px), (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
-    body:not(.dark):not(.green):not(.summit) .toggle-btn.view-active {
+    body:not(.dark):not(.green):not(.summit):not(.gold) .toggle-btn.view-active {
         box-shadow: 0 4px 12px rgba(0,0,0,0.25), 0 8px 20px rgba(40,60,50,0.25) !important;
     }
 }
@@ -7320,7 +7320,7 @@ body:not(.touch-mode).green .yc-metric-arrow-btn:hover{
     white-space: nowrap;
     vertical-align: middle;
 }
-body:not(.dark):not(.green):not(.summit) .tour-group-badge {
+body:not(.dark):not(.green):not(.summit):not(.gold) .tour-group-badge {
     background: rgba(0,0,0,0.08);
 }
 .tour-group-info {
@@ -7585,7 +7585,7 @@ body.dark .delete-btn {
 }
 
 body.dark .load-btn {
-    color: #2196f3;
+    color: var(--accent) !important;
 }
 
 body.dark .image-remove-btn,
@@ -7788,7 +7788,7 @@ body.dark .shooting-stars-layer {
 }
 
 /* Nur im Lighttheme sichtbar */
-body:not(.dark):not(.green):not(.summit) .birds-layer {
+body:not(.dark):not(.green):not(.summit):not(.gold) .birds-layer {
     opacity: 0.72;
     visibility: visible;
 }
@@ -7883,7 +7883,7 @@ body.green .birds-layer {
 
 /* Mobil etwas kleiner und unauffälliger */
 @media (max-width: 768px), (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
-    body:not(.dark):not(.green):not(.summit) .birds-layer {
+    body:not(.dark):not(.green):not(.summit):not(.gold) .birds-layer {
         opacity: 0.58;
     }
 
@@ -7911,24 +7911,24 @@ body.green .birds-layer {
    Lighttheme: Vögel deutlicher sichtbar
    ========================================================= */
 
-body:not(.dark):not(.green):not(.summit) .birds-layer {
+body:not(.dark):not(.green):not(.summit):not(.gold) .birds-layer {
     opacity: 0.95;
 }
 
-body:not(.dark):not(.green):not(.summit) .bird::before,
-body:not(.dark):not(.green):not(.summit) .bird::after {
+body:not(.dark):not(.green):not(.summit):not(.gold) .bird::before,
+body:not(.dark):not(.green):not(.summit):not(.gold) .bird::after {
     border-top-color: rgba(25, 40, 45, 0.92);
     border-top-width: 2.5px;
     filter: drop-shadow(0 1px 1px rgba(255,255,255,0.24));
 }
 
 @media (max-width: 768px), (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
-    body:not(.dark):not(.green):not(.summit) .birds-layer {
+    body:not(.dark):not(.green):not(.summit):not(.gold) .birds-layer {
         opacity: 0.88;
     }
 
-    body:not(.dark):not(.green):not(.summit) .bird::before,
-    body:not(.dark):not(.green):not(.summit) .bird::after {
+    body:not(.dark):not(.green):not(.summit):not(.gold) .bird::before,
+    body:not(.dark):not(.green):not(.summit):not(.gold) .bird::after {
         border-top-color: rgba(25, 40, 45, 0.90);
         border-top-width: 2px;
     }
@@ -7982,7 +7982,7 @@ body.green .peak-tier-3 {
    ========================================================= */
 
 /* Bronze: warm, kupferfarben */
-body:not(.dark):not(.green):not(.summit) .peak-tier-1 {
+body:not(.dark):not(.green):not(.summit):not(.gold) .peak-tier-1 {
     border-left-color: #a95724 !important;
 
     background: linear-gradient(
@@ -7995,7 +7995,7 @@ body:not(.dark):not(.green):not(.summit) .peak-tier-1 {
 
 
 /* Silber: kühl, hellblau und deutlich heller */
-body:not(.dark):not(.green):not(.summit) .peak-tier-2 {
+body:not(.dark):not(.green):not(.summit):not(.gold) .peak-tier-2 {
     border-left-color: #7895aa !important;
 
     background: linear-gradient(
@@ -8008,7 +8008,7 @@ body:not(.dark):not(.green):not(.summit) .peak-tier-2 {
 
 
 /* Gold: klar gelb und leuchtend */
-body:not(.dark):not(.green):not(.summit) .peak-tier-3 {
+body:not(.dark):not(.green):not(.summit):not(.gold) .peak-tier-3 {
     border-left-color: #c79200 !important;
 
     background: linear-gradient(
@@ -17446,7 +17446,7 @@ body.summit .peak-tier-3 {
 /* =========================================================
    Kräftigere Bronze-/Silber-/Gold-Töne in allen Themes
    ========================================================= */
-body:not(.dark):not(.green):not(.summit) {
+body.gold {
     --metal-bronze-border: #a84f18;
     --metal-bronze-bg: linear-gradient(135deg, rgba(146,62,14,0.34), rgba(224,124,45,0.58), rgba(146,62,14,0.34));
     --metal-silver-border: #6f8999;
@@ -17560,21 +17560,21 @@ body.summit {
 
 
 /* Hohe Spezifität für ältere Theme-Regeln in Dashboard/Modals. */
-body:not(.dark):not(.green):not(.summit) #dash-stat-modal .modal-card .peak-tier-1,
-body:not(.dark):not(.green):not(.summit) .modal .stats-list li.highlight-rank-bronze,
-body:not(.dark):not(.green):not(.summit) .modal-card.highlight-modal-bronze {
+body:not(.dark):not(.green):not(.summit):not(.gold) #dash-stat-modal .modal-card .peak-tier-1,
+body:not(.dark):not(.green):not(.summit):not(.gold) .modal .stats-list li.highlight-rank-bronze,
+body:not(.dark):not(.green):not(.summit):not(.gold) .modal-card.highlight-modal-bronze {
     border-left-color: var(--metal-bronze-border) !important;
     background: var(--metal-bronze-bg) !important;
 }
-body:not(.dark):not(.green):not(.summit) #dash-stat-modal .modal-card .peak-tier-2,
-body:not(.dark):not(.green):not(.summit) .modal .stats-list li.highlight-rank-silver,
-body:not(.dark):not(.green):not(.summit) .modal-card.highlight-modal-silver {
+body:not(.dark):not(.green):not(.summit):not(.gold) #dash-stat-modal .modal-card .peak-tier-2,
+body:not(.dark):not(.green):not(.summit):not(.gold) .modal .stats-list li.highlight-rank-silver,
+body:not(.dark):not(.green):not(.summit):not(.gold) .modal-card.highlight-modal-silver {
     border-left-color: var(--metal-silver-border) !important;
     background: var(--metal-silver-bg) !important;
 }
-body:not(.dark):not(.green):not(.summit) #dash-stat-modal .modal-card .peak-tier-3,
-body:not(.dark):not(.green):not(.summit) .modal .stats-list li.highlight-rank-gold,
-body:not(.dark):not(.green):not(.summit) .modal-card.highlight-modal-gold {
+body:not(.dark):not(.green):not(.summit):not(.gold) #dash-stat-modal .modal-card .peak-tier-3,
+body:not(.dark):not(.green):not(.summit):not(.gold) .modal .stats-list li.highlight-rank-gold,
+body:not(.dark):not(.green):not(.summit):not(.gold) .modal-card.highlight-modal-gold {
     border-left-color: var(--metal-gold-border) !important;
     background: var(--metal-gold-bg) !important;
 }
@@ -18114,19 +18114,19 @@ body.summit .development-point-popup {
     box-shadow: 0 9px 26px rgba(0,0,0,0.40);
 }
 
-body:not(.dark):not(.green):not(.summit) .development-point-popup {
+body:not(.dark):not(.green):not(.summit):not(.gold) .development-point-popup {
     color: #203229;
     border-color: color-mix(in srgb, var(--accent) 52%, rgba(35,55,44,0.18));
     box-shadow: 0 9px 24px rgba(35,55,44,0.22);
 }
 
-body:not(.dark):not(.green):not(.summit) .development-point-popup-head,
-body:not(.dark):not(.green):not(.summit) .development-point-popup-row {
+body:not(.dark):not(.green):not(.summit):not(.gold) .development-point-popup-head,
+body:not(.dark):not(.green):not(.summit):not(.gold) .development-point-popup-row {
     color: #56685e;
 }
 
-body:not(.dark):not(.green):not(.summit) .development-point-popup-head strong,
-body:not(.dark):not(.green):not(.summit) .development-point-popup-row b {
+body:not(.dark):not(.green):not(.summit):not(.gold) .development-point-popup-head strong,
+body:not(.dark):not(.green):not(.summit):not(.gold) .development-point-popup-row b {
     color: #203229;
 }
 
@@ -19369,36 +19369,36 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
    Light Theme
    --------------------------------------------------------- */
 
-body:not(.dark):not(.green):not(.summit) {
+body:not(.dark):not(.green):not(.summit):not(.gold) {
     color: #17251d;
 }
 
-body:not(.dark):not(.green):not(.summit) .box,
-body:not(.dark):not(.green):not(.summit) .dash-section,
-body:not(.dark):not(.green):not(.summit) .filter-simple-card,
-body:not(.dark):not(.green):not(.summit) .stats-analysis-section,
-body:not(.dark):not(.green):not(.summit) .stats-structure-section {
+body:not(.dark):not(.green):not(.summit):not(.gold) .box,
+body:not(.dark):not(.green):not(.summit):not(.gold) .dash-section,
+body:not(.dark):not(.green):not(.summit):not(.gold) .filter-simple-card,
+body:not(.dark):not(.green):not(.summit):not(.gold) .stats-analysis-section,
+body:not(.dark):not(.green):not(.summit):not(.gold) .stats-structure-section {
     background: rgba(255,255,255,0.74) !important;
     border-color: rgba(32,55,43,0.24) !important;
 }
 
-body:not(.dark):not(.green):not(.summit) .box-header,
-body:not(.dark):not(.green):not(.summit) .box-content,
-body:not(.dark):not(.green):not(.summit) .tour-form label,
-body:not(.dark):not(.green):not(.summit) .stats-label,
-body:not(.dark):not(.green):not(.summit) .stats-value,
-body:not(.dark):not(.green):not(.summit) .dash-stat-value,
-body:not(.dark):not(.green):not(.summit) .dash-stat-label,
-body:not(.dark):not(.green):not(.summit) .chart-title {
+body:not(.dark):not(.green):not(.summit):not(.gold) .box-header,
+body:not(.dark):not(.green):not(.summit):not(.gold) .box-content,
+body:not(.dark):not(.green):not(.summit):not(.gold) .tour-form label,
+body:not(.dark):not(.green):not(.summit):not(.gold) .stats-label,
+body:not(.dark):not(.green):not(.summit):not(.gold) .stats-value,
+body:not(.dark):not(.green):not(.summit):not(.gold) .dash-stat-value,
+body:not(.dark):not(.green):not(.summit):not(.gold) .dash-stat-label,
+body:not(.dark):not(.green):not(.summit):not(.gold) .chart-title {
     color: #17251d !important;
 }
 
-body:not(.dark):not(.green):not(.summit) .text-muted,
-body:not(.dark):not(.green):not(.summit) small,
-body:not(.dark):not(.green):not(.summit) .stats-analysis-subtitle,
-body:not(.dark):not(.green):not(.summit) .stats-structure-card-meta,
-body:not(.dark):not(.green):not(.summit) .development-metric-label,
-body:not(.dark):not(.green):not(.summit) .best-form-label {
+body:not(.dark):not(.green):not(.summit):not(.gold) .text-muted,
+body:not(.dark):not(.green):not(.summit):not(.gold) small,
+body:not(.dark):not(.green):not(.summit):not(.gold) .stats-analysis-subtitle,
+body:not(.dark):not(.green):not(.summit):not(.gold) .stats-structure-card-meta,
+body:not(.dark):not(.green):not(.summit):not(.gold) .development-metric-label,
+body:not(.dark):not(.green):not(.summit):not(.gold) .best-form-label {
     color: #405248 !important;
     opacity: 1 !important;
 }
@@ -19803,17 +19803,17 @@ input:disabled {
    Große Flächen und Karten
    --------------------------------------------------------- */
 
-body:not(.dark):not(.green):not(.summit) .box,
-body:not(.dark):not(.green):not(.summit) .dash-section,
-body:not(.dark):not(.green):not(.summit) .filter-simple-card,
-body:not(.dark):not(.green):not(.summit) .stats-analysis-section,
-body:not(.dark):not(.green):not(.summit) .stats-structure-section,
-body:not(.dark):not(.green):not(.summit) .chart-card,
-body:not(.dark):not(.green):not(.summit) .compare-box,
-body:not(.dark):not(.green):not(.summit) .compare-period-card,
-body:not(.dark):not(.green):not(.summit) .compare-list-card,
-body:not(.dark):not(.green):not(.summit) .tour-compare-pick-card,
-body:not(.dark):not(.green):not(.summit) .tour-compare-result {
+body:not(.dark):not(.green):not(.summit):not(.gold) .box,
+body:not(.dark):not(.green):not(.summit):not(.gold) .dash-section,
+body:not(.dark):not(.green):not(.summit):not(.gold) .filter-simple-card,
+body:not(.dark):not(.green):not(.summit):not(.gold) .stats-analysis-section,
+body:not(.dark):not(.green):not(.summit):not(.gold) .stats-structure-section,
+body:not(.dark):not(.green):not(.summit):not(.gold) .chart-card,
+body:not(.dark):not(.green):not(.summit):not(.gold) .compare-box,
+body:not(.dark):not(.green):not(.summit):not(.gold) .compare-period-card,
+body:not(.dark):not(.green):not(.summit):not(.gold) .compare-list-card,
+body:not(.dark):not(.green):not(.summit):not(.gold) .tour-compare-pick-card,
+body:not(.dark):not(.green):not(.summit):not(.gold) .tour-compare-result {
     background:
         linear-gradient(
             180deg,
@@ -19828,20 +19828,20 @@ body:not(.dark):not(.green):not(.summit) .tour-compare-result {
    Listen und kleinere Kacheln
    --------------------------------------------------------- */
 
-body:not(.dark):not(.green):not(.summit) .stats-list li,
-body:not(.dark):not(.green):not(.summit) .peak-tour-list li,
-body:not(.dark):not(.green):not(.summit) .tour-search-result,
-body:not(.dark):not(.green):not(.summit) .chart-stat-tile,
-body:not(.dark):not(.green):not(.summit) .dash-stat-tile,
-body:not(.dark):not(.green):not(.summit) .dash-milestone-tile,
-body:not(.dark):not(.green):not(.summit) .tour-profile-summary-card,
-body:not(.dark):not(.green):not(.summit) .development-metric-card,
-body:not(.dark):not(.green):not(.summit) .best-form-card,
-body:not(.dark):not(.green):not(.summit) .activity-summary-card,
-body:not(.dark):not(.green):not(.summit) .peak-summary-card,
-body:not(.dark):not(.green):not(.summit) .stats-structure-typical-card,
-body:not(.dark):not(.green):not(.summit) .stats-structure-type-card,
-body:not(.dark):not(.green):not(.summit) .stats-structure-burden-card {
+body:not(.dark):not(.green):not(.summit):not(.gold) .stats-list li,
+body:not(.dark):not(.green):not(.summit):not(.gold) .peak-tour-list li,
+body:not(.dark):not(.green):not(.summit):not(.gold) .tour-search-result,
+body:not(.dark):not(.green):not(.summit):not(.gold) .chart-stat-tile,
+body:not(.dark):not(.green):not(.summit):not(.gold) .dash-stat-tile,
+body:not(.dark):not(.green):not(.summit):not(.gold) .dash-milestone-tile,
+body:not(.dark):not(.green):not(.summit):not(.gold) .tour-profile-summary-card,
+body:not(.dark):not(.green):not(.summit):not(.gold) .development-metric-card,
+body:not(.dark):not(.green):not(.summit):not(.gold) .best-form-card,
+body:not(.dark):not(.green):not(.summit):not(.gold) .activity-summary-card,
+body:not(.dark):not(.green):not(.summit):not(.gold) .peak-summary-card,
+body:not(.dark):not(.green):not(.summit):not(.gold) .stats-structure-typical-card,
+body:not(.dark):not(.green):not(.summit):not(.gold) .stats-structure-type-card,
+body:not(.dark):not(.green):not(.summit):not(.gold) .stats-structure-burden-card {
     background:
         linear-gradient(
             180deg,
@@ -19884,13 +19884,13 @@ textarea::placeholder {
    Navigation und Steuerflächen
    --------------------------------------------------------- */
 
-body:not(.dark):not(.green):not(.summit) .chart-tab,
-body:not(.dark):not(.green):not(.summit) .quick-filter-btn,
-body:not(.dark):not(.green):not(.summit) .filter-section-nav-btn,
-body:not(.dark):not(.green):not(.summit) #tour-view .plan-section-btn,
-body:not(.dark):not(.green):not(.summit) .tour-page-btn,
-body:not(.dark):not(.green):not(.summit) .dash-year-arrow-btn,
-body:not(.dark):not(.green):not(.summit) .slope-toggle {
+body:not(.dark):not(.green):not(.summit):not(.gold) .chart-tab,
+body:not(.dark):not(.green):not(.summit):not(.gold) .quick-filter-btn,
+body:not(.dark):not(.green):not(.summit):not(.gold) .filter-section-nav-btn,
+body:not(.dark):not(.green):not(.summit):not(.gold) #tour-view .plan-section-btn,
+body:not(.dark):not(.green):not(.summit):not(.gold) .tour-page-btn,
+body:not(.dark):not(.green):not(.summit):not(.gold) .dash-year-arrow-btn,
+body:not(.dark):not(.green):not(.summit):not(.gold) .slope-toggle {
     background:
     linear-gradient(
         180deg,
@@ -20385,8 +20385,9 @@ textarea:focus {
     align-items: center;
     gap: 10px;
     padding: 12px 16px;
-    background: var(--surface-gradient, linear-gradient(135deg, #4facfe, #43e97b));
-    color: #fff;
+    background: var(--accent-gradient);
+    color: var(--accent-text-color);
+    border: 1px solid var(--app-surface-border);
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     animation: wrappedBannerSlideDown 0.4s ease;
 }
