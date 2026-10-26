@@ -9037,12 +9037,6 @@ body:not(.dark):not(.green):not(.summit) {
 .stats-structure-burden-card, .backup-status-item {
     background: linear-gradient(180deg, var(--surface-gradient-soft-top) 0%, var(--surface-gradient-soft-bottom) 100%) !important;
 }
-.box *, .dash-section *, .filter-simple-card *, .stats-analysis-section *,
-.stats-structure-section *, .chart-card *, .compare-box *, .compare-period-card *,
-.compare-list-card *, .tour-compare-pick-card *, .tour-compare-result *,
-.backup-status-panel *, .backup-info-card *, .backup-file-status * {
-    color: inherit;
-}
 /* Hauptnavigation erhält dieselbe themegerechte Akzentwelt wie die Dashboard-Flächen. */
 .top-main-nav {
     background: linear-gradient(180deg, var(--surface-gradient-soft-top) 0%, var(--surface-gradient-soft-bottom) 100%) !important;
