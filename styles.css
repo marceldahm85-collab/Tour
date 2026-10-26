@@ -19408,15 +19408,15 @@ body:not(.dark):not(.green):not(.summit):not(.gold) .best-form-label {
 textarea,
 #filter-view input:not([type="checkbox"]),
 #filter-view select {
-    background: rgba(255,255,255,0.84) !important;
-    color: #17251d !important;
-    border-color: rgba(32,55,43,0.30) !important;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.55) !important;
+    background: var(--app-surface-strong) !important;
+    color: var(--app-text-primary) !important;
+    border-color: var(--app-surface-border) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.035) !important;
 }
 
 input::placeholder,
 textarea::placeholder {
-    color: #53665b !important;
+    color: var(--app-text-muted) !important;
     opacity: 1 !important;
 }
 
@@ -19425,8 +19425,9 @@ textarea::placeholder {
 .tour-search-result,
 .chart-stat-tile,
 .dash-stat-tile {
-    background: rgba(255,255,255,0.78) !important;
-    border-color: rgba(32,55,43,0.22) !important;
+    background: linear-gradient(180deg, var(--app-surface-card), var(--app-surface-subtle)) !important;
+    border-color: var(--app-surface-border) !important;
+    color: var(--app-text-primary) !important;
 }
 
 /* ---------------------------------------------------------
@@ -19821,7 +19822,7 @@ body:not(.dark):not(.green):not(.summit):not(.gold) .tour-compare-result {
             var(--light-surface-bottom) 100%
         ) !important;
 
-    border-color: var(--light-surface-border) !important;
+    border-color: var(--app-surface-border) !important;
 }
 
 /* ---------------------------------------------------------
@@ -19849,7 +19850,7 @@ body:not(.dark):not(.green):not(.summit):not(.gold) .stats-structure-burden-card
             var(--light-surface-soft-bottom) 100%
         ) !important;
 
-    border-color: var(--light-surface-border) !important;
+    border-color: var(--app-surface-border) !important;
 }
 
 /* ---------------------------------------------------------
@@ -19869,7 +19870,7 @@ textarea,
         rgba(160, 216, 181, 0.97) 100%
     ) !important;
 
-    color: var(--light-surface-text) !important;
+    color: var(--app-text-primary) !important;
     border-color: rgba(63, 119, 110, 0.30) !important;
 }
 
@@ -19898,8 +19899,8 @@ body:not(.dark):not(.green):not(.summit):not(.gold) .slope-toggle {
         rgba(157, 211, 178, 0.95) 100%
     ) !important;
 
-    color: var(--light-surface-text) !important;
-    border-color: var(--light-surface-border) !important;
+    color: var(--app-text-primary) !important;
+    border-color: var(--app-surface-border) !important;
 }
 
 /* Jahresauswahl */
@@ -19912,25 +19913,19 @@ body:not(.dark):not(.green):not(.summit):not(.gold) .slope-toggle {
             rgba(225, 245, 232, 0.84) 100%
         ) !important;
 
-    color: var(--light-surface-text) !important;
-    border-color: var(--light-surface-border) !important;
+    color: var(--app-text-primary) !important;
+    border-color: var(--app-surface-border) !important;
 }
 
-/* Aktive Elemente etwas kräftiger */
+/* Aktive Elemente verwenden ausschließlich den im Editor eingestellten Akzent. */
 .chart-tab.active,
 .quick-filter-btn.active,
 .filter-section-nav-btn.active,
 #tour-view .plan-section-btn.active,
 .toggle-btn.view-active {
-    background:
-    linear-gradient(
-        135deg,
-        #78c7eb 0%,
-        #4fae79 100%
-    ) !important;
-
-    color: #12352b !important;
-    border-color: rgba(45, 105, 92, 0.38) !important;
+    background: var(--accent-gradient) !important;
+    color: var(--accent-text-color) !important;
+    border-color: var(--accent) !important;
 }
 
 /* ---------------------------------------------------------
@@ -19941,14 +19936,9 @@ body:not(.dark):not(.green):not(.summit):not(.gold) .slope-toggle {
 #planned-table tr,
 #saved-tours-list .tour-list li,
 #planned-tours-list .tour-list li {
-    background:
-        linear-gradient(
-            180deg,
-            rgba(238, 249, 255, 0.72) 0%,
-            rgba(226, 245, 233, 0.78) 100%
-        ) !important;
-
-    border-color: var(--light-surface-border) !important;
+    background: linear-gradient(180deg, var(--app-surface-card), var(--app-surface-subtle)) !important;
+    border-color: var(--app-surface-border) !important;
+    color: var(--app-text-primary) !important;
 }
 
 /* Tabellenzellen */
@@ -19957,7 +19947,7 @@ body:not(.dark):not(.green):not(.summit):not(.gold) .slope-toggle {
 #planned-table th,
 #planned-table td {
     background: transparent !important;
-    color: var(--light-surface-text) !important;
+    color: var(--app-text-primary) !important;
 }
 
 /* ---------------------------------------------------------
@@ -19965,23 +19955,17 @@ body:not(.dark):not(.green):not(.summit):not(.gold) .slope-toggle {
    --------------------------------------------------------- */
 
 .mob-sel-sheet {
-    background:
-        linear-gradient(
-            180deg,
-            #eaf8ff 0%,
-            #e4f5e9 100%
-        ) !important;
-
-    border-top-color: rgba(63, 119, 110, 0.30) !important;
+    background: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
+    border-top-color: var(--app-surface-border) !important;
 }
 
 .mob-sel-hdr {
-    border-bottom-color: rgba(63, 119, 110, 0.24) !important;
+    border-bottom-color: var(--app-surface-border) !important;
 }
 
 .mob-sel-opt.selected {
-    background: rgba(92, 166, 151, 0.18) !important;
-    color: #17624e !important;
+    background: var(--accent-soft) !important;
+    color: var(--accent-text-color) !important;
 }
 
 /* ---------------------------------------------------------
@@ -19991,10 +19975,8 @@ body:not(.dark):not(.green):not(.summit):not(.gold) .slope-toggle {
 input:not([type="checkbox"]):focus,
 select:focus,
 textarea:focus {
-    border-color: #4e9f91 !important;
-    box-shadow:
-        0 0 0 2px rgba(78, 159, 145, 0.24),
-        0 0 12px rgba(78, 159, 145, 0.14) !important;
+    border-color: var(--accent) !important;
+    box-shadow: var(--premium-focus-ring) !important;
 }
 
 /* =========================================================
@@ -20015,27 +19997,20 @@ textarea:focus {
     background:
         linear-gradient(
             180deg,
-            var(--light-nav-soft-top) 0%,
-            var(--light-nav-soft-bottom) 100%
+            var(--app-surface-card) 0%,
+            var(--app-surface-subtle) 100%
         ) !important;
 
-    color: var(--light-nav-text) !important;
-    border-color: var(--light-nav-border) !important;
+    color: var(--app-text-primary) !important;
+    border-color: var(--app-surface-border) !important;
 }
 
-/* Aktive Stats-Navigation deutlich hervorheben */
+/* Aktive Stats-Navigation verwendet den gemeinsamen Editor-Akzent. */
 #chart-view .stats-section-btn.active {
-    background:
-        linear-gradient(
-            135deg,
-            #79c7e8 0%,
-            #4fae79 100%
-        ) !important;
-
-    color: #10372a !important;
-    border-color: rgba(35, 101, 88, 0.52) !important;
-    box-shadow:
-        0 3px 8px rgba(45, 105, 92, 0.20) !important;
+    background: var(--accent-gradient) !important;
+    color: var(--accent-text-color) !important;
+    border-color: var(--accent) !important;
+    box-shadow: 0 3px 8px var(--accent-soft) !important;
 }
 
 /* ---------------------------------------------------------
@@ -20047,95 +20022,53 @@ textarea:focus {
 #map-view .map-controls,
 #map-view .map-control-panel,
 #map-view .map-sidebar {
-    background:
-        linear-gradient(
-            180deg,
-            var(--light-nav-top) 0%,
-            var(--light-nav-bottom) 100%
-        ) !important;
-
-    border-color: var(--light-nav-border) !important;
+    background: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
+    border-color: var(--app-surface-border) !important;
 }
 
 /* Karten-Jahresauswahl */
 #map-view .map-year-filter-wrap,
 #map-view #map-year-select,
 #map-view .mob-sel-btn {
-    background:
-        linear-gradient(
-            180deg,
-            var(--light-nav-soft-top) 0%,
-            var(--light-nav-soft-bottom) 100%
-        ) !important;
-
-    color: var(--light-nav-text) !important;
-    border-color: var(--light-nav-border) !important;
+    background: linear-gradient(180deg, var(--app-surface-card), var(--app-surface-subtle)) !important;
+    color: var(--app-text-primary) !important;
+    border-color: var(--app-surface-border) !important;
 }
 
 /* Kartenmodus-Schalter */
 #map-view .map-mode-toggle {
-    background:
-        linear-gradient(
-            180deg,
-            var(--light-nav-top) 0%,
-            var(--light-nav-bottom) 100%
-        ) !important;
-
-    border-color: var(--light-nav-border) !important;
+    background: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
+    border-color: var(--app-surface-border) !important;
 }
 
 #map-view .map-mode-btn {
-    background:
-        linear-gradient(
-            180deg,
-            var(--light-nav-soft-top) 0%,
-            var(--light-nav-soft-bottom) 100%
-        ) !important;
-
-    color: var(--light-nav-text) !important;
-    border-color: var(--light-nav-border) !important;
+    background: linear-gradient(180deg, var(--app-surface-card), var(--app-surface-subtle)) !important;
+    color: var(--app-text-primary) !important;
+    border-color: var(--app-surface-border) !important;
 }
 
 #map-view .map-mode-btn.active {
-    background:
-        linear-gradient(
-            135deg,
-            #79c7e8 0%,
-            #4fae79 100%
-        ) !important;
-
-    color: #10372a !important;
-    border-color: rgba(35, 101, 88, 0.52) !important;
+    background: var(--accent-gradient) !important;
+    color: var(--accent-text-color) !important;
+    border-color: var(--accent) !important;
 }
 
 /* Karten-Schnellfilter */
 #map-view #map-quick-filters,
 #map-view #map-quick-filters .quick-filter-btn {
-    background:
-        linear-gradient(
-            180deg,
-            var(--light-nav-soft-top) 0%,
-            var(--light-nav-soft-bottom) 100%
-        ) !important;
-
-    color: var(--light-nav-text) !important;
-    border-color: var(--light-nav-border) !important;
+    background: linear-gradient(180deg, var(--app-surface-card), var(--app-surface-subtle)) !important;
+    color: var(--app-text-primary) !important;
+    border-color: var(--app-surface-border) !important;
 }
 
 #map-view #map-quick-filters .quick-filter-btn.active {
-    background:
-        linear-gradient(
-            135deg,
-            #79c7e8 0%,
-            #4fae79 100%
-        ) !important;
-
-    color: #10372a !important;
+    background: var(--accent-gradient) !important;
+    color: var(--accent-text-color) !important;
 }
 
 /* Karteninfo nicht weiß erscheinen lassen */
 #map-view #map-info-bar {
-    color: var(--light-nav-text) !important;
+    color: var(--app-text-primary) !important;
     opacity: 1 !important;
 }
 
@@ -20149,15 +20082,9 @@ textarea:focus {
 #backup-view .backup-info-card,
 #backup-view .backup-file-status,
 #backup-view .backup-view-inner {
-    background:
-        linear-gradient(
-            180deg,
-            var(--light-nav-soft-top) 0%,
-            var(--light-nav-soft-bottom) 100%
-        ) !important;
-
-    border-color: var(--light-nav-border) !important;
-    color: var(--light-nav-text) !important;
+    background: linear-gradient(180deg, var(--app-surface-card), var(--app-surface-subtle)) !important;
+    border-color: var(--app-surface-border) !important;
+    color: var(--app-text-primary) !important;
 }
 
 /* Sicherungstexte */
@@ -20168,20 +20095,15 @@ textarea:focus {
 #backup-view .backup-info-text,
 #backup-view .backup-section-title,
 #backup-view .backup-file-status {
-    color: var(--light-nav-text) !important;
+    color: var(--app-text-primary) !important;
     opacity: 1 !important;
 }
 
 
 /* Trennlinie im Sicherungsbereich */
 #backup-view .backup-divider {
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            rgba(38, 104, 103, 0.45),
-            transparent
-        ) !important;
+    background: linear-gradient(90deg, transparent, var(--accent) 50%, transparent) !important;
+    opacity: .55;
 }
 
 /* ---------------------------------------------------------
@@ -20198,22 +20120,17 @@ textarea:focus {
         background:
             linear-gradient(
                 180deg,
-                var(--light-nav-top) 0%,
-                var(--light-nav-bottom) 100%
+                var(--app-surface-strong) 0%,
+                var(--app-surface-card) 100%
             ) !important;
 
-        border-color: var(--light-nav-border) !important;
+        border-color: var(--app-surface-border) !important;
     }
 
     #backup-view .backup-status-item,
     #backup-view .backup-info-card,
     #backup-view .backup-file-status {
-        background:
-            linear-gradient(
-                180deg,
-                rgba(181, 222, 244, 0.96) 0%,
-                rgba(163, 215, 181, 0.97) 100%
-            ) !important;
+        background: linear-gradient(180deg, var(--app-surface-card), var(--app-surface-subtle)) !important;
     }
 }
 
