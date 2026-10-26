@@ -328,7 +328,7 @@
                     class="more-menu-item"
                     type="button">
                     <span>🎨</span>
-                    <span>Theme Editor</span>
+                    <span>Editor</span>
                 </button>
 
 <button
@@ -340,22 +340,7 @@
     <span>Sicherung</span>
 </button>
 
-                <div class="more-menu-divider"></div>
-
-                <div class="more-theme-list" role="group" aria-label="Theme auswählen">
-                    <button type="button" class="more-theme-option" data-theme-choice="gold" aria-pressed="false">
-                        <span class="more-theme-icon">🟡</span><span>Gold</span><span class="more-theme-check">✓</span>
-                    </button>
-                    <button type="button" class="more-theme-option" data-theme-choice="dark" aria-pressed="false">
-                        <span class="more-theme-icon">🌙</span><span>Dunkel</span><span class="more-theme-check">✓</span>
-                    </button>
-                    <button type="button" class="more-theme-option" data-theme-choice="green" aria-pressed="false">
-                        <span class="more-theme-icon">🌿</span><span>Grün</span><span class="more-theme-check">✓</span>
-                    </button>
-                    <button type="button" class="more-theme-option" data-theme-choice="summit" aria-pressed="false">
-                        <span class="more-theme-icon">⛰️</span><span>Summit</span><span class="more-theme-check">✓</span>
-                    </button>
-                </div>
+                
 
             </div>
 
@@ -2398,22 +2383,16 @@
 </div>
 
 <!-- ======================================================
-     Theme Editor
+     Editor
      ====================================================== -->
 
 <div id="theme-view" class="view">
     <div class="theme-editor-inner">
         <section class="filter-simple-card theme-editor-card">
-            <div class="filter-simple-title">🎨 Theme Editor</div>
+            <div class="filter-simple-title">🎨 Editor</div>
 
             <div class="theme-editor-top">
-                <div class="compare-mode-toggle" id="theme-editor-tabs" role="group" aria-label="Theme auswählen">
-                    <button type="button" class="compare-mode-btn active" data-theme-editor-tab="light">🟡 Gold</button>
-                    <button type="button" class="compare-mode-btn" data-theme-editor-tab="dark">🌙 Dunkel</button>
-                    <button type="button" class="compare-mode-btn" data-theme-editor-tab="green">🌿 Grün</button>
-                    <button type="button" class="compare-mode-btn" data-theme-editor-tab="summit">⛰️ Summit</button>
-                </div>
-                <div id="theme-editor-hint"></div>
+                <div id="theme-editor-hint">Die Einstellungen gelten für die gesamte App.</div>
             </div>
 
             <div class="theme-editor-columns">
@@ -2495,16 +2474,11 @@
                         </div>
                     </div>
 
-                    <div class="tour-form-row tour-form-row-two">
-                        <div class="form-group">
-                            <label for="te-accent">Akzentfarbe</label>
-                            <input type="color" id="te-accent">
-                        </div>
-                        <div class="form-group">
-                            <label for="te-accent2">Akzentfarbe 2 (Verlauf)</label>
-                            <input type="color" id="te-accent2">
-                        </div>
+                    <div class="form-group">
+                        <label for="te-accent">Akzentfarbe für die gesamte App</label>
+                        <input type="color" id="te-accent">
                     </div>
+                    <input type="color" id="te-accent2" hidden aria-hidden="true" tabindex="-1" value="#ad7d12">
 
                     <div class="form-group">
                         <label for="te-shadow">Schattentiefe: <span id="te-shadow-value">50</span>%</label>
@@ -2663,7 +2637,7 @@
     </div>
 </div>
 
-<script src="./app-main-20261019.js?v=9" defer></script>
+<script src="./app-main-20261019.js?v=10" defer></script>
 <script src="./theme-editor-surface-compat.js?v=4" defer></script>
 <script src="./app-navigation-history.js?v=1" defer></script>
 
