@@ -7698,3 +7698,135 @@ body .best-form-label {
     color: var(--app-text-muted);
     opacity: 1;
 }
+
+
+/* PHASE 2 · SCHRITT 1 — Spezifitätsausgleich je Theme.
+   Diese nachgelagerten, gleich spezifischen Regeln überschreiben ältere
+   90%-Flächen tatsächlich; das fixierte Alpin-Hintergrundbild bleibt unberührt. */
+
+body:not(.dark):not(.green):not(.summit) .box,
+body:not(.dark):not(.green):not(.summit) .dash-section,
+body:not(.dark):not(.green):not(.summit) .filter-simple-card,
+body:not(.dark):not(.green):not(.summit) .stats-analysis-section,
+body:not(.dark):not(.green):not(.summit) .stats-structure-section,
+body:not(.dark):not(.green):not(.summit) .modal-card {
+    background: var(--app-surface-strong) !important;
+    border-color: var(--app-surface-border) !important;
+}
+
+body.dark .box,
+body.dark .dash-section,
+body.dark .filter-simple-card,
+body.dark .stats-analysis-section,
+body.dark .stats-structure-section,
+body.dark .modal-card {
+    background: var(--app-surface-strong) !important;
+    border-color: var(--app-surface-border) !important;
+}
+
+body.green .box,
+body.green .dash-section,
+body.green .filter-simple-card,
+body.green .stats-analysis-section,
+body.green .stats-structure-section,
+body.green .modal-card {
+    background: var(--app-surface-strong) !important;
+    border-color: var(--app-surface-border) !important;
+}
+
+body.summit .box,
+body.summit .dash-section,
+body.summit .filter-simple-card,
+body.summit .stats-analysis-section,
+body.summit .stats-structure-section,
+body.summit .modal-card {
+    background: var(--app-surface-strong) !important;
+    border-color: var(--app-surface-border) !important;
+}
+
+body:not(.dark):not(.green):not(.summit) .stats-list li,
+body:not(.dark):not(.green):not(.summit) .peak-tour-list li,
+body:not(.dark):not(.green):not(.summit) .tour-search-result,
+body:not(.dark):not(.green):not(.summit) .chart-stat-tile,
+body:not(.dark):not(.green):not(.summit) .dash-stat-tile,
+body:not(.dark):not(.green):not(.summit) .compare-row,
+body:not(.dark):not(.green):not(.summit) .compare-period-card,
+body:not(.dark):not(.green):not(.summit) .compare-list-card,
+body:not(.dark):not(.green):not(.summit) .compare-chip {
+    background: var(--app-surface-card) !important;
+    border-color: var(--app-surface-border) !important;
+}
+
+body.dark .stats-list li,
+body.dark .peak-tour-list li,
+body.dark .tour-search-result,
+body.dark .chart-stat-tile:not(.active),
+body.dark .dash-stat-tile,
+body.dark .compare-row,
+body.dark .compare-period-card,
+body.dark .compare-list-card,
+body.dark .compare-chip {
+    background: var(--app-surface-card) !important;
+    border-color: var(--app-surface-border) !important;
+}
+
+body.green .stats-list li,
+body.green .peak-tour-list li,
+body.green .tour-search-result,
+body.green .chart-stat-tile:not(.active),
+body.green .dash-stat-tile,
+body.green .compare-row,
+body.green .compare-period-card,
+body.green .compare-list-card,
+body.green .compare-chip {
+    background: var(--app-surface-card) !important;
+    border-color: var(--app-surface-border) !important;
+}
+
+body.summit .stats-list li,
+body.summit .peak-tour-list li,
+body.summit .tour-search-result,
+body.summit .chart-stat-tile:not(.active),
+body.summit .dash-stat-tile,
+body.summit .compare-row,
+body.summit .compare-period-card,
+body.summit .compare-list-card,
+body.summit .compare-chip {
+    background: var(--app-surface-card) !important;
+    border-color: var(--app-surface-border) !important;
+}
+
+/* Themeabhängige Textfarben mit ausreichendem Kontrast auf Karten sichern. */
+body:not(.dark):not(.green):not(.summit) .box-header,
+body:not(.dark):not(.green):not(.summit) .box-content,
+body:not(.dark):not(.green):not(.summit) .stats-label,
+body:not(.dark):not(.green):not(.summit) .stats-value,
+body:not(.dark):not(.green):not(.summit) .dash-stat-value,
+body:not(.dark):not(.green):not(.summit) .dash-stat-label,
+body:not(.dark):not(.green):not(.summit) .chart-title {
+    color: var(--app-text-primary) !important;
+}
+
+body.dark .box-header,
+body.dark .box-content,
+body.dark .stats-label,
+body.dark .stats-value,
+body.dark .dash-stat-value,
+body.dark .dash-stat-label,
+body.dark .chart-title,
+body.green .box-header,
+body.green .box-content,
+body.green .stats-label,
+body.green .stats-value,
+body.green .dash-stat-value,
+body.green .dash-stat-label,
+body.green .chart-title,
+body.summit .box-header,
+body.summit .box-content,
+body.summit .stats-label,
+body.summit .stats-value,
+body.summit .dash-stat-value,
+body.summit .dash-stat-label,
+body.summit .chart-title {
+    color: var(--app-text-primary) !important;
+}
