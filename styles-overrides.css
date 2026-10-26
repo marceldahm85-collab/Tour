@@ -7311,7 +7311,7 @@ body:not(.dark):not(.green):not(.summit) #map-view #map-quick-filters {
 /* Temporäres Bergwelt-Motiv: warmes Alpenpanorama mit Wanderer.
    Absichtlich nur auf die Hero-Fläche der Bergwelt-Startseite begrenzt. */
 #wrapped-view .bergwelt-cinematic-hero {
-    background-image: url("https://images.unsplash.com/photo-1694968537484-d4e1733301b5?auto=format&fit=crop&w=1400&q=85") !important;
+    background-image: url("./assets/bergwelt-fixed-alpine.webp") !important;
     background-position: 65% 44% !important;
 }
 
@@ -7536,7 +7536,7 @@ body.summit .parallax::before {
    damit die Silhouette des Wanderers im Bildbereich bleibt. */
 @media (max-width: 600px) {
     .parallax {
-        background-position: 59% center !important;
+        background-position: 100% center !important;
     }
 }
 
