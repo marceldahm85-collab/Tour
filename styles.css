@@ -29,7 +29,6 @@ option {
 
 }
 
-body.dark 
 
 /* =========================================================
    Parallax-Berge: natürlicheres Bergrelief
@@ -1890,7 +1889,6 @@ body::-webkit-scrollbar {
 
 
 /* Light */
-body:not(.dark):not(.green):not(.summit)
 #tour-view .plan-overview-tile {
     background:
         rgba(255,255,255,0.14);
@@ -1901,7 +1899,6 @@ body:not(.dark):not(.green):not(.summit)
 
 
 /* Dark */
-body.dark
 #tour-view .plan-overview-tile {
     background:
         rgba(255,255,255,0.04);
@@ -1912,7 +1909,6 @@ body.dark
 
 
 /* Green */
-body.green
 #tour-view .plan-overview-tile {
     background:
         rgba(255,255,255,0.035);
@@ -1923,7 +1919,6 @@ body.green
 
 
 /* Summit */
-body.summit
 #tour-view .plan-overview-tile {
     background:
         rgba(255,255,255,0.045);
@@ -3642,7 +3637,6 @@ body.dark .compare-mode-btn.active{
     text-align: left;
 }
 
-body:not(.dark):not(.green):not(.summit)
 #tour-list-modal
 .tour-group-insight {
     background:
@@ -6235,7 +6229,6 @@ body:not(.touch-mode).dark #td-close:hover, body:not(.touch-mode).dark #ms-close
    Lighttheme
    ───────────────────────────────────────────────────────── */
 
-body:not(.dark):not(.green):not(.summit)
 #dash-stat-modal .modal-card .peak-tier-1 {
     border-left-color: #a95724 !important;
     background:
@@ -6247,7 +6240,6 @@ body:not(.dark):not(.green):not(.summit)
         ) !important;
 }
 
-body:not(.dark):not(.green):not(.summit)
 #dash-stat-modal .modal-card .peak-tier-2 {
     border-left-color: #7895aa !important;
     background:
@@ -6259,7 +6251,6 @@ body:not(.dark):not(.green):not(.summit)
         ) !important;
 }
 
-body:not(.dark):not(.green):not(.summit)
 #dash-stat-modal .modal-card .peak-tier-3 {
     border-left-color: #c79200 !important;
     background:
@@ -6275,7 +6266,6 @@ body:not(.dark):not(.green):not(.summit)
    Darktheme
    ───────────────────────────────────────────────────────── */
 
-body.dark
 #dash-stat-modal .modal-card .peak-tier-1 {
     border-left-color: #d4904a !important;
     background:
@@ -6287,7 +6277,6 @@ body.dark
         ) !important;
 }
 
-body.dark
 #dash-stat-modal .modal-card .peak-tier-2 {
     border-left-color: #9ab8d0 !important;
     background:
@@ -6299,7 +6288,6 @@ body.dark
         ) !important;
 }
 
-body.dark
 #dash-stat-modal .modal-card .peak-tier-3 {
     border-left-color: #e0b020 !important;
     background:
@@ -6315,7 +6303,6 @@ body.dark
    Green-Theme
    ───────────────────────────────────────────────────────── */
 
-body.green
 #dash-stat-modal .modal-card .peak-tier-1 {
     border-left-color: #c46f32 !important;
     background:
@@ -6327,7 +6314,6 @@ body.green
         ) !important;
 }
 
-body.green
 #dash-stat-modal .modal-card .peak-tier-2 {
     border-left-color: #a9c7d8 !important;
     background:
@@ -6339,7 +6325,6 @@ body.green
         ) !important;
 }
 
-body.green
 #dash-stat-modal .modal-card .peak-tier-3 {
     border-left-color: #ffd23f !important;
     background:
@@ -8079,23 +8064,17 @@ body:not(.dark):not(.green):not(.summit) .peak-tier-3 {
 }
 
 /* Textfarben im Lighttheme */
-body:not(.dark):not(.green):not(.summit)
 .modal .stats-list li.highlight-rank-gold .stats-label,
-body:not(.dark):not(.green):not(.summit)
 .modal .stats-list li.highlight-rank-gold .stats-value {
     color: #735500;
 }
 
-body:not(.dark):not(.green):not(.summit)
 .modal .stats-list li.highlight-rank-silver .stats-label,
-body:not(.dark):not(.green):not(.summit)
 .modal .stats-list li.highlight-rank-silver .stats-value {
     color: #526f84;
 }
 
-body:not(.dark):not(.green):not(.summit)
 .modal .stats-list li.highlight-rank-bronze .stats-label,
-body:not(.dark):not(.green):not(.summit)
 .modal .stats-list li.highlight-rank-bronze .stats-value {
     color: #713410;
 }
@@ -10809,7 +10788,6 @@ body:not(.touch-mode).summit .chart-bar:hover{
 
 
 /* Bronze – über 2000 m */
-body.summit
 #dash-stat-modal .modal-card .peak-tier-1 {
     border-left-color:
         #c8753d !important;
@@ -10825,7 +10803,6 @@ body.summit
 
 
 /* Silber – über 2500 m */
-body.summit
 #dash-stat-modal .modal-card .peak-tier-2 {
     border-left-color:
         #c8d2cf !important;
@@ -10841,7 +10818,6 @@ body.summit
 
 
 /* Gold – über 3000 m */
-body.summit
 #dash-stat-modal .modal-card .peak-tier-3 {
     border-left-color:
         #e3b83f !important;
@@ -10855,23 +10831,17 @@ body.summit
         ) !important;
 }
 
-body.summit
 #dash-stat-modal .peak-tier-1 .stats-label,
-body.summit
 #dash-stat-modal .peak-tier-1 .stats-value {
     color: #f2d3bb;
 }
 
-body.summit
 #dash-stat-modal .peak-tier-2 .stats-label,
-body.summit
 #dash-stat-modal .peak-tier-2 .stats-value {
     color: #f2f6f4;
 }
 
-body.summit
 #dash-stat-modal .peak-tier-3 .stats-label,
-body.summit
 #dash-stat-modal .peak-tier-3 .stats-value {
     color: #ffe99a;
 }
@@ -11027,7 +10997,6 @@ body.summit .modal-card.highlight-modal-bronze {
 
 
 /* GOLD */
-body.summit
 .modal
 .stats-list
 li.highlight-rank-gold {
@@ -11048,7 +11017,6 @@ li.highlight-rank-gold {
 
 
 /* SILBER */
-body.summit
 .modal
 .stats-list
 li.highlight-rank-silver {
@@ -11069,7 +11037,6 @@ li.highlight-rank-silver {
 
 
 /* BRONZE */
-body.summit
 .modal
 .stats-list
 li.highlight-rank-bronze {
@@ -11131,9 +11098,7 @@ body.summit .dash-ms-progress-bar {
         );
 }
 
-body.summit
 .dash-year-filter-wrap select,
-body.summit
 .dash-year-filter-wrap .mob-sel-btn {
     background:
         rgba(25,32,28,0.72);
@@ -11144,13 +11109,11 @@ body.summit
     color: #f4f8f5;
 }
 
-body.summit
 .dash-year-filter-wrap select option {
     color: #f4f8f5;
     background: #252c28;
 }
 
-body.summit
 .dash-year-arrow-btn {
     background:
         rgba(25,32,28,0.72);
@@ -11211,7 +11174,6 @@ body.summit .stats-glow {
 }
 
 /* Jahresvergleich: Trennlinie bei "Alle Jahre" */
-body.summit
 .yc-year-btns-grid
 .yc-year-all-btn::after {
     background:
@@ -11220,7 +11182,6 @@ body.summit
 
 
 /* Scrollender Header */
-body.summit
 .accordion-header.header-scrolled
 .toggle-btn {
     box-shadow:
@@ -11655,7 +11616,6 @@ select {
     gap: 8px;
 }
 
-body:not(.dark):not(.green):not(.summit)
 #tour-view
 .plan-page-box
 .plan-season-card {
@@ -12056,12 +12016,10 @@ select {
 
 
 /* Dark */
-body.dark
 #app-view
 .tour-form
 input:not([type="file"]),
 
-body.dark
 #app-view
 .tour-form
 select {
@@ -12074,12 +12032,10 @@ select {
 
 
 /* Green */
-body.green
 #app-view
 .tour-form
 input:not([type="file"]),
 
-body.green
 #app-view
 .tour-form
 select {
@@ -12092,12 +12048,10 @@ select {
 
 
 /* Summit */
-body.summit
 #app-view
 .tour-form
 input:not([type="file"]),
 
-body.summit
 #app-view
 .tour-form
 select {
@@ -12136,11 +12090,9 @@ select {
 
 
 /* Dark */
-body.dark
 #app-view
 #geo-search-btn,
 
-body.dark
 #app-view
 #tour-image-pick-btn {
     background:
@@ -12152,11 +12104,9 @@ body.dark
 
 
 /* Green */
-body.green
 #app-view
 #geo-search-btn,
 
-body.green
 #app-view
 #tour-image-pick-btn {
     background:
@@ -12168,11 +12118,9 @@ body.green
 
 
 /* Summit */
-body.summit
 #app-view
 #geo-search-btn,
 
-body.summit
 #app-view
 #tour-image-pick-btn {
     background:
@@ -12430,7 +12378,6 @@ body.summit
 
 
 /* Dark */
-body.dark
 #app-view
 .tour-image-file-info {
     background:
@@ -12442,7 +12389,6 @@ body.dark
 
 
 /* Green */
-body.green
 #app-view
 .tour-image-file-info {
     background:
@@ -12454,7 +12400,6 @@ body.green
 
 
 /* Summit */
-body.summit
 #app-view
 .tour-image-file-info {
     background:
@@ -13655,19 +13600,16 @@ li[data-stat-type="tours"] {
 }
 
 
-body.dark
 .filter-section-nav-btn.active {
     color: #f1e3b0;
 }
 
 
-body.green
 .filter-section-nav-btn.active {
     color: #ffffff;
 }
 
 
-body.summit
 .filter-section-nav-btn.active {
     color: #f4f8f5;
 }
@@ -13940,19 +13882,16 @@ body.summit .tour-compare-result {
 }
 
 
-body.dark
 .tour-search-page-btn.active {
     color: #f1e3b0;
 }
 
 
-body.green
 .tour-search-page-btn.active {
     color: #ffffff;
 }
 
 
-body.summit
 .tour-search-page-btn.active {
     color: #f4f8f5;
 }
@@ -14360,7 +14299,6 @@ body.summit .backup-file-status {
    Themes
    ========================================================= */
 
-body.dark
 .filter-simple-card {
     background:
         rgba(255,255,255,0.055);
@@ -14370,7 +14308,6 @@ body.dark
 }
 
 
-body.green
 .filter-simple-card {
     background:
         rgba(255,255,255,0.055);
@@ -14380,7 +14317,6 @@ body.green
 }
 
 
-body.summit
 .filter-simple-card {
     background:
         rgba(22,29,25,0.64);
@@ -14596,7 +14532,6 @@ body.summit
 }
 
 
-body.dark
 #year-compare-inline
 #year-compare-canvas {
 
@@ -14608,7 +14543,6 @@ body.dark
 }
 
 
-body.green
 #year-compare-inline
 #year-compare-canvas {
 
@@ -15236,7 +15170,6 @@ li:active {
 
 
 /* Light */
-body:not(.dark):not(.green):not(.summit)
 #tour-view
 #planned-tours-list
 .tour-list
@@ -15253,7 +15186,6 @@ li {
 
 
 /* Dark */
-body.dark
 #tour-view
 #planned-tours-list
 .tour-list
@@ -15270,7 +15202,6 @@ li {
 
 
 /* Green */
-body.green
 #tour-view
 #planned-tours-list
 .tour-list
@@ -15287,7 +15218,6 @@ li {
 
 
 /* Summit */
-body.summit
 #tour-view
 #planned-tours-list
 .tour-list
@@ -15477,7 +15407,6 @@ li:active {
 
 
 /* Light – nur normale Gipfel */
-body:not(.dark):not(.green):not(.summit)
 #tour-view
 #planned-peaks-container
 .peak-tour-list
@@ -15494,7 +15423,6 @@ li:not(.peak-tier-1):not(.peak-tier-2):not(.peak-tier-3) {
 
 
 /* Dark – nur normale Gipfel */
-body.dark
 #tour-view
 #planned-peaks-container
 .peak-tour-list
@@ -15511,7 +15439,6 @@ li:not(.peak-tier-1):not(.peak-tier-2):not(.peak-tier-3) {
 
 
 /* Green – nur normale Gipfel */
-body.green
 #tour-view
 #planned-peaks-container
 .peak-tour-list
@@ -15528,7 +15455,6 @@ li:not(.peak-tier-1):not(.peak-tier-2):not(.peak-tier-3) {
 
 
 /* Summit – nur normale Gipfel */
-body.summit
 #tour-view
 #planned-peaks-container
 .peak-tour-list
@@ -15778,11 +15704,9 @@ input[type="checkbox"]:checked + span {
    Themes – nur neutrale Flächen
    --------------------------------------------------------- */
 
-body:not(.dark):not(.green):not(.summit)
 #tour-view
 #checklist-box
 .checklist-item,
-body:not(.dark):not(.green):not(.summit)
 #tour-view
 #checklist-box
 .checklist-mode-btn {
@@ -15794,11 +15718,9 @@ body:not(.dark):not(.green):not(.summit)
 }
 
 
-body.dark
 #tour-view
 #checklist-box
 .checklist-item,
-body.dark
 #tour-view
 #checklist-box
 .checklist-mode-btn {
@@ -15810,11 +15732,9 @@ body.dark
 }
 
 
-body.green
 #tour-view
 #checklist-box
 .checklist-item,
-body.green
 #tour-view
 #checklist-box
 .checklist-mode-btn {
@@ -15826,11 +15746,9 @@ body.green
 }
 
 
-body.summit
 #tour-view
 #checklist-box
 .checklist-item,
-body.summit
 #tour-view
 #checklist-box
 .checklist-mode-btn {
@@ -17729,13 +17647,10 @@ body.summit .modal-card.highlight-modal-gold {
 }
 
 /* Dark: kühle Nacht-/Navy-Flächen. Das dunkle Rot bleibt unverändert. */
-body.dark 
 
 /* Green: schwarzgrüne Flächen mit subtiler Wald-/Glaswirkung. */
-body.green 
 
 /* Summit: kühles Stein-/Schnee-/Eisgrau mit blauem Grundcharakter. */
-body.summit 
 
 /* Zahlen in der ganzen App ruhig und spaltenstabil darstellen. */
 body,
@@ -18574,13 +18489,6 @@ button.activity-summary-card.active {
    Dashboard / Stats / Karte: nur Optik, keine Größenänderung
    ========================================================= */
 
-:root 
-
-body.dark 
-
-body.green 
-
-body.summit 
 
 /*
  * Die drei Views verwenden dieselbe Jahressteuerung. Native Selects,
@@ -19471,7 +19379,6 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
    Gemeinsame Lesbarkeitsvariablen
    --------------------------------------------------------- */
 
-:root 
 
 /* ---------------------------------------------------------
    Light Theme
@@ -19511,15 +19418,10 @@ body:not(.dark):not(.green):not(.summit) .best-form-label {
     opacity: 1 !important;
 }
 
-body:not(.dark):not(.green):not(.summit)
 .tour-form input:not([type="checkbox"]),
-body:not(.dark):not(.green):not(.summit)
 .tour-form select,
-body:not(.dark):not(.green):not(.summit)
 textarea,
-body:not(.dark):not(.green):not(.summit)
 #filter-view input:not([type="checkbox"]),
-body:not(.dark):not(.green):not(.summit)
 #filter-view select {
     background: rgba(255,255,255,0.84) !important;
     color: #17251d !important;
@@ -19527,23 +19429,16 @@ body:not(.dark):not(.green):not(.summit)
     box-shadow: inset 0 0 0 1px rgba(255,255,255,0.55) !important;
 }
 
-body:not(.dark):not(.green):not(.summit)
 input::placeholder,
-body:not(.dark):not(.green):not(.summit)
 textarea::placeholder {
     color: #53665b !important;
     opacity: 1 !important;
 }
 
-body:not(.dark):not(.green):not(.summit)
 .stats-list li,
-body:not(.dark):not(.green):not(.summit)
 .peak-tour-list li,
-body:not(.dark):not(.green):not(.summit)
 .tour-search-result,
-body:not(.dark):not(.green):not(.summit)
 .chart-stat-tile,
-body:not(.dark):not(.green):not(.summit)
 .dash-stat-tile {
     background: rgba(255,255,255,0.78) !important;
     border-color: rgba(32,55,43,0.22) !important;
@@ -19553,7 +19448,6 @@ body:not(.dark):not(.green):not(.summit)
    Dark Theme
    --------------------------------------------------------- */
 
-body.dark 
 
 body.dark,
 body.dark .box,
@@ -19644,7 +19538,6 @@ body.dark .filter-section-nav-btn.active {
    Green Theme
    --------------------------------------------------------- */
 
-body.green 
 
 body.green,
 body.green .box,
@@ -19732,7 +19625,6 @@ body.green .filter-section-nav-btn.active {
    Summit Theme
    --------------------------------------------------------- */
 
-body.summit 
 
 body.summit,
 body.summit .box,
@@ -19921,7 +19813,6 @@ input:disabled {
    Der Seitenhintergrund bleibt unverändert.
    ========================================================= */
 
-body:not(.dark):not(.green):not(.summit) 
 
 /* ---------------------------------------------------------
    Große Flächen und Karten
@@ -19980,17 +19871,11 @@ body:not(.dark):not(.green):not(.summit) .stats-structure-burden-card {
    Formularfelder
    --------------------------------------------------------- */
 
-body:not(.dark):not(.green):not(.summit)
 .tour-form input:not([type="checkbox"]),
-body:not(.dark):not(.green):not(.summit)
 .tour-form select,
-body:not(.dark):not(.green):not(.summit)
 textarea,
-body:not(.dark):not(.green):not(.summit)
 #filter-view input:not([type="checkbox"]),
-body:not(.dark):not(.green):not(.summit)
 #filter-view select,
-body:not(.dark):not(.green):not(.summit)
 .mob-sel-btn {
     background:
     linear-gradient(
@@ -20004,9 +19889,7 @@ body:not(.dark):not(.green):not(.summit)
 }
 
 /* Platzhalter */
-body:not(.dark):not(.green):not(.summit)
 input::placeholder,
-body:not(.dark):not(.green):not(.summit)
 textarea::placeholder {
     color: #4c6f65 !important;
     opacity: 1 !important;
@@ -20036,9 +19919,7 @@ body:not(.dark):not(.green):not(.summit) .slope-toggle {
 }
 
 /* Jahresauswahl */
-body:not(.dark):not(.green):not(.summit)
 .dash-year-filter-wrap select,
-body:not(.dark):not(.green):not(.summit)
 .dash-year-filter-wrap .mob-sel-btn {
     background:
         linear-gradient(
@@ -20052,15 +19933,10 @@ body:not(.dark):not(.green):not(.summit)
 }
 
 /* Aktive Elemente etwas kräftiger */
-body:not(.dark):not(.green):not(.summit)
 .chart-tab.active,
-body:not(.dark):not(.green):not(.summit)
 .quick-filter-btn.active,
-body:not(.dark):not(.green):not(.summit)
 .filter-section-nav-btn.active,
-body:not(.dark):not(.green):not(.summit)
 #tour-view .plan-section-btn.active,
-body:not(.dark):not(.green):not(.summit)
 .toggle-btn.view-active {
     background:
     linear-gradient(
@@ -20077,13 +19953,9 @@ body:not(.dark):not(.green):not(.summit)
    Tabellen und mobile Karten
    --------------------------------------------------------- */
 
-body:not(.dark):not(.green):not(.summit)
 #overview-table tr,
-body:not(.dark):not(.green):not(.summit)
 #planned-table tr,
-body:not(.dark):not(.green):not(.summit)
 #saved-tours-list .tour-list li,
-body:not(.dark):not(.green):not(.summit)
 #planned-tours-list .tour-list li {
     background:
         linear-gradient(
@@ -20096,13 +19968,9 @@ body:not(.dark):not(.green):not(.summit)
 }
 
 /* Tabellenzellen */
-body:not(.dark):not(.green):not(.summit)
 #overview-table th,
-body:not(.dark):not(.green):not(.summit)
 #overview-table td,
-body:not(.dark):not(.green):not(.summit)
 #planned-table th,
-body:not(.dark):not(.green):not(.summit)
 #planned-table td {
     background: transparent !important;
     color: var(--light-surface-text) !important;
@@ -20112,7 +19980,6 @@ body:not(.dark):not(.green):not(.summit)
    Mobile Select-Bottom-Sheet
    --------------------------------------------------------- */
 
-body:not(.dark):not(.green):not(.summit)
 .mob-sel-sheet {
     background:
         linear-gradient(
@@ -20124,12 +19991,10 @@ body:not(.dark):not(.green):not(.summit)
     border-top-color: rgba(63, 119, 110, 0.30) !important;
 }
 
-body:not(.dark):not(.green):not(.summit)
 .mob-sel-hdr {
     border-bottom-color: rgba(63, 119, 110, 0.24) !important;
 }
 
-body:not(.dark):not(.green):not(.summit)
 .mob-sel-opt.selected {
     background: rgba(92, 166, 151, 0.18) !important;
     color: #17624e !important;
@@ -20139,11 +20004,8 @@ body:not(.dark):not(.green):not(.summit)
    Fokus
    --------------------------------------------------------- */
 
-body:not(.dark):not(.green):not(.summit)
 input:not([type="checkbox"]):focus,
-body:not(.dark):not(.green):not(.summit)
 select:focus,
-body:not(.dark):not(.green):not(.summit)
 textarea:focus {
     border-color: #4e9f91 !important;
     box-shadow:
@@ -20157,19 +20019,14 @@ textarea:focus {
    Seitenhintergrund bleibt unverändert
    ========================================================= */
 
-body:not(.dark):not(.green):not(.summit) 
 
 /* Stats-Wrapper-Flächen werden zentral in styles-overrides.css neutralisiert. */
 
 /* Falls die Navigation selbst keine eigene Fläche besitzt,
    bekommen die einzelnen Schaltflächen trotzdem Farbe. */
-body:not(.dark):not(.green):not(.summit)
 #chart-view .stats-section-btn,
-body:not(.dark):not(.green):not(.summit)
 #chart-view .stats-year-filter-wrap select,
-body:not(.dark):not(.green):not(.summit)
 #chart-view .stats-year-filter-wrap .mob-sel-btn,
-body:not(.dark):not(.green):not(.summit)
 #chart-view .stats-year-filter-wrap .dash-year-arrow-btn {
     background:
         linear-gradient(
@@ -20183,7 +20040,6 @@ body:not(.dark):not(.green):not(.summit)
 }
 
 /* Aktive Stats-Navigation deutlich hervorheben */
-body:not(.dark):not(.green):not(.summit)
 #chart-view .stats-section-btn.active {
     background:
         linear-gradient(
@@ -20203,13 +20059,9 @@ body:not(.dark):not(.green):not(.summit)
    --------------------------------------------------------- */
 
 /* Äußere Steuerbereiche der Karte */
-body:not(.dark):not(.green):not(.summit)
 #map-view .map-view-inner,
-body:not(.dark):not(.green):not(.summit)
 #map-view .map-controls,
-body:not(.dark):not(.green):not(.summit)
 #map-view .map-control-panel,
-body:not(.dark):not(.green):not(.summit)
 #map-view .map-sidebar {
     background:
         linear-gradient(
@@ -20222,11 +20074,8 @@ body:not(.dark):not(.green):not(.summit)
 }
 
 /* Karten-Jahresauswahl */
-body:not(.dark):not(.green):not(.summit)
 #map-view .map-year-filter-wrap,
-body:not(.dark):not(.green):not(.summit)
 #map-view #map-year-select,
-body:not(.dark):not(.green):not(.summit)
 #map-view .mob-sel-btn {
     background:
         linear-gradient(
@@ -20240,7 +20089,6 @@ body:not(.dark):not(.green):not(.summit)
 }
 
 /* Kartenmodus-Schalter */
-body:not(.dark):not(.green):not(.summit)
 #map-view .map-mode-toggle {
     background:
         linear-gradient(
@@ -20252,7 +20100,6 @@ body:not(.dark):not(.green):not(.summit)
     border-color: var(--light-nav-border) !important;
 }
 
-body:not(.dark):not(.green):not(.summit)
 #map-view .map-mode-btn {
     background:
         linear-gradient(
@@ -20265,7 +20112,6 @@ body:not(.dark):not(.green):not(.summit)
     border-color: var(--light-nav-border) !important;
 }
 
-body:not(.dark):not(.green):not(.summit)
 #map-view .map-mode-btn.active {
     background:
         linear-gradient(
@@ -20279,9 +20125,7 @@ body:not(.dark):not(.green):not(.summit)
 }
 
 /* Karten-Schnellfilter */
-body:not(.dark):not(.green):not(.summit)
 #map-view #map-quick-filters,
-body:not(.dark):not(.green):not(.summit)
 #map-view #map-quick-filters .quick-filter-btn {
     background:
         linear-gradient(
@@ -20294,7 +20138,6 @@ body:not(.dark):not(.green):not(.summit)
     border-color: var(--light-nav-border) !important;
 }
 
-body:not(.dark):not(.green):not(.summit)
 #map-view #map-quick-filters .quick-filter-btn.active {
     background:
         linear-gradient(
@@ -20307,7 +20150,6 @@ body:not(.dark):not(.green):not(.summit)
 }
 
 /* Karteninfo nicht weiß erscheinen lassen */
-body:not(.dark):not(.green):not(.summit)
 #map-view #map-info-bar {
     color: var(--light-nav-text) !important;
     opacity: 1 !important;
@@ -20317,17 +20159,11 @@ body:not(.dark):not(.green):not(.summit)
    Sicherung: sämtliche weißen Status- und Aktionsflächen
    --------------------------------------------------------- */
 
-body:not(.dark):not(.green):not(.summit)
 #backup-view .backup-card,
-body:not(.dark):not(.green):not(.summit)
 #backup-view .backup-status-panel,
-body:not(.dark):not(.green):not(.summit)
 #backup-view .backup-status-item,
-body:not(.dark):not(.green):not(.summit)
 #backup-view .backup-info-card,
-body:not(.dark):not(.green):not(.summit)
 #backup-view .backup-file-status,
-body:not(.dark):not(.green):not(.summit)
 #backup-view .backup-view-inner {
     background:
         linear-gradient(
@@ -20341,19 +20177,12 @@ body:not(.dark):not(.green):not(.summit)
 }
 
 /* Sicherungstexte */
-body:not(.dark):not(.green):not(.summit)
 #backup-view .backup-status-head,
-body:not(.dark):not(.green):not(.summit)
 #backup-view .backup-status-item span,
-body:not(.dark):not(.green):not(.summit)
 #backup-view .backup-status-item strong,
-body:not(.dark):not(.green):not(.summit)
 #backup-view .backup-info-title,
-body:not(.dark):not(.green):not(.summit)
 #backup-view .backup-info-text,
-body:not(.dark):not(.green):not(.summit)
 #backup-view .backup-section-title,
-body:not(.dark):not(.green):not(.summit)
 #backup-view .backup-file-status {
     color: var(--light-nav-text) !important;
     opacity: 1 !important;
@@ -20361,7 +20190,6 @@ body:not(.dark):not(.green):not(.summit)
 
 
 /* Trennlinie im Sicherungsbereich */
-body:not(.dark):not(.green):not(.summit)
 #backup-view .backup-divider {
     background:
         linear-gradient(
@@ -20381,9 +20209,7 @@ body:not(.dark):not(.green):not(.summit)
        and (orientation: landscape)
        and (pointer: coarse) {
 
-    body:not(.dark):not(.green):not(.summit)
     #chart-view .stats-section-switch,
-    body:not(.dark):not(.green):not(.summit)
     #chart-view .stats-year-filter-wrap {
         background:
             linear-gradient(
@@ -20395,11 +20221,8 @@ body:not(.dark):not(.green):not(.summit)
         border-color: var(--light-nav-border) !important;
     }
 
-    body:not(.dark):not(.green):not(.summit)
     #backup-view .backup-status-item,
-    body:not(.dark):not(.green):not(.summit)
     #backup-view .backup-info-card,
-    body:not(.dark):not(.green):not(.summit)
     #backup-view .backup-file-status {
         background:
             linear-gradient(
@@ -20437,9 +20260,7 @@ body:not(.dark):not(.green):not(.summit)
 }
 
 /* Light Theme: ebenfalls dunkles Rot */
-body:not(.dark):not(.green):not(.summit)
 #data-file-box #file-disconnect-btn,
-body:not(.dark):not(.green):not(.summit)
 #data-file-box .backup-disconnect-btn {
     background:
         linear-gradient(
@@ -20452,9 +20273,7 @@ body:not(.dark):not(.green):not(.summit)
 }
 
 /* Green Theme */
-body.green
 #data-file-box #file-disconnect-btn,
-body.green
 #data-file-box .backup-disconnect-btn {
     background:
         linear-gradient(
@@ -20467,9 +20286,7 @@ body.green
 }
 
 /* Summit Theme */
-body.summit
 #data-file-box #file-disconnect-btn,
-body.summit
 #data-file-box .backup-disconnect-btn {
     background:
         linear-gradient(
@@ -20482,9 +20299,7 @@ body.summit
 }
 
 /* Dark Theme */
-body.dark
 #data-file-box #file-disconnect-btn,
-body.dark
 #data-file-box .backup-disconnect-btn {
     background:
         linear-gradient(
