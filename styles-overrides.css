@@ -8044,3 +8044,94 @@ body.summit #dashboard-view {
         transition: none !important;
     }
 }
+
+
+/* =========================================================
+   PHASE 2 · LIGHT-THEME — warme alpine Stein- und Salbeiflächen
+   Am Referenzmotiv orientiert: mineralische Naturtöne statt weißer Standardkarten.
+   Text bleibt dunkel; das feste Alpin-Hintergrundmotiv und andere Themes bleiben unverändert.
+   ========================================================= */
+body:not(.dark):not(.green):not(.summit) {
+    --app-surface-strong: rgba(216, 205, 180, .84) !important;
+    --app-surface-card: rgba(202, 195, 168, .82) !important;
+    --app-surface-subtle: rgba(191, 190, 164, .80) !important;
+    --app-surface-border: rgba(59, 75, 54, .46) !important;
+    --app-text-primary: #17271d !important;
+    --app-text-muted: #24392b !important;
+
+    --glass-bg: rgba(204, 194, 166, .82) !important;
+    --glass-border: rgba(59, 75, 54, .46) !important;
+    --ui-card-bg: rgba(202, 195, 168, .82) !important;
+    --ui-card-bg-interactive: rgba(218, 207, 180, .90) !important;
+    --ui-card-border: rgba(59, 75, 54, .46) !important;
+    --ui-section-bg: rgba(191, 190, 164, .80) !important;
+    --year-control-bg: rgba(204, 194, 166, .82) !important;
+    --year-control-bg-hover: rgba(220, 209, 181, .92) !important;
+    --year-control-border: rgba(59, 75, 54, .46) !important;
+
+    --premium-surface-1: rgba(216, 205, 180, .84) !important;
+    --premium-surface-2: rgba(202, 195, 168, .82) !important;
+    --premium-border: rgba(59, 75, 54, .42) !important;
+    --premium-border-strong: rgba(59, 75, 54, .62) !important;
+    --premium-shadow-card: 0 10px 28px rgba(22, 31, 22, .22) !important;
+    --premium-shadow-hover: 0 14px 34px rgba(22, 31, 22, .30) !important;
+    --premium-accent-wash: rgba(173, 126, 43, .17) !important;
+
+    /* Kompatibilität mit den bestehenden Light-Komponenten und Bedienelementen. */
+    --light-surface-top: rgba(213, 201, 174, .82) !important;
+    --light-surface-bottom: rgba(180, 188, 155, .80) !important;
+    --light-surface-soft-top: rgba(203, 196, 168, .80) !important;
+    --light-surface-soft-bottom: rgba(166, 179, 145, .78) !important;
+    --light-surface-border: rgba(59, 75, 54, .48) !important;
+    --light-surface-text: #17271d !important;
+    --light-nav-top: rgba(205, 193, 164, .80) !important;
+    --light-nav-bottom: rgba(174, 184, 150, .78) !important;
+    --light-nav-soft-top: rgba(202, 195, 168, .80) !important;
+    --light-nav-soft-bottom: rgba(166, 179, 145, .78) !important;
+
+    --text-main: #17271d !important;
+    --text-soft: #24392b !important;
+    --text-color: #17271d !important;
+    --text-muted: #2c4032 !important;
+}
+
+/* Dashboard definiert eigene lokale Variablen; hier dieselbe Light-Palette erzwingen. */
+body:not(.dark):not(.green):not(.summit) #dashboard-view {
+    --premium-surface-1: rgba(216, 205, 180, .84) !important;
+    --premium-surface-2: rgba(202, 195, 168, .82) !important;
+    --premium-border: rgba(59, 75, 54, .42) !important;
+    --premium-border-strong: rgba(59, 75, 54, .62) !important;
+    --premium-shadow-card: 0 10px 26px rgba(22, 31, 22, .22) !important;
+    --premium-shadow-hover: 0 14px 32px rgba(22, 31, 22, .30) !important;
+    --premium-accent-wash: rgba(173, 126, 43, .17) !important;
+
+    --app-surface-strong: rgba(216, 205, 180, .84) !important;
+    --app-surface-card: rgba(202, 195, 168, .82) !important;
+    --app-surface-subtle: rgba(191, 190, 164, .80) !important;
+    --app-surface-border: rgba(59, 75, 54, .46) !important;
+    --app-text-primary: #17271d !important;
+    --app-text-muted: #24392b !important;
+    --text-main: #17271d !important;
+    --text-soft: #24392b !important;
+}
+
+/* Light-Textkontrast auf den warmen, halbtransparenten Flächen vereinheitlichen. */
+body:not(.dark):not(.green):not(.summit) .box-header,
+body:not(.dark):not(.green):not(.summit) .box-content,
+body:not(.dark):not(.green):not(.summit) .stats-label,
+body:not(.dark):not(.green):not(.summit) .stats-value,
+body:not(.dark):not(.green):not(.summit) .dash-stat-value,
+body:not(.dark):not(.green):not(.summit) .dash-stat-label,
+body:not(.dark):not(.green):not(.summit) .chart-title,
+body:not(.dark):not(.green):not(.summit) .modal-card {
+    color: var(--app-text-primary) !important;
+}
+
+body:not(.dark):not(.green):not(.summit) .text-muted,
+body:not(.dark):not(.green):not(.summit) .stats-analysis-subtitle,
+body:not(.dark):not(.green):not(.summit) .stats-structure-card-meta,
+body:not(.dark):not(.green):not(.summit) .development-metric-label,
+body:not(.dark):not(.green):not(.summit) .best-form-label {
+    color: var(--app-text-muted) !important;
+    opacity: 1;
+}
