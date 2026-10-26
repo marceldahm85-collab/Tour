@@ -1,11 +1,12 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Der PDF-Magazin-Renderer wird direkt über index.html geladen.
-const CACHE_NAME = 'bergtouren-cache-premium-alpine-v33';
+const CACHE_NAME = 'bergtouren-cache-premium-alpine-v34';
 
 const APP_SHELL = [
   './',
   './index.html',
   './app-main-20261019.js?v=5',
+  './theme-editor-surface-compat.js?v=1',
   './app-navigation-history.js?v=1',
   './bergwelt-badges-20261019.css?v=6',
   './bergwelt-badges-20261019.js?v=6',
