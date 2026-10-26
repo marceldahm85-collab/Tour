@@ -8103,3 +8103,136 @@ input[type="checkbox"]:checked,
     border-color: var(--app-surface-border) !important;
     color: var(--app-text-primary) !important;
 }
+
+
+/* Theme-Konsistenz: Akzentfarben und Jahresdropdowns für alle vier Themes. */
+/* Akzentfamilien: Dark = Dunkelrot, Green = Dunkelgrün, Summit = Dunkelblau, Light = Gold.
+   Zentrale Variablen statt view-spezifischer Einzelkorrekturen. */
+:root {
+    --accent: #b88620;
+    --accent-soft: rgba(184,134,32,.22);
+    --accent-gradient: linear-gradient(135deg, #e6bd58 0%, #a87517 100%);
+    --accent-text-color: #211b0d;
+    --year-control-bg: rgba(255,248,229,.22);
+    --year-control-bg-hover: rgba(255,239,190,.34);
+    --year-control-border: rgba(166,119,28,.42);
+    --year-control-shadow: 0 3px 10px rgba(67,55,30,.10), inset 0 1px 0 rgba(255,255,255,.28);
+    --year-option-bg: #f5eedb;
+    --year-option-text: #302719;
+}
+
+body.dark {
+    --accent: #7a0d0d;
+    --accent-soft: rgba(122,13,13,.28);
+    --accent-gradient: linear-gradient(135deg, #7a0d0d 0%, #4e0a0a 100%);
+    --accent-text-color: #fff5f5;
+    --year-control-bg: rgba(38,58,80,.22);
+    --year-control-bg-hover: rgba(50,73,99,.34);
+    --year-control-border: rgba(145,176,208,.20);
+    --year-control-shadow: 0 3px 11px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.045);
+    --year-option-bg: #172637;
+    --year-option-text: #e5edf6;
+}
+
+body.green {
+    --accent: #174c2d;
+    --accent-soft: rgba(23,76,45,.34);
+    --accent-gradient: linear-gradient(135deg, #1e6339 0%, #0b2d19 100%);
+    --accent-text-color: #f2faf5;
+    --year-control-bg: rgba(8,42,24,.52);
+    --year-control-bg-hover: rgba(12,58,33,.68);
+    --year-control-border: rgba(82,183,136,.30);
+    --year-control-shadow: 0 3px 12px rgba(0,8,4,.30), inset 0 1px 0 rgba(82,183,136,.07);
+    --year-option-bg: #071f12;
+    --year-option-text: #f2faf5;
+}
+
+body.summit {
+    --accent: #163e68;
+    --accent-soft: rgba(22,62,104,.32);
+    --accent-gradient: linear-gradient(135deg, #214f7d 0%, #0b2442 100%);
+    --accent-text-color: #f3f8ff;
+    --year-control-bg: rgba(24,49,72,.44);
+    --year-control-bg-hover: rgba(33,66,96,.58);
+    --year-control-border: rgba(145,190,224,.30);
+    --year-control-shadow: 0 3px 11px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.07);
+    --year-option-bg: #172b3b;
+    --year-option-text: #f1f7fc;
+}
+
+/* Dashboard, Stats und Karte verwenden identische Jahressteuerungen.
+   Light erhält explizite Farben statt geerbter dunkler/weißer Transparenzwerte. */
+body .dash-year-filter-wrap select,
+body .dash-year-filter-wrap .mob-sel-btn,
+body .dash-year-filter-wrap .dash-year-arrow-btn,
+body #chart-view .stats-year-filter-wrap select,
+body #chart-view .stats-year-filter-wrap .mob-sel-btn,
+body #chart-view .stats-year-filter-wrap .dash-year-arrow-btn,
+body #map-view .map-year-filter-wrap select,
+body #map-view .map-year-filter-wrap .mob-sel-btn,
+body #map-view .map-year-filter-wrap .dash-year-arrow-btn {
+    background: var(--year-control-bg) !important;
+    border: 1px solid var(--year-control-border) !important;
+    color: var(--text-main) !important;
+    box-shadow: var(--year-control-shadow) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+body .dash-year-filter-wrap select option,
+body #chart-view .stats-year-filter-wrap select option,
+body #map-view .map-year-filter-wrap select option {
+    background-color: var(--year-option-bg) !important;
+    color: var(--year-option-text) !important;
+}
+
+body .dash-year-filter-wrap select:focus,
+body .dash-year-filter-wrap .mob-sel-btn:focus-visible,
+body .dash-year-filter-wrap .dash-year-arrow-btn:focus-visible,
+body #chart-view .stats-year-filter-wrap select:focus,
+body #chart-view .stats-year-filter-wrap .mob-sel-btn:focus-visible,
+body #chart-view .stats-year-filter-wrap .dash-year-arrow-btn:focus-visible,
+body #map-view .map-year-filter-wrap select:focus,
+body #map-view .map-year-filter-wrap .mob-sel-btn:focus-visible,
+body #map-view .map-year-filter-wrap .dash-year-arrow-btn:focus-visible {
+    border-color: var(--accent) !important;
+    outline: none;
+    box-shadow: var(--year-control-shadow), 0 0 0 2px var(--accent-soft) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    body .dash-year-filter-wrap .mob-sel-btn:hover,
+    body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):hover,
+    body #chart-view .stats-year-filter-wrap .mob-sel-btn:hover,
+    body #chart-view .stats-year-filter-wrap .dash-year-arrow-btn:not(:disabled):hover,
+    body #map-view .map-year-filter-wrap .mob-sel-btn:hover,
+    body #map-view .map-year-filter-wrap .dash-year-arrow-btn:not(:disabled):hover {
+        background: var(--year-control-bg-hover) !important;
+        border-color: var(--accent) !important;
+    }
+}
+
+/* Hauptnavigation: gleicher Theme-Akzent wie die Dashboard-Basis, keine Änderung der Position. */
+body.dark .top-main-nav,
+body.green .top-main-nav,
+body.summit .top-main-nav {
+    border-color: var(--glass-border);
+}
+body.dark .top-main-nav .active,
+body.dark .top-main-nav button.active,
+body.dark .top-main-nav [aria-current="page"] {
+    background: var(--accent-gradient);
+    border-color: var(--accent);
+}
+body.green .top-main-nav .active,
+body.green .top-main-nav button.active,
+body.green .top-main-nav [aria-current="page"] {
+    background: var(--accent-gradient);
+    border-color: var(--accent);
+}
+body.summit .top-main-nav .active,
+body.summit .top-main-nav button.active,
+body.summit .top-main-nav [aria-current="page"] {
+    background: var(--accent-gradient);
+    border-color: var(--accent);
+}
