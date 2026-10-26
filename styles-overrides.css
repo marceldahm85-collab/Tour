@@ -7527,7 +7527,7 @@ body.summit {
     --year-option-text: var(--theme-palette-option-text) !important;
     --theme-color-scheme: var(--theme-palette-color-scheme) !important;
 
-    /* Legacy-Namen bleiben verfügbar, folgen aber stets der aktiven Palette. */
+    /* Historische --light-* Variablen bleiben als Kompatibilitätsalias für Gold erhalten. */
     --light-surface-top: var(--theme-palette-surface-strong) !important;
     --light-surface-bottom: var(--theme-palette-surface-subtle) !important;
     --light-surface-soft-top: var(--theme-palette-surface-card) !important;
