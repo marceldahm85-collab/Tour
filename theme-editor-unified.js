@@ -9,6 +9,7 @@
     const FONT_KEY = 'themeEditorFont_v1';
     const FONT_SIZE_KEY = 'themeEditorFontSize_v1';
     const HAPTIC_KEY = 'hapticFeedbackEnabled_v1';
+    const LEGACY_HAPTIC_KEY = 'bergTourenHaptics';
     const THEME_KEYS = ['light', 'dark', 'green', 'summit'];
     const DIRECTIONS = ['180deg', '90deg', '135deg', '45deg', 'radial'];
     const FONTS = ['android', 'system', 'rounded', 'serif', 'slab', 'mono', 'cursive', 'fantasy'];
@@ -164,13 +165,17 @@
         const oldFont = readStored(FONT_KEY);
         const oldFontSize = readStored(FONT_SIZE_KEY);
         const oldHaptics = readStored(HAPTIC_KEY);
+        const legacyHaptics = readStored(LEGACY_HAPTIC_KEY);
+        const migratedHaptics = typeof oldHaptics === 'boolean'
+            ? oldHaptics
+            : legacyHaptics === 'off' ? false : DEFAULTS.haptics;
 
         return normalizeSettings({
             accent: migratedAccent,
             radius: profile.radius,
             fontFamily: FONTS.includes(oldFont) ? oldFont : DEFAULTS.fontFamily,
             fontSize: oldFontSize,
-            haptics: typeof oldHaptics === 'boolean' ? oldHaptics : DEFAULTS.haptics,
+            haptics: migratedHaptics,
             gradientDirection: profile.gradientDirection,
             transition: profile.transition
         });
@@ -195,6 +200,7 @@
         writeStored(FONT_KEY, normalized.fontFamily);
         writeStored(FONT_SIZE_KEY, String(normalized.fontSize));
         writeStored(HAPTIC_KEY, normalized.haptics);
+        writeStored(LEGACY_HAPTIC_KEY, normalized.haptics ? 'on' : 'off');
         draft = normalized;
         return normalized;
     }
@@ -439,6 +445,7 @@
                 midColor: accentDark,
                 shadowIntensity: 50,
                 bgBrightness: 50,
+                appBrightness: 50,
                 radius: settings.radius,
                 blurIntensity: 10,
                 navTopColor: settings.accent,
@@ -566,6 +573,7 @@
                 next.haptics = draft.haptics;
                 writeStored(SETTINGS_KEY, next);
                 writeStored(HAPTIC_KEY, next.haptics);
+                writeStored(LEGACY_HAPTIC_KEY, next.haptics ? 'on' : 'off');
                 applyUnifiedSettings(false);
             });
         }
