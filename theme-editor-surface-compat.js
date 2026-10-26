@@ -4,40 +4,8 @@
 (function () {
     'use strict';
 
-    const PATCH_ID = '20261026-theme-editor-paused-for-premium-alpine';
+    const PATCH_ID = '20261026-theme-editor-translucent-surfaces';
     if (window.__themeEditorSurfaceCompat === PATCH_ID) return;
-
-    const isThemeEditorPaused = () =>
-        Boolean(document.body?.classList.contains('premium-alpine-editor-paused'));
-
-    function clearPausedThemeEditorStyles() {
-        const body = document.body;
-        if (body) {
-            [
-                '--text-main', '--text-soft', '--accent', '--accent-soft', '--accent-gradient', '--accent-text-color',
-                '--theme-surface-top', '--theme-surface-bottom', '--theme-surface-soft-top', '--theme-surface-soft-bottom',
-                '--theme-surface-border', '--theme-surface-text',
-                '--surface-gradient-top', '--surface-gradient-bottom', '--surface-gradient-soft-top', '--surface-gradient-soft-bottom',
-                '--surface-gradient-border', '--surface-gradient-text',
-                '--light-surface-top', '--light-surface-bottom', '--light-surface-soft-top', '--light-surface-soft-bottom',
-                '--light-surface-border', '--light-surface-text',
-                '--light-nav-top', '--light-nav-bottom', '--light-nav-soft-top', '--light-nav-soft-bottom',
-                '--light-nav-border', '--light-nav-text',
-                '--ui-card-bg', '--ui-card-bg-interactive', '--ui-section-bg', '--ui-card-border',
-                '--year-control-bg', '--year-control-bg-hover', '--year-control-border', '--year-option-bg', '--year-option-text',
-                '--glass-bg', '--glass-border'
-            ].forEach(name => body.style.removeProperty(name));
-        }
-
-        const liveStyle = document.getElementById('theme-editor-live-style');
-        if (liveStyle) liveStyle.textContent = '';
-
-        const brightnessLayer = document.getElementById('theme-editor-brightness-layer');
-        if (brightnessLayer) {
-            brightnessLayer.style.setProperty('opacity', '0', 'important');
-            brightnessLayer.setAttribute('aria-hidden', 'true');
-        }
-    }
 
     function softenThemeEditorSurfaces(cssText) {
         const capRgbaAlpha = (text, maxAlpha) => text.replace(
@@ -121,10 +89,6 @@
     const originalApplySettings = window.applyThemeEditorSettingsToDom;
     if (typeof originalApplySettings === 'function' && !originalApplySettings.__alpineSurfaceCompat) {
         const compatibleApplySettings = function () {
-            if (isThemeEditorPaused()) {
-                clearPausedThemeEditorStyles();
-                return;
-            }
             const result = originalApplySettings.apply(this, arguments);
             const liveStyle = document.getElementById('theme-editor-live-style');
             if (liveStyle) {
@@ -139,15 +103,11 @@
 
     // Die erste Theme-Anwendung kann vor dem Laden dieses Kompatibilitätsmoduls
     // erfolgt sein. Direkt den bereits erzeugten Live-Style mit angleichen.
-    if (isThemeEditorPaused()) {
-        clearPausedThemeEditorStyles();
-    } else {
-        const existingLiveStyle = document.getElementById('theme-editor-live-style');
-        if (existingLiveStyle) {
-            existingLiveStyle.textContent = softenThemeEditorSurfaces(existingLiveStyle.textContent);
-        }
-        softenThemeEditorInlineVariables();
+    const existingLiveStyle = document.getElementById('theme-editor-live-style');
+    if (existingLiveStyle) {
+        existingLiveStyle.textContent = softenThemeEditorSurfaces(existingLiveStyle.textContent);
     }
+    softenThemeEditorInlineVariables();
 
     window.__themeEditorSurfaceCompat = PATCH_ID;
 })();
