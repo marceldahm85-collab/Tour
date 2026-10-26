@@ -341,7 +341,16 @@
         const soft = rgba(accent, 0.24);
         const border = 'color-mix(in srgb, ' + accent + ' 38%, rgba(225,232,242,.14))';
         const accentGradient = 'linear-gradient(135deg, ' + accent + ' 0%, ' + accentDark + ' 100%)';
-        const accentText = luminance(accent) > 0.48 ? '#171b22' : '#f8fafc';
+        const accentLuminance = luminance(accent);
+        const darkText = '#171209';
+        const lightText = '#f8fafc';
+        const darkTextLuminance = luminance(darkText);
+        const lightTextLuminance = luminance(lightText);
+        const darkTextContrast = (Math.max(accentLuminance, darkTextLuminance) + 0.05) /
+            (Math.min(accentLuminance, darkTextLuminance) + 0.05);
+        const lightTextContrast = (Math.max(accentLuminance, lightTextLuminance) + 0.05) /
+            (Math.min(accentLuminance, lightTextLuminance) + 0.05);
+        const accentText = darkTextContrast >= lightTextContrast ? darkText : lightText;
         const root = document.documentElement;
         const body = document.body;
 
