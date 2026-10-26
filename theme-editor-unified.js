@@ -43,8 +43,6 @@
     let draft = null;
     let editorInitialized = false;
     let updateScheduled = false;
-    let lastAppliedFontFamily = null;
-    let lastAppliedFontSize = null;
 
     function parseStoredValue(value) {
         if (typeof value !== 'string') return value;
@@ -383,16 +381,6 @@
         if (!style.parentNode) document.head.appendChild(style);
 
         // Bestehende Farb-/Formelrenderer nutzen weiterhin diese Funktionen.
-        if (lastAppliedFontFamily !== settings.fontFamily &&
-            typeof window.applyThemeEditorFont === 'function') {
-            window.applyThemeEditorFont(settings.fontFamily, false);
-            lastAppliedFontFamily = settings.fontFamily;
-        }
-        if (lastAppliedFontSize !== settings.fontSize &&
-            typeof window.applyThemeEditorFontSize === 'function') {
-            window.applyThemeEditorFontSize(settings.fontSize, false);
-            lastAppliedFontSize = settings.fontSize;
-        }
     }
 
     function applyUnifiedSettings(refreshVisuals) {
@@ -592,6 +580,13 @@
             persistSettings(draft);
             fillForm();
             applyUnifiedSettings(true);
+            // Die vorhandene Schriftlogik erst bei einer bewussten Nutzeraktion anwenden.
+            if (typeof window.applyThemeEditorFont === 'function') {
+                window.applyThemeEditorFont(draft.fontFamily, false);
+            }
+            if (typeof window.applyThemeEditorFontSize === 'function') {
+                window.applyThemeEditorFontSize(draft.fontSize, false);
+            }
             showToastSafe('Editor auf die Grundeinstellungen zurückgesetzt ✓', 'info');
         });
 
@@ -665,7 +660,7 @@
         };
     }
 
-    // Schriftart/-größe werden auch ohne das Öffnen des Editors angewendet.
-    // Beim App-Neustart werden sie später vom vorhandenen Storage-Init bestätigt.
+    // Farben und Oberflächen sofort vereinheitlichen. Schriftart/-größe werden
+    // nach dem vorhandenen Storage-Init und der Font-Observer-Initialisierung angewendet.
     applyUnifiedSettings(false);
 })();
