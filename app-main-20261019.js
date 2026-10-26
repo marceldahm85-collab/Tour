@@ -22914,7 +22914,7 @@ function buildThemeEditorLiveCss() {
         }, settings.intensity);
         const navBorder = themeEditorHexToRgba(settings.accent, settings.borderOpacity);
         const navShadow = themeEditorBuildNavigationShadow(settings.shadowIntensity);
-        css += `${prefix} .top-main-nav { background: ${navGradient} !important; border-color: ${navBorder} !important; box-shadow: ${navShadow} !important; backdrop-filter: blur(${blur}px) !important; -webkit-backdrop-filter: blur(${blur}px) !important; }\\n`;
+        css += `${prefix} .top-main-nav { background: ${navGradient} !important; border-color: ${navBorder} !important; box-shadow: ${navShadow} !important; backdrop-filter: blur(${blur}px) !important; -webkit-backdrop-filter: blur(${blur}px) !important; }\n`;
 
         /* Den durchgehenden Balken nicht auf .accordion-header legen. */
         css += `@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {\n`;
