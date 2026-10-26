@@ -122,7 +122,7 @@
 
 
 <link rel="stylesheet" href="./styles.css?v=4">
-<link rel="stylesheet" href="./styles-overrides.css?v=59">
+<link rel="stylesheet" href="./styles-overrides.css?v=61">
 
 </head>
 <body>
@@ -131,7 +131,7 @@
 /* Sofortige Theme-Wiederherstellung für mobile/PWA-Reloads.
    Dieser Code läuft noch vor DOMContentLoaded und vor IndexedDB. */
 (function () {
-    const validThemes = ['light', 'dark', 'green', 'summit'];
+    const validThemes = ['gold', 'dark', 'green', 'summit'];
     let saved = null;
 
     try {
@@ -140,7 +140,7 @@
         console.warn('[Theme Bootstrap] localStorage-Lesen fehlgeschlagen:', error);
     }
 
-    if (!validThemes.includes(saved)) {
+    if (!validThemes.includes(saved) && saved !== 'light') {
         try {
             saved = sessionStorage.getItem('tourtracker-theme');
         } catch (error) {
@@ -148,9 +148,11 @@
         }
     }
 
-    if (!validThemes.includes(saved)) return;
+    // Alte Installationen speichern das Goldtheme noch unter "light".
+    if (saved === 'light' || !validThemes.includes(saved)) saved = 'gold';
 
-    document.body.classList.remove('dark', 'green', 'summit');
+    document.body.classList.remove('gold', 'dark', 'green', 'summit');
+    if (saved === 'gold') document.body.classList.add('gold');
     if (saved === 'dark') document.body.classList.add('dark');
     if (saved === 'green') document.body.classList.add('green');
     if (saved === 'summit') document.body.classList.add('summit');
@@ -341,8 +343,8 @@
                 <div class="more-menu-divider"></div>
 
                 <div class="more-theme-list" role="group" aria-label="Theme auswählen">
-                    <button type="button" class="more-theme-option" data-theme-choice="light" aria-pressed="false">
-                        <span class="more-theme-icon">☀️</span><span>Hell</span><span class="more-theme-check">✓</span>
+                    <button type="button" class="more-theme-option" data-theme-choice="gold" aria-pressed="false">
+                        <span class="more-theme-icon">🟡</span><span>Gold</span><span class="more-theme-check">✓</span>
                     </button>
                     <button type="button" class="more-theme-option" data-theme-choice="dark" aria-pressed="false">
                         <span class="more-theme-icon">🌙</span><span>Dunkel</span><span class="more-theme-check">✓</span>
@@ -2406,7 +2408,7 @@
 
             <div class="theme-editor-top">
                 <div class="compare-mode-toggle" id="theme-editor-tabs" role="group" aria-label="Theme auswählen">
-                    <button type="button" class="compare-mode-btn active" data-theme-editor-tab="light">☀️ Hell</button>
+                    <button type="button" class="compare-mode-btn active" data-theme-editor-tab="light">🟡 Gold</button>
                     <button type="button" class="compare-mode-btn" data-theme-editor-tab="dark">🌙 Dunkel</button>
                     <button type="button" class="compare-mode-btn" data-theme-editor-tab="green">🌿 Grün</button>
                     <button type="button" class="compare-mode-btn" data-theme-editor-tab="summit">⛰️ Summit</button>
@@ -2661,7 +2663,7 @@
     </div>
 </div>
 
-<script src="./app-main-20261019.js?v=5" defer></script>
+<script src="./app-main-20261019.js?v=8" defer></script>
 <script src="./theme-editor-surface-compat.js?v=4" defer></script>
 <script src="./app-navigation-history.js?v=1" defer></script>
 

@@ -2213,7 +2213,7 @@ async function buildAppDataPayload() {
                 ? 'green'
                 : document.body.classList.contains('summit')
                 ? 'summit'
-                : 'light',
+                : 'gold',
             themeEditorSettings: appStorage.get(THEME_EDITOR_KEY) || null,
             font: getThemeEditorFontName(),
             fontSize: getThemeEditorFontSizeScale()
@@ -2256,41 +2256,28 @@ function applyAppDataPayload(payload) {
     if (payload.meta?.theme) {
 
     const ICONS = {
-        light: '☀️',
+        gold: '🟡',
         dark: '🌙',
         green: '🌿',
         summit: '⛰️'
     };
 
-    const validThemes = [
-        'light',
-        'dark',
-        'green',
-        'summit'
-    ];
-
-    let theme =
-        payload.meta.theme;
+    const validThemes = ['gold', 'dark', 'green', 'summit'];
+    let theme = payload.meta.theme === 'light' ? 'gold' : payload.meta.theme;
 
     if (!validThemes.includes(theme)) {
-        theme = 'light';
+        theme = 'gold';
     }
 
-    document.body.classList.remove(
-        'dark',
-        'green',
-        'summit'
-    );
+    document.body.classList.remove('gold', 'dark', 'green', 'summit');
 
-    if (theme === 'dark') {
+    if (theme === 'gold') {
+        document.body.classList.add('gold');
+    } else if (theme === 'dark') {
         document.body.classList.add('dark');
-    }
-
-    if (theme === 'green') {
+    } else if (theme === 'green') {
         document.body.classList.add('green');
-    }
-
-    if (theme === 'summit') {
+    } else if (theme === 'summit') {
         document.body.classList.add('summit');
     }
 
@@ -2586,8 +2573,9 @@ async function restoreLinkedFileHandleOnStartup() {
             try {
                 const file = await handle.getFile();
                 const payload = JSON.parse(await file.text());
-                const fileTheme = payload?.meta?.theme;
-                const validThemes = ['light', 'dark', 'green', 'summit'];
+                const importedTheme = payload?.meta?.theme;
+                const fileTheme = importedTheme === 'light' ? 'gold' : importedTheme;
+                const validThemes = ['gold', 'dark', 'green', 'summit'];
 
                 if (payload?.meta?.themeEditorSettings) {
                     appStorage.set(THEME_EDITOR_KEY, payload.meta.themeEditorSettings);
@@ -2620,9 +2608,11 @@ async function restoreLinkedFileHandleOnStartup() {
                 }
 
                 if (validThemes.includes(fileTheme)) {
-                    document.body.classList.remove('dark', 'green', 'summit');
+                    document.body.classList.remove('gold', 'dark', 'green', 'summit');
 
-                    if (fileTheme === 'dark') {
+                    if (fileTheme === 'gold') {
+                        document.body.classList.add('gold');
+                    } else if (fileTheme === 'dark') {
                         document.body.classList.add('dark');
                     } else if (fileTheme === 'green') {
                         document.body.classList.add('green');
@@ -2645,7 +2635,7 @@ async function restoreLinkedFileHandleOnStartup() {
                     }
 
                     const icons = {
-                        light: '☀️',
+                        gold: '🟡',
                         dark: '🌙',
                         green: '🌿',
                         summit: '⛰️'
@@ -22166,7 +22156,8 @@ const THEME_EDITOR_FONT_PRESETS = {
 const THEME_EDITOR_KEY = 'themeEditorSettings_v1';
 
 const defaultThemeEditorSettings = {
-    light:  { topColor: '#9de3f9', bottomColor: '#9ad8b6', transition: 55, intensity: 90, textMain: '#17251d', textSoft: '#405248', accent: '#0f8a6c', accent2: '#e0a52e', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#c9e8d8', shadowIntensity: 50, bgBrightness: 50, appBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#9de3f9', navBottomColor: '#9ad8b6', chartColorStart: '#6fbf73', chartColorMid: '#a8d86a', chartColorEnd: '#f9d77e' },
+    // Legacy settings key "light" maps to the user-facing Gold theme.
+    light:  { topColor: '#191e27', bottomColor: '#0d151f', transition: 55, intensity: 82, textMain: '#f3f7fb', textSoft: '#cbd5df', accent: '#ad7d12', accent2: '#6e4e0b', borderOpacity: 36, gradientDirection: '180deg', midEnabled: false, midColor: '#151c24', shadowIntensity: 50, bgBrightness: 50, appBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#191e27', navBottomColor: '#0d151f', chartColorStart: '#241a06', chartColorMid: '#6e4e0b', chartColorEnd: '#e3c45f' },
     dark:   { topColor: '#912a34', bottomColor: '#0a121d', transition: 55, intensity: 88, textMain: '#f3f7fb', textSoft: '#c2cfdb', accent: '#d45c5c', accent2: '#4e0a0a', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#4a1c22', shadowIntensity: 50, bgBrightness: 50, appBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#912a34', navBottomColor: '#0a121d', chartColorStart: '#000000', chartColorMid: '#3b0000', chartColorEnd: '#7a0d0d' },
     green:  { topColor: '#26a352', bottomColor: '#010c07', transition: 55, intensity: 88, textMain: '#f2fff7', textSoft: '#c9e5d4', accent: '#52b788', accent2: '#2d6a4f', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#0e3d20', shadowIntensity: 50, bgBrightness: 50, appBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#26a352', navBottomColor: '#010c07', chartColorStart: '#0d2418', chartColorMid: '#1b4332', chartColorEnd: '#52b788' },
     summit: { topColor: '#3aa0ff', bottomColor: '#161d22', transition: 55, intensity: 88, textMain: '#f4faff', textSoft: '#d0dce4', accent: '#63b7ff', accent2: '#176fc1', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#1f4560', shadowIntensity: 50, bgBrightness: 50, appBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#3aa0ff', navBottomColor: '#161d22', chartColorStart: '#111513', chartColorMid: '#454e49', chartColorEnd: '#63b7ff' }
@@ -22909,6 +22900,7 @@ function themeEditorGetActiveTheme() {
     if (document.body.classList.contains('dark')) return 'dark';
     if (document.body.classList.contains('green')) return 'green';
     if (document.body.classList.contains('summit')) return 'summit';
+    // The Theme Editor's legacy "light" settings bucket is retained for Gold.
     return 'light';
 }
 
@@ -23805,14 +23797,14 @@ function initTheme() {
     );
 
     const THEMES = [
-        'light',
+        'gold',
         'dark',
         'green',
         'summit'
     ];
 
     const ICONS = {
-        light: '☀️',
+        gold: '🟡',
         dark: '🌙',
         green: '🌿',
         summit: '⛰️'
@@ -23853,25 +23845,26 @@ if (
          * Sicherheitsfallback für alte oder ungültige
          * gespeicherte Theme-Werte.
          */
+        // Preserve existing installations that still store "light".
+        if (theme === 'light') theme = 'gold';
         if (!THEMES.includes(theme)) {
-            theme = 'light';
+            theme = 'gold';
         }
 
         document.body.classList.remove(
+            'gold',
             'dark',
             'green',
             'summit'
         );
 
-        if (theme === 'dark') {
+        if (theme === 'gold') {
+            document.body.classList.add('gold');
+        } else if (theme === 'dark') {
             document.body.classList.add('dark');
-        }
-
-        if (theme === 'green') {
+        } else if (theme === 'green') {
             document.body.classList.add('green');
-        }
-
-        if (theme === 'summit') {
+        } else if (theme === 'summit') {
             document.body.classList.add('summit');
         }
 
@@ -23925,7 +23918,7 @@ if (
                 return null;
             }
         })() ||
-        'light';
+        'gold';
 
     applyTheme(saved);
 
@@ -23940,10 +23933,10 @@ if (
                 return null;
             }
         })() ||
-        'light';
+        'gold';
 
     const currentIndex =
-        THEMES.indexOf(current);
+        THEMES.indexOf(current === 'light' ? 'gold' : current);
 
     const safeIndex =
         currentIndex >= 0 ? currentIndex : 0;
@@ -34987,14 +34980,15 @@ const endHold = () => {
 }
 
 function getWrappedThemeColors() {
-    const theme = themeEditorGetActiveTheme(); // ← statt document.body.dataset.theme
+    const legacyThemeKey = themeEditorGetActiveTheme();
+    const theme = legacyThemeKey === 'light' ? 'gold' : legacyThemeKey;
     const palettes = {
-        light:  { bg1: '#4facfe', bg2: '#43e97b', text: '#0b2447', accent: '#ffffff' },
+        gold:   { bg1: '#191e27', bg2: '#0d151f', text: '#f3f7fb', accent: '#ad7d12' },
         dark:   { bg1: '#8e0e00', bg2: '#1f1c2c', text: '#ffffff', accent: '#ff6b6b' },
         green:  { bg1: '#11998e', bg2: '#0f0f0f', text: '#ffffff', accent: '#38ef7d' },
         summit: { bg1: '#2980b9', bg2: '#2c3e50', text: '#ffffff', accent: '#f5f5f5' }
     };
-    return palettes[theme] || palettes.light;
+    return palettes[theme] || palettes.gold;
 }
 
 function drawWrappedBackground(ctx, w, h, photoImg) {
