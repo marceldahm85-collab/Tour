@@ -20576,7 +20576,7 @@ return `
                     <div class="dash-ms-info">
                         <span class="dash-ms-label">${LABELS[type]}</span>
                         <span class="dash-ms-current${data.hasData ? '' : ' is-empty'}">${data.hasData
-                            ? (type === 'dist' ? Number(data.total).toFixed(1).replace('.', ',') : Math.round(data.total).toLocaleString('de-AT')) + ' ' + unit + ' erreicht'
+                            ? (type === 'dist' ? Number(data.total).toFixed(1).replace('.', ',') : Math.round(data.total).toLocaleString('de-AT')) + ' ' + unit
                             : 'Noch keine Messwerte'}</span>
                     </div>
                     <div class="dash-ms-progress-text">${progressText}</div>
