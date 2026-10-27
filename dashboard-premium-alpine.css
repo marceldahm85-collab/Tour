@@ -61,8 +61,8 @@
     height: 100%;
     object-fit: cover;
     object-position: 68% center;
-    opacity: .76;
-    filter: saturate(.9) contrast(1.08);
+    opacity: .92;
+    filter: saturate(1.12) contrast(1.22) brightness(1.10);
 }
 
 #dashboard-view #dash-milestones-section .dash-ms-watermark::before {
@@ -73,10 +73,10 @@
     background:
         linear-gradient(90deg,
             rgba(2,9,12,.92) 0%,
-            rgba(2,9,12,.82) 34%,
-            rgba(2,9,12,.58) 68%,
-            rgba(2,9,12,.40) 100%),
-        linear-gradient(0deg, rgba(2,8,10,.48), transparent 74%),
+            rgba(2,9,12,.72) 34%,
+            rgba(2,9,12,.38) 68%,
+            rgba(2,9,12,.20) 100%),
+        linear-gradient(0deg, rgba(2,8,10,.28), transparent 74%),
         radial-gradient(
             ellipse at 78% 22%,
             color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 30%, transparent),
@@ -187,14 +187,14 @@
     }
 
     #dashboard-view #dash-milestones-section .dash-ms-watermark > img {
-        opacity: .62;
+        opacity: .86;
         object-position: 72% center;
     }
 
     #dashboard-view #dash-milestones-section .dash-ms-watermark::before {
         background:
-            linear-gradient(90deg, rgba(2,9,12,.93) 0%, rgba(2,9,12,.82) 44%, rgba(2,9,12,.50) 100%),
-            linear-gradient(0deg, rgba(2,8,10,.48), transparent 74%),
+            linear-gradient(90deg, rgba(2,9,12,.93) 0%, rgba(2,9,12,.72) 44%, rgba(2,9,12,.30) 100%),
+            linear-gradient(0deg, rgba(2,8,10,.24), transparent 74%),
             radial-gradient(ellipse at 78% 22%, color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 28%, transparent), transparent 62%);
     }
 }
@@ -220,7 +220,7 @@
     }
 
     #dashboard-view #dash-milestones-section .dash-ms-watermark > img {
-        opacity: .58;
+        opacity: .80;
     }
 }
 
