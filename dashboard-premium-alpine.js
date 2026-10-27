@@ -6,11 +6,11 @@
     const SECTION_SELECTOR = '#dash-milestones-section';
     /* Individuelle, bildbasierte Alpenmotive. */
     const ICON_ASSETS = {
-        asc: './assets/milestones/milestone-asc.svg?v=2',
-        dist: './assets/milestones/milestone-dist.svg?v=2',
-        peaks: './assets/milestones/milestone-peaks.svg?v=2',
-        steps: './assets/milestones/milestone-steps.svg?v=2',
-        time: './assets/milestones/milestone-time.svg?v=2'
+        asc: './assets/milestones/milestone-asc.svg?v=3',
+        dist: './assets/milestones/milestone-dist.svg?v=3',
+        peaks: './assets/milestones/milestone-peaks.svg?v=3',
+        steps: './assets/milestones/milestone-steps.svg?v=3',
+        time: './assets/milestones/milestone-time.svg?v=3'
     };
     /* Jedes Dashboard-Ziel bekommt ein eigenes Panorama. */
     const BACKDROP_ASSETS = {
