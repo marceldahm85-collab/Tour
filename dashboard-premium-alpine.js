@@ -103,12 +103,14 @@
             icon.setAttribute('aria-hidden', 'true');
         }
 
-        /* Der Fortschrittsbalken sitzt im Textbereich rechts neben dem Motiv.
-           Die vorhandene Leiste und ihr berechneter Wert bleiben dieselben DOM-Elemente. */
-        const info = tile.querySelector('.dash-ms-info');
+        /* Die Fortschrittsspur richtet sich an der gesamten Meilensteinkachel aus,
+           nicht an der variablen Textbreite. Nur die farbige Füllung bleibt datenabhängig. */
+        const top = tile.querySelector('.dash-ms-top');
         const progressWrap = tile.querySelector('.dash-ms-progress-wrap');
-        if (info && progressWrap && progressWrap.parentElement !== info) {
-            info.appendChild(progressWrap);
+        if (top && progressWrap) {
+            if (progressWrap.parentElement !== tile || top.nextElementSibling !== progressWrap) {
+                tile.insertBefore(progressWrap, top.nextSibling);
+            }
         }
 
         if (!tile.querySelector('.dash-ms-watermark')) {
