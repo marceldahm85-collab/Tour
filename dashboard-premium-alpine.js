@@ -46,6 +46,14 @@
             icon.setAttribute('aria-hidden', 'true');
         }
 
+        /* Der Fortschrittsbalken sitzt im Textbereich rechts neben dem Motiv.
+           Die vorhandene Leiste und ihr berechneter Wert bleiben dieselben DOM-Elemente. */
+        const info = tile.querySelector('.dash-ms-info');
+        const progressWrap = tile.querySelector('.dash-ms-progress-wrap');
+        if (info && progressWrap && progressWrap.parentElement !== info) {
+            info.appendChild(progressWrap);
+        }
+
         if (!tile.querySelector('.dash-ms-watermark')) {
             const watermark = document.createElement('span');
             watermark.className = 'dash-ms-watermark';
@@ -54,6 +62,29 @@
                 '" alt="" aria-hidden="true" decoding="async" draggable="false">';
             tile.insertBefore(watermark, tile.firstChild);
         }
+    }
+
+    function trimRecentTours(section) {
+        if (!section) return;
+        const list = section.querySelector('.dash-tour-list');
+        if (!list) return;
+
+        const items = list.querySelectorAll(':scope > .dash-recent-item');
+        items.forEach((item, index) => {
+            if (index >= 3) item.remove();
+        });
+    }
+
+    function enhanceRecentTours() {
+        const section = document.querySelector('#dash-recent-section');
+        if (!section) return;
+
+        trimRecentTours(section);
+        if (section.dataset.premiumAlpineRecentObserver === 'true') return;
+
+        section.dataset.premiumAlpineRecentObserver = 'true';
+        const observer = new MutationObserver(() => trimRecentTours(section));
+        observer.observe(section, { childList: true, subtree: true });
     }
 
     function enhanceDashboardMilestones() {
@@ -65,15 +96,13 @@
 
     function init() {
         const section = document.querySelector(SECTION_SELECTOR);
-        if (!section || section.dataset.premiumAlpineObserver === 'true') {
-            enhanceDashboardMilestones();
-            return;
+        if (section && section.dataset.premiumAlpineObserver !== 'true') {
+            section.dataset.premiumAlpineObserver = 'true';
+            const observer = new MutationObserver(enhanceDashboardMilestones);
+            observer.observe(section, { childList: true, subtree: true });
         }
-
-        section.dataset.premiumAlpineObserver = 'true';
-        const observer = new MutationObserver(enhanceDashboardMilestones);
-        observer.observe(section, { childList: true, subtree: true });
         enhanceDashboardMilestones();
+        enhanceRecentTours();
     }
 
     if (document.readyState === 'loading') {
