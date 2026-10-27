@@ -8228,7 +8228,6 @@ body.summit .top-main-nav [aria-current="page"] {
     gap: 5px !important;
     width: 100% !important;
     max-width: 430px !important;
-    margin: 8px auto 0 !important;
     padding: 0 !important;
     border: 0 !important;
     border-radius: 0 !important;
@@ -8274,7 +8273,7 @@ body.summit .top-main-nav [aria-current="page"] {
     transform: scale(0.97);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px) and (orientation: portrait) {
     :is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold)) #chart-view > .stats-section-switch {
         gap: 4px !important;
         margin-top: 6px !important;
