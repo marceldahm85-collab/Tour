@@ -263,46 +263,57 @@
 }
 
 
-/* Dashboard-Statistikkacheln: dieselbe feine Alpine-Line-Art wie die Abschnittssymbole. */
+/* Premium-Alpine-Line-Art: Akzentfarbe explizit aus dem Editor übernehmen.
+   Nicht --theme-palette-accent verwenden: das kann je nach Theme hell/weiß sein. */
 #dashboard-view .dash-stat-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex: 0 0 20px;
-    width: 20px;
-    height: 20px;
-    color: var(--theme-palette-accent, var(--accent, #ad7d12));
+    flex: 0 0 22px;
+    width: 22px;
+    height: 22px;
+    color: var(--accent, #D5A64C) !important;
     font-size: 0 !important;
     line-height: 1;
-    opacity: .98;
+    opacity: 1;
     filter:
-        drop-shadow(0 1px 0 color-mix(in srgb, white 18%, transparent))
-        drop-shadow(0 2px 3px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 24%, transparent));
+        drop-shadow(0 0 1px color-mix(in srgb, var(--accent, #D5A64C) 45%, transparent))
+        drop-shadow(0 2px 4px color-mix(in srgb, var(--accent, #D5A64C) 28%, transparent));
 }
 
 #dashboard-view .dash-stat-icon svg {
     display: block;
     flex: 0 0 auto;
-    width: 20px;
-    height: 20px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.65;
+    width: 22px;
+    height: 22px;
+    fill: none !important;
+    stroke: var(--accent, #D5A64C) !important;
+    stroke-width: 1.7;
     stroke-linecap: round;
     stroke-linejoin: round;
     overflow: visible;
 }
 
+#dashboard-view .dash-stat-icon svg .icon-accent-fill {
+    fill: color-mix(in srgb, var(--accent, #D5A64C) 24%, transparent);
+    stroke: var(--accent, #D5A64C);
+}
+
+#dashboard-view .dash-stat-icon svg .icon-accent-line {
+    stroke: color-mix(in srgb, var(--accent, #D5A64C) 78%, white);
+    stroke-width: 1.35;
+}
+
 @media (max-width: 768px), (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
     #dashboard-view .dash-stat-icon {
-        flex-basis: 16px;
-        width: 16px;
-        height: 16px;
+        flex-basis: 18px;
+        width: 18px;
+        height: 18px;
     }
 
     #dashboard-view .dash-stat-icon svg {
-        width: 16px;
-        height: 16px;
+        width: 18px;
+        height: 18px;
     }
 }
 
