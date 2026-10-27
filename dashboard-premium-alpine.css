@@ -4,13 +4,15 @@
    Ausschließlich Darstellung; die bestehende Meilensteinlogik bleibt aktiv.
    ========================================================= */
 
-#dashboard-view #dash-milestones-section .dash-section-title {
+#dashboard-view #dash-milestones-section .dash-section-title,
+#dashboard-view #dash-recent-section .dash-section-title {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-#dashboard-view #dash-milestones-section .dash-section-mountain-mark {
+#dashboard-view #dash-milestones-section .dash-section-mountain-mark,
+#dashboard-view #dash-recent-section .dash-section-mountain-mark {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -24,7 +26,8 @@
         drop-shadow(0 2px 3px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 34%, transparent));
 }
 
-#dashboard-view #dash-milestones-section .dash-section-mountain-mark svg {
+#dashboard-view #dash-milestones-section .dash-section-mountain-mark svg,
+#dashboard-view #dash-recent-section .dash-section-mountain-mark svg {
     display: block;
     width: 100%;
     height: 100%;
@@ -137,18 +140,25 @@
 }
 
 #dashboard-view #dash-milestones-section .dash-ms-label {
-    font-weight: 750;
+    color: #fff !important;
+    font-weight: 800;
     letter-spacing: .01em;
+    text-shadow: 0 1px 2px rgba(0,0,0,.72);
 }
 
 #dashboard-view #dash-milestones-section .dash-ms-current {
+    color: #fff !important;
     font-variant-numeric: tabular-nums;
-    font-weight: 650;
+    font-weight: 750;
+    text-shadow: 0 1px 2px rgba(0,0,0,.72);
 }
 
 #dashboard-view #dash-milestones-section .dash-ms-progress-text {
-    opacity: .72;
+    color: rgba(255,255,255,.98) !important;
+    opacity: 1;
     font-variant-numeric: tabular-nums;
+    font-weight: 650;
+    text-shadow: 0 1px 2px rgba(0,0,0,.72);
 }
 
 #dashboard-view #dash-milestones-section .dash-ms-progress-wrap {
