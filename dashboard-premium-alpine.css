@@ -160,6 +160,28 @@
     background: var(--theme-palette-accent-gradient, var(--accent-gradient));
 }
 
+
+/* Individuelle Bildausschnitte für die fünf fotografischen Alpenmotive. */
+#dashboard-view #dash-milestones-section .dash-ms-watermark--asc > img {
+    object-position: 68% 57%;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-watermark--dist > img {
+    object-position: 54% center;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-watermark--peaks > img {
+    object-position: 56% 38%;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-watermark--steps > img {
+    object-position: 52% center;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-watermark--time > img {
+    object-position: 66% 76%;
+}
+
 @media (max-width: 380px) {
     #dashboard-view #dash-milestones-section .dash-ms-icon {
         flex-basis: 38px;
