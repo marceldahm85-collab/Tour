@@ -314,3 +314,29 @@
     }
 }
 
+
+
+/* Meilensteine: gleiche Track-Breite unabhängig vom Textinhalt jeder Kachel.
+   Die Track-Spur endet einheitlich nahe am rechten Innenrand; nur die Füllung
+   innerhalb der Spur variiert weiterhin anhand des tatsächlichen Fortschritts. */
+#dashboard-view #dash-milestones-section .dash-milestone-tile .dash-ms-top {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+#dashboard-view #dash-milestones-section .dash-milestone-tile .dash-ms-info {
+    flex: 1 1 0%;
+    width: 0;
+    min-width: 0;
+}
+
+#dashboard-view #dash-milestones-section .dash-milestone-tile .dash-ms-info > .dash-ms-progress-wrap {
+    display: block;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0;
+    align-self: stretch;
+    box-sizing: border-box;
+}
