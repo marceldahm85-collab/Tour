@@ -1,0 +1,145 @@
+/* =========================================================
+   PREMIUM ALPINE — Dashboard-Meilensteine
+   Dezente Bergsilhouetten und einheitliche, akzentfarbene SVG-Symbole.
+   Ausschließlich Darstellung; die bestehende Meilensteinlogik bleibt aktiv.
+   ========================================================= */
+
+#dashboard-view #dash-milestones-section .dash-section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#dashboard-view #dash-milestones-section .dash-section-mountain-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 20px;
+    width: 20px;
+    height: 18px;
+    color: var(--theme-palette-accent, var(--accent, #ad7d12));
+    opacity: .96;
+}
+
+#dashboard-view #dash-milestones-section .dash-section-mountain-mark svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+#dashboard-view #dash-milestones-section .dash-milestone-tile {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-watermark {
+    position: absolute;
+    z-index: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: block;
+    width: min(42%, 170px);
+    color: var(--theme-palette-accent, var(--accent, #ad7d12));
+    opacity: .13;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-watermark svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-top,
+#dashboard-view #dash-milestones-section .dash-ms-progress-wrap {
+    position: relative;
+    z-index: 1;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 26px;
+    width: 26px;
+    height: 28px;
+    color: var(--theme-palette-accent, var(--accent, #ad7d12));
+    font-size: 0 !important;
+    line-height: 1;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-symbol-svg {
+    display: block;
+    width: 26px;
+    height: 28px;
+    overflow: visible;
+    filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 22%, transparent));
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-label {
+    font-weight: 750;
+    letter-spacing: .01em;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-current {
+    font-variant-numeric: tabular-nums;
+    font-weight: 650;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-progress-text {
+    opacity: .72;
+    font-variant-numeric: tabular-nums;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-progress-wrap {
+    border: 1px solid color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 13%, transparent);
+    background: color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 7%, transparent);
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-progress-bar {
+    background: var(--theme-palette-accent-gradient, var(--accent-gradient));
+}
+
+@media (max-width: 380px) {
+    #dashboard-view #dash-milestones-section .dash-ms-icon {
+        flex-basis: 23px;
+        width: 23px;
+        height: 25px;
+    }
+
+    #dashboard-view #dash-milestones-section .dash-ms-symbol-svg {
+        width: 23px;
+        height: 25px;
+    }
+
+    #dashboard-view #dash-milestones-section .dash-ms-watermark {
+        width: 38%;
+        opacity: .10;
+    }
+}
+
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    #dashboard-view #dash-milestones-section .dash-ms-icon {
+        flex-basis: 22px;
+        width: 22px;
+        height: 24px;
+    }
+
+    #dashboard-view #dash-milestones-section .dash-ms-symbol-svg {
+        width: 22px;
+        height: 24px;
+    }
+
+    #dashboard-view #dash-milestones-section .dash-ms-watermark {
+        opacity: .08;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #dashboard-view #dash-milestones-section .dash-ms-symbol-svg {
+        filter: none;
+    }
+}
