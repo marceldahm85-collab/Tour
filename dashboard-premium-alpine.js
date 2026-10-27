@@ -14,11 +14,11 @@
     };
     /* Jedes Dashboard-Ziel bekommt ein eigenes Panorama. */
     const BACKDROP_ASSETS = {
-        asc: './assets/milestones/panorama-asc.svg?v=3',
-        dist: './assets/milestones/panorama-dist.svg?v=3',
-        peaks: './assets/milestones/panorama-peaks.svg?v=3',
-        steps: './assets/milestones/panorama-steps.svg?v=4',
-        time: './assets/milestones/panorama-time.svg?v=4'
+        asc: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg/1280px-Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg',
+        dist: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/20-06-2020_-_Alps_panorama.jpg/1280px-20-06-2020_-_Alps_panorama.jpg',
+        peaks: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Dolomites.jpg/1280px-Dolomites.jpg',
+        steps: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Tyrol_-_hiking_trail.jpg/1280px-Tyrol_-_hiking_trail.jpg',
+        time: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Alpenpanorama_bei_Sonnenuntergang.jpg/1280px-Alpenpanorama_bei_Sonnenuntergang.jpg'
     };
 
     const TITLE_MARK = '<svg viewBox="0 0 34 24" role="presentation" focusable="false"><path d="M1.5 21 10.5 8.3l4.2 5.1L22 2.5l10.5 18.5H1.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m7.3 21 3.2-4.5 2.3 2.1M18 9.4l4 4.9 2.2-2.2 4.1 7.2" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" opacity=".72"/></svg>';
@@ -63,7 +63,7 @@
 
         if (!tile.querySelector('.dash-ms-watermark')) {
             const watermark = document.createElement('span');
-            watermark.className = 'dash-ms-watermark';
+            watermark.className = 'dash-ms-watermark dash-ms-watermark--' + (BACKDROP_ASSETS[type] ? type : 'asc');
             watermark.setAttribute('aria-hidden', 'true');
             const backdropSrc = BACKDROP_ASSETS[type] || BACKDROP_ASSETS.asc;
             watermark.innerHTML = '<img src="' + backdropSrc +
