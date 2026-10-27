@@ -260,7 +260,7 @@
         '.stats-structure-section', '.chart-card', '.compare-box', '.compare-period-card',
         '.compare-list-card', '.tour-compare-pick-card', '.tour-compare-result',
         '.backup-status-panel', '.backup-info-card', '.backup-file-status', '.mob-sel-sheet',
-        '#chart-view .stats-year-filter-wrap', '#chart-view .stats-section-switch',
+        '#chart-view .stats-section-switch',
         '#backup-view .backup-card', '#backup-view .backup-view-inner',
         '#wrapped-view .bergwelt-side-nav', '#theme-view .theme-editor-card',
         '#theme-view .dashboard-editor-section'
