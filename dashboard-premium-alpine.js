@@ -35,7 +35,7 @@
         if (!title || title.querySelector('.dash-section-mountain-mark')) return;
 
         const textNode = Array.from(title.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
-        if (textNode) textNode.nodeValue = textNode.nodeValue.replace(/^\s*🏅\s*/, '');
+        if (textNode) textNode.nodeValue = textNode.nodeValue.replace(/^\s*(?:🏅|🕐)\s*/, '');
 
         const mark = document.createElement('span');
         mark.className = 'dash-section-mountain-mark';
@@ -87,11 +87,15 @@
         const section = document.querySelector('#dash-recent-section');
         if (!section) return;
 
+        enhanceTitle(section);
         trimRecentTours(section);
         if (section.dataset.premiumAlpineRecentObserver === 'true') return;
 
         section.dataset.premiumAlpineRecentObserver = 'true';
-        const observer = new MutationObserver(() => trimRecentTours(section));
+        const observer = new MutationObserver(() => {
+            enhanceTitle(section);
+            trimRecentTours(section);
+        });
         observer.observe(section, { childList: true, subtree: true });
     }
 
