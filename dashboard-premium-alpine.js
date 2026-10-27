@@ -22,7 +22,7 @@
     };
 
     const TITLE_MARK = '<svg viewBox="0 0 34 24" role="presentation" focusable="false"><path d="M1.5 21 10.5 8.3l4.2 5.1L22 2.5l10.5 18.5H1.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m7.3 21 3.2-4.5 2.3 2.1M18 9.4l4 4.9 2.2-2.2 4.1 7.2" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" opacity=".72"/></svg>';
-    const TOUR_HISTORY_MARK = '<svg viewBox="0 0 34 24" role="presentation" focusable="false"><path d="M9.1 6.1A9 9 0 1 1 6 15.8" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round"/><path d="M2.6 5.2 9.5 5.1 9.4 11.7" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 7.2v5.1l3.5 2.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="17" cy="12.2" r="1.1" fill="currentColor"/></svg>';
+    const TOUR_HISTORY_MARK = '<svg viewBox="0 0 34 24" role="presentation" focusable="false"><path d="M9.1 6.1A9 9 0 1 1 6 15.8" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round"/><path d="M6 15.8 6.5 22.3 13 18.4" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 7.2v5.1l3.5 2.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="17" cy="12.2" r="1.1" fill="currentColor"/></svg>';
 
 
     function buildIcon(type) {
