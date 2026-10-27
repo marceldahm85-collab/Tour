@@ -8668,3 +8668,22 @@ body.summit .top-main-nav [aria-current="page"] {
         background-image: none !important;
     }
 }
+
+
+/* PREMIUM ALPINE — feiner Akzentschimmer in der Hauptnavigation.
+   Die Akzentfarbe liegt nur als sehr transparente Lichtreflexion über
+   der dunklen Glasfläche. Kontur und entfernte Außenkanten bleiben neutral. */
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+.app-wrapper .accordion-header .header-actions > .top-main-nav {
+    background-image:
+        radial-gradient(
+            ellipse at 16% 0%,
+            color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 9%, transparent) 0%,
+            transparent 62%
+        ),
+        linear-gradient(
+            145deg,
+            var(--theme-palette-surface-strong, rgba(25,30,39,.92)),
+            var(--theme-palette-surface-card, rgba(17,26,37,.88))
+        ) !important;
+}
