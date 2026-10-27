@@ -4,7 +4,8 @@
     'use strict';
 
     const SECTION_SELECTOR = '#dash-milestones-section';
-    const FRAME = '<path d="M16 2.7 27 9v13L16 28.3 5 22V9Z" fill="none" stroke="currentColor" stroke-width="1.15" opacity=".78" stroke-linejoin="round"/>';
+    /* Leicht reliefartige Plakette: dunklere Schattenkante plus akzentfarbene Frontkontur. */
+    const FRAME = '<path d="M16 2.7 27 9v13L16 28.3 5 22V9Z" transform="translate(0 1.1)" fill="currentColor" fill-opacity=".035" stroke="currentColor" stroke-width="1.65" opacity=".34" stroke-linejoin="round"/><path d="M16 2.7 27 9v13L16 28.3 5 22V9Z" fill="currentColor" fill-opacity=".085" stroke="currentColor" stroke-width="1.15" opacity=".94" stroke-linejoin="round"/>';
 
     const ICON_DETAILS = {
         dist: '<path d="M8.5 22.2 13 16.5l3.7 3.1L23.7 11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8.5" cy="22.2" r="1.5" fill="currentColor"/><circle cx="23.7" cy="11" r="1.5" fill="currentColor"/><path d="M8.5 25h15" fill="none" stroke="currentColor" stroke-width="1" opacity=".45" stroke-linecap="round"/>',
@@ -16,7 +17,16 @@
 
     const TITLE_MARK = '<svg viewBox="0 0 34 24" role="presentation" focusable="false"><path d="M1.5 21 10.5 8.3l4.2 5.1L22 2.5l10.5 18.5H1.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m7.3 21 3.2-4.5 2.3 2.1M18 9.4l4 4.9 2.2-2.2 4.1 7.2" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" opacity=".72"/></svg>';
 
-    const WATERMARK = '<svg viewBox="0 0 260 90" preserveAspectRatio="xMaxYMid meet" focusable="false"><path d="M0 77 23 63 39 68 58 43 73 55 92 22 108 44 122 36 141 58 158 47 174 57 195 25 214 47 231 39 260 59V90H0Z" fill="currentColor" opacity=".12"/><path d="M0 77 23 63 39 68 58 43 73 55 92 22 108 44 122 36 141 58 158 47 174 57 195 25 214 47 231 39 260 59" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linejoin="round"/><path d="m47 57 11-14 8 7m18-9 8-19 8 11m23 10 7-7 11 18m38-3 16-26 8 11" fill="none" stroke="currentColor" stroke-width="1" opacity=".62" stroke-linecap="round" stroke-linejoin="round"/><path d="M0 84c36-9 58-4 89-10s54-1 85-8 52 0 86-7M44 89c27-6 45-5 69-9m49 3c21-5 48-4 71-9" fill="none" stroke="currentColor" stroke-width=".85" opacity=".5" stroke-linecap="round"/></svg>';
+    /* Mehrere Alpengrate geben der Wasserzeichen-Silhouette Tiefe, ohne die Kachel zu dominieren. */
+    const WATERMARK = '<svg viewBox="0 0 260 90" preserveAspectRatio="xMaxYMid meet" focusable="false">' +
+        '<path d="M0 75 18 64 34 69 51 51 65 62 82 42 97 57 113 49 130 65 147 55 165 66 184 39 202 55 220 45 241 61 260 53V90H0Z" fill="currentColor" opacity=".10"/>' +
+        '<path d="M0 78 23 63 39 68 58 43 73 55 92 22 108 44 122 36 141 58 158 47 174 57 195 25 214 47 231 39 260 59V90H0Z" fill="currentColor" opacity=".15"/>' +
+        '<path d="M0 85 27 75 47 80 67 68 90 75 112 61 130 69 151 58 174 73 193 65 216 76 238 64 260 71V90H0Z" fill="currentColor" opacity=".23"/>' +
+        '<path d="M0 75 18 64 34 69 51 51 65 62 82 42 97 57 113 49 130 65 147 55 165 66 184 39 202 55 220 45 241 61 260 53" fill="none" stroke="currentColor" stroke-width="1" opacity=".46" stroke-linejoin="round"/>' +
+        '<path d="M0 78 23 63 39 68 58 43 73 55 92 22 108 44 122 36 141 58 158 47 174 57 195 25 214 47 231 39 260 59" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>' +
+        '<path d="m51 51 7-8 7 7m20-8 7-20 8 11m35 24 7-7 7 10m39-22 7-13 8 11m20 3 8-8 6 10" fill="none" stroke="currentColor" stroke-width="1.05" opacity=".78" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '<path d="M0 84c36-9 58-4 89-10s54-1 85-8 52 0 86-7M44 89c27-6 45-5 69-9m49 3c21-5 48-4 71-9" fill="none" stroke="currentColor" stroke-width=".85" opacity=".52" stroke-linecap="round"/>' +
+        '</svg>';
 
     function buildIcon(type) {
         return '<svg class="dash-ms-symbol-svg" viewBox="0 0 32 31" aria-hidden="true" focusable="false">' +
