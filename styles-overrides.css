@@ -8738,3 +8738,55 @@ body.summit .top-main-nav [aria-current="page"] {
         height: 20px !important;
     }
 }
+
+
+/* PREMIUM ALPINE — aktiver Mehr-Punkt und SVG-Symbole im Mehr-Menü.
+   Der aktive Punkt erhält den Theme-Akzent trotz der allgemeinen Textfarbe
+   des aktiven Mehr-Buttons. Die übrigen Punkte bleiben zurückhaltend. */
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+.app-wrapper .accordion-header .header-actions > .top-main-nav
+.top-nav-more-wrap > .top-nav-btn.more-view-active .top-nav-icon.more-dots .more-dot.is-active {
+    color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+    opacity: 1 !important;
+    transform: scale(1.22);
+    text-shadow:
+        0 0 5px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 82%, transparent),
+        0 0 11px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 52%, transparent) !important;
+}
+
+#more-menu.more-menu .more-menu-item .more-menu-icon-svg {
+    display: inline-flex !important;
+    flex: 0 0 24px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    text-align: center !important;
+    color: color-mix(
+        in srgb,
+        var(--theme-palette-accent, var(--accent, #ad7d12)) 78%,
+        var(--theme-palette-text, #f3f7fb)
+    ) !important;
+    opacity: .96 !important;
+}
+
+#more-menu.more-menu .more-menu-item .more-menu-icon-svg > svg {
+    display: block !important;
+    flex: 0 0 auto !important;
+    width: 21px !important;
+    height: 21px !important;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 1.65 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+    overflow: visible;
+}
+
+#more-menu.more-menu .more-menu-item:hover .more-menu-icon-svg,
+#more-menu.more-menu .more-menu-item:focus-visible .more-menu-icon-svg,
+#more-menu.more-menu .more-menu-item:active .more-menu-icon-svg {
+    color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+}
