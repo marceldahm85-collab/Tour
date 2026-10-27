@@ -8484,34 +8484,44 @@ body.summit .top-main-nav [aria-current="page"] {
 }
 
 
-/* Premium Alpine – Navigation Schritt 1
-   Akzentlinien zuverlässig entfernen und aktive Navigation beruhigen.
-   Diese Regeln stehen bewusst am Dateiende und verwenden dieselbe Theme-Spezifität
-   wie die älteren Theme-Overrides, damit keine später/ spezifischer gesetzte Regel
-   die Akzentleisten erneut einblendet. */
+/* PREMIUM ALPINE — HAUPTNAVIGATION: Trennlinien an den Außenkanten vollständig entfernen.
+   Ursachen aus dem CSS-Audit:
+   - .accordion-header erhält je nach Ausrichtung border-bottom bzw. border-right.
+   - .accordion-header::after zeichnet eine zusätzliche Akzentlinie.
+   - .view-container::before zeichnet im Querformat eine zweite Linie.
+   Diese Regeln stehen am Dateiende und neutralisieren die älteren Theme-/Orientierungsregeln. */
 
-/* Keine dekorativen Akzentstriche am unteren bzw. seitlichen Rand der Kopfzone. */
-:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold)) .accordion-header::after {
+.accordion-header {
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+.accordion-header::before,
+.accordion-header::after {
     content: none !important;
     display: none !important;
     background: none !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
     opacity: 0 !important;
 }
 
-/* Die Trennung zur Navigation bleibt neutral; kein farbiger Rand im Hoch- oder Querformat. */
-:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold)) .accordion-header {
-    border-bottom-color: var(--theme-surface-border, var(--app-surface-border, rgba(255,255,255,.12))) !important;
-    border-right-color: var(--theme-surface-border, var(--app-surface-border, rgba(255,255,255,.12))) !important;
-    box-shadow: 0 4px 14px rgba(0,0,0,.08) !important;
-}
-
-/* Auch die zusätzliche senkrechte Linie am View-Inhalt deaktivieren. */
-:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold)) .view-container::before {
+.view-container::before,
+.view-container::after {
     content: none !important;
     display: none !important;
+    background: none !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
 }
 
-/* Hauptnavigation: neutrale Glasfläche mit zurückhaltender Kontur. */
+/* Die Navigation behält ihre abgerundete Glasfläche.
+   Ihre Kontur ist neutral und nicht von der Akzentfarbe abhängig. */
 :is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold)) .top-main-nav {
     border-color: var(--theme-surface-border, var(--app-surface-border, rgba(255,255,255,.12))) !important;
     box-shadow: 0 7px 20px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.035) !important;
