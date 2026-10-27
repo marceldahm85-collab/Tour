@@ -294,11 +294,6 @@
     overflow: visible;
 }
 
-/* Fine inner lines match the secondary stroke of the existing mountain mark. */
-#dashboard-view .dash-stat-icon svg .icon-detail {
-    stroke-width: 1.25 !important;
-}
-
 /* Accent marks remain filled; they do not introduce a thinner, inconsistent outline. */
 #dashboard-view .dash-stat-icon svg .icon-accent-fill {
     fill: color-mix(in srgb, var(--accent, #D5A64C) 24%, transparent) !important;
