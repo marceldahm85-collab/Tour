@@ -34,10 +34,11 @@
     position: relative;
     isolation: isolate;
     overflow: hidden;
+    padding: 7px 10px;
     border-color: color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 24%, var(--app-surface-border, rgba(255,255,255,.08)));
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,.075),
-        0 5px 16px rgba(0,0,0,.22);
+        0 4px 12px rgba(0,0,0,.20);
 }
 
 #dashboard-view #dash-milestones-section .dash-ms-watermark {
@@ -92,16 +93,30 @@
 }
 
 #dashboard-view #dash-milestones-section .dash-ms-top {
-    gap: 11px;
+    gap: 8px;
+    margin-bottom: 0;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-info {
+    min-width: 0;
+    gap: 1px;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-info .dash-ms-progress-wrap {
+    width: 100%;
+    height: 4px;
+    flex: 0 0 4px;
+    margin-top: 5px;
+    margin-bottom: 0;
 }
 
 #dashboard-view #dash-milestones-section .dash-ms-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex: 0 0 60px;
-    width: 60px;
-    height: 60px;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
     color: var(--theme-palette-accent, var(--accent, #ad7d12));
     font-size: 0 !important;
     line-height: 1;
@@ -110,15 +125,15 @@
 #dashboard-view #dash-milestones-section .dash-ms-symbol-svg {
     display: block;
     flex: 0 0 auto;
-    width: 60px;
-    height: 60px;
+    width: 44px;
+    height: 44px;
     aspect-ratio: 1;
     object-fit: cover;
     border-radius: 50%;
     box-shadow:
         0 0 0 1px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 42%, transparent),
-        0 3px 10px rgba(0,0,0,.55),
-        0 0 15px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 24%, transparent);
+        0 2px 7px rgba(0,0,0,.52),
+        0 0 10px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 22%, transparent);
 }
 
 #dashboard-view #dash-milestones-section .dash-ms-label {
@@ -147,14 +162,28 @@
 
 @media (max-width: 380px) {
     #dashboard-view #dash-milestones-section .dash-ms-icon {
-        flex-basis: 52px;
-        width: 52px;
-        height: 52px;
+        flex-basis: 38px;
+        width: 38px;
+        height: 38px;
     }
 
     #dashboard-view #dash-milestones-section .dash-ms-symbol-svg {
-        width: 52px;
-        height: 52px;
+        width: 38px;
+        height: 38px;
+    }
+
+    #dashboard-view #dash-milestones-section .dash-ms-label {
+        font-size: 12px;
+        line-height: 1.15;
+    }
+
+    #dashboard-view #dash-milestones-section .dash-ms-current {
+        font-size: 10px;
+        line-height: 1.15;
+    }
+
+    #dashboard-view #dash-milestones-section .dash-ms-progress-wrap {
+        margin-top: 4px;
     }
 
     #dashboard-view #dash-milestones-section .dash-ms-watermark > img {
@@ -172,14 +201,22 @@
 
 @media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
     #dashboard-view #dash-milestones-section .dash-ms-icon {
-        flex-basis: 44px;
-        width: 44px;
-        height: 44px;
+        flex-basis: 36px;
+        width: 36px;
+        height: 36px;
     }
 
     #dashboard-view #dash-milestones-section .dash-ms-symbol-svg {
-        width: 44px;
-        height: 44px;
+        width: 36px;
+        height: 36px;
+    }
+
+    #dashboard-view #dash-milestones-section .dash-ms-label {
+        font-size: 11px;
+    }
+
+    #dashboard-view #dash-milestones-section .dash-ms-current {
+        font-size: 9px;
     }
 
     #dashboard-view #dash-milestones-section .dash-ms-watermark > img {
