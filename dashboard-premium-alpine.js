@@ -128,9 +128,11 @@
         const list = section.querySelector('.dash-tour-list');
         if (!list) return;
 
+        /* Die Datenquelle rendert bis zu fünf Touren. Nicht auf drei kürzen,
+           denn das Hoch-/Querformat wird rein per CSS gesteuert. */
         const items = list.querySelectorAll(':scope > .dash-recent-item');
         items.forEach((item, index) => {
-            if (index >= 3) item.remove();
+            if (index >= 5) item.remove();
         });
     }
 
