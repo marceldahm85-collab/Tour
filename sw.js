@@ -1,6 +1,6 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Der PDF-Magazin-Renderer wird direkt über index.html geladen.
-const CACHE_NAME = 'bergtouren-cache-premium-alpine-v84';
+const CACHE_NAME = 'bergtouren-cache-premium-alpine-v85';
 
 const APP_SHELL = [
   './',
@@ -8,7 +8,7 @@ const APP_SHELL = [
   './app-main-20261019.js?v=11',
   './theme-editor-surface-compat.js?v=4',
   './theme-editor-unified.js?v=14',
-  './dashboard-premium-alpine.js?v=6',
+  './dashboard-premium-alpine.js?v=7',
   './app-navigation-history.js?v=1',
   './bergwelt-badges-20261019.css?v=6',
   './bergwelt-badges-20261019.js?v=6',
@@ -17,6 +17,11 @@ const APP_SHELL = [
   './dashboard-premium-alpine.css?v=6',
   './assets/bergwelt-fixed-alpine.webp',
   './assets/milestones/alpine-backdrop.svg?v=2',
+  './assets/milestones/panorama-asc.svg?v=1',
+  './assets/milestones/panorama-dist.svg?v=1',
+  './assets/milestones/panorama-peaks.svg?v=1',
+  './assets/milestones/panorama-steps.svg?v=1',
+  './assets/milestones/panorama-time.svg?v=1',
   './assets/milestones/milestone-asc.svg?v=2',
   './assets/milestones/milestone-dist.svg?v=2',
   './assets/milestones/milestone-peaks.svg?v=2',
