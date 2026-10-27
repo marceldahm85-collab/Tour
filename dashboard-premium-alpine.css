@@ -295,12 +295,13 @@
 }
 
 #dashboard-view .dash-stat-icon svg .icon-accent-fill {
-    fill: color-mix(in srgb, var(--accent, #D5A64C) 24%, transparent);
-    stroke: var(--accent, #D5A64C);
+    fill: color-mix(in srgb, var(--accent, #D5A64C) 24%, transparent) !important;
+    stroke: var(--accent, #D5A64C) !important;
+    stroke-width: 1.15 !important;
 }
 
 #dashboard-view .dash-stat-icon svg .icon-accent-line {
-    stroke: color-mix(in srgb, var(--accent, #D5A64C) 78%, white);
+    stroke: var(--accent, #D5A64C);
     stroke-width: 1.35;
 }
 
