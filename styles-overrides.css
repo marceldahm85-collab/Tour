@@ -8570,3 +8570,101 @@ body.summit .top-main-nav [aria-current="page"] {
         outline: 0 !important;
     }
 }
+
+
+/* =========================================================
+   PREMIUM ALPINE — Hauptnavigation, Schritt 1
+   Ruhige dunkle Glasfläche, zurückhaltender Aktivzustand.
+   Speichern bleibt optisch gleichrangig; Mehr-Punkte bleiben unverändert.
+   Hohe Spezifität stellt sicher, dass die Live-Theme-Regeln diese
+   Zustände nicht erneut mit einem Vollflächen-Akzent überschreiben.
+   ========================================================= */
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+.app-wrapper .accordion-header .header-actions > .top-main-nav {
+    background: linear-gradient(
+        145deg,
+        var(--theme-palette-surface-strong, rgba(25,30,39,.92)),
+        var(--theme-palette-surface-card, rgba(17,26,37,.88))
+    ) !important;
+    background-image: linear-gradient(
+        145deg,
+        var(--theme-palette-surface-strong, rgba(25,30,39,.92)),
+        var(--theme-palette-surface-card, rgba(17,26,37,.88))
+    ) !important;
+    border: 1px solid rgba(225,232,242,.10) !important;
+    border-radius: var(--app-radius, 18px) !important;
+    box-shadow:
+        0 8px 22px rgba(0,0,0,.22),
+        inset 0 1px 0 rgba(255,255,255,.035) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    backdrop-filter: blur(16px) !important;
+    filter: none !important;
+}
+
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+.app-wrapper .accordion-header .header-actions > .top-main-nav > .top-nav-btn,
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+.app-wrapper .accordion-header .header-actions > .top-main-nav .top-nav-more-wrap > .top-nav-btn {
+    background: transparent !important;
+    background-image: none !important;
+    border: 1px solid transparent !important;
+    color: var(--theme-palette-text, #f3f7fb) !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+.app-wrapper .accordion-header .header-actions > .top-main-nav .top-nav-btn:is(.view-active, .more-view-active) {
+    background: color-mix(
+        in srgb,
+        var(--theme-palette-accent, var(--accent, #ad7d12)) 15%,
+        var(--theme-palette-surface-strong, rgba(25,30,39,.92))
+    ) !important;
+    background-image: none !important;
+    border: 1px solid color-mix(
+        in srgb,
+        var(--theme-palette-accent, var(--accent, #ad7d12)) 38%,
+        transparent
+    ) !important;
+    color: var(--theme-palette-text, #f3f7fb) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.055),
+        0 2px 7px rgba(0,0,0,.12) !important;
+}
+
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+.app-wrapper .accordion-header .header-actions > .top-main-nav .top-nav-btn:is(.view-active, .more-view-active) :is(.top-nav-label, .top-nav-icon, .more-dot) {
+    color: var(--theme-palette-text, #f3f7fb) !important;
+    opacity: 1 !important;
+}
+
+/* Speichern ist eine normale Navigationstaste, keine primär hervorgehobene Aktion. */
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+.app-wrapper .accordion-header .header-actions > .top-main-nav > .top-nav-save {
+    background: transparent !important;
+    background-image: none !important;
+    border: 1px solid transparent !important;
+    color: var(--theme-palette-text, #f3f7fb) !important;
+    box-shadow: none !important;
+    filter: none !important;
+}
+
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+.app-wrapper .accordion-header .header-actions > .top-main-nav > .top-nav-save :is(.top-nav-label, .top-nav-plus) {
+    color: var(--theme-palette-text, #f3f7fb) !important;
+    opacity: .82 !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    :is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+    .app-wrapper .accordion-header .header-actions > .top-main-nav .top-nav-btn:not(.view-active):not(.more-view-active):not(.top-nav-save):hover,
+    :is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+    .app-wrapper .accordion-header .header-actions > .top-main-nav > .top-nav-save:hover {
+        background: color-mix(
+            in srgb,
+            var(--theme-palette-accent, var(--accent, #ad7d12)) 8%,
+            var(--theme-palette-surface-strong, rgba(25,30,39,.92))
+        ) !important;
+        background-image: none !important;
+    }
+}
