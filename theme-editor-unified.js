@@ -14,8 +14,10 @@
     const DIRECTIONS = ['180deg', '90deg', '135deg', '45deg', 'radial'];
     const FONTS = ['android', 'system', 'rounded', 'serif', 'slab', 'mono', 'cursive', 'fantasy'];
     const DEFAULT_ACCENT = '#ad7d12';
+    const DEFAULT_ACCENT_2 = '#000000';
     const DEFAULTS = {
         accent: DEFAULT_ACCENT,
+        accent2: DEFAULT_ACCENT_2,
         radius: 14,
         fontFamily: 'android',
         fontSize: 100,
@@ -127,6 +129,7 @@
         const settings = value && typeof value === 'object' ? value : {};
         return {
             accent: validHex(settings.accent) ? settings.accent : DEFAULT_ACCENT,
+            accent2: validHex(settings.accent2) ? settings.accent2 : DEFAULT_ACCENT_2,
             radius: clamp(settings.radius, 0, 28, DEFAULTS.radius),
             fontFamily: FONTS.includes(settings.fontFamily) ? settings.fontFamily : DEFAULTS.fontFamily,
             fontSize: clamp(settings.fontSize, 80, 130, DEFAULTS.fontSize),
@@ -310,13 +313,13 @@
         'button', 'input[type="color"]', 'input[type="range"]', 'select', 'textarea'
     ];
 
-    function gradientFor(direction, transition, accent, soft) {
-        // Die Akzentfarbe ist der feste Startpunkt; Schwarz ist der nicht
-        // editierbare Endpunkt. Der Regler legt fest, wo der Übergang beginnt.
+    function gradientFor(direction, transition, accent, accent2, soft) {
+        // Der Übergangspunkt gilt für beide globalen Akzentfarben und damit
+        // ausdrücklich auch für die Hauptnavigation.
         const t = clamp(transition, 10, 90, 55);
         const accentColor = validHex(accent) ? accent : DEFAULT_ACCENT;
-        const start = soft ? blendHex(accentColor, '#000000', 0.32) : accentColor;
-        const end = '#000000';
+        const end = validHex(accent2) ? accent2 : DEFAULT_ACCENT_2;
+        const start = soft ? blendHex(accentColor, end, 0.32) : accentColor;
 
         if (direction === 'radial') {
             return 'radial-gradient(circle at 28% 18%, ' + start + ' 0%, ' +
@@ -329,8 +332,8 @@
     function buildUnifiedLiveCss() {
         const settings = ensureDraft();
         const viewScope = ':is(body.gold) :is(#dashboard-view, #app-view, #chart-view, #tour-view, #map-view, #filter-view, #backup-view, #theme-view, #achievements-view, #wrapped-view, #more-menu)';
-        const bigGradient = gradientFor(settings.gradientDirection, settings.transition, settings.accent, false);
-        const softGradient = gradientFor(settings.gradientDirection, settings.transition, settings.accent, true);
+        const bigGradient = gradientFor(settings.gradientDirection, settings.transition, settings.accent, settings.accent2, false);
+        const softGradient = gradientFor(settings.gradientDirection, settings.transition, settings.accent, settings.accent2, true);
         const radius = settings.radius + 'px';
         const selectors = (items) => items.map(item =>
             item.startsWith('#') ? 'body.gold ' + item : viewScope + ' ' + item
@@ -351,19 +354,21 @@
 
     function applyPalette(settings) {
         const accent = settings.accent;
-        const accentDark = '#000000';
+        const accent2 = settings.accent2;
         const soft = rgba(accent, 0.24);
         const border = 'color-mix(in srgb, ' + accent + ' 38%, rgba(225,232,242,.14))';
-        const accentGradient = 'linear-gradient(135deg, ' + accent + ' 0%, #000000 100%)';
-        const accentLuminance = luminance(accent);
+        // Gleicher Verlaufsgenerator wie auf allen anderen großen Flächen:
+        // Richtung, zweite Akzentfarbe und Übergangspunkt greifen hier direkt.
+        const accentGradient = gradientFor(settings.gradientDirection, settings.transition, accent, accent2, false);
+        const contrastRatio = (a, b) => {
+            const la = luminance(a);
+            const lb = luminance(b);
+            return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+        };
         const darkText = '#171209';
         const lightText = '#f8fafc';
-        const darkTextLuminance = luminance(darkText);
-        const lightTextLuminance = luminance(lightText);
-        const darkTextContrast = (Math.max(accentLuminance, darkTextLuminance) + 0.05) /
-            (Math.min(accentLuminance, darkTextLuminance) + 0.05);
-        const lightTextContrast = (Math.max(accentLuminance, lightTextLuminance) + 0.05) /
-            (Math.min(accentLuminance, lightTextLuminance) + 0.05);
+        const darkTextContrast = Math.min(contrastRatio(accent, darkText), contrastRatio(accent2, darkText));
+        const lightTextContrast = Math.min(contrastRatio(accent, lightText), contrastRatio(accent2, lightText));
         const accentText = darkTextContrast >= lightTextContrast ? darkText : lightText;
         const root = document.documentElement;
         const body = document.body;
@@ -386,8 +391,8 @@
         setImportant(body, '--accent-gradient', accentGradient);
         setImportant(body, '--accent-text-color', accentText);
 
-        // Der Verlaufsfarbton bleibt stets dunkel und wird nicht mehr vom Nutzer
-        // je Theme separat gesetzt. Nur Richtung und Übergangspunkt variieren.
+        // Beide Akzentfarben sind global einstellbar; Richtung und Übergangspunkt
+        // steuern den Verlauf konsistent auf Flächen und Hauptnavigation.
         const style = document.getElementById('theme-editor-live-style') ||
             document.createElement('style');
         style.id = 'theme-editor-live-style';
@@ -423,9 +428,9 @@
         } catch (_) {}
 
         const settings = ensureDraft();
-        const accentDark = '#000000';
-        const chartStart = blendHex(settings.accent, '#000000', 0.78);
-        const chartMid = blendHex(settings.accent, '#000000', 0.38);
+        const accentDark = settings.accent2;
+        const chartStart = blendHex(settings.accent, settings.accent2, 0.78);
+        const chartMid = blendHex(settings.accent, settings.accent2, 0.38);
         const result = {};
         const textMain = '#f3f7fb';
         const textSoft = '#cbd5df';
@@ -454,7 +459,7 @@
                 navBottomColor: accentDark,
                 chartColorStart: chartStart,
                 chartColorMid: chartMid,
-                chartColorEnd: settings.accent
+                chartColorEnd: settings.accent2
             };
         });
 
@@ -468,6 +473,7 @@
             if (element) element.value = String(value);
         };
         setValue('te-unified-accent', settings.accent);
+        setValue('te-unified-accent2', settings.accent2);
         setValue('te-unified-radius', settings.radius);
         setValue('te-font-family', settings.fontFamily);
         setValue('te-font-size', settings.fontSize);
@@ -492,6 +498,7 @@
         const settings = { ...ensureDraft() };
         const value = id => document.getElementById(id);
         if (value('te-unified-accent')) settings.accent = value('te-unified-accent').value;
+        if (value('te-unified-accent2')) settings.accent2 = value('te-unified-accent2').value;
         if (value('te-unified-radius')) settings.radius = Number(value('te-unified-radius').value);
         if (value('te-font-family')) settings.fontFamily = value('te-font-family').value;
         if (value('te-font-size')) settings.fontSize = Number(value('te-font-size').value);
@@ -519,7 +526,7 @@
         }
 
         const controls = [
-            'te-unified-accent', 'te-unified-radius',
+            'te-unified-accent', 'te-unified-accent2', 'te-unified-radius',
             'te-unified-direction', 'te-unified-transition'
         ];
 
@@ -534,7 +541,7 @@
                 const transitionValue = document.getElementById('te-unified-transition-value');
                 if (radiusValue) radiusValue.textContent = draft.radius + ' px';
                 if (transitionValue) transitionValue.textContent = draft.transition + ' %';
-                applyUnifiedSettings(id === 'te-unified-accent');
+                applyUnifiedSettings(id === 'te-unified-accent' || id === 'te-unified-accent2');
             };
             element.addEventListener('input', update);
             element.addEventListener('change', update);
@@ -633,9 +640,9 @@
                 isDark: true,
                 dotFill: '#121b26',
                 gradientStops: [
-                    [0, blendHex(settings.accent, '#101722', 0.78)],
-                    [0.5, blendHex(settings.accent, '#101722', 0.38)],
-                    [1, settings.accent]
+                    [0, blendHex(settings.accent, settings.accent2, 0.78)],
+                    [0.5, blendHex(settings.accent, settings.accent2, 0.38)],
+                    [1, settings.accent2]
                 ]
             };
         };
@@ -648,7 +655,8 @@
                 bg1: '#191e27',
                 bg2: '#0d151f',
                 text: '#f3f7fb',
-                accent: settings.accent
+                accent: settings.accent,
+                accent2: settings.accent2
             };
         };
     }
