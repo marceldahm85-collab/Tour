@@ -8517,17 +8517,18 @@ body.summit .top-main-nav [aria-current="page"] {
     opacity: 0 !important;
 }
 
-/* Keine Akzentfarbe auf irgendeiner Außenkante; der Container bleibt als
-   dezente Glasfläche erhalten, aber ohne farbigen Rahmen. */
+/* Der Navigationsrahmen nutzt absichtlich einen festen Neutralton:
+   Theme-/Akzentvariablen dürfen keine einzelne Außenkante einfärben. */
 .top-main-nav {
-    border: 1px solid var(--app-surface-border, rgba(255,255,255,.10)) !important;
-    border-top-color: var(--app-surface-border, rgba(255,255,255,.10)) !important;
-    border-right-color: var(--app-surface-border, rgba(255,255,255,.10)) !important;
-    border-bottom-color: var(--app-surface-border, rgba(255,255,255,.10)) !important;
-    border-left-color: var(--app-surface-border, rgba(255,255,255,.10)) !important;
+    border: 1px solid rgba(225,232,242,.10) !important;
+    border-top-color: rgba(225,232,242,.10) !important;
+    border-right-color: rgba(225,232,242,.10) !important;
+    border-bottom-color: rgba(225,232,242,.10) !important;
+    border-left-color: rgba(225,232,242,.10) !important;
+    border-image: none !important;
     outline: 0 !important;
     filter: none !important;
-    box-shadow: 0 7px 20px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.025) !important;
+    box-shadow: 0 7px 20px rgba(0,0,0,.18) !important;
 }
 
 /* Keine zusätzliche Linie an der Kante des ersten Navigationsbereichs. */
