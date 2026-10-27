@@ -6,13 +6,13 @@
     const SECTION_SELECTOR = '#dash-milestones-section';
     /* Individuelle, bildbasierte Alpenmotive. */
     const ICON_ASSETS = {
-        asc: './assets/milestones/milestone-asc.svg',
-        dist: './assets/milestones/milestone-dist.svg',
-        peaks: './assets/milestones/milestone-peaks.svg',
-        steps: './assets/milestones/milestone-steps.svg',
-        time: './assets/milestones/milestone-time.svg'
+        asc: './assets/milestones/milestone-asc.svg?v=2',
+        dist: './assets/milestones/milestone-dist.svg?v=2',
+        peaks: './assets/milestones/milestone-peaks.svg?v=2',
+        steps: './assets/milestones/milestone-steps.svg?v=2',
+        time: './assets/milestones/milestone-time.svg?v=2'
     };
-    const BACKDROP_ASSET = './assets/milestones/alpine-backdrop.svg';
+    const BACKDROP_ASSET = './assets/milestones/alpine-backdrop.svg?v=2';
 
     const TITLE_MARK = '<svg viewBox="0 0 34 24" role="presentation" focusable="false"><path d="M1.5 21 10.5 8.3l4.2 5.1L22 2.5l10.5 18.5H1.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m7.3 21 3.2-4.5 2.3 2.1M18 9.4l4 4.9 2.2-2.2 4.1 7.2" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" opacity=".72"/></svg>';
 
