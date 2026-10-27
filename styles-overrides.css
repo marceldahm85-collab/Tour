@@ -8484,35 +8484,53 @@ body.summit .top-main-nav [aria-current="page"] {
 }
 
 
-/* Premium Alpine – Navigation Schritt 1: Akzentleisten entfernen, Oberflächen beruhigen. */
-:where(body) .accordion-header::after {
+/* Premium Alpine – Navigation Schritt 1
+   Akzentlinien zuverlässig entfernen und aktive Navigation beruhigen.
+   Diese Regeln stehen bewusst am Dateiende und verwenden dieselbe Theme-Spezifität
+   wie die älteren Theme-Overrides, damit keine später/ spezifischer gesetzte Regel
+   die Akzentleisten erneut einblendet. */
+
+/* Keine dekorativen Akzentstriche am unteren bzw. seitlichen Rand der Kopfzone. */
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold)) .accordion-header::after {
     content: none !important;
     display: none !important;
+    background: none !important;
+    opacity: 0 !important;
 }
-:where(body) .accordion-header {
-    border-bottom-color: var(--app-surface-border, rgba(255,255,255,.12)) !important;
-    border-right-color: var(--app-surface-border, rgba(255,255,255,.12)) !important;
+
+/* Die Trennung zur Navigation bleibt neutral; kein farbiger Rand im Hoch- oder Querformat. */
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold)) .accordion-header {
+    border-bottom-color: var(--theme-surface-border, var(--app-surface-border, rgba(255,255,255,.12))) !important;
+    border-right-color: var(--theme-surface-border, var(--app-surface-border, rgba(255,255,255,.12))) !important;
     box-shadow: 0 4px 14px rgba(0,0,0,.08) !important;
 }
-:where(body) .view-container::before {
+
+/* Auch die zusätzliche senkrechte Linie am View-Inhalt deaktivieren. */
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold)) .view-container::before {
     content: none !important;
     display: none !important;
 }
-:where(body) .top-main-nav {
+
+/* Hauptnavigation: neutrale Glasfläche mit zurückhaltender Kontur. */
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold)) .top-main-nav {
     border-color: var(--theme-surface-border, var(--app-surface-border, rgba(255,255,255,.12))) !important;
     box-shadow: 0 7px 20px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.035) !important;
 }
-:where(body) .top-main-nav .top-nav-btn:is(.view-active, .more-view-active) {
-    background: color-mix(in srgb, var(--accent) 15%, var(--app-surface-card, #18212b)) !important;
-    border: 1px solid color-mix(in srgb, var(--accent) 52%, transparent) !important;
+
+/* Aktiver View: dezente Akzentfläche statt Vollflächen-Verlauf und Leuchteffekt. */
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold)) .top-main-nav .top-nav-btn:is(.view-active, .more-view-active) {
+    background: color-mix(in srgb, var(--accent) 13%, var(--app-surface-card, #18212b)) !important;
+    border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--theme-surface-border, transparent)) !important;
     color: var(--app-text-primary, #f3f7fb) !important;
     box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
 }
-:where(body) .top-main-nav .top-nav-btn:is(.view-active, .more-view-active) :is(.top-nav-label, .top-nav-icon) {
+
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold)) .top-main-nav .top-nav-btn:is(.view-active, .more-view-active) :is(.top-nav-label, .top-nav-icon) {
     color: var(--accent) !important;
     opacity: 1 !important;
 }
-:where(body) .top-main-nav .top-nav-save,
-:where(body) .top-main-nav button.save-btn {
+
+/* Der Speichern-Button bleibt als einzige primäre Aktion klar hervorgehoben. */
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold)) .top-main-nav .top-nav-save {
     box-shadow: 0 4px 12px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.18) !important;
 }
