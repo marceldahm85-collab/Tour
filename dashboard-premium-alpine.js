@@ -17,8 +17,8 @@
         asc: './assets/milestones/panorama-asc.svg?v=1',
         dist: './assets/milestones/panorama-dist.svg?v=1',
         peaks: './assets/milestones/panorama-peaks.svg?v=1',
-        steps: './assets/milestones/panorama-steps.svg?v=1',
-        time: './assets/milestones/panorama-time.svg?v=1'
+        steps: './assets/milestones/panorama-steps.svg?v=2',
+        time: './assets/milestones/panorama-time.svg?v=2'
     };
 
     const TITLE_MARK = '<svg viewBox="0 0 34 24" role="presentation" focusable="false"><path d="M1.5 21 10.5 8.3l4.2 5.1L22 2.5l10.5 18.5H1.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m7.3 21 3.2-4.5 2.3 2.1M18 9.4l4 4.9 2.2-2.2 4.1 7.2" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" opacity=".72"/></svg>';
