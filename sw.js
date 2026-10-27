@@ -1,6 +1,6 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Der PDF-Magazin-Renderer wird direkt über index.html geladen.
-const CACHE_NAME = 'bergtouren-cache-premium-alpine-v89';
+const CACHE_NAME = 'bergtouren-cache-premium-alpine-v90';
 
 const APP_SHELL = [
   './',
@@ -8,20 +8,20 @@ const APP_SHELL = [
   './app-main-20261019.js?v=11',
   './theme-editor-surface-compat.js?v=4',
   './theme-editor-unified.js?v=14',
-  './dashboard-premium-alpine.js?v=11',
+  './dashboard-premium-alpine.js?v=12',
   './app-navigation-history.js?v=1',
   './bergwelt-badges-20261019.css?v=6',
   './bergwelt-badges-20261019.js?v=6',
   './styles.css?v=9',
   './styles-overrides.css?v=67',
-  './dashboard-premium-alpine.css?v=7',
+  './dashboard-premium-alpine.css?v=8',
   './assets/bergwelt-fixed-alpine.webp',
   './assets/milestones/alpine-backdrop.svg?v=2',
-  './assets/milestones/panorama-asc.svg?v=3',
-  './assets/milestones/panorama-dist.svg?v=3',
-  './assets/milestones/panorama-peaks.svg?v=3',
-  './assets/milestones/panorama-steps.svg?v=4',
-  './assets/milestones/panorama-time.svg?v=4',
+  'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg/1280px-Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg',
+  'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/20-06-2020_-_Alps_panorama.jpg/1280px-20-06-2020_-_Alps_panorama.jpg',
+  'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Dolomites.jpg/1280px-Dolomites.jpg',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Tyrol_-_hiking_trail.jpg/1280px-Tyrol_-_hiking_trail.jpg',
+  'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Alpenpanorama_bei_Sonnenuntergang.jpg/1280px-Alpenpanorama_bei_Sonnenuntergang.jpg',
   './assets/milestones/milestone-asc.svg?v=3',
   './assets/milestones/milestone-dist.svg?v=3',
   './assets/milestones/milestone-peaks.svg?v=3',
@@ -48,7 +48,7 @@ self.addEventListener('install', (event) => {
         APP_SHELL.map(async (url) => {
           try {
             const request = new Request(url, {
-              mode: url.startsWith('http') ? 'cors' : 'same-origin',
+              mode: url.includes('wikimedia.org/') ? 'no-cors' : (url.startsWith('http') ? 'cors' : 'same-origin'),
               // Refresh the browser HTTP cache as well as this service-worker cache.
               cache: url.startsWith('http') ? 'default' : 'reload'
             });
