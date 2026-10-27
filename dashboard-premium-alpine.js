@@ -103,14 +103,13 @@
             icon.setAttribute('aria-hidden', 'true');
         }
 
-        /* Die Fortschrittsspur richtet sich an der gesamten Meilensteinkachel aus,
-           nicht an der variablen Textbreite. Nur die farbige Füllung bleibt datenabhängig. */
+        /* Die Spur bleibt in der horizontalen Kopfzeile: links bündig mit dem Text
+           rechts neben dem Symbol, rechts bündig mit der gesamten Kachel-Innenkante.
+           Absolute Positionierung verhindert, dass Textlängen die Track-Breite bestimmen. */
         const top = tile.querySelector('.dash-ms-top');
         const progressWrap = tile.querySelector('.dash-ms-progress-wrap');
-        if (top && progressWrap) {
-            if (progressWrap.parentElement !== tile || top.nextElementSibling !== progressWrap) {
-                tile.insertBefore(progressWrap, top.nextSibling);
-            }
+        if (top && progressWrap && progressWrap.parentElement !== top) {
+            top.appendChild(progressWrap);
         }
 
         if (!tile.querySelector('.dash-ms-watermark')) {
