@@ -8687,3 +8687,54 @@ body.summit .top-main-nav [aria-current="page"] {
             var(--theme-palette-surface-card, rgba(17,26,37,.88))
         ) !important;
 }
+
+
+/* PREMIUM ALPINE — SVG-Liniensymbole der Hauptnavigation, Schritt 2.
+   Die Symbole verwenden die jeweilige Theme-Akzentfarbe statt Emoji-Farben.
+   Speichern-Plus und die sechs Mehr-Punkte bleiben davon unberührt. */
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+.app-wrapper .accordion-header .header-actions > .top-main-nav .top-nav-icon-svg {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 22px !important;
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    color: color-mix(
+        in srgb,
+        var(--theme-palette-accent, var(--accent, #ad7d12)) 76%,
+        var(--theme-palette-text, #f3f7fb)
+    ) !important;
+    opacity: .96 !important;
+}
+
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+.app-wrapper .accordion-header .header-actions > .top-main-nav .top-nav-icon-svg > svg {
+    display: block !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: visible;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 1.65 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+}
+
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+.app-wrapper .accordion-header .header-actions > .top-main-nav .top-nav-btn:is(.view-active, .more-view-active) .top-nav-icon-svg {
+    color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+    opacity: 1 !important;
+}
+
+@media (max-width: 380px) {
+    :is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+    .app-wrapper .accordion-header .header-actions > .top-main-nav .top-nav-icon-svg {
+        flex-basis: 20px !important;
+        width: 20px !important;
+        height: 20px !important;
+    }
+}
