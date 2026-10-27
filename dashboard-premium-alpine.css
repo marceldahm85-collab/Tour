@@ -318,27 +318,51 @@
 
 
 
-/* Meilenstein-Fortschritt: Track auf die volle Kachel-Innenbreite legen.
-   Die Leiste ist bewusst direkt nach dem Kopfbereich Kind der Kachel – niemals
-   Kind des Textcontainers .dash-ms-info, dessen Breite vom Inhalt abhängen kann. */
-#dashboard-view #dash-milestones-section .dash-milestone-tile > .dash-ms-progress-wrap {
+/* Meilenstein-Fortschritt: platzsparend rechts neben dem Symbol,
+   aber unabhängig von Textbreite und Prozentangabe bis zur rechten Kachel-Innenkante. */
+#dashboard-view #dash-milestones-section .dash-milestone-tile .dash-ms-top {
+    --dash-ms-track-icon-size: 44px;
+    --dash-ms-track-gap: 8px;
+    position: relative !important;
+    width: 100%;
+    min-width: 0;
+}
+
+#dashboard-view #dash-milestones-section .dash-milestone-tile .dash-ms-top > .dash-ms-progress-wrap {
     display: block !important;
-    position: relative;
-    width: 100% !important;
+    position: absolute !important;
+    left: calc(var(--dash-ms-track-icon-size) + var(--dash-ms-track-gap)) !important;
+    right: 0 !important;
+    bottom: 4px !important;
+    width: auto !important;
     min-width: 0 !important;
     max-width: none !important;
-    flex: 0 0 auto !important;
-    align-self: stretch !important;
-    margin-inline: 0 !important;
+    height: 4px !important;
+    margin: 0 !important;
+    flex: none !important;
     box-sizing: border-box !important;
     border: 1px solid rgba(255, 255, 255, .24) !important;
+    border-radius: 999px;
     background: rgba(255, 255, 255, .16) !important;
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, .22) !important;
 }
 
-#dashboard-view #dash-milestones-section .dash-milestone-tile > .dash-ms-progress-wrap > .dash-ms-progress-bar {
+#dashboard-view #dash-milestones-section .dash-milestone-tile .dash-ms-top > .dash-ms-progress-wrap > .dash-ms-progress-bar {
     display: block;
     max-width: none;
     height: 100%;
     box-sizing: border-box;
+}
+
+/* Match the horizontal offset to the smaller Alpine symbol on narrow screens. */
+@media (max-width: 380px) {
+    #dashboard-view #dash-milestones-section .dash-ms-top {
+        --dash-ms-track-icon-size: 38px;
+    }
+}
+
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    #dashboard-view #dash-milestones-section .dash-ms-top {
+        --dash-ms-track-icon-size: 36px;
+    }
 }
