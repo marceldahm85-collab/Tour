@@ -8246,7 +8246,6 @@ body.summit .top-main-nav [aria-current="page"] {
     min-height: 40px !important;
     padding: 5px 4px !important;
     border: 1px solid rgba(255,255,255,0.14) !important;
-    border-radius: 10px !important;
     background: linear-gradient(180deg, var(--app-surface-card), var(--app-surface-subtle)) !important;
     color: var(--app-text-primary) !important;
     font: inherit !important;
@@ -8284,7 +8283,6 @@ body.summit .top-main-nav [aria-current="page"] {
     :is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold)) #chart-view > .stats-section-switch > .stats-section-btn {
         min-height: 38px !important;
         padding: 5px 3px !important;
-        border-radius: 9px !important;
         font-size: 10px !important;
     }
 }
