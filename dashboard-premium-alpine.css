@@ -85,9 +85,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex: 0 0 26px;
-    width: 26px;
-    height: 28px;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 36px;
     color: var(--theme-palette-accent, var(--accent, #ad7d12));
     font-size: 0 !important;
     line-height: 1;
@@ -95,13 +95,13 @@
 
 #dashboard-view #dash-milestones-section .dash-ms-symbol-svg {
     display: block;
-    width: 26px;
-    height: 28px;
+    width: 34px;
+    height: 36px;
     overflow: visible;
     filter:
-        drop-shadow(0 1px 0 color-mix(in srgb, white 19%, transparent))
-        drop-shadow(0 2px 2px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 38%, transparent))
-        drop-shadow(0 0 5px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 15%, transparent));
+        drop-shadow(0 1px 0 color-mix(in srgb, white 20%, transparent))
+        drop-shadow(0 2px 3px rgba(0,0,0,.48))
+        drop-shadow(0 2px 3px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 36%, transparent));
 }
 
 #dashboard-view #dash-milestones-section .dash-ms-label {
@@ -130,14 +130,14 @@
 
 @media (max-width: 380px) {
     #dashboard-view #dash-milestones-section .dash-ms-icon {
-        flex-basis: 23px;
-        width: 23px;
-        height: 25px;
+        flex-basis: 30px;
+        width: 30px;
+        height: 32px;
     }
 
     #dashboard-view #dash-milestones-section .dash-ms-symbol-svg {
-        width: 23px;
-        height: 25px;
+        width: 30px;
+        height: 32px;
     }
 
     #dashboard-view #dash-milestones-section .dash-ms-watermark {
@@ -148,14 +148,14 @@
 
 @media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
     #dashboard-view #dash-milestones-section .dash-ms-icon {
-        flex-basis: 22px;
-        width: 22px;
-        height: 24px;
+        flex-basis: 27px;
+        width: 27px;
+        height: 29px;
     }
 
     #dashboard-view #dash-milestones-section .dash-ms-symbol-svg {
-        width: 22px;
-        height: 24px;
+        width: 27px;
+        height: 29px;
     }
 
     #dashboard-view #dash-milestones-section .dash-ms-watermark {
