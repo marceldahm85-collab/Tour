@@ -18,7 +18,10 @@
     width: 20px;
     height: 18px;
     color: var(--theme-palette-accent, var(--accent, #ad7d12));
-    opacity: .96;
+    opacity: .98;
+    filter:
+        drop-shadow(0 1px 0 color-mix(in srgb, white 18%, transparent))
+        drop-shadow(0 2px 3px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 34%, transparent));
 }
 
 #dashboard-view #dash-milestones-section .dash-section-mountain-mark svg {
@@ -31,6 +34,10 @@
     position: relative;
     isolation: isolate;
     overflow: hidden;
+    border-color: color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 18%, var(--app-surface-border, rgba(255,255,255,.08)));
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.055),
+        0 3px 10px rgba(0,0,0,.09);
 }
 
 #dashboard-view #dash-milestones-section .dash-ms-watermark {
@@ -42,12 +49,27 @@
     display: block;
     width: min(42%, 170px);
     color: var(--theme-palette-accent, var(--accent, #ad7d12));
-    opacity: .13;
+    opacity: .25;
     pointer-events: none;
     overflow: hidden;
+    filter: drop-shadow(0 2px 2px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 22%, transparent));
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-watermark::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        ellipse at 72% 38%,
+        color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 24%, transparent),
+        transparent 70%
+    );
+    opacity: .65;
 }
 
 #dashboard-view #dash-milestones-section .dash-ms-watermark svg {
+    position: relative;
+    z-index: 1;
     display: block;
     width: 100%;
     height: 100%;
@@ -76,7 +98,10 @@
     width: 26px;
     height: 28px;
     overflow: visible;
-    filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 22%, transparent));
+    filter:
+        drop-shadow(0 1px 0 color-mix(in srgb, white 19%, transparent))
+        drop-shadow(0 2px 2px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 38%, transparent))
+        drop-shadow(0 0 5px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 15%, transparent));
 }
 
 #dashboard-view #dash-milestones-section .dash-ms-label {
@@ -117,7 +142,7 @@
 
     #dashboard-view #dash-milestones-section .dash-ms-watermark {
         width: 38%;
-        opacity: .10;
+        opacity: .20;
     }
 }
 
@@ -134,7 +159,7 @@
     }
 
     #dashboard-view #dash-milestones-section .dash-ms-watermark {
-        opacity: .08;
+        opacity: .15;
     }
 }
 
