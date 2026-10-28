@@ -128,12 +128,12 @@
 
     function getMilestoneModalType() {
         const title = document.getElementById('milestone-modal-title');
-        const label = String(title?.textContent || '').replace(/^[^\\p{L}\\p{N}]+/u, '').trim();
-        if (/\\bstrecke\\b/i.test(label)) return 'dist';
-        if (/\\baufstieg\\b/i.test(label)) return 'asc';
-        if (/\\bgehzeit\\b/i.test(label)) return 'time';
-        if (/\\bgipfel\\b/i.test(label)) return 'peaks';
-        if (/\\bschritte\\b/i.test(label)) return 'steps';
+        const label = String(title?.textContent || '').toLocaleLowerCase('de');
+        if (label.includes('strecke')) return 'dist';
+        if (label.includes('aufstieg')) return 'asc';
+        if (label.includes('gehzeit')) return 'time';
+        if (label.includes('gipfel')) return 'peaks';
+        if (label.includes('schritte')) return 'steps';
         return null;
     }
 
