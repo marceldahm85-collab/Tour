@@ -41,7 +41,9 @@ function restoreMapUiState() {
         mapQuickFilters = new Set(['all']);
     }
 
-    syncMapQuickFilterButtons();
+    document.querySelectorAll('#map-quick-filters .quick-filter-btn').forEach(btn => {
+        btn.classList.toggle('active', mapQuickFilters.has(btn.dataset.mqf));
+    });
 
     document.querySelectorAll('.map-mode-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.mode === currentMapMode);
@@ -51,14 +53,6 @@ function restoreMapUiState() {
     if (performanceLegend) {
         performanceLegend.hidden = currentMapMode !== 'performance';
     }
-}
-
-function syncMapQuickFilterButtons() {
-    document.querySelectorAll('#map-quick-filters .quick-filter-btn').forEach(btn => {
-        const isActive = mapQuickFilters.has(btn.dataset.mqf);
-        btn.classList.toggle('active', isActive);
-        btn.setAttribute('aria-pressed', String(isActive));
-    });
 }
 
 function saveMapUiState() {
@@ -415,7 +409,9 @@ const tmp = L.circleMarker(e.latlng, {
                 }
             }
 
-            syncMapQuickFilterButtons();
+            document.querySelectorAll('#map-quick-filters .quick-filter-btn').forEach(b => {
+                b.classList.toggle('active', mapQuickFilters.has(b.dataset.mqf));
+            });
 
             saveMapUiState();
             refreshCurrentMap();
