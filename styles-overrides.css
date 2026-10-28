@@ -1153,7 +1153,7 @@
 
         display: grid !important;
         grid-template-columns: 1fr 1fr;
-        grid-template-rows: 32px 32px;
+        grid-template-rows: 36px 36px;
 
         width: 100% !important;
         max-width: none !important;
@@ -1205,8 +1205,8 @@
      */
     #map-view .map-year-filter-wrap > .dash-year-arrow-btn {
         width: 100% !important;
-        height: 32px !important;
-        min-height: 32px !important;
+        height: 36px !important;
+        min-height: 36px !important;
 
         margin: 0 !important;
         padding: 0 !important;
