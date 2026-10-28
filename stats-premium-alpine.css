@@ -555,26 +555,26 @@
 @media (max-width: 768px) and (orientation: portrait) {
     #stats-highlights-page #highlights-content .highlight-groups {
         grid-template-columns: minmax(0, 1fr) !important;
-        gap: 6px !important;
+        gap: 5px !important;
     }
 
     #stats-highlights-page #highlights-content .highlight-group {
-        padding: 8px !important;
+        padding: 7px 8px !important;
     }
 
     #stats-highlights-page #highlights-content .highlight-group-title {
         font-size: 10px !important;
         line-height: 1.2 !important;
-        margin-bottom: 6px !important;
+        margin-bottom: 5px !important;
         gap: 5px !important;
     }
 
     #stats-highlights-page #highlights-content .highlight-group-list {
-        gap: 4px !important;
+        gap: 3px !important;
     }
 
     #stats-highlights-page #highlights-content .highlight-group-list > li {
-        padding: 6px 7px !important;
+        padding: 5px 7px !important;
         column-gap: 6px !important;
     }
 
@@ -597,15 +597,15 @@
 /* Auch auf besonders schmalen Displays bleibt die größere, einspaltige Darstellung aktiv. */
 @media (max-width: 380px) and (orientation: portrait) {
     #stats-highlights-page #highlights-content .highlight-groups {
-        gap: 5px !important;
+        gap: 4px !important;
     }
 
     #stats-highlights-page #highlights-content .highlight-group {
-        padding: 7px !important;
+        padding: 6px 7px !important;
     }
 
     #stats-highlights-page #highlights-content .highlight-group-list > li {
-        padding: 6px !important;
+        padding: 5px 6px !important;
         column-gap: 4px !important;
     }
 }
