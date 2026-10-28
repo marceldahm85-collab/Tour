@@ -126,9 +126,18 @@
         enhanceDashboardStatIcons();
     }
 
+    const MILESTONE_MODAL_TITLES = {
+        dist: 'Strecke',
+        asc: 'Aufstieg',
+        time: 'Gehzeit',
+        peaks: 'Gipfel',
+        steps: 'Schritte'
+    };
+
     function getMilestoneModalType() {
         const title = document.getElementById('milestone-modal-title');
-        const label = String(title?.textContent || '').toLocaleLowerCase('de');
+        const formattedTitle = title?.querySelector('.milestone-modal-title-text');
+        const label = String(formattedTitle?.textContent || title?.textContent || '').toLocaleLowerCase('de');
         if (label.includes('strecke')) return 'dist';
         if (label.includes('aufstieg')) return 'asc';
         if (label.includes('gehzeit')) return 'time';
@@ -137,42 +146,53 @@
         return null;
     }
 
-    function enhanceMilestoneModalBackground() {
+    function enhanceMilestoneModalTitle() {
         const modal = document.getElementById('milestone-modal');
-        const card = modal?.querySelector('.modal-card');
+        const title = document.getElementById('milestone-modal-title');
         const type = getMilestoneModalType();
-        if (!modal || !card || !type) return;
+        if (!modal || !title || !type) return;
 
-        let watermark = card.querySelector(':scope > .milestone-modal-watermark');
-        if (!watermark) {
-            watermark = document.createElement('img');
-            watermark.className = 'milestone-modal-watermark';
-            watermark.alt = '';
-            watermark.setAttribute('aria-hidden', 'true');
-            watermark.setAttribute('draggable', 'false');
-            watermark.setAttribute('decoding', 'async');
-            card.insertBefore(watermark, card.firstChild);
+        const titleText = MILESTONE_MODAL_TITLES[type];
+        const currentText = title.querySelector('.milestone-modal-title-text');
+        if (title.dataset.milestoneModalTitleType === type &&
+            currentText?.textContent === titleText &&
+            title.querySelector('.milestone-modal-title-badge')) {
+            modal.querySelector('.milestone-modal-watermark')?.remove();
+            return;
         }
 
-        const source = ICON_ASSETS[type] || ICON_ASSETS.asc;
-        if (watermark.dataset.milestoneType !== type) {
-            watermark.src = source;
-            watermark.dataset.milestoneType = type;
-            modal.dataset.milestoneModalType = type;
-        }
+        const badge = document.createElement('img');
+        badge.className = 'milestone-modal-title-badge';
+        badge.src = ICON_ASSETS[type] || ICON_ASSETS.asc;
+        badge.alt = '';
+        badge.setAttribute('aria-hidden', 'true');
+        badge.setAttribute('draggable', 'false');
+        badge.setAttribute('decoding', 'async');
+
+        const text = document.createElement('span');
+        text.className = 'milestone-modal-title-text';
+        text.textContent = titleText;
+
+        title.replaceChildren(badge, text);
+        title.dataset.milestoneModalTitleType = type;
+        title.setAttribute('aria-label', titleText);
+        modal.dataset.milestoneModalType = type;
+
+        // Entfernt ggf. ein Abzeichen aus der früheren Hintergrund-Variante.
+        modal.querySelector('.milestone-modal-watermark')?.remove();
     }
 
-    function observeMilestoneModalBackground() {
+    function observeMilestoneModalTitle() {
         const title = document.getElementById('milestone-modal-title');
-        if (!title || title.dataset.milestoneBackgroundObserver === 'true') return;
+        if (!title || title.dataset.milestoneTitleObserver === 'true') return;
 
-        title.dataset.milestoneBackgroundObserver = 'true';
-        new MutationObserver(enhanceMilestoneModalBackground).observe(title, {
+        title.dataset.milestoneTitleObserver = 'true';
+        new MutationObserver(enhanceMilestoneModalTitle).observe(title, {
             childList: true,
             characterData: true,
             subtree: true
         });
-        enhanceMilestoneModalBackground();
+        enhanceMilestoneModalTitle();
     }
 
     function buildIcon(type) {
@@ -273,7 +293,7 @@
         observeDashboardStatIcons();
         enhanceDashboardStatIcons();
         enhanceChartTabIcons();
-        observeMilestoneModalBackground();
+        observeMilestoneModalTitle();
     }
 
     if (document.readyState === 'loading') {
