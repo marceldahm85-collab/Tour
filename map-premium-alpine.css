@@ -26,9 +26,8 @@
     isolation: isolate;
 }
 
-/* Kompakte Premium-Flächen für die vorhandenen Steuergruppen. */
-:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
-#map-view .map-year-filter-wrap,
+/* Kompakte Premium-Flächen für die vorhandenen Steuergruppen.
+   Der Jahresfilter-Wrapper bleibt – wie im Statsview – transparent. */
 :is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
 #map-view .map-mode-toggle,
 :is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
@@ -53,6 +52,32 @@
         0 5px 16px rgba(0,0,0,.15) !important;
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
+}
+
+
+
+/* Keine gemeinsame Hintergrundbox um Jahresdropdown und Pfeile.
+   Nur die einzelnen Controls erhalten die Statsview-Oberfläche. */
+#map-view .map-year-filter-wrap {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-color: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    outline: 0 !important;
+}
+
+#map-view .map-year-filter-wrap::before,
+#map-view .map-year-filter-wrap::after {
+    content: none !important;
+    display: none !important;
+    background: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
 }
 
 /* Jahresauswahl und Pfeile spiegeln die Controls im Statsview. */
