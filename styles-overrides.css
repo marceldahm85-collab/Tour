@@ -1183,8 +1183,8 @@
 
         width: 100% !important;
         min-width: 0 !important;
-        height: 32px !important;
-        min-height: 32px !important;
+        height: 36px !important;
+        min-height: 36px !important;
 
         box-sizing: border-box;
     }
@@ -1193,8 +1193,8 @@
         > .mob-sel-wrap
         > .mob-sel-btn {
         width: 100% !important;
-        height: 32px !important;
-        min-height: 32px !important;
+        height: 36px !important;
+        min-height: 36px !important;
 
         padding: 6px 8px;
         box-sizing: border-box;
