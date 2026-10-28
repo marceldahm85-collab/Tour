@@ -13351,19 +13351,6 @@ li[data-stat-type="tours"] {
 
 
 /*
- * Aktive Kachel leicht hervorheben,
- * ohne ihre vorhandene Theme-Farbe
- * zu verändern.
- */
-#stats-diagrams-page
-#chart-tabs
-.chart-tab.active {
-    transform:
-        translateY(-1px);
-}
-
-
-/*
  * Beim Antippen wieder kurz zurück.
  */
 #stats-diagrams-page
@@ -19908,7 +19895,6 @@ body:not(.dark):not(.green):not(.summit):not(.gold) .slope-toggle {
 }
 
 /* Aktive Elemente verwenden ausschließlich den im Editor eingestellten Akzent. */
-.chart-tab.active,
 .quick-filter-btn.active,
 .filter-section-nav-btn.active,
 #tour-view .plan-section-btn.active,
