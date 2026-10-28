@@ -127,7 +127,7 @@
 <link rel="stylesheet" href="./stats-premium-alpine.css?v=16">
 <link rel="stylesheet" href="./map-premium-alpine.css?v=19">
 <link rel="stylesheet" href="./appview-premium-alpine.css?v=9">
-<link rel="stylesheet" href="./plan-premium-alpine.css?v=3">
+<link rel="stylesheet" href="./plan-premium-alpine.css?v=4">
 
 </head>
 <body>
@@ -925,19 +925,19 @@
     <div class="plan-overview-grid">
 
       <div class="plan-overview-tile">
-        <span class="plan-overview-icon">🥾</span>
+        <span class="plan-overview-icon plan-icon-svg" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><circle cx="5" cy="18" r="2"/><circle cx="19" cy="6" r="2"/><path d="M7 17c4-1 2-6 6-7s4-3 4-4"/></svg></span>
         <span class="plan-overview-value" id="ov-total-tours">0</span>
         <span class="plan-overview-label">Touren</span>
       </div>
 
       <div class="plan-overview-tile">
-        <span class="plan-overview-icon">🏔️</span>
+        <span class="plan-overview-icon plan-icon-svg" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="m3 20 6.2-11.5 3.3 5.2 2.4-3.6L21 20H3Z"/><path d="m8.1 11.1 1.2 1.8 1.1-1.6"/></svg></span>
         <span class="plan-overview-value" id="ov-total-peaks">0</span>
         <span class="plan-overview-label">Gipfel</span>
       </div>
 
       <div class="plan-overview-tile">
-        <span class="plan-overview-icon">📏</span>
+        <span class="plan-overview-icon plan-icon-svg" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="m4 8 4-4 12 12-4 4L4 8Z"/><path d="m7.2 8.8 2-2m1.5 5.5 2-2m1.5 5.5 2-2"/></svg></span>
         <span class="plan-overview-value">
           <span id="ov-total-distance">0</span>
           <small>km</small>
@@ -946,7 +946,7 @@
       </div>
 
       <div class="plan-overview-tile">
-        <span class="plan-overview-icon">↗️</span>
+        <span class="plan-overview-icon plan-icon-svg" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M4 20h16"/><path d="m5 15 5-5 3 3 6-7"/><path d="M14 6h5v5"/></svg></span>
         <span class="plan-overview-value">
           <span id="ov-total-ascent">0</span>
           <small>hm</small>
@@ -955,7 +955,7 @@
       </div>
 
       <div class="plan-overview-tile">
-        <span class="plan-overview-icon">⏱️</span>
+        <span class="plan-overview-icon plan-icon-svg" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg></span>
         <span class="plan-overview-value" id="ov-total-time">0:00</span>
         <span class="plan-overview-label">Gehzeit</span>
       </div>
@@ -971,7 +971,7 @@
     class="box plan-section-panel plan-panel-active"
     data-plan-panel="plan">
       <div class="box-header">
-        <span>🎯 Tour planen</span>
+        <span class="plan-title-with-icon"><span class="plan-title-icon plan-icon-svg" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2.2 5.1-4.8 2 2-4.8 5-2.3Z"/></svg></span>Tour planen</span>
         <div class="arrow"></div>
       </div>
       <div class="box-content">
@@ -1150,7 +1150,7 @@
 
 <div id="plan-live-preview" class="plan-live-preview" aria-live="polite">
     <div class="plan-live-preview-head">
-        <span>⚡ Live-Auswertung</span>
+        <span class="plan-title-with-icon"><span class="plan-title-icon plan-icon-svg" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M3 12h4l2.1-5.5L13 18l2.1-6H21"/></svg></span>Live-Auswertung</span>
         <small>persönliche Einordnung</small>
     </div>
     <div id="plan-live-preview-content" class="plan-live-preview-content">
@@ -1222,7 +1222,7 @@
     id="planned-tours-list"
     data-plan-panel="list">
       <div class="box-header">
-        <span>🗺️ Tourliste</span>
+        <span class="plan-title-with-icon"><span class="plan-title-icon plan-icon-svg" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r=".8"/><circle cx="4.5" cy="12" r=".8"/><circle cx="4.5" cy="18" r=".8"/></svg></span>Tourliste</span>
         <div class="arrow"></div>
       </div>
       <div class="box-content">
@@ -1241,7 +1241,7 @@
     id="planned-table-box"
     data-plan-panel="list">
       <div class="box-header">
-        <span>🏕️ Geplante Touren</span>
+        <span class="plan-title-with-icon"><span class="plan-title-icon plan-icon-svg" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M3.5 9h17M3.5 14h17M9 9v11M15 9v11"/></svg></span>Geplante Touren</span>
         <div class="arrow"></div>
       </div>
       <div class="box-content">
@@ -1276,7 +1276,7 @@
     id="planned-peaks-box"
     data-plan-panel="peaks">
     <div class="box-header">
-        <span>🏔️ Geplante Gipfel</span>
+        <span class="plan-title-with-icon"><span class="plan-title-icon plan-icon-svg" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="m3 20 6.2-11.5 3.3 5.2 2.4-3.6L21 20H3Z"/><path d="m8.1 11.1 1.2 1.8 1.1-1.6"/></svg></span>Geplante Gipfel</span>
         <div class="arrow"></div>
     </div>
     <div class="box-content">
@@ -1302,7 +1302,7 @@
     id="checklist-box"
     data-plan-panel="check">
       <div class="box-header">
-        <span>✅ Checkliste</span>
+        <span class="plan-title-with-icon"><span class="plan-title-icon plan-icon-svg" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><rect x="6" y="4.5" width="12" height="16" rx="2"/><path d="M9 4.5V3h6v1.5"/><path d="m9 12 2 2 4-4"/></svg></span>Checkliste</span>
         <div class="arrow"></div>
       </div>
 
@@ -1390,7 +1390,7 @@
           type="button"
           class="plan-section-btn active"
           data-plan-section="plan">
-          <span class="plan-section-icon">🎯</span>
+          <span class="plan-section-icon plan-icon-svg" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2.2 5.1-4.8 2 2-4.8 5-2.3Z"/></svg></span>
           <span>Planen</span>
       </button>
 
@@ -1398,7 +1398,7 @@
           type="button"
           class="plan-section-btn"
           data-plan-section="list">
-          <span class="plan-section-icon">🗺️</span>
+          <span class="plan-section-icon plan-icon-svg" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r=".8"/><circle cx="4.5" cy="12" r=".8"/><circle cx="4.5" cy="18" r=".8"/></svg></span>
           <span>Liste</span>
       </button>
 
@@ -1406,7 +1406,7 @@
           type="button"
           class="plan-section-btn"
           data-plan-section="peaks">
-          <span class="plan-section-icon">🏔️</span>
+          <span class="plan-section-icon plan-icon-svg" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="m3 20 6.2-11.5 3.3 5.2 2.4-3.6L21 20H3Z"/><path d="m8.1 11.1 1.2 1.8 1.1-1.6"/></svg></span>
           <span>Gipfel</span>
       </button>
 
@@ -1414,7 +1414,7 @@
           type="button"
           class="plan-section-btn"
           data-plan-section="check">
-          <span class="plan-section-icon">✅</span>
+          <span class="plan-section-icon plan-icon-svg" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><rect x="6" y="4.5" width="12" height="16" rx="2"/><path d="M9 4.5V3h6v1.5"/><path d="m9 12 2 2 4-4"/></svg></span>
           <span>Check</span>
       </button>
 
@@ -2510,7 +2510,7 @@
     </div>
 </div>
 
-<script src="./app-main-20261019.js?v=19" defer></script>
+<script src="./app-main-20261019.js?v=20" defer></script>
 <script src="./stats-premium-alpine.js?v=10" defer></script>
 <script src="./theme-editor-surface-compat.js?v=4" defer></script>
 <script src="./theme-editor-unified.js?v=21" defer></script>
