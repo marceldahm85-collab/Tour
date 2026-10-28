@@ -41,6 +41,56 @@
     };
 
 
+    /* Wiederverwendung derselben Premium-Line-Art in den Diagramm-Kacheln.
+       Die Meilenstein-Diagramme verwenden bewusst die identischen Rundgrafiken
+       wie die fünf Dashboard-Meilensteine. */
+    const CHART_TAB_STAT_MARKS = {
+        bigTours: 'bigTours',
+        steps: 'steps',
+        peaks: 'gipfel',
+        performanceIndex: 'anstieg',
+        speed: 'speed',
+        gradient: 'steigung',
+        ascentRate: 'aufstieg',
+        avgSteps: 'steps',
+        scatterDistanceAscent: 'strecke',
+        scatterTimeAscent: 'gehzeit',
+        scatterTimeDistance: 'gehzeit',
+        regions: 'touren'
+    };
+    const CHART_TAB_MILESTONE_ICONS = {
+        msDistance: ICON_ASSETS.dist,
+        msAscent: ICON_ASSETS.asc,
+        msTime: ICON_ASSETS.time,
+        msPeaks: ICON_ASSETS.peaks
+    };
+
+    function enhanceChartTabIcons() {
+        const chartView = document.querySelector('#chart-view');
+        if (!chartView) return;
+
+        chartView.querySelectorAll('#chart-tabs .chart-tab[data-chart]').forEach(tile => {
+            const type = tile.dataset.chart;
+            const icon = tile.querySelector('.chart-tab-icon');
+            if (!icon || icon.dataset.premiumAlpineChartIcon === type) return;
+
+            const milestoneSrc = CHART_TAB_MILESTONE_ICONS[type];
+            if (milestoneSrc) {
+                icon.innerHTML = '<img class="chart-tab-ms-art" src="' + milestoneSrc +
+                    '" alt="" aria-hidden="true" decoding="async" draggable="false">';
+            } else {
+                const markKey = CHART_TAB_STAT_MARKS[type];
+                const svg = DASH_STAT_MARKS[markKey];
+                if (!svg) return;
+                icon.innerHTML = svg;
+            }
+
+            icon.dataset.premiumAlpineChartIcon = type;
+            icon.setAttribute('aria-hidden', 'true');
+        });
+    }
+
+
     function enhanceDashboardStatIcons() {
         const dashboard = document.querySelector('#dashboard-view');
         if (!dashboard) return;
@@ -170,6 +220,7 @@
         enhanceRecentTours();
         observeDashboardStatIcons();
         enhanceDashboardStatIcons();
+        enhanceChartTabIcons();
     }
 
     if (document.readyState === 'loading') {
