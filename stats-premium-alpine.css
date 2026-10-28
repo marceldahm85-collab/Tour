@@ -550,3 +550,62 @@
     max-width: none !important;
     flex: 0 0 100% !important;
 }
+
+/* Highlights auf dem Smartphone etwas großzügiger nutzen, ohne auf zwei Spalten zu wechseln. */
+@media (max-width: 768px) and (orientation: portrait) {
+    #stats-highlights-page #highlights-content .highlight-groups {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 8px !important;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-group {
+        padding: 8px !important;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-group-title {
+        font-size: 10px !important;
+        line-height: 1.2 !important;
+        margin-bottom: 6px !important;
+        gap: 5px !important;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-group-list {
+        gap: 4px !important;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-group-list > li {
+        padding: 6px 7px !important;
+        column-gap: 6px !important;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-row-label,
+    #stats-highlights-page #highlights-content .highlight-row-text,
+    #stats-highlights-page #highlights-content .highlight-group-list > li .stats-label,
+    #stats-highlights-page #highlights-content .highlight-group-list > li .stats-value {
+        font-size: 10px !important;
+        line-height: 1.2 !important;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-row-icon,
+    #stats-highlights-page #highlights-content .highlight-row-icon .stats-premium-content-icon {
+        width: 15px !important;
+        height: 15px !important;
+        flex-basis: 15px !important;
+    }
+}
+
+/* Auch auf besonders schmalen Displays bleibt die größere, einspaltige Darstellung aktiv. */
+@media (max-width: 380px) and (orientation: portrait) {
+    #stats-highlights-page #highlights-content .highlight-groups {
+        gap: 7px !important;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-group {
+        padding: 7px !important;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-group-list > li {
+        padding: 6px !important;
+        column-gap: 4px !important;
+    }
+}
