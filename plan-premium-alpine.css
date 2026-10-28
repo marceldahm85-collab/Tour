@@ -445,3 +445,20 @@ html body #tour-view #checklist-box .checklist-mode-btn.active {
     border-color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
     color: var(--theme-palette-accent-text, var(--accent-text-color, #fff)) !important;
 }
+
+
+/* CHECKLISTE — der Umschalter selbst bleibt transparent.
+   Nur die beiden Auswahlflächen erhalten ihre eigene Oberfläche;
+   so kann keine globale Theme-Regel die dunkle Hintergrundbox reaktivieren. */
+html body #tour-view #checklist-box .checklist-mode-toggle {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-color: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
