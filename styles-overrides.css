@@ -8863,3 +8863,91 @@ body.summit .top-main-nav [aria-current="page"] {
 #more-menu.more-menu .more-menu-item:active .more-menu-icon-svg {
     color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
 }
+
+
+
+/* PREMIUM ALPINE — Hauptnavigation: Speichern und Mehr exakt an die
+   drei übrigen Navigationselemente angleichen. Nur Maße und Typografie;
+   keine Änderung an View-Umschaltung, Farblogik aktiver Zustände oder Funktionen. */
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+.app-wrapper .accordion-header .header-actions > .top-main-nav > .top-nav-save {
+    border-radius: 15px !important;
+    padding: 4px 2px !important;
+    gap: 3px !important;
+    box-sizing: border-box !important;
+}
+
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+.app-wrapper .accordion-header .header-actions > .top-main-nav > .top-nav-save .top-nav-plus {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 22px !important;
+    width: 22px !important;
+    height: 22px !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-family: var(--app-font, inherit) !important;
+    font-size: 22px !important;
+    font-weight: 300 !important;
+    line-height: 1 !important;
+    opacity: .96 !important;
+}
+
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+.app-wrapper .accordion-header .header-actions > .top-main-nav > .top-nav-save .top-nav-label {
+    font-family: var(--app-font, inherit) !important;
+    line-height: 1 !important;
+    font-weight: 650 !important;
+    letter-spacing: normal !important;
+    opacity: .68 !important;
+}
+
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+.app-wrapper .accordion-header .header-actions > .top-main-nav > .top-nav-more-wrap {
+    display: flex !important;
+    align-items: stretch !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+}
+
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+.app-wrapper .accordion-header .header-actions > .top-main-nav > .top-nav-more-wrap > #more-toggle {
+    align-self: stretch !important;
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    border-radius: 15px !important;
+    padding: 4px 2px !important;
+    gap: 3px !important;
+    box-sizing: border-box !important;
+}
+
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+.app-wrapper .accordion-header .header-actions > .top-main-nav > .top-nav-more-wrap > #more-toggle .more-dots {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 22px !important;
+    width: 22px !important;
+    height: 22px !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-family: var(--app-font, inherit) !important;
+    font-size: 19px !important;
+    line-height: 1 !important;
+}
+
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+.app-wrapper .accordion-header .header-actions > .top-main-nav > .top-nav-more-wrap > #more-toggle:not(.more-view-active) .top-nav-label {
+    font-family: var(--app-font, inherit) !important;
+    line-height: 1 !important;
+    font-weight: 650 !important;
+    letter-spacing: normal !important;
+    opacity: .68 !important;
+}
