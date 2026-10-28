@@ -273,8 +273,8 @@
         '.peak-summary-card', '.stats-structure-typical-card', '.stats-structure-type-card',
         '.stats-structure-burden-card', '.tour-history-summary > div',
         '.activity-detail-stat-grid > div', '.backup-status-item',
-        '.activity-detail-stat-grid > div', '#theme-view .theme-editor-option',
-        '#theme-view .theme-editor-panel'
+        '.activity-detail-stat-grid > div', '.save-form-card',
+        '#theme-view .theme-editor-option', '#theme-view .theme-editor-panel'
     ];
 
     const RADIUS_SURFACES = [
