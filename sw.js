@@ -1,11 +1,11 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Der PDF-Magazin-Renderer wird direkt über index.html geladen.
-const CACHE_NAME = 'bergtouren-cache-premium-alpine-v133';
+const CACHE_NAME = 'bergtouren-cache-premium-alpine-v134';
 
 const APP_SHELL = [
   './',
   './index.html',
-  './app-main-20261019.js?v=13',
+  './app-main-20261019.js?v=14',
   './stats-premium-alpine.js?v=10',
   './theme-editor-surface-compat.js?v=4',
   './theme-editor-unified.js?v=17',
@@ -17,7 +17,7 @@ const APP_SHELL = [
   './styles-overrides.css?v=85',
   './dashboard-premium-alpine.css?v=22',
   './stats-premium-alpine.css?v=16',
-  './map-premium-alpine.css?v=10',
+  './map-premium-alpine.css?v=11',
   './assets/bergwelt-fixed-alpine.webp',
   './assets/milestones/alpine-backdrop.svg?v=2',
   'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg/1280px-Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg',
@@ -87,6 +87,18 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   const requestUrl = new URL(event.request.url);
+  const isMaptoolkitAsset = [
+    'styles.maptoolkit.org',
+    'tiles.maptoolkit.org',
+    'fonts.maptoolkit.org',
+    'tiles.mapterhorn.com'
+  ].includes(requestUrl.hostname);
+
+  if (isMaptoolkitAsset) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   const isCriticalAppAsset = requestUrl.origin === self.location.origin &&
     /\/(?:index\.html|app-main(?:-20261019)?\.js|theme-editor-unified\.js|bergwelt(?:-badges-20261019)?\.(?:js|css))$/.test(requestUrl.pathname);
 
