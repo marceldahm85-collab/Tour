@@ -531,3 +531,126 @@
         0 0 0 1px color-mix(in srgb, var(--map-premium-accent) 6%, transparent),
         0 5px 14px rgba(0,0,0,.15) !important;
 }
+
+
+/* Schritt 2 — kompakte, klar gruppierte Kartenfilter.
+   Chips bleiben echte Toggle-Buttons; mehrere Tourmerkmale und Regionen
+   können gleichzeitig aktiv sein. */
+#map-view #map-quick-filters.map-filter-groups {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch;
+    gap: 9px !important;
+    padding: 8px !important;
+    overflow: hidden;
+}
+
+#map-view #map-quick-filters .map-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+#map-view #map-quick-filters .map-filter-group + .map-filter-group {
+    padding-top: 8px;
+    border-top: 1px solid color-mix(
+        in srgb,
+        var(--map-premium-accent) 20%,
+        var(--map-premium-border)
+    );
+}
+
+#map-view #map-quick-filters .map-filter-group-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 24px;
+    padding: 0 3px;
+}
+
+#map-view #map-quick-filters .map-filter-group-title {
+    color: var(--app-text-primary, var(--text-main, #f3f6fa));
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .09em;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+
+#map-view #map-quick-filters .map-filter-group-hint {
+    color: var(--app-text-secondary, var(--text-soft, #bac4cf));
+    font-size: 10px;
+    font-weight: 650;
+    letter-spacing: .015em;
+    white-space: nowrap;
+}
+
+#map-view #map-quick-filters .map-filter-chip-row {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 1px 2px 4px;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color:
+        color-mix(in srgb, var(--map-premium-accent) 55%, transparent)
+        transparent;
+}
+
+#map-view #map-quick-filters .map-filter-chip-row::-webkit-scrollbar {
+    height: 3px;
+}
+
+#map-view #map-quick-filters .map-filter-chip-row::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#map-view #map-quick-filters .map-filter-chip-row::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--map-premium-accent) 48%, transparent);
+    border-radius: 999px;
+}
+
+#map-view #map-quick-filters .map-filter-chip-row .quick-filter-btn {
+    flex: 0 0 auto;
+    min-height: 31px;
+    padding: 6px 10px;
+    white-space: nowrap;
+    touch-action: pan-x;
+}
+
+#map-view #map-quick-filters .map-filter-group-tours .map-filter-chip-row .quick-filter-btn {
+    min-height: 30px;
+}
+
+#map-view #map-quick-filters .map-filter-group-heading .map-filter-reset {
+    flex: 0 0 auto;
+    min-height: 26px;
+    padding: 4px 10px;
+    border-style: solid !important;
+    border-color: color-mix(in srgb, var(--map-premium-accent) 32%, var(--map-premium-border)) !important;
+    font-size: 10px;
+    line-height: 1.1;
+}
+
+#map-view #map-quick-filters .map-filter-group-heading .map-filter-reset.active {
+    border-color: color-mix(in srgb, var(--map-premium-accent) 54%, transparent) !important;
+}
+
+@media (max-width: 380px) and (orientation: portrait) {
+    #map-view #map-quick-filters .map-filter-chip-row .quick-filter-btn {
+        padding-inline: 8px;
+        font-size: 10px;
+    }
+
+    #map-view #map-quick-filters .map-filter-group-heading {
+        min-height: 22px;
+    }
+}
