@@ -285,37 +285,68 @@
     }
 
     function enhanceStatsModalTitle() {
-        const title = document.getElementById('tl-title');
-        if (!title) return;
+        const titles = [
+            document.getElementById('tl-title'),
+            document.getElementById('ds-title')
+        ].filter(Boolean);
 
-        const raw = String(title.textContent || '').trim();
-        if (!LEADING_EMOJI.test(raw)) return;
+        titles.forEach(title => {
+            const raw = String(title.textContent || '').trim();
+            if (!LEADING_EMOJI.test(raw)) return;
 
-        const clean = cleanTitle(raw);
-        const isTopTen = /\btop\s*10\b/i.test(clean);
-        const isCalendarDate = /^\d{1,2}\.\d{1,2}\.\d{4}$/.test(clean);
-        if (!isTopTen && !isCalendarDate) return;
+            const clean = cleanTitle(raw);
+            if (!clean) return;
 
-        const key = isCalendarDate ? 'calendarCheck' : contentIconKeyForLabel(clean);
-        title.replaceChildren(
-            createContentIcon(key),
-            document.createTextNode(' ' + clean)
-        );
-        title.dataset.statsPremiumModalIconKey = key;
-    }
-
-    function observeStatsModalTitle() {
-        const title = document.getElementById('tl-title');
-        if (!title || title.dataset.statsPremiumModalObserver === 'true') return;
-
-        title.dataset.statsPremiumModalObserver = 'true';
-        new MutationObserver(enhanceStatsModalTitle).observe(title, {
-            childList: true,
-            characterData: true,
-            subtree: true
+            const isCalendarDate = /^\\d{1,2}\\.\\d{1,2}\\.\\d{4}$/.test(clean);
+            const key = isCalendarDate ? 'calendarCheck' : contentIconKeyForLabel(clean);
+            title.replaceChildren(createContentIcon(key), document.createTextNode(clean));
+            title.dataset.statsPremiumModalIconKey = key;
         });
     }
 
+    function observeStatsModalTitle() {
+        ['tl-title', 'ds-title'].forEach(id => {
+            const title = document.getElementById(id);
+            if (!title || title.dataset.statsPremiumModalObserver === 'true') return;
+
+            title.dataset.statsPremiumModalObserver = 'true';
+            new MutationObserver(enhanceStatsModalTitle).observe(title, {
+                childList: true,
+                characterData: true,
+                subtree: true
+            });
+        });
+    }
+
+    function enhanceModalBodyIcons() {
+        const bodies = [
+            document.getElementById('tl-body'),
+            document.getElementById('ds-body')
+        ].filter(Boolean);
+
+        const selectors = [
+            '.stats-label',
+            '.tour-group-meta span',
+            '.tour-group-insight-label',
+            '.tour-stat-label',
+            '.tour-stat-item > span:first-child'
+        ].join(', ');
+
+        bodies.forEach(root => {
+            root.querySelectorAll(selectors).forEach(element => {
+                const raw = String(element.textContent || '').trim();
+                if (!LEADING_EMOJI.test(raw)) return;
+
+                const clean = cleanTitle(raw);
+                const isCalendarDate = /^\\d{1,2}\\.\\d{1,2}\\.\\d{4}$/.test(clean);
+                const isStageMeta = /etappe|mehrtag|gruppe/i.test(clean);
+                const key = isCalendarDate
+                    ? 'calendarCheck'
+                    : (isStageMeta ? 'backpack' : contentIconKeyForLabel(clean));
+                replaceLeadingEmoji(element, key);
+            });
+        });
+    }
     function enhanceHighlightPanoramas() {
         const highlights = document.getElementById('stats-highlights-page');
         if (!highlights) return;
@@ -354,6 +385,7 @@
         ).forEach(enhanceTitle);
         enhanceContentIcons();
         enhanceStatsModalTitle();
+        enhanceModalBodyIcons();
     }
 
     function init() {
