@@ -10504,13 +10504,41 @@ function loadMapScript(src, key) {
     });
 }
 
+const MAP_MAIN_MAPLIBRE_GL_CSS_URL = 'https://cdn.jsdelivr.net/npm/maplibre-gl@6.9.0/dist/maplibre-gl.css';
+const MAP_MAIN_MAPLIBRE_GL_MODULE_URL = 'https://cdn.jsdelivr.net/npm/maplibre-gl@6.9.0/dist/maplibre-gl.mjs';
+const MAP_MAIN_MAPLIBRE_GL_LEAFLET_URL = 'https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.1.4/leaflet-maplibre-gl.js';
+let mapMainLibreSupportPromise = null;
+
+function ensureMapLibreLayerSupport() {
+    if (window.L && typeof window.L.maplibreGL === 'function') return Promise.resolve(true);
+    if (!mapMainLibreSupportPromise) {
+        mapMainLibreSupportPromise = (async () => {
+            await loadMapStylesheet(
+                MAP_MAIN_MAPLIBRE_GL_CSS_URL,
+                'maplibre-gl-css'
+            );
+            const maplibregl = await import(MAP_MAIN_MAPLIBRE_GL_MODULE_URL);
+            window.maplibregl = maplibregl;
+            await import(MAP_MAIN_MAPLIBRE_GL_LEAFLET_URL);
+            if (!window.L || typeof window.L.maplibreGL !== 'function') {
+                throw new Error('Die Vektorkarte konnte nicht in Leaflet eingebunden werden.');
+            }
+            return true;
+        })().catch(error => {
+            mapMainLibreSupportPromise = null;
+            throw error;
+        });
+    }
+    return mapMainLibreSupportPromise;
+}
+
 function ensureMapLibraries() {
     if (
         window.L &&
         typeof window.L.heatLayer === 'function' &&
         typeof window.L.markerClusterGroup === 'function'
     ) {
-        return Promise.resolve();
+        return ensureMapLibreLayerSupport();
     }
 
     if (!mapLibrariesPromise) {
@@ -10546,6 +10574,7 @@ function ensureMapLibraries() {
             ) {
                 throw new Error('Die Karten-Bibliotheken wurden unvollständig geladen.');
             }
+            await ensureMapLibreLayerSupport();
         })().catch(error => {
             mapLibrariesPromise = null;
             throw error;
@@ -10555,29 +10584,10 @@ function ensureMapLibraries() {
     return mapLibrariesPromise;
 }
 
-/* Verhindert helle 1px-Kachelspalten bei Leaflet-Subpixel-Positionierung.
-   Die Kacheln überlappen sich minimal, damit der Container-Hintergrund nicht durchscheint. */
-function installMapTileSeamFix() {
-    const GridLayer = window.L && window.L.GridLayer;
-    if (!GridLayer || GridLayer.prototype.__mapTileSeamFixInstalled) return;
-
-    const originalInitTile = GridLayer.prototype._initTile;
-    GridLayer.include({
-        _initTile: function(tile) {
-            originalInitTile.call(this, tile);
-            const tileSize = this.getTileSize();
-            tile.style.width = (tileSize.x + 1) + 'px';
-            tile.style.height = (tileSize.y + 1) + 'px';
-        }
-    });
-    GridLayer.prototype.__mapTileSeamFixInstalled = true;
-}
-
 function initTourMap() {
     const mapEl = document.getElementById('tour-map');
     if (!mapEl) return;
 
-    installMapTileSeamFix();
     restoreMapUiState();
     populateMapYearSelect();
 
@@ -10586,7 +10596,8 @@ function initTourMap() {
     if (
         !window.L ||
         typeof window.L.heatLayer !== 'function' ||
-        typeof window.L.markerClusterGroup !== 'function'
+        typeof window.L.markerClusterGroup !== 'function' ||
+        typeof window.L.maplibreGL !== 'function'
     ) {
         if (mapLibraryInitPending) return;
 
@@ -10616,14 +10627,33 @@ function initTourMap() {
     zoom:   MAP_ZOOM,
     zoomControl: true,
     attributionControl: true,
-    closePopupOnClick: false
+    closePopupOnClick: false,
+    minZoom: 1
 });
 
     // OpenTopoMap — kostenlos, perfekt für Wanderungen
-    L.tileLayer('https://tile.top-o-map.de/{z}/{x}/{y}.png', {
-        maxZoom: 17,
-        attribution: '© <a href="https://opentopomap.org">OpenTopoMap</a> | © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    L.maplibreGL({
+        style: 'https://styles.maptoolkit.org/hiking.json',
+        attribution: '© <a href="https://www.maptoolkit.org/">Maptoolkit</a> © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
     }).addTo(tourMap);
+
+    // Das Logo ist neben der Copyright-Zeile gefordert und bleibt anklickbar.
+    const maptoolkitLogoControl = L.control({ position: 'bottomleft' });
+    maptoolkitLogoControl.onAdd = () => {
+        const link = L.DomUtil.create('a', 'maptoolkit-logo-control');
+        link.href = 'https://www.maptoolkit.org/';
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.setAttribute('aria-label', 'Maptoolkit – Kartenquelle');
+        const image = L.DomUtil.create('img', '', link);
+        image.src = 'https://www.maptoolkit.org/assets/maptoolkit-attribution.png';
+        image.alt = 'Maptoolkit';
+        image.decoding = 'async';
+        L.DomEvent.disableClickPropagation(link);
+        L.DomEvent.disableScrollPropagation(link);
+        return link;
+    };
+    maptoolkitLogoControl.addTo(tourMap);
 
 
     /* Karten-Popups automatisch nach 5 Sekunden schließen. */
