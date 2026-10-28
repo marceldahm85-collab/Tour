@@ -448,33 +448,91 @@
     }
 }
 
-/* Dashboard-Meilenstein-Modal: scharfes Abzeichen mittig als Hintergrundmotiv.
-   Die vorhandene absolute Modalpositionierung bleibt unverändert. */
-#milestone-modal .modal-card > .milestone-modal-watermark {
+/* Dashboard-Meilenstein-Modal: Abzeichen im Titel, ohne Hintergrundmotiv.
+   Die globale Modalpositionierung aus styles.css bleibt unberührt. */
+#milestone-modal .modal-card > .modal-header {
+    position: relative !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    height: 108px !important;
+    min-height: 108px !important;
+    margin: 0 0 2px !important;
+    padding: 0 !important;
+}
+
+#milestone-modal #milestone-modal-title {
     position: absolute !important;
-    z-index: 0 !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 112px !important;
+    height: 104px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    text-align: center !important;
+    line-height: 1 !important;
+    z-index: 1 !important;
+}
+
+#milestone-modal .milestone-modal-title-badge {
+    position: absolute !important;
     left: 50% !important;
     top: 50% !important;
     transform: translate(-50%, -50%) !important;
     display: block !important;
-    width: min(78%, 320px) !important;
-    height: auto !important;
+    width: 100px !important;
+    height: 100px !important;
     max-width: none !important;
-    max-height: 76% !important;
-    aspect-ratio: 1 / 1;
+    max-height: none !important;
     object-fit: contain !important;
-    opacity: .18 !important;
+    opacity: 1 !important;
     filter: none !important;
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
     pointer-events: none !important;
     user-select: none !important;
+    z-index: 0 !important;
 }
 
-/* Nur Inhaltsebenen über das Wasserzeichen legen; Modalposition und Scrolling bleiben intakt. */
-#milestone-modal .modal-card > .modal-header,
+#milestone-modal .milestone-modal-title-text {
+    position: relative !important;
+    z-index: 1 !important;
+    display: block !important;
+    max-width: 84px !important;
+    padding: 3px 5px !important;
+    border-radius: 5px !important;
+    color: #ffffff !important;
+    font-size: 13px !important;
+    font-weight: 850 !important;
+    line-height: 1.15 !important;
+    text-align: center !important;
+    overflow-wrap: anywhere;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, .98), 0 0 6px rgba(0, 0, 0, .95) !important;
+    -webkit-text-stroke: .2px rgba(0, 0, 0, .55);
+}
+
+#milestone-modal #milestone-modal-close {
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    z-index: 3 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 34px !important;
+    height: 34px !important;
+    margin: 0 !important;
+    padding: 7px !important;
+    flex-shrink: 0 !important;
+}
+
 #milestone-modal .modal-card > .modal-body {
     position: relative;
     z-index: 1;
+    margin-top: 0;
 }
