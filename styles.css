@@ -1453,10 +1453,11 @@ body:not(.touch-mode) #planned-table tbody tr:hover td{
     content: " Std.";
 }
 
-/* 📱 Mobiler Tap-Highlight – NUR unter 768px, rot */
+/* Mobile Tap-Highlights: keine feste rote Markierung auf Karten oder enthaltenen Bedienelementen. */
 @media (max-width: 768px), (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
     .box {
-        -webkit-tap-highlight-color: rgba(180, 20, 20, 0.4);
+        -webkit-tap-highlight-color: transparent !important;
+        tap-highlight-color: transparent !important;
     }
 }
 #planned-tours-list .tour-list,
@@ -1567,10 +1568,10 @@ body.dark #saved-tours-list .tour-list li {
 
 /* Aktiv = hervorgehoben */
 .slope-toggle[aria-pressed="true"] {
-    background: #f9d77e;
-    box-shadow: 0 0 10px rgba(249,215,126,0.8);
+    background: transparent;
+    box-shadow: none;
     opacity: 1;
-    transform: scale(1.05);
+    transform: none;
 }
 
 body:not(.touch-mode) .slope-toggle:hover{
@@ -1588,8 +1589,9 @@ body.dark .slope-toggle {
 }
 
 body.dark .slope-toggle[aria-pressed="true"] {
-    background: #7a0d0d;
-    box-shadow: 0 0 10px rgba(122,13,13,0.8);
+    background: transparent;
+    box-shadow: none;
+    transform: none;
 }
 
 /* Pfeil-Markierung neben Strecke */
@@ -7034,8 +7036,7 @@ button.save-btn:active,
 .mob-sel-close:active,
 .mini-btn:active,
 .map-popup-btn:active,
-.dash-year-arrow-btn:active,
-.slope-toggle:active {
+.dash-year-arrow-btn:active {
     box-shadow: inset 0 2px 5px rgba(0,0,0,0.25), inset 0 1px 1px rgba(0,0,0,0.15) !important;
     transition: box-shadow 0.08s ease, transform 0.08s ease !important;
 }
@@ -7063,7 +7064,6 @@ body.dark .tour-page-btn:active,
 body.dark .mob-sel-close:active,
 body.dark .mini-btn:active,
 body.dark .dash-year-arrow-btn:active,
-body.dark .slope-toggle:active,
 body.green button.save-btn:active,
 body.green .chart-tab:active,
 body.green .quick-filter-btn:active,
@@ -7078,8 +7078,7 @@ body.green .dash-milestone-tile:active,
 body.green .tour-page-btn:active,
 body.green .mob-sel-close:active,
 body.green .mini-btn:active,
-body.green .dash-year-arrow-btn:active,
-body.green .slope-toggle:active {
+body.green .dash-year-arrow-btn:active {
     box-shadow: inset 0 2px 6px rgba(0,0,0,0.45), inset 0 1px 1px rgba(0,0,0,0.25) !important;
 }
 
@@ -10596,10 +10595,9 @@ body.summit .slope-toggle {
 }
 
 body.summit .slope-toggle[aria-pressed="true"] {
-    background: #3aa0ff;
-
-    box-shadow:
-        0 0 12px rgba(99,183,255,0.48);
+    background: transparent;
+    box-shadow: none;
+    transform: none;
 }
 
 
@@ -10663,8 +10661,7 @@ body.summit .dash-milestone-tile:active,
 body.summit .tour-page-btn:active,
 body.summit .mob-sel-close:active,
 body.summit .mini-btn:active,
-body.summit .dash-year-arrow-btn:active,
-body.summit .slope-toggle:active {
+body.summit .dash-year-arrow-btn:active {
     box-shadow:
         inset 0 2px 6px rgba(0,0,0,0.40),
         inset 0 1px 1px rgba(0,0,0,0.22) !important;
@@ -12175,7 +12172,8 @@ select {
 #app-view
 .tour-form-row-date-slope
 .slope-toggle:active {
-    transform: scale(0.94);
+    transform: none !important;
+    box-shadow: none !important;
 }
 
 
@@ -19674,7 +19672,7 @@ input:not([type="checkbox"]):focus,
 select:focus,
 textarea:focus,
 .mob-sel-btn:focus-visible,
-button:focus-visible {
+button:focus-visible:not(#slope-toggle) {
     outline: 2px solid var(--accent) !important;
     outline-offset: 2px;
 }
