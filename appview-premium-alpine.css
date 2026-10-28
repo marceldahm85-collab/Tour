@@ -256,3 +256,57 @@
     #app-view #tour-image-pick-btn,
     #app-view #save-btn { transition: none !important; }
 }
+
+/* =========================================================
+   FINAL APPVIEW OVERRIDES — focus state + uniform field height
+   ========================================================= */
+
+/* Final, ID-specific override for legacy global hover/active/focus rules.
+   The slope toggle stays visually neutral in every interaction state;
+   only the mountain glyph uses the Editor accent. */
+html body #app-view #tour-form #slope-toggle,
+html body #app-view #tour-form #slope-toggle:hover,
+html body #app-view #tour-form #slope-toggle:active,
+html body #app-view #tour-form #slope-toggle:focus,
+html body #app-view #tour-form #slope-toggle:focus-visible,
+html body #app-view #tour-form #slope-toggle:focus:active,
+html body #app-view #tour-form #slope-toggle[aria-pressed="true"],
+html body #app-view #tour-form #slope-toggle[aria-pressed="true"]:hover,
+html body #app-view #tour-form #slope-toggle[aria-pressed="true"]:active,
+html body #app-view #tour-form #slope-toggle[aria-pressed="true"]:focus,
+html body #app-view #tour-form #slope-toggle[aria-pressed="true"]:focus-visible,
+html body #app-view #tour-form #slope-toggle[aria-pressed="true"]:focus:active {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    outline: 0 !important;
+    outline-style: none !important;
+    outline-width: 0 !important;
+    outline-offset: 0 !important;
+    box-shadow: none !important;
+    filter: none !important;
+    transform: none !important;
+    background: linear-gradient(145deg,
+        var(--app-surface-strong, rgba(255,255,255,.075)),
+        var(--app-surface-card, rgba(10,16,23,.78))
+    ) !important;
+    border: 1px solid var(--app-surface-border, var(--premium-border, rgba(255,255,255,.14))) !important;
+    border-radius: var(--editor-radius, var(--premium-radius-control, 12px)) !important;
+    color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+    -webkit-tap-highlight-color: transparent !important;
+    transition: none !important;
+}
+
+/* Every visible input/select/textarea in the save form gets the same
+   compact 32-px outer height, including conditional and dynamically added fields. */
+#app-view #tour-form input:not([type="file"]):not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+#app-view #tour-form select,
+#app-view #tour-form textarea {
+    height: 32px !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+    box-sizing: border-box !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    line-height: 1.1 !important;
+}
+
