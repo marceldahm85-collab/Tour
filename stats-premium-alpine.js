@@ -390,6 +390,38 @@
         });
     }
 
+
+    /* Dasselbe Dolomitenpanorama wie beim Gipfel-Highlight hinter die Gipfelliste legen. */
+    function enhanceStatsPeakPanorama() {
+        const page = document.getElementById('stats-peaks-page');
+        if (!page) return;
+
+        const sections = page.querySelectorAll('#stats-peaks-content > .stats-analysis-section');
+        const target = sections[1];
+        const asset = HIGHLIGHT_PANORAMAS['highlight-group-gipfel'];
+        if (!target || !asset) return;
+
+        const current = target.querySelector(':scope > .stats-peak-panorama');
+        if (current && current.dataset.photoKey === asset.key) return;
+        if (current) current.remove();
+
+        const panorama = document.createElement('span');
+        panorama.className = 'stats-peak-panorama';
+        panorama.dataset.photoKey = asset.key;
+        panorama.setAttribute('aria-hidden', 'true');
+
+        const image = document.createElement('img');
+        image.src = asset.src;
+        image.alt = '';
+        image.setAttribute('aria-hidden', 'true');
+        image.setAttribute('decoding', 'async');
+        image.setAttribute('loading', 'lazy');
+        image.draggable = false;
+
+        panorama.appendChild(image);
+        target.insertBefore(panorama, target.firstChild);
+    }
+
     /* Auf-/Zuklappzustände der Statistikboxen bleiben über Seitenwechsel und App-Neustarts erhalten. */
     const STATS_COLLAPSE_STORAGE_KEY = 'tour.stats.collapsible-sections.v1';
     let statsCollapseStateCache = null;
@@ -564,6 +596,7 @@
 
     function enhanceAll() {
         enhanceHighlightPanoramas();
+        enhanceStatsPeakPanorama();
         document.querySelectorAll(
             '#chart-view .stats-analysis-title, ' +
             '#chart-view .chart-title, ' +
