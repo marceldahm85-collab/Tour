@@ -24794,7 +24794,7 @@ function loadPlannedTours() {
             <td data-label="Aktion">
                 ${isGroup ? '' : `
                 <button class="edit-btn" title="Geplante Tour bearbeiten">✎</button>
-                <button class="load-btn" title="Ins Formular übernehmen"><svg class="plan-action-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M13 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21H14"/><path d="M13 3v5h5"/><path d="M13 3v5h5"/><path d="M21 14h-7m3-3-3 3 3 3"/></svg></button>
+                <button class="load-btn" title="Ins Formular übernehmen"><svg class="plan-action-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M13 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21H14"/><path d="M13 3v5h5"/><path d="M21 14h-7m3-3-3 3 3 3"/></svg></button>
                 <button class="delete-btn">✕</button>
                 `}
             </td>
