@@ -10601,7 +10601,7 @@ function initTourMap() {
 });
 
     // OpenTopoMap — kostenlos, perfekt für Wanderungen
-    L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://tile.top-o-map.de/{z}/{x}/{y}.png', {
         maxZoom: 17,
         attribution: '© <a href="https://opentopomap.org">OpenTopoMap</a> | © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(tourMap);
