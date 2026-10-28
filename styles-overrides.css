@@ -217,7 +217,6 @@
         height: auto;
         padding: 3px 2px;
         gap: 2px;
-        border-radius: 9px;
         box-sizing: border-box;
     }
 
@@ -6824,12 +6823,20 @@ body.green #theme-view .haptic-feedback-toggle {
 
 #chart-view .stats-section-btn,
 #chart-view .chart-tab {
-    border-radius: var(--premium-radius-control);
     transition:
         border-color var(--premium-motion-fast) ease,
         box-shadow var(--premium-motion-fast) ease,
         background-color var(--premium-motion-fast) ease,
         transform var(--premium-motion-fast) ease;
+}
+
+#chart-view .stats-section-btn {
+    border-radius: var(--premium-radius-control);
+}
+
+/* Die Diagramm-Kacheln folgen direkt dem Radius aus dem globalen Editor. */
+#chart-view .chart-tab {
+    border-radius: var(--editor-radius, var(--premium-radius-control)) !important;
 }
 
 #chart-view .stats-section-btn.active {
@@ -6844,8 +6851,15 @@ body.green #theme-view .haptic-feedback-toggle {
     background: linear-gradient(145deg, var(--app-surface-strong), var(--app-surface-card)) !important;
     border-color: var(--accent) !important;
     color: var(--app-text-primary) !important;
+    text-shadow: none !important;
     box-shadow: none !important;
     transform: none !important;
+}
+
+/* Das ältere Sliding-Highlight hat einen eigenen Radius und Akzentverlauf.
+   Für Diagramme ist es nicht mehr nötig; die aktive Kachel nutzt nur den Rand. */
+#chart-view #chart-tabs .tab-sliding-highlight {
+    display: none !important;
 }
 
 #chart-view .stats-section-btn:focus-visible,
