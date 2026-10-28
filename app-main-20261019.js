@@ -24794,7 +24794,7 @@ function loadPlannedTours() {
             <td data-label="Aktion">
                 ${isGroup ? '' : `
                 <button class="edit-btn" title="Geplante Tour bearbeiten">✎</button>
-                <button class="load-btn" title="Ins Formular übernehmen">⏳</button>
+                <button class="load-btn" title="Ins Formular übernehmen"><svg class="plan-action-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M13 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21H14"/><path d="M13 3v5h5"/><path d="M13 3v5h5"/><path d="M21 14h-7m3-3-3 3 3 3"/></svg></button>
                 <button class="delete-btn">✕</button>
                 `}
             </td>
@@ -24807,7 +24807,7 @@ function loadPlannedTours() {
             acc.innerHTML = `
                 <td colspan="8">
                     <div class="gipfel-accordion" style="display:none;">
-                        ${t.gipfelDetails.map(g => `⛰ ${escapeHtml(g.name || 'Unbekannt')} – ${escapeHtml(g.hoehe || '–')} m`).join('<br>')}
+                        ${t.gipfelDetails.map(g => `<span class="planned-peak-inline-icon plan-icon-svg" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="m3 20 6.2-11.5 3.3 5.2 2.4-3.6L21 20H3Z"/><path d="m8.1 11.1 1.2 1.8 1.1-1.6"/></svg></span> ${escapeHtml(g.name || 'Unbekannt')} – ${escapeHtml(g.hoehe || '–')} m`).join('<br>')}
                     </div>
                 </td>
             `;
