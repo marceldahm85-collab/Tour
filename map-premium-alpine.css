@@ -18,7 +18,7 @@
 
 #map-view #tour-map {
     position: relative;
-    border: 1px solid var(--map-premium-border) !important;
+    border: 1px solid var(--map-premium-accent) !important;
     border-radius: var(--editor-radius, 18px) !important;
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,.08),
