@@ -1,0 +1,147 @@
+/* Premium Alpine — passende Line-Art-Symbole für Statistik-Überschriften.
+   Rein visuelle Ergänzung: Statistiken, Filter und Interaktionen bleiben unverändert. */
+(function () {
+    'use strict';
+
+    const ICONS = {
+        trail: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20c2.2-3.8 4.8-5.7 7.1-5.1 2.2.6 2.7 1.4 4.4-.9 1-1.4 2.1-3.2 4.5-6"/><circle cx="4" cy="20" r="1.4"/><circle cx="20" cy="8" r="1.4"/><path d="m16.8 8.1 3.2-.1-.1-3.2"/><path d="M7 17.5h2.3M10.3 14.9l1.4 1.3M14.8 12l1.4 1.1"/></svg>',
+        typical: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m2.5 19.5 6.1-9.4 3.1 4.2 3.4-7 6.4 12.2H2.5Z"/><path d="m13.5 10.2 1.6-2.9 1.6 3.1-1.2-.5-1 .9-.8-.6Z"/><path d="M5.2 19.5c1.7-1 2.8-1 4.1-.2 1.2.7 2.3.8 3.7.1"/></svg>',
+        balance: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v17M7 21h10M5 6h14M12 3l-2 2M12 3l2 2"/><path d="m5 6-3 6h6L5 6ZM19 6l-3 6h6l-3-6Z"/><path d="M2.5 12c.3 1.7 1.1 2.5 2.5 2.5s2.2-.8 2.5-2.5M16.5 12c.3 1.7 1.1 2.5 2.5 2.5s2.2-.8 2.5-2.5"/></svg>',
+        compare: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 5h7M3 5l2.5-2.5M3 5l2.5 2.5M21 19h-7M21 19l-2.5-2.5M21 19l-2.5 2.5"/><path d="M5 9v7M9 9v7M15 8v8M19 8v8"/><path d="M3 16h8M13 8h8"/></svg>',
+        trend: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 3v18h18"/><path d="m5.5 16 4.2-4.1 3.1 1.8 5.7-7.1"/><path d="M14.8 6.6h3.7v3.7"/><circle cx="9.7" cy="11.9" r=".8"/><circle cx="12.8" cy="13.7" r=".8"/></svg>',
+        trophy: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 3h10v5.5a5 5 0 0 1-10 0V3ZM9 14v3h6v-3M7 20h10M12 17v3"/><path d="M7 5H3v2a4 4 0 0 0 4 4M17 5h4v2a4 4 0 0 1-4 4"/><path d="m12 4 .8 1.7 1.8.2-1.3 1.2.4 1.8L12 8l-1.7.9.4-1.8-1.3-1.2 1.8-.2L12 4Z"/></svg>',
+        calendarTrend: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 9h18M6.5 17l3-3 2.5 1.5 5-4"/><path d="M14.5 11.5H17v2.5"/></svg>',
+        profile: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m2.5 18.5 5-7 3.1 3.7 4.5-8.1 6.4 11.4H2.5Z"/><path d="M4 20.5h16"/><path d="m7.5 13 3.1 2.2 4.5-8.1"/><circle cx="15.1" cy="7.1" r="1"/></svg>',
+        calendarCheck: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 9h18"/><path d="m7 14 2 2 3.5-3.5M15 14h2M15 17h2"/></svg>',
+        peaks: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m1.8 20 6.1-9.2 3 4 4.2-8.3 7.1 13.5H1.8Z"/><path d="m13.2 9.4 1.9-2.9 2 3.6-1.5-.5-1.1 1-.8-1.2Z"/><path d="M15.1 6.5V2.5h4"/><path d="m4.5 16 3.4-5.2 3 4 4.2-8.3"/></svg>',
+        peakList: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s7-6.6 7-12a7 7 0 0 0-14 0c0 5.4 7 12 7 12Z"/><path d="m7.5 12.5 2.5-3.7 1.5 2 1.8-3.3 3.2 5H7.5Z"/><circle cx="12" cy="6.8" r=".7"/></svg>',
+        distance: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m4 17 13-13 4 4L8 21l-4-4Z"/><path d="m14 7 2 2M11.5 9.5l1.5 1.5M9 12l2 2M6.5 14.5 8 16M16.5 4.5 19 7"/></svg>',
+        performance: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 18a9 9 0 1 1 18 0v2H3v-2Z"/><path d="m12 16 5-6"/><circle cx="12" cy="16" r="1.7"/><path d="m5.4 11.1-1.3-1M8.5 7.1l-.7-1.5M12 6V4.5M15.5 7.1l.7-1.5M18.6 11.1l1.3-1"/></svg>',
+        frequency: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 9h18"/><circle cx="8" cy="13" r=".8"/><circle cx="12" cy="13" r=".8"/><circle cx="16" cy="13" r=".8"/><circle cx="8" cy="17" r=".8"/><circle cx="12" cy="17" r=".8"/></svg>',
+        steps: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.5 3C5.8 3 4.8 4.5 5 6.3c.1 1.5 1 2.3 1.1 3.7.1 1.1.5 2 1.7 2.1 1.4.1 2.5-1 2.5-2.3 0-1.3-.7-2.3-.5-3.7C10.1 4.4 9.2 3 7.5 3ZM17.1 12c-1.6 0-2.7 1.5-2.5 3.3.1 1.4.9 2.3 1 3.5.1 1.1.5 2 1.7 2.1 1.4.1 2.4-1 2.4-2.4 0-1.2-.7-2.1-.4-3.5.2-1.7-.6-3-2.2-3Z"/><circle cx="6.6" cy="4.7" r=".45"/><circle cx="8" cy="4.4" r=".45"/><circle cx="9.2" cy="5.1" r=".45"/></svg>',
+        time: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2M9 2.5h6M12 2.5V3.5"/><circle cx="12" cy="12" r=".8"/></svg>',
+        speed: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 18a9 9 0 1 1 18 0v2H3v-2Z"/><path d="m12 16 5-6"/><circle cx="12" cy="16" r="1.5"/><path d="M5.5 11.5 4.2 10M8.5 7.5 7.8 6M12 6V4.5M15.5 7.5l.7-1.5M18.5 11.5l1.3-1.5"/></svg>',
+        grade: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 20 20 4M3 20h18"/><path d="m15.8 4.5 4-.5-.5 4"/><path d="M6 17.2a5 5 0 0 0-1-2.1"/></svg>'
+    };
+
+    const TITLE_RULES = [
+        [/aktivitätsmix/i, 'trail'],
+        [/typische tour/i, 'typical'],
+        [/belastungsverteilung/i, 'balance'],
+        [/tourarten.?vergleich/i, 'compare'],
+        [/persönliche bestform/i, 'trophy'],
+        [/formtrend/i, 'trend'],
+        [/langfristige entwicklung/i, 'calendarTrend'],
+        [/aktivität\s*&\s*regelmäßigkeit/i, 'calendarCheck'],
+        [/tourprofil/i, 'profile'],
+        [/gipfelstatistik/i, 'peaks'],
+        [/gipfelliste|top\s*10.*gipfel|höchster gipfel|höchste gipfel/i, 'peakList'],
+        [/gipfel\s*&\s*touren|gipfel|summit/i, 'peaks'],
+        [/umfang|längste strecke|strecke|distanz/i, 'distance'],
+        [/leistung|belastung|schnellste tour|schnellster anstieg|leistungsindex|bestform/i, 'performance'],
+        [/häufigkeiten|regelmäßigkeit|aktivität/i, 'frequency'],
+        [/schritte|steps/i, 'steps'],
+        [/gehzeit|dauer|zeit/i, 'time'],
+        [/speed|tempo|geschwindigkeit/i, 'speed'],
+        [/steigung|steil|gradient/i, 'grade'],
+        [/typische tour|touren|tour\b/i, 'typical']
+    ];
+
+    const LEADING_EMOJI = /^\s*(?:[\p{Extended_Pictographic}\p{Emoji_Presentation}\p{Emoji_Modifier}\uFE0E\uFE0F\u200D\u20E3]+\s*)+/u;
+
+    function cleanTitle(value) {
+        return String(value || '').replace(LEADING_EMOJI, '').replace(/\s+/g, ' ').trim();
+    }
+
+    function getLabel(heading) {
+        if (heading.matches('.stats-analysis-title')) {
+            return Array.from(heading.children).find(child =>
+                child.tagName === 'SPAN' &&
+                !child.classList.contains('stats-structure-scope') &&
+                !child.classList.contains('stats-premium-title-icon')
+            ) || heading;
+        }
+
+        if (heading.matches('.chart-title')) {
+            return Array.from(heading.children).find(child =>
+                child.tagName === 'SPAN' &&
+                !child.classList.contains('stats-premium-title-icon')
+            ) || heading;
+        }
+
+        return heading;
+    }
+
+    function stripEmoji(label) {
+        const textNode = Array.from(label.childNodes).find(node =>
+            node.nodeType === Node.TEXT_NODE && node.nodeValue.trim()
+        );
+        if (!textNode) return;
+        const cleaned = textNode.nodeValue.replace(LEADING_EMOJI, '');
+        if (cleaned !== textNode.nodeValue) textNode.nodeValue = cleaned;
+    }
+
+    function iconKeyFor(title) {
+        const clean = cleanTitle(title);
+        const match = TITLE_RULES.find(([pattern]) => pattern.test(clean));
+        return match ? match[1] : 'peaks';
+    }
+
+    function enhanceTitle(heading) {
+        const label = getLabel(heading);
+        if (!label) return;
+
+        const cleanText = cleanTitle(label.textContent);
+        if (!cleanText) return;
+
+        const iconKey = iconKeyFor(cleanText);
+        stripEmoji(label);
+
+        const current = label.querySelector(':scope > .stats-premium-title-icon');
+        if (current && current.dataset.iconKey === iconKey) {
+            heading.dataset.statsPremiumTitleIcon = iconKey;
+            label.classList.add('stats-premium-title-label');
+            return;
+        }
+        if (current) current.remove();
+
+        const icon = document.createElement('span');
+        icon.className = 'stats-premium-title-icon';
+        icon.dataset.iconKey = iconKey;
+        icon.setAttribute('aria-hidden', 'true');
+        icon.innerHTML = ICONS[iconKey] || ICONS.peaks;
+
+        label.insertBefore(icon, label.firstChild);
+        label.classList.add('stats-premium-title-label');
+        heading.dataset.statsPremiumTitleIcon = iconKey;
+    }
+
+    function enhanceAll() {
+        document.querySelectorAll(
+            '#chart-view .stats-analysis-title, ' +
+            '#chart-view .chart-title, ' +
+            '#chart-view .highlight-group-title'
+        ).forEach(enhanceTitle);
+    }
+
+    function init() {
+        enhanceAll();
+
+        const target = document.getElementById('chart-view');
+        if (!target || target.dataset.statsPremiumTitleObserver === 'true') return;
+
+        target.dataset.statsPremiumTitleObserver = 'true';
+        const observer = new MutationObserver(enhanceAll);
+        observer.observe(target, {
+            childList: true,
+            characterData: true,
+            subtree: true
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init, { once: true });
+    } else {
+        init();
+    }
+})();
