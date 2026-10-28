@@ -8951,3 +8951,27 @@ body.summit .top-main-nav [aria-current="page"] {
     letter-spacing: normal !important;
     opacity: .68 !important;
 }
+
+
+/* PREMIUM ALPINE — Editor-Akzent für Speichern-Plus und Mehr-Punkte.
+   Exakt dieselbe Akzentmischung wie bei den übrigen SVG-Navigationssymbolen.
+   Maße, Positionen und die besondere Hervorhebung des aktiven Mehr-Punkts bleiben unverändert. */
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+.app-wrapper .accordion-header .header-actions > .top-main-nav > .top-nav-save .top-nav-plus {
+    color: color-mix(
+        in srgb,
+        var(--theme-palette-accent, var(--accent, #ad7d12)) 76%,
+        var(--theme-palette-text, #f3f7fb)
+    ) !important;
+    opacity: .96 !important;
+}
+
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+.app-wrapper .accordion-header .header-actions > .top-main-nav > .top-nav-more-wrap > #more-toggle .more-dots .more-dot:not(.is-active) {
+    color: color-mix(
+        in srgb,
+        var(--theme-palette-accent, var(--accent, #ad7d12)) 76%,
+        var(--theme-palette-text, #f3f7fb)
+    ) !important;
+    opacity: .96 !important;
+}
