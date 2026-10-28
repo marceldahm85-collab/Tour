@@ -516,6 +516,11 @@
                 root: document.getElementById('stats-development-page'),
                 selector: '.stats-analysis-section',
                 scope: 'development'
+            },
+            {
+                root: document.getElementById('stats-peaks-page'),
+                selector: '#stats-peaks-content > .stats-analysis-section:first-child',
+                scope: 'peaks'
             }
         ];
 
@@ -542,8 +547,11 @@
                 heading.header.setAttribute('role', 'button');
                 heading.header.setAttribute('tabindex', '0');
 
-                // Nicht gespeicherte Bereiche sind beim ersten Öffnen standardmäßig geschlossen.
-                const expanded = state[stateKey] === true;
+                // Die Gipfelstatistik bleibt initial geöffnet; andere neue Bereiche starten wie bisher geschlossen.
+                const hasSavedState = Object.prototype.hasOwnProperty.call(state, stateKey);
+                const expanded = hasSavedState
+                    ? state[stateKey] === true
+                    : scope === 'peaks';
                 setStatsSectionCollapsed(section, !expanded, false);
             });
         });
