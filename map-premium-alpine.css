@@ -658,14 +658,26 @@
 }
 
 #map-view #map-quick-filters .map-filter-group-regions .map-filter-chip-row {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
     overflow: visible;
-    padding-bottom: 1px;
+    padding: 1px 2px 2px;
     touch-action: pan-y;
 }
 
 #map-view #map-quick-filters .map-filter-group-regions .map-filter-chip-row .quick-filter-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-width: 0;
     max-width: 100%;
+    min-height: 30px;
+    padding: 5px 4px;
+    box-sizing: border-box;
+    white-space: nowrap;
+    text-align: center;
 }
 
 @media (max-width: 380px) and (orientation: portrait) {
