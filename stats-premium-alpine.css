@@ -796,3 +796,131 @@
         transition: none;
     }
 }
+
+
+/* Premium Alpine – Statistikbalken: stabile Tourartenfarben und ruhige Segmentoptik.
+   Nur Darstellung; Werte, Breiten und Datenaufbereitung bleiben unverändert. */
+#chart-view {
+    --stats-bar-wandern: color-mix(in srgb, var(--accent, #D5A64C) 24%, #6F9B82);
+    --stats-bar-klettersteig: #75A7BF;
+    --stats-bar-hike-climb: #A1A980;
+    --stats-bar-bike-hike: #8EA3BC;
+    --stats-bar-radtour: #C37E73;
+    --stats-bar-mehrtaegig: #B6A06B;
+    --stats-bar-sonstige: #A69BC0;
+
+    --stats-bar-hiking: var(--stats-bar-wandern);
+    --stats-bar-climbing: var(--stats-bar-klettersteig);
+    --stats-bar-cycling: var(--stats-bar-radtour);
+}
+
+#chart-view .stats-structure-stackbar,
+#chart-view .stats-structure-burden-bar {
+    height: 9px;
+    border: 1px solid color-mix(
+        in srgb,
+        var(--accent, #D5A64C) 18%,
+        var(--premium-border, rgba(255, 255, 255, .14))
+    );
+    border-radius: 999px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, .055), rgba(0, 0, 0, .16)),
+        var(--app-surface-card, rgba(9, 14, 20, .84));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .055),
+        0 1px 2px rgba(0, 0, 0, .14);
+}
+
+#chart-view .stats-structure-stack-segment {
+    --stats-segment-color: var(--stats-bar-sonstige);
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--stats-segment-color) 80%, white) 0%,
+        var(--stats-segment-color) 54%,
+        color-mix(in srgb, var(--stats-segment-color) 78%, black) 100%
+    ) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .18),
+        inset 0 -1px 0 rgba(0, 0, 0, .20);
+}
+
+#chart-view .stats-structure-dot {
+    --stats-segment-color: var(--stats-bar-sonstige);
+    background: var(--stats-segment-color) !important;
+    box-shadow: 0 0 0 2px color-mix(
+        in srgb,
+        var(--stats-segment-color) 17%,
+        transparent
+    );
+}
+
+#chart-view .stats-structure-stack-segment.type-wandern,
+#chart-view .stats-structure-dot.type-wandern {
+    --stats-segment-color: var(--stats-bar-wandern);
+}
+
+#chart-view .stats-structure-stack-segment.type-klettersteig,
+#chart-view .stats-structure-dot.type-klettersteig {
+    --stats-segment-color: var(--stats-bar-klettersteig);
+}
+
+#chart-view .stats-structure-stack-segment.type-hike-climb,
+#chart-view .stats-structure-dot.type-hike-climb {
+    --stats-segment-color: var(--stats-bar-hike-climb);
+}
+
+#chart-view .stats-structure-stack-segment.type-bike-hike,
+#chart-view .stats-structure-dot.type-bike-hike {
+    --stats-segment-color: var(--stats-bar-bike-hike);
+}
+
+#chart-view .stats-structure-stack-segment.type-radtour,
+#chart-view .stats-structure-dot.type-radtour {
+    --stats-segment-color: var(--stats-bar-radtour);
+}
+
+#chart-view .stats-structure-stack-segment.type-mehrtaegig,
+#chart-view .stats-structure-dot.type-mehrtaegig {
+    --stats-segment-color: var(--stats-bar-mehrtaegig);
+}
+
+#chart-view .stats-structure-stack-segment.type-sonstige,
+#chart-view .stats-structure-dot.type-sonstige {
+    --stats-segment-color: var(--stats-bar-sonstige);
+}
+
+#chart-view .stats-structure-burden-segment {
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--stats-segment-color) 80%, white) 0%,
+        var(--stats-segment-color) 54%,
+        color-mix(in srgb, var(--stats-segment-color) 78%, black) 100%
+    ) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .18),
+        inset 0 -1px 0 rgba(0, 0, 0, .20);
+}
+
+#chart-view .stats-structure-burden-segment.hiking,
+#chart-view .stats-structure-burden-legend i.hiking {
+    --stats-segment-color: var(--stats-bar-hiking);
+}
+
+#chart-view .stats-structure-burden-segment.climbing,
+#chart-view .stats-structure-burden-legend i.climbing {
+    --stats-segment-color: var(--stats-bar-climbing);
+}
+
+#chart-view .stats-structure-burden-segment.cycling,
+#chart-view .stats-structure-burden-legend i.cycling {
+    --stats-segment-color: var(--stats-bar-cycling);
+}
+
+#chart-view .stats-structure-burden-legend i {
+    background: var(--stats-segment-color) !important;
+    box-shadow: 0 0 0 1.5px color-mix(
+        in srgb,
+        var(--stats-segment-color) 18%,
+        transparent
+    );
+}
