@@ -531,3 +531,50 @@
         0 0 0 1px color-mix(in srgb, var(--map-premium-accent) 6%, transparent),
         0 5px 14px rgba(0,0,0,.15) !important;
 }
+
+
+/* Kartenfläche priorisieren: Infobox und Moduswahl möglichst flach halten. */
+#map-view #map-info-bar {
+    min-height: 27px !important;
+    height: auto !important;
+    padding: 4px 8px !important;
+    border-radius: 9px !important;
+    font-size: 10px !important;
+    line-height: 1.15 !important;
+    letter-spacing: .015em !important;
+}
+
+#map-view .map-mode-toggle {
+    padding: 3px !important;
+    gap: 3px !important;
+    min-height: 0 !important;
+}
+
+#map-view .map-mode-btn {
+    height: 27px !important;
+    min-height: 27px !important;
+    padding: 3px 6px !important;
+    gap: 5px !important;
+    font-size: 11px !important;
+    line-height: 1 !important;
+}
+
+#map-view .map-mode-icon {
+    flex-basis: 15px !important;
+    width: 15px !important;
+    height: 15px !important;
+}
+
+@media (max-width: 380px) and (orientation: portrait) {
+    #map-view .map-mode-btn {
+        padding-inline: 4px !important;
+        gap: 4px !important;
+        font-size: 10px !important;
+    }
+
+    #map-view .map-mode-icon {
+        flex-basis: 14px !important;
+        width: 14px !important;
+        height: 14px !important;
+    }
+}
