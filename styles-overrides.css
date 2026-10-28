@@ -6922,8 +6922,7 @@ body.green #theme-view .haptic-feedback-toggle {
     box-shadow: none;
 }
 
-#chart-view .stats-section-btn.active,
-#chart-view .chart-tab.active {
+#chart-view .stats-section-btn.active {
     box-shadow: inset 0 -2px 0 var(--accent) !important;
 }
 
