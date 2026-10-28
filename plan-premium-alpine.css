@@ -393,3 +393,55 @@ html body #tour-view #planned-table .plan-action-icon {
     width: 14px;
     height: 14px;
 }
+
+
+/* CHECKLISTE — flache Gruppen, Editor-Akzent und Radius für antippbare Elemente. */
+html body #tour-view #checklist-box .checklist-section {
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-color: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Die feinen Abschnittslinien folgen der einzigen Editor-Akzentfarbe. */
+html body #tour-view #checklist-box .checklist-section-title {
+    color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+}
+html body #tour-view #checklist-box .checklist-section-title::after {
+    background: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+}
+
+/* Einzelne Zeilen bleiben als gut antippbare Flächen erhalten.
+   Ihr Radius kommt direkt aus dem gemeinsamen Theme-Editor. */
+html body #tour-view #checklist-box .checklist-item {
+    border-radius: var(--editor-radius, var(--premium-radius-control, 12px)) !important;
+    border-color: var(--app-surface-border, var(--theme-surface-border, rgba(255,255,255,.14))) !important;
+    color: var(--app-text-primary, var(--theme-palette-text, #f3f7fb)) !important;
+}
+html body #tour-view #checklist-box .checklist-item input[type="checkbox"] {
+    accent-color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+    border-color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+}
+html body #tour-view #checklist-box .checklist-item input[type="checkbox"]:checked {
+    background: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+    border-color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+}
+html body #tour-view #checklist-box .checklist-item input[type="checkbox"]:checked::after {
+    background: var(--app-surface-card, rgba(17,26,37,.74)) !important;
+}
+
+/* Beide Umschalter richten Radius, Akzent und Kontrast am Editor aus. */
+html body #tour-view #checklist-box .checklist-mode-btn {
+    border-radius: var(--editor-radius, var(--premium-radius-control, 12px)) !important;
+    border-color: var(--app-surface-border, var(--theme-surface-border, rgba(255,255,255,.14))) !important;
+}
+html body #tour-view #checklist-box .checklist-mode-btn.active {
+    background: var(--accent-gradient, var(--theme-palette-accent-gradient)) !important;
+    border-color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+    color: var(--theme-palette-accent-text, var(--accent-text-color, #fff)) !important;
+}
