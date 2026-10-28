@@ -2745,9 +2745,7 @@ body:not(.touch-mode) .chart-tab:hover{
   box-shadow: none;
 }
 
-.chart-tab:not(.active){
-  opacity: 0.88;
-}
+
 
 /* Dark Mode */
 body.dark .chart-tab{
@@ -2769,9 +2767,7 @@ body.dark .chart-tab.active{
   box-shadow: none;
 }
 
-body.dark .chart-tab:not(.active){
-  opacity: 0.92;
-}
+
 
 /* Mobile: "Alle Touren" komplett ausblenden */
 @media (max-width: 768px), (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
@@ -13335,12 +13331,7 @@ li[data-stat-type="tours"] {
    Diagrammkacheln
    --------------------------------------------------------- */
 
-#stats-diagrams-page
-#chart-tabs
-.chart-tab:not(.active) {
-    opacity:
-        0.82;
-}
+
 
 
 /*
