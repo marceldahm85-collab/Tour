@@ -390,6 +390,133 @@
         });
     }
 
+    /* Auf-/Zuklappzustände der Statistikboxen bleiben über Seitenwechsel und App-Neustarts erhalten. */
+    const STATS_COLLAPSE_STORAGE_KEY = 'tour.stats.collapsible-sections.v1';
+    let statsCollapseStateCache = null;
+
+    function getStatsCollapseState() {
+        if (statsCollapseStateCache) return statsCollapseStateCache;
+
+        try {
+            const saved = localStorage.getItem(STATS_COLLAPSE_STORAGE_KEY);
+            const parsed = saved ? JSON.parse(saved) : {};
+            statsCollapseStateCache = parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+                ? parsed
+                : {};
+        } catch (error) {
+            statsCollapseStateCache = {};
+        }
+
+        return statsCollapseStateCache;
+    }
+
+    function saveStatsCollapseState() {
+        try {
+            localStorage.setItem(STATS_COLLAPSE_STORAGE_KEY, JSON.stringify(getStatsCollapseState()));
+        } catch (error) {
+            // Falls lokaler Speicher blockiert ist, bleibt der Zustand wenigstens bis zum Neuladen im DOM erhalten.
+        }
+    }
+
+    function statsCollapsibleHeading(section) {
+        const header = section.querySelector(':scope > .stats-analysis-title');
+        if (!header) return null;
+
+        const label = Array.from(header.children).find(child =>
+            child.tagName === 'SPAN' &&
+            !child.classList.contains('stats-structure-scope') &&
+            !child.classList.contains('stats-premium-title-icon')
+        );
+        const text = cleanTitle(label?.textContent || header.textContent || '');
+        return text ? { header, text } : null;
+    }
+
+    function setStatsSectionCollapsed(section, collapsed, persist = false) {
+        const header = section.querySelector(':scope > .stats-analysis-title');
+        if (!header) return;
+
+        section.classList.toggle('is-collapsed', collapsed);
+        header.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+
+        const label = statsCollapsibleHeading(section)?.text || 'Statistikbereich';
+        header.setAttribute('aria-label', label + (collapsed ? ' öffnen' : ' schließen'));
+
+        if (persist && section.dataset.statsCollapseKey) {
+            getStatsCollapseState()[section.dataset.statsCollapseKey] = !collapsed;
+            saveStatsCollapseState();
+        }
+    }
+
+    function toggleStatsCollapsibleFromEvent(root, target) {
+        const header = target.closest('.stats-section-collapsible > .stats-analysis-title');
+        if (!header || !root.contains(header)) return false;
+
+        const section = header.parentElement;
+        setStatsSectionCollapsed(section, !section.classList.contains('is-collapsed'), true);
+        return true;
+    }
+
+    function bindStatsCollapsibleControls(root) {
+        if (root.dataset.statsCollapsibleControlsBound === 'true') return;
+        root.dataset.statsCollapsibleControlsBound = 'true';
+
+        root.addEventListener('click', event => {
+            toggleStatsCollapsibleFromEvent(root, event.target);
+        });
+
+        root.addEventListener('keydown', event => {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            const header = event.target.closest('.stats-section-collapsible > .stats-analysis-title');
+            if (!header || !root.contains(header)) return;
+            event.preventDefault();
+            toggleStatsCollapsibleFromEvent(root, event.target);
+        });
+    }
+
+    function enhanceStatsCollapsibleSections() {
+        const definitions = [
+            {
+                root: document.getElementById('stats-statistics-page'),
+                selector: '.stats-structure-section',
+                scope: 'statistics'
+            },
+            {
+                root: document.getElementById('stats-development-page'),
+                selector: '.stats-analysis-section',
+                scope: 'development'
+            }
+        ];
+
+        const state = getStatsCollapseState();
+
+        definitions.forEach(({ root, selector, scope }) => {
+            if (!root) return;
+            bindStatsCollapsibleControls(root);
+
+            root.querySelectorAll(selector).forEach(section => {
+                const heading = statsCollapsibleHeading(section);
+                if (!heading) return;
+
+                const slug = heading.text.toLocaleLowerCase('de')
+                    .normalize('NFD')
+                    .replace(/[\\u0300-\\u036f]/g, '')
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '') || 'bereich';
+                const stateKey = scope + ':' + slug;
+
+                section.classList.add('stats-section-collapsible');
+                section.dataset.statsCollapseKey = stateKey;
+
+                heading.header.setAttribute('role', 'button');
+                heading.header.setAttribute('tabindex', '0');
+
+                // Nicht gespeicherte Bereiche sind beim ersten Öffnen standardmäßig geschlossen.
+                const expanded = state[stateKey] === true;
+                setStatsSectionCollapsed(section, !expanded, false);
+            });
+        });
+    }
+
     function enhanceAll() {
         enhanceHighlightPanoramas();
         document.querySelectorAll(
@@ -400,6 +527,7 @@
         enhanceContentIcons();
         enhanceStatsModalTitle();
         enhanceModalBodyIcons();
+        enhanceStatsCollapsibleSections();
     }
 
     function init() {
