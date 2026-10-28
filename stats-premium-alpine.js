@@ -24,6 +24,16 @@
         grade: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 20 20 4M3 20h18"/><path d="m15.8 4.5 4-.5-.5 4"/><path d="M6 17.2a5 5 0 0 0-1-2.1"/></svg>'
     };
 
+
+    /* Zusätzliche Motive für Aktivitätsarten und Tourprofile. */
+    Object.assign(ICONS, {
+        hiking: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 3.5h4.2v6.6l3.1 2.4 3.6 1.1a3 3 0 0 1 2.2 2.9V20H3.5v-2.7a2 2 0 0 1 2-2H8V3.5Z"/><path d="M8.2 15.3h2M12 17.2h2M4 20h16"/></svg>',
+        climbing: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9.1 3.5a4.6 4.6 0 0 0-4.6 4.6v7.1a5.3 5.3 0 0 0 5.3 5.3h4.4a5.3 5.3 0 0 0 5.3-5.3V9.8a4.6 4.6 0 0 0-4.6-4.6"/><path d="M9.2 3.5h5.6M7.1 10.1l3.1 2.7 2.2-2.1 3 2.6"/><path d="m9.1 16.7 2-1.8 2.2 1.8 1.8-1.4"/></svg>',
+        cycling: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="5.2" cy="17.1" r="3.5"/><circle cx="18.7" cy="17.1" r="3.5"/><path d="m5.2 17.1 4.1-7.2 4.1 7.2H5.2ZM9.3 9.9h4.2l5.2 7.2M12.7 6.3h3.1M8.3 8.1l1-1.8"/></svg>',
+        backpack: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 6V5a4 4 0 0 1 8 0v1"/><rect x="4.2" y="6" width="15.6" height="15" rx="3"/><path d="M7.5 10h9M7.2 14h9.6v4H7.2zM4.5 11H2.8v5h1.7M19.5 11h1.7v5h-1.7"/></svg>',
+        compass: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.1 5.5-5.5 2.1 2.1-5.5 5.5-2.1Z"/><path d="M12 3v2M21 12h-2M12 21v-2M3 12h2"/></svg>'
+    });
+
     const TITLE_RULES = [
         [/aktivitätsmix/i, 'trail'],
         [/typische tour/i, 'typical'],
@@ -116,12 +126,181 @@
         heading.dataset.statsPremiumTitleIcon = iconKey;
     }
 
+
+    const STAT_TYPE_ICONS = {
+        tours: 'trail',
+        'hiking-tours': 'hiking',
+        'climbing-tours': 'climbing',
+        'cycling-tours': 'cycling',
+        'hiking-distance': 'distance',
+        'climbing-distance': 'distance',
+        'cycling-distance': 'distance',
+        'hiking-ascent': 'peaks',
+        'climbing-ascent': 'peaks',
+        'cycling-ascent': 'peaks',
+        'hiking-time': 'time',
+        'climbing-time': 'time',
+        'cycling-time': 'time',
+        steps: 'steps',
+        'big-tours': 'backpack',
+        peaks: 'peaks',
+        performance: 'performance',
+        speed: 'speed',
+        gradient: 'grade'
+    };
+
+    function contentIconKeyForLabel(value) {
+        const label = cleanTitle(value).replace(/\s+/g, ' ').trim().toLocaleLowerCase('de');
+
+        if (/(klettersteig|klettern|hike\s*&\s*climb|climbing)/i.test(label)) return 'climbing';
+        if (/(radtour|radfahren|bike\s*&\s*hike|cycling)/i.test(label)) return 'cycling';
+        if (/(mehrtag|big\s*tour)/i.test(label)) return 'backpack';
+        if (/(wandern|ausdauertour|hiking)/i.test(label)) return 'hiking';
+        if (/region/i.test(label)) return 'compass';
+        if (/schritt/i.test(label)) return 'steps';
+        if (/(gehzeit|fahrzeit|dauer|\bzeit\b)/i.test(label)) return 'time';
+        if (/(geschwindigkeit|schnell|tempo|anstieg.*h)/i.test(label)) return 'speed';
+        if (/(leistungsindex|leistungsmerkmal|\bleistung\b|intensiv|bestform|rekord)/i.test(label)) return 'performance';
+        if (/(steigung|steiltour|steil)/i.test(label)) return 'grade';
+        if (/(strecke|distanz|umfang)/i.test(label)) return 'distance';
+        if (/(höhenmeter|aufstieg|gipfel)/i.test(label)) return 'peaks';
+        if (/(ausgewogen|belastungsverteilung)/i.test(label)) return 'balance';
+        if (/(tourprofil|tourarten|art der tour|typische tour)/i.test(label)) return 'typical';
+        if (/(häufigkeiten|aktivität|regelmäßigkeit|tourtage|touren)/i.test(label)) return 'frequency';
+        return 'peaks';
+    }
+
+    function createContentIcon(iconKey) {
+        const key = Object.prototype.hasOwnProperty.call(ICONS, iconKey) ? iconKey : 'peaks';
+        const icon = document.createElement('span');
+        icon.className = 'stats-premium-content-icon';
+        icon.dataset.iconKey = key;
+        icon.setAttribute('aria-hidden', 'true');
+        icon.innerHTML = ICONS[key];
+        return icon;
+    }
+
+    function replaceLeadingEmoji(element, iconKey) {
+        if (!element) return false;
+
+        const textNode = Array.from(element.childNodes).find(node =>
+            node.nodeType === Node.TEXT_NODE && LEADING_EMOJI.test(node.nodeValue)
+        );
+        if (!textNode) return false;
+
+        const cleaned = textNode.nodeValue.replace(LEADING_EMOJI, '');
+        const icon = createContentIcon(iconKey);
+        textNode.parentNode.insertBefore(icon, textNode);
+        textNode.nodeValue = cleaned;
+        element.dataset.statsPremiumContentIcon = iconKey;
+        return true;
+    }
+
+    function replaceEmojiOnlyIcon(element, iconKey) {
+        if (!element || !LEADING_EMOJI.test(element.textContent || '')) return false;
+        element.replaceChildren(createContentIcon(iconKey));
+        element.dataset.statsPremiumContentIcon = iconKey;
+        return true;
+    }
+
+    function enhanceLegacyStatisticsLabels(root) {
+        root.querySelectorAll('.stats-main-list > li[data-stat-type] .stats-label')
+            .forEach(label => {
+                if (label.querySelector(':scope > .stats-premium-content-icon')) return;
+                const item = label.closest('li[data-stat-type]');
+                const key = STAT_TYPE_ICONS[item?.dataset?.statType] ||
+                    contentIconKeyForLabel(label.textContent);
+                label.insertBefore(createContentIcon(key), label.firstChild);
+            });
+    }
+
+    function enhanceContentIcons() {
+        const statistics = document.getElementById('stats-statistics-page');
+        if (statistics) {
+            const structureSelectors = [
+                '.stats-structure-mix-name',
+                '.stats-structure-typical-card .stats-structure-card-label',
+                '.stats-structure-burden-head strong',
+                '.stats-structure-burden-name',
+                '.stats-structure-type-head strong'
+            ];
+            structureSelectors.forEach(selector => {
+                statistics.querySelectorAll(selector).forEach(element => {
+                    const key = contentIconKeyForLabel(element.textContent);
+                    replaceLeadingEmoji(element, key);
+                });
+            });
+            enhanceLegacyStatisticsLabels(statistics);
+        }
+
+        const highlights = document.getElementById('stats-highlights-page');
+        if (highlights) {
+            highlights.querySelectorAll('.highlight-row-icon').forEach(element => {
+                const label = element.closest('.highlight-row-label')
+                    ?.querySelector('.highlight-row-text')?.textContent || element.textContent;
+                replaceEmojiOnlyIcon(element, contentIconKeyForLabel(label));
+            });
+        }
+
+        const development = document.getElementById('stats-development-page');
+        if (development) {
+            const developmentSelectors = [
+                '.tour-profile-summary-value',
+                '.tour-profile-summary-meta',
+                '.tour-profile-row .tour-profile-name',
+                '.tour-profile-feature-card > strong',
+                '.tour-profile-detail-name',
+                '.tour-profile-detail-trait'
+            ];
+            developmentSelectors.forEach(selector => {
+                development.querySelectorAll(selector).forEach(element => {
+                    const key = contentIconKeyForLabel(element.textContent);
+                    replaceLeadingEmoji(element, key);
+                });
+            });
+        }
+    }
+
+    function enhanceStatsModalTitle() {
+        const title = document.getElementById('tl-title');
+        if (!title) return;
+
+        const raw = String(title.textContent || '').trim();
+        if (!LEADING_EMOJI.test(raw)) return;
+
+        const clean = cleanTitle(raw);
+        const isTopTen = /\btop\s*10\b/i.test(clean);
+        const isCalendarDate = /^\d{1,2}\.\d{1,2}\.\d{4}$/.test(clean);
+        if (!isTopTen && !isCalendarDate) return;
+
+        const key = isCalendarDate ? 'calendarCheck' : contentIconKeyForLabel(clean);
+        title.replaceChildren(
+            createContentIcon(key),
+            document.createTextNode(' ' + clean)
+        );
+        title.dataset.statsPremiumModalIconKey = key;
+    }
+
+    function observeStatsModalTitle() {
+        const title = document.getElementById('tl-title');
+        if (!title || title.dataset.statsPremiumModalObserver === 'true') return;
+
+        title.dataset.statsPremiumModalObserver = 'true';
+        new MutationObserver(enhanceStatsModalTitle).observe(title, {
+            childList: true,
+            characterData: true,
+            subtree: true
+        });
+    }
+
     function enhanceAll() {
         document.querySelectorAll(
             '#chart-view .stats-analysis-title, ' +
             '#chart-view .chart-title, ' +
             '#chart-view .highlight-group-title'
         ).forEach(enhanceTitle);
+        enhanceContentIcons();
+        enhanceStatsModalTitle();
     }
 
     function init() {
@@ -131,6 +310,7 @@
         if (!target || target.dataset.statsPremiumTitleObserver === 'true') return;
 
         target.dataset.statsPremiumTitleObserver = 'true';
+        observeStatsModalTitle();
         const observer = new MutationObserver(enhanceAll);
         observer.observe(target, {
             childList: true,
