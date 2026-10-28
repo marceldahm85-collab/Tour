@@ -517,6 +517,51 @@
         });
     }
 
+
+    /* Stabile Farbzuordnung für Aktivitätstypen:
+       Die Farbklasse folgt dem Namen, nicht der sortierten Häufigkeit. */
+    function structureTourTypeColorClass(label) {
+        const key = String(label || '').trim().toLocaleLowerCase('de');
+        const classes = {
+            'wandern': 'wandern',
+            'klettersteig': 'klettersteig',
+            'hike & climb': 'hike-climb',
+            'bike & hike': 'bike-hike',
+            'radtour': 'radtour',
+            'mehrtägig': 'mehrtaegig',
+            'sonstige': 'sonstige'
+        };
+        return classes[key] || 'sonstige';
+    }
+
+    function enhanceStructureBarColors() {
+        const segments = Array.from(document.querySelectorAll(
+            '#stats-statistics-page .stats-structure-stackbar .stats-structure-stack-segment'
+        ));
+        const rows = Array.from(document.querySelectorAll(
+            '#stats-statistics-page .stats-structure-mix-row'
+        ));
+        const legacyClasses = ['segment-0', 'segment-1', 'segment-2', 'segment-3', 'segment-4', 'segment-5'];
+        const typeClasses = [
+            'type-wandern', 'type-klettersteig', 'type-hike-climb',
+            'type-bike-hike', 'type-radtour', 'type-mehrtaegig', 'type-sonstige'
+        ];
+
+        segments.forEach((segment, index) => {
+            const title = segment.getAttribute('title') || '';
+            const label = title.split(':')[0].trim();
+            const typeClass = 'type-' + structureTourTypeColorClass(label);
+            segment.classList.remove(...legacyClasses, ...typeClasses);
+            segment.classList.add(typeClass);
+
+            const dot = rows[index]?.querySelector('.stats-structure-dot');
+            if (dot) {
+                dot.classList.remove(...legacyClasses, ...typeClasses);
+                dot.classList.add(typeClass);
+            }
+        });
+    }
+
     function enhanceAll() {
         enhanceHighlightPanoramas();
         document.querySelectorAll(
@@ -525,6 +570,7 @@
             '#chart-view .highlight-group-title'
         ).forEach(enhanceTitle);
         enhanceContentIcons();
+        enhanceStructureBarColors();
         enhanceStatsModalTitle();
         enhanceModalBodyIcons();
         enhanceStatsCollapsibleSections();
