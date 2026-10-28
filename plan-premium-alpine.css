@@ -283,3 +283,41 @@ html body #tour-view #plan-form #plan-save-btn:active {
         transition: none !important;
     }
 }
+
+
+/* TOUR PLANEN — Region und Tourart wie im Speicher-Formular gleich breit. */
+html body #tour-view #plan-form .plan-region-type-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    gap: 7px !important;
+    width: 100% !important;
+    align-items: end;
+}
+html body #tour-view #plan-form .plan-region-type-row > .form-group {
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+/* Die fünf Kennzahlen sind nur für Liste und Gipfel relevant.
+   Ohne aktiven Bereich bleibt der Kopf vorsichtshalber kompakt. */
+html body #tour-view .plan-page-header .plan-overview-grid {
+    display: none !important;
+}
+html body #tour-view[data-plan-section-active="list"] .plan-page-header .plan-overview-grid,
+html body #tour-view[data-plan-section-active="peaks"] .plan-page-header .plan-overview-grid {
+    display: grid !important;
+}
+
+/* Im mobilen Querformat die rechte Kopfzeile einklappen, wenn die Kacheln
+   verborgen sind; Liste und Gipfel behalten die bisherige Fünf-Kachel-Höhe. */
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    html body #tour-view[data-plan-section-active="plan"],
+    html body #tour-view[data-plan-section-active="check"] {
+        grid-template-rows: auto minmax(0, 1fr) !important;
+    }
+    html body #tour-view[data-plan-section-active="plan"] > .plan-page-header,
+    html body #tour-view[data-plan-section-active="check"] > .plan-page-header {
+        height: auto !important;
+        min-height: 0 !important;
+    }
+}
