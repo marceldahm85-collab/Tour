@@ -18,16 +18,10 @@
 
 #map-view #tour-map {
     position: relative;
-    background-color: var(--app-surface-card, #111820) !important;
-    border: 1px solid color-mix(
-        in srgb,
-        var(--map-premium-accent) 68%,
-        var(--map-premium-border)
-    ) !important;
+    border: 1px solid var(--map-premium-border) !important;
     border-radius: var(--editor-radius, 18px) !important;
     box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.06),
-        0 0 0 1px color-mix(in srgb, var(--map-premium-accent) 10%, transparent),
+        inset 0 1px 0 rgba(255,255,255,.08),
         0 10px 28px rgba(0,0,0,.28) !important;
     isolation: isolate;
 }
@@ -583,46 +577,4 @@
         width: 14px !important;
         height: 14px !important;
     }
-}
-
-
-/* Maptoolkit-Hiking-Karte: dezente, sichtbare Kartenquellen-Angabe. */
-#map-view .maptoolkit-logo-control {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 84px;
-    height: 22px;
-    margin: 0 0 8px 8px;
-    padding: 3px 6px;
-    box-sizing: border-box;
-    border: 1px solid rgba(255,255,255,.5);
-    border-radius: 5px;
-    background: rgba(255,255,255,.93);
-    box-shadow: 0 2px 8px rgba(0,0,0,.26);
-    overflow: hidden;
-}
-
-#map-view .maptoolkit-logo-control img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-}
-
-#map-view .leaflet-control-attribution {
-    max-width: min(78vw, 560px);
-    padding: 2px 5px;
-    border-radius: 4px 0 0 0;
-    background: rgba(8,14,20,.82) !important;
-    color: rgba(245,248,251,.9) !important;
-    font-size: 9px;
-    line-height: 1.25;
-    text-shadow: none;
-}
-
-#map-view .leaflet-control-attribution a {
-    color: var(--map-premium-accent) !important;
 }
