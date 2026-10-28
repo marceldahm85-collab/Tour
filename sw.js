@@ -1,11 +1,12 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Der PDF-Magazin-Renderer wird direkt über index.html geladen.
-const CACHE_NAME = 'bergtouren-cache-premium-alpine-v129';
+const CACHE_NAME = 'bergtouren-cache-premium-alpine-v130';
 
 const APP_SHELL = [
   './',
   './index.html',
-  './app-main-20261019.js?v=11',
+  './app-main-20261019.js?v=11
+  './stats-premium-alpine.js?v=1',',
   './theme-editor-surface-compat.js?v=4',
   './theme-editor-unified.js?v=17',
   './dashboard-premium-alpine.js?v=30',
@@ -15,7 +16,7 @@ const APP_SHELL = [
   './styles.css?v=13',
   './styles-overrides.css?v=84',
   './dashboard-premium-alpine.css?v=19',
-  './stats-premium-alpine.css?v=1',
+  './stats-premium-alpine.css?v=2',
   './assets/bergwelt-fixed-alpine.webp',
   './assets/milestones/alpine-backdrop.svg?v=2',
   'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg/1280px-Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg',
