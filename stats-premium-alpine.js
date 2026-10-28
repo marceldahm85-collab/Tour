@@ -297,7 +297,7 @@
             const clean = cleanTitle(raw);
             if (!clean) return;
 
-            const isCalendarDate = /^\\d{1,2}\\.\\d{1,2}\\.\\d{4}$/.test(clean);
+            const isCalendarDate = /^\d{1,2}\.\d{1,2}\.\d{4}$/.test(clean);
             const key = isCalendarDate ? 'calendarCheck' : contentIconKeyForLabel(clean);
             title.replaceChildren(createContentIcon(key), document.createTextNode(clean));
             title.dataset.statsPremiumModalIconKey = key;
@@ -338,7 +338,7 @@
                 if (!LEADING_EMOJI.test(raw)) return;
 
                 const clean = cleanTitle(raw);
-                const isCalendarDate = /^\\d{1,2}\\.\\d{1,2}\\.\\d{4}$/.test(clean);
+                const isCalendarDate = /^\d{1,2}\.\d{1,2}\.\d{4}$/.test(clean);
                 const isStageMeta = /etappe|mehrtag|gruppe/i.test(clean);
                 const key = isCalendarDate
                     ? 'calendarCheck'
@@ -347,6 +347,20 @@
             });
         });
     }
+    function observeStatsModalBodies() {
+        ['tl-body', 'ds-body'].forEach(id => {
+            const body = document.getElementById(id);
+            if (!body || body.dataset.statsPremiumModalBodyObserver === 'true') return;
+
+            body.dataset.statsPremiumModalBodyObserver = 'true';
+            new MutationObserver(enhanceModalBodyIcons).observe(body, {
+                childList: true,
+                characterData: true,
+                subtree: true
+            });
+        });
+    }
+
     function enhanceHighlightPanoramas() {
         const highlights = document.getElementById('stats-highlights-page');
         if (!highlights) return;
@@ -390,12 +404,13 @@
 
     function init() {
         enhanceAll();
+        observeStatsModalTitle();
+        observeStatsModalBodies();
 
         const target = document.getElementById('chart-view');
         if (!target || target.dataset.statsPremiumTitleObserver === 'true') return;
 
         target.dataset.statsPremiumTitleObserver = 'true';
-        observeStatsModalTitle();
         const observer = new MutationObserver(enhanceAll);
         observer.observe(target, {
             childList: true,
