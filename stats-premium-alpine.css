@@ -609,3 +609,84 @@
         column-gap: 4px !important;
     }
 }
+
+/* Echte Fotopanorama-Bilder wie auf dem Dashboard; weicher Fade unter den Titeln. */
+#stats-highlights-page #highlights-content .highlight-group {
+    position: relative !important;
+    isolation: isolate;
+    overflow: hidden;
+}
+
+#stats-highlights-page #highlights-content .highlight-group > .highlight-panorama {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    display: block;
+    overflow: hidden;
+    pointer-events: none;
+    border-radius: inherit;
+    -webkit-mask-image: linear-gradient(
+        to bottom,
+        #000 0%,
+        #000 16%,
+        rgba(0, 0, 0, .88) 29%,
+        rgba(0, 0, 0, .58) 43%,
+        rgba(0, 0, 0, .24) 58%,
+        transparent 76%
+    );
+    mask-image: linear-gradient(
+        to bottom,
+        #000 0%,
+        #000 16%,
+        rgba(0, 0, 0, .88) 29%,
+        rgba(0, 0, 0, .58) 43%,
+        rgba(0, 0, 0, .24) 58%,
+        transparent 76%
+    );
+}
+
+#stats-highlights-page #highlights-content .highlight-panorama > img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: .92;
+    filter: saturate(1.12) contrast(1.22) brightness(1.08);
+}
+
+#stats-highlights-page #highlights-content .highlight-panorama::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(2, 9, 12, .30) 0%,
+        rgba(2, 9, 12, .16) 23%,
+        rgba(2, 8, 10, .06) 47%,
+        transparent 68%
+    );
+}
+
+#stats-highlights-page #highlights-content .highlight-group > :not(.highlight-panorama) {
+    position: relative;
+    z-index: 1;
+}
+
+/* Bildausschnitte abgestimmt auf die Motive der Dashboard-Meilensteine. */
+#stats-highlights-page #highlights-content .highlight-panorama--dist > img {
+    object-position: 54% center;
+}
+
+#stats-highlights-page #highlights-content .highlight-panorama--asc > img {
+    object-position: 68% 57%;
+}
+
+#stats-highlights-page #highlights-content .highlight-panorama--peaks > img {
+    object-position: 56% 38%;
+}
+
+#stats-highlights-page #highlights-content .highlight-panorama--time > img {
+    object-position: 66% 76%;
+}
