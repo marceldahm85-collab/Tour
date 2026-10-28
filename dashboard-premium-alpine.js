@@ -126,6 +126,55 @@
         enhanceDashboardStatIcons();
     }
 
+    function getMilestoneModalType() {
+        const title = document.getElementById('milestone-modal-title');
+        const label = String(title?.textContent || '').replace(/^[^\\p{L}\\p{N}]+/u, '').trim();
+        if (/\\bstrecke\\b/i.test(label)) return 'dist';
+        if (/\\baufstieg\\b/i.test(label)) return 'asc';
+        if (/\\bgehzeit\\b/i.test(label)) return 'time';
+        if (/\\bgipfel\\b/i.test(label)) return 'peaks';
+        if (/\\bschritte\\b/i.test(label)) return 'steps';
+        return null;
+    }
+
+    function enhanceMilestoneModalBackground() {
+        const modal = document.getElementById('milestone-modal');
+        const card = modal?.querySelector('.modal-card');
+        const type = getMilestoneModalType();
+        if (!modal || !card || !type) return;
+
+        let watermark = card.querySelector(':scope > .milestone-modal-watermark');
+        if (!watermark) {
+            watermark = document.createElement('img');
+            watermark.className = 'milestone-modal-watermark';
+            watermark.alt = '';
+            watermark.setAttribute('aria-hidden', 'true');
+            watermark.setAttribute('draggable', 'false');
+            watermark.setAttribute('decoding', 'async');
+            card.insertBefore(watermark, card.firstChild);
+        }
+
+        const source = ICON_ASSETS[type] || ICON_ASSETS.asc;
+        if (watermark.dataset.milestoneType !== type) {
+            watermark.src = source;
+            watermark.dataset.milestoneType = type;
+            modal.dataset.milestoneModalType = type;
+        }
+    }
+
+    function observeMilestoneModalBackground() {
+        const title = document.getElementById('milestone-modal-title');
+        if (!title || title.dataset.milestoneBackgroundObserver === 'true') return;
+
+        title.dataset.milestoneBackgroundObserver = 'true';
+        new MutationObserver(enhanceMilestoneModalBackground).observe(title, {
+            childList: true,
+            characterData: true,
+            subtree: true
+        });
+        enhanceMilestoneModalBackground();
+    }
+
     function buildIcon(type) {
         const src = ICON_ASSETS[type] || ICON_ASSETS.asc;
         return '<img class="dash-ms-symbol-svg dash-ms-art-image" src="' + src +
@@ -224,6 +273,7 @@
         observeDashboardStatIcons();
         enhanceDashboardStatIcons();
         enhanceChartTabIcons();
+        observeMilestoneModalBackground();
     }
 
     if (document.readyState === 'loading') {
