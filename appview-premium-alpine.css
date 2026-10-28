@@ -241,6 +241,34 @@ body.gold #app-view .form-section-title::after {
     box-shadow: 0 0 0 2px var(--theme-palette-accent-soft, var(--accent-soft, rgba(173,125,18,.22)));
 }
 
+/* Standortsymbol im Editor-Akzent. Bei der laufenden Suche bleibt
+   der vorhandene JS-Textindikator (Sanduhr) unverändert sichtbar. */
+#app-view #geo-search-btn:not(:disabled) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0 !important;
+}
+
+#app-view #geo-search-btn:not(:disabled)::before {
+    content: "";
+    display: inline-block !important;
+    flex: 0 0 16px;
+    width: 16px;
+    height: 16px;
+    background-color: var(--theme-palette-accent, var(--accent, #ad7d12));
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z' fill='none' stroke='%23000' stroke-width='1.8' stroke-linejoin='round'/%3E%3Ccircle cx='12' cy='10' r='2.5' fill='none' stroke='%23000' stroke-width='1.8'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z' fill='none' stroke='%23000' stroke-width='1.8' stroke-linejoin='round'/%3E%3Ccircle cx='12' cy='10' r='2.5' fill='none' stroke='%23000' stroke-width='1.8'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+#app-view #geo-search-btn:disabled {
+    font-size: 16px !important;
+}
+
+#app-view #geo-search-btn:disabled::before {
+    display: none !important;
+}
+
 /* Gipfeldaten als sauber getrennte Zeilen ohne neue Interaktionslogik. */
 #app-view #gipfel-details-container {
     gap: 9px;
