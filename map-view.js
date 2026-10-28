@@ -289,10 +289,29 @@ function shiftMapYear(direction) {
     yearSelect.dispatchEvent(new Event('change'));
 }
 
+/* Verhindert helle 1px-Kachelspalten bei Leaflet-Subpixel-Positionierung.
+   Die Kacheln überlappen sich minimal, damit der Container-Hintergrund nicht durchscheint. */
+function installMapTileSeamFix() {
+    const GridLayer = window.L && window.L.GridLayer;
+    if (!GridLayer || GridLayer.prototype.__mapTileSeamFixInstalled) return;
+
+    const originalInitTile = GridLayer.prototype._initTile;
+    GridLayer.include({
+        _initTile: function(tile) {
+            originalInitTile.call(this, tile);
+            const tileSize = this.getTileSize();
+            tile.style.width = (tileSize.x + 1) + 'px';
+            tile.style.height = (tileSize.y + 1) + 'px';
+        }
+    });
+    GridLayer.prototype.__mapTileSeamFixInstalled = true;
+}
+
 function initTourMap() {
     const mapEl = document.getElementById('tour-map');
     if (!mapEl) return;
 
+    installMapTileSeamFix();
     restoreMapUiState();
     populateMapYearSelect();
 
