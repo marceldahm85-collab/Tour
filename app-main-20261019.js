@@ -5490,10 +5490,6 @@ function openPlannedTourDetail(entry, options = {}) {
     bodyEl.innerHTML = `
         <div class="modal-detail-grid">
 
-            <div class="modal-detail-item">
-                <strong>Beste Zeit:</strong> ${escapeHtml(formatSaison(entry.monatVon, entry.monatBis) || '–')}
-            </div>
-
             ${renderModalActivityStats(entry)}
 
             ${(() => {
@@ -22667,7 +22663,7 @@ const THEME_EDITOR_SOFT_SELECTORS = [
     '#planned-tours-list .tour-list li',
     '.tour-image-preview-wrap', '.tour-detail-image-wrap', '.form-details',
     '.diagram-filter-checkbox', '.checklist-section', '.stats-chart-block',
-    '.plan-live-preview', '.plan-season-card',
+    '.plan-live-preview',
     '#chart-view .stats-section-btn', '#chart-view .stats-year-filter-wrap select',
     '#chart-view .stats-year-filter-wrap .mob-sel-btn', '#chart-view .stats-year-filter-wrap .dash-year-arrow-btn',
     '#map-view .map-year-filter-wrap select', '#map-view .map-year-filter-wrap .mob-sel-btn',
@@ -24098,38 +24094,7 @@ const plannedTableBody = document.querySelector('#planned-table tbody');
 
 let plannedTours = [];
 
-// ---------- Saison Auswahl initialisieren ----------
-const monatVonSelect = document.getElementById('monat-von');
-const monatBisSelect = document.getElementById('monat-bis');
-
-if (monatVonSelect && monatBisSelect) {
-
-    const monate = [
-        'Jänner','Februar','März','April','Mai','Juni',
-        'Juli','August','September','Oktober','November','Dezember'
-    ];
-
-    monate.forEach((m, i) => {
-        monatVonSelect.add(new Option(m, i + 1));
-        monatBisSelect.add(new Option(m, i + 1));
-    });
-
-}
-
 // Box-Höhe wird zentral durch updateBoxHeight() weiter oben gesteuert.
-
-const monthShort = ['Jän','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
-
-function formatSaison(monatVon, monatBis) {
-    if (!monatVon || !monatBis) return '';
-
-    const vonIndex = parseInt(monatVon, 10) - 1;
-    const bisIndex = parseInt(monatBis, 10) - 1;
-
-    if (vonIndex < 0 || bisIndex < 0) return '';
-
-    return `${monthShort[vonIndex]}–${monthShort[bisIndex]}`;
-}
 
 // ---------- Gipfel Formular ----------
 planGipfelCount.addEventListener('change', () => {
@@ -24218,9 +24183,6 @@ const planBikeZeit =
     const tourDayVal = document.getElementById('plan-tour-day')?.value.trim() || '';
     const tourDayCountVal = document.getElementById('plan-tour-day-count')?.value.trim() || '';
 
-    const monatVon = monatVonSelect.value;
-    const monatBis = monatBisSelect.value;
-
     // Pflichtfeld prüfen
     if (!tourname) {
         showToast('Bitte einen Tournamen eingeben.', { type: 'error' });
@@ -24281,8 +24243,6 @@ const savedPlanZeit = isPlanBikeTour ? '' : zeit;
     const entry = {
         id: String(planForm.dataset.editEntryId || '').trim() || createEntryId('plan'),
         tourname,
-        monatVon,
-        monatBis,
         strecke: savedPlanStrecke,
 aufstieg: savedPlanAufstieg,
 ausgangspunkt,
@@ -24372,8 +24332,6 @@ function normalizePlannedTourForCompare(entry) {
 
     return JSON.stringify({
         tourname: String(entry.tourname || ''),
-        monatVon: String(entry.monatVon || ''),
-        monatBis: String(entry.monatBis || ''),
         strecke: String(entry.strecke || ''),
         aufstieg: String(entry.aufstieg || ''),
         ausgangspunkt: String(entry.ausgangspunkt || ''),
@@ -24417,14 +24375,6 @@ function fillPlanFormFromEntry(entry) {
     planForm.dataset.editEntryId = String(entry?.id || '');
 
     planTourname.value = entry.tourname || '';
-
-    if (monatVonSelect) {
-        monatVonSelect.value = entry.monatVon || '';
-    }
-
-    if (monatBisSelect) {
-        monatBisSelect.value = entry.monatBis || '';
-    }
 
 if (planRegion)     planRegion.value     = entry.region     || '';
 if (planDifficulty) planDifficulty.value = entry.difficulty || '';
@@ -24783,7 +24733,34 @@ function initPlannedTableDelegation() {
 }
 
 function loadPlannedTours() {
-    plannedTours = appStorage.get('plannedTours') || [];
+    const storedPlannedTours = appStorage.get('plannedTours') || [];
+    let removedLegacySeasonFields = false;
+
+    plannedTours = Array.isArray(storedPlannedTours)
+        ? storedPlannedTours.map(entry => {
+            if (
+                !entry ||
+                typeof entry !== 'object' ||
+                (
+                    !Object.prototype.hasOwnProperty.call(entry, 'monatVon') &&
+                    !Object.prototype.hasOwnProperty.call(entry, 'monatBis')
+                )
+            ) {
+                return entry;
+            }
+
+            const cleanedEntry = { ...entry };
+            delete cleanedEntry.monatVon;
+            delete cleanedEntry.monatBis;
+            removedLegacySeasonFields = true;
+            return cleanedEntry;
+        })
+        : [];
+
+    if (removedLegacySeasonFields) {
+        appStorage.set('plannedTours', plannedTours);
+        autoSaveDataFileIfLinked();
+    }
 
     initPlannedTableDelegation();
     plannedTableEntryCache.clear();
@@ -24791,14 +24768,7 @@ function loadPlannedTours() {
     plannedTableBody.innerHTML = '';
 
     const displayData = groupEntriesForDisplay(plannedTours, 'planned')
-        .sort((a, b) => {
-            const ma = parseInt(a.monatVon) || 99;
-            const mb = parseInt(b.monatVon) || 99;
-
-            if (ma !== mb) return ma - mb;
-
-            return (a.tourname || '').localeCompare(b.tourname || '');
-        });
+        .sort((a, b) => (a.tourname || '').localeCompare(b.tourname || ''));
 
     displayData.forEach((t, i) => {
         const isGroup = !!t._isMultidaySummary;
@@ -24812,7 +24782,6 @@ function loadPlannedTours() {
 
         tr.innerHTML = `
             <td data-label="Nr.">${i + 1}</td>
-            <td data-label="Saison">${formatSaison(t.monatVon, t.monatBis)}</td>
             <td data-label="Tour">${escapeHtml(t.tourname || 'Unbekannt')}${multidaySummaryBadge(t)}</td>
             <td data-label="Gipfel" class="gipfel-toggle" style="cursor:pointer;font-weight:600;">${t.gipfel}</td>
             <td data-label="Strecke"><span class="value">${formatDecimalAT(t.strecke)}</span></td>
@@ -24833,7 +24802,7 @@ function loadPlannedTours() {
         if (t.gipfelDetails && t.gipfelDetails.length > 0) {
             const acc = document.createElement('tr');
             acc.innerHTML = `
-                <td colspan="9">
+                <td colspan="8">
                     <div class="gipfel-accordion" style="display:none;">
                         ${t.gipfelDetails.map(g => `⛰ ${escapeHtml(g.name || 'Unbekannt')} – ${escapeHtml(g.hoehe || '–')} m`).join('<br>')}
                     </div>
