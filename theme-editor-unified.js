@@ -279,7 +279,7 @@
 
     const RADIUS_SURFACES = [
         '.box', '.box-header', '.box-content', '.dash-section', '.filter-simple-card',
-        '[class*="-card"]', '[class*="-tile"]', '[class*="-panel"]',
+        '[class*="-card"]', ':not(.leaflet-tile)[class*="-tile"]', '[class*="-panel"]',
         '[class*="-section"]', '[class*="-btn"]', '[class*="-button"]',
         '[class*="-nav"]', '[class*="-list"] > li',
         '.dash-stat-tile', '.chart-stat-tile', '.dash-milestone-tile', '.chart-card', '.chart-tab',
@@ -345,7 +345,7 @@
         css += selectors(SOFT_SURFACES) + ' { background: ' + softGradient +
             ' !important; border-radius: ' + radius + ' !important; }\n';
         css += selectors(RADIUS_SURFACES) + ' { border-radius: ' + radius + ' !important; }\n';
-        css += 'body.gold :is(#dashboard-view, #app-view, #chart-view, #map-view, #tour-view, #backup-view, #wrapped-view, #achievements-view, #theme-view, #filter-view) :is([class*="-card"], [class*="-tile"], [class*="-panel"], [class*="-section"], [class*="-btn"], [class*="-button"], [class*="-nav"], [class*="-list"] > li, button, input[type="text"], input[type="number"], input[type="date"], input[type="search"], input[type="time"], input[type="email"], input[type="tel"], input[type="color"], input[type="range"], select, textarea, details > summary) { border-radius: ' + radius + ' !important; }\n';
+        css += 'body.gold :is(#dashboard-view, #app-view, #chart-view, #map-view, #tour-view, #backup-view, #wrapped-view, #achievements-view, #theme-view, #filter-view) :is([class*="-card"], [class*="-tile"]:not(.leaflet-tile), [class*="-panel"], [class*="-section"], [class*="-btn"], [class*="-button"], [class*="-nav"], [class*="-list"] > li, button, input[type="text"], input[type="number"], input[type="date"], input[type="search"], input[type="time"], input[type="email"], input[type="tel"], input[type="color"], input[type="range"], select, textarea, details > summary) { border-radius: ' + radius + ' !important; }\n';
         css += 'body.gold .top-main-nav { background: linear-gradient(145deg, var(--theme-palette-surface-strong), var(--theme-palette-surface-card)) !important; border-color: rgba(225,232,242,.10) !important; border-radius: ' + radius + 'px !important; }\n';
         css += 'body.gold .top-main-nav :is(button, a, .top-main-nav-item) { color: var(--theme-palette-text, #f3f7fb) !important; }\n';
         css += 'body.gold #theme-view .theme-editor-card, body.gold #theme-view .dashboard-editor-section { border-radius: ' + radius + 'px !important; }\n';
