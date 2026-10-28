@@ -377,3 +377,160 @@
         transition: none !important;
     }
 }
+
+
+/* Premium Alpine — alle neuen Line-Art-Grafiken konsequent in der Editor-Akzentfarbe. */
+#chart-view .stats-premium-title-icon,
+#chart-view .stats-premium-content-icon {
+    color: var(--accent, #D5A64C) !important;
+}
+
+#chart-view .stats-premium-title-icon svg,
+#chart-view .stats-premium-content-icon svg {
+    stroke: var(--accent, #D5A64C) !important;
+}
+
+/* Titel: derselbe Akzentton, aber mit etwas mehr Kontur und Licht. */
+#chart-view .stats-premium-title-icon {
+    opacity: 1 !important;
+    filter:
+        drop-shadow(0 0 2px color-mix(in srgb, var(--accent, #D5A64C) 52%, transparent))
+        drop-shadow(0 1px 4px color-mix(in srgb, var(--accent, #D5A64C) 32%, transparent)) !important;
+}
+
+#chart-view .stats-premium-title-icon svg {
+    stroke-width: 1.8 !important;
+}
+
+/* Auch die Gruppenlinien und -marker der Highlights verwenden die eingestellte Akzentfarbe. */
+#stats-highlights-page #highlights-content .highlight-group-umfang,
+#stats-highlights-page #highlights-content .highlight-group-leistung,
+#stats-highlights-page #highlights-content .highlight-group-gipfel,
+#stats-highlights-page #highlights-content .highlight-group-haeufigkeiten {
+    --highlight-group-accent: var(--accent, #D5A64C) !important;
+}
+
+/* Highlights: im mobilen Hochformat vier Gruppen kompakt in einem 2x2-Raster. */
+@media (max-width: 768px) and (orientation: portrait) {
+    #stats-highlights-page #highlights-content {
+        padding: 0 !important;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-groups {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-auto-rows: max-content;
+        gap: 6px;
+        align-items: start;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-group {
+        min-width: 0;
+        padding: 6px;
+        border-radius: var(--editor-radius, var(--premium-radius-card, 12px));
+    }
+
+    #stats-highlights-page #highlights-content .highlight-group-title {
+        gap: 4px;
+        margin: 0 1px 4px;
+        font-size: 9px;
+        line-height: 1.15;
+        letter-spacing: .045em;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-group-title::after {
+        margin-left: 1px;
+        opacity: .58;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-group-list {
+        gap: 3px;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-group-list > li {
+        grid-template-columns: minmax(0, 1fr) auto;
+        column-gap: 4px;
+        padding: 4px 5px;
+        border-left-width: 2px !important;
+        border-radius: 7px;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-row-label {
+        gap: 4px;
+        min-width: 0;
+        font-size: 9px;
+        line-height: 1.15;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-row-icon,
+    #stats-highlights-page #highlights-content .highlight-row-icon .stats-premium-content-icon {
+        width: 14px;
+        height: 14px;
+        flex: 0 0 14px;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-row-text,
+    #stats-highlights-page #highlights-content .highlight-group-list > li .stats-label {
+        min-width: 0;
+        font-size: 9px !important;
+        line-height: 1.15;
+        overflow-wrap: anywhere;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-group-list > li .stats-value {
+        min-width: 0;
+        max-width: 100%;
+        font-size: 9px !important;
+        line-height: 1.15;
+        white-space: normal;
+        text-align: right;
+        overflow-wrap: anywhere;
+    }
+}
+
+/* Kleine Displays: kompaktere Abstände, aber Symbole und Werte bleiben lesbar. */
+@media (max-width: 380px) and (orientation: portrait) {
+    #stats-highlights-page #highlights-content .highlight-groups {
+        gap: 5px;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-group {
+        padding: 5px;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-group-list > li {
+        padding: 4px;
+        column-gap: 3px;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-row-label,
+    #stats-highlights-page #highlights-content .highlight-group-list > li .stats-value {
+        font-size: 8.5px !important;
+    }
+}
+
+/* Querformat bereits zweispaltig; hier nur zusätzliche Höhe aus den Zeilen nehmen. */
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    #stats-highlights-page #highlights-content .highlight-group {
+        padding: 6px;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-group-list {
+        gap: 3px;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-group-list > li {
+        padding: 4px 6px;
+        column-gap: 5px;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-group-title {
+        font-size: 9px;
+        margin-bottom: 4px;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-group-list > li .stats-label,
+    #stats-highlights-page #highlights-content .highlight-group-list > li .stats-value {
+        font-size: 9px;
+    }
+}
