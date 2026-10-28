@@ -2671,7 +2671,6 @@ body.dark .chart-tabs{
   gap: 4px;
 
   border: 1px solid rgba(255,255,255,0.24);
-  border-radius: 14px;
 
   background: rgba(255,255,255,0.14);
   color: var(--text-main);
@@ -12771,8 +12770,6 @@ select {
 
     padding:
         6px 6px;
-
-    border-radius: 10px;
 }
 
 
@@ -12790,11 +12787,7 @@ select {
 }
 
 
-#stats-diagrams-page
-#chart-tabs
-.tab-sliding-highlight {
-    border-radius: 10px;
-}
+
 
 
 #stats-diagrams-page
