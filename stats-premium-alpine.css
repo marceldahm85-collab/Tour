@@ -735,3 +735,64 @@
     height: 18px;
     margin-right: 0;
 }
+
+
+/* Statistik und Entwicklung: große Analyseboxen einzeln aufklappbar.
+   Kleine Kennzahlen innerhalb der geöffneten Boxen bleiben unverändert. */
+#stats-statistics-page .stats-section-collapsible > .stats-analysis-title,
+#stats-development-page .stats-section-collapsible > .stats-analysis-title {
+    position: relative;
+    padding-right: 26px;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#stats-statistics-page .stats-section-collapsible > .stats-analysis-title::after,
+#stats-development-page .stats-section-collapsible > .stats-analysis-title::after {
+    content: "";
+    position: absolute;
+    right: 5px;
+    top: calc(50% - 5px);
+    width: 8px;
+    height: 8px;
+    border-right: 1.8px solid var(--theme-palette-accent, var(--accent, #D5A64C));
+    border-bottom: 1.8px solid var(--theme-palette-accent, var(--accent, #D5A64C));
+    transform: rotate(45deg);
+    transform-origin: center;
+    transition: transform 160ms ease, top 160ms ease;
+    opacity: .95;
+}
+
+#stats-statistics-page .stats-section-collapsible:not(.is-collapsed) > .stats-analysis-title::after,
+#stats-development-page .stats-section-collapsible:not(.is-collapsed) > .stats-analysis-title::after {
+    top: calc(50% - 2px);
+    transform: rotate(225deg);
+}
+
+#stats-statistics-page .stats-section-collapsible.is-collapsed > .stats-analysis-title,
+#stats-development-page .stats-section-collapsible.is-collapsed > .stats-analysis-title {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    border-bottom-color: transparent !important;
+}
+
+#stats-statistics-page .stats-section-collapsible.is-collapsed > :not(.stats-analysis-title),
+#stats-development-page .stats-section-collapsible.is-collapsed > :not(.stats-analysis-title) {
+    display: none !important;
+}
+
+#stats-statistics-page .stats-section-collapsible > .stats-analysis-title:focus-visible,
+#stats-development-page .stats-section-collapsible > .stats-analysis-title:focus-visible {
+    outline: 2px solid var(--theme-palette-accent, var(--accent, #D5A64C));
+    outline-offset: 3px;
+    border-radius: 5px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #stats-statistics-page .stats-section-collapsible > .stats-analysis-title::after,
+    #stats-development-page .stats-section-collapsible > .stats-analysis-title::after {
+        transition: none;
+    }
+}
