@@ -29,6 +29,7 @@
     Object.assign(ICONS, {
         hiking: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 3.5h4.2v6.6l3.1 2.4 3.6 1.1a3 3 0 0 1 2.2 2.9V20H3.5v-2.7a2 2 0 0 1 2-2H8V3.5Z"/><path d="M8.2 15.3h2M12 17.2h2M4 20h16"/></svg>',
         climbing: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9.1 3.5a4.6 4.6 0 0 0-4.6 4.6v7.1a5.3 5.3 0 0 0 5.3 5.3h4.4a5.3 5.3 0 0 0 5.3-5.3V9.8a4.6 4.6 0 0 0-4.6-4.6"/><path d="M9.2 3.5h5.6M7.1 10.1l3.1 2.7 2.2-2.1 3 2.6"/><path d="m9.1 16.7 2-1.8 2.2 1.8 1.8-1.4"/></svg>',
+        ascentRate: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 20h18M5 17.5 10 12l3 2.5L20 5"/><path d="M15.5 5H20v4.5"/></svg>',
         cycling: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="5.2" cy="17.1" r="3.5"/><circle cx="18.7" cy="17.1" r="3.5"/><path d="m5.2 17.1 4.1-7.2 4.1 7.2H5.2ZM9.3 9.9h4.2l5.2 7.2M12.7 6.3h3.1M8.3 8.1l1-1.8"/></svg>',
         backpack: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 6V5a4 4 0 0 1 8 0v1"/><rect x="4.2" y="6" width="15.6" height="15" rx="3"/><path d="M7.5 10h9M7.2 14h9.6v4H7.2zM4.5 11H2.8v5h1.7M19.5 11h1.7v5h-1.7"/></svg>',
         compass: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.1 5.5-5.5 2.1 2.1-5.5 5.5-2.1Z"/><path d="M12 3v2M21 12h-2M12 21v-2M3 12h2"/></svg>'
@@ -141,6 +142,7 @@
         'hiking-time': 'time',
         'climbing-time': 'time',
         'cycling-time': 'time',
+        'ascent-rate': 'ascentRate',
         steps: 'steps',
         'big-tours': 'backpack',
         peaks: 'peaks',
@@ -159,7 +161,8 @@
         if (/region/i.test(label)) return 'compass';
         if (/schritt/i.test(label)) return 'steps';
         if (/(gehzeit|fahrzeit|dauer|\bzeit\b)/i.test(label)) return 'time';
-        if (/(geschwindigkeit|schnell|tempo|anstieg.*h)/i.test(label)) return 'speed';
+        if (/(schnellster anstieg|anstieg.*h|hm\/h)/i.test(label)) return 'ascentRate';
+        if (/(geschwindigkeit|schnell|tempo)/i.test(label)) return 'speed';
         if (/(leistungsindex|leistungsmerkmal|\bleistung\b|intensiv|bestform|rekord)/i.test(label)) return 'performance';
         if (/(steigung|steiltour|steil)/i.test(label)) return 'grade';
         if (/(strecke|distanz|umfang)/i.test(label)) return 'distance';
