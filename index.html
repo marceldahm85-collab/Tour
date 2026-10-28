@@ -1504,19 +1504,33 @@
             <span><i class="map-performance-dot top"></i>Top 10 %</span>
         </div>
 
-        <!-- Schnellfilter -->
-        <div class="quick-filters filter-search-quick-grid" id="map-quick-filters">
-    <button type="button" class="quick-filter-btn" data-mqf="all">Alle</button>
-    <button type="button" class="quick-filter-btn" data-mqf="bigTours">Big Tours</button>
-    <button type="button" class="quick-filter-btn" data-mqf="peaks">Gipfeltouren</button>
-    <button type="button" class="quick-filter-btn active" data-mqf="osttirol">Osttirol</button>
-    <button type="button" class="quick-filter-btn" data-mqf="kaernten">Kärnten</button>
-    <button type="button" class="quick-filter-btn" data-mqf="nordtirol">Nordtirol</button>
-    <button type="button" class="quick-filter-btn" data-mqf="suedtirol">Südtirol</button>
-    <button type="button" class="quick-filter-btn" data-mqf="salzburg">Salzburg</button>
-    <button type="button" class="quick-filter-btn" data-mqf="anderswo">Anderswo</button>
+        <!-- Kombinierbare Kartenfilter -->
+        <div class="quick-filters filter-search-quick-grid map-filter-groups" id="map-quick-filters" aria-label="Kartenfilter">
+            <div class="map-filter-group map-filter-group-tours">
+                <div class="map-filter-group-heading">
+                    <span class="map-filter-group-title">Tourenmerkmale</span>
+                    <button type="button" class="quick-filter-btn map-filter-reset" data-mqf="all" aria-label="Alle Filter zurücksetzen" aria-pressed="false">Alle</button>
+                </div>
+                <div class="map-filter-chip-row" role="group" aria-label="Tourenmerkmale, Mehrfachauswahl möglich">
+                    <button type="button" class="quick-filter-btn" data-mqf="bigTours" aria-pressed="false">Big Tours</button>
+                    <button type="button" class="quick-filter-btn" data-mqf="peaks" aria-pressed="false">Gipfeltouren</button>
+                </div>
+            </div>
 
-
+            <div class="map-filter-group map-filter-group-regions">
+                <div class="map-filter-group-heading">
+                    <span class="map-filter-group-title">Regionen</span>
+                    <span class="map-filter-group-hint">Mehrfachauswahl</span>
+                </div>
+                <div class="map-filter-chip-row" role="group" aria-label="Regionen, mehrere auswählbar">
+                    <button type="button" class="quick-filter-btn active" data-mqf="osttirol" aria-pressed="true">Osttirol</button>
+                    <button type="button" class="quick-filter-btn" data-mqf="kaernten" aria-pressed="false">Kärnten</button>
+                    <button type="button" class="quick-filter-btn" data-mqf="nordtirol" aria-pressed="false">Nordtirol</button>
+                    <button type="button" class="quick-filter-btn" data-mqf="suedtirol" aria-pressed="false">Südtirol</button>
+                    <button type="button" class="quick-filter-btn" data-mqf="salzburg" aria-pressed="false">Salzburg</button>
+                    <button type="button" class="quick-filter-btn" data-mqf="anderswo" aria-pressed="false">Anderswo</button>
+                </div>
+            </div>
         </div>
 
     </div>
