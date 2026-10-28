@@ -555,11 +555,11 @@
 @media (max-width: 768px) and (orientation: portrait) {
     #stats-highlights-page #highlights-content .highlight-groups {
         grid-template-columns: minmax(0, 1fr) !important;
-        gap: 5px !important;
+        gap: 6px !important;
     }
 
     #stats-highlights-page #highlights-content .highlight-group {
-        padding: 7px 8px !important;
+        padding: 9px 8px !important;
     }
 
     #stats-highlights-page #highlights-content .highlight-group-title {
@@ -597,11 +597,11 @@
 /* Auch auf besonders schmalen Displays bleibt die größere, einspaltige Darstellung aktiv. */
 @media (max-width: 380px) and (orientation: portrait) {
     #stats-highlights-page #highlights-content .highlight-groups {
-        gap: 4px !important;
+        gap: 5px !important;
     }
 
     #stats-highlights-page #highlights-content .highlight-group {
-        padding: 6px 7px !important;
+        padding: 8px 7px !important;
     }
 
     #stats-highlights-page #highlights-content .highlight-group-list > li {
@@ -689,4 +689,49 @@
 
 #stats-highlights-page #highlights-content .highlight-panorama--time > img {
     object-position: 66% 76%;
+}
+
+/* Modal-Symbole: feste kleine Abmessungen und Editor-Akzentfarbe auch außerhalb von #chart-view. */
+#tour-list-modal .stats-premium-content-icon,
+#dash-stat-modal .stats-premium-content-icon {
+    display: inline-flex;
+    flex: 0 0 16px;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
+    color: var(--theme-palette-accent, var(--accent, #D5A64C)) !important;
+    vertical-align: -0.18em;
+    filter: drop-shadow(0 1px 3px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #D5A64C)) 24%, transparent));
+}
+
+#tour-list-modal .stats-premium-content-icon svg,
+#dash-stat-modal .stats-premium-content-icon svg {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100%;
+    max-height: 100%;
+    fill: none !important;
+    stroke: var(--theme-palette-accent, var(--accent, #D5A64C)) !important;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    overflow: visible;
+}
+
+#tour-list-modal #tl-title,
+#dash-stat-modal #ds-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#tour-list-modal #tl-title > .stats-premium-content-icon,
+#dash-stat-modal #ds-title > .stats-premium-content-icon {
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+    margin-right: 0;
 }
