@@ -3,12 +3,13 @@
    Filterlogik und Kartenebenen bleiben unverändert. */
 
 :root {
-    --map-premium-accent: var(--theme-palette-accent, var(--accent, #D5A64C));
     --map-premium-radius: var(--editor-radius, var(--premium-radius-control, 12px));
     --map-premium-border: var(--premium-border, rgba(255,255,255,.13));
 }
 
 #map-view {
+    /* Auf #map-view berechnen, damit der vom Editor auf body gesetzte Akzent geerbt wird. */
+    --map-premium-accent: var(--theme-palette-accent, var(--accent, #D5A64C));
     color: var(--app-text-primary, var(--text-main, #f3f6fa));
 }
 
@@ -102,6 +103,7 @@
 }
 
 #map-view .map-year-filter-wrap > .dash-year-arrow-btn {
+    color: var(--map-premium-accent) !important;
     font-weight: 750;
 }
 
@@ -113,9 +115,9 @@
 
 @media (hover: hover) and (pointer: fine) {
     body:not(.touch-mode) #map-view .map-year-filter-wrap .dash-year-arrow-btn:not(:disabled):hover {
-        border-color: var(--premium-border-strong, var(--accent, #D5A64C)) !important;
+        border-color: color-mix(in srgb, var(--map-premium-accent) 60%, var(--map-premium-border)) !important;
         background: linear-gradient(145deg,
-            color-mix(in srgb, var(--accent, #D5A64C) 7%, var(--app-surface-strong, #1b2027)),
+            color-mix(in srgb, var(--map-premium-accent) 10%, var(--app-surface-strong, #1b2027)),
             var(--app-surface-card, #111820)) !important;
     }
 }
@@ -303,6 +305,9 @@
 /* Cluster behalten ihre Anzahl und Größenstaffelung, nutzen aber den
    aktuellen Akzent mit klarer Kontur. */
 #map-view #tour-map .tour-cluster {
+    /* Überschreibt die alten, themefesten Clusterfarben gezielt nur im Mapview. */
+    background: var(--map-premium-accent) !important;
+    color: var(--theme-palette-accent-text, var(--accent-text-color, #fff)) !important;
     border: 2px solid color-mix(in srgb, var(--map-premium-accent) 45%, white) !important;
     box-shadow:
         0 0 0 2px color-mix(in srgb, var(--map-premium-accent) 18%, transparent),
@@ -445,8 +450,19 @@
 }
 
 #map-view .leaflet-bar a {
+    color: var(--map-premium-accent) !important;
     font-weight: 750;
     transition: color 150ms ease, background 150ms ease;
+}
+
+#map-view .leaflet-control-attribution a {
+    color: var(--map-premium-accent) !important;
+}
+
+#map-view .leaflet-popup-close-button,
+#map-view .leaflet-popup-close-button:hover,
+#map-view .leaflet-popup-close-button:focus-visible {
+    color: var(--map-premium-accent) !important;
 }
 
 #map-view .leaflet-bar a:hover,
