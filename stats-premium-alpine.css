@@ -964,75 +964,152 @@
 }
 
 
-/* Premium Alpine — Stats-Gipfelstatistik: sechs Kennzahlen als gemeinsame Karte.
-   Schriftgrößen leicht erhöhen; keine Inhalte oder Berechnungen verändern. */
+/* Premium Alpine — Gipfelstatistik: einzelne Kennzahlen-Kacheln, kompakt und lesbar.
+   Die zusammenhängende Flächenvariante wird bewusst ersetzt; Inhalt/Berechnung bleiben unverändert. */
+#stats-peaks-page #stats-peaks-content > .stats-analysis-section {
+    margin: 0 0 5px !important;
+    padding: 10px !important;
+}
+
+#stats-peaks-page #stats-peaks-content > .stats-analysis-section .stats-analysis-title {
+    margin-bottom: 7px !important;
+}
+
 #stats-peaks-page .peak-summary-grid {
-    gap: 0 !important;
-    overflow: hidden;
-    border: 1px solid var(--premium-border, rgba(255, 255, 255, .13));
-    border-radius: var(--editor-radius, var(--premium-radius-control, 12px));
-    background: linear-gradient(
-        145deg,
-        var(--app-surface-card, rgba(255, 255, 255, .055)),
-        var(--app-surface-subtle, rgba(0, 0, 0, .14))
-    );
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+    margin-bottom: 0 !important;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
 }
 
 #stats-peaks-page .peak-summary-grid > .peak-summary-card {
-    min-height: 30px !important;
-    padding: 5px 8px !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-}
-
-#stats-peaks-page .peak-summary-grid > .peak-summary-card:nth-child(odd) {
-    border-right: 1px solid color-mix(
-        in srgb,
-        var(--premium-border, rgba(255, 255, 255, .13)) 78%,
-        transparent
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    min-width: 0;
+    min-height: 34px !important;
+    padding: 6px 8px !important;
+    border: 1px solid var(--premium-border, rgba(255, 255, 255, .13)) !important;
+    border-radius: 9px !important;
+    background: linear-gradient(
+        150deg,
+        var(--app-surface-card, rgba(255, 255, 255, .055)),
+        var(--app-surface-subtle, rgba(0, 0, 0, .14))
     ) !important;
-}
-
-#stats-peaks-page .peak-summary-grid > .peak-summary-card:nth-child(-n+4) {
-    border-bottom: 1px solid color-mix(
-        in srgb,
-        var(--premium-border, rgba(255, 255, 255, .13)) 78%,
-        transparent
-    ) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .035) !important;
 }
 
 #stats-peaks-page .peak-summary-grid .peak-summary-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0 !important;
     font-size: 10px !important;
     line-height: 1.18;
     font-weight: 700;
+    overflow-wrap: anywhere;
 }
 
 #stats-peaks-page .peak-summary-grid .peak-summary-value {
+    flex: 0 0 auto;
+    min-width: 0;
+    margin: 0 !important;
     font-size: 13px !important;
     line-height: 1.15;
     font-weight: 800;
+    text-align: right;
+    white-space: nowrap;
 }
 
+/* Gipfelliste: das bereits in den Highlights verwendete Dolomitenpanorama.
+   Gedämpfte Überlagerung bewahrt Lesbarkeit und die bestehenden Metallstufen. */
+#stats-peaks-page #stats-peaks-content > .stats-analysis-section:nth-child(2) {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: linear-gradient(
+        150deg,
+        var(--app-surface-strong, rgba(10, 16, 23, .84)),
+        var(--app-surface-card, rgba(10, 16, 23, .90))
+    ) !important;
+}
+
+#stats-peaks-page .stats-peak-panorama {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    display: block;
+    overflow: hidden;
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+#stats-peaks-page .stats-peak-panorama > img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 54% 46%;
+    opacity: .52;
+    filter: saturate(1.08) contrast(1.16) brightness(.80);
+}
+
+#stats-peaks-page .stats-peak-panorama::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(4, 8, 12, .28) 0%,
+        rgba(4, 8, 12, .57) 38%,
+        rgba(4, 8, 12, .76) 100%
+    );
+}
+
+#stats-peaks-page #stats-peaks-content > .stats-analysis-section:nth-child(2) > :not(.stats-peak-panorama) {
+    position: relative;
+    z-index: 1;
+}
+
+/* Die normalen Listeneinträge bleiben leicht transparent, damit das Panorama
+   durchscheint. Bronze, Silber und Gold behalten ihre bestehenden Oberflächen. */
+#stats-peaks-page .stats-peak-history-item:not(.peak-tier-1):not(.peak-tier-2):not(.peak-tier-3) {
+    background: linear-gradient(
+        145deg,
+        rgba(7, 12, 17, .30),
+        rgba(7, 12, 17, .44)
+    ) !important;
+    border-color: color-mix(
+        in srgb,
+        var(--premium-border, rgba(255, 255, 255, .13)) 88%,
+        transparent
+    ) !important;
+}
+
+/* Im mobilen Querformat bleibt die bewährte einspaltige Kennzahlenfolge erhalten. */
 @media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    #stats-peaks-page #stats-peaks-content > .stats-analysis-section {
+        margin: 0 !important;
+        padding: 8px !important;
+    }
+
+    #stats-peaks-page #stats-peaks-content {
+        gap: 5px !important;
+    }
+
     #stats-peaks-page .peak-summary-grid {
         grid-template-columns: minmax(0, 1fr) !important;
+        gap: 3px !important;
     }
 
-    #stats-peaks-page .peak-summary-grid > .peak-summary-card:nth-child(odd) {
-        border-right: 0 !important;
-    }
-
-    #stats-peaks-page .peak-summary-grid > .peak-summary-card:not(:last-child) {
-        border-bottom: 1px solid color-mix(
-            in srgb,
-            var(--premium-border, rgba(255, 255, 255, .13)) 78%,
-            transparent
-        ) !important;
-    }
-
-    #stats-peaks-page .peak-summary-grid > .peak-summary-card:last-child {
-        border-bottom: 0 !important;
+    #stats-peaks-page .peak-summary-grid > .peak-summary-card {
+        min-height: 29px !important;
+        padding: 5px 8px !important;
     }
 }
