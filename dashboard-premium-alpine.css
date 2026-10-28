@@ -447,3 +447,38 @@
         font-size: 10px;
     }
 }
+
+/* Dashboard-Meilenstein-Modal: ein scharfes, zentriertes Abzeichen als Wasserzeichen. */
+#milestone-modal .modal-card {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+}
+
+#milestone-modal .modal-card > .milestone-modal-watermark {
+    position: absolute !important;
+    z-index: 0 !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    display: block !important;
+    width: min(78%, 320px) !important;
+    height: auto !important;
+    max-width: none !important;
+    max-height: 76% !important;
+    aspect-ratio: 1 / 1;
+    object-fit: contain !important;
+    opacity: .17 !important;
+    filter: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    pointer-events: none !important;
+    user-select: none !important;
+}
+
+#milestone-modal .modal-card > :not(.milestone-modal-watermark) {
+    position: relative;
+    z-index: 1;
+}
+
