@@ -448,13 +448,8 @@
     }
 }
 
-/* Dashboard-Meilenstein-Modal: ein scharfes, zentriertes Abzeichen als Wasserzeichen. */
-#milestone-modal .modal-card {
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
-}
-
+/* Dashboard-Meilenstein-Modal: scharfes Abzeichen mittig als Hintergrundmotiv.
+   Die vorhandene absolute Modalpositionierung bleibt unverändert. */
 #milestone-modal .modal-card > .milestone-modal-watermark {
     position: absolute !important;
     z-index: 0 !important;
@@ -468,7 +463,7 @@
     max-height: 76% !important;
     aspect-ratio: 1 / 1;
     object-fit: contain !important;
-    opacity: .17 !important;
+    opacity: .18 !important;
     filter: none !important;
     border: 0 !important;
     border-radius: 0 !important;
@@ -477,8 +472,9 @@
     user-select: none !important;
 }
 
-#milestone-modal .modal-card > :not(.milestone-modal-watermark) {
+/* Nur Inhaltsebenen über das Wasserzeichen legen; Modalposition und Scrolling bleiben intakt. */
+#milestone-modal .modal-card > .modal-header,
+#milestone-modal .modal-card > .modal-body {
     position: relative;
     z-index: 1;
 }
-
