@@ -321,3 +321,75 @@ html body #tour-view[data-plan-section-active="peaks"] .plan-page-header .plan-o
         min-height: 0 !important;
     }
 }
+
+
+/* PREMIUM ALPINE — SVG-Liniensymbole für alle vier Tourplanungsbereiche. */
+html body #tour-view .plan-icon-svg,
+html body #tour-view .planned-peak-inline-icon {
+    color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+}
+html body #tour-view .plan-icon-svg svg,
+html body #tour-view .planned-peak-inline-icon svg,
+html body #tour-view #planned-table .plan-action-icon {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    overflow: visible;
+}
+html body #tour-view .plan-title-with-icon {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+html body #tour-view .plan-title-icon {
+    display: inline-flex;
+    flex: 0 0 15px;
+    width: 15px;
+    height: 15px;
+}
+html body #tour-view #plan-form .plan-live-preview-head .plan-title-icon {
+    flex-basis: 14px;
+    width: 14px;
+    height: 14px;
+}
+html body #tour-view .plan-overview-icon.plan-icon-svg {
+    display: inline-flex;
+    flex: 0 0 13px;
+    width: 13px;
+    height: 13px;
+    align-items: center;
+    justify-content: center;
+    font-size: 0 !important;
+    line-height: 0;
+}
+html body #tour-view .plan-section-btn .plan-section-icon.plan-icon-svg {
+    display: inline-flex !important;
+    flex: 0 0 14px !important;
+    width: 14px !important;
+    height: 14px !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 0 !important;
+    line-height: 0 !important;
+}
+html body #tour-view .plan-section-btn .plan-section-icon.plan-icon-svg,
+html body #tour-view .plan-section-btn.active .plan-section-icon.plan-icon-svg {
+    color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+}
+html body #tour-view .planned-peak-inline-icon {
+    display: inline-flex;
+    width: 13px;
+    height: 13px;
+    vertical-align: -2px;
+    margin-right: 3px;
+}
+html body #tour-view #planned-table .plan-action-icon {
+    width: 14px;
+    height: 14px;
+}
