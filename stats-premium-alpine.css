@@ -94,9 +94,12 @@
                 0 8px 22px rgba(0,0,0,.16) !important;
 }
 
-/* Überschriften bekommen eine kleine alpine Linienmarke aus der Akzentfarbe. */
+/* Überschriften: individuelle alpine Line-Art statt eines identischen Bergsymbols. */
 #chart-view .stats-analysis-title,
 #chart-view .chart-title {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
     color: var(--app-text-primary, var(--text-main, inherit)) !important;
     gap: 8px;
     border-bottom: 1px solid var(--premium-border, rgba(255,255,255,.12));
@@ -107,22 +110,44 @@
 
 #chart-view .stats-analysis-title::before,
 #chart-view .chart-title::before {
-    content: "";
-    display: block;
+    content: none !important;
+    display: none !important;
+}
+
+#chart-view .stats-premium-title-label {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    gap: 7px;
+}
+
+#chart-view .stats-premium-title-icon {
+    display: inline-flex;
     flex: 0 0 18px;
+    align-items: center;
+    justify-content: center;
     width: 18px;
     height: 18px;
-    background: var(--accent, #D5A64C);
-    -webkit-mask-image: var(--stats-ridge-mask);
-    mask-image: var(--stats-ridge-mask);
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    -webkit-mask-position: center;
-    mask-position: center;
-    -webkit-mask-size: contain;
-    mask-size: contain;
-    opacity: .96;
-    filter: drop-shadow(0 1px 3px color-mix(in srgb, var(--accent, #D5A64C) 25%, transparent));
+    color: var(--accent, #D5A64C);
+    opacity: .98;
+    vertical-align: middle;
+    filter: drop-shadow(0 1px 3px color-mix(in srgb, var(--accent, #D5A64C) 22%, transparent));
+}
+
+#chart-view .stats-premium-title-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.55;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    overflow: visible;
+}
+
+#chart-view .highlight-group-title .stats-premium-title-icon {
+    margin-right: 7px;
 }
 
 /* Inhaltsbereiche: klare Premium-Flächen statt beliebiger heller Einzelrahmen. */
@@ -269,11 +294,14 @@
         margin-bottom: 9px;
     }
 
-    #chart-view .stats-analysis-title::before,
-    #chart-view .chart-title::before {
+    #chart-view .stats-premium-title-icon {
         flex-basis: 16px;
         width: 16px;
         height: 16px;
+    }
+
+    #chart-view .stats-premium-title-label {
+        gap: 6px;
     }
 
     #stats-highlights-page #highlights-content .highlight-group {
