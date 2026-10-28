@@ -3,6 +3,26 @@
 (function () {
     'use strict';
 
+    /* Dieselben echten Alpenfotos wie bei den Dashboard-Meilensteinen. */
+    const HIGHLIGHT_PANORAMAS = {
+        'highlight-group-umfang': {
+            key: 'dist',
+            src: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/20-06-2020_-_Alps_panorama.jpg/1280px-20-06-2020_-_Alps_panorama.jpg'
+        },
+        'highlight-group-leistung': {
+            key: 'asc',
+            src: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg/1280px-Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg'
+        },
+        'highlight-group-gipfel': {
+            key: 'peaks',
+            src: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Dolomites.jpg/1280px-Dolomites.jpg'
+        },
+        'highlight-group-haeufigkeiten': {
+            key: 'time',
+            src: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Alpenpanorama_bei_Sonnenuntergang.jpg/1280px-Alpenpanorama_bei_Sonnenuntergang.jpg'
+        }
+    };
+
     const ICONS = {
         trail: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20c2.2-3.8 4.8-5.7 7.1-5.1 2.2.6 2.7 1.4 4.4-.9 1-1.4 2.1-3.2 4.5-6"/><circle cx="4" cy="20" r="1.4"/><circle cx="20" cy="8" r="1.4"/><path d="m16.8 8.1 3.2-.1-.1-3.2"/><path d="M7 17.5h2.3M10.3 14.9l1.4 1.3M14.8 12l1.4 1.1"/></svg>',
         typical: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m2.5 19.5 6.1-9.4 3.1 4.2 3.4-7 6.4 12.2H2.5Z"/><path d="m13.5 10.2 1.6-2.9 1.6 3.1-1.2-.5-1 .9-.8-.6Z"/><path d="M5.2 19.5c1.7-1 2.8-1 4.1-.2 1.2.7 2.3.8 3.7.1"/></svg>',
@@ -296,7 +316,37 @@
         });
     }
 
+    function enhanceHighlightPanoramas() {
+        const highlights = document.getElementById('stats-highlights-page');
+        if (!highlights) return;
+
+        Object.entries(HIGHLIGHT_PANORAMAS).forEach(([groupClass, asset]) => {
+            highlights.querySelectorAll('#highlights-content .' + groupClass).forEach(group => {
+                const current = group.querySelector(':scope > .highlight-panorama');
+                if (current && current.dataset.photoKey === asset.key) return;
+                if (current) current.remove();
+
+                const panorama = document.createElement('span');
+                panorama.className = 'highlight-panorama highlight-panorama--' + asset.key;
+                panorama.dataset.photoKey = asset.key;
+                panorama.setAttribute('aria-hidden', 'true');
+
+                const image = document.createElement('img');
+                image.src = asset.src;
+                image.alt = '';
+                image.setAttribute('aria-hidden', 'true');
+                image.setAttribute('decoding', 'async');
+                image.setAttribute('loading', 'lazy');
+                image.draggable = false;
+
+                panorama.appendChild(image);
+                group.insertBefore(panorama, group.firstChild);
+            });
+        });
+    }
+
     function enhanceAll() {
+        enhanceHighlightPanoramas();
         document.querySelectorAll(
             '#chart-view .stats-analysis-title, ' +
             '#chart-view .chart-title, ' +
