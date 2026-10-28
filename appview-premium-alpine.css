@@ -117,11 +117,21 @@
     stroke-linejoin: round;
 }
 #app-view .slope-toggle[aria-pressed="true"] {
-    background: color-mix(in srgb,
-        var(--theme-palette-accent, var(--accent, #ad7d12)) 13%,
-        var(--app-surface-strong, #111923)
-    );
-    border-color: var(--theme-palette-accent, var(--accent, #ad7d12));
+    background: var(--accent-gradient, var(--theme-palette-accent-gradient)) !important;
+    border-color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+    color: var(--accent-text-color, var(--theme-palette-accent-text, #fff)) !important;
+    border-radius: var(--editor-radius, var(--premium-radius-control, 12px)) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.10) !important;
+}
+
+/* Aktiv-/Fokusmarkierung des Steigungsbuttons: Editor-Akzent, Editor-Radius,
+   kein alter roter bzw. eckiger Legacy-Schatten. */
+#app-view .tour-form .slope-toggle:focus,
+#app-view .tour-form .slope-toggle:focus-visible {
+    outline: none !important;
+    border-color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+    border-radius: var(--editor-radius, var(--premium-radius-control, 12px)) !important;
+    box-shadow: 0 0 0 2px var(--theme-palette-accent-soft, var(--accent-soft, rgba(173,125,18,.24))) !important;
 }
 
 /* Dynamische Gipfelfelder bleiben unverändert, nur die Trennung wird verfeinert. */
@@ -132,12 +142,16 @@
 }
 #app-view .save-peak-row:last-child { padding-bottom: 0; border-bottom: 0; }
 
-/* Koordinaten dauerhaft zeigen: die vorhandenen Felder bleiben in ihrem Formularbereich. */
+/* Koordinaten dauerhaft zeigen, ohne die globale .form-details-Fläche. */
 #app-view details.form-details {
     display: block !important;
-    padding: 0;
-    border: 0;
-    background: transparent;
+    padding: 0 !important;
+    border: 0 !important;
+    border-color: transparent !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
 }
 #app-view details.form-details > summary { display: none !important; }
 #app-view details.form-details[open] > .tour-form-row { margin-top: 5px; }
