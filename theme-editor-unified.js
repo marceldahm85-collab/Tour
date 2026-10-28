@@ -282,7 +282,7 @@
         '[class*="-card"]', '[class*="-tile"]', '[class*="-panel"]',
         '[class*="-section"]', '[class*="-btn"]', '[class*="-button"]',
         '[class*="-nav"]', '[class*="-list"] > li',
-        '.dash-stat-tile', '.chart-stat-tile', '.dash-milestone-tile', '.chart-card',
+        '.dash-stat-tile', '.chart-stat-tile', '.dash-milestone-tile', '.chart-card', '.chart-tab',
         '.stats-analysis-section', '.stats-structure-section', '.compare-box',
         '.compare-period-card', '.compare-list-card', '.tour-compare-pick-card',
         '.tour-compare-result', '.tour-profile-summary-card', '.development-metric-card',
