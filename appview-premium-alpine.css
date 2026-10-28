@@ -296,6 +296,37 @@ html body #app-view #tour-form #slope-toggle[aria-pressed="true"]:focus:active {
     transition: none !important;
 }
 
+
+/* Clear selected-state cue for "Steigung ganze Strecke", without any outer
+   focus/tap marker. The soft surface and icon glow both follow the Editor accent. */
+html body #app-view #tour-form #slope-toggle[aria-pressed="true"],
+html body #app-view #tour-form #slope-toggle[aria-pressed="true"]:hover,
+html body #app-view #tour-form #slope-toggle[aria-pressed="true"]:active,
+html body #app-view #tour-form #slope-toggle[aria-pressed="true"]:focus,
+html body #app-view #tour-form #slope-toggle[aria-pressed="true"]:focus-visible,
+html body #app-view #tour-form #slope-toggle[aria-pressed="true"]:focus:active {
+    background: color-mix(
+        in srgb,
+        var(--theme-palette-accent, var(--accent, #ad7d12)) 19%,
+        var(--app-surface-strong, #111923)
+    ) !important;
+    border-color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+    color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+    box-shadow: none !important;
+}
+
+/* Glow is applied only to the SVG strokes, never to the button rectangle. */
+html body #app-view #tour-form #slope-toggle[aria-pressed="true"] svg {
+    filter: drop-shadow(
+        0 0 3px var(--theme-palette-accent, var(--accent, #ad7d12))
+    ) !important;
+    opacity: 1 !important;
+}
+html body #app-view #tour-form #slope-toggle:not([aria-pressed="true"]) svg {
+    filter: none !important;
+    opacity: .82;
+}
+
 /* Every visible input/select/textarea in the save form gets the same
    compact 32-px outer height, including conditional and dynamically added fields. */
 #app-view #tour-form input:not([type="file"]):not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
