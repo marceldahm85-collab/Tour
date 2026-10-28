@@ -2098,27 +2098,6 @@
     }
 
     /*
-     * Planung: Saisonfenster kompakt zweispaltig.
-     */
-    #tour-view .plan-form-left .plan-season-card {
-        width: 100%;
-        min-width: 0;
-
-        padding: 7px 8px;
-    }
-
-    #tour-view .plan-form-left .plan-season-selects {
-        display: grid !important;
-
-        grid-template-columns:
-            minmax(0, 1fr)
-            minmax(0, 1fr);
-
-        gap: 7px;
-        width: 100%;
-    }
-
-    /*
      * Region und Tourart nebeneinander.
      */
     #tour-view .plan-form-left .plan-region-type-row {
@@ -3412,8 +3391,7 @@ body {
 .diagram-filter-checkbox,
 .checklist-section,
 .stats-chart-block,
-.plan-live-preview,
-.plan-season-card {
+.plan-live-preview {
     background:
         linear-gradient(
             180deg,
@@ -3808,7 +3786,6 @@ body.dark .diagram-filter-checkbox,
 body.dark .checklist-section,
 body.dark .stats-chart-block,
 body.dark .plan-live-preview,
-body.dark .plan-season-card,
 
 body.green .tour-image-preview-wrap,
 body.green .tour-detail-image-wrap,
@@ -3817,7 +3794,6 @@ body.green .diagram-filter-checkbox,
 body.green .checklist-section,
 body.green .stats-chart-block,
 body.green .plan-live-preview,
-body.green .plan-season-card,
 
 body.summit .tour-image-preview-wrap,
 body.summit .tour-detail-image-wrap,
@@ -3825,8 +3801,7 @@ body.summit .form-details,
 body.summit .diagram-filter-checkbox,
 body.summit .checklist-section,
 body.summit .stats-chart-block,
-body.summit .plan-live-preview,
-body.summit .plan-season-card {
+body.summit .plan-live-preview {
     background:
         linear-gradient(
             180deg,
@@ -7960,7 +7935,7 @@ body.premium-alpine-editor-paused #theme-view {
 :is(
     .checklist-section, .checklist-item, .diagram-filter-checkbox, .form-details,
     .tour-image-preview-wrap, .tour-detail-image-wrap, .stats-chart-block,
-    .plan-season-card, .tour-group-insight, .tour-history-summary > div,
+    .tour-group-insight, .tour-history-summary > div,
     .activity-detail-stat-grid > div
 ) {
     background: linear-gradient(180deg, var(--app-surface-card), var(--app-surface-subtle)) !important;
