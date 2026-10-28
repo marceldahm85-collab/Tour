@@ -18,10 +18,16 @@
 
 #map-view #tour-map {
     position: relative;
-    border: 1px solid var(--map-premium-border) !important;
+    background-color: var(--app-surface-card, #111820) !important;
+    border: 1px solid color-mix(
+        in srgb,
+        var(--map-premium-accent) 68%,
+        var(--map-premium-border)
+    ) !important;
     border-radius: var(--editor-radius, 18px) !important;
     box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.08),
+        inset 0 1px 0 rgba(255,255,255,.06),
+        0 0 0 1px color-mix(in srgb, var(--map-premium-accent) 10%, transparent),
         0 10px 28px rgba(0,0,0,.28) !important;
     isolation: isolate;
 }
