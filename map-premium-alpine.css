@@ -55,32 +55,44 @@
     backdrop-filter: blur(14px);
 }
 
-/* Jahreswahl und Pfeile entsprechen den Controls der übrigen Premium-Views. */
+/* Jahresauswahl und Pfeile spiegeln die Controls im Statsview. */
 :is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
 #map-view .map-year-filter-wrap > select,
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+#map-view .map-year-filter-wrap > .mob-sel-wrap,
 :is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
 #map-view .map-year-filter-wrap > .mob-sel-wrap > .mob-sel-btn,
 :is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
 #map-view .map-year-filter-wrap > .dash-year-arrow-btn {
-    color: var(--app-text-primary, var(--text-main, #f3f6fa)) !important;
-    background: linear-gradient(
-        145deg,
-        var(--app-surface-strong, rgba(255,255,255,.08)),
-        var(--app-surface-card, rgba(10,16,23,.82))
-    ) !important;
-    border: 1px solid var(--map-premium-border) !important;
-    border-radius: var(--map-premium-radius) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.04) !important;
-    font-weight: 700;
+    color: var(--app-text-primary, var(--text-main, inherit)) !important;
+    background: linear-gradient(145deg,
+        var(--app-surface-strong, rgba(255,255,255,.075)),
+        var(--app-surface-card, rgba(10,16,23,.78))) !important;
+    border: 1px solid var(--premium-border, rgba(255,255,255,.14)) !important;
+    border-radius: var(--editor-radius, var(--premium-radius-control, 12px)) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
+    transition: border-color var(--premium-motion-fast, 160ms) ease,
+                background var(--premium-motion-fast, 160ms) ease,
+                box-shadow var(--premium-motion-fast, 160ms) ease;
 }
 
-#map-view .map-year-filter-wrap > .dash-year-arrow-btn:not(:disabled):active {
-    border-color: color-mix(in srgb, var(--map-premium-accent) 72%, transparent) !important;
+#map-view .map-year-filter-wrap > .dash-year-arrow-btn {
+    font-weight: 750;
 }
 
 #map-view .map-year-filter-wrap > .dash-year-arrow-btn:disabled {
-    opacity: .32 !important;
-    filter: saturate(.45);
+    opacity: .34 !important;
+    cursor: default !important;
+    box-shadow: none !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    body:not(.touch-mode) #map-view .map-year-filter-wrap .dash-year-arrow-btn:not(:disabled):hover {
+        border-color: var(--premium-border-strong, var(--accent, #D5A64C)) !important;
+        background: linear-gradient(145deg,
+            color-mix(in srgb, var(--accent, #D5A64C) 7%, var(--app-surface-strong, #1b2027)),
+            var(--app-surface-card, #111820)) !important;
+    }
 }
 
 /* Tourenzahl als ruhige Statuszeile statt losem Text. */
@@ -448,4 +460,49 @@
     #map-view #tour-map .leaflet-marker-icon > div {
         transition: none !important;
     }
+}
+
+
+/* Feinschliff nach Abgleich mit dem Statsview:
+   Akzentkontur an den beiden Steuergruppen und flachere Moduswahl. */
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+#map-view .map-mode-toggle {
+    border: 1px solid color-mix(
+        in srgb,
+        var(--map-premium-accent) 30%,
+        var(--map-premium-border)
+    ) !important;
+    padding: 4px !important;
+    gap: 4px !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.045),
+        0 0 0 1px color-mix(in srgb, var(--map-premium-accent) 6%, transparent),
+        0 5px 14px rgba(0,0,0,.15) !important;
+}
+
+#map-view .map-mode-btn {
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 5px 8px !important;
+    gap: 6px;
+    box-sizing: border-box;
+}
+
+#map-view .map-mode-icon {
+    flex-basis: 17px;
+    width: 17px;
+    height: 17px;
+}
+
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+#map-view #map-quick-filters {
+    border: 1px solid color-mix(
+        in srgb,
+        var(--map-premium-accent) 30%,
+        var(--map-premium-border)
+    ) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.045),
+        0 0 0 1px color-mix(in srgb, var(--map-premium-accent) 6%, transparent),
+        0 5px 14px rgba(0,0,0,.15) !important;
 }
