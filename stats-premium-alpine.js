@@ -499,7 +499,7 @@
 
                 const slug = heading.text.toLocaleLowerCase('de')
                     .normalize('NFD')
-                    .replace(/[\\u0300-\\u036f]/g, '')
+                    .replace(/[\u0300-\u036f]/g, '')
                     .replace(/[^a-z0-9]+/g, '-')
                     .replace(/^-+|-+$/g, '') || 'bereich';
                 const stateKey = scope + ':' + slug;
