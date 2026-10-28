@@ -37,7 +37,10 @@
         gehzeit: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 2.2h6l.8 3.1H8.2L9 2.2ZM8.2 18.7h7.6l-.8 3.1H9l-.8-3.1Z"/><circle cx="12" cy="12" r="7.2"/><circle cx="12" cy="12" r="5.6"/><path d="M12 7.9v4.4l3.1 1.8M12 5.3v1M18.7 12h-1M6.3 12h-1"/><circle cx="12" cy="12" r=".8" class="icon-accent-fill"/><path d="M19.4 13.8h1.8v2.4h-1.8"/></svg>',
         speed: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 18.8a9 9 0 1 1 18 0v1H3v-1Z"/><path d="M5.2 13.3 3.8 12M8.1 8.1 7.2 6.5M12 6.4V4.8M15.9 8.1l.9-1.6M18.8 13.3l1.4-1.3"/><path d="M12 16.5 16.7 9.7"/><circle cx="12" cy="16.5" r="1.8"/><path d="M6.4 17.7h1.2M16.4 17.7h1.2"/><circle cx="12" cy="16.5" r=".55" class="icon-accent-fill"/></svg>',
         steigung: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 19.8 20.5 5.2M3 19.8h18"/><path d="m16.8 5.5 3.7-.4-.4 3.7"/><path d="M7.4 19.8a4.4 4.4 0 0 0-1.1-2.9"/><circle cx="3.3" cy="19.5" r=".65" class="icon-accent-fill"/><circle cx="20.4" cy="5.3" r=".65" class="icon-accent-fill"/></svg>',
-        anstieg: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2.5 19.8V4.2M2.5 19.8h19"/><path d="m4.5 17.2 4-3.8 3 1.6 3.7-5 2.1 1.3 3.1-5.1"/><path d="M16.9 6.2h3.5v3.5"/><circle cx="8.5" cy="13.4" r=".9" class="icon-accent-fill"/><circle cx="11.5" cy="15" r=".9" class="icon-accent-fill"/><circle cx="15.2" cy="10" r=".9" class="icon-accent-fill"/><path d="M4.4 7.4h2.1M4.4 10.2h1.4" stroke-dasharray="1 1.6"/></svg>'
+        anstieg: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2.5 19.8V4.2M2.5 19.8h19"/><path d="m4.5 17.2 4-3.8 3 1.6 3.7-5 2.1 1.3 3.1-5.1"/><path d="M16.9 6.2h3.5v3.5"/><circle cx="8.5" cy="13.4" r=".9" class="icon-accent-fill"/><circle cx="11.5" cy="15" r=".9" class="icon-accent-fill"/><circle cx="15.2" cy="10" r=".9" class="icon-accent-fill"/><path d="M4.4 7.4h2.1M4.4 10.2h1.4" stroke-dasharray="1 1.6"/></svg>',
+
+        timeAscent: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="6.6" cy="12.5" r="4.2"/><path d="M6.6 10.1v2.6l1.8 1.1"/><path d="M12 19.8 16.4 9.2 18.6 13l1.6-2.3 2.5 9.1H12Z"/><path d="m14.9 12.8 1.5 2 1.2-1.4 1.2 2.1"/><path d="m16.4 9.2-.8 2.2 1.2-.2 1.3 1.8" class="icon-accent-fill"/><circle cx="6.6" cy="12.5" r=".55" class="icon-accent-fill"/></svg>',
+        timeDistance: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="7.2" cy="7.2" r="4.3"/><path d="M7.2 4.8v2.6l1.7 1"/><path d="M2.5 21h19"/><path d="M3.5 17.8 8 15.7l3.4.8 5.1-5.1 3.7-1.7"/><path d="m17.6 9.3 2.8.2-.1 2.8"/><circle cx="3.5" cy="17.8" r=".7" class="icon-accent-fill"/><circle cx="11.4" cy="16.5" r=".65" class="icon-accent-fill"/><circle cx="16.5" cy="11.4" r=".65" class="icon-accent-fill"/></svg>'
     };
 
 
@@ -54,8 +57,8 @@
         ascentRate: 'aufstieg',
         avgSteps: 'steps',
         scatterDistanceAscent: 'strecke',
-        scatterTimeAscent: 'gehzeit',
-        scatterTimeDistance: 'gehzeit',
+        scatterTimeAscent: 'timeAscent',
+        scatterTimeDistance: 'timeDistance',
         regions: 'touren'
     };
     const CHART_TAB_MILESTONE_ICONS = {
