@@ -1,0 +1,293 @@
+/* Premium Alpine — Statistik
+   Eigenständige Oberflächenebene für die gesamte Stats-Ansicht.
+   Keine Daten-, Navigations- oder Diagrammlogik wird verändert. */
+
+#chart-view {
+    --stats-ridge-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M2 20 9 7.5l4.1 6 3-4.2L22 20Z' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='m7.2 10.7 1.8-3.2 2.2 3.2' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    color: var(--app-text-primary, var(--text-main, inherit));
+}
+
+/* Jahreswahl: eigenständige, wertige Controls statt großer Sammelfläche. */
+#chart-view .stats-year-filter-wrap > select,
+#chart-view .stats-year-filter-wrap > .mob-sel-wrap,
+#chart-view .stats-year-filter-wrap > .mob-sel-wrap > .mob-sel-btn,
+#chart-view .stats-year-filter-wrap > .dash-year-arrow-btn {
+    color: var(--app-text-primary, var(--text-main, inherit)) !important;
+    background: linear-gradient(145deg,
+        var(--app-surface-strong, rgba(255,255,255,.075)),
+        var(--app-surface-card, rgba(10,16,23,.78))) !important;
+    border: 1px solid var(--premium-border, rgba(255,255,255,.14)) !important;
+    border-radius: var(--editor-radius, var(--premium-radius-control, 12px)) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
+    transition: border-color var(--premium-motion-fast, 160ms) ease,
+                background var(--premium-motion-fast, 160ms) ease,
+                box-shadow var(--premium-motion-fast, 160ms) ease;
+}
+
+#chart-view .stats-year-filter-wrap > .dash-year-arrow-btn {
+    font-weight: 750;
+}
+
+#chart-view .stats-year-filter-wrap > .dash-year-arrow-btn:disabled {
+    opacity: .34 !important;
+    cursor: default !important;
+    box-shadow: none !important;
+}
+
+/* Die Bereichsnavigation bleibt flach; der aktive Bereich wird klar markiert. */
+#chart-view .stats-section-btn {
+    color: var(--app-text-secondary, var(--text-soft, inherit)) !important;
+    background: linear-gradient(145deg,
+        var(--app-surface-strong, rgba(255,255,255,.06)),
+        var(--app-surface-card, rgba(10,16,23,.72))) !important;
+    border: 1px solid var(--premium-border, rgba(255,255,255,.13)) !important;
+    border-radius: var(--editor-radius, var(--premium-radius-control, 12px)) !important;
+    font-weight: 700;
+    letter-spacing: .005em;
+}
+
+#chart-view .stats-section-btn.active {
+    color: var(--app-text-primary, var(--text-main, inherit)) !important;
+    background: linear-gradient(145deg,
+        var(--app-surface-strong, rgba(255,255,255,.09)),
+        var(--app-surface-card, rgba(10,16,23,.8))) !important;
+    border-color: var(--accent, #D5A64C) !important;
+    box-shadow: inset 0 -2px 0 var(--accent, #D5A64C),
+                inset 0 1px 0 rgba(255,255,255,.055) !important;
+}
+
+/* Eigenständige Chart-Auswahlkacheln: ruhige Flächen, präzise Outline. */
+#chart-view #chart-tabs .chart-tab {
+    color: var(--app-text-primary, var(--text-main, inherit)) !important;
+    background: linear-gradient(150deg,
+        var(--app-surface-strong, rgba(255,255,255,.065)),
+        var(--app-surface-card, rgba(10,16,23,.78))) !important;
+    border: 1px solid var(--premium-border, rgba(255,255,255,.14)) !important;
+    border-radius: var(--editor-radius, var(--premium-radius-control, 12px)) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
+    opacity: 1 !important;
+}
+
+#chart-view #chart-tabs .chart-tab.active {
+    background: linear-gradient(145deg,
+        var(--app-surface-strong, rgba(255,255,255,.09)),
+        var(--app-surface-card, rgba(10,16,23,.8))) !important;
+    border: 2px solid var(--accent, #D5A64C) !important;
+    box-shadow: none !important;
+}
+
+#chart-view #chart-tabs .chart-tab-label {
+    color: inherit !important;
+    font-weight: 750;
+    letter-spacing: -.01em;
+}
+
+#chart-view #chart-tabs .chart-tab-icon {
+    filter: drop-shadow(0 1px 3px color-mix(in srgb, var(--accent, #D5A64C) 22%, transparent));
+}
+
+/* Diagrammfläche: dezente Tiefe ohne Eingriff in Canvas-Größe oder Daten. */
+#chart-view .chart-canvas-stage canvas {
+    border: 1px solid var(--premium-border, rgba(255,255,255,.14)) !important;
+    border-radius: var(--editor-radius, var(--premium-radius-card, 16px)) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04),
+                0 8px 22px rgba(0,0,0,.16) !important;
+}
+
+/* Überschriften bekommen eine kleine alpine Linienmarke aus der Akzentfarbe. */
+#chart-view .stats-analysis-title,
+#chart-view .chart-title {
+    color: var(--app-text-primary, var(--text-main, inherit)) !important;
+    gap: 8px;
+    border-bottom: 1px solid var(--premium-border, rgba(255,255,255,.12));
+    padding-bottom: 8px;
+    margin-bottom: 11px;
+    line-height: 1.25;
+}
+
+#chart-view .stats-analysis-title::before,
+#chart-view .chart-title::before {
+    content: "";
+    display: block;
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+    background: var(--accent, #D5A64C);
+    -webkit-mask-image: var(--stats-ridge-mask);
+    mask-image: var(--stats-ridge-mask);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    opacity: .96;
+    filter: drop-shadow(0 1px 3px color-mix(in srgb, var(--accent, #D5A64C) 25%, transparent));
+}
+
+/* Inhaltsbereiche: klare Premium-Flächen statt beliebiger heller Einzelrahmen. */
+#chart-view .stats-analysis-section,
+#chart-view .stats-structure-section,
+#chart-view .stats-chart-block,
+#chart-view .chart-card {
+    position: relative;
+    border: 1px solid var(--premium-border, rgba(255,255,255,.13)) !important;
+    border-radius: var(--editor-radius, var(--premium-radius-card, 16px)) !important;
+    background:
+        radial-gradient(ellipse at 98% 0%,
+            color-mix(in srgb, var(--accent, #D5A64C) 7%, transparent),
+            transparent 42%),
+        linear-gradient(150deg,
+            var(--app-surface-strong, rgba(255,255,255,.055)),
+            var(--app-surface-card, rgba(10,16,23,.8))) !important;
+    box-shadow: var(--premium-shadow-card, 0 8px 22px rgba(0,0,0,.18)),
+                inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+
+/* Kleinere Kennzahlen bleiben sichtbar eigenständig, aber optisch aus einer Familie. */
+#chart-view .chart-stat-tile,
+#chart-view .stats-structure-typical-card,
+#chart-view .stats-structure-type-card,
+#chart-view .stats-structure-burden-card,
+#chart-view .development-metric-card,
+#chart-view .best-form-card,
+#chart-view .tour-profile-summary-card,
+#chart-view .activity-summary-card,
+#chart-view .peak-summary-card {
+    color: var(--app-text-primary, var(--text-main, inherit)) !important;
+    background: linear-gradient(155deg,
+        var(--app-surface-card, rgba(255,255,255,.055)),
+        var(--app-surface-subtle, rgba(0,0,0,.12))) !important;
+    border: 1px solid var(--premium-border, rgba(255,255,255,.12)) !important;
+    border-radius: var(--editor-radius, var(--premium-radius-control, 12px)) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+#chart-view button.chart-stat-tile.active,
+#chart-view button.development-metric-card.active,
+#chart-view button.tour-profile-summary-card.active,
+#chart-view button.activity-summary-card.active {
+    border: 2px solid var(--accent, #D5A64C) !important;
+    background: linear-gradient(145deg,
+        var(--app-surface-strong, rgba(255,255,255,.09)),
+        var(--app-surface-card, rgba(10,16,23,.8))) !important;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent, #D5A64C) 16%, transparent) !important;
+}
+
+/* Highlights: Gruppen als kompakte alpine Panels mit Akzent an den Zeilen. */
+#stats-highlights-page #highlights-content .highlight-group {
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid var(--premium-border, rgba(255,255,255,.12));
+    border-radius: var(--editor-radius, var(--premium-radius-card, 16px));
+    background:
+        radial-gradient(ellipse at 100% 0%,
+            color-mix(in srgb, var(--accent, #D5A64C) 5%, transparent),
+            transparent 48%),
+        linear-gradient(155deg,
+            var(--app-surface-strong, rgba(255,255,255,.05)),
+            var(--app-surface-card, rgba(10,16,23,.72)));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+#stats-highlights-page #highlights-content .highlight-group-title {
+    color: var(--app-text-primary, var(--text-main, inherit));
+    letter-spacing: .075em;
+}
+
+#stats-highlights-page #highlights-content .highlight-group-title::after {
+    opacity: .42;
+}
+
+#stats-highlights-page #highlights-content .highlight-group-list > li {
+    border-radius: var(--editor-radius, var(--premium-radius-control, 12px));
+    border-top: 1px solid color-mix(in srgb, var(--premium-border, rgba(255,255,255,.12)) 70%, transparent);
+    border-right: 1px solid color-mix(in srgb, var(--premium-border, rgba(255,255,255,.12)) 70%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--premium-border, rgba(255,255,255,.12)) 70%, transparent);
+}
+
+/* Entwicklung und Gipfelstatistik: Zahlenwerte erhalten mehr Hierarchie. */
+#stats-development-page .development-metric-value,
+#stats-development-page .best-form-value,
+#stats-development-page .tour-profile-summary-value,
+#stats-development-page .activity-summary-value,
+#stats-peaks-page .peak-summary-value {
+    color: var(--app-text-primary, var(--text-main, inherit)) !important;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    letter-spacing: -.025em;
+}
+
+#stats-development-page .development-metric-label,
+#stats-development-page .best-form-label,
+#stats-development-page .tour-profile-summary-label,
+#stats-development-page .activity-summary-label,
+#stats-peaks-page .peak-summary-label {
+    color: var(--app-text-secondary, var(--text-soft, inherit)) !important;
+    opacity: 1;
+    font-weight: 700;
+}
+
+#stats-peaks-page .peak-tour-list li {
+    border-radius: var(--editor-radius, var(--premium-radius-control, 12px));
+    border: 1px solid var(--premium-border, rgba(255,255,255,.12));
+    background: linear-gradient(155deg,
+        var(--app-surface-card, rgba(255,255,255,.05)),
+        var(--app-surface-subtle, rgba(0,0,0,.12)));
+}
+
+/* Lesbarer Fokus und zurückhaltende Hover-Reaktion. */
+#chart-view .stats-section-btn:focus-visible,
+#chart-view .chart-tab:focus-visible,
+#chart-view .stats-year-filter-wrap select:focus-visible,
+#chart-view .stats-year-filter-wrap .mob-sel-btn:focus-visible,
+#chart-view .stats-year-filter-wrap .dash-year-arrow-btn:focus-visible,
+#chart-view button.chart-stat-tile:focus-visible,
+#chart-view button.development-metric-card:focus-visible,
+#chart-view button.tour-profile-summary-card:focus-visible,
+#chart-view button.activity-summary-card:focus-visible {
+    outline: 2px solid var(--accent, #D5A64C) !important;
+    outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    body:not(.touch-mode) #chart-view .stats-section-btn:not(.active):hover,
+    body:not(.touch-mode) #chart-view .chart-tab:not(.active):hover,
+    body:not(.touch-mode) #chart-view .stats-year-filter-wrap .dash-year-arrow-btn:not(:disabled):hover {
+        border-color: var(--premium-border-strong, var(--accent, #D5A64C)) !important;
+        background: linear-gradient(145deg,
+            color-mix(in srgb, var(--accent, #D5A64C) 7%, var(--app-surface-strong, #1b2027)),
+            var(--app-surface-card, #111820)) !important;
+    }
+}
+
+@media (max-width: 380px) {
+    #chart-view .stats-analysis-title,
+    #chart-view .chart-title {
+        gap: 6px;
+        padding-bottom: 7px;
+        margin-bottom: 9px;
+    }
+
+    #chart-view .stats-analysis-title::before,
+    #chart-view .chart-title::before {
+        flex-basis: 16px;
+        width: 16px;
+        height: 16px;
+    }
+
+    #stats-highlights-page #highlights-content .highlight-group {
+        padding: 8px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #chart-view .stats-year-filter-wrap > select,
+    #chart-view .stats-year-filter-wrap > .mob-sel-wrap,
+    #chart-view .stats-year-filter-wrap > .mob-sel-wrap > .mob-sel-btn,
+    #chart-view .stats-year-filter-wrap > .dash-year-arrow-btn,
+    #chart-view .stats-section-btn,
+    #chart-view #chart-tabs .chart-tab {
+        transition: none !important;
+    }
+}
