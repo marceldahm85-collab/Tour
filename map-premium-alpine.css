@@ -565,7 +565,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
+    gap: 8px;
     min-height: 24px;
     padding: 0 3px;
 }
@@ -587,47 +587,60 @@
     white-space: nowrap;
 }
 
+#map-view #map-quick-filters .map-filter-group-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 7px;
+    min-width: 0;
+}
+
+#map-view #map-quick-filters .map-filter-group-tours .map-filter-group-heading {
+    justify-content: flex-start;
+    gap: 8px;
+    min-height: 31px;
+}
+
+#map-view #map-quick-filters .map-filter-group-tours .map-filter-group-title {
+    flex: 0 0 auto;
+}
+
 #map-view #map-quick-filters .map-filter-chip-row {
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     align-items: center;
     gap: 6px;
     min-width: 0;
     max-width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 1px 2px 4px;
-    overscroll-behavior-x: contain;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    scrollbar-color:
-        color-mix(in srgb, var(--map-premium-accent) 55%, transparent)
-        transparent;
+    overflow: visible;
+    padding: 1px 2px 2px;
+    overscroll-behavior: auto;
+    -webkit-overflow-scrolling: auto;
+    scrollbar-width: none;
+    touch-action: pan-y;
 }
 
-#map-view #map-quick-filters .map-filter-chip-row::-webkit-scrollbar {
-    height: 3px;
-}
-
-#map-view #map-quick-filters .map-filter-chip-row::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-#map-view #map-quick-filters .map-filter-chip-row::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, var(--map-premium-accent) 48%, transparent);
-    border-radius: 999px;
+#map-view #map-quick-filters .map-filter-group-tours .map-filter-chip-row {
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    gap: 5px;
+    min-width: 0;
+    max-width: none;
+    padding: 0;
 }
 
 #map-view #map-quick-filters .map-filter-chip-row .quick-filter-btn {
     flex: 0 0 auto;
-    min-height: 31px;
-    padding: 6px 10px;
+    min-height: 30px;
+    padding: 5px 8px;
     white-space: nowrap;
-    touch-action: pan-x;
+    touch-action: manipulation;
 }
 
 #map-view #map-quick-filters .map-filter-group-tours .map-filter-chip-row .quick-filter-btn {
     min-height: 30px;
+    padding: 5px 7px;
+    font-size: 10px;
 }
 
 #map-view #map-quick-filters .map-filter-group-heading .map-filter-reset {
@@ -644,13 +657,33 @@
     border-color: color-mix(in srgb, var(--map-premium-accent) 54%, transparent) !important;
 }
 
+#map-view #map-quick-filters .map-filter-group-regions .map-filter-chip-row {
+    flex-wrap: wrap;
+    overflow: visible;
+    padding-bottom: 1px;
+    touch-action: pan-y;
+}
+
+#map-view #map-quick-filters .map-filter-group-regions .map-filter-chip-row .quick-filter-btn {
+    max-width: 100%;
+}
+
 @media (max-width: 380px) and (orientation: portrait) {
     #map-view #map-quick-filters .map-filter-chip-row .quick-filter-btn {
-        padding-inline: 8px;
+        padding-inline: 7px;
         font-size: 10px;
     }
 
     #map-view #map-quick-filters .map-filter-group-heading {
         min-height: 22px;
+    }
+
+    #map-view #map-quick-filters .map-filter-group-tours .map-filter-group-heading {
+        min-height: 30px;
+        gap: 6px;
+    }
+
+    #map-view #map-quick-filters .map-filter-group-tours .map-filter-chip-row {
+        gap: 4px;
     }
 }
