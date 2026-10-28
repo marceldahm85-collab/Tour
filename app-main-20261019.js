@@ -23977,6 +23977,9 @@ const planSectionPanels =
 
 function showPlanSection(section) {
 
+    // Der aktive Bereich steuert nur die Sichtbarkeit der Übersichtskacheln.
+    document.getElementById('tour-view')?.setAttribute('data-plan-section-active', section);
+
     /*
      * Aktiven Button markieren
      */
