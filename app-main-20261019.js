@@ -10631,30 +10631,14 @@ function initTourMap() {
     minZoom: 1
 });
 
-    // OpenTopoMap — kostenlos, perfekt für Wanderungen
+    // OpenFreeMap Liberty — Vektorkarte ohne zusammengesetzte Raster-Bildkacheln.
     L.maplibreGL({
-        style: 'https://styles.maptoolkit.org/hiking.json',
-        attribution: '© <a href="https://www.maptoolkit.org/">Maptoolkit</a> © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+        style: 'https://tiles.openfreemap.org/styles/liberty',
+        attribution:
+            '<a href="https://openfreemap.org/" target="_blank" rel="noopener">© OpenFreeMap</a> ' +
+            '<a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">© OpenMapTiles</a> ' +
+            '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>'
     }).addTo(tourMap);
-
-    // Das Logo ist neben der Copyright-Zeile gefordert und bleibt anklickbar.
-    const maptoolkitLogoControl = L.control({ position: 'bottomleft' });
-    maptoolkitLogoControl.onAdd = () => {
-        const link = L.DomUtil.create('a', 'maptoolkit-logo-control');
-        link.href = 'https://www.maptoolkit.org/';
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        link.setAttribute('aria-label', 'Maptoolkit – Kartenquelle');
-        const image = L.DomUtil.create('img', '', link);
-        image.src = 'https://www.maptoolkit.org/assets/maptoolkit-attribution.png';
-        image.alt = 'Maptoolkit';
-        image.decoding = 'async';
-        L.DomEvent.disableClickPropagation(link);
-        L.DomEvent.disableScrollPropagation(link);
-        return link;
-    };
-    maptoolkitLogoControl.addTo(tourMap);
-
 
     /* Karten-Popups automatisch nach 5 Sekunden schließen. */
     tourMap.on('popupopen', event => {
