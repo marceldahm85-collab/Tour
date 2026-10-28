@@ -261,6 +261,64 @@
         var(--app-surface-subtle, rgba(0,0,0,.12)));
 }
 
+
+/* Premium Alpine — SVG-Line-Art auch innerhalb der Statistik-Inhalte. */
+#chart-view .stats-premium-content-icon {
+    display: inline-flex;
+    flex: 0 0 16px;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    color: var(--accent, #D5A64C);
+    opacity: .97;
+    vertical-align: -0.2em;
+    filter: drop-shadow(0 1px 3px color-mix(in srgb, var(--accent, #D5A64C) 18%, transparent));
+}
+
+#chart-view .stats-premium-content-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.55;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    overflow: visible;
+}
+
+#stats-statistics-page .stats-structure-mix-name .stats-premium-content-icon,
+#stats-statistics-page .stats-structure-burden-name .stats-premium-content-icon,
+#stats-highlights-page .highlight-row-icon .stats-premium-content-icon {
+    margin-right: 0;
+}
+
+#stats-highlights-page .highlight-row-icon .stats-premium-content-icon {
+    width: 17px;
+    height: 17px;
+    flex-basis: 17px;
+}
+
+#stats-development-page .tour-profile-name .stats-premium-content-icon,
+#stats-development-page .tour-profile-summary-value .stats-premium-content-icon,
+#stats-development-page .tour-profile-summary-meta .stats-premium-content-icon,
+#stats-development-page .tour-profile-detail-name .stats-premium-content-icon,
+#stats-development-page .tour-profile-detail-trait .stats-premium-content-icon,
+#stats-development-page .tour-profile-feature-card strong .stats-premium-content-icon {
+    width: 14px;
+    height: 14px;
+    flex-basis: 14px;
+}
+
+/* Falls die ältere Statistikliste noch vorhanden ist: Emoji-Pseudoelemente ausblenden;
+   das Skript fügt stattdessen echte SVG-Line-Art in die Labels ein. */
+#stats-statistics-page .stats-main-list > li[data-stat-type] .stats-label::before {
+    content: none !important;
+    display: none !important;
+}
+
 /* Lesbarer Fokus und zurückhaltende Hover-Reaktion. */
 #chart-view .stats-section-btn:focus-visible,
 #chart-view .chart-tab:focus-visible,
