@@ -9,8 +9,8 @@
         asc: './assets/milestones/milestone-asc.svg?v=3',
         dist: './assets/milestones/milestone-dist.svg?v=3',
         peaks: './assets/milestones/milestone-peaks.svg?v=3',
-        steps: './assets/milestones/milestone-steps.svg?v=3',
-        time: './assets/milestones/milestone-time.svg?v=3'
+        steps: './assets/milestones/milestone-steps.svg?v=4',
+        time: './assets/milestones/milestone-time.svg?v=4'
     };
     /* Jedes Dashboard-Ziel bekommt ein eigenes Panorama. */
     const BACKDROP_ASSETS = {
