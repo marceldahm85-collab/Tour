@@ -832,3 +832,71 @@ html body #tour-view #checklist-box .checklist-item input[type="checkbox"]:check
         transform: none !important;
     }
 }
+
+/* KORREKTUR — Metallstufen in der Gipfelansicht ausdrücklich erhalten.
+   peak-tier-1 = Bronze, peak-tier-2 = Silber, peak-tier-3 = Gold.
+   Die drei Sonderflächen dürfen niemals auf den neutralen Listenstil zurückfallen. */
+html body #tour-view #planned-peaks-container .peak-tour-list > li.peak-tier-1 {
+    border-left: 3px solid var(--metal-bronze-border, #c8753d) !important;
+    background: var(--metal-bronze-bg, linear-gradient(135deg, rgba(105,55,25,.42), rgba(184,104,54,.38), rgba(65,35,20,.30))) !important;
+    box-shadow: inset 0 1px 0 rgba(255,225,180,.48),
+                inset 0 -2px 4px rgba(95,35,8,.22),
+                0 2px 7px rgba(125,55,15,.14) !important;
+}
+html body #tour-view #planned-peaks-container .peak-tour-list > li.peak-tier-2 {
+    border-left: 3px solid var(--metal-silver-border, #c8d2cf) !important;
+    background: var(--metal-silver-bg, linear-gradient(135deg, rgba(105,118,114,.40), rgba(205,218,214,.40), rgba(72,85,80,.28))) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.62),
+                inset 0 -2px 4px rgba(65,90,110,.18),
+                0 2px 7px rgba(100,130,155,.12) !important;
+}
+html body #tour-view #planned-peaks-container .peak-tour-list > li.peak-tier-3 {
+    border-left: 3px solid var(--metal-gold-border, #ffd43b) !important;
+    background: var(--metal-gold-bg, linear-gradient(135deg, rgba(120,88,12,.40), rgba(222,177,45,.42), rgba(82,60,8,.30))) !important;
+    box-shadow: inset 0 1px 0 rgba(255,250,190,.66),
+                inset 0 -2px 4px rgba(125,85,0,.20),
+                0 2px 8px rgba(190,135,0,.16) !important;
+}
+
+/* CHECK — Gruppierungen wieder als eigene, ruhige Premium-Karten darstellen.
+   Kontur und Radius folgen dem Editor; die linke Akzentkante bleibt dezent. */
+html body #tour-view #checklist-box .checklist-section {
+    margin: 0 !important;
+    padding: 9px !important;
+    border: 1px solid var(--premium-border, var(--app-surface-border, rgba(255,255,255,.13))) !important;
+    border-left: 2px solid color-mix(
+        in srgb,
+        var(--theme-palette-accent, var(--accent, #ad7d12)) 72%,
+        transparent
+    ) !important;
+    border-radius: var(--editor-radius, var(--premium-radius-card, 14px)) !important;
+    background: linear-gradient(
+        145deg,
+        var(--app-surface-strong, rgba(255,255,255,.065)),
+        var(--app-surface-card, rgba(10,16,23,.78))
+    ) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
+    gap: 7px !important;
+    overflow: hidden;
+}
+
+html body #tour-view #checklist-box .checklist-section-title {
+    margin: 0 1px 2px !important;
+}
+
+/* Zwischen den Checkbox-Kacheln 1 px weniger Abstand als zuvor (6 → 5 px). */
+html body #tour-view #checklist-box .checklist-items-grid {
+    gap: 5px !important;
+}
+
+/* Querformat bleibt kompakt, mit denselben Editor-Rundungen und Akzenten. */
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    html body #tour-view #checklist-box .checklist-section {
+        padding: 7px !important;
+        gap: 5px !important;
+    }
+
+    html body #tour-view #checklist-box .checklist-items-grid {
+        gap: 5px !important;
+    }
+}
