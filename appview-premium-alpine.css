@@ -403,3 +403,67 @@ html body #app-view #tour-form .save-form-card .form-section-title::after {
 }
 
 
+
+
+/* PREMIUM ALPINE — source-derived Lienzer Dolomiten contour pattern */
+/* The SVG masks preserve the shape layout from the user's Lienzer Dolomiten map.
+   Fine lines use a quiet relief tone; wider/index contours use the Editor accent.
+   The aspect ratio is preserved (cover), with no road/label photo layer. */
+html body #app-view #tour-form .save-form-card {
+    position: relative !important;
+    isolation: isolate !important;
+}
+
+html body #app-view #tour-form .save-form-card::before,
+html body #app-view #tour-form .save-form-card::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background-repeat: no-repeat;
+    background-position: center center;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center center;
+    mask-position: center center;
+    -webkit-mask-size: cover;
+    mask-size: cover;
+}
+
+/* Fine contour network, extracted from the supplied map. */
+html body #app-view #tour-form .save-form-card::before {
+    background-color: color-mix(
+        in srgb,
+        #a9bdb1 78%,
+        var(--theme-palette-accent, var(--accent, #ad7d12)) 22%
+    );
+    opacity: .42;
+    -webkit-mask-image: url("./assets/topography/lienzer-dolomiten-contours-fine.svg");
+    mask-image: url("./assets/topography/lienzer-dolomiten-contours-fine.svg");
+}
+
+/* Wider/index contour candidates take the current Editor accent color. */
+html body #app-view #tour-form .save-form-card::after {
+    background-color: var(--theme-palette-accent, var(--accent, #ad7d12));
+    opacity: .48;
+    -webkit-mask-image: url("./assets/topography/lienzer-dolomiten-contours-index.svg");
+    mask-image: url("./assets/topography/lienzer-dolomiten-contours-index.svg");
+}
+
+/* Existing headings, labels, fields and actions stay above the map-derived pattern. */
+html body #app-view #tour-form .save-form-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+@media (max-width: 520px) {
+    html body #app-view #tour-form .save-form-card::before {
+        opacity: .38;
+    }
+
+    html body #app-view #tour-form .save-form-card::after {
+        opacity: .44;
+    }
+}
