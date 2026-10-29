@@ -953,60 +953,110 @@ html body #tour-view #checklist-box > .box-content > .plan-view-title {
 }
 
 
-/* PREMIUM ALPINE — endgültige, flächendeckende Motive für Planen, Liste und Check.
-   Höhenlinien sind feine Karten-Isolinien; das Listenfoto folgt der Bildsprache der Stats-Highlights. */
+/* PREMIUM ALPINE — echte Alpenmotive wie in den Stats-Highlights.
+   Keine Silhouetten und keine kartografischen SVG-Linien. */
 
-/* PLANEN — feine Höhenlinien über die gesamte Fläche jeder Formkarte. */
-html body #tour-view #plan-form > .plan-form-column {
+html body #tour-view #plan-form > .plan-form-column.plan-form-left {
     background-image:
-        url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20640%20480%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23dce8f0%22%20stroke-width%3D%221.25%22%20stroke-opacity%3D%22.34%22%3E%0A%3Cpath%20d%3D%22M-35%2088C8%2024%2092%20-2%20163%2017S273%2077%20254%20132%20189%20217%20122%20215%201%20179%20-28%20135-51%20112-35%2088Z%22%2F%3E%0A%3Cpath%20d%3D%22M-7%2090C29%2043%2096%2022%20151%2036s83%2048%2069%2088-56%2065-104%2064-91-22-111-52-23-31-12-46Z%22%2F%3E%0A%3Cpath%20d%3D%22M23%2091C52%2059%20105%2043%20145%2054s56%2032%2046%2060-39%2045-72%2044-63-14-78-35-17-20-18-32Z%22%2F%3E%0A%3Cpath%20d%3D%22M52%2091C73%2069%20111%2059%20138%2067s35%2020%2029%2040-25%2030-47%2029-41-9-52-23-13-15-16-22Z%22%2F%3E%0A%3Cpath%20d%3D%22M355%2018C408-5%20483%207%20529%2043s59%2078%2035%20118-76%2063-131%2045-91-60-91-100%205-70%2013-88Z%22%2F%3E%0A%3Cpath%20d%3D%22M374%2038C417%2019%20475%2027%20509%2055s43%2057%2024%2088-58%2048-99%2034-68-42-68-76%203-50%208-63Z%22%2F%3E%0A%3Cpath%20d%3D%22M396%2056C427%2042%20466%2047%20488%2066s29%2038%2015%2061-42%2033-72%2022-49-29-49-53%204-39%2014-30Z%22%2F%3E%0A%3Cpath%20d%3D%22M414%2073C434%2064%20458%2067%20471%2079s18%2025%209%2039-26%2021-44%2014-30-18-30-34%203-13%208-19Z%22%2F%3E%0A%3Cpath%20d%3D%22M-28%20306C15%20262%2080%20247%20142%20266s99%2065%2089%20112-58%2079-119%2078-128-35-148-82-10-47%208-68Z%22%2F%3E%0A%3Cpath%20d%3D%22M2%20314C37%20281%2087%20271%20135%20286s75%2049%2068%2085-45%2060-92%2060-96-27-113-63-8-35%204-49Z%22%2F%3E%0A%3Cpath%20d%3D%22M35%20321C62%20300%2098%20294%20130%20304s50%2031%2045%2055-31%2041-64%2040-67-18-78-44-7-23%202-32Z%22%2F%3E%0A%3Cpath%20d%3D%22M348%20273C392%20231%20465%20218%20524%20240s87%2066%2079%20111-57%2078-114%2075-112-39-127-87-7-46-14-66Z%22%2F%3E%0A%3Cpath%20d%3D%22M375%20280C411%20248%20463%20239%20507%20256s64%2047%2057%2080-42%2057-84%2055-84-30-94-64-4-35-11-51Z%22%2F%3E%0A%3Cpath%20d%3D%22M400%20288C425%20266%20460%20261%20489%20272s42%2030%2037%2052-29%2039-57%2038-56-19-64-43-2-26-5-47Z%22%2F%3E%0A%3Cpath%20d%3D%22M236%20225C279%20203%20315%20205%20342%20226s35%2054%2019%2079-47%2035-72%2022-43-41-40-66%200-25-13-36Z%22%2F%3E%0A%3Cpath%20d%3D%22M256%20230C287%20214%20311%20216%20330%20232s25%2039%2014%2057-33%2024-51%2015-30-29-28-47%200-15-9-27Z%22%2F%3E%0A%3Cpath%20d%3D%22M280%20235C298%20226%20311%20228%20323%20238s15%2025%208%2036-21%2015-33%209-18-18-17-29%200-8-1-16Z%22%2F%3E%0A%3C%2Fg%3E%3C%2Fsvg%3E"),
+        linear-gradient(180deg, rgba(4, 9, 14, .42) 0%, rgba(4, 9, 14, .60) 100%),
+        url("https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg/1280px-Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg"),
         linear-gradient(145deg, var(--app-surface-strong, rgba(255,255,255,.075)), var(--app-surface-card, rgba(10,16,23,.78))) !important;
-    background-repeat: no-repeat, no-repeat !important;
-    background-position: center center, center center !important;
-    background-size: cover, 100% 100% !important;
-}
-
-/* LISTE — echtes Alpenpanorama mit derselben Bildsprache wie bei den Stats-Highlights. */
-html body #tour-view #planned-tours-list > .box-content {
-    background-image:
-        linear-gradient(145deg, rgba(4, 10, 16, .32) 0%, rgba(4, 10, 16, .54) 100%),
-        url("https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/20-06-2020_-_Alps_panorama.jpg/1280px-20-06-2020_-_Alps_panorama.jpg"),
-        linear-gradient(145deg, var(--app-surface-strong, rgba(255,255,255,.065)), var(--app-surface-card, rgba(10,16,23,.78))) !important;
     background-repeat: no-repeat, no-repeat, no-repeat !important;
-    background-position: center center, center 48%, center center !important;
+    background-position: center, 68% 57%, center !important;
     background-size: 100% 100%, cover, 100% 100% !important;
 }
 
-/* Tourzeilen bleiben lesbar, lassen das Foto durch die dunkle Glasfläche aber sichtbar wirken. */
-html body #tour-view #planned-tours-list .tour-list > li {
-    background: linear-gradient(155deg, rgba(13, 21, 31, .45), rgba(10, 16, 23, .58)) !important;
+html body #tour-view #plan-form > .plan-form-column:not(.plan-form-left) {
+    background-image:
+        linear-gradient(180deg, rgba(4, 9, 14, .40) 0%, rgba(4, 9, 14, .60) 100%),
+        url("https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Alpenpanorama_bei_Sonnenuntergang.jpg/1280px-Alpenpanorama_bei_Sonnenuntergang.jpg"),
+        linear-gradient(145deg, var(--app-surface-strong, rgba(255,255,255,.075)), var(--app-surface-card, rgba(10,16,23,.78))) !important;
+    background-repeat: no-repeat, no-repeat, no-repeat !important;
+    background-position: center, 66% 76%, center !important;
+    background-size: 100% 100%, cover, 100% 100% !important;
 }
 
-/* CHECK — Höhenlinien über die gesamte Box und auf allen sichtbaren Checklistengruppen. */
-html body #tour-view #checklist-box > .box-content {
+/* LISTE — Alpenpanorama wie in den Highlights; der Verlauf dunkelt nur so weit ab,
+   dass Tourtitel und Metadaten klar lesbar bleiben. */
+html body #tour-view #planned-tours-list > .box-content {
     background-image:
-        url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20640%20480%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23dce8f0%22%20stroke-width%3D%221.25%22%20stroke-opacity%3D%22.34%22%3E%0A%3Cpath%20d%3D%22M-35%2088C8%2024%2092%20-2%20163%2017S273%2077%20254%20132%20189%20217%20122%20215%201%20179%20-28%20135-51%20112-35%2088Z%22%2F%3E%0A%3Cpath%20d%3D%22M-7%2090C29%2043%2096%2022%20151%2036s83%2048%2069%2088-56%2065-104%2064-91-22-111-52-23-31-12-46Z%22%2F%3E%0A%3Cpath%20d%3D%22M23%2091C52%2059%20105%2043%20145%2054s56%2032%2046%2060-39%2045-72%2044-63-14-78-35-17-20-18-32Z%22%2F%3E%0A%3Cpath%20d%3D%22M52%2091C73%2069%20111%2059%20138%2067s35%2020%2029%2040-25%2030-47%2029-41-9-52-23-13-15-16-22Z%22%2F%3E%0A%3Cpath%20d%3D%22M355%2018C408-5%20483%207%20529%2043s59%2078%2035%20118-76%2063-131%2045-91-60-91-100%205-70%2013-88Z%22%2F%3E%0A%3Cpath%20d%3D%22M374%2038C417%2019%20475%2027%20509%2055s43%2057%2024%2088-58%2048-99%2034-68-42-68-76%203-50%208-63Z%22%2F%3E%0A%3Cpath%20d%3D%22M396%2056C427%2042%20466%2047%20488%2066s29%2038%2015%2061-42%2033-72%2022-49-29-49-53%204-39%2014-30Z%22%2F%3E%0A%3Cpath%20d%3D%22M414%2073C434%2064%20458%2067%20471%2079s18%2025%209%2039-26%2021-44%2014-30-18-30-34%203-13%208-19Z%22%2F%3E%0A%3Cpath%20d%3D%22M-28%20306C15%20262%2080%20247%20142%20266s99%2065%2089%20112-58%2079-119%2078-128-35-148-82-10-47%208-68Z%22%2F%3E%0A%3Cpath%20d%3D%22M2%20314C37%20281%2087%20271%20135%20286s75%2049%2068%2085-45%2060-92%2060-96-27-113-63-8-35%204-49Z%22%2F%3E%0A%3Cpath%20d%3D%22M35%20321C62%20300%2098%20294%20130%20304s50%2031%2045%2055-31%2041-64%2040-67-18-78-44-7-23%202-32Z%22%2F%3E%0A%3Cpath%20d%3D%22M348%20273C392%20231%20465%20218%20524%20240s87%2066%2079%20111-57%2078-114%2075-112-39-127-87-7-46-14-66Z%22%2F%3E%0A%3Cpath%20d%3D%22M375%20280C411%20248%20463%20239%20507%20256s64%2047%2057%2080-42%2057-84%2055-84-30-94-64-4-35-11-51Z%22%2F%3E%0A%3Cpath%20d%3D%22M400%20288C425%20266%20460%20261%20489%20272s42%2030%2037%2052-29%2039-57%2038-56-19-64-43-2-26-5-47Z%22%2F%3E%0A%3Cpath%20d%3D%22M236%20225C279%20203%20315%20205%20342%20226s35%2054%2019%2079-47%2035-72%2022-43-41-40-66%200-25-13-36Z%22%2F%3E%0A%3Cpath%20d%3D%22M256%20230C287%20214%20311%20216%20330%20232s25%2039%2014%2057-33%2024-51%2015-30-29-28-47%200-15-9-27Z%22%2F%3E%0A%3Cpath%20d%3D%22M280%20235C298%20226%20311%20228%20323%20238s15%2025%208%2036-21%2015-33%209-18-18-17-29%200-8-1-16Z%22%2F%3E%0A%3C%2Fg%3E%3C%2Fsvg%3E"),
+        linear-gradient(
+            180deg,
+            rgba(4, 10, 16, .18) 0%,
+            rgba(4, 10, 16, .34) 36%,
+            rgba(4, 10, 16, .62) 100%
+        ),
+        url("https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/20-06-2020_-_Alps_panorama.jpg/1280px-20-06-2020_-_Alps_panorama.jpg"),
         linear-gradient(145deg, var(--app-surface-strong, rgba(255,255,255,.065)), var(--app-surface-card, rgba(10,16,23,.78))) !important;
-    background-repeat: no-repeat, no-repeat !important;
-    background-position: center center, center center !important;
-    background-size: cover, 100% 100% !important;
+    background-repeat: no-repeat, no-repeat, no-repeat !important;
+    background-position: center, 54% center, center !important;
+    background-size: 100% 100%, cover, 100% 100% !important;
 }
 
-html body #tour-view #checklist-box .checklist-section {
+html body #tour-view #planned-tours-list .tour-list > li {
+    background: linear-gradient(
+        155deg,
+        rgba(13, 21, 31, .38),
+        rgba(10, 16, 23, .52)
+    ) !important;
+}
+
+/* CHECK — kein Bild und keine zusätzliche Fläche hinter dem gesamten Inhalt.
+   Jedes vorhandene Gruppenelement bekommt sein eigenes dezentes Alpenfoto. */
+html body #tour-view #checklist-box > .box-content {
+    background-image: none !important;
+}
+
+html body #tour-view #checklist-box .checklist-section:not(.checklist-specific) {
     background-image:
-        url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20640%20480%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23dce8f0%22%20stroke-width%3D%221.25%22%20stroke-opacity%3D%22.34%22%3E%0A%3Cpath%20d%3D%22M-35%2088C8%2024%2092%20-2%20163%2017S273%2077%20254%20132%20189%20217%20122%20215%201%20179%20-28%20135-51%20112-35%2088Z%22%2F%3E%0A%3Cpath%20d%3D%22M-7%2090C29%2043%2096%2022%20151%2036s83%2048%2069%2088-56%2065-104%2064-91-22-111-52-23-31-12-46Z%22%2F%3E%0A%3Cpath%20d%3D%22M23%2091C52%2059%20105%2043%20145%2054s56%2032%2046%2060-39%2045-72%2044-63-14-78-35-17-20-18-32Z%22%2F%3E%0A%3Cpath%20d%3D%22M52%2091C73%2069%20111%2059%20138%2067s35%2020%2029%2040-25%2030-47%2029-41-9-52-23-13-15-16-22Z%22%2F%3E%0A%3Cpath%20d%3D%22M355%2018C408-5%20483%207%20529%2043s59%2078%2035%20118-76%2063-131%2045-91-60-91-100%205-70%2013-88Z%22%2F%3E%0A%3Cpath%20d%3D%22M374%2038C417%2019%20475%2027%20509%2055s43%2057%2024%2088-58%2048-99%2034-68-42-68-76%203-50%208-63Z%22%2F%3E%0A%3Cpath%20d%3D%22M396%2056C427%2042%20466%2047%20488%2066s29%2038%2015%2061-42%2033-72%2022-49-29-49-53%204-39%2014-30Z%22%2F%3E%0A%3Cpath%20d%3D%22M414%2073C434%2064%20458%2067%20471%2079s18%2025%209%2039-26%2021-44%2014-30-18-30-34%203-13%208-19Z%22%2F%3E%0A%3Cpath%20d%3D%22M-28%20306C15%20262%2080%20247%20142%20266s99%2065%2089%20112-58%2079-119%2078-128-35-148-82-10-47%208-68Z%22%2F%3E%0A%3Cpath%20d%3D%22M2%20314C37%20281%2087%20271%20135%20286s75%2049%2068%2085-45%2060-92%2060-96-27-113-63-8-35%204-49Z%22%2F%3E%0A%3Cpath%20d%3D%22M35%20321C62%20300%2098%20294%20130%20304s50%2031%2045%2055-31%2041-64%2040-67-18-78-44-7-23%202-32Z%22%2F%3E%0A%3Cpath%20d%3D%22M348%20273C392%20231%20465%20218%20524%20240s87%2066%2079%20111-57%2078-114%2075-112-39-127-87-7-46-14-66Z%22%2F%3E%0A%3Cpath%20d%3D%22M375%20280C411%20248%20463%20239%20507%20256s64%2047%2057%2080-42%2057-84%2055-84-30-94-64-4-35-11-51Z%22%2F%3E%0A%3Cpath%20d%3D%22M400%20288C425%20266%20460%20261%20489%20272s42%2030%2037%2052-29%2039-57%2038-56-19-64-43-2-26-5-47Z%22%2F%3E%0A%3Cpath%20d%3D%22M236%20225C279%20203%20315%20205%20342%20226s35%2054%2019%2079-47%2035-72%2022-43-41-40-66%200-25-13-36Z%22%2F%3E%0A%3Cpath%20d%3D%22M256%20230C287%20214%20311%20216%20330%20232s25%2039%2014%2057-33%2024-51%2015-30-29-28-47%200-15-9-27Z%22%2F%3E%0A%3Cpath%20d%3D%22M280%20235C298%20226%20311%20228%20323%20238s15%2025%208%2036-21%2015-33%209-18-18-17-29%200-8-1-16Z%22%2F%3E%0A%3C%2Fg%3E%3C%2Fsvg%3E"),
-        linear-gradient(145deg, rgba(14, 23, 32, .42), rgba(9, 16, 24, .54)) !important;
-    background-repeat: no-repeat, no-repeat !important;
-    background-position: center center, center center !important;
-    background-size: cover, 100% 100% !important;
+        linear-gradient(180deg, rgba(4, 9, 14, .34) 0%, rgba(4, 9, 14, .57) 100%),
+        url("https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Dolomites.jpg/1280px-Dolomites.jpg"),
+        linear-gradient(145deg, var(--app-surface-strong, rgba(255,255,255,.065)), var(--app-surface-card, rgba(10,16,23,.78))) !important;
+    background-repeat: no-repeat, no-repeat, no-repeat !important;
+    background-position: center, 56% 38%, center !important;
+    background-size: 100% 100%, cover, 100% 100% !important;
+}
+
+html body #tour-view #checklist-box .checklist-section[data-checklist-section="day"] {
+    background-image:
+        linear-gradient(180deg, rgba(4, 9, 14, .34) 0%, rgba(4, 9, 14, .57) 100%),
+        url("https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg/1280px-Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg"),
+        linear-gradient(145deg, var(--app-surface-strong, rgba(255,255,255,.065)), var(--app-surface-card, rgba(10,16,23,.78))) !important;
+    background-repeat: no-repeat, no-repeat, no-repeat !important;
+    background-position: center, 68% 57%, center !important;
+    background-size: 100% 100%, cover, 100% 100% !important;
+}
+
+html body #tour-view #checklist-box .checklist-section[data-checklist-section="multi"] {
+    background-image:
+        linear-gradient(180deg, rgba(4, 9, 14, .34) 0%, rgba(4, 9, 14, .57) 100%),
+        url("https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Alpenpanorama_bei_Sonnenuntergang.jpg/1280px-Alpenpanorama_bei_Sonnenuntergang.jpg"),
+        linear-gradient(145deg, var(--app-surface-strong, rgba(255,255,255,.065)), var(--app-surface-card, rgba(10,16,23,.78))) !important;
+    background-repeat: no-repeat, no-repeat, no-repeat !important;
+    background-position: center, 66% 76%, center !important;
+    background-size: 100% 100%, cover, 100% 100% !important;
+}
+
+/* Check-Kacheln bleiben kontrastreich, lassen das Bild der jeweiligen Gruppe aber subtil durchscheinen. */
+html body #tour-view #checklist-box .checklist-section .checklist-item {
+    background: linear-gradient(
+        150deg,
+        color-mix(in srgb, var(--app-surface-strong, rgba(25, 30, 39, .82)) 70%, transparent),
+        color-mix(in srgb, var(--app-surface-card, rgba(17, 26, 37, .74)) 66%, transparent)
+    ) !important;
 }
 
 @media (max-width: 520px) {
     html body #tour-view #planned-tours-list .tour-list > li {
-        background: linear-gradient(155deg, rgba(13, 21, 31, .48), rgba(10, 16, 23, .60)) !important;
+        background: linear-gradient(
+            155deg,
+            rgba(13, 21, 31, .42),
+            rgba(10, 16, 23, .56)
+        ) !important;
     }
 }
 
+/* Gipfel bleibt unverändert. */
 /* Gipfel-Panorama bleibt unverändert. */
 /* GIPFEL — dasselbe Dolomitenpanorama wie in der Gipfelstatistik, stark abgedunkelt.
    Die Bronze-, Silber- und Goldkarten liegen darüber und behalten ihre Metallfarben. */
@@ -1038,12 +1088,12 @@ html body #tour-view #planned-peaks-box > .box-content::after {
 
 
 
+
 @media (max-width: 520px) {
     html body #tour-view #planned-peaks-box > .box-content::after {
         opacity: .60;
     }
 }
-
 html body #tour-view #planned-peaks-container .peak-tour-list > li:not(.peak-tier-1):not(.peak-tier-2):not(.peak-tier-3) {
     background: linear-gradient(
         145deg,
