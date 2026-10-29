@@ -953,60 +953,43 @@ html body #tour-view #checklist-box > .box-content > .plan-view-title {
 }
 
 
-/* PREMIUM ALPINE — leise alpine Motive für Tour planen, Liste, Gipfel und Check.
-   Alle Motive sind dekorative Ebenen hinter dem Inhalt; die vorhandenen Oberflächen,
-   Eingaben, Touch-Ziele, Metallfarben und Abläufe bleiben unverändert. */
-
-/* PLANEN — feine Höhenlinien nur in der ersten Formspalte, keine Fotofläche hinter Feldern. */
-html body #tour-view #plan-form > .plan-form-column {
-    position: relative !important;
-    isolation: isolate !important;
+/* PREMIUM ALPINE — direkte SVG-Hintergrundschichten für Planen, Liste und Check.
+   Transparente Grafiken statt Masken/Pseudoelemente, damit Motive im Kartenhintergrund sichtbar sind. */
+html body #tour-view #plan-form > .plan-form-column:first-child {
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 140'%3E%3Cpath d='M-8 116C22 88 44 96 58 71S94 32 122 45s40 38 62 24 34-31 48-45' fill='none' stroke='%23dce9f2' stroke-width='3.2' stroke-opacity='.68'/%3E%3Cpath d='M-12 132C23 105 45 111 67 88S103 49 127 61s42 35 63 22 34-30 48-43' fill='none' stroke='%23dce9f2' stroke-width='3.2' stroke-opacity='.62'/%3E%3Cpath d='M-5 93C27 65 48 74 52 51S91 12 118 25s40 37 63 23 35-30 53-45' fill='none' stroke='%23eaf4fb' stroke-width='3.2' stroke-opacity='.64'/%3E%3Cpath d='M23 144c10-21 23-29 43-30s28-19 30-36 22-32 43-25 30 25 48 18 28-22 39-37' fill='none' stroke='%23dce9f2' stroke-width='2.6' stroke-opacity='.54'/%3E%3C/svg%3E"),
+        linear-gradient(145deg, var(--app-surface-strong, rgba(255,255,255,.075)), var(--app-surface-card, rgba(10,16,23,.78))) !important;
+    background-repeat: no-repeat, no-repeat !important;
+    background-position: right 7px bottom 8px, center !important;
+    background-size: 176px 112px, 100% 100% !important;
 }
-
-html body #tour-view #plan-form > .plan-form-column:first-child::after {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    right: 6px;
-    bottom: 7px;
-    width: 156px;
-    height: 100px;
-    pointer-events: none;
-    opacity: .075;
-    background-color: color-mix(
-        in srgb,
-        var(--theme-palette-accent, var(--accent, #ad7d12)) 78%,
-        #dbe7ee
-    );
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 140'%3E%3Cpath d='M-8 116C22 88 44 96 58 71S94 32 122 45s40 38 62 24 34-31 48-45' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cpath d='M-12 132C23 105 45 111 67 88S103 49 127 61s42 35 63 22 34-30 48-43' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cpath d='M-5 93C27 65 48 74 52 51S91 12 118 25s40 37 63 23 35-30 53-45' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cpath d='M23 144c10-21 23-29 43-30s28-19 30-36 22-32 43-25 30 25 48 18 28-22 39-37' fill='none' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E") center / contain no-repeat;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 140'%3E%3Cpath d='M-8 116C22 88 44 96 58 71S94 32 122 45s40 38 62 24 34-31 48-45' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cpath d='M-12 132C23 105 45 111 67 88S103 49 127 61s42 35 63 22 34-30 48-43' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cpath d='M-5 93C27 65 48 74 52 51S91 12 118 25s40 37 63 23 35-30 53-45' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cpath d='M23 144c10-21 23-29 43-30s28-19 30-36 22-32 43-25 30 25 48 18 28-22 39-37' fill='none' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E") center / contain no-repeat;
-}
-
-/* LISTE — ein Wasserzeichen auf der äußeren Gruppierungsbox, nicht auf jeder Tourzeile. */
 html body #tour-view #planned-tours-list > .box-content {
-    position: relative !important;
-    isolation: isolate !important;
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 150'%3E%3Cpath d='M0 135 55 78 82 101 144 22 206 97 231 72 320 134V150H0Z' fill='%23dce9f2' fill-opacity='.30'/%3E%3Cpath d='M0 135 55 78 82 101 144 22 206 97 231 72 320 134' fill='none' stroke='%23eaf4fb' stroke-width='2.8' stroke-opacity='.58'/%3E%3Cpath d='m111 65 33-43 28 39-20-10-13 18-11-11-17 7Z' fill='none' stroke='%23f4f8fb' stroke-width='2' stroke-opacity='.62'/%3E%3C/svg%3E"),
+        linear-gradient(145deg, var(--app-surface-strong, rgba(255,255,255,.065)), var(--app-surface-card, rgba(10,16,23,.78))) !important;
+    background-repeat: no-repeat, no-repeat !important;
+    background-position: right 7px top 6px, center !important;
+    background-size: 156px 78px, 100% 100% !important;
 }
-
-html body #tour-view #planned-tours-list > .box-content::after {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    top: 8px;
-    right: 8px;
-    width: 142px;
-    height: 84px;
-    pointer-events: none;
-    opacity: .105;
-    background-color: color-mix(
-        in srgb,
-        var(--theme-palette-accent, var(--accent, #ad7d12)) 82%,
-        #dbe7ee
-    );
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 150'%3E%3Cpath d='M0 135 55 78 82 101 144 22 206 97 231 72 320 134V150H0Z' fill='%23fff'/%3E%3Cpath d='m111 65 33-43 28 39-20-10-13 18-11-11-17 7Z' fill='%23fff' opacity='.72'/%3E%3C/svg%3E") center / contain no-repeat;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 150'%3E%3Cpath d='M0 135 55 78 82 101 144 22 206 97 231 72 320 134V150H0Z' fill='%23fff'/%3E%3Cpath d='m111 65 33-43 28 39-20-10-13 18-11-11-17 7Z' fill='%23fff' opacity='.72'/%3E%3C/svg%3E") center / contain no-repeat;
+html body #tour-view #checklist-box .checklist-section:not(.checklist-specific) {
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 140'%3E%3Cpath d='M-8 116C22 88 44 96 58 71S94 32 122 45s40 38 62 24 34-31 48-45' fill='none' stroke='%23dce9f2' stroke-width='3.4' stroke-opacity='.72'/%3E%3Cpath d='M-12 132C23 105 45 111 67 88S103 49 127 61s42 35 63 22 34-30 48-43' fill='none' stroke='%23eaf4fb' stroke-width='3.4' stroke-opacity='.66'/%3E%3Cpath d='M-5 93C27 65 48 74 52 51S91 12 118 25s40 37 63 23 35-30 53-45' fill='none' stroke='%23dce9f2' stroke-width='3.4' stroke-opacity='.68'/%3E%3C/svg%3E"),
+        linear-gradient(145deg, var(--app-surface-strong, rgba(255,255,255,.065)), var(--app-surface-card, rgba(10,16,23,.78))) !important;
+    background-repeat: no-repeat, no-repeat !important;
+    background-position: right 5px top 4px, center !important;
+    background-size: 126px 78px, 100% 100% !important;
 }
-
+@media (max-width: 520px) {
+    html body #tour-view #plan-form > .plan-form-column:first-child {
+        background-size: 148px 94px, 100% 100% !important;
+    }
+    html body #tour-view #planned-tours-list > .box-content {
+        background-size: 128px 64px, 100% 100% !important;
+    }
+    html body #tour-view #checklist-box .checklist-section:not(.checklist-specific) {
+        background-size: 106px 66px, 100% 100% !important;
+    }
+}
 /* GIPFEL — dasselbe Dolomitenpanorama wie in der Gipfelstatistik, stark abgedunkelt.
    Die Bronze-, Silber- und Goldkarten liegen darüber und behalten ihre Metallfarben. */
 html body #tour-view #planned-peaks-box > .box-content {
@@ -1034,59 +1017,29 @@ html body #tour-view #planned-peaks-box > .box-content::after {
     background-size: 100% 100%, cover;
 }
 
-/* CHECK — nur kleine Höhenlinien im rechten oberen Bereich; keine Fototapete hinter Häkchen. */
-html body #tour-view #checklist-box > .box-content {
-    position: relative !important;
-    isolation: isolate !important;
-}
-
-html body #tour-view #checklist-box > .box-content::after {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    top: 43px;
-    right: 5px;
-    width: 78px;
-    height: 48px;
-    pointer-events: none;
-    opacity: .055;
-    background-color: color-mix(
-        in srgb,
-        var(--theme-palette-accent, var(--accent, #ad7d12)) 78%,
-        #dbe7ee
-    );
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 140'%3E%3Cpath d='M-8 116C22 88 44 96 58 71S94 32 122 45s40 38 62 24 34-31 48-45' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cpath d='M-12 132C23 105 45 111 67 88S103 49 127 61s42 35 63 22 34-30 48-43' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cpath d='M-5 93C27 65 48 74 52 51S91 12 118 25s40 37 63 23 35-30 53-45' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3C/svg%3E") center / contain no-repeat;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 140'%3E%3Cpath d='M-8 116C22 88 44 96 58 71S94 32 122 45s40 38 62 24 34-31 48-45' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cpath d='M-12 132C23 105 45 111 67 88S103 49 127 61s42 35 63 22 34-30 48-43' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cpath d='M-5 93C27 65 48 74 52 51S91 12 118 25s40 37 63 23 35-30 53-45' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3C/svg%3E") center / contain no-repeat;
-}
 
 @media (max-width: 520px) {
-    html body #tour-view #planned-tours-list > .box-content::after {
-        width: 108px;
-        height: 64px;
-        opacity: .09;
-    }
-
     html body #tour-view #planned-peaks-box > .box-content::after {
         opacity: .60;
     }
-
-    html body #tour-view #checklist-box > .box-content::after {
-        top: 38px;
-        width: 64px;
-        height: 40px;
-        opacity: .065;
-    }
 }
 
-
-/* KORREKTUR — Motive müssen durch die normalen Innenkarten sichtbar bleiben.
-   Die Flächen nutzen weiterhin die Editor-Surface-Tokens; Metallkarten sind ausgenommen. */
+/* Dunkle Innenflächen der Tourliste lassen das äußere Bergmotiv sichtbar durchscheinen. */
 html body #tour-view #planned-tours-list .tour-list > li {
     background: linear-gradient(
         155deg,
-        color-mix(in srgb, var(--app-surface-strong, rgba(25, 30, 39, .82)) 62%, transparent),
-        color-mix(in srgb, var(--app-surface-card, rgba(17, 26, 37, .74)) 54%, transparent)
+        color-mix(in srgb, var(--app-surface-strong, rgba(25, 30, 39, .82)) 42%, transparent),
+        color-mix(in srgb, var(--app-surface-card, rgba(17, 26, 37, .74)) 36%, transparent)
     ) !important;
+}
+@media (max-width: 520px) {
+    html body #tour-view #planned-tours-list .tour-list > li {
+        background: linear-gradient(
+            155deg,
+            color-mix(in srgb, var(--app-surface-strong, rgba(25, 30, 39, .82)) 46%, transparent),
+            color-mix(in srgb, var(--app-surface-card, rgba(17, 26, 37, .74)) 40%, transparent)
+        ) !important;
+    }
 }
 
 html body #tour-view #planned-peaks-container .peak-tour-list > li:not(.peak-tier-1):not(.peak-tier-2):not(.peak-tier-3) {
@@ -1095,14 +1048,4 @@ html body #tour-view #planned-peaks-container .peak-tour-list > li:not(.peak-tie
         color-mix(in srgb, var(--app-surface-strong, rgba(25, 30, 39, .82)) 54%, transparent),
         color-mix(in srgb, var(--app-surface-card, rgba(17, 26, 37, .74)) 48%, transparent)
     ) !important;
-}
-
-@media (max-width: 520px) {
-    html body #tour-view #planned-tours-list .tour-list > li {
-        background: linear-gradient(
-            155deg,
-            color-mix(in srgb, var(--app-surface-strong, rgba(25, 30, 39, .82)) 64%, transparent),
-            color-mix(in srgb, var(--app-surface-card, rgba(17, 26, 37, .74)) 56%, transparent)
-        ) !important;
-    }
 }
