@@ -413,7 +413,7 @@ html body #app-view #tour-form .save-form-card {
 html body #app-view #tour-form .save-form-card::after {
     content: "";
     position: absolute;
-    z-index: 0;
+    z-index: -1;
     top: 13px;
     right: 5px;
     width: 134px;
@@ -427,11 +427,6 @@ html body #app-view #tour-form .save-form-card::after {
     );
     -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 150'%3E%3Cpath d='M0 135 55 78 82 101 144 22 206 97 231 72 320 134V150H0Z' fill='%23fff'/%3E%3Cpath d='m111 65 33-43 28 39-20-10-13 18-11-11-17 7Z' fill='%23fff' opacity='.72'/%3E%3Cpath d='M0 135 55 78 82 101 144 22 206 97 231 72 320 134' fill='none' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E") center / contain no-repeat;
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 150'%3E%3Cpath d='M0 135 55 78 82 101 144 22 206 97 231 72 320 134V150H0Z' fill='%23fff'/%3E%3Cpath d='m111 65 33-43 28 39-20-10-13 18-11-11-17 7Z' fill='%23fff' opacity='.72'/%3E%3Cpath d='M0 135 55 78 82 101 144 22 206 97 231 72 320 134' fill='none' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E") center / contain no-repeat;
-}
-
-html body #app-view #tour-form .save-form-card > * {
-    position: relative;
-    z-index: 1;
 }
 
 @media (max-width: 520px) {
