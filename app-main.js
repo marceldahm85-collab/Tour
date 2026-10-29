@@ -57,6 +57,9 @@ loadData();
 initStatisticsClickHandlers();
 
 // Geplante Touren
+// Gespeicherte Gehzeiten mit der aktuellen Rundtour-Formel abgleichen,
+// bevor die Planungsliste dargestellt wird.
+refreshStoredPlannedWalkingTimeEstimates();
 loadPlannedTours();
     updatePlannedPeaks();
     initPlannedEstimatedWalkingTime();
@@ -3980,6 +3983,74 @@ function calculatePlannedEstimatedWalkingMinutes(distanceValue, ascentValue) {
         0,
         Math.round(rawMinutes / 15) * 15
     );
+}
+
+/*
+ * Vorhandene geplante Touren beim App-Start mit der aktuellen
+ * Gehzeitschätzung synchronisieren. Die Werte werden nur gespeichert,
+ * wenn sich eine Schätzung tatsächlich ändert.
+ *
+ * Reine Radtouren besitzen eine separate Fahrzeit und bleiben unangetastet.
+ * Einträge ohne Strecken- und Höhenmeterbasis bleiben ebenfalls erhalten,
+ * damit eventuell manuell gepflegte Zeiten nicht unbeabsichtigt gelöscht werden.
+ */
+function refreshStoredPlannedWalkingTimeEstimates() {
+    const savedTours = appStorage.get('plannedTours') || [];
+
+    if (!Array.isArray(savedTours) || savedTours.length === 0) {
+        return false;
+    }
+
+    let changed = false;
+
+    savedTours.forEach(entry => {
+        if (!entry || typeof entry !== 'object') {
+            return;
+        }
+
+        const difficulty = String(entry.difficulty || '')
+            .trim()
+            .toLowerCase();
+
+        if (difficulty === 'radtour') {
+            return;
+        }
+
+        const distance = parseFloat(
+            String(entry.strecke ?? '').trim().replace(',', '.')
+        );
+
+        const ascent = parseFloat(
+            String(entry.aufstieg ?? '').trim().replace(',', '.')
+        );
+
+        const hasDistance = Number.isFinite(distance) && distance > 0;
+        const hasAscent = Number.isFinite(ascent) && ascent > 0;
+
+        if (!hasDistance && !hasAscent) {
+            return;
+        }
+
+        const minutes = calculatePlannedEstimatedWalkingMinutes(
+            entry.strecke,
+            entry.aufstieg
+        );
+
+        const estimatedTime = minutes > 0
+            ? formatFerrataMinutes(minutes)
+            : '';
+
+        if (String(entry.zeit ?? '') !== estimatedTime) {
+            entry.zeit = estimatedTime;
+            changed = true;
+        }
+    });
+
+    if (changed) {
+        appStorage.set('plannedTours', savedTours);
+    }
+
+    return changed;
 }
 
 function updatePlannedEstimatedWalkingTime() {
