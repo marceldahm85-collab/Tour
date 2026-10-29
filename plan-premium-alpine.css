@@ -1049,3 +1049,63 @@ html body #tour-view #planned-peaks-container .peak-tour-list > li:not(.peak-tie
         color-mix(in srgb, var(--app-surface-card, rgba(17, 26, 37, .74)) 48%, transparent)
     ) !important;
 }
+
+
+/* ZIELGESTALTUNG — Höhenlinien über die gesamte Fläche beider Planungs-Karten. */
+html body #tour-view #plan-form > .plan-form-column {
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 480'%3E%3Cg fill='none' stroke='%23dce8f0' stroke-width='1.35' stroke-opacity='.27'%3E%3Cpath d='M-28 79C14 19 103-8 173 13c61 18 91 67 76 119-15 52-65 80-123 80-64 0-124-29-151-74C-44 112-44 100-28 79Z'/%3E%3Cpath d='M7 80C42 34 109 15 163 31c47 14 70 48 59 86-11 39-51 60-97 61-48 1-91-21-112-52C-1 109-4 96 7 80Z'/%3E%3Cpath d='M37 81C61 51 111 38 151 50c32 10 48 33 40 58-8 27-37 42-69 43-34 1-64-14-80-35-11-14-13-23-5-35Z'/%3E%3Cpath d='M62 82C80 62 111 54 139 62c21 6 31 21 26 37-5 18-25 28-46 29-23 1-43-9-53-23-8-10-10-15-4-23Z'/%3E%3Cpath d='M352 28C411-6 489 6 532 43c36 31 46 76 25 113-25 44-76 61-128 44-54-17-91-59-90-101 0-29 4-52 13-71Z'/%3E%3Cpath d='M370 44C417 18 478 28 512 57c28 24 36 59 19 87-20 34-60 46-101 33-41-13-70-45-69-78 0-22 3-41 9-55Z'/%3E%3Cpath d='M389 59C423 41 466 47 490 68c21 18 26 42 14 63-14 24-43 32-73 23-30-9-50-32-50-56 0-16 2-29 8-39Z'/%3E%3Cpath d='M408 73C429 62 454 66 469 79c13 11 16 26 8 39-9 14-27 20-45 14-18-6-30-19-29-34 0-10 1-18 5-25Z'/%3E%3Cpath d='M-34 315C18 265 83 250 145 270c61 20 96 64 89 113-7 48-58 80-119 80-67 0-128-33-151-82-10-22-9-45 2-66Z'/%3E%3Cpath d='M-2 321C38 284 88 274 137 289c47 15 72 47 67 83-6 36-45 60-91 60-51 0-96-25-114-62-8-17-7-33-1-49Z'/%3E%3Cpath d='M35 326C63 302 98 296 132 306c31 10 48 31 44 55-4 25-31 42-64 42-36 0-68-18-80-43-5-11-4-23 3-34Z'/%3E%3Cpath d='M352 270C397 229 469 217 527 239c55 21 85 64 77 108-9 48-56 79-112 76-60-3-112-39-127-87-8-25-5-47  -13-66Z'/%3E%3Cpath d='M376 277C411 246 464 238 507 255c41 16 63 46 57 78-7 35-42 58-84 56-45-2-83-29-94-64-6-18-3-35-10-48Z'/%3E%3Cpath d='M400 285C425 263 460 259 488 270c27 10 41 30 37 51-5 24-29 40-57 39-30-1-56-19-64-43-4-12-2-24-4-32Z'/%3E%3Cpath d='M272 171c33-31 59-39 83-27 24 12 33 35 26 60-8 27-33 41-58 34-25-7-42-29-41-48 1-8-2-14-10-19Z'/%3E%3Cpath d='M286 175c22-20 40-25 56-17 16 8 22 23 17 40-6 18-22 27-39 22-17-5-28-19-28-32 1-5-1-9-6-13Z'/%3E%3C/g%3E%3C/svg%3E"),
+        linear-gradient(145deg, var(--app-surface-strong, rgba(255,255,255,.075)), var(--app-surface-card, rgba(10,16,23,.78))) !important;
+    background-repeat: no-repeat, no-repeat !important;
+    background-position: center, center !important;
+    background-size: cover, 100% 100% !important;
+}
+
+/* ZIELGESTALTUNG — echtes Alpenpanorama wie bei den Stats-Highlights auf der gesamten Listenbox. */
+html body #tour-view #planned-tours-list > .box-content {
+    background-image:
+        linear-gradient(145deg, rgba(4, 10, 16, .36) 0%, rgba(4, 10, 16, .58) 100%),
+        url("https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/20-06-2020_-_Alps_panorama.jpg/1280px-20-06-2020_-_Alps_panorama.jpg"),
+        linear-gradient(145deg, var(--app-surface-strong, rgba(255,255,255,.065)), var(--app-surface-card, rgba(10,16,23,.78))) !important;
+    background-repeat: no-repeat, no-repeat, no-repeat !important;
+    background-position: center, center 48%, center !important;
+    background-size: 100% 100%, cover, 100% 100% !important;
+}
+
+/* Tourzeilen bleiben gut lesbar, lassen das Foto hinter der Gruppierung aber sichtbar durch. */
+html body #tour-view #planned-tours-list .tour-list > li {
+    background: linear-gradient(155deg, rgba(13, 21, 31, .52), rgba(10, 16, 23, .62)) !important;
+}
+@media (max-width: 520px) {
+    html body #tour-view #planned-tours-list .tour-list > li {
+        background: linear-gradient(155deg, rgba(13, 21, 31, .54), rgba(10, 16, 23, .64)) !important;
+    }
+}
+
+/* ZIELGESTALTUNG — feine kartografische Höhenlinien über der gesamten Check-Box
+   und auch auf allen aktuell sichtbaren Checklistengruppen. */
+html body #tour-view #checklist-box > .box-content {
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 480'%3E%3Cg fill='none' stroke='%23dce8f0' stroke-width='1.35' stroke-opacity='.27'%3E%3Cpath d='M-28 79C14 19 103-8 173 13c61 18 91 67 76 119-15 52-65 80-123 80-64 0-124-29-151-74C-44 112-44 100-28 79Z'/%3E%3Cpath d='M7 80C42 34 109 15 163 31c47 14 70 48 59 86-11 39-51 60-97 61-48 1-91-21-112-52C-1 109-4 96 7 80Z'/%3E%3Cpath d='M37 81C61 51 111 38 151 50c32 10 48 33 40 58-8 27-37 42-69 43-34 1-64-14-80-35-11-14-13-23-5-35Z'/%3E%3Cpath d='M62 82C80 62 111 54 139 62c21 6 31 21 26 37-5 18-25 28-46 29-23 1-43-9-53-23-8-10-10-15-4-23Z'/%3E%3Cpath d='M352 28C411-6 489 6 532 43c36 31 46 76 25 113-25 44-76 61-128 44-54-17-91-59-90-101 0-29 4-52 13-71Z'/%3E%3Cpath d='M370 44C417 18 478 28 512 57c28 24 36 59 19 87-20 34-60 46-101 33-41-13-70-45-69-78 0-22 3-41 9-55Z'/%3E%3Cpath d='M389 59C423 41 466 47 490 68c21 18 26 42 14 63-14 24-43 32-73 23-30-9-50-32-50-56 0-16 2-29 8-39Z'/%3E%3Cpath d='M408 73C429 62 454 66 469 79c13 11 16 26 8 39-9 14-27 20-45 14-18-6-30-19-29-34 0-10 1-18 5-25Z'/%3E%3Cpath d='M-34 315C18 265 83 250 145 270c61 20 96 64 89 113-7 48-58 80-119 80-67 0-128-33-151-82-10-22-9-45 2-66Z'/%3E%3Cpath d='M-2 321C38 284 88 274 137 289c47 15 72 47 67 83-6 36-45 60-91 60-51 0-96-25-114-62-8-17-7-33-1-49Z'/%3E%3Cpath d='M35 326C63 302 98 296 132 306c31 10 48 31 44 55-4 25-31 42-64 42-36 0-68-18-80-43-5-11-4-23 3-34Z'/%3E%3Cpath d='M352 270C397 229 469 217 527 239c55 21 85 64 77 108-9 48-56 79-112 76-60-3-112-39-127-87-8-25-5-47  -13-66Z'/%3E%3Cpath d='M376 277C411 246 464 238 507 255c41 16 63 46 57 78-7 35-42 58-84 56-45-2-83-29-94-64-6-18-3-35-10-48Z'/%3E%3Cpath d='M400 285C425 263 460 259 488 270c27 10 41 30 37 51-5 24-29 40-57 39-30-1-56-19-64-43-4-12-2-24-4-32Z'/%3E%3Cpath d='M272 171c33-31 59-39 83-27 24 12 33 35 26 60-8 27-33 41-58 34-25-7-42-29-41-48 1-8-2-14-10-19Z'/%3E%3Cpath d='M286 175c22-20 40-25 56-17 16 8 22 23 17 40-6 18-22 27-39 22-17-5-28-19-28-32 1-5-1-9-6-13Z'/%3E%3C/g%3E%3C/svg%3E"),
+        linear-gradient(145deg, var(--app-surface-strong, rgba(255,255,255,.065)), var(--app-surface-card, rgba(10,16,23,.78))) !important;
+    background-repeat: no-repeat, no-repeat !important;
+    background-position: center, center !important;
+    background-size: cover, 100% 100% !important;
+}
+
+html body #tour-view #checklist-box .checklist-section {
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 480'%3E%3Cg fill='none' stroke='%23dce8f0' stroke-width='1.35' stroke-opacity='.27'%3E%3Cpath d='M-28 79C14 19 103-8 173 13c61 18 91 67 76 119-15 52-65 80-123 80-64 0-124-29-151-74C-44 112-44 100-28 79Z'/%3E%3Cpath d='M7 80C42 34 109 15 163 31c47 14 70 48 59 86-11 39-51 60-97 61-48 1-91-21-112-52C-1 109-4 96 7 80Z'/%3E%3Cpath d='M37 81C61 51 111 38 151 50c32 10 48 33 40 58-8 27-37 42-69 43-34 1-64-14-80-35-11-14-13-23-5-35Z'/%3E%3Cpath d='M62 82C80 62 111 54 139 62c21 6 31 21 26 37-5 18-25 28-46 29-23 1-43-9-53-23-8-10-10-15-4-23Z'/%3E%3Cpath d='M352 28C411-6 489 6 532 43c36 31 46 76 25 113-25 44-76 61-128 44-54-17-91-59-90-101 0-29 4-52 13-71Z'/%3E%3Cpath d='M370 44C417 18 478 28 512 57c28 24 36 59 19 87-20 34-60 46-101 33-41-13-70-45-69-78 0-22 3-41 9-55Z'/%3E%3Cpath d='M389 59C423 41 466 47 490 68c21 18 26 42 14 63-14 24-43 32-73 23-30-9-50-32-50-56 0-16 2-29 8-39Z'/%3E%3Cpath d='M408 73C429 62 454 66 469 79c13 11 16 26 8 39-9 14-27 20-45 14-18-6-30-19-29-34 0-10 1-18 5-25Z'/%3E%3Cpath d='M-34 315C18 265 83 250 145 270c61 20 96 64 89 113-7 48-58 80-119 80-67 0-128-33-151-82-10-22-9-45 2-66Z'/%3E%3Cpath d='M-2 321C38 284 88 274 137 289c47 15 72 47 67 83-6 36-45 60-91 60-51 0-96-25-114-62-8-17-7-33-1-49Z'/%3E%3Cpath d='M35 326C63 302 98 296 132 306c31 10 48 31 44 55-4 25-31 42-64 42-36 0-68-18-80-43-5-11-4-23 3-34Z'/%3E%3Cpath d='M352 270C397 229 469 217 527 239c55 21 85 64 77 108-9 48-56 79-112 76-60-3-112-39-127-87-8-25-5-47  -13-66Z'/%3E%3Cpath d='M376 277C411 246 464 238 507 255c41 16 63 46 57 78-7 35-42 58-84 56-45-2-83-29-94-64-6-18-3-35-10-48Z'/%3E%3Cpath d='M400 285C425 263 460 259 488 270c27 10 41 30 37 51-5 24-29 40-57 39-30-1-56-19-64-43-4-12-2-24-4-32Z'/%3E%3Cpath d='M272 171c33-31 59-39 83-27 24 12 33 35 26 60-8 27-33 41-58 34-25-7-42-29-41-48 1-8-2-14-10-19Z'/%3E%3Cpath d='M286 175c22-20 40-25 56-17 16 8 22 23 17 40-6 18-22 27-39 22-17-5-28-19-28-32 1-5-1-9-6-13Z'/%3E%3C/g%3E%3C/svg%3E"),
+        linear-gradient(145deg, rgba(14, 23, 32, .48), rgba(9, 16, 24, .58)) !important;
+    background-repeat: no-repeat, no-repeat !important;
+    background-position: center, center !important;
+    background-size: cover, 100% 100% !important;
+}
+
+@media (max-width: 520px) {
+    html body #tour-view #checklist-box > .box-content,
+    html body #tour-view #checklist-box .checklist-section {
+        background-position: center, center !important;
+        background-size: cover, 100% 100% !important;
+    }
+}
