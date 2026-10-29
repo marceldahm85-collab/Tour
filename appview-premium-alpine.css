@@ -403,20 +403,38 @@ html body #app-view #tour-form .save-form-card .form-section-title::after {
 }
 
 
-/* PREMIUM ALPINE — sichtbares Bergmotiv direkt in den Kartenhintergründen von Tour speichern.
-   Die transparente SVG-Schicht liegt über dem dunklen Theme-Verlauf; keine Masken oder Pseudoelemente. */
+/* PREMIUM ALPINE — akzentfarbene Bergsilhouette unten rechts in jeder Speicherbox. */
 html body #app-view #tour-form .save-form-card {
-    background-image:
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 150'%3E%3Cpath d='M0 135 55 78 82 101 144 22 206 97 231 72 320 134V150H0Z' fill='%23dce9f2' fill-opacity='.28'/%3E%3Cpath d='M0 135 55 78 82 101 144 22 206 97 231 72 320 134' fill='none' stroke='%23eaf4fb' stroke-width='2.4' stroke-opacity='.54'/%3E%3Cpath d='m111 65 33-43 28 39-20-10-13 18-11-11-17 7Z' fill='none' stroke='%23f4f8fb' stroke-width='2' stroke-opacity='.62'/%3E%3C/svg%3E"),
-        linear-gradient(145deg, var(--app-surface-strong, rgba(255,255,255,.075)), var(--app-surface-card, rgba(10,16,23,.78))) !important;
-    background-repeat: no-repeat, no-repeat !important;
-    background-position: right 5px top 10px, center !important;
-    background-size: 146px 76px, 100% 100% !important;
+    position: relative !important;
+    isolation: isolate !important;
+}
+
+html body #app-view #tour-form .save-form-card::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    right: 7px;
+    bottom: 6px;
+    width: 162px;
+    height: 78px;
+    pointer-events: none;
+    opacity: .22;
+    background-color: var(--theme-palette-accent, var(--accent, #ad7d12));
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 150'%3E%3Cpath d='M0 135 55 78 82 101 144 22 206 97 231 72 320 134V150H0Z' fill='%23fff'/%3E%3Cpath d='m111 65 33-43 28 39-20-10-13 18-11-11-17 7Z' fill='%23fff' opacity='.76'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 150'%3E%3Cpath d='M0 135 55 78 82 101 144 22 206 97 231 72 320 134V150H0Z' fill='%23fff'/%3E%3Cpath d='m111 65 33-43 28 39-20-10-13 18-11-11-17 7Z' fill='%23fff' opacity='.76'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+html body #app-view #tour-form .save-form-card > * {
+    position: relative;
+    z-index: 1;
 }
 
 @media (max-width: 520px) {
-    html body #app-view #tour-form .save-form-card {
-        background-size: 118px 62px, 100% 100% !important;
-        background-position: right 3px top 14px, center !important;
+    html body #app-view #tour-form .save-form-card::after {
+        right: 5px;
+        bottom: 5px;
+        width: 126px;
+        height: 61px;
+        opacity: .20;
     }
 }
