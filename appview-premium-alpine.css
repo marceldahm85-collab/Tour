@@ -385,3 +385,19 @@ html body #app-view #tour-form select:focus-visible {
     line-height: 1.1 !important;
 }
 
+/* PREMIUM ALPINE — Abschnittsüberschriften im Formular Tour speichern.
+   Die gemeinsame Textfarben-Regel in styles-overrides.css setzt .form-section-title
+   auf Textfarbe. Dieser eng begrenzte, höher priorisierte Selector hält im
+   Speicherformular die Abschnittstitel wie in Tour planen auf der Editor-Akzentfarbe. */
+html body #app-view #tour-form .save-form-card .form-section-title {
+    color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+}
+
+html body #app-view #tour-form .save-form-card .form-section-title::after {
+    background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 42%, transparent),
+        transparent
+    ) !important;
+    opacity: .9 !important;
+}
