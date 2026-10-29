@@ -951,3 +951,146 @@ html body #tour-view #checklist-box > .box-content > .plan-view-title {
         padding: 8px !important;
     }
 }
+
+
+/* PREMIUM ALPINE — leise alpine Motive für Tour planen, Liste, Gipfel und Check.
+   Alle Motive sind dekorative Ebenen hinter dem Inhalt; die vorhandenen Oberflächen,
+   Eingaben, Touch-Ziele, Metallfarben und Abläufe bleiben unverändert. */
+
+/* PLANEN — feine Höhenlinien nur in der ersten Formspalte, keine Fotofläche hinter Feldern. */
+html body #tour-view #plan-form > .plan-form-column {
+    position: relative !important;
+    isolation: isolate !important;
+}
+
+html body #tour-view #plan-form > .plan-form-column:first-child::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    right: 6px;
+    bottom: 7px;
+    width: 156px;
+    height: 100px;
+    pointer-events: none;
+    opacity: .075;
+    background-color: color-mix(
+        in srgb,
+        var(--theme-palette-accent, var(--accent, #ad7d12)) 78%,
+        #dbe7ee
+    );
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 140'%3E%3Cpath d='M-8 116C22 88 44 96 58 71S94 32 122 45s40 38 62 24 34-31 48-45' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cpath d='M-12 132C23 105 45 111 67 88S103 49 127 61s42 35 63 22 34-30 48-43' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cpath d='M-5 93C27 65 48 74 52 51S91 12 118 25s40 37 63 23 35-30 53-45' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cpath d='M23 144c10-21 23-29 43-30s28-19 30-36 22-32 43-25 30 25 48 18 28-22 39-37' fill='none' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 140'%3E%3Cpath d='M-8 116C22 88 44 96 58 71S94 32 122 45s40 38 62 24 34-31 48-45' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cpath d='M-12 132C23 105 45 111 67 88S103 49 127 61s42 35 63 22 34-30 48-43' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cpath d='M-5 93C27 65 48 74 52 51S91 12 118 25s40 37 63 23 35-30 53-45' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cpath d='M23 144c10-21 23-29 43-30s28-19 30-36 22-32 43-25 30 25 48 18 28-22 39-37' fill='none' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+html body #tour-view #plan-form > .plan-form-column > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* LISTE — ein Wasserzeichen auf der äußeren Gruppierungsbox, nicht auf jeder Tourzeile. */
+html body #tour-view #planned-tours-list > .box-content {
+    position: relative !important;
+    isolation: isolate !important;
+}
+
+html body #tour-view #planned-tours-list > .box-content::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    top: 8px;
+    right: 8px;
+    width: 126px;
+    height: 72px;
+    pointer-events: none;
+    opacity: .065;
+    background-color: color-mix(
+        in srgb,
+        var(--theme-palette-accent, var(--accent, #ad7d12)) 82%,
+        #dbe7ee
+    );
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 150'%3E%3Cpath d='M0 135 55 78 82 101 144 22 206 97 231 72 320 134V150H0Z' fill='%23fff'/%3E%3Cpath d='m111 65 33-43 28 39-20-10-13 18-11-11-17 7Z' fill='%23fff' opacity='.72'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 150'%3E%3Cpath d='M0 135 55 78 82 101 144 22 206 97 231 72 320 134V150H0Z' fill='%23fff'/%3E%3Cpath d='m111 65 33-43 28 39-20-10-13 18-11-11-17 7Z' fill='%23fff' opacity='.72'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* GIPFEL — dasselbe Dolomitenpanorama wie in der Gipfelstatistik, stark abgedunkelt.
+   Die Bronze-, Silber- und Goldkarten liegen darüber und behalten ihre Metallfarben. */
+html body #tour-view #planned-peaks-box > .box-content {
+    position: relative !important;
+    isolation: isolate !important;
+}
+
+html body #tour-view #planned-peaks-box > .box-content::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 220px;
+    pointer-events: none;
+    opacity: .42;
+    background-image:
+        linear-gradient(180deg, rgba(7, 12, 17, .26) 0%, rgba(7, 12, 17, .58) 58%, rgba(7, 12, 17, .96) 100%),
+        url("https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Dolomites.jpg/1280px-Dolomites.jpg");
+    background-repeat: no-repeat;
+    background-position: center 42%;
+    background-size: cover;
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 42%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 0%, #000 42%, transparent 100%);
+}
+
+html body #tour-view #planned-tours-list > .box-content > *,
+html body #tour-view #planned-peaks-box > .box-content > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* CHECK — nur kleine Höhenlinien im rechten oberen Bereich; keine Fototapete hinter Häkchen. */
+html body #tour-view #checklist-box > .box-content {
+    position: relative !important;
+    isolation: isolate !important;
+}
+
+html body #tour-view #checklist-box > .box-content::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    top: 43px;
+    right: 5px;
+    width: 78px;
+    height: 48px;
+    pointer-events: none;
+    opacity: .055;
+    background-color: color-mix(
+        in srgb,
+        var(--theme-palette-accent, var(--accent, #ad7d12)) 78%,
+        #dbe7ee
+    );
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 140'%3E%3Cpath d='M-8 116C22 88 44 96 58 71S94 32 122 45s40 38 62 24 34-31 48-45' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cpath d='M-12 132C23 105 45 111 67 88S103 49 127 61s42 35 63 22 34-30 48-43' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cpath d='M-5 93C27 65 48 74 52 51S91 12 118 25s40 37 63 23 35-30 53-45' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 140'%3E%3Cpath d='M-8 116C22 88 44 96 58 71S94 32 122 45s40 38 62 24 34-31 48-45' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cpath d='M-12 132C23 105 45 111 67 88S103 49 127 61s42 35 63 22 34-30 48-43' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cpath d='M-5 93C27 65 48 74 52 51S91 12 118 25s40 37 63 23 35-30 53-45' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+html body #tour-view #checklist-box > .box-content > * {
+    position: relative;
+    z-index: 1;
+}
+
+@media (max-width: 520px) {
+    html body #tour-view #planned-tours-list > .box-content::after {
+        width: 98px;
+        height: 58px;
+        opacity: .055;
+    }
+
+    html body #tour-view #planned-peaks-box > .box-content::after {
+        height: 180px;
+        opacity: .36;
+    }
+
+    html body #tour-view #checklist-box > .box-content::after {
+        top: 38px;
+        width: 64px;
+        height: 40px;
+        opacity: .045;
+    }
+}
