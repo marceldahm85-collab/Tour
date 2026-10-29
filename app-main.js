@@ -3938,11 +3938,11 @@ updateActivityFieldsVisibility();
 
 
 /* =========================================================
-   Tour planen – automatische Gehzeitschätzung nach Alpenverein
+   Tour planen – automatische Gehzeitschätzung für Rundtouren
 
    Berechnungsbasis:
    - 4 km Strecke = 1 h
-   - 300 Hm Aufstieg = 1 h
+   - 400 Hm als effektiver Höhenrichtwert = 1 h
    - kleinerer Zeitwert wird halbiert und zum größeren addiert
    - bei Gleichstand wird ebenfalls einer der beiden Werte halbiert
    - Ausgabe auf 15 Minuten gerundet
@@ -3963,7 +3963,7 @@ function calculatePlannedEstimatedWalkingMinutes(distanceValue, ascentValue) {
 
     const ascentHours =
         Number.isFinite(ascent) && ascent > 0
-            ? ascent / 300
+            ? ascent / 400
             : 0;
 
     if (distanceHours <= 0 && ascentHours <= 0) {
