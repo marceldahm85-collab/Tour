@@ -222,6 +222,14 @@
             return;
         }
 
+        const zoom = clamp(settings.zoom, 1, 1.6, 1);
+        // Bei der Standardgröße bleibt das ursprüngliche Cover-Verhalten aktiv;
+        // dafür muss das Bild nicht zusätzlich zur CSS-Hintergrundebene geladen werden.
+        if (zoom <= 1.001) {
+            parallax.style.setProperty('background-size', 'cover', 'important');
+            return;
+        }
+
         const applyDimensions = () => {
             if (!sizingImage || !sizingImage.naturalWidth || !sizingImage.naturalHeight) {
                 parallax.style.setProperty('background-size', 'cover', 'important');
