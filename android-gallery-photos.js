@@ -10,6 +10,13 @@
         typeof nativeBridge.postMessage === 'function' &&
         typeof nativeBridge.addEventListener === 'function';
 
+    const isAndroidWebView = /;\s*wv\)/i.test(
+        String(window.navigator && window.navigator.userAgent || '')
+    );
+
+    // Außerhalb der nativen Android-WebView bleibt die normale PWA vollständig unverändert.
+    if (!nativeBridgeAvailable && !isAndroidWebView) return;
+
     if (!nativeBridgeAvailable) {
         console.error('[Android-Galerie] Die native TourNative-Bridge wurde in dieser WebView nicht bereitgestellt. Der Fotobereich zeigt den Verbindungsfehler in der Tourdetailansicht an.');
     }
