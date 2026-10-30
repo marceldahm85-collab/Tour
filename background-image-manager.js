@@ -118,12 +118,17 @@
         positionY: 50,
         mobilePositionX: 59,
         landscapePositionX: 56,
+        zoom: 1,
         fit: 'cover'
     });
 
     let currentSettings = null;
     let customImageObjectUrl = '';
     let initializationPromise = null;
+    let sizingImage = null;
+    let sizingImageUrl = '';
+    let sizingImageToken = 0;
+    let resizeListenerBound = false;
 
     function clamp(value, min, max, fallback) {
         const number = Number(value);
@@ -155,6 +160,7 @@
             landscapePositionX: clamp(
                 source.landscapePositionX, 0, 100, DEFAULT_SETTINGS.landscapePositionX
             ),
+            zoom: clamp(source.zoom, 1, 1.6, DEFAULT_SETTINGS.zoom),
             fit: 'cover'
         };
     }
@@ -193,7 +199,71 @@
         document.documentElement.dataset.appBackgroundPreset =
             settings.mode === 'custom' ? 'custom' : preset.id;
 
+        applyZoomSize();
+        if (!resizeListenerBound && typeof window.addEventListener === 'function') {
+            window.addEventListener('resize', applyZoomSize, { passive: true });
+            resizeListenerBound = true;
+        }
+
         return true;
+    }
+
+    function applyZoomSize() {
+        const parallax = document.querySelector('.parallax');
+        if (!parallax) return;
+
+        const settings = currentSettings || DEFAULT_SETTINGS;
+        const preset = findPreset(settings.presetId);
+        const imageUrl = settings.mode === 'custom' && customImageObjectUrl
+            ? customImageObjectUrl
+            : preset.src;
+        if (!imageUrl) {
+            parallax.style.setProperty('--app-background-size', 'cover');
+            return;
+        }
+
+        const applyDimensions = () => {
+            if (!sizingImage || !sizingImage.naturalWidth || !sizingImage.naturalHeight) {
+                parallax.style.setProperty('--app-background-size', 'cover');
+                return;
+            }
+
+            const width = parallax.clientWidth || window.innerWidth || 1;
+            const height = parallax.clientHeight || window.innerHeight || 1;
+            const coverScale = Math.max(
+                width / sizingImage.naturalWidth,
+                height / sizingImage.naturalHeight
+            );
+            const zoom = clamp(settings.zoom, 1, 1.6, 1);
+            const scaledWidth = Math.ceil(sizingImage.naturalWidth * coverScale * zoom);
+            const scaledHeight = Math.ceil(sizingImage.naturalHeight * coverScale * zoom);
+
+            parallax.style.setProperty(
+                '--app-background-size',
+                scaledWidth + 'px ' + scaledHeight + 'px'
+            );
+        };
+
+        if (sizingImage && sizingImageUrl === imageUrl && sizingImage.complete &&
+            sizingImage.naturalWidth && sizingImage.naturalHeight) {
+            applyDimensions();
+            return;
+        }
+
+        const token = ++sizingImageToken;
+        const image = new Image();
+        sizingImage = image;
+        sizingImageUrl = imageUrl;
+        image.onload = () => {
+            if (token !== sizingImageToken) return;
+            applyDimensions();
+        };
+        image.onerror = () => {
+            if (token !== sizingImageToken) return;
+            parallax.style.setProperty('--app-background-size', 'cover');
+        };
+        image.src = imageUrl;
+        if (image.complete && image.naturalWidth) applyDimensions();
     }
 
     function persistSettings() {
@@ -273,7 +343,8 @@
             positionX: preset.positionX,
             positionY: preset.positionY,
             mobilePositionX: preset.mobilePositionX,
-            landscapePositionX: preset.landscapePositionX
+            landscapePositionX: preset.landscapePositionX,
+            zoom: 1
         });
 
         persistSettings();
@@ -288,7 +359,8 @@
             positionX: input.positionX ?? currentSettings?.positionX,
             positionY: input.positionY ?? currentSettings?.positionY,
             mobilePositionX: input.mobilePositionX ?? currentSettings?.mobilePositionX,
-            landscapePositionX: input.landscapePositionX ?? currentSettings?.landscapePositionX
+            landscapePositionX: input.landscapePositionX ?? currentSettings?.landscapePositionX,
+            zoom: input.zoom ?? currentSettings?.zoom
         });
         persistSettings();
         applySettingsToDom();
@@ -327,7 +399,8 @@
             positionX: 50,
             positionY: 50,
             mobilePositionX: 50,
-            landscapePositionX: 50
+            landscapePositionX: 50,
+            zoom: 1
         });
 
         persistSettings();
