@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/android-gallery-shell
+      - feature/android-unified-media-gallery
     paths:
       - "android/**"
       - ".github/workflows/android-debug-apk.yml"
