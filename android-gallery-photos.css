@@ -1,7 +1,8 @@
-/* Premium-Alpine-Styling für die native Fotoauswahl in Tourdetails. */
+/* Premium-Alpine-Fotogalerie: gespeicherte Auswahl und optionaler Auswahlmodus. */
 #td-gallery-panel.atg-panel {
     --atg-accent: var(--accent, #c7a66a);
-    margin: 14px 0 4px;
+    display: block;
+    margin: 16px 0 5px;
     padding: 14px;
     min-width: 0;
     border: 1px solid var(--theme-palette-border, color-mix(in srgb, var(--atg-accent) 34%, transparent));
@@ -16,6 +17,10 @@
     overflow: hidden;
 }
 
+#td-gallery-panel [hidden] {
+    display: none !important;
+}
+
 .atg-heading {
     display: flex;
     align-items: flex-start;
@@ -24,9 +29,7 @@
     min-width: 0;
 }
 
-.atg-heading-copy {
-    min-width: 0;
-}
+.atg-heading-copy { min-width: 0; }
 
 .atg-title {
     font-size: 15px;
@@ -43,7 +46,8 @@
     line-height: 1.35;
 }
 
-.atg-count {
+.atg-count,
+.atg-picker-count {
     flex: 0 0 auto;
     padding: 5px 9px;
     border: 1px solid color-mix(in srgb, var(--atg-accent) 35%, transparent);
@@ -56,8 +60,66 @@
     font-variant-numeric: tabular-nums;
 }
 
+.atg-display { margin-top: 10px; }
+
+.atg-empty {
+    grid-column: 1 / -1;
+    padding: 14px 10px;
+    border: 1px dashed color-mix(in srgb, currentColor 24%, transparent);
+    border-radius: 11px;
+    color: var(--theme-palette-text-muted, currentColor);
+    font-size: 11px;
+    line-height: 1.45;
+    text-align: center;
+}
+
+.atg-display-empty { margin: 0; padding: 12px 10px; }
+
+.atg-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    align-items: center;
+}
+
+.atg-display-actions { margin-top: 10px; }
+
+.atg-actions button,
+.atg-select-btn {
+    min-height: 34px;
+    padding: 7px 11px;
+    border: 1px solid color-mix(in srgb, var(--atg-accent) 42%, transparent);
+    border-radius: 10px;
+    background: var(--theme-palette-control-bg, rgba(128, 128, 128, .12));
+    color: inherit;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform .16s ease, background .16s ease, border-color .16s ease;
+}
+
+.atg-actions .atg-manage-btn,
+.atg-actions .atg-apply-btn {
+    border-color: transparent;
+    background: var(--accent-gradient, linear-gradient(135deg, #c7a66a, #8d6a38));
+    color: var(--accent-text-color, #17130b);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--atg-accent) 24%, transparent);
+}
+
+.atg-actions .atg-cancel-btn,
+.atg-actions .atg-refresh-btn { background: transparent; }
+
+.atg-actions button:disabled,
+.atg-select-btn:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.atg-picker { margin-top: 10px; }
+
 .atg-status {
-    margin-top: 10px;
     padding: 8px 10px;
     border-radius: 10px;
     background: var(--theme-palette-surface-subtle, rgba(128, 128, 128, .10));
@@ -75,60 +137,17 @@
     border: 1px solid color-mix(in srgb, #d85b5b 44%, transparent);
 }
 
-.atg-status[data-kind="success"] {
-    border: 1px solid color-mix(in srgb, #4aaf79 38%, transparent);
-}
-
-.atg-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 7px;
-    margin-top: 9px;
-}
-
-.atg-actions button,
-.atg-select-btn {
-    min-height: 34px;
-    padding: 7px 11px;
-    border: 1px solid color-mix(in srgb, var(--atg-accent) 42%, transparent);
-    border-radius: 10px;
-    background: var(--theme-palette-control-bg, rgba(128, 128, 128, .12));
-    color: inherit;
-    font: inherit;
-    font-size: 11px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: transform .16s ease, background .16s ease, border-color .16s ease;
-}
-
-.atg-actions .atg-access-btn {
-    border-color: transparent;
-    background: var(--accent-gradient, linear-gradient(135deg, #c7a66a, #8d6a38));
-    color: var(--accent-text-color, #17130b);
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--atg-accent) 24%, transparent);
-}
-
-.atg-actions .atg-refresh-btn {
-    background: transparent;
-}
-
-.atg-actions button:disabled,
-.atg-select-btn:disabled {
-    opacity: .55;
-    cursor: wait;
-}
-
-.atg-actions button[hidden] {
-    display: none !important;
-}
+.atg-picker-top-actions { margin-top: 8px; }
 
 .atg-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 9px;
-    margin-top: 11px;
     min-width: 0;
 }
+
+.atg-saved-grid { margin-top: 4px; }
+.atg-picker-grid { margin-top: 10px; }
 
 .atg-photo-card {
     min-width: 0;
@@ -174,13 +193,9 @@
     transition: opacity .18s ease;
 }
 
-.atg-thumb-wrap.has-image .atg-thumb {
-    opacity: 1;
-}
+.atg-thumb-wrap.has-image .atg-thumb { opacity: 1; }
 
-.atg-thumb-wrap.is-unavailable .atg-thumb-placeholder {
-    font-size: 11px;
-}
+.atg-thumb-wrap.is-unavailable .atg-thumb-placeholder { font-size: 11px; }
 
 .atg-thumb-wrap.is-unavailable .atg-thumb-placeholder::after {
     content: "Vorschau nicht verfügbar";
@@ -217,15 +232,20 @@
     color: var(--accent-text-color, #17130b);
 }
 
-.atg-empty {
-    grid-column: 1 / -1;
-    padding: 15px 10px;
-    border: 1px dashed color-mix(in srgb, currentColor 24%, transparent);
-    border-radius: 11px;
-    color: var(--theme-palette-text-muted, currentColor);
-    font-size: 11px;
-    line-height: 1.45;
-    text-align: center;
+.atg-picker-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.atg-picker-footer-actions {
+    margin-left: auto;
+    justify-content: flex-end;
 }
 
 .atg-footnote {
@@ -237,13 +257,11 @@
 }
 
 @media (min-width: 520px) {
-    .atg-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
+    .atg-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (hover: hover) {
-    .atg-actions button:hover,
+    .atg-actions button:hover:not(:disabled),
     .atg-select-btn:hover {
         transform: translateY(-1px);
         border-color: var(--atg-accent);

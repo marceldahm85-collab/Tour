@@ -1,6 +1,7 @@
-/* Android-Galeriezuordnung für gespeicherte Touren.
- * Läuft nur in der nativen Android-WebView mit unterstützter TourNative-Bridge.
- * Browser-PWA und bestehende Tourbildfunktion bleiben unverändert.
+/* Optionale Fotozuordnung für gespeicherte Touren in der nativen Android-App.
+ * Beim Öffnen werden ausschließlich bereits zugeordnete Fotos angezeigt.
+ * Die Suche nach Tagesfotos startet erst nach ausdrücklichem Antippen.
+ * Originalbilder bleiben in der Samsung-Galerie; gespeichert werden nur URI und Metadaten.
  */
 (() => {
     'use strict';
@@ -14,16 +15,11 @@
         String(window.navigator && window.navigator.userAgent || '')
     );
 
-    // Außerhalb der nativen Android-WebView bleibt die normale PWA vollständig unverändert.
+    // Außerhalb der nativen Android-WebView bleibt die normale PWA unverändert.
     if (!nativeBridgeAvailable && !isAndroidWebView) return;
-
-    if (!nativeBridgeAvailable) {
-        console.error('[Android-Galerie] Die native TourNative-Bridge wurde in dieser WebView nicht bereitgestellt. Der Fotobereich zeigt den Verbindungsfehler in der Tourdetailansicht an.');
-    }
 
     const pendingRequests = new Map();
     let requestCounter = 0;
-    let openSequence = 0;
     let activePanel = null;
     let detailObserver = null;
 
@@ -60,7 +56,7 @@
         timeoutMs = timeoutMs || 18000;
 
         if (!nativeBridgeAvailable) {
-            return Promise.reject(new Error('Die native Android-Galerie-Bridge ist in dieser App-Sitzung nicht verfügbar.'));
+            return Promise.reject(new Error('Die native Android-Galerie-Schnittstelle ist in dieser App-Sitzung nicht verfügbar.'));
         }
 
         return new Promise((resolve, reject) => {
@@ -84,18 +80,17 @@
         });
     }
 
-    const bridgeReady = nativeBridgeAvailable
-        ? nativeRequest('bridge.ping', {}, 8000)
-            .then(reply => {
-                const features = Array.isArray(reply.features) ? reply.features : [];
-                return features.includes('gallery.mediaStore.v1') &&
-                    features.includes('gallery.thumbnail.v1');
-            })
-            .catch(error => {
-                console.warn('[Android-Galerie] Native Galerie-Bridge nicht bereit.', error);
-                return false;
-            })
-        : Promise.resolve(false);
+    async function checkNativeGalleryBridge() {
+        try {
+            const reply = await nativeRequest('bridge.ping', {}, 8000);
+            const features = Array.isArray(reply.features) ? reply.features : [];
+            return features.includes('gallery.mediaStore.v1') &&
+                features.includes('gallery.thumbnail.v1');
+        } catch (error) {
+            console.warn('[Android-Galerie] Native Galerie-Bridge antwortet nicht.', error);
+            return false;
+        }
+    }
 
     function normalizeTourDate(value) {
         const raw = String(value || '').trim();
@@ -127,6 +122,12 @@
         };
     }
 
+    function getSavedPhotos(entry) {
+        return Array.isArray(entry.galleryPhotos)
+            ? entry.galleryPhotos.map(cleanPhoto).filter(Boolean)
+            : [];
+    }
+
     function setStatus(panel, text, kind) {
         const node = panel.querySelector('.atg-status');
         if (!node) return;
@@ -134,9 +135,70 @@
         node.dataset.kind = kind || 'info';
     }
 
-    function updateSelectedCount(panel, selected) {
-        const node = panel.querySelector('.atg-count');
-        if (node) node.textContent = selected.size + ' zugeordnet';
+    function disconnectThumbnailObserver(panel) {
+        if (panel && panel._atgObserver) {
+            panel._atgObserver.disconnect();
+            panel._atgObserver = null;
+        }
+    }
+
+    function watchThumbnail(panel, image) {
+        if ('IntersectionObserver' in window) {
+            if (!panel._atgObserver) {
+                panel._atgObserver = new IntersectionObserver(entries => {
+                    entries.forEach(item => {
+                        if (!item.isIntersecting) return;
+                        panel._atgObserver.unobserve(item.target);
+                        loadThumbnail(item.target);
+                    });
+                }, { rootMargin: '240px 0px' });
+            }
+            panel._atgObserver.observe(image);
+        } else {
+            loadThumbnail(image);
+        }
+    }
+
+    function createPhotoCard(panel, photo, selectable, selected, onToggle) {
+        const card = document.createElement('article');
+        card.className = 'atg-photo-card';
+        card.classList.toggle('is-selected', !!selected);
+
+        const thumbWrap = document.createElement('div');
+        thumbWrap.className = 'atg-thumb-wrap';
+
+        const placeholder = document.createElement('div');
+        placeholder.className = 'atg-thumb-placeholder';
+        placeholder.textContent = '⛰';
+        thumbWrap.appendChild(placeholder);
+
+        const image = document.createElement('img');
+        image.className = 'atg-thumb';
+        image.alt = photo.displayName || 'Tourfoto';
+        image.loading = 'lazy';
+        image.decoding = 'async';
+        image.dataset.uri = photo.uri;
+        thumbWrap.appendChild(image);
+
+        const name = document.createElement('div');
+        name.className = 'atg-photo-name';
+        name.textContent = photo.displayName || 'Foto';
+
+        card.append(thumbWrap, name);
+
+        if (selectable) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'atg-select-btn';
+            button.classList.toggle('is-selected', !!selected);
+            button.setAttribute('aria-pressed', selected ? 'true' : 'false');
+            button.textContent = selected ? '✓ Ausgewählt' : '+ Auswählen';
+            button.addEventListener('click', () => onToggle(card, button));
+            card.appendChild(button);
+        }
+
+        watchThumbnail(panel, image);
+        return card;
     }
 
     function makePanel(entry) {
@@ -147,18 +209,34 @@
         panel.innerHTML = [
             '<div class="atg-heading">',
               '<div class="atg-heading-copy">',
-                '<div class="atg-title">Fotos vom Tourtag</div>',
+                '<div class="atg-title">Tourfotos</div>',
                 '<div class="atg-subtitle"></div>',
               '</div>',
               '<span class="atg-count">0 zugeordnet</span>',
             '</div>',
-            '<div class="atg-status" role="status" aria-live="polite">Galerie wird vorbereitet …</div>',
-            '<div class="atg-actions">',
-              '<button type="button" class="atg-access-btn">Galeriezugriff erlauben</button>',
-              '<button type="button" class="atg-refresh-btn">Erneut suchen</button>',
+            '<div class="atg-display">',
+              '<div class="atg-empty atg-display-empty">Noch keine Fotos zugeordnet.</div>',
+              '<div class="atg-grid atg-saved-grid" aria-label="Der Tour zugeordnete Fotos" hidden></div>',
+              '<div class="atg-actions atg-display-actions">',
+                '<button type="button" class="atg-manage-btn">Fotos hinzufügen</button>',
+              '</div>',
             '</div>',
-            '<div class="atg-grid" aria-label="Fotos vom Tourtag"></div>',
-            '<div class="atg-footnote">Ausgewählte Fotos bleiben in deiner Samsung-Galerie. Die App speichert nur lokale Bildverweise, keine Bildkopien.</div>'
+            '<div class="atg-picker" hidden>',
+              '<div class="atg-status" role="status" aria-live="polite">Galerie wird vorbereitet …</div>',
+              '<div class="atg-actions atg-picker-top-actions">',
+                '<button type="button" class="atg-access-btn" hidden>Galeriezugriff erlauben</button>',
+                '<button type="button" class="atg-refresh-btn" hidden>Erneut suchen</button>',
+              '</div>',
+              '<div class="atg-grid atg-picker-grid" aria-label="Fotos vom Tourtag"></div>',
+              '<div class="atg-picker-footer">',
+                '<span class="atg-picker-count">0 ausgewählt</span>',
+                '<div class="atg-actions atg-picker-footer-actions">',
+                  '<button type="button" class="atg-cancel-btn">Abbrechen</button>',
+                  '<button type="button" class="atg-apply-btn" disabled>Auswahl übernehmen</button>',
+                '</div>',
+              '</div>',
+            '</div>',
+            '<div class="atg-footnote">Die Originalfotos bleiben in deiner Samsung-Galerie. Die App speichert nur lokale Bildverweise, keine Bildkopien.</div>'
         ].join('');
 
         const date = normalizeTourDate(entry.date);
@@ -168,27 +246,28 @@
             })
             : 'Kein gültiges Tourdatum';
 
+        panel.querySelector('.atg-manage-btn').addEventListener('click', () => {
+            openPhotoPicker(panel, entry);
+        });
         panel.querySelector('.atg-access-btn').addEventListener('click', () => {
             requestGalleryAccess(panel, entry);
         });
         panel.querySelector('.atg-refresh-btn').addEventListener('click', () => {
             searchTourDate(panel, entry);
         });
+        panel.querySelector('.atg-cancel-btn').addEventListener('click', () => {
+            cancelPhotoPicker(panel, entry);
+        });
+        panel.querySelector('.atg-apply-btn').addEventListener('click', () => {
+            applyPhotoSelection(panel, entry);
+        });
 
         return panel;
     }
 
     function insertPanel(panel, body) {
-        const anchor = body.querySelector('.tour-detail-image-wrap') ||
-            body.querySelector('.modal-detail-grid');
-        if (anchor) anchor.insertAdjacentElement('afterend', panel);
-        else body.appendChild(panel);
-    }
-
-    function getSavedPhotos(entry) {
-        return Array.isArray(entry.galleryPhotos)
-            ? entry.galleryPhotos.map(cleanPhoto).filter(Boolean)
-            : [];
+        // Die Fotogalerie gehört bewusst ans Ende – nach sämtlichen Tourinformationen.
+        body.appendChild(panel);
     }
 
     function saveSelection(entry, selectedPhotos, panel) {
@@ -218,20 +297,173 @@
                     currentDetailEntry.galleryPhotos = metadata;
                 }
             } catch (_) {
-                // Die Detailansicht bleibt auch ohne globales currentDetailEntry nutzbar.
+                // Die Detailansicht bleibt auch ohne globale currentDetailEntry nutzbar.
             }
 
-            setStatus(
-                panel,
-                metadata.length + ' Foto' + (metadata.length === 1 ? '' : 's') + ' dieser Etappe gespeichert.',
-                'success'
-            );
             return true;
         } catch (error) {
             console.error('[Android-Galerie] Zuordnung konnte nicht gespeichert werden.', error);
             setStatus(panel, error.message || 'Fotoauswahl konnte nicht gespeichert werden.', 'error');
             return false;
         }
+    }
+
+    function renderSavedPhotos(panel, entry) {
+        disconnectThumbnailObserver(panel);
+
+        const savedPhotos = getSavedPhotos(entry);
+        const count = panel.querySelector('.atg-count');
+        const empty = panel.querySelector('.atg-display-empty');
+        const grid = panel.querySelector('.atg-saved-grid');
+        const manage = panel.querySelector('.atg-manage-btn');
+
+        count.textContent = savedPhotos.length + ' zugeordnet';
+        manage.textContent = savedPhotos.length ? 'Fotos bearbeiten' : 'Fotos hinzufügen';
+        empty.hidden = savedPhotos.length > 0;
+        grid.hidden = savedPhotos.length === 0;
+        grid.replaceChildren();
+
+        savedPhotos.forEach(photo => {
+            grid.appendChild(createPhotoCard(panel, photo, false, false, null));
+        });
+    }
+
+    function setPickerVisible(panel, visible) {
+        panel.querySelector('.atg-display').hidden = visible;
+        panel.querySelector('.atg-picker').hidden = !visible;
+    }
+
+    function updatePickerSelection(panel) {
+        const state = panel._atgPickerState;
+        if (!state) return;
+
+        const count = panel.querySelector('.atg-picker-count');
+        const apply = panel.querySelector('.atg-apply-btn');
+        if (count) count.textContent = state.selected.size + ' ausgewählt';
+
+        const savedUris = new Set(state.saved.map(photo => photo.uri));
+        const changed = state.selected.size !== savedUris.size ||
+            Array.from(state.selected).some(uri => !savedUris.has(uri));
+        if (apply) apply.disabled = !changed || state.loading;
+    }
+
+    function renderSelectionGrid(panel, entry, result) {
+        disconnectThumbnailObserver(panel);
+
+        const saved = getSavedPhotos(entry);
+        const photoMap = new Map();
+
+        (Array.isArray(result.photos) ? result.photos : [])
+            .map(cleanPhoto)
+            .filter(Boolean)
+            .forEach(photo => photoMap.set(photo.uri, photo));
+
+        // Zugeordnete Bilder bleiben bearbeitbar, auch wenn Android sie nicht mehr
+        // in der aktuellen Tagesabfrage zurückliefert.
+        saved.forEach(photo => {
+            if (!photoMap.has(photo.uri)) photoMap.set(photo.uri, photo);
+        });
+
+        const allPhotos = Array.from(photoMap.values());
+        const selected = new Set(saved.map(photo => photo.uri));
+        panel._atgPickerState = {
+            saved: saved,
+            photos: allPhotos,
+            selected: selected,
+            loading: false
+        };
+
+        const grid = panel.querySelector('.atg-picker-grid');
+        grid.replaceChildren();
+
+        if (result.status === 'partial_results') {
+            setStatus(
+                panel,
+                (Number(result.count) || 0) + ' freigegebene Fotos am Tourdatum gefunden. Android zeigt nur die Fotos, für die du Zugriff erteilt hast.',
+                'warning'
+            );
+        } else {
+            setStatus(
+                panel,
+                (Number(result.count) || 0) + ' Fotos am Tourdatum gefunden. Wähle die gewünschten Bilder aus.',
+                'info'
+            );
+        }
+
+        if (result.truncated) {
+            const note = document.createElement('div');
+            note.className = 'atg-empty atg-result-note';
+            note.textContent = 'Die Galerieauswahl ist auf 500 Fotos begrenzt.';
+            grid.appendChild(note);
+        }
+
+        if (allPhotos.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'atg-empty';
+            empty.textContent = 'Für dieses Datum wurden keine freigegebenen Fotos gefunden.';
+            grid.appendChild(empty);
+        }
+
+        allPhotos.forEach(photo => {
+            const isSelected = selected.has(photo.uri);
+            const card = createPhotoCard(
+                panel,
+                photo,
+                true,
+                isSelected,
+                (cardNode, button) => {
+                    if (selected.has(photo.uri)) selected.delete(photo.uri);
+                    else selected.add(photo.uri);
+
+                    const nowSelected = selected.has(photo.uri);
+                    cardNode.classList.toggle('is-selected', nowSelected);
+                    button.classList.toggle('is-selected', nowSelected);
+                    button.setAttribute('aria-pressed', nowSelected ? 'true' : 'false');
+                    button.textContent = nowSelected ? '✓ Ausgewählt' : '+ Auswählen';
+                    updatePickerSelection(panel);
+                }
+            );
+            grid.appendChild(card);
+        });
+
+        updatePickerSelection(panel);
+        panel.querySelector('.atg-access-btn').hidden = result.access !== 'partial';
+        panel.querySelector('.atg-access-btn').textContent = 'Weitere Fotos freigeben';
+        panel.querySelector('.atg-refresh-btn').hidden = false;
+    }
+
+    function showSavedPhotosInPicker(panel, entry, message, kind, showAccess) {
+        renderSelectionGrid(panel, entry, {
+            photos: [],
+            count: 0,
+            status: 'ok',
+            access: 'none',
+            truncated: false
+        });
+        setStatus(panel, message, kind || 'warning');
+        panel.querySelector('.atg-access-btn').hidden = !showAccess;
+        panel.querySelector('.atg-access-btn').textContent = 'Galeriezugriff erlauben';
+        panel.querySelector('.atg-refresh-btn').hidden = !nativeBridgeAvailable;
+    }
+
+    async function openPhotoPicker(panel, entry) {
+        setPickerVisible(panel, true);
+        disconnectThumbnailObserver(panel);
+
+        panel._atgPickerState = {
+            saved: getSavedPhotos(entry),
+            photos: [],
+            selected: new Set(getSavedPhotos(entry).map(photo => photo.uri)),
+            loading: true
+        };
+        panel.querySelector('.atg-picker-grid').replaceChildren();
+        panel.querySelector('.atg-access-btn').hidden = true;
+        panel.querySelector('.atg-refresh-btn').hidden = false;
+        panel.querySelector('.atg-refresh-btn').textContent = 'Erneut suchen';
+        updatePickerSelection(panel);
+        setStatus(panel, 'Verbindung zur Android-Galerie wird geprüft …');
+
+        await searchTourDate(panel, entry);
     }
 
     async function requestGalleryAccess(panel, entry) {
@@ -261,25 +493,48 @@
 
     async function searchTourDate(panel, entry) {
         const date = normalizeTourDate(entry.date);
+        const refresh = panel.querySelector('.atg-refresh-btn');
+        refresh.disabled = true;
+        refresh.hidden = false;
+        refresh.textContent = 'Suche läuft …';
+
         if (!date) {
             setStatus(panel, 'Für diese Tour ist kein gültiges Datum hinterlegt.', 'warning');
+            refresh.disabled = false;
+            refresh.textContent = 'Erneut suchen';
             return;
         }
 
-        const refresh = panel.querySelector('.atg-refresh-btn');
-        refresh.disabled = true;
-        refresh.textContent = 'Suche läuft …';
+        const state = panel._atgPickerState;
+        if (state) {
+            state.loading = true;
+            updatePickerSelection(panel);
+        }
         setStatus(panel, 'Suche nach Fotos mit dem Aufnahmedatum dieser Etappe …');
 
         try {
+            const supported = await checkNativeGalleryBridge();
+            if (!supported) {
+                showSavedPhotosInPicker(
+                    panel,
+                    entry,
+                    nativeBridgeAvailable
+                        ? 'Die Android-Galerie antwortet gerade nicht. Du kannst bereits zugeordnete Fotos trotzdem abwählen oder die Verbindung erneut versuchen.'
+                        : 'Die native Android-Galerie-Schnittstelle wurde nicht erkannt. Bereits zugeordnete Fotos kannst du weiterhin aus der Tour entfernen.',
+                    'error',
+                    false
+                );
+                return;
+            }
+
             const permission = await nativeRequest('gallery.permission.get');
             if (permission.access === 'none') {
-                panel.querySelector('.atg-access-btn').hidden = false;
-                panel.querySelector('.atg-refresh-btn').hidden = true;
-                setStatus(
+                showSavedPhotosInPicker(
                     panel,
-                    'Für den automatischen Fotoabgleich ist eine einmalige Galerie-Freigabe erforderlich.',
-                    'warning'
+                    entry,
+                    'Für neue Fotos ist eine Galerie-Freigabe erforderlich. Bereits zugeordnete Fotos bleiben hier bearbeitbar.',
+                    'warning',
+                    true
                 );
                 return;
             }
@@ -288,9 +543,13 @@
             if (activePanel !== panel || !panel.isConnected) return;
 
             if (result.status === 'permission_required' || result.status === 'permission_changed') {
-                panel.querySelector('.atg-access-btn').hidden = false;
-                panel.querySelector('.atg-refresh-btn').hidden = true;
-                setStatus(panel, 'Der Galerie-Zugriff wurde nicht erteilt oder zwischenzeitlich geändert.', 'warning');
+                showSavedPhotosInPicker(
+                    panel,
+                    entry,
+                    'Der Galerie-Zugriff wurde nicht erteilt oder zwischenzeitlich geändert. Bereits zugeordnete Fotos kannst du weiterhin bearbeiten.',
+                    'warning',
+                    true
+                );
                 return;
             }
             if (result.status === 'invalid_date') {
@@ -302,125 +561,46 @@
                 return;
             }
 
-            panel.querySelector('.atg-access-btn').hidden = result.access !== 'partial';
-            panel.querySelector('.atg-refresh-btn').hidden = false;
-            renderPhotos(panel, entry, result);
+            renderSelectionGrid(panel, entry, result);
         } catch (error) {
             if (activePanel !== panel || !panel.isConnected) return;
-            setStatus(panel, error.message || 'Die Galerie konnte nicht durchsucht werden.', 'error');
+            showSavedPhotosInPicker(
+                panel,
+                entry,
+                error.message || 'Die Galerie konnte nicht durchsucht werden.',
+                'error',
+                false
+            );
         } finally {
-            refresh.disabled = false;
-            refresh.textContent = 'Erneut suchen';
+            if (panel.isConnected) {
+                const currentState = panel._atgPickerState;
+                if (currentState) {
+                    currentState.loading = false;
+                    updatePickerSelection(panel);
+                }
+                refresh.disabled = false;
+                refresh.textContent = 'Erneut suchen';
+            }
         }
     }
 
-    function renderPhotos(panel, entry, result) {
-        const grid = panel.querySelector('.atg-grid');
-        grid.replaceChildren();
+    function cancelPhotoPicker(panel, entry) {
+        disconnectThumbnailObserver(panel);
+        panel._atgPickerState = null;
+        setPickerVisible(panel, false);
+        renderSavedPhotos(panel, entry);
+    }
 
-        const selectedPhotos = getSavedPhotos(entry);
-        const photoMap = new Map();
+    function applyPhotoSelection(panel, entry) {
+        const state = panel._atgPickerState;
+        if (!state) return;
 
-        (Array.isArray(result.photos) ? result.photos : [])
-            .map(cleanPhoto)
-            .filter(Boolean)
-            .forEach(photo => photoMap.set(photo.uri, photo));
+        const nextPhotos = state.photos.filter(photo => state.selected.has(photo.uri));
+        if (!saveSelection(entry, nextPhotos, panel)) return;
 
-        // Bereits zugeordnete Fotos bleiben sichtbar, auch wenn Aufnahmedatum
-        // oder Android-Freigabe später verändert wurden.
-        selectedPhotos.forEach(photo => {
-            if (!photoMap.has(photo.uri)) photoMap.set(photo.uri, photo);
-        });
-
-        const allPhotos = Array.from(photoMap.values());
-        const selected = new Set(selectedPhotos.map(photo => photo.uri));
-        updateSelectedCount(panel, selected);
-
-        const infoParts = [];
-        const count = Number(result.count) || 0;
-        infoParts.push(count + ' Foto' + (count === 1 ? '' : 's') + ' am Tourdatum gefunden');
-        if (result.status === 'partial_results') {
-            infoParts.push('Es werden nur die in Android freigegebenen Fotos berücksichtigt.');
-        }
-        if (result.truncated) infoParts.push('Die Anzeige ist auf 500 Fotos begrenzt.');
-        if (selectedPhotos.length > 0) infoParts.push(selectedPhotos.length + ' bereits zugeordnet');
-        setStatus(panel, infoParts.join(' '), result.status === 'partial_results' ? 'warning' : 'info');
-
-        if (allPhotos.length === 0) {
-            const empty = document.createElement('div');
-            empty.className = 'atg-empty';
-            empty.textContent = 'Für dieses Datum wurden keine freigegebenen Fotos gefunden.';
-            grid.appendChild(empty);
-            return;
-        }
-
-        const thumbnailObserver = 'IntersectionObserver' in window
-            ? new IntersectionObserver(entries => {
-                entries.forEach(item => {
-                    if (!item.isIntersecting) return;
-                    thumbnailObserver.unobserve(item.target);
-                    loadThumbnail(item.target);
-                });
-            }, { rootMargin: '260px 0px' })
-            : null;
-        panel._atgObserver = thumbnailObserver;
-
-        allPhotos.forEach(photo => {
-            const card = document.createElement('article');
-            card.className = 'atg-photo-card';
-            card.classList.toggle('is-selected', selected.has(photo.uri));
-
-            const thumbWrap = document.createElement('div');
-            thumbWrap.className = 'atg-thumb-wrap';
-
-            const placeholder = document.createElement('div');
-            placeholder.className = 'atg-thumb-placeholder';
-            placeholder.textContent = '⛰';
-            thumbWrap.appendChild(placeholder);
-
-            const img = document.createElement('img');
-            img.className = 'atg-thumb';
-            img.alt = photo.displayName || 'Tourfoto';
-            img.loading = 'lazy';
-            img.decoding = 'async';
-            img.dataset.uri = photo.uri;
-            thumbWrap.appendChild(img);
-
-            const name = document.createElement('div');
-            name.className = 'atg-photo-name';
-            name.textContent = photo.displayName || 'Foto';
-
-            const choose = document.createElement('button');
-            choose.type = 'button';
-            choose.className = 'atg-select-btn';
-            choose.setAttribute('aria-pressed', selected.has(photo.uri) ? 'true' : 'false');
-            choose.textContent = selected.has(photo.uri) ? '✓ Zugeordnet' : '+ Zur Tour';
-
-            choose.addEventListener('click', () => {
-                const wasSelected = selected.has(photo.uri);
-                if (wasSelected) selected.delete(photo.uri);
-                else selected.add(photo.uri);
-
-                const nextPhotos = allPhotos.filter(item => selected.has(item.uri));
-                if (!saveSelection(entry, nextPhotos, panel)) {
-                    if (wasSelected) selected.add(photo.uri);
-                    else selected.delete(photo.uri);
-                    return;
-                }
-
-                card.classList.toggle('is-selected', selected.has(photo.uri));
-                choose.classList.toggle('is-selected', selected.has(photo.uri));
-                choose.setAttribute('aria-pressed', selected.has(photo.uri) ? 'true' : 'false');
-                choose.textContent = selected.has(photo.uri) ? '✓ Zugeordnet' : '+ Zur Tour';
-                updateSelectedCount(panel, selected);
-            });
-
-            card.append(thumbWrap, name, choose);
-            grid.appendChild(card);
-
-            if (thumbnailObserver) thumbnailObserver.observe(img);
-            else loadThumbnail(img);
-        });
+        panel._atgPickerState = null;
+        setPickerVisible(panel, false);
+        renderSavedPhotos(panel, entry);
     }
 
     async function loadThumbnail(img) {
@@ -453,60 +633,18 @@
             return;
         }
 
-        const sequence = ++openSequence;
         const body = document.getElementById('td-body');
         const modal = document.getElementById('tour-detail-modal');
         if (!body || !modal || modal.classList.contains('hidden')) return;
 
-        if (activePanel && activePanel._atgObserver) activePanel._atgObserver.disconnect();
+        if (activePanel) disconnectThumbnailObserver(activePanel);
         if (activePanel) activePanel.remove();
         activePanel = null;
 
         const panel = makePanel(entry);
         activePanel = panel;
         insertPanel(panel, body);
-
-        const accessButton = panel.querySelector('.atg-access-btn');
-        panel.querySelector('.atg-refresh-btn').hidden = true;
-
-        if (!entry.id) {
-            accessButton.hidden = true;
-            setStatus(panel, 'Diese Tour besitzt keine eindeutige Kennung. Fotos können deshalb nicht sicher zugeordnet werden.', 'error');
-            return;
-        }
-
-        const supported = await bridgeReady;
-        if (sequence !== openSequence || activePanel !== panel || !panel.isConnected) return;
-        if (!supported) {
-            accessButton.hidden = true;
-            setStatus(
-                panel,
-                nativeBridgeAvailable
-                    ? 'Die Android-Galerie ist in der App vorhanden, antwortet aber nicht. Bitte schließe die Fototest-App vollständig und öffne sie erneut. Der Fotobereich bleibt zur Diagnose sichtbar.'
-                    : 'Die native Android-Galerie-Schnittstelle wurde nicht erkannt. Diese App-Sitzung kann deshalb noch nicht auf die Galerie zugreifen. Bitte schließe die Fototest-App vollständig und öffne sie erneut.',
-                'error'
-            );
-            return;
-        }
-
-        try {
-            const permission = await nativeRequest('gallery.permission.get');
-            if (sequence !== openSequence || activePanel !== panel || !panel.isConnected) return;
-            if (permission.access === 'none') {
-                accessButton.hidden = false;
-                setStatus(
-                    panel,
-                    'Die App sucht automatisch nach Fotos dieses Tourtags. Beim ersten Mal musst du dafür den Galerie-Zugriff freigeben.',
-                    'warning'
-                );
-                return;
-            }
-            await searchTourDate(panel, entry);
-        } catch (error) {
-            if (sequence === openSequence && panel.isConnected) {
-                setStatus(panel, error.message || 'Galerie-Status konnte nicht abgefragt werden.', 'error');
-            }
-        }
+        renderSavedPhotos(panel, entry);
     }
 
     function installTourDetailHook() {
@@ -531,6 +669,9 @@
 
     function getCurrentSavedDetailEntry() {
         try {
+            if (typeof currentDetailType !== 'undefined' && currentDetailType !== 'saved') {
+                return null;
+            }
             if (typeof currentDetailEntry !== 'undefined' && currentDetailEntry) {
                 return currentDetailEntry;
             }
