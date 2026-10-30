@@ -9,6 +9,7 @@
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
 
     <application
@@ -33,5 +34,12 @@
             </intent-filter>
 
         </activity>
+
+        <activity
+            android:name=".GalleryVideoActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:exported="false"
+            android:screenOrientation="fullSensor"
+            android:theme="@style/AppTheme" />
     </application>
 </manifest>
