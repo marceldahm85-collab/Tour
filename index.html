@@ -2468,6 +2468,78 @@
                 aria-label="Integrierte Alpen-Hintergrundbilder">
             </div>
 
+            <div class="background-image-upload-panel">
+                <div class="background-image-subheading">
+                    <span class="background-image-subheading-icon" aria-hidden="true">▧</span>
+                    <div>
+                        <strong>Eigenes Foto verwenden</strong>
+                        <small>Wähle ein Bild direkt aus deiner Smartphone-Galerie oder vom Computer.</small>
+                    </div>
+                </div>
+
+                <input
+                    type="file"
+                    id="background-image-file-input"
+                    accept="image/*"
+                    hidden
+                    aria-label="Eigenes Hintergrundfoto auswählen">
+                <button type="button" class="background-image-upload-button" id="background-image-choose-file">
+                    <span aria-hidden="true">＋</span>
+                    <span>Bild aus Galerie auswählen</span>
+                </button>
+                <p class="background-image-upload-hint">Das Foto wird automatisch optimiert (max. 1920 Pixel) und nur auf diesem Gerät gespeichert. Originaldatei und Galerie bleiben unverändert.</p>
+                <p class="background-image-upload-status" id="background-image-upload-status" role="status" aria-live="polite" hidden></p>
+
+                <div class="background-image-custom-panel" id="background-image-custom-panel" hidden>
+                    <img id="background-image-custom-preview" class="background-image-custom-preview" alt="Vorschau des eigenen Hintergrundbildes" hidden>
+                    <div class="background-image-custom-copy">
+                        <strong id="background-image-custom-name">Eigenes Hintergrundbild</strong>
+                        <small id="background-image-custom-meta"></small>
+                    </div>
+                    <div class="background-image-custom-actions">
+                        <button type="button" class="background-image-secondary-button" id="background-image-activate-custom" hidden>Eigenes Foto aktivieren</button>
+                        <button type="button" class="background-image-danger-button" id="background-image-remove-custom">Eigenes Foto löschen</button>
+                    </div>
+                </div>
+
+                <div class="background-image-position-panel" id="background-image-position-panel" hidden>
+                    <div class="background-image-subheading">
+                        <span class="background-image-subheading-icon" aria-hidden="true">⌗</span>
+                        <div>
+                            <strong>Bildposition anpassen</strong>
+                            <small>Stelle den Bildausschnitt für die verschiedenen Bildschirmformate ein.</small>
+                        </div>
+                    </div>
+
+                    <div class="background-image-profile-switch" role="group" aria-label="Bildschirmformat für die Bildposition">
+                        <button type="button" data-background-profile="portrait" class="is-active" aria-pressed="true">Hochformat</button>
+                        <button type="button" data-background-profile="landscape" aria-pressed="false">Querformat</button>
+                        <button type="button" data-background-profile="desktop" aria-pressed="false">Desktop</button>
+                    </div>
+
+                    <div class="background-image-position-control">
+                        <div class="background-image-position-label">
+                            <label for="background-image-position-x">Seitliche Bildposition</label>
+                            <span id="background-image-position-x-value">50 %</span>
+                        </div>
+                        <input type="range" id="background-image-position-x" min="0" max="100" step="1" value="50">
+                    </div>
+
+                    <div class="background-image-position-control">
+                        <div class="background-image-position-label">
+                            <label for="background-image-position-y">Vertikale Bildposition</label>
+                            <span id="background-image-position-y-value">50 %</span>
+                        </div>
+                        <input type="range" id="background-image-position-y" min="0" max="100" step="1" value="50">
+                    </div>
+
+                    <div class="background-image-position-footer">
+                        <span>Die vertikale Position gilt für alle Formate.</span>
+                        <button type="button" class="background-image-secondary-button" id="background-image-center-position">Zentrieren</button>
+                    </div>
+                </div>
+            </div>
+
             <details class="background-image-credits">
                 <summary>Bildnachweise</summary>
                 <ul id="background-image-credits-list"></ul>
