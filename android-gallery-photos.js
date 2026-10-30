@@ -129,7 +129,8 @@
     function getPhotoSourceLabel(photo) {
         const path = String(photo && photo.relativePath || '').toLowerCase();
         if (path.includes('whatsapp')) return 'WhatsApp';
-        if (/(^|\\/)dcim\\/camera(\\/|$)/.test(path)) return 'Kamera';
+        const pathSegments = path.split('/').filter(Boolean);
+        if (pathSegments[0] === 'dcim' && pathSegments[1] === 'camera') return 'Kamera';
         if (path.includes('screenshot')) return 'Screenshots';
         if (path.includes('download')) return 'Downloads';
         return path ? 'Weitere Bilder' : 'Galerie';
