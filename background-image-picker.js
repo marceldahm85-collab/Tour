@@ -18,8 +18,10 @@
     const positionPanel = document.getElementById('background-image-position-panel');
     const positionX = document.getElementById('background-image-position-x');
     const positionY = document.getElementById('background-image-position-y');
+    const positionZoom = document.getElementById('background-image-position-zoom');
     const positionXValue = document.getElementById('background-image-position-x-value');
     const positionYValue = document.getElementById('background-image-position-y-value');
+    const positionZoomValue = document.getElementById('background-image-position-zoom-value');
     const centerButton = document.getElementById('background-image-center-position');
     const profileButtons = Array.from(document.querySelectorAll('[data-background-profile]'));
 
@@ -279,8 +281,13 @@
         const y = Number(settings.positionY);
         positionX.value = String(Number.isFinite(x) ? x : 50);
         positionY.value = String(Number.isFinite(y) ? y : 50);
+        if (positionZoom) {
+            const zoomPercent = Math.round((Number(settings.zoom) || 1) * 100);
+            positionZoom.value = String(Math.min(160, Math.max(100, zoomPercent)));
+        }
         if (positionXValue) positionXValue.textContent = positionX.value + ' %';
         if (positionYValue) positionYValue.textContent = positionY.value + ' %';
+        if (positionZoomValue) positionZoomValue.textContent = (positionZoom ? positionZoom.value : '100') + ' %';
 
         profileButtons.forEach(button => {
             const selected = button.dataset.backgroundProfile === activeProfile;
@@ -297,7 +304,8 @@
         const field = getActiveHorizontalField(settings);
         const values = {
             [field]: Number(positionX.value),
-            positionY: Number(positionY.value)
+            positionY: Number(positionY.value),
+            zoom: positionZoom ? Number(positionZoom.value) / 100 : 1
         };
 
         try {
@@ -508,6 +516,10 @@
 
     positionX?.addEventListener('input', updatePositionFromControls);
     positionY?.addEventListener('input', updatePositionFromControls);
+    positionZoom?.addEventListener('input', updatePositionFromControls);
+    positionZoom?.addEventListener('input', () => {
+        if (positionZoomValue) positionZoomValue.textContent = positionZoom.value + ' %';
+    });
 
     centerButton?.addEventListener('click', () => {
         if (typeof window.setAppBackgroundImagePosition !== 'function') return;
@@ -516,7 +528,8 @@
                 positionX: 50,
                 positionY: 50,
                 mobilePositionX: 50,
-                landscapePositionX: 50
+                landscapePositionX: 50,
+                zoom: 1
             });
             syncPositionControls();
             showToast('Bildposition zentriert.');
