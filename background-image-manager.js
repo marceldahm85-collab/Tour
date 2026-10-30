@@ -241,6 +241,12 @@
                         '[Hintergrund] Eigenes Hintergrundbild konnte nicht geladen werden:',
                         error
                     );
+                    currentSettings = normalizeSettings({
+                        ...currentSettings,
+                        mode: 'preset',
+                        customImageName: ''
+                    });
+                    persistSettings();
                 }
             }
 
@@ -300,11 +306,14 @@
             throw new Error('Der lokale Bildspeicher ist nicht verfügbar.');
         }
 
+        if (!currentSettings) await initialize();
         const settings = currentSettings || DEFAULT_SETTINGS;
         const fileName = typeof options?.fileName === 'string'
             ? options.fileName.slice(0, 180)
             : '';
 
+        // Das optimierte Bild wird getrennt von den kleinen Einstellungen gespeichert.
+        // Erst nach erfolgreichem IndexedDB-Schreiben wird es zur aktiven Auswahl.
         await _idbSet(CUSTOM_IMAGE_STORAGE_KEY, blob);
 
         revokeCustomObjectUrl();
@@ -312,7 +321,13 @@
         currentSettings = normalizeSettings({
             ...settings,
             mode: 'custom',
-            customImageName: fileName
+            customImageName: fileName,
+            // Ein neu gewähltes Foto startet mittig; danach kann jede Ansicht
+            // unabhängig horizontal und alle gemeinsam vertikal justiert werden.
+            positionX: 50,
+            positionY: 50,
+            mobilePositionX: 50,
+            landscapePositionX: 50
         });
 
         persistSettings();
@@ -331,11 +346,12 @@
             await _idbDel(CUSTOM_IMAGE_STORAGE_KEY);
         }
         revokeCustomObjectUrl();
-        const preset = findPreset(CURRENT_PRESET_ID);
+        const existing = currentSettings || DEFAULT_SETTINGS;
+        const preset = findPreset(existing.presetId || CURRENT_PRESET_ID);
         currentSettings = normalizeSettings({
-            ...(currentSettings || DEFAULT_SETTINGS),
+            ...existing,
             mode: 'preset',
-            presetId: CURRENT_PRESET_ID,
+            presetId: preset.id,
             customImageName: '',
             positionX: preset.positionX,
             positionY: preset.positionY,
