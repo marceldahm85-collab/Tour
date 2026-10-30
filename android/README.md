@@ -36,7 +36,7 @@ Dieses Android-Modul ist eine separate native Hülle für die vorhandene Bergtou
 
 ## Wichtige Grenzen
 
-- Die Android-WebView besitzt einen eigenen Web-Speicher. Sie greift nicht auf den IndexedDB-Speicher von Chrome zu. Der einmalige Import deiner vorhandenen JSON-Sicherung wird in einem eigenen späteren Schritt umgesetzt und geprüft.
+- Die Android-WebView besitzt einen eigenen Web-Speicher. Sie greift nicht auf den IndexedDB-Speicher von Chrome zu. Der einmalige JSON-Import wurde auf dem Galaxy S23 erfolgreich durchgeführt.
 - Die native Galerieabfrage ist als separater Baustein vorhanden, aber noch nicht mit der Tourdetailansicht verbunden.
 - Zum Aufruf der Galerie-Bridge wird später eine ausdrückliche Aktion in der Touransicht ergänzt; beim App-Start wird keine Berechtigung angefragt und es werden keine Galerieinhalte geladen.
 - Derzeit werden noch keine Vorschaubilder an die Web-Oberfläche übertragen; der erste Galeriebaustein liefert Referenz-URIs und Metadaten für einen einzelnen Tourtag.
@@ -44,7 +44,7 @@ Dieses Android-Modul ist eine separate native Hülle für die vorhandene Bergtou
 
 ## Noch nicht als produktionsfertig betrachten
 
-Dies ist zunächst das Android-Grundgerüst. Vor einer Installation auf deinem S23 müssen Gradle-Synchronisierung, APK-Build, WebView-Start, Offline-Verhalten, Dateiauswahl/Backup-Import und der Bridge-Handshake auf einem realen Gerät geprüft werden.
+Der Android-Shell-Start und der JSON-Import sind auf dem Galaxy S23 bereits geprüft. Der neue Galeriebaustein ist dagegen noch nicht auf dem Gerät getestet und noch nicht in die Tourdetailansicht eingebunden. Vor diesem Schritt müssen Berechtigungsdialog, Datumssuche und Verhalten bei eingeschränktem oder widerrufenem Zugriff auf dem S23 geprüft werden.
 
 ## APK ohne lokale Installation bauen
 
