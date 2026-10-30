@@ -4,6 +4,13 @@
     <!-- Netzwerkzugriff für die bestehende, über HTTPS ausgelieferte PWA. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Galerieabfrage: nur lesender Zugriff, und erst nach ausdrücklicher Laufzeitfreigabe. -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
+
     <application
         android:allowBackup="false"
         android:icon="@drawable/ic_launcher"
