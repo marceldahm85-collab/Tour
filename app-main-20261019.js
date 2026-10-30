@@ -24375,6 +24375,8 @@ function removePlannedTourFromStorage(entry) {
 }
 
 function fillPlanFormFromEntry(entry) {
+    // Bearbeiten aus jeder Listen-/Detailansicht öffnet immer den Formularbereich.
+    showPlanSection('plan');
     planForm.dataset.editEntryId = String(entry?.id || '');
 
     planTourname.value = entry.tourname || '';
