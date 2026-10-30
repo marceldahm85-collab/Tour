@@ -18,6 +18,7 @@
     let requestCounter = 0;
     let openSequence = 0;
     let activePanel = null;
+    let detailObserver = null;
 
     function nextRequestId() {
         requestCounter += 1;
@@ -533,6 +534,8 @@
     }
 
     function installTourDetailObserver() {
+        if (detailObserver) return;
+
         const modal = document.getElementById('tour-detail-modal');
         const body = document.getElementById('td-body');
         if (!modal || !body || typeof MutationObserver !== 'function') return;
@@ -551,9 +554,9 @@
             });
         };
 
-        const observer = new MutationObserver(syncPanel);
-        observer.observe(body, { childList: true });
-        observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
+        detailObserver = new MutationObserver(syncPanel);
+        detailObserver.observe(body, { childList: true });
+        detailObserver.observe(modal, { attributes: true, attributeFilter: ['class'] });
     }
 
     function excludeDeviceReferencesFromBackup() {
