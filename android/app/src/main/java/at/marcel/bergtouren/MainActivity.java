@@ -466,7 +466,8 @@ public final class MainActivity extends Activity {
                 };
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 permissions = new String[] {
-                        Manifest.permission.READ_MEDIA_IMAGES
+                        Manifest.permission.READ_MEDIA_IMAGES,
+                        Manifest.permission.READ_MEDIA_VIDEO
                 };
             } else {
                 permissions = new String[] {
