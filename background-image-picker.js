@@ -240,7 +240,7 @@
         if (!(blob instanceof Blob) || !blob.type.startsWith('image/')) {
             revokeCustomPreviewUrl();
             customPanel.hidden = true;
-            if (positionPanel) positionPanel.hidden = settings.mode !== 'custom';
+            if (positionPanel) positionPanel.hidden = true;
             return;
         }
 
@@ -263,7 +263,7 @@
         }
         if (removeCustomButton) removeCustomButton.hidden = false;
         customPanel.hidden = false;
-        if (positionPanel) positionPanel.hidden = false;
+        if (positionPanel) positionPanel.hidden = settings.mode !== 'custom';
     }
 
     function getActiveHorizontalField(settings) {
@@ -288,7 +288,6 @@
             button.setAttribute('aria-pressed', selected ? 'true' : 'false');
         });
 
-        positionPanel.hidden = false;
     }
 
     function updatePositionFromControls() {
