@@ -47,15 +47,20 @@ jobs:
       - name: Assemble debug APK
         run: ./android/gradlew --no-daemon --stacktrace -p android :app:assembleDebug
 
-      - name: Calculate APK checksum
-        run: sha256sum android/app/build/outputs/apk/debug/app-debug.apk
+      - name: Prepare clearly named APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/bergtouren-debug.apk
 
-      - name: Upload APK for download on the phone
+      - name: Calculate APK checksum
+        run: sha256sum android/app/build/outputs/apk/debug/bergtouren-debug.apk
+
+      - name: Upload APK for direct download on the phone
         id: upload
         uses: actions/upload-artifact@v7
         with:
-          name: bergtouren-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          # archive:false uploads the single APK as a raw file.
+          # upload-artifact v7 ignores "name" in this mode, so the filename
+          # itself determines the artifact label shown in GitHub Actions.
+          path: android/app/build/outputs/apk/debug/bergtouren-debug.apk
           archive: false
           if-no-files-found: error
           retention-days: 14
@@ -67,10 +72,10 @@ jobs:
           {
             echo "## Bergtouren Android – Debug APK"
             echo
-            echo "The APK is attached as the artifact **bergtouren-debug-apk**."
+            echo "The APK is attached as the directly downloadable artifact **bergtouren-debug.apk**."
             echo
             echo "SHA-256:"
-            sha256sum android/app/build/outputs/apk/debug/app-debug.apk
+            sha256sum android/app/build/outputs/apk/debug/bergtouren-debug.apk
             echo
             echo "The artifact is retained for 14 days."
           } >> "$GITHUB_STEP_SUMMARY"
