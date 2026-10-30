@@ -354,6 +354,10 @@ public final class MainActivity extends Activity {
                                 JSONObject response = new JSONObject();
                                 response.put("type", "bridge.pong");
                                 response.put("nativeVersion", BuildConfig.VERSION_NAME);
+                                org.json.JSONArray features = new org.json.JSONArray();
+                                features.put("gallery.mediaStore.v1");
+                                features.put("gallery.thumbnail.v1");
+                                response.put("features", features);
                                 replyToBridge(replyProxy, response);
                                 Log.i(TAG, "Sichere JavaScript-Bridge ist erreichbar.");
                             } else if ("gallery.permission.get".equals(type)) {
@@ -363,6 +367,9 @@ public final class MainActivity extends Activity {
                             } else if ("gallery.photos.byDate".equals(type)) {
                                 String date = request.optString("date", "");
                                 queryGalleryPhotosForDate(replyProxy, requestId, date);
+                            } else if ("gallery.thumbnail".equals(type)) {
+                                String uri = request.optString("uri", "");
+                                queryGalleryThumbnail(replyProxy, requestId, uri);
                             } else {
                                 Log.w(TAG, "Unbekannte Bridge-Nachricht verworfen.");
                             }
@@ -489,6 +496,48 @@ public final class MainActivity extends Activity {
                     response.put("message", "Die Fotos für dieses Datum konnten nicht gelesen werden.");
                 } catch (JSONException jsonError) {
                     Log.e(TAG, "Fehlerantwort konnte nicht serialisiert werden.", jsonError);
+                }
+            }
+
+            JSONObject finalResponse = response;
+            mainHandler.post(() -> replyToBridge(replyProxy, finalResponse));
+        });
+    }
+
+    private void queryGalleryThumbnail(
+            JavaScriptReplyProxy replyProxy,
+            String requestId,
+            String uri
+    ) {
+        if (uri == null || uri.isEmpty() || uri.length() > 512) {
+            JSONObject error = createGalleryResponse("gallery.thumbnail.result", requestId);
+            try {
+                error.put("status", "invalid_uri");
+            } catch (JSONException jsonError) {
+                Log.e(TAG, "Thumbnail-Fehlerantwort konnte nicht serialisiert werden.", jsonError);
+            }
+            replyToBridge(replyProxy, error);
+            return;
+        }
+
+        galleryExecutor.execute(() -> {
+            JSONObject response;
+            try {
+                response = GalleryMediaStore.loadThumbnailBase64(
+                        getApplicationContext(),
+                        uri
+                );
+                response.put("type", "gallery.thumbnail.result");
+                if (requestId != null && !requestId.isEmpty()) {
+                    response.put("requestId", requestId);
+                }
+            } catch (Exception error) {
+                Log.w(TAG, "Galerie-Vorschau konnte nicht geladen werden.", error);
+                response = createGalleryResponse("gallery.thumbnail.result", requestId);
+                try {
+                    response.put("status", "thumbnail_failed");
+                } catch (JSONException jsonError) {
+                    Log.e(TAG, "Thumbnail-Fehlerantwort konnte nicht serialisiert werden.", jsonError);
                 }
             }
 
