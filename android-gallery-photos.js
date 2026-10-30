@@ -115,11 +115,34 @@
             uri: photo.uri,
             displayName: String(photo.displayName || 'Foto'),
             dateTaken: Number(photo.dateTaken) || 0,
+            dateAdded: Number(photo.dateAdded) || 0,
+            dateBasis: photo.dateBasis === 'capture' || photo.dateBasis === 'added'
+                ? photo.dateBasis : '',
+            relativePath: String(photo.relativePath || '').replace(/\\/g, '/'),
             mimeType: String(photo.mimeType || 'image/*'),
             width: Number(photo.width) || 0,
             height: Number(photo.height) || 0,
             sizeBytes: Number(photo.sizeBytes) || 0
         };
+    }
+
+    function getPhotoSourceLabel(photo) {
+        const path = String(photo && photo.relativePath || '').toLowerCase();
+        if (path.includes('whatsapp')) return 'WhatsApp';
+        if (/(^|\\/)dcim\\/camera(\\/|$)/.test(path)) return 'Kamera';
+        if (path.includes('screenshot')) return 'Screenshots';
+        if (path.includes('download')) return 'Downloads';
+        return path ? 'Weitere Bilder' : 'Galerie';
+    }
+
+    function getPhotoMetaLabel(photo) {
+        const source = getPhotoSourceLabel(photo);
+        const basis = photo && photo.dateBasis === 'added'
+            ? 'Speicherdatum'
+            : photo && photo.dateBasis === 'capture'
+                ? 'Aufnahmedatum'
+                : '';
+        return basis ? source + ' · ' + basis : source;
     }
 
     function getSavedPhotos(entry) {
@@ -184,7 +207,11 @@
         name.className = 'atg-photo-name';
         name.textContent = photo.displayName || 'Foto';
 
-        card.append(thumbWrap, name);
+        const meta = document.createElement('div');
+        meta.className = 'atg-photo-meta';
+        meta.textContent = getPhotoMetaLabel(photo);
+
+        card.append(thumbWrap, name, meta);
 
         if (selectable) {
             const button = document.createElement('button');
@@ -429,13 +456,13 @@
         if (result.status === 'partial_results') {
             setStatus(
                 panel,
-                (Number(result.count) || 0) + ' freigegebene Fotos am Tourdatum gefunden. Android zeigt nur die Fotos, für die du Zugriff erteilt hast.',
+                (Number(result.count) || 0) + ' freigegebene Fotos gefunden. Android zeigt nur Bilder, für die du Zugriff erteilt hast; Herkunft und Datumsbasis stehen unter jedem Bild.',
                 'warning'
             );
         } else {
             setStatus(
                 panel,
-                (Number(result.count) || 0) + ' Fotos am Tourdatum gefunden. Wähle die gewünschten Bilder aus.',
+                (Number(result.count) || 0) + ' Fotos gefunden. WhatsApp- und andere indexierte Ordner sind eingeschlossen; Herkunft und Datumsbasis stehen unter jedem Bild.',
                 'info'
             );
         }
@@ -560,7 +587,7 @@
             state.loading = true;
             updatePickerSelection(panel);
         }
-        setStatus(panel, 'Suche nach Fotos mit dem Aufnahmedatum dieser Etappe …');
+        setStatus(panel, 'Suche nach dem Aufnahmedatum; falls es fehlt, zählt das Speicherdatum dieser Etappe …');
 
         try {
             const supported = await checkNativeGalleryBridge();
