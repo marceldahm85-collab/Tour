@@ -334,6 +334,9 @@
         next.hidden = viewerItems.length < 2;
 
         try {
+            if (!nativeFeatures.has('gallery.thumbnail.v1')) {
+                await checkNativeGalleryBridge();
+            }
             const action = nativeFeatures.has('gallery.image.full.v1')
                 ? 'gallery.image.full' : 'gallery.thumbnail';
             const response = await nativeRequest(action, { uri: media.uri }, 30000);
@@ -368,6 +371,9 @@
     document.addEventListener('keydown', handleViewerKeys);
 
     async function playVideo(panel, media) {
+        if (!nativeFeatures.has('gallery.video.player.v1')) {
+            await checkNativeGalleryBridge();
+        }
         if (!nativeFeatures.has('gallery.video.player.v1')) {
             setStatus(
                 panel,
