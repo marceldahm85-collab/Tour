@@ -661,9 +661,15 @@
             setPickerVisible(panel, false);
             renderSavedPhotos(panel, entry);
         } finally {
-            if (panel.isConnected && applyButton) {
-                applyButton.textContent = 'Auswahl übernehmen';
-                applyButton.disabled = false;
+            if (panel.isConnected) {
+                if (panel._atgPickerState === state) {
+                    state.loading = false;
+                    updatePickerSelection(panel);
+                }
+                if (applyButton) {
+                    applyButton.textContent = 'Auswahl übernehmen';
+                    applyButton.disabled = false;
+                }
             }
         }
     }
