@@ -351,15 +351,17 @@ public final class MainActivity extends Activity {
                             String requestId = request.optString("requestId", "");
 
                             if ("bridge.ping".equals(type)) {
-                                JSONObject response = new JSONObject();
-                                response.put("type", "bridge.pong");
+                                // Auch der Verbindungstest muss seine Anfrage-ID zurückgeben.
+                                // Andernfalls kann die JavaScript-Seite den Pong keiner offenen
+                                // Anfrage zuordnen und stuft die Bridge nach dem Timeout als offline ein.
+                                JSONObject response = createGalleryResponse("bridge.pong", requestId);
                                 response.put("nativeVersion", BuildConfig.VERSION_NAME);
                                 org.json.JSONArray features = new org.json.JSONArray();
                                 features.put("gallery.mediaStore.v1");
                                 features.put("gallery.thumbnail.v1");
                                 response.put("features", features);
                                 replyToBridge(replyProxy, response);
-                                Log.i(TAG, "Sichere JavaScript-Bridge ist erreichbar.");
+                                Log.i(TAG, "Sichere JavaScript-Bridge ist erreichbar (Request-ID bestätigt).");
                             } else if ("gallery.permission.get".equals(type)) {
                                 replyGalleryPermissionState(replyProxy, requestId);
                             } else if ("gallery.permission.request".equals(type)) {
