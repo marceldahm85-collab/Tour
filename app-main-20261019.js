@@ -24133,6 +24133,9 @@ planGipfelCount.addEventListener('change', () => {
 // ---------- Speichern ----------
 planSaveBtn.addEventListener('click', () => {
 
+    // Bearbeitungsstatus vor dem späteren Löschen der ID-Kennung sichern.
+    const isEditingPlannedTour = Object.prototype.hasOwnProperty.call(planForm.dataset, 'editEntryId');
+
     // Gehzeit unmittelbar vor dem Speichern aus Strecke/Aufstieg aktualisieren.
     updatePlannedEstimatedWalkingTime();
 
@@ -24323,6 +24326,12 @@ updatePlanActivityFieldsVisibility();
     if(box) {
         box.classList.remove('active');
         box.querySelector('.box-content').style.maxHeight = '0';
+    }
+
+    // Nur nach dem Bearbeiten einer bestehenden Planung zurück zur Liste.
+    // Bei einer neu angelegten Tour bleibt der bisherige Bereich aktiv.
+    if (isEditingPlannedTour) {
+        showPlanSection('list');
     }
 });
 
