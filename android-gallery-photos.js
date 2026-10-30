@@ -6,10 +6,12 @@
     'use strict';
 
     const nativeBridge = window.TourNative;
-    if (!nativeBridge ||
-        typeof nativeBridge.postMessage !== 'function' ||
-        typeof nativeBridge.addEventListener !== 'function') {
-        return;
+    const nativeBridgeAvailable = !!nativeBridge &&
+        typeof nativeBridge.postMessage === 'function' &&
+        typeof nativeBridge.addEventListener === 'function';
+
+    if (!nativeBridgeAvailable) {
+        console.error('[Android-Galerie] Die native TourNative-Bridge wurde in dieser WebView nicht bereitgestellt. Der Fotobereich zeigt den Verbindungsfehler in der Tourdetailansicht an.');
     }
 
     const pendingRequests = new Map();
@@ -41,11 +43,17 @@
         pending.resolve(message);
     }
 
-    nativeBridge.addEventListener('message', handleNativeMessage);
+    if (nativeBridgeAvailable) {
+        nativeBridge.addEventListener('message', handleNativeMessage);
+    }
 
     function nativeRequest(type, payload, timeoutMs) {
         payload = payload || {};
         timeoutMs = timeoutMs || 18000;
+
+        if (!nativeBridgeAvailable) {
+            return Promise.reject(new Error('Die native Android-Galerie-Bridge ist in dieser App-Sitzung nicht verfügbar.'));
+        }
 
         return new Promise((resolve, reject) => {
             const requestId = nextRequestId();
@@ -68,16 +76,18 @@
         });
     }
 
-    const bridgeReady = nativeRequest('bridge.ping', {}, 8000)
-        .then(reply => {
-            const features = Array.isArray(reply.features) ? reply.features : [];
-            return features.includes('gallery.mediaStore.v1') &&
-                features.includes('gallery.thumbnail.v1');
-        })
-        .catch(error => {
-            console.warn('[Android-Galerie] Native Galerie-Bridge nicht bereit.', error);
-            return false;
-        });
+    const bridgeReady = nativeBridgeAvailable
+        ? nativeRequest('bridge.ping', {}, 8000)
+            .then(reply => {
+                const features = Array.isArray(reply.features) ? reply.features : [];
+                return features.includes('gallery.mediaStore.v1') &&
+                    features.includes('gallery.thumbnail.v1');
+            })
+            .catch(error => {
+                console.warn('[Android-Galerie] Native Galerie-Bridge nicht bereit.', error);
+                return false;
+            })
+        : Promise.resolve(false);
 
     function normalizeTourDate(value) {
         const raw = String(value || '').trim();
@@ -125,6 +135,7 @@
         const panel = document.createElement('section');
         panel.className = 'atg-panel';
         panel.id = 'td-gallery-panel';
+        panel.dataset.tourId = String(entry.id || '');
         panel.innerHTML = [
             '<div class="atg-heading">',
               '<div class="atg-heading-copy">',
@@ -428,6 +439,12 @@
     }
 
     async function mountGalleryPanel(entry) {
+        const tourId = String(entry && entry.id || '');
+        if (activePanel && activePanel.isConnected &&
+            activePanel.dataset.tourId === tourId) {
+            return;
+        }
+
         const sequence = ++openSequence;
         const body = document.getElementById('td-body');
         const modal = document.getElementById('tour-detail-modal');
@@ -453,8 +470,14 @@
         const supported = await bridgeReady;
         if (sequence !== openSequence || activePanel !== panel || !panel.isConnected) return;
         if (!supported) {
-            panel.remove();
-            activePanel = null;
+            accessButton.hidden = true;
+            setStatus(
+                panel,
+                nativeBridgeAvailable
+                    ? 'Die Android-Galerie ist in der App vorhanden, antwortet aber nicht. Bitte schließe die Fototest-App vollständig und öffne sie erneut. Der Fotobereich bleibt zur Diagnose sichtbar.'
+                    : 'Die native Android-Galerie-Schnittstelle wurde nicht erkannt. Diese App-Sitzung kann deshalb noch nicht auf die Galerie zugreifen. Bitte schließe die Fototest-App vollständig und öffne sie erneut.',
+                'error'
+            );
             return;
         }
 
@@ -480,7 +503,7 @@
 
     function installTourDetailHook() {
         const originalOpen = window.openTourDetail;
-        if (typeof originalOpen !== 'function' || originalOpen.__atgWrapped) return;
+        if (typeof originalOpen !== 'function' || originalOpen.__atgWrapped) return false;
 
         const wrappedOpen = async function(entry, options) {
             const result = await originalOpen.apply(this, arguments);
@@ -495,6 +518,42 @@
         };
         wrappedOpen.__atgWrapped = true;
         window.openTourDetail = wrappedOpen;
+        return true;
+    }
+
+    function getCurrentSavedDetailEntry() {
+        try {
+            if (typeof currentDetailEntry !== 'undefined' && currentDetailEntry) {
+                return currentDetailEntry;
+            }
+        } catch (_) {
+            // Fallback auf die Window-Property, falls die App den Zustand dort ablegt.
+        }
+        return window.currentDetailEntry || null;
+    }
+
+    function installTourDetailObserver() {
+        const modal = document.getElementById('tour-detail-modal');
+        const body = document.getElementById('td-body');
+        if (!modal || !body || typeof MutationObserver !== 'function') return;
+
+        const syncPanel = () => {
+            if (modal.classList.contains('hidden')) return;
+
+            const entry = getCurrentSavedDetailEntry();
+            if (!entry || entry._isMultidaySummary || !entry.id) return;
+
+            const existing = body.querySelector('#td-gallery-panel');
+            if (existing && existing.dataset.tourId === String(entry.id)) return;
+
+            mountGalleryPanel(entry).catch(error => {
+                console.error('[Android-Galerie] Detailbeobachtung konnte den Fotobereich nicht einblenden.', error);
+            });
+        };
+
+        const observer = new MutationObserver(syncPanel);
+        observer.observe(body, { childList: true });
+        observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
     }
 
     function excludeDeviceReferencesFromBackup() {
@@ -515,10 +574,12 @@
     }
 
     installTourDetailHook();
+    installTourDetailObserver();
     excludeDeviceReferencesFromBackup();
 
     document.addEventListener('DOMContentLoaded', () => {
         installTourDetailHook();
+        installTourDetailObserver();
         excludeDeviceReferencesFromBackup();
     });
 })();
