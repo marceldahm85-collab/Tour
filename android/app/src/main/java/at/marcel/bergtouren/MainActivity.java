@@ -382,8 +382,7 @@ public final class MainActivity extends Activity {
                                 queryGalleryFullImage(replyProxy, requestId, uri);
                             } else if ("gallery.video.play".equals(type)) {
                                 String uri = request.optString("uri", "");
-                                String title = request.optString("title", "Tourvideo");
-                                launchGalleryVideo(replyProxy, requestId, uri, title);
+                                launchGalleryVideo(replyProxy, requestId, uri);
                             } else {
                                 Log.w(TAG, "Unbekannte Bridge-Nachricht verworfen.");
                             }
@@ -601,8 +600,7 @@ public final class MainActivity extends Activity {
     private void launchGalleryVideo(
             JavaScriptReplyProxy replyProxy,
             String requestId,
-            String uriString,
-            String title
+            String uriString
     ) {
         runOnUiThread(() -> {
             JSONObject response = createGalleryResponse("gallery.video.play.result", requestId);
@@ -615,8 +613,6 @@ public final class MainActivity extends Activity {
                 } else {
                     Intent intent = new Intent(this, GalleryVideoActivity.class);
                     intent.putExtra(GalleryVideoActivity.EXTRA_URI, uri.toString());
-                    intent.putExtra(GalleryVideoActivity.EXTRA_TITLE,
-                            title == null || title.trim().isEmpty() ? "Tourvideo" : title);
                     startActivity(intent);
                     response.put("status", "started");
                 }

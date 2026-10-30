@@ -338,35 +338,27 @@
 }
 
 .atg-viewer-header {
+    position: relative;
     display: flex;
     flex: 0 0 auto;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 12px;
     min-height: 58px;
-    padding: 7px 14px 7px 17px;
+    padding: 7px 14px;
     border-bottom: 1px solid rgba(255, 255, 255, .11);
     background: rgba(13, 18, 24, .98);
 }
 
-.atg-viewer-heading {
-    min-width: 0;
-}
-
-.atg-viewer-title {
-    overflow: hidden;
-    font-size: 13px;
-    font-weight: 800;
-    line-height: 1.35;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
 .atg-viewer-counter {
-    margin-top: 2px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: 0;
     color: rgba(255, 255, 255, .68);
     font-size: 10px;
     font-variant-numeric: tabular-nums;
+    transform: translate(-50%, -50%);
 }
 
 .atg-viewer-close,

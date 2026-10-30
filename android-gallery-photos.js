@@ -231,10 +231,7 @@
         root.setAttribute('aria-hidden', 'true');
         root.innerHTML = [
             '<div class="atg-viewer-header">',
-              '<div class="atg-viewer-heading">',
-                '<div class="atg-viewer-title">Tourfoto</div>',
-                '<div class="atg-viewer-counter"></div>',
-              '</div>',
+              '<div class="atg-viewer-counter" aria-live="polite"></div>',
               '<button id="atg-photo-viewer-close" type="button" class="atg-viewer-close" aria-label="Vollbild schließen">✕</button>',
             '</div>',
             '<div class="atg-viewer-stage">',
@@ -319,7 +316,6 @@
         const token = ++viewerRequestToken;
         const image = viewer.querySelector('.atg-viewer-image');
         const loading = viewer.querySelector('.atg-viewer-loading');
-        const title = viewer.querySelector('.atg-viewer-title');
         const counter = viewer.querySelector('.atg-viewer-counter');
         const previous = viewer.querySelector('.atg-viewer-prev');
         const next = viewer.querySelector('.atg-viewer-next');
@@ -328,7 +324,6 @@
         image.hidden = true;
         loading.hidden = false;
         loading.textContent = 'Foto wird geladen …';
-        title.textContent = media.displayName || 'Tourfoto';
         counter.textContent = (viewerIndex + 1) + ' / ' + viewerItems.length;
         previous.hidden = viewerItems.length < 2;
         next.hidden = viewerItems.length < 2;
@@ -385,8 +380,7 @@
 
         try {
             const result = await nativeRequest('gallery.video.play', {
-                uri: media.uri,
-                title: media.displayName || 'Tourvideo'
+                uri: media.uri
             }, 12000);
             if (result.status === 'started') return;
             if (result.status === 'permission_required') {
