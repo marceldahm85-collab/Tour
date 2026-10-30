@@ -967,8 +967,10 @@
         const tourId = String(latestEntry && latestEntry.id || '');
         if (activePanel && activePanel.isConnected &&
             activePanel.dataset.tourId === tourId) {
+            activePanel._atgEntry = latestEntry;
             return;
         }
+        if (activePanel && activePanel.dataset.tourId !== tourId) closePhotoViewer();
 
         const body = document.getElementById('td-body');
         const modal = document.getElementById('tour-detail-modal');
