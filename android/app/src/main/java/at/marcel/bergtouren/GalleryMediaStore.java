@@ -65,6 +65,10 @@ final class GalleryMediaStore {
         return hasPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE);
     }
 
+    static boolean hasVideoAccess(Context context) {
+        return canReadVideos(context);
+    }
+
     private static boolean canReadVideos(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             return hasPermission(context, Manifest.permission.READ_MEDIA_VIDEO)
