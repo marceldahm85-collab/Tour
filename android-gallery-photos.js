@@ -235,7 +235,7 @@
                 '<div class="atg-viewer-title">Tourfoto</div>',
                 '<div class="atg-viewer-counter"></div>',
               '</div>',
-              '<button type="button" class="atg-viewer-close" aria-label="Vollbild schließen">✕</button>',
+              '<button id="atg-photo-viewer-close" type="button" class="atg-viewer-close" aria-label="Vollbild schließen">✕</button>',
             '</div>',
             '<div class="atg-viewer-stage">',
               '<div class="atg-viewer-loading" role="status">Foto wird geladen …</div>',
