@@ -270,7 +270,37 @@
         body.appendChild(panel);
     }
 
-    function saveSelection(entry, selectedPhotos, panel) {
+    async function waitForTourStorageCommit() {
+        // appStorage.set aktualisiert den synchronen Cache sofort, persistiert
+        // IndexedDB aber über eine interne Schreibwarteschlange. Auf alle aktuell
+        // eingereihten Schreibvorgänge warten, bevor die Auswahl als gespeichert gilt.
+        if (typeof _storageWriteQueue === 'undefined' ||
+            typeof _idbGet !== 'function') {
+            throw new Error('Die dauerhafte Tourenspeicherung ist in dieser App-Version nicht erreichbar.');
+        }
+
+        let queueSnapshot;
+        do {
+            queueSnapshot = _storageWriteQueue;
+            await queueSnapshot;
+        } while (queueSnapshot !== _storageWriteQueue);
+
+        const persistedTours = await _idbGet('touren');
+        if (!Array.isArray(persistedTours)) {
+            throw new Error('Die gespeicherten Tourdaten konnten nach dem Schreiben nicht zurückgelesen werden.');
+        }
+        return persistedTours;
+    }
+
+    function getLatestStoredTour(entry) {
+        const tourId = String(entry && entry.id || '');
+        if (!tourId || typeof appStorage === 'undefined' || !appStorage) return entry;
+
+        const tours = appStorage.get('touren') || [];
+        return tours.find(item => String(item && item.id || '') === tourId) || entry;
+    }
+
+    async function saveSelection(entry, selectedPhotos, panel) {
         try {
             if (typeof appStorage === 'undefined' || !appStorage) {
                 throw new Error('Der Tourenspeicher ist nicht verfügbar.');
@@ -279,7 +309,9 @@
             const tourId = String(entry.id || '');
             if (!tourId) throw new Error('Der Tour fehlt eine eindeutige Kennung.');
 
-            const allTours = appStorage.get('touren') || [];
+            // Immer vom aktuellen Tourenbestand ausgehen, nicht von einem möglicherweise
+            // veralteten Objekt aus der geöffneten Listenansicht.
+            const allTours = (appStorage.get('touren') || []).slice();
             const index = allTours.findIndex(item => String(item && item.id || '') === tourId);
             if (index < 0) throw new Error('Die Tour wurde im Speicher nicht gefunden.');
 
@@ -287,23 +319,41 @@
             allTours[index] = Object.assign({}, allTours[index], {
                 galleryPhotos: metadata
             });
+
             appStorage.set('touren', allTours);
 
-            entry.galleryPhotos = metadata;
+            // Erst nach erfolgreichem IndexedDB-Schreiben und Rücklesen bestätigen.
+            const persistedTours = await waitForTourStorageCommit();
+            const persistedEntry = persistedTours.find(
+                item => String(item && item.id || '') === tourId
+            );
+            const persistedPhotos = Array.isArray(persistedEntry && persistedEntry.galleryPhotos)
+                ? persistedEntry.galleryPhotos.map(cleanPhoto).filter(Boolean)
+                : [];
+
+            const expectedUris = metadata.map(photo => photo.uri).sort();
+            const actualUris = persistedPhotos.map(photo => photo.uri).sort();
+            if (expectedUris.length !== actualUris.length ||
+                expectedUris.some((uri, index) => uri !== actualUris[index])) {
+                throw new Error('Die Fotoauswahl wurde nicht dauerhaft gespeichert. Bitte versuche es erneut.');
+            }
+
+            // Veraltete Detail-/Listenobjekte für die laufende Ansicht synchronisieren.
+            entry.galleryPhotos = persistedPhotos;
             try {
                 if (typeof currentDetailEntry !== 'undefined' &&
                     currentDetailEntry &&
                     String(currentDetailEntry.id || '') === tourId) {
-                    currentDetailEntry.galleryPhotos = metadata;
+                    currentDetailEntry.galleryPhotos = persistedPhotos;
                 }
             } catch (_) {
-                // Die Detailansicht bleibt auch ohne globale currentDetailEntry nutzbar.
+                // Der Datenbankeintrag ist bereits verifiziert; Detailzustand ist nur Komfort.
             }
 
             return true;
         } catch (error) {
-            console.error('[Android-Galerie] Zuordnung konnte nicht gespeichert werden.', error);
-            setStatus(panel, error.message || 'Fotoauswahl konnte nicht gespeichert werden.', 'error');
+            console.error('[Android-Galerie] Dauerhafte Fotozuordnung fehlgeschlagen.', error);
+            setStatus(panel, error.message || 'Fotoauswahl konnte nicht dauerhaft gespeichert werden.', 'error');
             return false;
         }
     }
@@ -591,16 +641,31 @@
         renderSavedPhotos(panel, entry);
     }
 
-    function applyPhotoSelection(panel, entry) {
+    async function applyPhotoSelection(panel, entry) {
         const state = panel._atgPickerState;
-        if (!state) return;
+        if (!state || state.loading) return;
 
         const nextPhotos = state.photos.filter(photo => state.selected.has(photo.uri));
-        if (!saveSelection(entry, nextPhotos, panel)) return;
+        const applyButton = panel.querySelector('.atg-apply-btn');
+        state.loading = true;
+        if (applyButton) {
+            applyButton.disabled = true;
+            applyButton.textContent = 'Speichere …';
+        }
 
-        panel._atgPickerState = null;
-        setPickerVisible(panel, false);
-        renderSavedPhotos(panel, entry);
+        try {
+            const saved = await saveSelection(entry, nextPhotos, panel);
+            if (!saved) return;
+
+            panel._atgPickerState = null;
+            setPickerVisible(panel, false);
+            renderSavedPhotos(panel, entry);
+        } finally {
+            if (panel.isConnected && applyButton) {
+                applyButton.textContent = 'Auswahl übernehmen';
+                applyButton.disabled = false;
+            }
+        }
     }
 
     async function loadThumbnail(img) {
@@ -627,7 +692,8 @@
     }
 
     async function mountGalleryPanel(entry) {
-        const tourId = String(entry && entry.id || '');
+        const latestEntry = getLatestStoredTour(entry) || entry;
+        const tourId = String(latestEntry && latestEntry.id || '');
         if (activePanel && activePanel.isConnected &&
             activePanel.dataset.tourId === tourId) {
             return;
@@ -641,10 +707,10 @@
         if (activePanel) activePanel.remove();
         activePanel = null;
 
-        const panel = makePanel(entry);
+        const panel = makePanel(latestEntry);
         activePanel = panel;
         insertPanel(panel, body);
-        renderSavedPhotos(panel, entry);
+        renderSavedPhotos(panel, latestEntry);
     }
 
     function installTourDetailHook() {
