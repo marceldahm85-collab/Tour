@@ -1,6 +1,6 @@
 /* Hintergrundbild-Verwaltung für Premium Alpine.
-   Schritt 1: Bestehendes Motiv als Preset registrieren und stabile Speicher-APIs
-   für spätere Galerie- und Preset-Auswahl bereitstellen. */
+   Schritt 2: Vorgegebene Alpenmotive zentral registrieren; die Speicher-APIs
+   bleiben für spätere Galerie- und Backup-Funktionen erhalten. */
 (function () {
     'use strict';
 
@@ -21,7 +21,91 @@
             positionY: 50,
             mobilePositionX: 59,
             landscapePositionX: 56,
-            fit: 'cover'
+            fit: 'cover',
+            credit: 'Bisheriges App-Motiv',
+            sourceUrl: '',
+            licenseLabel: '',
+            licenseUrl: ''
+        }),
+        Object.freeze({
+            id: 'dolomites',
+            name: 'Dolomiten',
+            description: 'Markante Felsgipfel und alpine Bergflanken',
+            src: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Dolomites.jpg/1280px-Dolomites.jpg',
+            preview: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Dolomites.jpg/1280px-Dolomites.jpg',
+            positionX: 52,
+            positionY: 50,
+            mobilePositionX: 54,
+            landscapePositionX: 50,
+            fit: 'cover',
+            credit: 'Mona Hassan Abo-Abda · CC BY-SA 4.0',
+            sourceUrl: 'https://commons.wikimedia.org/wiki/File:Dolomites.jpg',
+            licenseLabel: 'CC BY-SA 4.0',
+            licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/'
+        }),
+        Object.freeze({
+            id: 'alpine-lake-reflection',
+            name: 'Bergsee',
+            description: 'Schneebedeckte Gipfel spiegeln sich im stillen See',
+            src: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ee/Mountain_Reflection_on_Alpine_Lake.jpg/1280px-Mountain_Reflection_on_Alpine_Lake.jpg?utm_campaign=index&utm_content=thumbnail&utm_source=commons.wikimedia.org',
+            preview: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ee/Mountain_Reflection_on_Alpine_Lake.jpg/1280px-Mountain_Reflection_on_Alpine_Lake.jpg?utm_campaign=index&utm_content=thumbnail&utm_source=commons.wikimedia.org',
+            positionX: 50,
+            positionY: 50,
+            mobilePositionX: 50,
+            landscapePositionX: 50,
+            fit: 'cover',
+            credit: 'Sabrina Schreiber · CC BY-SA 4.0',
+            sourceUrl: 'https://commons.wikimedia.org/wiki/File:Mountain_Reflection_on_Alpine_Lake.jpg',
+            licenseLabel: 'CC BY-SA 4.0',
+            licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/'
+        }),
+        Object.freeze({
+            id: 'lake-landro',
+            name: 'See & Dolomiten',
+            description: 'Türkiser Bergsee vor den hellen Dolomitengipfeln',
+            src: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/Dolomites_and_Lake_Landro%2C_Italy.jpg/1280px-Dolomites_and_Lake_Landro%2C_Italy.jpg?utm_campaign=index&utm_content=thumbnail&utm_source=commons.wikimedia.org',
+            preview: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/Dolomites_and_Lake_Landro%2C_Italy.jpg/1280px-Dolomites_and_Lake_Landro%2C_Italy.jpg?utm_campaign=index&utm_content=thumbnail&utm_source=commons.wikimedia.org',
+            positionX: 50,
+            positionY: 50,
+            mobilePositionX: 50,
+            landscapePositionX: 50,
+            fit: 'cover',
+            credit: 'Francesca.z73 · CC BY-SA 4.0',
+            sourceUrl: 'https://commons.wikimedia.org/wiki/File:Dolomites_and_Lake_Landro,_Italy.jpg',
+            licenseLabel: 'CC BY-SA 4.0',
+            licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/'
+        }),
+        Object.freeze({
+            id: 'alpine-meadows',
+            name: 'Almwiesen',
+            description: 'Grüne Bergwiesen, Wälder und weiter Alpenblick',
+            src: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg/1280px-Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg',
+            preview: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg/1280px-Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg',
+            positionX: 54,
+            positionY: 50,
+            mobilePositionX: 58,
+            landscapePositionX: 54,
+            fit: 'cover',
+            credit: 'Ddayzzz · CC BY 4.0',
+            sourceUrl: 'https://commons.wikimedia.org/wiki/File:Alpine_meadows_and_mountain_panorama_from_Mount_Rigi,_September_2026.jpg',
+            licenseLabel: 'CC BY 4.0',
+            licenseUrl: 'https://creativecommons.org/licenses/by/4.0/'
+        }),
+        Object.freeze({
+            id: 'alpine-sunset',
+            name: 'Abendglühen',
+            description: 'Warme Abendsonne über den Berner Alpen',
+            src: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Alpenpanorama_bei_Sonnenuntergang.jpg/1280px-Alpenpanorama_bei_Sonnenuntergang.jpg',
+            preview: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Alpenpanorama_bei_Sonnenuntergang.jpg/1280px-Alpenpanorama_bei_Sonnenuntergang.jpg',
+            positionX: 56,
+            positionY: 48,
+            mobilePositionX: 59,
+            landscapePositionX: 56,
+            fit: 'cover',
+            credit: 'MBudget · CC BY-SA 4.0',
+            sourceUrl: 'https://commons.wikimedia.org/wiki/File:Alpenpanorama_bei_Sonnenuntergang.jpg',
+            licenseLabel: 'CC BY-SA 4.0',
+            licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/'
         })
     ]);
 
@@ -268,7 +352,11 @@
             id: preset.id,
             name: preset.name,
             description: preset.description,
-            preview: preset.preview
+            preview: preset.preview,
+            credit: preset.credit || '',
+            sourceUrl: preset.sourceUrl || '',
+            licenseLabel: preset.licenseLabel || '',
+            licenseUrl: preset.licenseUrl || ''
         }));
     };
     window.getAppBackgroundSettings = getSettingsSnapshot;
