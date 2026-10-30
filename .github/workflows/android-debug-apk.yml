@@ -82,14 +82,18 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           SIGNING_SOURCE_RUN_ID: "41108642560"
         run: |
+          set -euo pipefail
           mkdir -p "$HOME/.android" "$RUNNER_TEMP/signing-key"
-          gh run download "$SIGNING_SOURCE_RUN_ID" \
-            --repo "$GITHUB_REPOSITORY" \
-            --name "bergtouren-gallery-signing-key.keystore" \
-            --dir "$RUNNER_TEMP/signing-key"
-          key_file="$(find "$RUNNER_TEMP/signing-key" -type f -name "bergtouren-gallery-signing-key.keystore" -print -quit)"
-          test -n "$key_file"
-          cp "$key_file" "$HOME/.android/debug.keystore"
+          artifact_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SIGNING_SOURCE_RUN_ID/artifacts" \
+            --jq '.artifacts[] | select(.name == "bergtouren-gallery-signing-key.keystore") | .id' | head -n 1)"
+          test -n "$artifact_id"
+          # upload-artifact v7 archive:false stores this one-file artifact raw.
+          curl --fail --silent --show-error --location \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$artifact_id/zip" \
+            --output "$RUNNER_TEMP/signing-key/bergtouren-gallery-signing-key.keystore"
+          cp "$RUNNER_TEMP/signing-key/bergtouren-gallery-signing-key.keystore" "$HOME/.android/debug.keystore"
           keytool -list -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey
 
       - name: Verify existing signing key
