@@ -1,6 +1,6 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Der PDF-Magazin-Renderer wird direkt über index.html geladen.
-const CACHE_NAME = 'bergtouren-cache-premium-alpine-v162';
+const CACHE_NAME = 'bergtouren-cache-premium-alpine-v163';
 
 const APP_SHELL = [
   './',
@@ -20,7 +20,7 @@ const APP_SHELL = [
   './map-premium-alpine.css?v=19',
   './appview-premium-alpine.css?v=9',
   './plan-premium-alpine.css?v=6',
-  './assets/bergwelt-fixed-alpine.webp',
+  'https://images.unsplash.com/photo-1694968537484-d4e1733301b5?auto=format&fit=crop&w=1400&q=85',
   './assets/milestones/alpine-backdrop.svg?v=2',
   'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg/1280px-Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg',
   'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/20-06-2020_-_Alps_panorama.jpg/1280px-20-06-2020_-_Alps_panorama.jpg',
@@ -53,7 +53,7 @@ self.addEventListener('install', (event) => {
         APP_SHELL.map(async (url) => {
           try {
             const request = new Request(url, {
-              mode: url.includes('wikimedia.org/') ? 'no-cors' : (url.startsWith('http') ? 'cors' : 'same-origin'),
+              mode: (url.includes('wikimedia.org/') || url.includes('images.unsplash.com/')) ? 'no-cors' : (url.startsWith('http') ? 'cors' : 'same-origin'),
               // Refresh the browser HTTP cache as well as this service-worker cache.
               cache: url.startsWith('http') ? 'default' : 'reload'
             });
