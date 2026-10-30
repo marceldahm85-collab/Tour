@@ -9,10 +9,14 @@ Dieses Android-Modul ist eine separate native Hülle für die vorhandene Bergtou
 - HTTPS-only: HTTP-Inhalte und TLS-Zertifikatsfehler werden nicht akzeptiert
 - Navigation innerhalb des App-Pfads bleibt im WebView; externe Ziele werden an Android übergeben
 - Sichere native Nachrichten-Schnittstelle über AndroidX WebKit `WebViewCompat.addWebMessageListener`
-- Bridge ist auf den Web-Ursprung der App beschränkt und akzeptiert derzeit ausschließlich einen unverbindlichen `bridge.ping`-Handshake
+- Bridge ist auf den exakten HTTPS-Ursprung der App und den Hauptframe beschränkt
+- Bridge-Befehle für den Galerie-Grundbaustein: Berechtigungsstatus abfragen, Zugriff auf ausdrückliche Nutzeraktion anfordern und Bilder eines einzelnen lokalen Kalendertages abfragen
+- Android 14+: vollständiger und eingeschränkter Fotozugriff werden getrennt ausgewiesen
+- Galerieabfragen verwenden ausschließlich den MediaStore-Zeitpunkt `DATE_TAKEN` und sind auf das angefragte Datum begrenzt
+- Zurückgegeben werden nur MediaStore-Referenz-URIs und leichte Metadaten; Originalbilder werden weder kopiert noch verändert
+- Galerieabfragen laufen nicht beim App-Start und fragen nicht die gesamte Mediathek ab
 - Datei-Auswahl bleibt für die bestehende JSON-Sicherungs-/Importfunktion der PWA verfügbar
-- Keine Galerie-, Kamera-, Standort- oder sonstigen Medienberechtigungen in diesem Schritt
-- Keine Kopie oder Migration der Tourdaten in diesem Schritt
+- Die Fotoabfrage ist noch nicht mit der Tourdetailansicht verbunden; das erfolgt nach separatem Test des nativen Bausteins
 
 ## Build-Umgebung
 
@@ -33,8 +37,9 @@ Dieses Android-Modul ist eine separate native Hülle für die vorhandene Bergtou
 ## Wichtige Grenzen
 
 - Die Android-WebView besitzt einen eigenen Web-Speicher. Sie greift nicht auf den IndexedDB-Speicher von Chrome zu. Der einmalige Import deiner vorhandenen JSON-Sicherung wird in einem eigenen späteren Schritt umgesetzt und geprüft.
-- Der native Medienzugriff ist absichtlich noch nicht implementiert.
-- Der App-Start lädt keine Galerieinhalte.
+- Die native Galerieabfrage ist als separater Baustein vorhanden, aber noch nicht mit der Tourdetailansicht verbunden.
+- Zum Aufruf der Galerie-Bridge wird später eine ausdrückliche Aktion in der Touransicht ergänzt; beim App-Start wird keine Berechtigung angefragt und es werden keine Galerieinhalte geladen.
+- Derzeit werden noch keine Vorschaubilder an die Web-Oberfläche übertragen; der erste Galeriebaustein liefert Referenz-URIs und Metadaten für einen einzelnen Tourtag.
 - Der Web-App-Endpunkt ist zentral in `app/build.gradle.kts` als `WEB_APP_URL` hinterlegt und kann dort angepasst werden, falls sich die GitHub-Pages-Adresse ändert.
 
 ## Noch nicht als produktionsfertig betrachten
