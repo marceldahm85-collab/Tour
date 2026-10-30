@@ -1,6 +1,6 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Der PDF-Magazin-Renderer wird direkt über index.html geladen.
-const CACHE_NAME = 'bergtouren-cache-premium-alpine-v174';
+const CACHE_NAME = 'bergtouren-cache-premium-alpine-v175';
 
 const APP_SHELL = [
   './',
@@ -14,6 +14,8 @@ const APP_SHELL = [
   './background-image-picker.css?v=2',
   './dashboard-premium-alpine.js?v=35',
   './app-navigation-history.js?v=1',
+  './android-gallery-photos.js?v=1',
+  './android-gallery-photos.css?v=1',
   './bergwelt-badges-20261019.css?v=6',
   './bergwelt-badges-20261019.js?v=6',
   './styles.css?v=15',
@@ -107,7 +109,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   const isCriticalAppAsset = requestUrl.origin === self.location.origin &&
-    /\/(?:index\.html|app-main(?:-20261019)?\.js|theme-editor-unified\.js|background-image-(?:manager|picker)\.js|bergwelt(?:-badges-20261019)?\.(?:js|css))$/.test(requestUrl.pathname);
+    /\/(?:index\.html|app-main(?:-20261019)?\.js|theme-editor-unified\.js|background-image-(?:manager|picker)\.js|android-gallery-photos\.js|bergwelt(?:-badges-20261019)?\.(?:js|css))$/.test(requestUrl.pathname);
 
   // App-Einstieg und kritische Module netzwerkzuerst laden. Bei Offline-Betrieb
   // wird auf die im aktuellen Cache gespeicherte Datei zurückgegriffen.

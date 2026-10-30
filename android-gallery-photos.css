@@ -1,0 +1,251 @@
+/* Premium-Alpine-Styling für die native Fotoauswahl in Tourdetails. */
+#td-gallery-panel.atg-panel {
+    --atg-accent: var(--accent, #c7a66a);
+    margin: 14px 0 4px;
+    padding: 14px;
+    min-width: 0;
+    border: 1px solid var(--theme-palette-border, color-mix(in srgb, var(--atg-accent) 34%, transparent));
+    border-radius: 17px;
+    background: linear-gradient(
+        145deg,
+        var(--theme-palette-surface-strong, rgba(30, 36, 44, .84)),
+        var(--theme-palette-surface-card, rgba(18, 25, 33, .72))
+    );
+    color: var(--theme-palette-text, inherit);
+    box-shadow: var(--theme-palette-shadow, 0 8px 22px rgba(0, 0, 0, .18));
+    overflow: hidden;
+}
+
+.atg-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 0;
+}
+
+.atg-heading-copy {
+    min-width: 0;
+}
+
+.atg-title {
+    font-size: 15px;
+    line-height: 1.25;
+    font-weight: 850;
+    letter-spacing: .01em;
+}
+
+.atg-subtitle {
+    margin-top: 3px;
+    color: var(--theme-palette-text-muted, currentColor);
+    opacity: .82;
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.atg-count {
+    flex: 0 0 auto;
+    padding: 5px 9px;
+    border: 1px solid color-mix(in srgb, var(--atg-accent) 35%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--atg-accent) 14%, transparent);
+    color: inherit;
+    font-size: 10px;
+    font-weight: 800;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.atg-status {
+    margin-top: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: var(--theme-palette-surface-subtle, rgba(128, 128, 128, .10));
+    color: var(--theme-palette-text-muted, currentColor);
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.atg-status[data-kind="warning"] {
+    border: 1px solid color-mix(in srgb, #d6a34a 42%, transparent);
+    color: inherit;
+}
+
+.atg-status[data-kind="error"] {
+    border: 1px solid color-mix(in srgb, #d85b5b 44%, transparent);
+}
+
+.atg-status[data-kind="success"] {
+    border: 1px solid color-mix(in srgb, #4aaf79 38%, transparent);
+}
+
+.atg-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 9px;
+}
+
+.atg-actions button,
+.atg-select-btn {
+    min-height: 34px;
+    padding: 7px 11px;
+    border: 1px solid color-mix(in srgb, var(--atg-accent) 42%, transparent);
+    border-radius: 10px;
+    background: var(--theme-palette-control-bg, rgba(128, 128, 128, .12));
+    color: inherit;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform .16s ease, background .16s ease, border-color .16s ease;
+}
+
+.atg-actions .atg-access-btn {
+    border-color: transparent;
+    background: var(--accent-gradient, linear-gradient(135deg, #c7a66a, #8d6a38));
+    color: var(--accent-text-color, #17130b);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--atg-accent) 24%, transparent);
+}
+
+.atg-actions .atg-refresh-btn {
+    background: transparent;
+}
+
+.atg-actions button:disabled,
+.atg-select-btn:disabled {
+    opacity: .55;
+    cursor: wait;
+}
+
+.atg-actions button[hidden] {
+    display: none !important;
+}
+
+.atg-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+    margin-top: 11px;
+    min-width: 0;
+}
+
+.atg-photo-card {
+    min-width: 0;
+    padding: 6px;
+    border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+    border-radius: 13px;
+    background: var(--theme-palette-surface-subtle, rgba(128, 128, 128, .08));
+    overflow: hidden;
+}
+
+.atg-photo-card.is-selected {
+    border-color: color-mix(in srgb, var(--atg-accent) 72%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--atg-accent) 24%, transparent);
+}
+
+.atg-thumb-wrap {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    background: color-mix(in srgb, currentColor 7%, transparent);
+    overflow: hidden;
+}
+
+.atg-thumb-placeholder {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: color-mix(in srgb, currentColor 50%, transparent);
+    font-size: 24px;
+    opacity: .75;
+}
+
+.atg-thumb {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity .18s ease;
+}
+
+.atg-thumb-wrap.has-image .atg-thumb {
+    opacity: 1;
+}
+
+.atg-thumb-wrap.is-unavailable .atg-thumb-placeholder {
+    font-size: 11px;
+}
+
+.atg-thumb-wrap.is-unavailable .atg-thumb-placeholder::after {
+    content: "Vorschau nicht verfügbar";
+    display: block;
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    bottom: 8px;
+    text-align: center;
+    font-size: 9px;
+    line-height: 1.25;
+}
+
+.atg-photo-name {
+    margin: 7px 2px 6px;
+    overflow: hidden;
+    color: var(--theme-palette-text-muted, currentColor);
+    font-size: 10px;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.atg-select-btn {
+    width: 100%;
+    min-height: 31px;
+    padding: 6px 5px;
+    font-size: 10px;
+}
+
+.atg-select-btn.is-selected {
+    border-color: transparent;
+    background: var(--accent-gradient, linear-gradient(135deg, #c7a66a, #8d6a38));
+    color: var(--accent-text-color, #17130b);
+}
+
+.atg-empty {
+    grid-column: 1 / -1;
+    padding: 15px 10px;
+    border: 1px dashed color-mix(in srgb, currentColor 24%, transparent);
+    border-radius: 11px;
+    color: var(--theme-palette-text-muted, currentColor);
+    font-size: 11px;
+    line-height: 1.45;
+    text-align: center;
+}
+
+.atg-footnote {
+    margin-top: 10px;
+    color: var(--theme-palette-text-muted, currentColor);
+    opacity: .78;
+    font-size: 9px;
+    line-height: 1.45;
+}
+
+@media (min-width: 520px) {
+    .atg-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (hover: hover) {
+    .atg-actions button:hover,
+    .atg-select-btn:hover {
+        transform: translateY(-1px);
+        border-color: var(--atg-accent);
+    }
+}

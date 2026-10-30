@@ -1,5 +1,6 @@
 package at.marcel.bergtouren;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -8,6 +9,8 @@ import android.graphics.Insets;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -38,10 +41,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Collections;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public final class MainActivity extends Activity {
     private static final String TAG = "BergtourenAndroid";
     private static final int FILE_CHOOSER_REQUEST_CODE = 4102;
+    private static final int GALLERY_PERMISSION_REQUEST_CODE = 4203;
     private static final String BRIDGE_NAME = "TourNative";
 
     private static final Uri APP_URI = Uri.parse(BuildConfig.WEB_APP_URL);
@@ -56,6 +62,10 @@ public final class MainActivity extends Activity {
     private ValueCallback<Uri[]> pendingFileChooser;
     private boolean bridgeAvailable;
     private Object backInvokedCallback;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private final ExecutorService galleryExecutor = Executors.newSingleThreadExecutor();
+    private JavaScriptReplyProxy pendingGalleryPermissionReply;
+    private String pendingGalleryPermissionRequestId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -337,16 +347,32 @@ public final class MainActivity extends Activity {
 
                         try {
                             JSONObject request = new JSONObject(data);
-                            if (!"bridge.ping".equals(request.optString("type"))) {
-                                Log.w(TAG, "Unbekannte Bridge-Nachricht verworfen.");
-                                return;
-                            }
+                            String type = request.optString("type", "");
+                            String requestId = request.optString("requestId", "");
 
-                            JSONObject response = new JSONObject();
-                            response.put("type", "bridge.pong");
-                            response.put("nativeVersion", BuildConfig.VERSION_NAME);
-                            replyProxy.postMessage(response.toString());
-                            Log.i(TAG, "Sichere JavaScript-Bridge ist erreichbar.");
+                            if ("bridge.ping".equals(type)) {
+                                JSONObject response = new JSONObject();
+                                response.put("type", "bridge.pong");
+                                response.put("nativeVersion", BuildConfig.VERSION_NAME);
+                                org.json.JSONArray features = new org.json.JSONArray();
+                                features.put("gallery.mediaStore.v1");
+                                features.put("gallery.thumbnail.v1");
+                                response.put("features", features);
+                                replyToBridge(replyProxy, response);
+                                Log.i(TAG, "Sichere JavaScript-Bridge ist erreichbar.");
+                            } else if ("gallery.permission.get".equals(type)) {
+                                replyGalleryPermissionState(replyProxy, requestId);
+                            } else if ("gallery.permission.request".equals(type)) {
+                                requestGalleryPermission(replyProxy, requestId);
+                            } else if ("gallery.photos.byDate".equals(type)) {
+                                String date = request.optString("date", "");
+                                queryGalleryPhotosForDate(replyProxy, requestId, date);
+                            } else if ("gallery.thumbnail".equals(type)) {
+                                String uri = request.optString("uri", "");
+                                queryGalleryThumbnail(replyProxy, requestId, uri);
+                            } else {
+                                Log.w(TAG, "Unbekannte Bridge-Nachricht verworfen.");
+                            }
                         } catch (JSONException error) {
                             Log.w(TAG, "Ungültige Bridge-Nachricht verworfen.", error);
                         }
@@ -355,6 +381,202 @@ public final class MainActivity extends Activity {
         );
 
         bridgeAvailable = true;
+    }
+
+    private void replyToBridge(JavaScriptReplyProxy replyProxy, JSONObject response) {
+        if (replyProxy == null || response == null) {
+            return;
+        }
+        try {
+            replyProxy.postMessage(response.toString());
+        } catch (RuntimeException error) {
+            Log.w(TAG, "Native Antwort konnte nicht an die Web-App gesendet werden.", error);
+        }
+    }
+
+    private JSONObject createGalleryResponse(String type, String requestId) {
+        JSONObject response = new JSONObject();
+        try {
+            response.put("type", type);
+            if (requestId != null && !requestId.isEmpty()) {
+                response.put("requestId", requestId);
+            }
+        } catch (JSONException error) {
+            Log.e(TAG, "Native Galerieantwort konnte nicht vorbereitet werden.", error);
+        }
+        return response;
+    }
+
+    private void replyGalleryPermissionState(JavaScriptReplyProxy replyProxy, String requestId) {
+        String access = GalleryMediaStore.getAccessState(this);
+        JSONObject response = createGalleryResponse("gallery.permission.result", requestId);
+        try {
+            response.put("access", access);
+            response.put("canSearchEntireLibrary", GalleryMediaStore.ACCESS_FULL.equals(access));
+        } catch (JSONException error) {
+            Log.e(TAG, "Berechtigungsstatus konnte nicht serialisiert werden.", error);
+        }
+        replyToBridge(replyProxy, response);
+    }
+
+    private void requestGalleryPermission(JavaScriptReplyProxy replyProxy, String requestId) {
+        runOnUiThread(() -> {
+            String access = GalleryMediaStore.getAccessState(this);
+            if (GalleryMediaStore.ACCESS_FULL.equals(access)) {
+                replyGalleryPermissionState(replyProxy, requestId);
+                return;
+            }
+
+            if (pendingGalleryPermissionReply != null) {
+                JSONObject busy = createGalleryResponse("gallery.permission.result", requestId);
+                try {
+                    busy.put("access", access);
+                    busy.put("canSearchEntireLibrary", false);
+                    busy.put("status", "request_in_progress");
+                } catch (JSONException error) {
+                    Log.e(TAG, "Berechtigungsantwort konnte nicht serialisiert werden.", error);
+                }
+                replyToBridge(replyProxy, busy);
+                return;
+            }
+
+            pendingGalleryPermissionReply = replyProxy;
+            pendingGalleryPermissionRequestId = requestId;
+
+            String[] permissions;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                permissions = new String[] {
+                        Manifest.permission.READ_MEDIA_IMAGES,
+                        Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+                };
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                permissions = new String[] {
+                        Manifest.permission.READ_MEDIA_IMAGES
+                };
+            } else {
+                permissions = new String[] {
+                        Manifest.permission.READ_EXTERNAL_STORAGE
+                };
+            }
+
+            requestPermissions(permissions, GALLERY_PERMISSION_REQUEST_CODE);
+        });
+    }
+
+    private void queryGalleryPhotosForDate(
+            JavaScriptReplyProxy replyProxy,
+            String requestId,
+            String date
+    ) {
+        if (date == null || date.length() != 10) {
+            JSONObject error = createGalleryResponse("gallery.photos.result", requestId);
+            try {
+                error.put("status", "invalid_date");
+                error.put("message", "Das Datum muss im Format JJJJ-MM-TT vorliegen.");
+            } catch (JSONException jsonError) {
+                Log.e(TAG, "Fehlerantwort konnte nicht serialisiert werden.", jsonError);
+            }
+            replyToBridge(replyProxy, error);
+            return;
+        }
+
+        galleryExecutor.execute(() -> {
+            JSONObject response;
+            try {
+                response = GalleryMediaStore.queryImagesForLocalDate(getApplicationContext(), date);
+                response.put("type", "gallery.photos.result");
+                if (requestId != null && !requestId.isEmpty()) {
+                    response.put("requestId", requestId);
+                }
+            } catch (Exception error) {
+                Log.e(TAG, "Galerieabfrage für " + date + " fehlgeschlagen.", error);
+                response = createGalleryResponse("gallery.photos.result", requestId);
+                try {
+                    response.put("status", "query_failed");
+                    response.put("message", "Die Fotos für dieses Datum konnten nicht gelesen werden.");
+                } catch (JSONException jsonError) {
+                    Log.e(TAG, "Fehlerantwort konnte nicht serialisiert werden.", jsonError);
+                }
+            }
+
+            JSONObject finalResponse = response;
+            mainHandler.post(() -> replyToBridge(replyProxy, finalResponse));
+        });
+    }
+
+    private void queryGalleryThumbnail(
+            JavaScriptReplyProxy replyProxy,
+            String requestId,
+            String uri
+    ) {
+        if (uri == null || uri.isEmpty() || uri.length() > 512) {
+            JSONObject error = createGalleryResponse("gallery.thumbnail.result", requestId);
+            try {
+                error.put("status", "invalid_uri");
+            } catch (JSONException jsonError) {
+                Log.e(TAG, "Thumbnail-Fehlerantwort konnte nicht serialisiert werden.", jsonError);
+            }
+            replyToBridge(replyProxy, error);
+            return;
+        }
+
+        galleryExecutor.execute(() -> {
+            JSONObject response;
+            try {
+                response = GalleryMediaStore.loadThumbnailBase64(
+                        getApplicationContext(),
+                        uri
+                );
+                response.put("type", "gallery.thumbnail.result");
+                if (requestId != null && !requestId.isEmpty()) {
+                    response.put("requestId", requestId);
+                }
+            } catch (Exception error) {
+                Log.w(TAG, "Galerie-Vorschau konnte nicht geladen werden.", error);
+                response = createGalleryResponse("gallery.thumbnail.result", requestId);
+                try {
+                    response.put("status", "thumbnail_failed");
+                } catch (JSONException jsonError) {
+                    Log.e(TAG, "Thumbnail-Fehlerantwort konnte nicht serialisiert werden.", jsonError);
+                }
+            }
+
+            JSONObject finalResponse = response;
+            mainHandler.post(() -> replyToBridge(replyProxy, finalResponse));
+        });
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public void onRequestPermissionsResult(
+            int requestCode,
+            String[] permissions,
+            int[] grantResults
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode != GALLERY_PERMISSION_REQUEST_CODE) {
+            return;
+        }
+
+        JavaScriptReplyProxy replyProxy = pendingGalleryPermissionReply;
+        String requestId = pendingGalleryPermissionRequestId;
+        pendingGalleryPermissionReply = null;
+        pendingGalleryPermissionRequestId = null;
+
+        if (replyProxy == null) {
+            return;
+        }
+
+        String access = GalleryMediaStore.getAccessState(this);
+        JSONObject response = createGalleryResponse("gallery.permission.result", requestId);
+        try {
+            response.put("access", access);
+            response.put("canSearchEntireLibrary", GalleryMediaStore.ACCESS_FULL.equals(access));
+            response.put("granted", !GalleryMediaStore.ACCESS_NONE.equals(access));
+        } catch (JSONException error) {
+            Log.e(TAG, "Berechtigungsergebnis konnte nicht serialisiert werden.", error);
+        }
+        replyToBridge(replyProxy, response);
     }
 
     private void sendBridgeHandshake() {
@@ -480,6 +702,10 @@ public final class MainActivity extends Activity {
             pendingFileChooser.onReceiveValue(null);
             pendingFileChooser = null;
         }
+
+        pendingGalleryPermissionReply = null;
+        pendingGalleryPermissionRequestId = null;
+        galleryExecutor.shutdownNow();
 
         if (webView != null) {
             webView.stopLoading();
