@@ -2258,7 +2258,7 @@ function createBackgroundBlobFromBase64(base64, mimeType) {
 async function buildBackgroundImageBackupData() {
     if (typeof window.getAppBackgroundSettings !== 'function' ||
         typeof window.getAppBackgroundCustomImageBlob !== 'function') {
-        return null;
+        throw new Error('Die Hintergrundverwaltung ist nicht verfügbar. Die Sicherungsdatei konnte nicht vollständig erstellt werden.');
     }
 
     const settings = window.getAppBackgroundSettings();
@@ -2381,6 +2381,10 @@ async function applyAppDataPayload(payload) {
             'plan'
         ).entries;
 
+    // Hintergrunddaten vor den übrigen Änderungen validieren und wiederherstellen.
+    // Eine beschädigte Bilddatei darf keinen halbfertigen Tourdaten-Import auslösen.
+    await restoreBackgroundImageFromPayload(payload);
+
     appStorage.set('touren', importedTours);
     appStorage.set('plannedTours', importedPlannedTours);
 
@@ -2465,9 +2469,6 @@ async function applyAppDataPayload(payload) {
             applyThemeEditorFontSize(importedFontSize, false);
         }
     }
-
-    // Bild, Preset und Positionierung zusammen mit den übrigen App-Daten übernehmen.
-    await restoreBackgroundImageFromPayload(payload);
 
     tablePage = 1;
     loadData();
