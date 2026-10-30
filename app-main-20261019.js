@@ -97,22 +97,30 @@ applyThemeEditorFontSize(
 
 // Einfacher Download (funktioniert auf allen Geräten)
     document.getElementById('simple-download-btn')?.addEventListener('click', async () => {
-        const payload = await buildAppDataPayload();
-        const json = JSON.stringify(payload, null, 2);
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
+        try {
+            const payload = await buildAppDataPayload();
+            const json = JSON.stringify(payload, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
 
-        const date = new Date().toISOString().slice(0, 10);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Touren-${date}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        markBackupSavedNow();
+            const date = new Date().toISOString().slice(0, 10);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Touren-${date}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            markBackupSavedNow();
 
-        showToast('Datei heruntergeladen ✓', { type: 'success', duration: 2000 });
+            showToast('Datei heruntergeladen ✓', { type: 'success', duration: 2000 });
+        } catch (error) {
+            console.error('[Sicherung] JSON-Download fehlgeschlagen:', error);
+            showToast(
+                error?.message || 'Sicherung fehlgeschlagen. Bitte erneut versuchen.',
+                { type: 'error', duration: 4500 }
+            );
+        }
     });
 
     // Einfacher Import (funktioniert auf allen Geräten)
