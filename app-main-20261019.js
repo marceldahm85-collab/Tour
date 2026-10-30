@@ -127,7 +127,7 @@ applyThemeEditorFontSize(
         try {
             const text = await file.text();
             const payload = JSON.parse(text);
-            applyAppDataPayload(payload);
+            await applyAppDataPayload(payload);
             showToast('Daten erfolgreich importiert ✓', { type: 'success', duration: 3000 });
         } catch (err) {
             console.error(err);
@@ -2195,6 +2195,144 @@ function markBackupSavedNow() {
     updateBackupStatusSummary();
 }
 
+const MAX_BACKGROUND_BACKUP_IMAGE_BYTES = 15 * 1024 * 1024;
+const MAX_BACKGROUND_BACKUP_BASE64_LENGTH = Math.ceil(MAX_BACKGROUND_BACKUP_IMAGE_BYTES / 3) * 4 + 16;
+
+function readBackgroundBlobAsBase64(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const dataUrl = String(reader.result || '');
+            const separator = dataUrl.indexOf(',');
+            if (separator < 0 || !dataUrl.slice(0, separator).includes(';base64')) {
+                reject(new Error('Das Hintergrundbild konnte nicht für die Sicherung kodiert werden.'));
+                return;
+            }
+            resolve(dataUrl.slice(separator + 1));
+        };
+        reader.onerror = () => reject(reader.error || new Error('Das Hintergrundbild konnte nicht gelesen werden.'));
+        reader.onabort = () => reject(new Error('Das Lesen des Hintergrundbildes wurde abgebrochen.'));
+        reader.readAsDataURL(blob);
+    });
+}
+
+function createBackgroundBlobFromBase64(base64, mimeType) {
+    if (typeof base64 !== 'string' || !base64 ||
+        base64.length > MAX_BACKGROUND_BACKUP_BASE64_LENGTH) {
+        throw new RangeError('Das Hintergrundbild in der Sicherungsdatei ist ungültig oder zu groß.');
+    }
+
+    const cleanBase64 = base64.replace(/\s/g, '');
+    if (!/^[A-Za-z0-9+/]+={0,2}$/.test(cleanBase64)) {
+        throw new Error('Die Bilddaten in der Sicherungsdatei sind beschädigt.');
+    }
+
+    const allowedMimeTypes = ['image/webp', 'image/jpeg', 'image/png'];
+    if (!allowedMimeTypes.includes(String(mimeType || '').toLowerCase())) {
+        throw new Error('Das Bildformat in der Sicherungsdatei wird nicht unterstützt.');
+    }
+
+    let binary;
+    try {
+        binary = atob(cleanBase64);
+    } catch (_) {
+        throw new Error('Die Bilddaten in der Sicherungsdatei konnten nicht dekodiert werden.');
+    }
+
+    if (!binary.length || binary.length > MAX_BACKGROUND_BACKUP_IMAGE_BYTES) {
+        throw new RangeError('Das Hintergrundbild in der Sicherungsdatei ist zu groß.');
+    }
+
+    const bytes = new Uint8Array(binary.length);
+    const chunkSize = 0x8000;
+    for (let offset = 0; offset < binary.length; offset += chunkSize) {
+        const end = Math.min(binary.length, offset + chunkSize);
+        for (let index = offset; index < end; index++) {
+            bytes[index] = binary.charCodeAt(index);
+        }
+    }
+
+    return new Blob([bytes], { type: mimeType.toLowerCase() });
+}
+
+async function buildBackgroundImageBackupData() {
+    if (typeof window.getAppBackgroundSettings !== 'function' ||
+        typeof window.getAppBackgroundCustomImageBlob !== 'function') {
+        return null;
+    }
+
+    const settings = window.getAppBackgroundSettings();
+    if (!settings || typeof settings !== 'object') {
+        throw new Error('Die Hintergrund-Einstellungen konnten nicht gelesen werden.');
+    }
+
+    const blob = await window.getAppBackgroundCustomImageBlob();
+    let customImage = null;
+
+    if (blob instanceof Blob) {
+        if (!blob.type || !['image/webp', 'image/jpeg', 'image/png'].includes(blob.type.toLowerCase()) ||
+            blob.size <= 0 || blob.size > MAX_BACKGROUND_BACKUP_IMAGE_BYTES) {
+            throw new Error('Das gespeicherte Hintergrundbild hat ein nicht unterstütztes Format oder ist zu groß.');
+        }
+
+        customImage = {
+            name: settings.customImageName || 'Eigenes Hintergrundbild',
+            mimeType: blob.type.toLowerCase(),
+            size: blob.size,
+            dataBase64: await readBackgroundBlobAsBase64(blob)
+        };
+    } else if (settings.mode === 'custom') {
+        throw new Error('Das aktive eigene Hintergrundbild fehlt im lokalen Speicher. Die Sicherung wurde abgebrochen.');
+    }
+
+    return {
+        version: 1,
+        settings,
+        customImage
+    };
+}
+
+async function restoreBackgroundImageFromPayload(payload) {
+    if (!payload || !Object.prototype.hasOwnProperty.call(payload, 'backgroundImage')) {
+        // Ältere Sicherungsdateien enthalten noch keine Hintergrunddaten.
+        // In diesem Fall die aktuelle lokale Auswahl unverändert lassen.
+        return false;
+    }
+
+    const backup = payload.backgroundImage;
+    if (!backup || typeof backup !== 'object' || !backup.settings ||
+        typeof backup.settings !== 'object') {
+        throw new Error('Die Hintergrunddaten in der Sicherungsdatei sind ungültig.');
+    }
+
+    let customImageBlob = null;
+    if (backup.customImage != null) {
+        const image = backup.customImage;
+        if (!image || typeof image !== 'object') {
+            throw new Error('Die Bildinformationen in der Sicherungsdatei sind ungültig.');
+        }
+        customImageBlob = createBackgroundBlobFromBase64(image.dataBase64, image.mimeType);
+        if (Number.isFinite(Number(image.size)) && Number(image.size) !== customImageBlob.size) {
+            throw new Error('Die Größe des Hintergrundbildes stimmt nicht mit den Sicherungsdaten überein.');
+        }
+    }
+
+    if (typeof window.restoreAppBackgroundBackupData !== 'function') {
+        throw new Error('Die Wiederherstellung des Hintergrundbildes ist in dieser App-Version nicht verfügbar.');
+    }
+
+    await window.restoreAppBackgroundBackupData({
+        settings: backup.settings,
+        customImageBlob
+    });
+
+    if (typeof window.refreshAppBackgroundPicker === 'function') {
+        await window.refreshAppBackgroundPicker();
+    }
+
+    return true;
+}
+
 async function buildAppDataPayload() {
     // Export nutzt Kopien, damit das Nachladen der Fotos den Start-Cache
     // nicht unnötig mit allen Bilddaten füllt.
@@ -2206,6 +2344,7 @@ async function buildAppDataPayload() {
         updatedAt: new Date().toISOString(),
         touren,
         plannedTours: appStorage.get('plannedTours') || [],
+        backgroundImage: await buildBackgroundImageBackupData(),
         meta: {
             theme: document.body.classList.contains('dark')
                 ? 'dark'
@@ -2221,7 +2360,7 @@ async function buildAppDataPayload() {
     };
 }
 
-function applyAppDataPayload(payload) {
+async function applyAppDataPayload(payload) {
     if (!payload || typeof payload !== 'object') {
         throw new Error('Ungültige Datendatei');
     }
@@ -2326,6 +2465,9 @@ function applyAppDataPayload(payload) {
             applyThemeEditorFontSize(importedFontSize, false);
         }
     }
+
+    // Bild, Preset und Positionierung zusammen mit den übrigen App-Daten übernehmen.
+    await restoreBackgroundImageFromPayload(payload);
 
     tablePage = 1;
     loadData();
@@ -2518,7 +2660,7 @@ async function loadDataFromLinkedFile() {
         const text = await file.text();
         const payload = JSON.parse(text);
 
-        applyAppDataPayload(payload);
+        await applyAppDataPayload(payload);
         updateFileStatus(`Geladen: ${linkedFileHandle.name}`);
     } catch (err) {
         console.error(err);
@@ -2573,6 +2715,18 @@ async function restoreLinkedFileHandleOnStartup() {
             try {
                 const file = await handle.getFile();
                 const payload = JSON.parse(await file.text());
+
+                // Hintergrund aus der verknüpften Sicherungsdatei übernehmen,
+                // ohne die gespeicherten Tourdaten automatisch zu importieren.
+                try {
+                    await restoreBackgroundImageFromPayload(payload);
+                } catch (backgroundError) {
+                    console.warn(
+                        '[Hintergrund] Hintergrund aus verknüpfter Datendatei konnte nicht wiederhergestellt werden:',
+                        backgroundError
+                    );
+                }
+
                 const importedTheme = payload?.meta?.theme;
                 const fileTheme = 'gold';
                 const validThemes = ['gold'];
