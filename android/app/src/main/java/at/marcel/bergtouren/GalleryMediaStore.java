@@ -28,9 +28,11 @@ import java.util.List;
 /**
  * Read-only access to photos already indexed by Android MediaStore.
  *
+ * Capture time (DATE_TAKEN) is preferred. DATE_ADDED is used only when the
+ * capture timestamp is missing, allowing received/downloaded photos (for
+ * example WhatsApp images without EXIF data) to be found on their device-save day.
  * This class never copies, edits, or deletes user media. Queries are restricted
- * to the requested local calendar day and are only executed after the user has
- * granted the corresponding runtime permission.
+ * to the requested local calendar day and only run after runtime permission.
  */
 final class GalleryMediaStore {
     static final String ACCESS_FULL = "full";
@@ -90,23 +92,53 @@ final class GalleryMediaStore {
         long startMillis = localDate.atStartOfDay(zone).toInstant().toEpochMilli();
         long endMillis = localDate.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli();
 
-        String[] projection = new String[] {
-                MediaStore.Images.Media._ID,
-                MediaStore.Images.Media.DISPLAY_NAME,
-                MediaStore.Images.Media.DATE_TAKEN,
-                MediaStore.Images.Media.MIME_TYPE,
-                MediaStore.Images.Media.WIDTH,
-                MediaStore.Images.Media.HEIGHT,
-                MediaStore.Images.Media.SIZE
-        };
+        // Android 10+ liefert den tatsächlichen Geräteordner über RELATIVE_PATH.
+        // Auf älteren Android-Versionen bleibt die Abfrage ordnerneutral.
+        String[] projection;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            projection = new String[] {
+                    MediaStore.Images.Media._ID,
+                    MediaStore.Images.Media.DISPLAY_NAME,
+                    MediaStore.Images.Media.DATE_TAKEN,
+                    MediaStore.MediaColumns.DATE_ADDED,
+                    MediaStore.Images.Media.MIME_TYPE,
+                    MediaStore.Images.Media.WIDTH,
+                    MediaStore.Images.Media.HEIGHT,
+                    MediaStore.Images.Media.SIZE,
+                    MediaStore.MediaColumns.RELATIVE_PATH
+            };
+        } else {
+            projection = new String[] {
+                    MediaStore.Images.Media._ID,
+                    MediaStore.Images.Media.DISPLAY_NAME,
+                    MediaStore.Images.Media.DATE_TAKEN,
+                    MediaStore.MediaColumns.DATE_ADDED,
+                    MediaStore.Images.Media.MIME_TYPE,
+                    MediaStore.Images.Media.WIDTH,
+                    MediaStore.Images.Media.HEIGHT,
+                    MediaStore.Images.Media.SIZE
+            };
+        }
 
-        String selection = MediaStore.Images.Media.DATE_TAKEN + " >= ? AND "
-                + MediaStore.Images.Media.DATE_TAKEN + " < ?";
+        String dateTakenColumn = MediaStore.Images.Media.DATE_TAKEN;
+        String dateAddedColumn = MediaStore.MediaColumns.DATE_ADDED;
+        long startSeconds = startMillis / 1000L;
+        long endSeconds = endMillis / 1000L;
+
+        // Das Aufnahmedatum ist maßgeblich. Nur wenn DATE_TAKEN fehlt oder 0 ist,
+        // wird DATE_ADDED als Zeitpunkt verwendet, zu dem Android das Bild indexiert hat.
+        String selection = "((" + dateTakenColumn + " >= ? AND "
+                + dateTakenColumn + " < ?) OR (("
+                + dateTakenColumn + " IS NULL OR " + dateTakenColumn + " <= 0) AND "
+                + dateAddedColumn + " >= ? AND " + dateAddedColumn + " < ?))";
         String[] selectionArgs = new String[] {
                 Long.toString(startMillis),
-                Long.toString(endMillis)
+                Long.toString(endMillis),
+                Long.toString(startSeconds),
+                Long.toString(endSeconds)
         };
-        String sortOrder = MediaStore.Images.Media.DATE_TAKEN + " ASC, "
+        String sortOrder = dateTakenColumn + " ASC, "
+                + dateAddedColumn + " ASC, "
                 + MediaStore.Images.Media._ID + " ASC";
 
         JSONArray photos = new JSONArray();
@@ -124,6 +156,8 @@ final class GalleryMediaStore {
                 int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
                 int nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
                 int dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN);
+                int dateAddedColumnIndex = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_ADDED);
+                int pathColumn = cursor.getColumnIndex(MediaStore.MediaColumns.RELATIVE_PATH);
                 int mimeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.MIME_TYPE);
                 int widthColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH);
                 int heightColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT);
@@ -142,7 +176,17 @@ final class GalleryMediaStore {
                     photo.put("uri", itemUri.toString());
                     photo.put("displayName", cursor.isNull(nameColumn)
                             ? JSONObject.NULL : cursor.getString(nameColumn));
-                    photo.put("dateTaken", cursor.getLong(dateColumn));
+                    long dateTaken = cursor.isNull(dateColumn) ? 0L : cursor.getLong(dateColumn);
+                    long dateAddedSeconds = cursor.isNull(dateAddedColumnIndex)
+                            ? 0L : cursor.getLong(dateAddedColumnIndex);
+                    String relativePath = pathColumn >= 0 && !cursor.isNull(pathColumn)
+                            ? cursor.getString(pathColumn) : "";
+
+                    photo.put("dateTaken", dateTaken);
+                    photo.put("dateAdded", dateAddedSeconds > 0
+                            ? dateAddedSeconds * 1000L : 0L);
+                    photo.put("dateBasis", dateTaken > 0 ? "capture" : "added");
+                    photo.put("relativePath", relativePath);
                     photo.put("mimeType", cursor.isNull(mimeColumn)
                             ? JSONObject.NULL : cursor.getString(mimeColumn));
                     photo.put("width", cursor.isNull(widthColumn)
