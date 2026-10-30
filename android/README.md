@@ -40,3 +40,24 @@ Dieses Android-Modul ist eine separate native Hülle für die vorhandene Bergtou
 ## Noch nicht als produktionsfertig betrachten
 
 Dies ist zunächst das Android-Grundgerüst. Vor einer Installation auf deinem S23 müssen Gradle-Synchronisierung, APK-Build, WebView-Start, Offline-Verhalten, Dateiauswahl/Backup-Import und der Bridge-Handshake auf einem realen Gerät geprüft werden.
+
+## APK ohne lokale Installation bauen
+
+Für diesen Branch ist ein Cloud-Build über GitHub Actions eingerichtet. Android Studio und das Android SDK müssen auf dem eigenen PC nicht installiert werden.
+
+1. Im GitHub-Repository den Branch `feature/android-gallery-shell` öffnen.
+2. Den Reiter **Actions** öffnen.
+3. Den Workflow **Android APK (Debug)** auswählen.
+4. Den neuesten erfolgreichen Lauf öffnen.
+5. Unter **Artifacts** die Datei `bergtouren-debug-apk` herunterladen. Der Workflow lädt die APK als einzelne Datei und nicht als ZIP hoch.
+6. Die APK auf dem Android-Gerät öffnen und die Installation bestätigen.
+
+Der Workflow wird bei Änderungen an `android/**` auf diesem Branch automatisch gestartet. Er kann außerdem über **Run workflow** manuell gestartet werden. Das Artefakt bleibt 14 Tage verfügbar.
+
+### Hinweis zur Debug-Version
+
+Die Debug-APK ist nur für die ersten Geräte- und Funktionsprüfungen gedacht. Für spätere regelmäßige Updates wird ein eigener, dauerhaft geschützter Signaturschlüssel eingerichtet. Debug-Builds aus getrennten Cloud-Läufen können unterschiedliche Debug-Signaturen besitzen und lassen sich dann nicht als Update übereinander installieren; gegebenenfalls muss die vorherige Testversion deinstalliert werden.
+
+### Wenn der Build fehlschlägt
+
+Die APK wird nur bei erfolgreichem Build veröffentlicht. Bei einem Fehler im Workflow-Lauf zuerst den Abschnitt **Build debug APK** öffnen; dort steht die konkrete Gradle- oder Compilerfehlermeldung. Ein fehlgeschlagener Build ist kein Anlass, die PWA auf `main` zu ändern.
