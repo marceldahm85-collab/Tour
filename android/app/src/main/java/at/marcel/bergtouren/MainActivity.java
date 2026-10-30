@@ -359,6 +359,10 @@ public final class MainActivity extends Activity {
                                 org.json.JSONArray features = new org.json.JSONArray();
                                 features.put("gallery.mediaStore.v1");
                                 features.put("gallery.thumbnail.v1");
+                                features.put("gallery.mediaStore.v2");
+                                features.put("gallery.thumbnail.v2");
+                                features.put("gallery.image.full.v1");
+                                features.put("gallery.video.player.v1");
                                 response.put("features", features);
                                 replyToBridge(replyProxy, response);
                                 Log.i(TAG, "Sichere JavaScript-Bridge ist erreichbar (Request-ID bestätigt).");
@@ -366,12 +370,20 @@ public final class MainActivity extends Activity {
                                 replyGalleryPermissionState(replyProxy, requestId);
                             } else if ("gallery.permission.request".equals(type)) {
                                 requestGalleryPermission(replyProxy, requestId);
-                            } else if ("gallery.photos.byDate".equals(type)) {
+                            } else if ("gallery.media.byDate".equals(type)
+                                    || "gallery.photos.byDate".equals(type)) {
                                 String date = request.optString("date", "");
-                                queryGalleryPhotosForDate(replyProxy, requestId, date);
+                                queryGalleryMediaForDate(replyProxy, requestId, date);
                             } else if ("gallery.thumbnail".equals(type)) {
                                 String uri = request.optString("uri", "");
                                 queryGalleryThumbnail(replyProxy, requestId, uri);
+                            } else if ("gallery.image.full".equals(type)) {
+                                String uri = request.optString("uri", "");
+                                queryGalleryFullImage(replyProxy, requestId, uri);
+                            } else if ("gallery.video.play".equals(type)) {
+                                String uri = request.optString("uri", "");
+                                String title = request.optString("title", "Tourvideo");
+                                launchGalleryVideo(replyProxy, requestId, uri, title);
                             } else {
                                 Log.w(TAG, "Unbekannte Bridge-Nachricht verworfen.");
                             }
@@ -449,11 +461,13 @@ public final class MainActivity extends Activity {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 permissions = new String[] {
                         Manifest.permission.READ_MEDIA_IMAGES,
+                        Manifest.permission.READ_MEDIA_VIDEO,
                         Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
                 };
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 permissions = new String[] {
-                        Manifest.permission.READ_MEDIA_IMAGES
+                        Manifest.permission.READ_MEDIA_IMAGES,
+                        Manifest.permission.READ_MEDIA_VIDEO
                 };
             } else {
                 permissions = new String[] {
@@ -465,13 +479,13 @@ public final class MainActivity extends Activity {
         });
     }
 
-    private void queryGalleryPhotosForDate(
+    private void queryGalleryMediaForDate(
             JavaScriptReplyProxy replyProxy,
             String requestId,
             String date
     ) {
         if (date == null || date.length() != 10) {
-            JSONObject error = createGalleryResponse("gallery.photos.result", requestId);
+            JSONObject error = createGalleryResponse("gallery.media.result", requestId);
             try {
                 error.put("status", "invalid_date");
                 error.put("message", "Das Datum muss im Format JJJJ-MM-TT vorliegen.");
@@ -485,17 +499,17 @@ public final class MainActivity extends Activity {
         galleryExecutor.execute(() -> {
             JSONObject response;
             try {
-                response = GalleryMediaStore.queryImagesForLocalDate(getApplicationContext(), date);
-                response.put("type", "gallery.photos.result");
+                response = GalleryMediaStore.queryMediaForLocalDate(getApplicationContext(), date);
+                response.put("type", "gallery.media.result");
                 if (requestId != null && !requestId.isEmpty()) {
                     response.put("requestId", requestId);
                 }
             } catch (Exception error) {
-                Log.e(TAG, "Galerieabfrage für " + date + " fehlgeschlagen.", error);
-                response = createGalleryResponse("gallery.photos.result", requestId);
+                Log.e(TAG, "Medienabfrage für " + date + " fehlgeschlagen.", error);
+                response = createGalleryResponse("gallery.media.result", requestId);
                 try {
                     response.put("status", "query_failed");
-                    response.put("message", "Die Fotos für dieses Datum konnten nicht gelesen werden.");
+                    response.put("message", "Fotos und Videos für dieses Datum konnten nicht gelesen werden.");
                 } catch (JSONException jsonError) {
                     Log.e(TAG, "Fehlerantwort konnte nicht serialisiert werden.", jsonError);
                 }
@@ -545,6 +559,76 @@ public final class MainActivity extends Activity {
 
             JSONObject finalResponse = response;
             mainHandler.post(() -> replyToBridge(replyProxy, finalResponse));
+        });
+    }
+
+    private void queryGalleryFullImage(
+            JavaScriptReplyProxy replyProxy,
+            String requestId,
+            String uri
+    ) {
+        if (uri == null || uri.isEmpty() || uri.length() > 512) {
+            JSONObject error = createGalleryResponse("gallery.image.full.result", requestId);
+            try {
+                error.put("status", "invalid_uri");
+            } catch (JSONException jsonError) {
+                Log.e(TAG, "Vollbild-Fehlerantwort konnte nicht serialisiert werden.", jsonError);
+            }
+            replyToBridge(replyProxy, error);
+            return;
+        }
+
+        galleryExecutor.execute(() -> {
+            JSONObject response;
+            try {
+                response = GalleryMediaStore.loadFullImageBase64(getApplicationContext(), uri);
+                response.put("type", "gallery.image.full.result");
+                if (requestId != null && !requestId.isEmpty()) response.put("requestId", requestId);
+            } catch (Exception error) {
+                Log.w(TAG, "Vollbildfoto konnte nicht geladen werden.", error);
+                response = createGalleryResponse("gallery.image.full.result", requestId);
+                try {
+                    response.put("status", "image_failed");
+                } catch (JSONException jsonError) {
+                    Log.e(TAG, "Vollbild-Fehlerantwort konnte nicht serialisiert werden.", jsonError);
+                }
+            }
+            JSONObject finalResponse = response;
+            mainHandler.post(() -> replyToBridge(replyProxy, finalResponse));
+        });
+    }
+
+    private void launchGalleryVideo(
+            JavaScriptReplyProxy replyProxy,
+            String requestId,
+            String uriString,
+            String title
+    ) {
+        runOnUiThread(() -> {
+            JSONObject response = createGalleryResponse("gallery.video.play.result", requestId);
+            try {
+                Uri uri = Uri.parse(uriString == null ? "" : uriString);
+                if (!GalleryMediaStore.isAllowedVideoUri(uri)) {
+                    response.put("status", "invalid_uri");
+                } else if (!GalleryMediaStore.hasVideoAccess(this)) {
+                    response.put("status", "permission_required");
+                } else {
+                    Intent intent = new Intent(this, GalleryVideoActivity.class);
+                    intent.putExtra(GalleryVideoActivity.EXTRA_URI, uri.toString());
+                    intent.putExtra(GalleryVideoActivity.EXTRA_TITLE,
+                            title == null || title.trim().isEmpty() ? "Tourvideo" : title);
+                    startActivity(intent);
+                    response.put("status", "started");
+                }
+            } catch (Exception error) {
+                Log.w(TAG, "Video-Player konnte nicht geöffnet werden.", error);
+                try {
+                    response.put("status", "player_failed");
+                } catch (JSONException jsonError) {
+                    Log.e(TAG, "Player-Fehlerantwort konnte nicht serialisiert werden.", jsonError);
+                }
+            }
+            replyToBridge(replyProxy, response);
         });
     }
 

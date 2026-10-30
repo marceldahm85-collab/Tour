@@ -278,3 +278,181 @@
         border-color: var(--atg-accent);
     }
 }
+
+
+/* Einheitliche Darstellung der zugeordneten Foto- und Videomedien. */
+.atg-photo-viewer [hidden] { display: none !important; }
+
+.atg-media-card.is-video .atg-thumb-wrap {
+    cursor: pointer;
+}
+
+.atg-video-play {
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    top: 50%;
+    display: grid;
+    place-items: center;
+    width: 39px;
+    height: 39px;
+    padding-left: 3px;
+    border: 1px solid rgba(255, 255, 255, .75);
+    border-radius: 50%;
+    background: rgba(5, 9, 14, .74);
+    color: #fff;
+    font-size: 15px;
+    line-height: 1;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    box-shadow: 0 3px 14px rgba(0, 0, 0, .35);
+}
+
+.atg-media-card .atg-thumb-wrap[role="button"] {
+    cursor: pointer;
+    outline-offset: 2px;
+}
+
+.atg-media-card .atg-thumb-wrap[role="button"]:focus-visible {
+    outline: 2px solid var(--atg-accent);
+}
+
+/* Eigenständige Vollbildansicht: vollständiges Foto, niemals object-fit: cover. */
+.atg-photo-viewer[hidden] {
+    display: none !important;
+}
+
+.atg-photo-viewer:not([hidden]) {
+    position: fixed;
+    z-index: 100000;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+    overflow: hidden;
+    background: #05080c;
+    color: #f7f8fa;
+}
+
+.atg-viewer-header {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 58px;
+    padding: 7px 14px 7px 17px;
+    border-bottom: 1px solid rgba(255, 255, 255, .11);
+    background: rgba(13, 18, 24, .98);
+}
+
+.atg-viewer-heading {
+    min-width: 0;
+}
+
+.atg-viewer-title {
+    overflow: hidden;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.atg-viewer-counter {
+    margin-top: 2px;
+    color: rgba(255, 255, 255, .68);
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+}
+
+.atg-viewer-close,
+.atg-viewer-nav {
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, .22);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .08);
+    color: #fff;
+    font: inherit;
+    font-size: 22px;
+    font-weight: 700;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.atg-viewer-close:active,
+.atg-viewer-nav:active {
+    background: rgba(255, 255, 255, .2);
+}
+
+.atg-viewer-stage {
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    padding: 8px 5px;
+    overflow: hidden;
+    background: #05080c;
+    touch-action: pan-y;
+}
+
+.atg-viewer-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: center;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.atg-viewer-loading {
+    max-width: 280px;
+    padding: 18px;
+    color: rgba(255, 255, 255, .78);
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.atg-viewer-footer {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 58px;
+    padding: 7px 14px;
+    border-top: 1px solid rgba(255, 255, 255, .11);
+    background: rgba(13, 18, 24, .98);
+}
+
+.atg-viewer-nav {
+    font-size: 30px;
+    line-height: 1;
+}
+
+.atg-viewer-hint {
+    flex: 1 1 auto;
+    color: rgba(255, 255, 255, .56);
+    font-size: 9px;
+    line-height: 1.35;
+    text-align: center;
+}
+
+@media (min-width: 700px) {
+    .atg-viewer-stage { padding: 18px; }
+    .atg-viewer-image { max-width: min(100%, 1400px); }
+}

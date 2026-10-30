@@ -1,7 +1,6 @@
-/* Optionale Fotozuordnung für gespeicherte Touren in der nativen Android-App.
- * Beim Öffnen werden ausschließlich bereits zugeordnete Fotos angezeigt.
- * Die Suche nach Tagesfotos startet erst nach ausdrücklichem Antippen.
- * Originalbilder bleiben in der Samsung-Galerie; gespeichert werden nur URI und Metadaten.
+/* Gemeinsame Foto- und Videogalerie für gespeicherte Touren in der nativen Android-App.
+ * Originalmedien bleiben in der Gerätegalerie; die App speichert nur lokale URI-Metadaten.
+ * Die Tagesabfrage startet ausschließlich nach ausdrücklichem Öffnen der Medienauswahl.
  */
 (() => {
     'use strict';
@@ -10,18 +9,22 @@
     const nativeBridgeAvailable = !!nativeBridge &&
         typeof nativeBridge.postMessage === 'function' &&
         typeof nativeBridge.addEventListener === 'function';
-
     const isAndroidWebView = /;\s*wv\)/i.test(
         String(window.navigator && window.navigator.userAgent || '')
     );
 
-    // Außerhalb der nativen Android-WebView bleibt die normale PWA unverändert.
     if (!nativeBridgeAvailable && !isAndroidWebView) return;
 
     const pendingRequests = new Map();
     let requestCounter = 0;
     let activePanel = null;
     let detailObserver = null;
+    let nativeFeatures = new Set();
+    let viewer = null;
+    let viewerItems = [];
+    let viewerIndex = 0;
+    let viewerRequestToken = 0;
+    let previousBodyOverflow = '';
 
     function nextRequestId() {
         requestCounter += 1;
@@ -56,14 +59,14 @@
         timeoutMs = timeoutMs || 18000;
 
         if (!nativeBridgeAvailable) {
-            return Promise.reject(new Error('Die native Android-Galerie-Schnittstelle ist in dieser App-Sitzung nicht verfügbar.'));
+            return Promise.reject(new Error('Die native Android-Medienschnittstelle ist in dieser App-Sitzung nicht verfügbar.'));
         }
 
         return new Promise((resolve, reject) => {
             const requestId = nextRequestId();
             const timeout = window.setTimeout(() => {
                 pendingRequests.delete(requestId);
-                reject(new Error('Die Android-Fotofunktion antwortet gerade nicht.'));
+                reject(new Error('Die Android-Medienfunktion antwortet gerade nicht.'));
             }, timeoutMs);
 
             pendingRequests.set(requestId, { resolve, reject, timeout });
@@ -83,11 +86,12 @@
     async function checkNativeGalleryBridge() {
         try {
             const reply = await nativeRequest('bridge.ping', {}, 8000);
-            const features = Array.isArray(reply.features) ? reply.features : [];
-            return features.includes('gallery.mediaStore.v1') &&
-                features.includes('gallery.thumbnail.v1');
+            nativeFeatures = new Set(Array.isArray(reply.features) ? reply.features : []);
+            return nativeFeatures.has('gallery.mediaStore.v1') &&
+                nativeFeatures.has('gallery.thumbnail.v1');
         } catch (error) {
             console.warn('[Android-Galerie] Native Galerie-Bridge antwortet nicht.', error);
+            nativeFeatures = new Set();
             return false;
         }
     }
@@ -105,55 +109,87 @@
         return '';
     }
 
-    function cleanPhoto(photo) {
-        if (!photo || typeof photo.uri !== 'string' ||
-            !photo.uri.startsWith('content://media/')) {
+    function detectMediaType(media) {
+        const uri = String(media && media.uri || '');
+        return media && media.mediaType === 'video' || /\/video\/media\/\d+$/i.test(uri)
+            ? 'video' : 'photo';
+    }
+
+    function cleanMedia(media) {
+        if (!media || typeof media.uri !== 'string' ||
+            !/^content:\/\/media\/(external\/(images|video)\/media)\/\d+$/i.test(media.uri)) {
             return null;
         }
 
         return {
-            uri: photo.uri,
-            displayName: String(photo.displayName || 'Foto'),
-            dateTaken: Number(photo.dateTaken) || 0,
-            dateAdded: Number(photo.dateAdded) || 0,
-            dateBasis: photo.dateBasis === 'capture' || photo.dateBasis === 'added'
-                ? photo.dateBasis : '',
-            relativePath: String(photo.relativePath || '').replace(/\\/g, '/'),
-            mimeType: String(photo.mimeType || 'image/*'),
-            width: Number(photo.width) || 0,
-            height: Number(photo.height) || 0,
-            sizeBytes: Number(photo.sizeBytes) || 0
+            uri: media.uri,
+            mediaType: detectMediaType(media),
+            displayName: String(media.displayName || (detectMediaType(media) === 'video' ? 'Video' : 'Foto')),
+            dateTaken: Number(media.dateTaken) || 0,
+            dateAdded: Number(media.dateAdded) || 0,
+            dateBasis: media.dateBasis === 'capture' || media.dateBasis === 'added'
+                ? media.dateBasis : '',
+            relativePath: String(media.relativePath || '').replace(/\\/g, '/'),
+            mimeType: String(media.mimeType || (detectMediaType(media) === 'video' ? 'video/*' : 'image/*')),
+            width: Number(media.width) || 0,
+            height: Number(media.height) || 0,
+            sizeBytes: Number(media.sizeBytes) || 0,
+            durationMillis: Number(media.durationMillis) || 0
         };
     }
 
-    function getPhotoSourceLabel(photo) {
-        const path = String(photo && photo.relativePath || '').toLowerCase();
-        if (path.includes('whatsapp')) return 'WhatsApp';
-        const pathSegments = path.split('/').filter(Boolean);
-        if (pathSegments[0] === 'dcim' && pathSegments[1] === 'camera') return 'Kamera';
-        if (path.includes('screenshot')) return 'Screenshots';
-        if (path.includes('download')) return 'Downloads';
-        return path ? 'Weitere Bilder' : 'Galerie';
-    }
+    function getSavedMedia(entry) {
+        const photos = Array.isArray(entry && entry.galleryPhotos) ? entry.galleryPhotos : [];
+        const videos = Array.isArray(entry && entry.galleryVideos) ? entry.galleryVideos : [];
+        const byUri = new Map();
 
-    function getPhotoMetaLabel(photo) {
-        const source = getPhotoSourceLabel(photo);
-        const basis = photo && photo.dateBasis === 'added'
-            ? 'Speicherdatum'
-            : photo && photo.dateBasis === 'capture'
-                ? 'Aufnahmedatum'
-                : '';
-        return basis ? source + ' · ' + basis : source;
+        photos.concat(videos).forEach(item => {
+            const media = cleanMedia(item);
+            if (media) byUri.set(media.uri, media);
+        });
+        return Array.from(byUri.values()).sort(compareMedia);
     }
 
     function getSavedPhotos(entry) {
-        return Array.isArray(entry.galleryPhotos)
-            ? entry.galleryPhotos.map(cleanPhoto).filter(Boolean)
-            : [];
+        return getSavedMedia(entry).filter(media => media.mediaType === 'photo');
+    }
+
+    function compareMedia(a, b) {
+        const aTime = a.dateTaken > 0 ? a.dateTaken : a.dateAdded;
+        const bTime = b.dateTaken > 0 ? b.dateTaken : b.dateAdded;
+        return aTime - bTime || a.displayName.localeCompare(b.displayName, 'de');
+    }
+
+    function getMediaSourceLabel(media) {
+        const path = String(media && media.relativePath || '').toLowerCase();
+        if (path.includes('whatsapp')) return 'WhatsApp';
+        const segments = path.split('/').filter(Boolean);
+        if (segments[0] === 'dcim' && segments[1] === 'camera') return 'Kamera';
+        if (path.includes('screenshot')) return 'Screenshots';
+        if (path.includes('download')) return 'Downloads';
+        return path ? 'Weitere Medien' : 'Galerie';
+    }
+
+    function getMediaMetaLabel(media) {
+        const source = getMediaSourceLabel(media);
+        const basis = media && media.dateBasis === 'added'
+            ? 'Speicherdatum'
+            : media && media.dateBasis === 'capture'
+                ? 'Aufnahmedatum'
+                : '';
+        const duration = media && media.mediaType === 'video' && media.durationMillis > 0
+            ? formatDuration(media.durationMillis) : '';
+        return [source, basis, duration].filter(Boolean).join(' · ');
+    }
+
+    function formatDuration(value) {
+        const seconds = Math.max(0, Math.floor(Number(value) / 1000));
+        const minutes = Math.floor(seconds / 60);
+        return minutes + ':' + String(seconds % 60).padStart(2, '0') + ' min';
     }
 
     function setStatus(panel, text, kind) {
-        const node = panel.querySelector('.atg-status');
+        const node = panel && panel.querySelector('.atg-status');
         if (!node) return;
         node.textContent = text;
         node.dataset.kind = kind || 'info';
@@ -183,34 +219,241 @@
         }
     }
 
-    function createPhotoCard(panel, photo, selectable, selected, onToggle) {
+    function ensurePhotoViewer() {
+        if (viewer && viewer.isConnected) return viewer;
+
+        const root = document.createElement('div');
+        root.id = 'atg-photo-viewer';
+        root.className = 'atg-photo-viewer';
+        root.hidden = true;
+        root.setAttribute('role', 'dialog');
+        root.setAttribute('aria-modal', 'true');
+        root.setAttribute('aria-hidden', 'true');
+        root.innerHTML = [
+            '<div class="atg-viewer-header">',
+              '<div class="atg-viewer-heading">',
+                '<div class="atg-viewer-title">Tourfoto</div>',
+                '<div class="atg-viewer-counter"></div>',
+              '</div>',
+              '<button id="atg-photo-viewer-close" type="button" class="atg-viewer-close" aria-label="Vollbild schließen">✕</button>',
+            '</div>',
+            '<div class="atg-viewer-stage">',
+              '<div class="atg-viewer-loading" role="status">Foto wird geladen …</div>',
+              '<img class="atg-viewer-image" alt="Tourfoto in Vollbildansicht">',
+            '</div>',
+            '<div class="atg-viewer-footer">',
+              '<button type="button" class="atg-viewer-nav atg-viewer-prev" aria-label="Vorheriges Foto">‹</button>',
+              '<span class="atg-viewer-hint">Das vollständige Bild wird ohne Beschnitt angezeigt.</span>',
+              '<button type="button" class="atg-viewer-nav atg-viewer-next" aria-label="Nächstes Foto">›</button>',
+            '</div>'
+        ].join('');
+        document.body.appendChild(root);
+
+        root.querySelector('.atg-viewer-close').addEventListener('click', closePhotoViewer);
+        root.querySelector('.atg-viewer-prev').addEventListener('click', () => changeViewerPhoto(-1));
+        root.querySelector('.atg-viewer-next').addEventListener('click', () => changeViewerPhoto(1));
+        root.addEventListener('click', event => {
+            if (event.target === root) closePhotoViewer();
+        });
+
+        const stage = root.querySelector('.atg-viewer-stage');
+        let touchStartX = 0;
+        stage.addEventListener('touchstart', event => {
+            touchStartX = event.changedTouches && event.changedTouches[0]
+                ? event.changedTouches[0].clientX : 0;
+        }, { passive: true });
+        stage.addEventListener('touchend', event => {
+            const endX = event.changedTouches && event.changedTouches[0]
+                ? event.changedTouches[0].clientX : touchStartX;
+            const delta = endX - touchStartX;
+            if (Math.abs(delta) > 65) changeViewerPhoto(delta < 0 ? 1 : -1);
+        }, { passive: true });
+
+        viewer = root;
+        return viewer;
+    }
+
+    function openPhotoViewer(panel, media, availableMedia) {
+        const photos = (Array.isArray(availableMedia) ? availableMedia : getSavedMedia(panel._atgEntry))
+            .filter(item => item && item.mediaType === 'photo');
+        const current = cleanMedia(media);
+        if (!current || current.mediaType !== 'photo') return;
+
+        viewerItems = photos.length ? photos : [current];
+        let index = viewerItems.findIndex(item => item.uri === current.uri);
+        if (index < 0) {
+            viewerItems.push(current);
+            index = viewerItems.length - 1;
+        }
+
+        const root = ensurePhotoViewer();
+        if (root.hidden) {
+            previousBodyOverflow = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+        }
+        root.hidden = false;
+        root.classList.add('is-open');
+        root.setAttribute('aria-hidden', 'false');
+        showViewerPhoto(index);
+    }
+
+    function closePhotoViewer() {
+        if (!viewer || viewer.hidden) return;
+        viewer.classList.remove('is-open');
+        viewer.hidden = true;
+        viewer.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = previousBodyOverflow;
+        viewerRequestToken += 1;
+    }
+
+    function changeViewerPhoto(direction) {
+        if (!viewer || viewer.hidden || viewerItems.length < 2) return;
+        const next = (viewerIndex + direction + viewerItems.length) % viewerItems.length;
+        showViewerPhoto(next);
+    }
+
+    async function showViewerPhoto(index) {
+        if (!viewer || !viewerItems.length) return;
+        viewerIndex = Math.max(0, Math.min(index, viewerItems.length - 1));
+        const media = viewerItems[viewerIndex];
+        const token = ++viewerRequestToken;
+        const image = viewer.querySelector('.atg-viewer-image');
+        const loading = viewer.querySelector('.atg-viewer-loading');
+        const title = viewer.querySelector('.atg-viewer-title');
+        const counter = viewer.querySelector('.atg-viewer-counter');
+        const previous = viewer.querySelector('.atg-viewer-prev');
+        const next = viewer.querySelector('.atg-viewer-next');
+
+        image.removeAttribute('src');
+        image.hidden = true;
+        loading.hidden = false;
+        loading.textContent = 'Foto wird geladen …';
+        title.textContent = media.displayName || 'Tourfoto';
+        counter.textContent = (viewerIndex + 1) + ' / ' + viewerItems.length;
+        previous.hidden = viewerItems.length < 2;
+        next.hidden = viewerItems.length < 2;
+
+        try {
+            if (!nativeFeatures.has('gallery.thumbnail.v1')) {
+                await checkNativeGalleryBridge();
+            }
+            const action = nativeFeatures.has('gallery.image.full.v1')
+                ? 'gallery.image.full' : 'gallery.thumbnail';
+            const response = await nativeRequest(action, { uri: media.uri }, 30000);
+            if (token !== viewerRequestToken || viewer.hidden) return;
+            if (response.status !== 'ok' || !response.data) {
+                throw new Error(response.status === 'permission_required'
+                    ? 'Für dieses Foto fehlt aktuell der Galerie-Zugriff.'
+                    : 'Das Foto kann gerade nicht geladen werden.');
+            }
+            image.src = 'data:' + (response.mimeType || 'image/jpeg') + ';base64,' + response.data;
+            image.hidden = false;
+            loading.hidden = true;
+        } catch (error) {
+            if (token !== viewerRequestToken || viewer.hidden) return;
+            loading.textContent = error.message || 'Foto konnte nicht geladen werden.';
+        }
+    }
+
+    function handleViewerKeys(event) {
+        if (!viewer || viewer.hidden) return;
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            closePhotoViewer();
+        } else if (event.key === 'ArrowLeft') {
+            event.preventDefault();
+            changeViewerPhoto(-1);
+        } else if (event.key === 'ArrowRight') {
+            event.preventDefault();
+            changeViewerPhoto(1);
+        }
+    }
+    document.addEventListener('keydown', handleViewerKeys);
+
+    async function playVideo(panel, media) {
+        if (!nativeFeatures.has('gallery.video.player.v1')) {
+            await checkNativeGalleryBridge();
+        }
+        if (!nativeFeatures.has('gallery.video.player.v1')) {
+            setStatus(
+                panel,
+                'Für die Videowiedergabe innerhalb der App ist die aktuelle Android-App-Version erforderlich. Bitte installiere das aktualisierte APK.',
+                'warning'
+            );
+            return;
+        }
+
+        try {
+            const result = await nativeRequest('gallery.video.play', {
+                uri: media.uri,
+                title: media.displayName || 'Tourvideo'
+            }, 12000);
+            if (result.status === 'started') return;
+            if (result.status === 'permission_required') {
+                setStatus(panel, 'Für dieses Video fehlt der Zugriff auf Videos. Öffne die Medienauswahl und erteile die Freigabe.', 'warning');
+            } else {
+                setStatus(panel, 'Der Video-Player konnte nicht geöffnet werden.', 'error');
+            }
+        } catch (error) {
+            setStatus(panel, error.message || 'Der Video-Player antwortet gerade nicht.', 'error');
+        }
+    }
+
+    function createMediaCard(panel, media, selectable, selected, onToggle, mediaList) {
         const card = document.createElement('article');
-        card.className = 'atg-photo-card';
+        card.className = 'atg-photo-card atg-media-card';
+        if (media.mediaType === 'video') card.classList.add('is-video');
         card.classList.toggle('is-selected', !!selected);
 
         const thumbWrap = document.createElement('div');
         thumbWrap.className = 'atg-thumb-wrap';
+        if (media.mediaType === 'video') thumbWrap.classList.add('is-video');
+        thumbWrap.setAttribute('role', 'button');
+        thumbWrap.setAttribute('tabindex', '0');
+        thumbWrap.setAttribute('aria-label', media.mediaType === 'video'
+            ? 'Video abspielen: ' + media.displayName
+            : 'Foto im Vollbild öffnen: ' + media.displayName);
 
         const placeholder = document.createElement('div');
         placeholder.className = 'atg-thumb-placeholder';
-        placeholder.textContent = '⛰';
+        placeholder.textContent = media.mediaType === 'video' ? '▶' : '⛰';
         thumbWrap.appendChild(placeholder);
 
         const image = document.createElement('img');
         image.className = 'atg-thumb';
-        image.alt = photo.displayName || 'Tourfoto';
+        image.alt = media.displayName || (media.mediaType === 'video' ? 'Tourvideo' : 'Tourfoto');
         image.loading = 'lazy';
         image.decoding = 'async';
-        image.dataset.uri = photo.uri;
+        image.dataset.uri = media.uri;
         thumbWrap.appendChild(image);
+
+        if (media.mediaType === 'video') {
+            const play = document.createElement('span');
+            play.className = 'atg-video-play';
+            play.setAttribute('aria-hidden', 'true');
+            play.textContent = '▶';
+            thumbWrap.appendChild(play);
+        }
+
+        const activate = () => {
+            if (media.mediaType === 'video') playVideo(panel, media);
+            else openPhotoViewer(panel, media, mediaList);
+        };
+        thumbWrap.addEventListener('click', activate);
+        thumbWrap.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                activate();
+            }
+        });
 
         const name = document.createElement('div');
         name.className = 'atg-photo-name';
-        name.textContent = photo.displayName || 'Foto';
+        name.textContent = media.displayName || (media.mediaType === 'video' ? 'Video' : 'Foto');
 
         const meta = document.createElement('div');
         meta.className = 'atg-photo-meta';
-        meta.textContent = getPhotoMetaLabel(photo);
+        meta.textContent = getMediaMetaLabel(media);
 
         card.append(thumbWrap, name, meta);
 
@@ -234,28 +477,29 @@
         panel.className = 'atg-panel';
         panel.id = 'td-gallery-panel';
         panel.dataset.tourId = String(entry.id || '');
+        panel._atgEntry = entry;
         panel.innerHTML = [
             '<div class="atg-heading">',
               '<div class="atg-heading-copy">',
-                '<div class="atg-title">Tourfotos</div>',
+                '<div class="atg-title">Tourmedien</div>',
                 '<div class="atg-subtitle"></div>',
               '</div>',
               '<span class="atg-count">0 zugeordnet</span>',
             '</div>',
             '<div class="atg-display">',
-              '<div class="atg-empty atg-display-empty">Noch keine Fotos zugeordnet.</div>',
-              '<div class="atg-grid atg-saved-grid" aria-label="Der Tour zugeordnete Fotos" hidden></div>',
+              '<div class="atg-empty atg-display-empty">Noch keine Fotos oder Videos zugeordnet.</div>',
+              '<div class="atg-grid atg-saved-grid" aria-label="Der Tour zugeordnete Fotos und Videos" hidden></div>',
               '<div class="atg-actions atg-display-actions">',
-                '<button type="button" class="atg-manage-btn">Fotos hinzufügen</button>',
+                '<button type="button" class="atg-manage-btn">Medien hinzufügen</button>',
               '</div>',
             '</div>',
             '<div class="atg-picker" hidden>',
-              '<div class="atg-status" role="status" aria-live="polite">Galerie wird vorbereitet …</div>',
+              '<div class="atg-status" role="status" aria-live="polite">Mediengalerie wird vorbereitet …</div>',
               '<div class="atg-actions atg-picker-top-actions">',
-                '<button type="button" class="atg-access-btn" hidden>Galeriezugriff erlauben</button>',
+                '<button type="button" class="atg-access-btn" hidden>Medienzugriff erlauben</button>',
                 '<button type="button" class="atg-refresh-btn" hidden>Erneut suchen</button>',
               '</div>',
-              '<div class="atg-grid atg-picker-grid" aria-label="Fotos vom Tourtag"></div>',
+              '<div class="atg-grid atg-picker-grid" aria-label="Fotos und Videos vom Tourtag"></div>',
               '<div class="atg-picker-footer">',
                 '<span class="atg-picker-count">0 ausgewählt</span>',
                 '<div class="atg-actions atg-picker-footer-actions">',
@@ -264,7 +508,7 @@
                 '</div>',
               '</div>',
             '</div>',
-            '<div class="atg-footnote">Die Originalfotos bleiben in deiner Samsung-Galerie. Die App speichert nur lokale Bildverweise, keine Bildkopien.</div>'
+            '<div class="atg-footnote">Die Originalfotos und -videos bleiben in deiner Gerätegalerie. Gespeichert werden nur lokale Medienverweise, keine Medienkopien.</div>'
         ].join('');
 
         const date = normalizeTourDate(entry.date);
@@ -275,7 +519,7 @@
             : 'Kein gültiges Tourdatum';
 
         panel.querySelector('.atg-manage-btn').addEventListener('click', () => {
-            openPhotoPicker(panel, entry);
+            openMediaPicker(panel, entry);
         });
         panel.querySelector('.atg-access-btn').addEventListener('click', () => {
             requestGalleryAccess(panel, entry);
@@ -284,24 +528,20 @@
             searchTourDate(panel, entry);
         });
         panel.querySelector('.atg-cancel-btn').addEventListener('click', () => {
-            cancelPhotoPicker(panel, entry);
+            cancelMediaPicker(panel, entry);
         });
         panel.querySelector('.atg-apply-btn').addEventListener('click', () => {
-            applyPhotoSelection(panel, entry);
+            applyMediaSelection(panel, entry);
         });
 
         return panel;
     }
 
     function insertPanel(panel, body) {
-        // Die Fotogalerie gehört bewusst ans Ende – nach sämtlichen Tourinformationen.
         body.appendChild(panel);
     }
 
     async function waitForTourStorageCommit() {
-        // appStorage.set aktualisiert den synchronen Cache sofort, persistiert
-        // IndexedDB aber über eine interne Schreibwarteschlange. Auf alle aktuell
-        // eingereihten Schreibvorgänge warten, bevor die Auswahl als gespeichert gilt.
         if (typeof _storageWriteQueue === 'undefined' ||
             typeof _idbGet !== 'function') {
             throw new Error('Die dauerhafte Tourenspeicherung ist in dieser App-Version nicht erreichbar.');
@@ -328,81 +568,79 @@
         return tours.find(item => String(item && item.id || '') === tourId) || entry;
     }
 
-    async function saveSelection(entry, selectedPhotos, panel) {
+    async function saveMediaSelection(entry, selectedMedia, panel) {
         try {
             if (typeof appStorage === 'undefined' || !appStorage) {
                 throw new Error('Der Tourenspeicher ist nicht verfügbar.');
             }
-
             const tourId = String(entry.id || '');
             if (!tourId) throw new Error('Der Tour fehlt eine eindeutige Kennung.');
 
-            // Immer vom aktuellen Tourenbestand ausgehen, nicht von einem möglicherweise
-            // veralteten Objekt aus der geöffneten Listenansicht.
             const allTours = (appStorage.get('touren') || []).slice();
             const index = allTours.findIndex(item => String(item && item.id || '') === tourId);
             if (index < 0) throw new Error('Die Tour wurde im Speicher nicht gefunden.');
 
-            const metadata = selectedPhotos.map(cleanPhoto).filter(Boolean);
+            const metadata = selectedMedia.map(cleanMedia).filter(Boolean);
+            const photos = metadata.filter(item => item.mediaType === 'photo');
+            const videos = metadata.filter(item => item.mediaType === 'video');
             allTours[index] = Object.assign({}, allTours[index], {
-                galleryPhotos: metadata
+                galleryPhotos: photos,
+                galleryVideos: videos
             });
 
             appStorage.set('touren', allTours);
-
-            // Erst nach erfolgreichem IndexedDB-Schreiben und Rücklesen bestätigen.
             const persistedTours = await waitForTourStorageCommit();
             const persistedEntry = persistedTours.find(
                 item => String(item && item.id || '') === tourId
             );
             const persistedPhotos = Array.isArray(persistedEntry && persistedEntry.galleryPhotos)
-                ? persistedEntry.galleryPhotos.map(cleanPhoto).filter(Boolean)
-                : [];
+                ? persistedEntry.galleryPhotos.map(cleanMedia).filter(Boolean) : [];
+            const persistedVideos = Array.isArray(persistedEntry && persistedEntry.galleryVideos)
+                ? persistedEntry.galleryVideos.map(cleanMedia).filter(Boolean) : [];
 
-            const expectedUris = metadata.map(photo => photo.uri).sort();
-            const actualUris = persistedPhotos.map(photo => photo.uri).sort();
+            const expectedUris = metadata.map(item => item.uri).sort();
+            const actualUris = persistedPhotos.concat(persistedVideos).map(item => item.uri).sort();
             if (expectedUris.length !== actualUris.length ||
                 expectedUris.some((uri, index) => uri !== actualUris[index])) {
-                throw new Error('Die Fotoauswahl wurde nicht dauerhaft gespeichert. Bitte versuche es erneut.');
+                throw new Error('Die Medienauswahl wurde nicht dauerhaft gespeichert. Bitte versuche es erneut.');
             }
 
-            // Veraltete Detail-/Listenobjekte für die laufende Ansicht synchronisieren.
-            entry.galleryPhotos = persistedPhotos;
+            entry.galleryPhotos = persistedPhotos.filter(item => item.mediaType === 'photo');
+            entry.galleryVideos = persistedVideos.filter(item => item.mediaType === 'video');
             try {
                 if (typeof currentDetailEntry !== 'undefined' &&
                     currentDetailEntry &&
                     String(currentDetailEntry.id || '') === tourId) {
-                    currentDetailEntry.galleryPhotos = persistedPhotos;
+                    currentDetailEntry.galleryPhotos = entry.galleryPhotos;
+                    currentDetailEntry.galleryVideos = entry.galleryVideos;
                 }
             } catch (_) {
-                // Der Datenbankeintrag ist bereits verifiziert; Detailzustand ist nur Komfort.
+                // Der verifizierte Datenbankeintrag ist maßgeblich.
             }
-
             return true;
         } catch (error) {
-            console.error('[Android-Galerie] Dauerhafte Fotozuordnung fehlgeschlagen.', error);
-            setStatus(panel, error.message || 'Fotoauswahl konnte nicht dauerhaft gespeichert werden.', 'error');
+            console.error('[Android-Galerie] Dauerhafte Medienzuordnung fehlgeschlagen.', error);
+            setStatus(panel, error.message || 'Medienauswahl konnte nicht dauerhaft gespeichert werden.', 'error');
             return false;
         }
     }
 
-    function renderSavedPhotos(panel, entry) {
+    function renderSavedMedia(panel, entry) {
         disconnectThumbnailObserver(panel);
-
-        const savedPhotos = getSavedPhotos(entry);
+        const savedMedia = getSavedMedia(entry);
         const count = panel.querySelector('.atg-count');
         const empty = panel.querySelector('.atg-display-empty');
         const grid = panel.querySelector('.atg-saved-grid');
         const manage = panel.querySelector('.atg-manage-btn');
 
-        count.textContent = savedPhotos.length + ' zugeordnet';
-        manage.textContent = savedPhotos.length ? 'Fotos bearbeiten' : 'Fotos hinzufügen';
-        empty.hidden = savedPhotos.length > 0;
-        grid.hidden = savedPhotos.length === 0;
+        count.textContent = savedMedia.length + ' zugeordnet';
+        manage.textContent = savedMedia.length ? 'Medien bearbeiten' : 'Medien hinzufügen';
+        empty.hidden = savedMedia.length > 0;
+        grid.hidden = savedMedia.length === 0;
         grid.replaceChildren();
 
-        savedPhotos.forEach(photo => {
-            grid.appendChild(createPhotoCard(panel, photo, false, false, null));
+        savedMedia.forEach(media => {
+            grid.appendChild(createMediaCard(panel, media, false, false, null, savedMedia));
         });
     }
 
@@ -414,12 +652,11 @@
     function updatePickerSelection(panel) {
         const state = panel._atgPickerState;
         if (!state) return;
-
         const count = panel.querySelector('.atg-picker-count');
         const apply = panel.querySelector('.atg-apply-btn');
         if (count) count.textContent = state.selected.size + ' ausgewählt';
 
-        const savedUris = new Set(state.saved.map(photo => photo.uri));
+        const savedUris = new Set(state.saved.map(media => media.uri));
         const changed = state.selected.size !== savedUris.size ||
             Array.from(state.selected).some(uri => !savedUris.has(uri));
         if (apply) apply.disabled = !changed || state.loading;
@@ -427,26 +664,27 @@
 
     function renderSelectionGrid(panel, entry, result) {
         disconnectThumbnailObserver(panel);
+        const saved = getSavedMedia(entry);
+        const mediaMap = new Map();
+        let responseItems = Array.isArray(result.media) ? result.media : [];
 
-        const saved = getSavedPhotos(entry);
-        const photoMap = new Map();
+        if (!responseItems.length) {
+            responseItems = (Array.isArray(result.photos) ? result.photos : [])
+                .concat(Array.isArray(result.videos) ? result.videos : []);
+        }
 
-        (Array.isArray(result.photos) ? result.photos : [])
-            .map(cleanPhoto)
-            .filter(Boolean)
-            .forEach(photo => photoMap.set(photo.uri, photo));
-
-        // Zugeordnete Bilder bleiben bearbeitbar, auch wenn Android sie nicht mehr
-        // in der aktuellen Tagesabfrage zurückliefert.
-        saved.forEach(photo => {
-            if (!photoMap.has(photo.uri)) photoMap.set(photo.uri, photo);
+        responseItems.map(cleanMedia).filter(Boolean).forEach(media => {
+            mediaMap.set(media.uri, media);
+        });
+        saved.forEach(media => {
+            if (!mediaMap.has(media.uri)) mediaMap.set(media.uri, media);
         });
 
-        const allPhotos = Array.from(photoMap.values());
-        const selected = new Set(saved.map(photo => photo.uri));
+        const allMedia = Array.from(mediaMap.values()).sort(compareMedia);
+        const selected = new Set(saved.map(media => media.uri));
         panel._atgPickerState = {
             saved: saved,
-            photos: allPhotos,
+            media: allMedia,
             selected: selected,
             loading: false
         };
@@ -457,13 +695,13 @@
         if (result.status === 'partial_results') {
             setStatus(
                 panel,
-                (Number(result.count) || 0) + ' freigegebene Fotos gefunden. Android zeigt nur Bilder, für die du Zugriff erteilt hast; Herkunft und Datumsbasis stehen unter jedem Bild.',
+                (Number(result.count) || 0) + ' freigegebene Medien gefunden. Android zeigt nur Fotos und Videos, für die du Zugriff erteilt hast; Herkunft und Datumsbasis stehen unter jedem Eintrag.',
                 'warning'
             );
         } else {
             setStatus(
                 panel,
-                (Number(result.count) || 0) + ' Fotos gefunden. WhatsApp- und andere indexierte Ordner sind eingeschlossen; Herkunft und Datumsbasis stehen unter jedem Bild.',
+                (Number(result.count) || 0) + ' Fotos und Videos gefunden. WhatsApp- und andere indexierte Ordner sind eingeschlossen.',
                 'info'
             );
         }
@@ -471,48 +709,50 @@
         if (result.truncated) {
             const note = document.createElement('div');
             note.className = 'atg-empty atg-result-note';
-            note.textContent = 'Die Galerieauswahl ist auf 500 Fotos begrenzt.';
+            note.textContent = 'Die Medienauswahl ist auf 500 Einträge begrenzt.';
             grid.appendChild(note);
         }
 
-        if (allPhotos.length === 0) {
+        if (allMedia.length === 0) {
             const empty = document.createElement('div');
             empty.className = 'atg-empty';
-            empty.textContent = 'Für dieses Datum wurden keine freigegebenen Fotos gefunden.';
+            empty.textContent = 'Für dieses Datum wurden keine freigegebenen Fotos oder Videos gefunden.';
             grid.appendChild(empty);
         }
 
-        allPhotos.forEach(photo => {
-            const isSelected = selected.has(photo.uri);
-            const card = createPhotoCard(
+        allMedia.forEach(media => {
+            const isSelected = selected.has(media.uri);
+            const card = createMediaCard(
                 panel,
-                photo,
+                media,
                 true,
                 isSelected,
                 (cardNode, button) => {
-                    if (selected.has(photo.uri)) selected.delete(photo.uri);
-                    else selected.add(photo.uri);
-
-                    const nowSelected = selected.has(photo.uri);
+                    if (selected.has(media.uri)) selected.delete(media.uri);
+                    else selected.add(media.uri);
+                    const nowSelected = selected.has(media.uri);
                     cardNode.classList.toggle('is-selected', nowSelected);
                     button.classList.toggle('is-selected', nowSelected);
                     button.setAttribute('aria-pressed', nowSelected ? 'true' : 'false');
                     button.textContent = nowSelected ? '✓ Ausgewählt' : '+ Auswählen';
                     updatePickerSelection(panel);
-                }
+                },
+                allMedia
             );
             grid.appendChild(card);
         });
 
         updatePickerSelection(panel);
         panel.querySelector('.atg-access-btn').hidden = result.access !== 'partial';
-        panel.querySelector('.atg-access-btn').textContent = 'Weitere Fotos freigeben';
+        panel.querySelector('.atg-access-btn').textContent = 'Weitere Medien freigeben';
         panel.querySelector('.atg-refresh-btn').hidden = false;
     }
 
-    function showSavedPhotosInPicker(panel, entry, message, kind, showAccess) {
+    function showSavedMediaInPicker(panel, entry, message, kind, showAccess) {
         renderSelectionGrid(panel, entry, {
+            media: [],
             photos: [],
+            videos: [],
             count: 0,
             status: 'ok',
             access: 'none',
@@ -520,18 +760,18 @@
         });
         setStatus(panel, message, kind || 'warning');
         panel.querySelector('.atg-access-btn').hidden = !showAccess;
-        panel.querySelector('.atg-access-btn').textContent = 'Galeriezugriff erlauben';
+        panel.querySelector('.atg-access-btn').textContent = 'Medienzugriff erlauben';
         panel.querySelector('.atg-refresh-btn').hidden = !nativeBridgeAvailable;
     }
 
-    async function openPhotoPicker(panel, entry) {
+    async function openMediaPicker(panel, entry) {
         setPickerVisible(panel, true);
         disconnectThumbnailObserver(panel);
-
+        const saved = getSavedMedia(entry);
         panel._atgPickerState = {
-            saved: getSavedPhotos(entry),
-            photos: [],
-            selected: new Set(getSavedPhotos(entry).map(photo => photo.uri)),
+            saved: saved,
+            media: [],
+            selected: new Set(saved.map(media => media.uri)),
             loading: true
         };
         panel.querySelector('.atg-picker-grid').replaceChildren();
@@ -539,8 +779,7 @@
         panel.querySelector('.atg-refresh-btn').hidden = false;
         panel.querySelector('.atg-refresh-btn').textContent = 'Erneut suchen';
         updatePickerSelection(panel);
-        setStatus(panel, 'Verbindung zur Android-Galerie wird geprüft …');
-
+        setStatus(panel, 'Verbindung zur Android-Mediengalerie wird geprüft …');
         await searchTourDate(panel, entry);
     }
 
@@ -548,22 +787,21 @@
         const button = panel.querySelector('.atg-access-btn');
         button.disabled = true;
         button.textContent = 'Berechtigung wird geprüft …';
-
         try {
             const permission = await nativeRequest('gallery.permission.request');
             if (permission.access === 'none') {
                 setStatus(
                     panel,
-                    'Kein Galerie-Zugriff erteilt. Du kannst die Berechtigung später in den Android-App-Einstellungen freigeben.',
+                    'Kein Medienzugriff erteilt. Du kannst die Berechtigung später in den Android-App-Einstellungen freigeben.',
                     'warning'
                 );
-                button.textContent = 'Galeriezugriff erneut anfragen';
+                button.textContent = 'Medienzugriff erneut anfragen';
                 return;
             }
             await searchTourDate(panel, entry);
         } catch (error) {
-            setStatus(panel, error.message || 'Galeriezugriff konnte nicht angefragt werden.', 'error');
-            button.textContent = 'Galeriezugriff erneut anfragen';
+            setStatus(panel, error.message || 'Medienzugriff konnte nicht angefragt werden.', 'error');
+            button.textContent = 'Medienzugriff erneut anfragen';
         } finally {
             button.disabled = false;
         }
@@ -593,12 +831,12 @@
         try {
             const supported = await checkNativeGalleryBridge();
             if (!supported) {
-                showSavedPhotosInPicker(
+                showSavedMediaInPicker(
                     panel,
                     entry,
                     nativeBridgeAvailable
-                        ? 'Die Android-Galerie antwortet gerade nicht. Du kannst bereits zugeordnete Fotos trotzdem abwählen oder die Verbindung erneut versuchen.'
-                        : 'Die native Android-Galerie-Schnittstelle wurde nicht erkannt. Bereits zugeordnete Fotos kannst du weiterhin aus der Tour entfernen.',
+                        ? 'Die Android-Mediengalerie antwortet gerade nicht. Bereits zugeordnete Medien bleiben bearbeitbar.'
+                        : 'Die native Android-Mediengalerie wurde nicht erkannt. Bereits zugeordnete Medien bleiben bearbeitbar.',
                     'error',
                     false
                 );
@@ -607,24 +845,26 @@
 
             const permission = await nativeRequest('gallery.permission.get');
             if (permission.access === 'none') {
-                showSavedPhotosInPicker(
+                showSavedMediaInPicker(
                     panel,
                     entry,
-                    'Für neue Fotos ist eine Galerie-Freigabe erforderlich. Bereits zugeordnete Fotos bleiben hier bearbeitbar.',
+                    'Für neue Medien ist eine Galerie-Freigabe erforderlich. Bereits zugeordnete Fotos und Videos bleiben hier bearbeitbar.',
                     'warning',
                     true
                 );
                 return;
             }
 
-            const result = await nativeRequest('gallery.photos.byDate', { date: date }, 26000);
+            const action = nativeFeatures.has('gallery.mediaStore.v2')
+                ? 'gallery.media.byDate' : 'gallery.photos.byDate';
+            const result = await nativeRequest(action, { date: date }, 30000);
             if (activePanel !== panel || !panel.isConnected) return;
 
             if (result.status === 'permission_required' || result.status === 'permission_changed') {
-                showSavedPhotosInPicker(
+                showSavedMediaInPicker(
                     panel,
                     entry,
-                    'Der Galerie-Zugriff wurde nicht erteilt oder zwischenzeitlich geändert. Bereits zugeordnete Fotos kannst du weiterhin bearbeiten.',
+                    'Der Galerie-Zugriff wurde nicht erteilt oder zwischenzeitlich geändert. Bereits zugeordnete Medien kannst du weiterhin bearbeiten.',
                     'warning',
                     true
                 );
@@ -635,17 +875,17 @@
                 return;
             }
             if (result.status !== 'ok' && result.status !== 'partial_results') {
-                setStatus(panel, 'Die Fotos für dieses Datum konnten nicht durchsucht werden.', 'error');
+                setStatus(panel, 'Fotos und Videos für dieses Datum konnten nicht durchsucht werden.', 'error');
                 return;
             }
 
             renderSelectionGrid(panel, entry, result);
         } catch (error) {
             if (activePanel !== panel || !panel.isConnected) return;
-            showSavedPhotosInPicker(
+            showSavedMediaInPicker(
                 panel,
                 entry,
-                error.message || 'Die Galerie konnte nicht durchsucht werden.',
+                error.message || 'Die Mediengalerie konnte nicht durchsucht werden.',
                 'error',
                 false
             );
@@ -662,18 +902,17 @@
         }
     }
 
-    function cancelPhotoPicker(panel, entry) {
+    function cancelMediaPicker(panel, entry) {
         disconnectThumbnailObserver(panel);
         panel._atgPickerState = null;
         setPickerVisible(panel, false);
-        renderSavedPhotos(panel, entry);
+        renderSavedMedia(panel, entry);
     }
 
-    async function applyPhotoSelection(panel, entry) {
+    async function applyMediaSelection(panel, entry) {
         const state = panel._atgPickerState;
         if (!state || state.loading) return;
-
-        const nextPhotos = state.photos.filter(photo => state.selected.has(photo.uri));
+        const nextMedia = state.media.filter(media => state.selected.has(media.uri));
         const applyButton = panel.querySelector('.atg-apply-btn');
         state.loading = true;
         if (applyButton) {
@@ -682,12 +921,11 @@
         }
 
         try {
-            const saved = await saveSelection(entry, nextPhotos, panel);
+            const saved = await saveMediaSelection(entry, nextMedia, panel);
             if (!saved) return;
-
             panel._atgPickerState = null;
             setPickerVisible(panel, false);
-            renderSavedPhotos(panel, entry);
+            renderSavedMedia(panel, entry);
         } finally {
             if (panel.isConnected) {
                 if (panel._atgPickerState === state) {
@@ -706,7 +944,6 @@
         if (!img || img.dataset.loading === '1' || img.dataset.loaded === '1') return;
         const uri = img.dataset.uri;
         if (!uri) return;
-
         img.dataset.loading = '1';
         try {
             const response = await nativeRequest('gallery.thumbnail', { uri: uri }, 22000);
@@ -730,8 +967,10 @@
         const tourId = String(latestEntry && latestEntry.id || '');
         if (activePanel && activePanel.isConnected &&
             activePanel.dataset.tourId === tourId) {
+            activePanel._atgEntry = latestEntry;
             return;
         }
+        if (activePanel && activePanel.dataset.tourId !== tourId) closePhotoViewer();
 
         const body = document.getElementById('td-body');
         const modal = document.getElementById('tour-detail-modal');
@@ -744,7 +983,7 @@
         const panel = makePanel(latestEntry);
         activePanel = panel;
         insertPanel(panel, body);
-        renderSavedPhotos(panel, latestEntry);
+        renderSavedMedia(panel, latestEntry);
     }
 
     function installTourDetailHook() {
@@ -783,22 +1022,23 @@
 
     function installTourDetailObserver() {
         if (detailObserver) return;
-
         const modal = document.getElementById('tour-detail-modal');
         const body = document.getElementById('td-body');
         if (!modal || !body || typeof MutationObserver !== 'function') return;
 
         const syncPanel = () => {
-            if (modal.classList.contains('hidden')) return;
+            if (modal.classList.contains('hidden')) {
+                closePhotoViewer();
+                return;
+            }
 
             const entry = getCurrentSavedDetailEntry();
             if (!entry || entry._isMultidaySummary || !entry.id) return;
-
             const existing = body.querySelector('#td-gallery-panel');
             if (existing && existing.dataset.tourId === String(entry.id)) return;
 
             mountGalleryPanel(entry).catch(error => {
-                console.error('[Android-Galerie] Detailbeobachtung konnte den Fotobereich nicht einblenden.', error);
+                console.error('[Android-Galerie] Detailbeobachtung konnte den Medienbereich nicht einblenden.', error);
             });
         };
 
@@ -815,7 +1055,10 @@
             const payload = await originalBuild.apply(this, arguments);
             if (Array.isArray(payload && payload.touren)) {
                 payload.touren.forEach(tour => {
-                    if (tour && typeof tour === 'object') delete tour.galleryPhotos;
+                    if (tour && typeof tour === 'object') {
+                        delete tour.galleryPhotos;
+                        delete tour.galleryVideos;
+                    }
                 });
             }
             return payload;
