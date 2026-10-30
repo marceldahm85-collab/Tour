@@ -555,5 +555,10 @@
         };
     }
 
+    window.refreshAppBackgroundPicker = async function () {
+        render();
+        await refreshCustomPreview();
+    };
+
     window.addEventListener('beforeunload', revokeCustomPreviewUrl);
 })();
