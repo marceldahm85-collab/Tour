@@ -453,6 +453,60 @@
         return getSettingsSnapshot();
     }
 
+    async function restoreBackupData(data) {
+        if (!data || typeof data !== 'object' || !data.settings ||
+            typeof data.settings !== 'object') {
+            throw new TypeError('Die Hintergrunddaten in der Sicherungsdatei sind ungültig.');
+        }
+        if (typeof _idbSet !== 'function' || typeof _idbDel !== 'function') {
+            throw new Error('Der lokale Hintergrundspeicher ist nicht verfügbar.');
+        }
+
+        const next = normalizeSettings(data.settings);
+        const blob = data.customImageBlob instanceof Blob ? data.customImageBlob : null;
+        const validBlob = Boolean(
+            blob &&
+            blob.type.startsWith('image/') &&
+            blob.size > 0 &&
+            blob.size <= 15 * 1024 * 1024
+        );
+
+        if (blob && !validBlob) {
+            throw new RangeError('Das Hintergrundbild in der Sicherungsdatei ist ungültig oder zu groß.');
+        }
+
+        if (validBlob) {
+            // Bild und Metadaten getrennt speichern; das Bild bleibt vom normalen
+            // App-Startcache ausgeschlossen und wird nur bei Bedarf geladen.
+            await _idbSet(CUSTOM_IMAGE_STORAGE_KEY, blob);
+            revokeCustomObjectUrl();
+            customImageObjectUrl = URL.createObjectURL(blob);
+        } else {
+            await _idbDel(CUSTOM_IMAGE_STORAGE_KEY);
+            revokeCustomObjectUrl();
+        }
+
+        let restoredSettings = next;
+        if (next.mode === 'custom' && !validBlob) {
+            const fallbackPreset = findPreset(next.presetId || CURRENT_PRESET_ID);
+            restoredSettings = normalizeSettings({
+                mode: 'preset',
+                presetId: fallbackPreset.id,
+                customImageName: '',
+                positionX: fallbackPreset.positionX,
+                positionY: fallbackPreset.positionY,
+                mobilePositionX: fallbackPreset.mobilePositionX,
+                landscapePositionX: fallbackPreset.landscapePositionX,
+                zoom: 1
+            });
+        }
+
+        currentSettings = restoredSettings;
+        persistSettings();
+        applySettingsToDom();
+        return getSettingsSnapshot();
+    }
+
     window.getAppBackgroundPresetCatalog = function () {
         return PRESETS.map(preset => ({
             id: preset.id,
@@ -472,6 +526,7 @@
     window.setAppBackgroundCustomImage = setCustomImage;
     window.getAppBackgroundCustomImageBlob = getCustomImageBlob;
     window.clearAppBackgroundCustomImage = clearCustomImage;
+    window.restoreAppBackgroundBackupData = restoreBackupData;
     window.refreshAppBackgroundFromStorage = initialize;
 
     // Nach erfolgreicher IndexedDB-Initialisierung laden.
