@@ -281,6 +281,8 @@
 
 
 /* Einheitliche Darstellung der zugeordneten Foto- und Videomedien. */
+.atg-photo-viewer [hidden] { display: none !important; }
+
 .atg-media-card.is-video .atg-thumb-wrap {
     cursor: pointer;
 }
