@@ -29718,6 +29718,7 @@ const IDB_NAME  = 'BergtorenDB';
 const IDB_VER   = 1;
 const IDB_STORE = 'keyval';
 const STARTUP_IGNORED_STORAGE_KEY = 'preispilot-osttirol-v1';
+const APP_BACKGROUND_IMAGE_STORAGE_PREFIX = '~backgroundImage:';
 const TOUR_IMAGE_STORAGE_PREFIX = '~tourImage:';
 const TOUR_IMAGE_SPLIT_MARKER = '__tourImagesSplit_v1__';
 let   _db       = null;
@@ -30015,14 +30016,18 @@ function _idbGetAllFromDB() {
         const tx = db.transaction(IDB_STORE, 'readonly');
         const store = tx.objectStore(IDB_STORE);
 
-        // Zwei große Werte werden aus dem kritischen Startpfad ausgelassen:
-        // PreisPilot (fremder Datensatz) und die separat gespeicherten Tourbilder.
-        // Die Bilddaten bleiben in IndexedDB und werden bei Bedarf nachgeladen.
+        // Große Fremd- und Bilddaten werden aus dem kritischen Startpfad ausgelassen:
+        // PreisPilot sowie separat gespeicherte Tour- und Hintergrundbilder.
+        // Die Bilddaten bleiben in IndexedDB und werden ausschließlich bei Bedarf geladen.
         const excludedKey = STARTUP_IGNORED_STORAGE_KEY;
-        const imagePrefixMax = TOUR_IMAGE_STORAGE_PREFIX + String.fromCharCode(65535);
+        const backgroundImagePrefixMax =
+            APP_BACKGROUND_IMAGE_STORAGE_PREFIX + String.fromCharCode(65535);
+        const imagePrefixMax =
+            TOUR_IMAGE_STORAGE_PREFIX + String.fromCharCode(65535);
         const groups = [
             { range: IDBKeyRange.upperBound(excludedKey, true), keys: null, values: null },
-            { range: IDBKeyRange.bound(excludedKey, TOUR_IMAGE_STORAGE_PREFIX, true, true), keys: null, values: null },
+            { range: IDBKeyRange.bound(excludedKey, APP_BACKGROUND_IMAGE_STORAGE_PREFIX, true, true), keys: null, values: null },
+            { range: IDBKeyRange.bound(backgroundImagePrefixMax, TOUR_IMAGE_STORAGE_PREFIX, true, true), keys: null, values: null },
             { range: IDBKeyRange.lowerBound(imagePrefixMax, true), keys: null, values: null }
         ];
 
