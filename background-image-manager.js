@@ -218,13 +218,19 @@
             ? customImageObjectUrl
             : preset.src;
         if (!imageUrl) {
-            parallax.style.setProperty('--app-background-size', 'cover');
+            parallax.style.setProperty('background-size', 'cover', 'important');
             return;
         }
 
         const applyDimensions = () => {
             if (!sizingImage || !sizingImage.naturalWidth || !sizingImage.naturalHeight) {
-                parallax.style.setProperty('--app-background-size', 'cover');
+                parallax.style.setProperty('background-size', 'cover', 'important');
+                return;
+            }
+
+            const zoom = clamp(settings.zoom, 1, 1.6, 1);
+            if (zoom <= 1.001) {
+                parallax.style.setProperty('background-size', 'cover', 'important');
                 return;
             }
 
@@ -234,13 +240,15 @@
                 width / sizingImage.naturalWidth,
                 height / sizingImage.naturalHeight
             );
-            const zoom = clamp(settings.zoom, 1, 1.6, 1);
             const scaledWidth = Math.ceil(sizingImage.naturalWidth * coverScale * zoom);
             const scaledHeight = Math.ceil(sizingImage.naturalHeight * coverScale * zoom);
 
+            // Explizite Pixelmaße skalieren das Cover-Ergebnis proportional,
+            // ohne das Foto durch zwei unabhängige Prozentwerte zu verzerren.
             parallax.style.setProperty(
-                '--app-background-size',
-                scaledWidth + 'px ' + scaledHeight + 'px'
+                'background-size',
+                scaledWidth + 'px ' + scaledHeight + 'px',
+                'important'
             );
         };
 
@@ -429,7 +437,8 @@
             positionX: preset.positionX,
             positionY: preset.positionY,
             mobilePositionX: preset.mobilePositionX,
-            landscapePositionX: preset.landscapePositionX
+            landscapePositionX: preset.landscapePositionX,
+            zoom: 1
         });
         persistSettings();
         applySettingsToDom();
