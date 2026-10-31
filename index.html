@@ -144,7 +144,7 @@
 
     // Die Android-WebView erhält die Statusleisten-Safe-Area bereits nativ.
     // Die Android-spezifische CSS-Regel verhindert einen doppelten oberen Abstand.
-    if (/Android/i.test(navigator.userAgent || '') && /;\\s*wv\\)/i.test(navigator.userAgent || '')) {
+    if (/Android/i.test(navigator.userAgent || '') && /;\s*wv\)/i.test(navigator.userAgent || '')) {
         document.documentElement.classList.add('android-native-shell');
     }
 
