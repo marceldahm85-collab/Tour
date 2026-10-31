@@ -122,7 +122,7 @@
 
 
 <link rel="stylesheet" href="./styles.css?v=15">
-<link rel="stylesheet" href="./styles-overrides.css?v=89">
+<link rel="stylesheet" href="./styles-overrides.css?v=90">
 <link rel="stylesheet" href="./background-image-picker.css?v=2">
 <link rel="stylesheet" href="./android-gallery-photos.css?v=5">
 <link rel="stylesheet" href="./dashboard-premium-alpine.css?v=22">
@@ -141,6 +141,12 @@
     // Ein gemeinsamer dunkler Editor-Modus; alte Theme-Klassen dürfen keine Alt-CSS-Regeln aktivieren.
     document.body.classList.remove('gold', 'dark', 'green', 'summit');
     document.body.classList.add('gold');
+
+    // Die Android-WebView erhält die Statusleisten-Safe-Area bereits nativ.
+    // Die Android-spezifische CSS-Regel verhindert einen doppelten oberen Abstand.
+    if (/Android/i.test(navigator.userAgent || '') && /;\\s*wv\\)/i.test(navigator.userAgent || '')) {
+        document.documentElement.classList.add('android-native-shell');
+    }
 
     // Die App verwendet nur noch den gemeinsamen Editor-Modus.
     try {

@@ -110,9 +110,11 @@ public final class MainActivity extends Activity {
                 Insets systemBars = insets.getInsets(
                         WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout()
                 );
+                // Die Android-Activity übernimmt die Statusleisten-Safe-Area.
+                // Die PWA-WebView bekommt daher keinen zusätzlichen CSS-Top-Inset.
                 view.setPadding(
                         systemBars.left,
-                        systemBars.top,
+                        0,
                         systemBars.right,
                         systemBars.bottom
                 );

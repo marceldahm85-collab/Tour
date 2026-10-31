@@ -8950,3 +8950,18 @@ body.summit .top-main-nav [aria-current="page"] {
     ) !important;
     opacity: .96 !important;
 }
+
+
+/* Android-WebView: Den Statusleisten-Abstand nur einmal anwenden.
+   MainActivity setzt den nativen Systemleisten-Inset bereits am WebView-Root.
+   Die PWA-interne Zusatzpolsterung entfällt deshalb hier; ein kleiner Abstand
+   von 4 px hält die Hauptnavigation trotzdem sauber unter der Statusleiste. */
+@media (max-width: 768px), (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    html.android-native-shell body {
+        padding-top: 0 !important;
+    }
+
+    html.android-native-shell body .accordion-header {
+        margin-top: 4px !important;
+    }
+}

@@ -11,6 +11,7 @@ on:
       - "background-image-manager.js"
       - "theme-editor-unified.js"
       - "index.html"
+      - "styles-overrides.css"
       - "sw.js"
       - ".github/workflows/android-debug-apk.yml"
   workflow_dispatch:
