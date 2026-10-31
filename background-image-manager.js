@@ -615,6 +615,15 @@
                     if (typeof window.invalidateThemeEditorDraft === 'function') {
                         window.invalidateThemeEditorDraft();
                     }
+                    if (typeof meta.themeEditorUnifiedSettings.haptics === 'boolean' &&
+                        typeof appStorage.set === 'function') {
+                        appStorage.set('hapticFeedbackEnabled_v1', meta.themeEditorUnifiedSettings.haptics);
+                        appStorage.set('bergTourenHaptics', meta.themeEditorUnifiedSettings.haptics ? 'on' : 'off');
+                        try {
+                            localStorage.setItem('hapticFeedbackEnabled_v1', JSON.stringify(meta.themeEditorUnifiedSettings.haptics));
+                            localStorage.setItem('bergTourenHaptics', meta.themeEditorUnifiedSettings.haptics ? 'on' : 'off');
+                        } catch (_) {}
+                    }
                     if (typeof window.applyThemeEditorSettingsToDom === 'function') {
                         window.applyThemeEditorSettingsToDom();
                     }

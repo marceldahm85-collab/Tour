@@ -103,6 +103,33 @@
         } catch (_) {}
     }
 
+    // Das Editor-Häkchen steuert die tatsächlich verwendeten Vibrationsimpulse.
+    // Android-WebView benötigt dafür zusätzlich android.permission.VIBRATE.
+    const originalHapticFeedback =
+        typeof window.hapticFeedback === 'function'
+            ? window.hapticFeedback
+            : null;
+
+    if (originalHapticFeedback && !originalHapticFeedback.__themeEditorPreference) {
+        const preferenceAwareHapticFeedback = function (duration) {
+            const settings = readStored(SETTINGS_KEY);
+            if (settings && typeof settings === 'object' &&
+                typeof settings.haptics === 'boolean') {
+                if (!settings.haptics) return;
+            } else {
+                const stored = readStored(HAPTIC_KEY);
+                if (typeof stored === 'boolean') {
+                    if (!stored) return;
+                } else if (readStored(LEGACY_HAPTIC_KEY) === 'off') {
+                    return;
+                }
+            }
+            return originalHapticFeedback.apply(this, arguments);
+        };
+        preferenceAwareHapticFeedback.__themeEditorPreference = true;
+        window.hapticFeedback = preferenceAwareHapticFeedback;
+    }
+
     function validHex(value) {
         return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value.trim());
     }
