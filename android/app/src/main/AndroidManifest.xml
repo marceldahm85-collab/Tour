@@ -4,6 +4,9 @@
     <!-- Netzwerkzugriff für die bestehende, über HTTPS ausgelieferte PWA. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Entspricht dem in der PWA aktivierbaren haptischen Feedback. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <!-- Galerieabfrage: nur lesender Zugriff, und erst nach ausdrücklicher Laufzeitfreigabe. -->
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
@@ -14,9 +17,9 @@
 
     <application
         android:allowBackup="false"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable-nodpi/ic_launcher_pwa"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/ic_launcher"
+        android:roundIcon="@drawable-nodpi/ic_launcher_pwa"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="false">

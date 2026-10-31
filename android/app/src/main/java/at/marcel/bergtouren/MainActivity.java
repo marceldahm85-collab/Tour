@@ -285,6 +285,13 @@ public final class MainActivity extends Activity {
 
                 try {
                     Intent chooserIntent = fileChooserParams.createIntent();
+                    // Die ausgewählte Datei wird direkt durch die WebView eingelesen
+                    // und anschließend lokal optimiert/gespeichert. Der Lesezugriff
+                    // auf Content-URIs muss deshalb ausdrücklich mitgegeben werden.
+                    chooserIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    if (fileChooserParams.getMode() == WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE) {
+                        chooserIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                    }
                     startActivityForResult(chooserIntent, FILE_CHOOSER_REQUEST_CODE);
                     return true;
                 } catch (RuntimeException error) {

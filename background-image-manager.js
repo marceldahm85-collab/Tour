@@ -463,7 +463,28 @@
         }
 
         const next = normalizeSettings(data.settings);
-        const blob = data.customImageBlob instanceof Blob ? data.customImageBlob : null;
+        let blob = data.customImageBlob instanceof Blob ? data.customImageBlob : null;
+
+        // JSON-Sicherungen übertragen das eigene Hintergrundbild als Data-URL,
+        // damit PWA und eigenständige Android-WebView denselben Editorzustand nutzen.
+        if (!blob && typeof data.customImageDataUrl === 'string' && data.customImageDataUrl) {
+            const encoded = data.customImageDataUrl;
+            const match = /^data:(image\/[a-z0-9.+-]+);base64,([a-z0-9+/=\\r\\n]+)$/i.exec(encoded);
+            const maxEncodedLength = Math.ceil((15 * 1024 * 1024) * 4 / 3) + 16;
+            if (!match || encoded.length > maxEncodedLength) {
+                throw new TypeError('Das Hintergrundbild in der Sicherungsdatei ist ungültig oder zu groß.');
+            }
+            const binary = atob(match[2].replace(/\\s/g, ''));
+            if (binary.length > 15 * 1024 * 1024) {
+                throw new RangeError('Das Hintergrundbild in der Sicherungsdatei ist größer als 15 MB.');
+            }
+            const bytes = new Uint8Array(binary.length);
+            for (let index = 0; index < binary.length; index++) {
+                bytes[index] = binary.charCodeAt(index);
+            }
+            blob = new Blob([bytes], { type: match[1] });
+        }
+
         const validBlob = Boolean(
             blob &&
             blob.type.startsWith('image/') &&
@@ -507,6 +528,124 @@
         return getSettingsSnapshot();
     }
 
+    function blobToDataUrl(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                if (typeof reader.result === 'string') resolve(reader.result);
+                else reject(new Error('Das Hintergrundbild konnte nicht für die Sicherung vorbereitet werden.'));
+            };
+            reader.onerror = () => reject(reader.error || new Error('Das Hintergrundbild konnte nicht gelesen werden.'));
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    async function createBackupData() {
+        await initialize();
+        const settings = getSettingsSnapshot();
+        let customImageDataUrl = '';
+
+        if (settings.mode === 'custom') {
+            const blob = await getCustomImageBlob();
+            if (!(blob instanceof Blob) || !blob.type.startsWith('image/') ||
+                blob.size <= 0 || blob.size > 15 * 1024 * 1024) {
+                throw new Error('Das eigene Hintergrundbild konnte nicht vollständig gesichert werden.');
+            }
+            customImageDataUrl = await blobToDataUrl(blob);
+        }
+
+        return {
+            version: 1,
+            settings,
+            customImageDataUrl
+        };
+    }
+
+    function installEditorBackupIntegration() {
+        const originalBuild = window.buildAppDataPayload;
+        if (typeof originalBuild === 'function' && !originalBuild.__appBackgroundBackup) {
+            const wrappedBuild = async function () {
+                const payload = await originalBuild.apply(this, arguments);
+                if (!payload || typeof payload !== 'object') return payload;
+
+                const meta = payload.meta && typeof payload.meta === 'object'
+                    ? payload.meta
+                    : {};
+
+                try {
+                    const unifiedSettings = typeof appStorage !== 'undefined' &&
+                        appStorage && typeof appStorage.get === 'function'
+                        ? appStorage.get('themeEditorUnifiedSettings_v1')
+                        : null;
+                    if (unifiedSettings && typeof unifiedSettings === 'object') {
+                        meta.themeEditorUnifiedSettings = unifiedSettings;
+                    }
+                    meta.appBackground = await createBackupData();
+                    payload.meta = meta;
+                    return payload;
+                } catch (error) {
+                    console.error('[Editor-Sicherung] Editor-Einstellungen konnten nicht vollständig exportiert werden.', error);
+                    throw error;
+                }
+            };
+            wrappedBuild.__appBackgroundBackup = true;
+            window.buildAppDataPayload = wrappedBuild;
+        }
+
+        const originalApply = window.applyAppDataPayload;
+        if (typeof originalApply === 'function' && !originalApply.__appBackgroundBackup) {
+            const wrappedApply = function (payload) {
+                const result = originalApply.apply(this, arguments);
+                const meta = payload && typeof payload === 'object' &&
+                    payload.meta && typeof payload.meta === 'object'
+                    ? payload.meta
+                    : {};
+
+                if (meta.themeEditorUnifiedSettings &&
+                    typeof meta.themeEditorUnifiedSettings === 'object' &&
+                    typeof appStorage !== 'undefined' &&
+                    appStorage && typeof appStorage.set === 'function') {
+                    appStorage.set('themeEditorUnifiedSettings_v1', meta.themeEditorUnifiedSettings);
+                    try {
+                        localStorage.setItem(
+                            'themeEditorUnifiedSettings_v1',
+                            JSON.stringify(meta.themeEditorUnifiedSettings)
+                        );
+                    } catch (_) {}
+                    if (typeof window.invalidateThemeEditorDraft === 'function') {
+                        window.invalidateThemeEditorDraft();
+                    }
+                    if (typeof window.applyThemeEditorSettingsToDom === 'function') {
+                        window.applyThemeEditorSettingsToDom();
+                    }
+                }
+
+                if (meta.appBackground && typeof meta.appBackground === 'object') {
+                    restoreBackupData(meta.appBackground)
+                        .then(() => {
+                            if (typeof window.refreshAppBackgroundPicker === 'function') {
+                                return window.refreshAppBackgroundPicker();
+                            }
+                            return null;
+                        })
+                        .catch(error => {
+                            console.error('[Editor-Sicherung] Hintergrundbild konnte nicht wiederhergestellt werden.', error);
+                            if (typeof window.showToast === 'function') {
+                                window.showToast('Hintergrundbild konnte nicht aus der Sicherung übernommen werden.', {
+                                    type: 'error',
+                                    duration: 3500
+                                });
+                            }
+                        });
+                }
+
+                return result;
+            };
+            wrappedApply.__appBackgroundBackup = true;
+            window.applyAppDataPayload = wrappedApply;
+        }
+    }
+
     window.getAppBackgroundPresetCatalog = function () {
         return PRESETS.map(preset => ({
             id: preset.id,
@@ -527,7 +666,10 @@
     window.getAppBackgroundCustomImageBlob = getCustomImageBlob;
     window.clearAppBackgroundCustomImage = clearCustomImage;
     window.restoreAppBackgroundBackupData = restoreBackupData;
+    window.getAppBackgroundBackupData = createBackupData;
     window.refreshAppBackgroundFromStorage = initialize;
+
+    installEditorBackupIntegration();
 
     // Nach erfolgreicher IndexedDB-Initialisierung laden.
     const originalInitStorage = window.initStorage;

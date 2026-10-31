@@ -108,6 +108,7 @@ jobs:
 
       - name: Check gallery integration JavaScript syntax
         run: node --check android-gallery-photos.js
+          node --check background-image-manager.js
 
       - name: Assemble debug APK
         run: ./android/gradlew --no-daemon --stacktrace -p android :app:assembleDebug
