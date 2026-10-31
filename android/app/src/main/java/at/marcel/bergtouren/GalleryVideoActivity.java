@@ -2,12 +2,15 @@ package at.marcel.bergtouren;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -31,8 +34,16 @@ public final class GalleryVideoActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getWindow().setStatusBarColor(Color.BLACK);
-        getWindow().setNavigationBarColor(Color.BLACK);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // Wie in der Hauptansicht: Edge-to-Edge mit sicheren Insets für
+            // Statusleiste, Navigationsleiste und Displayaussparungen.
+            getWindow().setDecorFitsSystemWindows(false);
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+            getWindow().setNavigationBarColor(Color.TRANSPARENT);
+        } else {
+            getWindow().setStatusBarColor(Color.BLACK);
+            getWindow().setNavigationBarColor(Color.BLACK);
+        }
         getWindow().getDecorView().setSystemUiVisibility(0);
 
         String uriString = getIntent().getStringExtra(EXTRA_URI);
@@ -41,6 +52,22 @@ public final class GalleryVideoActivity extends Activity {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(Color.BLACK);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            root.setOnApplyWindowInsetsListener((view, insets) -> {
+                Insets systemBars = insets.getInsets(
+                        WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout()
+                );
+                // Der Footer samt Zurück-Button bleibt oberhalb der Android-
+                // Navigationsleiste und verhält sich wie der Foto-Vollbildviewer.
+                view.setPadding(
+                        systemBars.left,
+                        systemBars.top,
+                        systemBars.right,
+                        systemBars.bottom
+                );
+                return insets;
+            });
+        }
 
         FrameLayout playerArea = new FrameLayout(this);
         playerArea.setBackgroundColor(Color.BLACK);
