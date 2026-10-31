@@ -470,7 +470,7 @@
         if (!blob && typeof data.customImageDataUrl === 'string' && data.customImageDataUrl) {
             const encoded = data.customImageDataUrl;
             const match = /^data:(image\/[a-z0-9.+-]+);base64,([a-z0-9+/=]+)$/i.exec(encoded);
-            const maxEncodedLength = Math.ceil((15 * 1024 * 1024) * 4 / 3) + 16;
+            const maxEncodedLength = Math.ceil((15 * 1024 * 1024) * 4 / 3) + 128;
             if (!match || encoded.length > maxEncodedLength) {
                 throw new TypeError('Das Hintergrundbild in der Sicherungsdatei ist ungültig oder zu groß.');
             }
