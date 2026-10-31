@@ -8,6 +8,10 @@ on:
       - "android/**"
       - "android-gallery-photos.js"
       - "android-gallery-photos.css"
+      - "background-image-manager.js"
+      - "theme-editor-unified.js"
+      - "index.html"
+      - "sw.js"
       - ".github/workflows/android-debug-apk.yml"
   workflow_dispatch:
   # Keep the default-branch signing cache active. GitHub expires unused
@@ -106,9 +110,11 @@ jobs:
           java --version
           ./android/gradlew --version
 
-      - name: Check gallery integration JavaScript syntax
-        run: node --check android-gallery-photos.js
+      - name: Check Android and editor JavaScript syntax
+        run: |
+          node --check android-gallery-photos.js
           node --check background-image-manager.js
+          node --check theme-editor-unified.js
 
       - name: Assemble debug APK
         run: ./android/gradlew --no-daemon --stacktrace -p android :app:assembleDebug
