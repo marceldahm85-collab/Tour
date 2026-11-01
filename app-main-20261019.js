@@ -2195,6 +2195,39 @@ function initHeaderScrollShadow(){
 
 let linkedFileHandle = null;
 const BACKUP_LAST_SAVED_KEY = 'backupLastSavedAt_v1';
+const LINKED_NATIVE_BACKUP_KEY = 'tourtracker-linked-native-backup-v1';
+
+function loadLinkedNativeBackupFile() {
+    try {
+        const raw = localStorage.getItem(LINKED_NATIVE_BACKUP_KEY);
+        if (!raw) return null;
+        const saved = JSON.parse(raw);
+        if (!saved || typeof saved.uri !== 'string' || !saved.uri.startsWith('content://')) {
+            return null;
+        }
+        return {
+            uri: saved.uri,
+            fileName: String(saved.fileName || 'Touren-Backup.json')
+        };
+    } catch (error) {
+        console.warn('[Sicherung] Verknüpfte Android-Datei konnte nicht wiederhergestellt werden:', error);
+        return null;
+    }
+}
+
+function persistLinkedNativeBackupFile(file) {
+    if (!file || typeof file.uri !== 'string' || !file.uri.startsWith('content://')) {
+        throw new Error('Die ausgewählte Sicherungsdatei ist ungültig.');
+    }
+    const saved = {
+        uri: file.uri,
+        fileName: String(file.fileName || 'Touren-Backup.json')
+    };
+    localStorage.setItem(LINKED_NATIVE_BACKUP_KEY, JSON.stringify(saved));
+    linkedNativeBackupFile = saved;
+}
+
+let linkedNativeBackupFile = loadLinkedNativeBackupFile();
 
 function formatBackupStatusDate(value) {
     const date = new Date(value);
@@ -2222,7 +2255,7 @@ function updateBackupStatusSummary() {
     if (savedEl) savedEl.textContent = String(Array.isArray(savedTours) ? savedTours.length : 0);
     if (plannedEl) plannedEl.textContent = String(Array.isArray(plannedTours) ? plannedTours.length : 0);
     if (lastEl) lastEl.textContent = formatBackupStatusDate(lastSavedAt);
-    if (fileEl) fileEl.textContent = linkedFileHandle?.name || 'Nicht verbunden';
+    if (fileEl) fileEl.textContent = linkedNativeBackupFile?.fileName || linkedFileHandle?.name || 'Nicht verbunden';
 }
 
 function markBackupSavedNow() {
@@ -2519,6 +2552,45 @@ function updateFileStatus(text) {
 }
 
 async function createNewDataFile() {
+    if (typeof window.saveTourBackupNative === 'function' &&
+        typeof window.readTourBackupNative === 'function') {
+        try {
+            const payload = await buildAppDataPayload();
+            const json = JSON.stringify(payload, null, 2);
+            const result = await window.saveTourBackupNative(
+                json,
+                'Tourentracker-Daten.json',
+                { linkOnSave: true }
+            );
+
+            if (result && result.handled) {
+                if (result.cancelled) {
+                    showToast('Dateiauswahl abgebrochen.', { type: 'info', duration: 2200 });
+                    return;
+                }
+                if (!result.saved || !result.uri) {
+                    throw new Error('Die neue Sicherungsdatei wurde nicht dauerhaft verknüpft.');
+                }
+
+                persistLinkedNativeBackupFile({
+                    uri: result.uri,
+                    fileName: result.fileName || 'Tourentracker-Daten.json'
+                });
+                markBackupSavedNow();
+                updateFileStatus(`Neue Datei verbunden: ${linkedNativeBackupFile.fileName}`);
+                showToast('Neue Sicherungsdatei angelegt ✓', { type: 'success', duration: 2800 });
+                return;
+            }
+        } catch (error) {
+            console.error('[Sicherung] Neue Android-Datei konnte nicht angelegt werden:', error);
+            showToast(error?.message || 'Neue Datei konnte nicht angelegt werden.', {
+                type: 'error',
+                duration: 4000
+            });
+            return;
+        }
+    }
+
     if (!window.showSaveFilePicker) {
         if (typeof window.saveTourBackupNative === 'function') {
             document.getElementById('simple-download-btn')?.click();
@@ -2568,6 +2640,38 @@ async function createNewDataFile() {
 }
 
 async function openExistingDataFile() {
+    if (typeof window.openTourBackupNative === 'function') {
+        try {
+            const result = await window.openTourBackupNative();
+            if (result && result.handled) {
+                if (result.cancelled) {
+                    showToast('Dateiauswahl abgebrochen.', { type: 'info', duration: 2200 });
+                    return;
+                }
+                if (!result.uri || typeof result.content !== 'string') {
+                    throw new Error('Die ausgewählte Sicherungsdatei konnte nicht vollständig gelesen werden.');
+                }
+
+                const payload = JSON.parse(result.content);
+                persistLinkedNativeBackupFile({
+                    uri: result.uri,
+                    fileName: result.fileName || 'Touren-Backup.json'
+                });
+                await applyAppDataPayload(payload);
+                updateFileStatus(`Geöffnet: ${linkedNativeBackupFile.fileName}`);
+                showToast('Bestehende Sicherungsdatei geöffnet ✓', { type: 'success', duration: 2800 });
+                return;
+            }
+        } catch (error) {
+            console.error('[Sicherung] Bestehende Android-Datei konnte nicht geöffnet werden:', error);
+            showToast(error?.message || 'Bestehende Datei konnte nicht geöffnet werden.', {
+                type: 'error',
+                duration: 4000
+            });
+            return;
+        }
+    }
+
     if (!window.showOpenFilePicker) {
         if (typeof window.saveTourBackupNative === 'function') {
             document.getElementById('simple-import-input')?.click();
@@ -2619,9 +2723,52 @@ async function openExistingDataFile() {
 }
 
 async function saveDataToLinkedFile(silent = false) {
+    if (linkedNativeBackupFile && typeof window.saveTourBackupNative === 'function') {
+        try {
+            const payload = await buildAppDataPayload();
+            const json = JSON.stringify(payload, null, 2);
+            const result = await window.saveTourBackupNative(
+                json,
+                linkedNativeBackupFile.fileName || 'Touren-Backup.json',
+                { targetUri: linkedNativeBackupFile.uri }
+            );
+
+            if (result && result.handled && result.saved) {
+                updateFileStatus(`Gespeichert: ${linkedNativeBackupFile.fileName} (${new Date().toLocaleTimeString('de-DE')})`);
+                markBackupSavedNow();
+                if (!silent) {
+                    showToast('In bestehender Sicherungsdatei gespeichert ✓', {
+                        type: 'success',
+                        duration: 2600
+                    });
+                }
+                return true;
+            }
+            if (result && result.cancelled) return false;
+            if (result && result.handled === false) {
+                throw new Error('Die native Android-Dateiverknüpfung ist nicht verfügbar.');
+            }
+            return false;
+        } catch (error) {
+            console.error('[Sicherung] Speichern in bestehender Android-Datei fehlgeschlagen:', error);
+            if (!silent) {
+                showToast(error?.message || 'Speichern in bestehender Sicherungsdatei fehlgeschlagen.', {
+                    type: 'error',
+                    duration: 4000
+                });
+            }
+            return false;
+        }
+    }
+
     if (!linkedFileHandle) {
         if (typeof window.saveTourBackupNative === 'function') {
-            document.getElementById('simple-download-btn')?.click();
+            if (!silent) {
+                showToast('Bitte zuerst eine bestehende Datei öffnen oder eine neue Datei anlegen.', {
+                    type: 'info',
+                    duration: 3200
+                });
+            }
             return false;
         }
         if (!silent) {
@@ -2680,6 +2827,27 @@ async function saveDataToLinkedFile(silent = false) {
 }
 
 async function loadDataFromLinkedFile() {
+    if (!linkedFileHandle && linkedNativeBackupFile &&
+        typeof window.readTourBackupNative === 'function') {
+        try {
+            const result = await window.readTourBackupNative(linkedNativeBackupFile.uri);
+            if (!result || !result.handled || typeof result.content !== 'string') {
+                throw new Error('Die verknüpfte Sicherungsdatei konnte nicht gelesen werden.');
+            }
+            const payload = JSON.parse(result.content);
+            await applyAppDataPayload(payload);
+            updateFileStatus(`Geladen: ${linkedNativeBackupFile.fileName}`);
+            showToast('Daten aus Sicherungsdatei geladen ✓', { type: 'success', duration: 2600 });
+        } catch (error) {
+            console.error('[Sicherung] Laden aus bestehender Android-Datei fehlgeschlagen:', error);
+            showToast(error?.message || 'Laden aus Datei fehlgeschlagen oder Datei ist ungültig.', {
+                type: 'error',
+                duration: 4000
+            });
+        }
+        return;
+    }
+
     if (!linkedFileHandle) {
         if (typeof window.saveTourBackupNative === 'function') {
             document.getElementById('simple-import-input')?.click();
@@ -2728,6 +2896,12 @@ async function loadDataFromLinkedFile() {
 
 async function disconnectDataFile() {
     linkedFileHandle = null;
+    linkedNativeBackupFile = null;
+    try {
+        localStorage.removeItem(LINKED_NATIVE_BACKUP_KEY);
+    } catch (error) {
+        console.warn('[Sicherung] Android-Dateiverknüpfung konnte nicht entfernt werden:', error);
+    }
 
     try {
         await clearPersistedFileHandle();
@@ -2747,6 +2921,15 @@ async function autoSaveDataFileIfLinked() {
 }
 
 async function restoreLinkedFileHandleOnStartup() {
+    if (typeof window.readTourBackupNative === 'function') {
+        const savedNativeFile = loadLinkedNativeBackupFile();
+        if (savedNativeFile) {
+            linkedNativeBackupFile = savedNativeFile;
+            updateFileStatus(`Verbunden: ${savedNativeFile.fileName}`);
+            return;
+        }
+    }
+
     try {
         const handle = await loadPersistedFileHandle();
 
