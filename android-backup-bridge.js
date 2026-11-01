@@ -162,6 +162,13 @@
             return { handled: false };
         }
 
+        const saveOptions = options && typeof options === 'object' ? options : {};
+        const targetUri = typeof saveOptions.targetUri === 'string' ? saveOptions.targetUri : '';
+        const linkOnSave = saveOptions.linkOnSave === true;
+        if ((targetUri || linkOnSave) && !features.includes('backup.file.link.v1')) {
+            return { handled: false };
+        }
+
         const bytes = new TextEncoder().encode(json);
         if (!bytes.length || bytes.length > MAX_BACKUP_BYTES) {
             throw new RangeError('Die Sicherungsdatei ist für den Android-Export zu groß (maximal 48 MB).');
@@ -170,9 +177,6 @@
         const fileName = String(suggestedFileName || 'Touren-Backup.json')
             .replace(/[^A-Za-z0-9._-]/g, '_')
             .slice(0, 80) || 'Touren-Backup.json';
-        const saveOptions = options && typeof options === 'object' ? options : {};
-        const targetUri = typeof saveOptions.targetUri === 'string' ? saveOptions.targetUri : '';
-        const linkOnSave = saveOptions.linkOnSave === true;
         if (targetUri && !targetUri.startsWith('content://')) {
             throw new Error('Die verknüpfte Sicherungsdatei ist ungültig.');
         }
