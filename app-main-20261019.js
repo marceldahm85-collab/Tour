@@ -49,6 +49,10 @@ if (window.__nativeWidgetPendingOpenYearStats) {
     window.__nativeWidgetPendingOpenYearStats = false;
     openYearStatsFromNativeWidget();
 }
+if (window.__nativeWidgetPendingOpenDashboard) {
+    window.__nativeWidgetPendingOpenDashboard = false;
+    goToView('dashboard', true);
+}
 initChartTabs();
 
 initYearCompareSwipe();
@@ -15441,6 +15445,16 @@ window.__openYearStatsFromNativeWidget = function () {
         return 'queued';
     }
     openYearStatsFromNativeWidget();
+    return 'opened';
+};
+
+/* Android-Widget: beim Antippen immer das Dashboard öffnen. */
+window.__openDashboardFromNativeWidget = function () {
+    if (!window.__nativeWidgetStartupReady) {
+        window.__nativeWidgetPendingOpenDashboard = true;
+        return 'queued';
+    }
+    goToView('dashboard', true);
     return 'opened';
 };
 
