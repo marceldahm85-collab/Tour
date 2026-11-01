@@ -19,11 +19,11 @@ option {
 }
 
 :root {
-    /* Android-Systemschrift: normalerweise Roboto */
+    /* Bevorzugt die aktuelle UI-Schrift des Betriebssystems. */
     --app-font:
+        system-ui,
         Roboto,
         "Noto Sans",
-        system-ui,
         sans-serif;
 
 

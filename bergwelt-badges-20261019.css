@@ -2603,7 +2603,7 @@ body.summit #wrapped-view .bergwelt-height-years-chart-section {
 #wrapped-view .bergwelt-cinematic-hero h2 em {
     color: #f0cc7d;
     font-style: normal;
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--app-font);
     font-weight: 500;
     letter-spacing: -.045em;
 }
@@ -2827,7 +2827,7 @@ body.summit #wrapped-view.bergwelt-mode { --bw-surface-rgb: 9, 20, 34; }
     padding: clamp(30px, 7vw, 58px) clamp(20px, 5.5vw, 42px) 26px;
 }
 #wrapped-view.bergwelt-mode .bergwelt-cinematic-hero h2 {
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--app-font);
     font-size: clamp(2.55rem, 10vw, 4.7rem);
     line-height: .98;
     letter-spacing: -.04em;
@@ -2854,7 +2854,7 @@ body.summit #wrapped-view.bergwelt-mode { --bw-surface-rgb: 9, 20, 34; }
     background: rgb(var(--bw-surface-rgb));
 }
 #wrapped-view.bergwelt-mode .bergwelt-cinematic-section-heading h3 {
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--app-font);
     font-weight: 600;
     letter-spacing: -.025em;
 }

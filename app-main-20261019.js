@@ -9012,7 +9012,7 @@ function drawStatisticsLineChart(canvas, values, type, color, title) {
      * Titel
      */
     ctx.fillStyle = textColor;
-    ctx.font = '600 11px Inter, sans-serif';
+    ctx.font = getThemeEditorCanvasFont(11, 600);
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
     ctx.fillText(title, paddingLeft, 12);
@@ -9043,7 +9043,7 @@ function drawStatisticsLineChart(canvas, values, type, color, title) {
         ctx.stroke();
 
         ctx.fillStyle = textColor;
-        ctx.font = '9px Inter, sans-serif';
+        ctx.font = getThemeEditorCanvasFont(9, 400);
         ctx.textAlign = 'right';
         ctx.textBaseline = 'alphabetic';
 
@@ -9063,7 +9063,7 @@ function drawStatisticsLineChart(canvas, values, type, color, title) {
     ];
 
     ctx.fillStyle = textColor;
-    ctx.font = '9px Inter, sans-serif';
+    ctx.font = getThemeEditorCanvasFont(9, 400);
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
 
@@ -9081,7 +9081,7 @@ function drawStatisticsLineChart(canvas, values, type, color, title) {
      */
     if (lastDataIndex < 0) {
         ctx.fillStyle = textColor;
-        ctx.font = '12px Inter, sans-serif';
+        ctx.font = getThemeEditorCanvasFont(12, 400);
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
@@ -13242,7 +13242,7 @@ function drawScatterDiagram({
 
     if (points.length === 0) {
         ctx.fillStyle = textColor;
-        ctx.font = '14px Inter, sans-serif';
+        ctx.font = getThemeEditorCanvasFont(14, 400);
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
@@ -13308,7 +13308,7 @@ function drawScatterDiagram({
     /*
      * Hilfslinien und Achsenbeschriftungen
      */
-    ctx.font = '9px Inter, sans-serif';
+    ctx.font = getThemeEditorCanvasFont(9, 400);
     ctx.textBaseline = 'middle';
 
     for (
@@ -13410,7 +13410,7 @@ function drawScatterDiagram({
      * Achsen-Titel
      */
     ctx.fillStyle = textColor;
-    ctx.font = '10px Inter, sans-serif';
+    ctx.font = getThemeEditorCanvasFont(10, 400);
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
 
@@ -13433,7 +13433,7 @@ const legend = [
 let legendX = paddingLeft;
 const legendY = getCanvasLogicalHeight(canvas) - 12;
 
-ctx.font = '9px Inter, sans-serif';
+ctx.font = getThemeEditorCanvasFont(9, 400);
 ctx.textBaseline = 'middle';
 
 legend.forEach(([label, colour]) => {
@@ -15482,7 +15482,7 @@ function drawCategoryBars(
         ctx.save();
 
         ctx.fillStyle = textColor;
-        ctx.font = '10px Inter, sans-serif';
+        ctx.font = getThemeEditorCanvasFont(10, 400);
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
 
@@ -15904,8 +15904,7 @@ ctx.stroke();
             ctx.fillStyle =
     textColor;
 
-ctx.font =
-    '11px Inter, sans-serif';
+ctx.font = getThemeEditorCanvasFont(11, 400);
 
 ctx.textAlign =
     'center';
@@ -16175,8 +16174,7 @@ if (value > 0) {
 
         ctx.fillStyle = textColor;
 
-ctx.font =
-    '11px Inter, sans-serif';
+ctx.font = getThemeEditorCanvasFont(11, 400);
 
 ctx.textAlign =
     'center';
@@ -16326,7 +16324,7 @@ function drawSmartBarLabel(ctx, text, x, y, barWidth, barHeight, textColor, inte
 
     ctx.save();
     ctx.fillStyle = textColor;
-    ctx.font = '12px Inter, sans-serif';
+    ctx.font = getThemeEditorCanvasFont(12, 400);
 
     if (barHeight < shortBarThreshold) {
         /*
@@ -16389,7 +16387,7 @@ function drawChartTitleWithTotal(ctx, canvas, title, totalText) {
      * Titel etwas klarer,
      * aber schwächer als der Kennwert rechts.
      */
-    ctx.font = '600 13px Inter, sans-serif';
+    ctx.font = getThemeEditorCanvasFont(13, 600);
     ctx.fillStyle = color;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
@@ -16404,7 +16402,7 @@ function drawChartTitleWithTotal(ctx, canvas, title, totalText) {
     /*
      * Kennwert rechts stärker hervorheben.
      */
-    ctx.font = '700 13px Inter, sans-serif';
+    ctx.font = getThemeEditorCanvasFont(13, 700);
     ctx.textAlign = 'right';
 
     ctx.fillText(
@@ -16475,8 +16473,7 @@ if (value > 0) {
 
         ctx.fillStyle = textColor;
 
-ctx.font =
-    '11px Inter, sans-serif';
+ctx.font = getThemeEditorCanvasFont(11, 400);
 
 ctx.textAlign =
     'center';
@@ -18214,7 +18211,7 @@ function drawYearCompareDiagram() {
 
     if (years.length === 0) {
         ctx.fillStyle = textColor;
-        ctx.font = '14px Inter, sans-serif';
+        ctx.font = getThemeEditorCanvasFont(14, 400);
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
@@ -18584,7 +18581,7 @@ const countedTourGroups = new Set();
      * Titel
      */
     ctx.fillStyle = textColor;
-    ctx.font = '13px Inter, sans-serif';
+    ctx.font = getThemeEditorCanvasFont(13, 400);
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
 
@@ -18652,7 +18649,7 @@ const countedTourGroups = new Set();
         ctx.fill();
 
         ctx.fillStyle = textColor;
-        ctx.font = '11px Inter, sans-serif';
+        ctx.font = getThemeEditorCanvasFont(11, 400);
         ctx.textAlign = 'left';
         ctx.textBaseline = 'alphabetic';
 
@@ -18742,7 +18739,7 @@ const countedTourGroups = new Set();
         ctx.stroke();
 
         ctx.fillStyle = textColor;
-        ctx.font = '10px Inter, sans-serif';
+        ctx.font = getThemeEditorCanvasFont(10, 400);
         ctx.textAlign = 'right';
         ctx.textBaseline = 'middle';
 
@@ -18786,7 +18783,7 @@ const countedTourGroups = new Set();
 
     monthLabels.forEach((label, month) => {
         ctx.fillStyle = textColor;
-        ctx.font = '12px Inter, sans-serif';
+        ctx.font = getThemeEditorCanvasFont(12, 400);
         ctx.textAlign = 'center';
         ctx.textBaseline = 'alphabetic';
 
@@ -21119,7 +21116,7 @@ function drawMilestoneChartView(type) {
 
     if (!milestones.length) {
         ctx.fillStyle = textColor;
-        ctx.font = '14px Inter, sans-serif';
+        ctx.font = getThemeEditorCanvasFont(14, 400);
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(
@@ -21366,7 +21363,7 @@ const axisLabels =
 
     if (years.length === 0 || allData.length === 0) {
         ctx.fillStyle = textColor;
-        ctx.font = '14px Inter, sans-serif';
+        ctx.font = getThemeEditorCanvasFont(14, 400);
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
@@ -21525,7 +21522,7 @@ yearMonthSums[
 
     if (yearsWithData.length === 0) {
         ctx.fillStyle = textColor;
-        ctx.font = '14px Inter, sans-serif';
+        ctx.font = getThemeEditorCanvasFont(14, 400);
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
@@ -21737,7 +21734,7 @@ const xForPrevious = index => {
             ctx.fill();
 
             ctx.fillStyle = textColor;
-            ctx.font = '11px Inter, sans-serif';
+            ctx.font = getThemeEditorCanvasFont(11, 400);
             ctx.textAlign = 'left';
             ctx.textBaseline = 'alphabetic';
 
@@ -21802,7 +21799,7 @@ const xForPrevious = index => {
     ctx.save();
 
     ctx.fillStyle = textColor;
-    ctx.font = '10px Inter, sans-serif';
+    ctx.font = getThemeEditorCanvasFont(10, 400);
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
 
@@ -21850,8 +21847,7 @@ const xForPrevious = index => {
                 -Math.PI / 2
             );
 
-            ctx.font =
-                '10px Inter, sans-serif';
+            ctx.font = getThemeEditorCanvasFont(10, 400);
 
             ctx.textAlign =
                 'center';
@@ -21873,8 +21869,7 @@ const xForPrevious = index => {
              * Einzeljahr:
              * Monate weiterhin normal
              */
-            ctx.font =
-                '12px Inter, sans-serif';
+            ctx.font = getThemeEditorCanvasFont(12, 400);
 
             ctx.textAlign =
                 'center';
@@ -22249,58 +22244,13 @@ const THEME_EDITOR_FONT_SIZE_KEY = 'themeEditorFontSize_v1';
 const THEME_EDITOR_DEFAULT_FONT_SIZE = 100;
 
 const THEME_EDITOR_FONT_PRESETS = {
-    /*
-     * Android-Standard. Auf den meisten Android-Geräten: Roboto.
-     */
-    android:
-        'Roboto, "Noto Sans", system-ui, sans-serif',
-
-    /*
-     * Systemabhängige serifenlose Schrift.
-     */
-    system:
-        'system-ui, sans-serif',
-
-    /*
-     * ui-rounded wird von modernen Android-Browsern teilweise
-     * als abgerundete Systemschrift interpretiert.
-     * Die weiteren Schriften sind Fallbacks.
-     */
-    rounded:
-        'ui-rounded, "Arial Rounded MT Bold", "Trebuchet MS", sans-serif',
-
-    /*
-     * Deutlich sichtbare Serifenschrift.
-     */
-    serif:
-        '"Noto Serif", "Droid Serif", Georgia, serif',
-
-    /*
-     * Etwas kräftigere, blockartige Serifenschrift.
-     * Falls Roboto Slab nicht vorhanden ist, greift Noto Serif.
-     */
-    slab:
-        '"Roboto Slab", "Noto Serif", Georgia, serif',
-
-    /*
-     * Feste Zeichenbreite.
-     */
-    mono:
-        '"Roboto Mono", "Noto Sans Mono", "Courier New", monospace',
-
-    /*
-     * Browser-/Systemschrift für handschriftliche Darstellung.
-     * Auf Android kann die konkrete Schrift je nach Gerät variieren.
-     */
-    cursive:
-        'cursive',
-
-    /*
-     * Dekorative Systemkategorie.
-     * Die konkrete Darstellung ist browserabhängig.
-     */
-    fantasy:
-        'fantasy'
+    system: 'system-ui, sans-serif',
+    inter: '"Tour Inter", sans-serif',
+    'roboto-condensed': '"Tour Roboto Condensed", sans-serif',
+    'nunito-sans': '"Tour Nunito Sans", sans-serif',
+    righteous: '"Tour Righteous", sans-serif',
+    mono: '"Roboto Mono", "Noto Sans Mono", "Courier New", monospace',
+    cursive: 'cursive'
 };
 
 const THEME_EDITOR_KEY = 'themeEditorSettings_v1';
@@ -22313,30 +22263,17 @@ const defaultThemeEditorSettings = {
     summit: { topColor: '#3aa0ff', bottomColor: '#161d22', transition: 55, intensity: 88, textMain: '#f4faff', textSoft: '#d0dce4', accent: '#63b7ff', accent2: '#176fc1', borderOpacity: 34, gradientDirection: '180deg', midEnabled: false, midColor: '#1f4560', shadowIntensity: 50, bgBrightness: 50, appBrightness: 50, radius: 14, blurIntensity: 10, navTopColor: '#191e27', navBottomColor: '#0d151f', chartColorStart: '#111513', chartColorMid: '#454e49', chartColorEnd: '#63b7ff' }
 };
 
+function normalizeThemeEditorFontName(fontName) {
+    const aliases = { android: 'system', rounded: 'nunito-sans', serif: 'inter', slab: 'inter', fantasy: 'righteous' };
+    const resolved = aliases[fontName] || fontName;
+    return Object.prototype.hasOwnProperty.call(THEME_EDITOR_FONT_PRESETS, resolved) ? resolved : 'system';
+}
 function getThemeEditorFontName() {
-    const savedFont = appStorage.get(THEME_EDITOR_FONT_KEY);
-
-    if (
-        typeof savedFont === 'string' &&
-        Object.prototype.hasOwnProperty.call(
-            THEME_EDITOR_FONT_PRESETS,
-            savedFont
-        )
-    ) {
-        return savedFont;
-    }
-
-    return 'android';
+    return normalizeThemeEditorFontName(appStorage.get(THEME_EDITOR_FONT_KEY));
 }
 
 function applyThemeEditorFont(fontName, save = true) {
-    const validFontName =
-        Object.prototype.hasOwnProperty.call(
-            THEME_EDITOR_FONT_PRESETS,
-            fontName
-        )
-            ? fontName
-            : 'android';
+    const validFontName = normalizeThemeEditorFontName(fontName);
 
     const fontStack =
         THEME_EDITOR_FONT_PRESETS[validFontName];
@@ -22408,6 +22345,15 @@ function getThemeEditorFontSizeScale() {
     }
 
     return Math.max(80, Math.min(130, savedValue));
+}
+
+function getThemeEditorCanvasFont(size, weight = '400', style = 'normal') {
+    const n = Number(size);
+    const safe = Number.isFinite(n) && n > 0 ? n : 12;
+    const px = safe * (getThemeEditorFontSizeScale() / 100);
+    const name = getThemeEditorFontName();
+    const family = THEME_EDITOR_FONT_PRESETS[name] || THEME_EDITOR_FONT_PRESETS.system;
+    return `${style} ${weight} ${px}px ${family}`;
 }
 
 function rememberOriginalInlineFontSize(element) {
@@ -34750,7 +34696,7 @@ function getWrappedFontFamily() {
         const fontName = getThemeEditorFontName();
 
         return THEME_EDITOR_FONT_PRESETS[fontName]
-            || THEME_EDITOR_FONT_PRESETS.android;
+            || THEME_EDITOR_FONT_PRESETS.system;
     }
 
     return 'Roboto, "Noto Sans", system-ui, sans-serif';
@@ -34769,8 +34715,8 @@ function getWrappedFontScale() {
      * bei sehr großen globalen Schriftgrößen zerbricht.
      */
     return Math.max(
-        0.86,
-        Math.min(1.18, appScale)
+        0.8,
+        Math.min(1.3, appScale)
     );
 }
 

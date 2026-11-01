@@ -12,14 +12,14 @@
     const LEGACY_HAPTIC_KEY = 'bergTourenHaptics';
     const THEME_KEYS = ['light', 'dark', 'green', 'summit'];
     const DIRECTIONS = ['180deg', '90deg', '135deg', '45deg', 'radial'];
-    const FONTS = ['android', 'system', 'rounded', 'serif', 'slab', 'mono', 'cursive', 'fantasy'];
+    const FONTS = ['system', 'inter', 'roboto-condensed', 'nunito-sans', 'righteous', 'mono', 'cursive'];
     const DEFAULT_ACCENT = '#ad7d12';
     const DEFAULT_ACCENT_2 = '#000000';
     const DEFAULTS = {
         accent: DEFAULT_ACCENT,
         accent2: DEFAULT_ACCENT_2,
         radius: 14,
-        fontFamily: 'android',
+        fontFamily: 'system',
         fontSize: 100,
         haptics: true,
         gradientDirection: '180deg',
@@ -152,13 +152,15 @@
             : fallback;
     }
 
+    const FONT_ALIASES = { android: 'system', rounded: 'nunito-sans', serif: 'inter', slab: 'inter', fantasy: 'righteous' };
+    function normalizeFontFamily(value) { return FONTS.includes(value) ? value : (FONT_ALIASES[value] || DEFAULTS.fontFamily); }
     function normalizeSettings(value) {
         const settings = value && typeof value === 'object' ? value : {};
         return {
             accent: validHex(settings.accent) ? settings.accent : DEFAULT_ACCENT,
             accent2: validHex(settings.accent2) ? settings.accent2 : DEFAULT_ACCENT_2,
             radius: clamp(settings.radius, 0, 28, DEFAULTS.radius),
-            fontFamily: FONTS.includes(settings.fontFamily) ? settings.fontFamily : DEFAULTS.fontFamily,
+            fontFamily: normalizeFontFamily(settings.fontFamily),
             fontSize: clamp(settings.fontSize, 80, 130, DEFAULTS.fontSize),
             haptics: settings.haptics !== false,
             gradientDirection: DIRECTIONS.includes(settings.gradientDirection)
@@ -203,7 +205,7 @@
         return normalizeSettings({
             accent: migratedAccent,
             radius: profile.radius,
-            fontFamily: FONTS.includes(oldFont) ? oldFont : DEFAULTS.fontFamily,
+            fontFamily: normalizeFontFamily(oldFont),
             fontSize: oldFontSize,
             haptics: migratedHaptics,
             gradientDirection: profile.gradientDirection,
