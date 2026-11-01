@@ -1,6 +1,6 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Der PDF-Magazin-Renderer wird direkt über index.html geladen.
-const CACHE_NAME = 'bergtouren-cache-premium-alpine-v190';
+const CACHE_NAME = 'bergtouren-cache-premium-alpine-v191';
 
 const APP_SHELL = [
   './',
@@ -10,7 +10,7 @@ const APP_SHELL = [
   './fonts/roboto-condensed-latin-wght-normal.woff2',
   './fonts/nunito-sans-latin-wght-normal.woff2',
   './fonts/righteous-latin-400-normal.woff2',
-  './app-main-20261019.js?v=31',
+  './app-main-20261019.js?v=32',
   './stats-premium-alpine.js?v=10',
   './theme-editor-unified.js?v=25',
   './background-image-manager.js?v=7',
@@ -29,6 +29,7 @@ const APP_SHELL = [
   './map-premium-alpine.css?v=19',
   './appview-premium-alpine.css?v=9',
   './plan-premium-alpine.css?v=6',
+  './typography-profiles.css?v=1',
   'https://images.unsplash.com/photo-1694968537484-d4e1733301b5?auto=format&fit=crop&w=1400&q=85',
   './assets/milestones/alpine-backdrop.svg?v=2',
   'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg/1280px-Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg',
