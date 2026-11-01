@@ -389,14 +389,14 @@
         const viewScope = ':is(body.gold) :is(#dashboard-view, #app-view, #chart-view, #tour-view, #map-view, #filter-view, #backup-view, #theme-view, #achievements-view, #wrapped-view, #more-menu)';
         const bigGradient = buildSurfaceGradient(settings, false);
         const softGradient = buildSurfaceGradient(settings, true);
-        const navGradient = buildSurfaceGradient(settings, true);
+        const navGradient = buildSurfaceGradient(settings, false);
         const radius = settings.radius + 'px';
         const selectors = (items) => items.map(item =>
             item.startsWith('#') ? 'body.gold ' + item : viewScope + ' ' + item
-        ).join(',\\n');
+        ).join(',\n');
         const globalSelectors = (items) => items.map(item =>
             'body.gold ' + item
-        ).join(',\\n');
+        ).join(',\n');
 
         const GLOBAL_BIG_SURFACES = [
             '.modal-card:not(.highlight-modal-gold):not(.highlight-modal-silver):not(.highlight-modal-bronze)',
@@ -410,21 +410,21 @@
 
         let css = '';
         css += selectors(BIG_SURFACES) + ' { background: ' + bigGradient +
-            ' !important; border-radius: ' + radius + ' !important; }\\n';
+            ' !important; border-radius: ' + radius + ' !important; }\n';
         css += selectors(SOFT_SURFACES) + ' { background: ' + softGradient +
-            ' !important; border-radius: ' + radius + ' !important; }\\n';
+            ' !important; border-radius: ' + radius + ' !important; }\n';
         css += globalSelectors(GLOBAL_BIG_SURFACES) + ' { background: ' + bigGradient +
-            ' !important; border-color: var(--theme-palette-border, rgba(225,232,242,.12)) !important; }\\n';
+            ' !important; border-color: var(--theme-palette-border, rgba(225,232,242,.12)) !important; }\n';
         css += globalSelectors(GLOBAL_SOFT_SURFACES) + ' { background: ' + softGradient +
-            ' !important; }\\n';
-        css += selectors(RADIUS_SURFACES) + ' { border-radius: ' + radius + ' !important; }\\n';
-        css += 'body.gold :is(#dashboard-view, #app-view, #chart-view, #map-view, #tour-view, #backup-view, #wrapped-view, #achievements-view, #theme-view, #filter-view) :is([class*="-card"], [class*="-tile"]:not(.leaflet-tile), [class*="-panel"], [class*="-section"], [class*="-btn"], [class*="-button"], [class*="-nav"], [class*="-list"] > li, button, input[type="text"], input[type="number"], input[type="date"], input[type="search"], input[type="time"], input[type="email"], input[type="tel"], input[type="color"], input[type="range"], select, textarea, details > summary) { border-radius: ' + radius + ' !important; }\\n';
+            ' !important; }\n';
+        css += selectors(RADIUS_SURFACES) + ' { border-radius: ' + radius + ' !important; }\n';
+        css += 'body.gold :is(#dashboard-view, #app-view, #chart-view, #map-view, #tour-view, #backup-view, #wrapped-view, #achievements-view, #theme-view, #filter-view) :is([class*="-card"], [class*="-tile"]:not(.leaflet-tile), [class*="-panel"], [class*="-section"], [class*="-btn"], [class*="-button"], [class*="-nav"], [class*="-list"] > li, button, input[type="text"], input[type="number"], input[type="date"], input[type="search"], input[type="time"], input[type="email"], input[type="tel"], input[type="color"], input[type="range"], select, textarea, details > summary) { border-radius: ' + radius + ' !important; }\n';
         css += 'body.gold .top-main-nav { background: ' + navGradient +
             ' !important; background-image: ' + navGradient +
             ' !important; border-color: color-mix(in srgb, ' + settings.accent +
-            ' 26%, rgba(225,232,242,.10)) !important; border-radius: ' + radius + 'px !important; }\\n';
-        css += 'body.gold .top-main-nav :is(button, a, .top-main-nav-item) { color: var(--theme-palette-text, #f3f7fb) !important; }\\n';
-        css += 'body.gold #theme-view .theme-editor-card, body.gold #theme-view .dashboard-editor-section { border-radius: ' + radius + 'px !important; }\\n';
+            ' 26%, rgba(225,232,242,.10)) !important; border-radius: ' + radius + 'px !important; }\n';
+        css += 'body.gold .top-main-nav :is(button, a, .top-main-nav-item) { color: var(--theme-palette-text, #f3f7fb) !important; }\n';
+        css += 'body.gold #theme-view .theme-editor-card, body.gold #theme-view .dashboard-editor-section { border-radius: ' + radius + 'px !important; }\n';
         return css;
     }
 
