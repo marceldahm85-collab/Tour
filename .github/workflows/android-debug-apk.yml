@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "android/**"
+      - "app-main-20261019.js"
       - "android-gallery-photos.js"
       - "android-gallery-photos.css"
       - "background-image-manager.js"
@@ -113,6 +114,7 @@ jobs:
 
       - name: Check Android and editor JavaScript syntax
         run: |
+          node --check app-main-20261019.js
           node --check android-gallery-photos.js
           node --check background-image-manager.js
           node --check theme-editor-unified.js

@@ -5,13 +5,16 @@ Die Android-App ist eine native Hülle um dieselbe, zentral veröffentlichte Ber
 ## Aktueller Stand
 
 - Die App lädt die PWA unter `https://marceldahm85-collab.github.io/Tour/`.
-- Das Android-Launcher-Symbol verwendet dieselbe PNG-Grafik wie das PWA-Manifest (`icons/icon-512_neu.png`).
+- Das Android-Launcher-Symbol verwendet dieselbe 192×192-PNG-Grafik wie das PWA-Manifest (`icons/icon-192.png`).
 - Der Android-Anzeigename ist **Bergtouren**.
 - Die Hauptansicht bleibt im Hochformat; der native Videoplayer darf sich bei Bedarf drehen.
 - Die WebView aktiviert JavaScript und DOM-Speicher, erlaubt aber keine lokalen `file://`-Zugriffe. Ausgewählte Dateien werden über Android-Content-URIs gelesen.
 - Der Theme-Editor unterstützt die gleichen Akzent-, Radius-, Schrift-, Verlaufs- und Haptik-Einstellungen wie die PWA. Die Android-App besitzt dafür die normale Vibrationsberechtigung.
 - Hintergrundmotive und selbst ausgewählte Hintergrundbilder werden lokal in IndexedDB gespeichert. Eigene Bilder werden vor dem Speichern auf maximal 1920 Pixel und höchstens 15 MB optimiert.
 - Die Galerie-Funktion liest Fotos und Videos nach ausdrücklicher Freigabe aus Android MediaStore. Originalmedien bleiben an ihrem bisherigen Speicherort.
+- Das native Startbildschirm-Widget **Bergjahr** zeigt abgeschlossene Touren, Gesamtkilometer und Aufstieg des aktuellen Kalenderjahres. Mehrtagestouren zählen einmal als Tour; die Strecken und Aufstiege aller Etappen fließen in die Summen ein.
+- Das Widget speichert ausschließlich einen kleinen Statistik-Schnappschuss in Android SharedPreferences. Die eigentlichen Tourdaten verbleiben unverändert im bestehenden App-Speicher.
+- Nach dem Speichern, Bearbeiten, Löschen oder Importieren von Touren aktualisiert die App das Widget. Die Akzentfarbe aus dem Editor wird übernommen; beim Jahreswechsel wechselt die Anzeige automatisch auf das neue Jahr.
 
 ## Daten und Editor-Einstellungen zwischen PWA und APK
 
@@ -29,6 +32,12 @@ Für die Übernahme des bestehenden PWA-Zustands:
 3. Danach sind die übertragenen Tour-, Theme- und Hintergrundbild-Einstellungen in der APK verfügbar.
 
 Gerätegebundene Galerie-URIs werden absichtlich nicht in JSON-Sicherungen übertragen. Die Fotos und Videos bleiben mit der lokalen Android-Galerie verknüpft und müssen bei einem Gerätewechsel neu zugeordnet werden.
+
+## Jahresstatistik-Widget
+
+Das Widget wird über den Android-Startbildschirm hinzugefügt: freien Bereich lange drücken, **Widgets** öffnen und **Bergtouren → Bergjahr** auswählen. Die breite Kachel öffnet beim Antippen direkt **Stats → Statistik** für das aktuelle Kalenderjahr.
+
+Die APK und die Chrome-PWA haben getrennte lokale Datenbestände. Das Widget verwendet deshalb die Tourdaten der APK. Vor der ersten Nutzung sollte eine aktuelle JSON-Sicherung aus der PWA in die APK importiert werden. Spätere Änderungen innerhalb der APK werden automatisch an das Widget übertragen.
 
 ## Android-Build
 

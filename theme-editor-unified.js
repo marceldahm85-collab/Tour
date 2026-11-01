@@ -232,6 +232,9 @@
         writeStored(HAPTIC_KEY, normalized.haptics);
         writeStored(LEGACY_HAPTIC_KEY, normalized.haptics ? 'on' : 'off');
         draft = normalized;
+        try {
+            window.__syncAndroidYearStatsWidget?.();
+        } catch (_) {}
         return normalized;
     }
 
@@ -651,6 +654,9 @@
     window.buildThemeEditorLiveCss = buildUnifiedLiveCss;
     window.applyThemeEditorSettingsToDom = function () {
         applyUnifiedSettings(false);
+        try {
+            window.__syncAndroidYearStatsWidget?.();
+        } catch (_) {}
     };
     window.invalidateThemeEditorDraft = function () {
         draft = null;

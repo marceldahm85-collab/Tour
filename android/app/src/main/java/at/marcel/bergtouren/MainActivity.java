@@ -49,6 +49,8 @@ public final class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST_CODE = 4102;
     private static final int GALLERY_PERMISSION_REQUEST_CODE = 4203;
     private static final String BRIDGE_NAME = "TourNative";
+    public static final String ACTION_OPEN_YEAR_STATS =
+            "at.marcel.bergtouren.action.OPEN_YEAR_STATS";
 
     private static final Uri APP_URI = Uri.parse(BuildConfig.WEB_APP_URL);
     private static final String APP_ORIGIN =
@@ -61,6 +63,8 @@ public final class MainActivity extends Activity {
     private LinearLayout errorPanel;
     private ValueCallback<Uri[]> pendingFileChooser;
     private boolean bridgeAvailable;
+    private boolean webPageLoaded;
+    private boolean pendingOpenYearStats;
     private Object backInvokedCallback;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final ExecutorService galleryExecutor = Executors.newSingleThreadExecutor();
@@ -70,6 +74,9 @@ public final class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        pendingOpenYearStats = getIntent() != null
+                && ACTION_OPEN_YEAR_STATS.equals(getIntent().getAction());
 
         configureSystemBars();
         createWebViewLayout();
@@ -216,6 +223,7 @@ public final class MainActivity extends Activity {
             @Override
             public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
+                webPageLoaded = false;
 
                 Uri target = Uri.parse(url);
                 if (!isTrustedAppUrl(target)) {
@@ -235,8 +243,10 @@ public final class MainActivity extends Activity {
                     return;
                 }
 
+                webPageLoaded = true;
                 progressBar.setVisibility(View.GONE);
                 sendBridgeHandshake();
+                deliverPendingYearStatsWidgetNavigation();
             }
 
             @Override
@@ -373,6 +383,7 @@ public final class MainActivity extends Activity {
                                 features.put("gallery.thumbnail.v2");
                                 features.put("gallery.image.full.v1");
                                 features.put("gallery.video.player.v1");
+                                features.put("widget.yearStats.v1");
                                 response.put("features", features);
                                 replyToBridge(replyProxy, response);
                                 Log.i(TAG, "Sichere JavaScript-Bridge ist erreichbar (Request-ID bestätigt).");
@@ -393,6 +404,23 @@ public final class MainActivity extends Activity {
                             } else if ("gallery.video.play".equals(type)) {
                                 String uri = request.optString("uri", "");
                                 launchGalleryVideo(replyProxy, requestId, uri);
+                            } else if ("widget.yearStats.update".equals(type)) {
+                                int year = request.optInt("year", -1);
+                                int tours = request.optInt("tours", -1);
+                                double distance = request.optDouble("distance", Double.NaN);
+                                double ascent = request.optDouble("ascent", Double.NaN);
+                                String accent = request.optString("accent", "#ad7d12");
+
+                                if (year >= 2000 && year <= 9999
+                                        && tours >= 0
+                                        && Double.isFinite(distance) && distance >= 0
+                                        && Double.isFinite(ascent) && ascent >= 0
+                                        && accent.matches("#[0-9a-fA-F]{6}")) {
+                                    YearStatsWidgetProvider.updateStats(
+                                            MainActivity.this, year, tours, distance, ascent, accent);
+                                } else {
+                                    Log.w(TAG, "Ungültige Jahresstatistik für das Widget verworfen.");
+                                }
                             } else {
                                 Log.w(TAG, "Unbekannte Bridge-Nachricht verworfen.");
                             }
@@ -780,6 +808,34 @@ public final class MainActivity extends Activity {
         if (webView != null) {
             webView.onResume();
         }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        if (intent != null && ACTION_OPEN_YEAR_STATS.equals(intent.getAction())) {
+            pendingOpenYearStats = true;
+            deliverPendingYearStatsWidgetNavigation();
+        }
+    }
+
+    private void deliverPendingYearStatsWidgetNavigation() {
+        if (!pendingOpenYearStats || !webPageLoaded || webView == null) return;
+
+        webView.evaluateJavascript(
+                "(function(){try{"
+                        + "if(typeof window.__openYearStatsFromNativeWidget==='function'){"
+                        + "return window.__openYearStatsFromNativeWidget();"
+                        + "}}catch(e){}return 'unavailable';})()",
+                result -> {
+                    if (result != null && (result.contains("opened") || result.contains("queued"))) {
+                        pendingOpenYearStats = false;
+                    } else {
+                        Log.w(TAG, "Jahresstatistik-Navigation aus dem Widget ist noch nicht verfügbar.");
+                    }
+                }
+        );
     }
 
     @Override

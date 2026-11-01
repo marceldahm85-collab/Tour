@@ -44,6 +44,11 @@ initImageLightbox();
 
 initStatsPeaksInteractions();
 initStatsSectionPages();
+window.__nativeWidgetStartupReady = true;
+if (window.__nativeWidgetPendingOpenYearStats) {
+    window.__nativeWidgetPendingOpenYearStats = false;
+    openYearStatsFromNativeWidget();
+}
 initChartTabs();
 
 initYearCompareSwipe();
@@ -53,6 +58,9 @@ initYearCompareSwipe();
 
     // Bestehende Touren
 loadData();
+
+// Initiale Jahresbilanz nach dem Laden der lokalen Tourdaten übertragen.
+syncNativeYearStatsWidget(appStorage.get('touren') || []);
 
 // Statistikzeilen einmalig klickbar machen
 initStatisticsClickHandlers();
@@ -15112,6 +15120,39 @@ function initStatsSectionPages() {
     );
 }
 
+/* Android-Widget: Statistik-Unterseite für das aktuelle Kalenderjahr öffnen. */
+function openYearStatsFromNativeWidget() {
+    const year = String(new Date().getFullYear());
+    statsYearFilter = year;
+    populateStatsYearSelect();
+
+    const selector = document.getElementById('stats-year-select');
+    if (selector) {
+        if (!Array.from(selector.options).some(option => option.value === year)) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            selector.appendChild(option);
+        }
+        selector.value = year;
+        selector.dispatchEvent(new Event('change'));
+    }
+
+    goToView('chart', true);
+    document.querySelector(
+        '#stats-section-switch [data-stats-section="statistics"]'
+    )?.click();
+}
+
+window.__openYearStatsFromNativeWidget = function () {
+    if (!window.__nativeWidgetStartupReady) {
+        window.__nativeWidgetPendingOpenYearStats = true;
+        return 'queued';
+    }
+    openYearStatsFromNativeWidget();
+    return 'opened';
+};
+
 function getCanvasLogicalWidth(canvas) {
     if (!canvas) return 0;
 
@@ -27145,6 +27186,66 @@ if (performanceScore !== null) {
     };
 }
 
+/*
+ * Übergibt die Jahresbilanz an das native Android-Widget.
+ * Die Tourenzahl verwendet dieselbe Identitätsregel wie die Stats-Seite:
+ * Mehrtagestour-Etappen zählen einmal, ihre Strecken und Aufstiege summieren sich.
+ */
+function syncNativeYearStatsWidget(entries = null) {
+    const bridge = window.TourNative;
+    if (!bridge || typeof bridge.postMessage !== 'function') return false;
+
+    const source = Array.isArray(entries)
+        ? entries
+        : (appStorage.get('touren') || []);
+    const year = new Date().getFullYear();
+    const yearEntries = source.filter(entry =>
+        getYearFromDate(entry?.date) === year
+    );
+
+    let totalDistance = 0;
+    let totalAscent = 0;
+    yearEntries.forEach(entry => {
+        totalDistance += entry?.strecke
+            ? parseFloat(String(entry.strecke).replace(',', '.')) || 0
+            : 0;
+        totalAscent += entry?.aufstieg
+            ? parseFloat(String(entry.aufstieg).replace(',', '.')) || 0
+            : 0;
+    });
+
+    let accent = '#ad7d12';
+    try {
+        const settings = typeof window.getThemeEditorSettings === 'function'
+            ? window.getThemeEditorSettings()
+            : null;
+        const profile = settings?.gold || settings?.dark || settings?.light || settings?.summit;
+        if (/^#[0-9a-f]{6}$/i.test(String(profile?.accent || ''))) {
+            accent = profile.accent;
+        }
+    } catch (error) {
+        console.warn('[Android-Widget] Editor-Akzent konnte nicht gelesen werden:', error);
+    }
+
+    const payload = {
+        type: 'widget.yearStats.update',
+        year,
+        tours: countDistinctTours(yearEntries),
+        distance: Number(totalDistance.toFixed(3)),
+        ascent: Number(totalAscent.toFixed(1)),
+        accent
+    };
+
+    try {
+        bridge.postMessage(JSON.stringify(payload));
+        return true;
+    } catch (error) {
+        console.warn('[Android-Widget] Jahreswerte konnten nicht übergeben werden:', error);
+        return false;
+    }
+}
+window.__syncAndroidYearStatsWidget = syncNativeYearStatsWidget;
+
 // ================== PDF-Tourenbuch: Datenfunktionen ==================
 
 function getToursInYearRange(fromYear, toYear) {
@@ -30275,6 +30376,11 @@ const appStorage = {
             ) {
                 invalidateTourDataCaches();
             }
+
+            // Jahreswerte nach jeder Touränderung an das native Widget senden.
+            if (typeof syncNativeYearStatsWidget === 'function') {
+                syncNativeYearStatsWidget(Array.isArray(val) ? val : []);
+            }
         }
 
         const snapshot =
@@ -30321,6 +30427,10 @@ const appStorage = {
                     'function'
             ) {
                 invalidateTourDataCaches();
+            }
+
+            if (typeof syncNativeYearStatsWidget === 'function') {
+                syncNativeYearStatsWidget([]);
             }
         }
 
