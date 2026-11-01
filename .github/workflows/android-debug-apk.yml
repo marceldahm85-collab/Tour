@@ -112,8 +112,12 @@ jobs:
           java --version
           ./android/gradlew --version
 
-      - name: Check Android and editor JavaScript syntax
+      - name: Check Android widget layout and editor JavaScript syntax
         run: |
+          if grep -Eq '<View([[:space:]>])' android/app/src/main/res/layout/widget_year_stats.xml; then
+            echo "::error::RemoteViews does not support plain android.view.View elements in widget layouts."
+            exit 1
+          fi
           node --check app-main-20261019.js
           node --check android-gallery-photos.js
           node --check background-image-manager.js
