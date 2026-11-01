@@ -20789,7 +20789,7 @@ const ICONS = {
                 : Math.round(remaining).toLocaleString('de-AT');
             const fmtNext = next.toLocaleString('de-AT');
 
-            progressText = `${fmtRemain} ${unit} bis ${fmtNext} ${unit}`;
+            progressText = `${fmtRemain} bis ${fmtNext} ${unit}`;
         }
 
 
