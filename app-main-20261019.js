@@ -22549,7 +22549,9 @@ const THEME_EDITOR_FONT_SIZE_KEY = 'themeEditorFontSize_v1';
 const THEME_EDITOR_DEFAULT_FONT_SIZE = 100;
 
 const THEME_EDITOR_FONT_PRESETS = {
-    system: 'system-ui, sans-serif',
+    // Generische Android-Systemfamilie: berücksichtigt auch die vom Nutzer
+    // in Samsung One UI installierte FlipFont, sofern WebView sie bereitstellt.
+    system: 'sans-serif',
     inter: '"Tour Inter", sans-serif',
     'roboto-condensed': '"Tour Roboto Condensed", sans-serif',
     'nunito-sans': '"Tour Nunito Sans", sans-serif',
@@ -35063,7 +35065,7 @@ function getWrappedFontFamily() {
             || THEME_EDITOR_FONT_PRESETS.system;
     }
 
-    return 'Roboto, "Noto Sans", system-ui, sans-serif';
+    return 'sans-serif';
 }
 
 function getWrappedFontScale() {
