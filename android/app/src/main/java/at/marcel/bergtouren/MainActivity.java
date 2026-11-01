@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.net.Uri;
@@ -11,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.OpenableColumns;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
@@ -43,6 +45,7 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
@@ -53,6 +56,7 @@ public final class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST_CODE = 4102;
     private static final int GALLERY_PERMISSION_REQUEST_CODE = 4203;
     private static final int BACKUP_SAVE_REQUEST_CODE = 4304;
+    private static final int BACKUP_OPEN_REQUEST_CODE = 4305;
     private static final int MAX_BACKUP_BYTES = 48 * 1024 * 1024;
     private static final int MAX_BACKUP_CHUNKS = 2048;
     private static final int MAX_BACKUP_CHUNK_CHARS = 48 * 1024;
@@ -81,6 +85,10 @@ public final class MainActivity extends Activity {
     private ByteArrayOutputStream pendingBackupStream;
     private String pendingBackupTransferId;
     private String pendingBackupFileName;
+    private Uri pendingBackupTargetUri;
+    private boolean pendingBackupLinkOnSave;
+    private JavaScriptReplyProxy pendingBackupOpenReply;
+    private String pendingBackupOpenRequestId;
     private int pendingBackupExpectedBytes;
     private int pendingBackupExpectedChunks;
     private int pendingBackupNextChunk;
@@ -403,6 +411,7 @@ public final class MainActivity extends Activity {
                                 features.put("widget.yearStats.v1");
                                 features.put("widget.yearStats.v2");
                                 features.put("backup.export.v1");
+                                features.put("backup.file.link.v1");
                                 response.put("features", features);
                                 replyToBridge(replyProxy, response);
                                 Log.i(TAG, "Sichere JavaScript-Bridge ist erreichbar (Request-ID bestätigt).");
@@ -431,6 +440,10 @@ public final class MainActivity extends Activity {
                                 finishBackupExport(request, replyProxy, requestId);
                             } else if ("backup.export.abort".equals(type)) {
                                 abortBackupExport(request, replyProxy, requestId);
+                            } else if ("backup.file.open".equals(type)) {
+                                openBackupFilePicker(replyProxy, requestId);
+                            } else if ("backup.file.read".equals(type)) {
+                                readBackupFile(request, replyProxy, requestId);
                             } else if ("widget.yearStats.update".equals(type)) {
                                 int year = request.optInt("year", -1);
                                 int tours = request.optInt("tours", -1);
@@ -512,7 +525,20 @@ public final class MainActivity extends Activity {
         }
 
         pendingBackupTransferId = transferId;
+        String targetUriValue = request.optString("targetUri", "");
+        Uri targetUri = null;
+        if (!targetUriValue.isEmpty()) {
+            targetUri = Uri.parse(targetUriValue);
+            if (!"content".equalsIgnoreCase(targetUri.getScheme()) || targetUriValue.length() > 2048) {
+                replyBackupExport(replyProxy, "backup.export.error", requestId,
+                        false, "Die ausgewählte Sicherungsdatei ist ungültig.");
+                return;
+            }
+        }
+
         pendingBackupFileName = fileName;
+        pendingBackupTargetUri = targetUri;
+        pendingBackupLinkOnSave = request.optBoolean("linkOnSave", false);
         pendingBackupExpectedBytes = totalBytes;
         pendingBackupExpectedChunks = totalChunks;
         pendingBackupNextChunk = 0;
@@ -578,12 +604,19 @@ public final class MainActivity extends Activity {
 
         pendingBackupFinishReply = replyProxy;
         pendingBackupFinishRequestId = requestId;
+        if (pendingBackupTargetUri != null) {
+            saveBackupToExistingUri(pendingBackupTargetUri, replyProxy, requestId);
+            return;
+        }
         runOnUiThread(() -> {
             try {
                 Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
                 intent.setType("application/json");
                 intent.putExtra(Intent.EXTRA_TITLE, pendingBackupFileName);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
                 startActivityForResult(intent, BACKUP_SAVE_REQUEST_CODE);
             } catch (RuntimeException error) {
                 Log.e(TAG, "Android-Speicherdialog für die Sicherung konnte nicht geöffnet werden.", error);
@@ -640,6 +673,7 @@ public final class MainActivity extends Activity {
             try {
                 response.put("ok", true);
                 response.put("fileName", fileName);
+                if (pendingBackupLinkOnSave) response.put("uri", destination.toString());
             } catch (JSONException serializationError) {
                 Log.e(TAG, "Backup-Erfolgsantwort konnte nicht erstellt werden.", serializationError);
             }
@@ -664,11 +698,262 @@ public final class MainActivity extends Activity {
         pendingBackupStream = null;
         pendingBackupTransferId = null;
         pendingBackupFileName = null;
+        pendingBackupTargetUri = null;
+        pendingBackupLinkOnSave = false;
         pendingBackupExpectedBytes = 0;
         pendingBackupExpectedChunks = 0;
         pendingBackupNextChunk = 0;
         pendingBackupFinishReply = null;
         pendingBackupFinishRequestId = null;
+    }
+
+
+    private void saveBackupToExistingUri(
+            Uri destination,
+            JavaScriptReplyProxy replyProxy,
+            String requestId
+    ) {
+        final byte[] backupBytes = pendingBackupStream.toByteArray();
+        final String fileName = pendingBackupFileName;
+        final boolean linkOnSave = pendingBackupLinkOnSave;
+
+        galleryExecutor.execute(() -> {
+            JSONObject response = createGalleryResponse("backup.export.complete", requestId);
+            try (OutputStream output = getContentResolver().openOutputStream(destination, "wt")) {
+                if (output == null) {
+                    throw new IOException("Der Zieldateistream konnte nicht geöffnet werden.");
+                }
+                output.write(backupBytes);
+                output.flush();
+                response.put("ok", true);
+                response.put("fileName", fileName);
+                if (linkOnSave) response.put("uri", destination.toString());
+            } catch (Exception error) {
+                Log.e(TAG, "Bestehende JSON-Sicherung konnte nicht überschrieben werden.", error);
+                response = createGalleryResponse("backup.export.error", requestId);
+                try {
+                    response.put("ok", false);
+                    response.put("error", "Die bestehende Sicherungsdatei konnte nicht überschrieben werden. Prüfe den Schreibzugriff.");
+                } catch (JSONException serializationError) {
+                    Log.e(TAG, "Backup-Fehlerantwort konnte nicht erstellt werden.", serializationError);
+                }
+            }
+
+            JSONObject finalResponse = response;
+            mainHandler.post(() -> {
+                replyToBridge(replyProxy, finalResponse);
+                clearBackupExportState();
+            });
+        });
+    }
+
+    private void openBackupFilePicker(
+            JavaScriptReplyProxy replyProxy,
+            String requestId
+    ) {
+        runOnUiThread(() -> {
+            if (pendingBackupOpenReply != null) {
+                replyBackupFileError(replyProxy, requestId,
+                        "Eine Dateiauswahl ist bereits geöffnet.");
+                return;
+            }
+
+            pendingBackupOpenReply = replyProxy;
+            pendingBackupOpenRequestId = requestId;
+
+            try {
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("application/json");
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+                startActivityForResult(intent, BACKUP_OPEN_REQUEST_CODE);
+            } catch (RuntimeException error) {
+                Log.e(TAG, "Android-Dateiauswahl für eine bestehende Sicherung konnte nicht geöffnet werden.", error);
+                pendingBackupOpenReply = null;
+                pendingBackupOpenRequestId = null;
+                replyBackupFileError(replyProxy, requestId,
+                        "Die Android-Dateiauswahl konnte nicht geöffnet werden.");
+            }
+        });
+    }
+
+    private void readBackupFile(
+            JSONObject request,
+            JavaScriptReplyProxy replyProxy,
+            String requestId
+    ) {
+        String uriValue = request.optString("uri", "");
+        Uri uri = Uri.parse(uriValue);
+        if (uriValue.isEmpty() || uriValue.length() > 2048
+                || !"content".equalsIgnoreCase(uri.getScheme())) {
+            replyBackupFileError(replyProxy, requestId,
+                    "Die verknüpfte Sicherungsdatei ist ungültig.");
+            return;
+        }
+        sendBackupFileContents(replyProxy, requestId, uri);
+    }
+
+    private void handleBackupOpenResult(int resultCode, Intent data) {
+        JavaScriptReplyProxy reply = pendingBackupOpenReply;
+        String requestId = pendingBackupOpenRequestId;
+        pendingBackupOpenReply = null;
+        pendingBackupOpenRequestId = null;
+
+        if (reply == null || requestId == null) return;
+
+        if (resultCode != RESULT_OK || data == null || data.getData() == null) {
+            JSONObject cancelled = createGalleryResponse("backup.file.read.complete", requestId);
+            try {
+                cancelled.put("ok", true);
+                cancelled.put("cancelled", true);
+            } catch (JSONException error) {
+                Log.w(TAG, "Abbruchantwort für Dateiauswahl konnte nicht erstellt werden.", error);
+            }
+            replyToBridge(reply, cancelled);
+            return;
+        }
+
+        Uri uri = data.getData();
+        int grantedFlags = data.getFlags() & (
+                Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+        );
+        if ((grantedFlags & Intent.FLAG_GRANT_WRITE_URI_PERMISSION) == 0) {
+            replyBackupFileError(reply, requestId,
+                    "Android hat für diese Datei keinen Schreibzugriff freigegeben. Bitte wähle eine beschreibbare JSON-Datei.");
+            return;
+        }
+
+        try {
+            getContentResolver().takePersistableUriPermission(uri, grantedFlags);
+        } catch (SecurityException error) {
+            Log.e(TAG, "Dateizugriff konnte nicht dauerhaft freigegeben werden.", error);
+            replyBackupFileError(reply, requestId,
+                    "Der Zugriff auf diese Sicherungsdatei konnte nicht dauerhaft gespeichert werden.");
+            return;
+        }
+
+        sendBackupFileContents(reply, requestId, uri);
+    }
+
+    private void sendBackupFileContents(
+            JavaScriptReplyProxy replyProxy,
+            String requestId,
+            Uri uri
+    ) {
+        galleryExecutor.execute(() -> {
+            byte[] contents;
+            String fileName;
+            try {
+                fileName = getBackupDisplayName(uri);
+                try (InputStream input = getContentResolver().openInputStream(uri);
+                     ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+                    if (input == null) {
+                        throw new IOException("Die ausgewählte Datei konnte nicht geöffnet werden.");
+                    }
+                    byte[] buffer = new byte[32 * 1024];
+                    int read;
+                    while ((read = input.read(buffer)) != -1) {
+                        if (output.size() + read > MAX_BACKUP_BYTES) {
+                            throw new IOException("Die Sicherungsdatei überschreitet 48 MB.");
+                        }
+                        output.write(buffer, 0, read);
+                    }
+                    contents = output.toByteArray();
+                }
+                if (contents.length == 0) {
+                    throw new IOException("Die ausgewählte Sicherungsdatei ist leer.");
+                }
+            } catch (Exception error) {
+                Log.e(TAG, "Bestehende JSON-Sicherung konnte nicht gelesen werden.", error);
+                mainHandler.post(() -> replyBackupFileError(replyProxy, requestId,
+                        "Die Sicherungsdatei konnte nicht gelesen werden. Prüfe, ob sie zugänglich und höchstens 48 MB groß ist."));
+                return;
+            }
+
+            final byte[] fileBytes = contents;
+            final String displayName = fileName;
+            mainHandler.post(() -> {
+                JSONObject start = createGalleryResponse("backup.file.read.start", requestId);
+                try {
+                    start.put("ok", true);
+                    start.put("uri", uri.toString());
+                    start.put("fileName", displayName);
+                    start.put("totalBytes", fileBytes.length);
+                } catch (JSONException error) {
+                    Log.e(TAG, "Datei-Lesekopf konnte nicht serialisiert werden.", error);
+                    replyBackupFileError(replyProxy, requestId, "Die Sicherungsdatei konnte nicht vorbereitet werden.");
+                    return;
+                }
+                replyToBridge(replyProxy, start);
+
+                final int chunkBytes = 36 * 1024;
+                for (int offset = 0; offset < fileBytes.length; offset += chunkBytes) {
+                    int length = Math.min(chunkBytes, fileBytes.length - offset);
+                    JSONObject chunk = createGalleryResponse("backup.file.read.chunk", requestId);
+                    try {
+                        chunk.put("data", Base64.encodeToString(
+                                fileBytes, offset, length, Base64.NO_WRAP
+                        ));
+                    } catch (JSONException error) {
+                        Log.e(TAG, "Sicherungsteil konnte nicht serialisiert werden.", error);
+                        replyBackupFileError(replyProxy, requestId, "Die Sicherungsdatei konnte nicht vollständig übertragen werden.");
+                        return;
+                    }
+                    replyToBridge(replyProxy, chunk);
+                }
+
+                JSONObject complete = createGalleryResponse("backup.file.read.complete", requestId);
+                try {
+                    complete.put("ok", true);
+                } catch (JSONException error) {
+                    Log.e(TAG, "Datei-Abschlussantwort konnte nicht serialisiert werden.", error);
+                }
+                replyToBridge(replyProxy, complete);
+            });
+        });
+    }
+
+    private String getBackupDisplayName(Uri uri) {
+        Cursor cursor = null;
+        try {
+            cursor = getContentResolver().query(
+                    uri,
+                    new String[] { OpenableColumns.DISPLAY_NAME },
+                    null,
+                    null,
+                    null
+            );
+            if (cursor != null && cursor.moveToFirst()) {
+                int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                if (nameIndex >= 0) {
+                    String name = cursor.getString(nameIndex);
+                    if (name != null && !name.trim().isEmpty()) return name;
+                }
+            }
+        } catch (RuntimeException error) {
+            Log.w(TAG, "Name der Sicherungsdatei konnte nicht ermittelt werden.", error);
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+        String fallback = uri.getLastPathSegment();
+        return fallback == null || fallback.isEmpty() ? "Touren-Backup.json" : fallback;
+    }
+
+    private void replyBackupFileError(
+            JavaScriptReplyProxy replyProxy,
+            String requestId,
+            String message
+    ) {
+        JSONObject response = createGalleryResponse("backup.file.read.error", requestId);
+        try {
+            response.put("ok", false);
+            response.put("error", message);
+        } catch (JSONException error) {
+            Log.e(TAG, "Datei-Fehlerantwort konnte nicht serialisiert werden.", error);
+        }
+        replyToBridge(replyProxy, response);
     }
 
     private void replyToBridge(JavaScriptReplyProxy replyProxy, JSONObject response) {
@@ -919,6 +1204,8 @@ public final class MainActivity extends Activity {
         String requestId = pendingGalleryPermissionRequestId;
         pendingGalleryPermissionReply = null;
         pendingGalleryPermissionRequestId = null;
+        pendingBackupOpenReply = null;
+        pendingBackupOpenRequestId = null;
 
         if (replyProxy == null) {
             return;
@@ -1012,6 +1299,11 @@ public final class MainActivity extends Activity {
 
         if (requestCode == BACKUP_SAVE_REQUEST_CODE) {
             handleBackupSaveResult(resultCode, data);
+            return;
+        }
+
+        if (requestCode == BACKUP_OPEN_REQUEST_CODE) {
+            handleBackupOpenResult(resultCode, data);
             return;
         }
 
