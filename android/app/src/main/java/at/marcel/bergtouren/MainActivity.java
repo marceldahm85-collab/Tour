@@ -662,6 +662,27 @@ public final class MainActivity extends Activity {
         }
 
         Uri destination = data.getData();
+        if (pendingBackupLinkOnSave) {
+            int grantedFlags = data.getFlags() & (
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            );
+            if ((grantedFlags & Intent.FLAG_GRANT_WRITE_URI_PERMISSION) == 0) {
+                replyBackupExport(reply, "backup.export.error", requestId, false,
+                        "Android hat keinen dauerhaften Schreibzugriff auf die neue Datei freigegeben.");
+                clearBackupExportState();
+                return;
+            }
+            try {
+                getContentResolver().takePersistableUriPermission(destination, grantedFlags);
+            } catch (SecurityException error) {
+                Log.e(TAG, "Neue Sicherungsdatei konnte nicht dauerhaft verknüpft werden.", error);
+                replyBackupExport(reply, "backup.export.error", requestId, false,
+                        "Der dauerhafte Zugriff auf die neue Sicherungsdatei konnte nicht gespeichert werden.");
+                clearBackupExportState();
+                return;
+            }
+        }
+
         try (OutputStream output = getContentResolver().openOutputStream(destination, "wt")) {
             if (output == null) {
                 throw new IOException("Der Zieldateistream konnte nicht geöffnet werden.");
