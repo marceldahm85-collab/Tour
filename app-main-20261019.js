@@ -22253,6 +22253,43 @@ const THEME_EDITOR_FONT_PRESETS = {
     cursive: 'cursive'
 };
 
+/*
+ * Typografische Profile: Jede Schrift behält ihre eigene Familie, erhält aber
+ * einen passenden optischen Größenabgleich. Die Mindestgröße verhindert,
+ * dass kompakte Alt-CSS-Regeln die Lesbarkeit unnötig reduzieren.
+ *
+ * Die Werte gelten sowohl für DOM-Text als auch für Canvas-/Diagrammtexte.
+ */
+const THEME_EDITOR_FONT_PROFILES = Object.freeze({
+    system:            { scale: 1.00, minSize: 11.0 },
+    inter:              { scale: 1.02, minSize: 11.0 },
+    'roboto-condensed': { scale: 1.06, minSize: 11.0 },
+    'nunito-sans':      { scale: 1.02, minSize: 11.0 },
+    righteous:          { scale: 1.08, minSize: 11.5 },
+    mono:               { scale: 1.02, minSize: 11.0 },
+    cursive:            { scale: 1.06, minSize: 11.5 }
+});
+
+function getThemeEditorFontProfile(fontName = getThemeEditorFontName()) {
+    return THEME_EDITOR_FONT_PROFILES[fontName] || THEME_EDITOR_FONT_PROFILES.system;
+}
+
+function getThemeEditorAdjustedFontSize(size, percent = getThemeEditorFontSizeScale()) {
+    const numericSize = Number(size);
+    if (!Number.isFinite(numericSize) || numericSize <= 0) return numericSize;
+
+    const numericPercent = Number(percent);
+    const safePercent = Number.isFinite(numericPercent)
+        ? Math.max(80, Math.min(130, numericPercent))
+        : THEME_EDITOR_DEFAULT_FONT_SIZE;
+    const profile = getThemeEditorFontProfile();
+    const readableBaseSize = Math.max(numericSize, profile.minSize);
+
+    return Math.round(
+        readableBaseSize * profile.scale * (safePercent / 100) * 100
+    ) / 100;
+}
+
 const THEME_EDITOR_KEY = 'themeEditorSettings_v1';
 
 const defaultThemeEditorSettings = {
@@ -22285,6 +22322,16 @@ function applyThemeEditorFont(fontName, save = true) {
     document.documentElement.style.setProperty(
         '--app-font',
         fontStack
+    );
+
+    const fontProfile = getThemeEditorFontProfile(validFontName);
+    document.documentElement.style.setProperty(
+        '--app-font-profile-scale',
+        String(fontProfile.scale)
+    );
+    document.documentElement.style.setProperty(
+        '--app-font-min-size',
+        fontProfile.minSize + 'px'
     );
 
     document.body.dataset.font = validFontName;
@@ -22325,6 +22372,9 @@ function initThemeEditorFontSelector() {
 
     select.addEventListener('change', event => {
         applyThemeEditorFont(event.target.value, true);
+        // Ein Schriftwechsel muss auch die individuelle Größenkalibrierung
+        // sofort auf alle vorhandenen Views und dynamischen Texte anwenden.
+        applyThemeEditorFontSize(getThemeEditorFontSizeScale(), false);
     });
 }
 
@@ -22350,7 +22400,7 @@ function getThemeEditorFontSizeScale() {
 function getThemeEditorCanvasFont(size, weight = '400', style = 'normal') {
     const n = Number(size);
     const safe = Number.isFinite(n) && n > 0 ? n : 12;
-    const px = safe * (getThemeEditorFontSizeScale() / 100);
+    const px = getThemeEditorAdjustedFontSize(safe, getThemeEditorFontSizeScale());
     const name = getThemeEditorFontName();
     const family = THEME_EDITOR_FONT_PRESETS[name] || THEME_EDITOR_FONT_PRESETS.system;
     return `${style} ${weight} ${px}px ${family}`;
@@ -22451,7 +22501,7 @@ function applyThemeEditorFontSizeToSubtree(root, value) {
         // die vom Editor vorgegebene globale Schriftgröße nicht aushebeln.
         element.style.setProperty(
             'font-size',
-            `${originalSize * (percent / 100)}px`,
+            `${getThemeEditorAdjustedFontSize(originalSize, percent)}px`,
             'important'
         );
     });
@@ -22522,8 +22572,7 @@ elements.forEach(element => {
 });
 
 originalSizes.forEach(({ element, originalSize }) => {
-    const scaledSize =
-        originalSize * (percent / 100);
+    const scaledSize = getThemeEditorAdjustedFontSize(originalSize, percent);
 
     // Auch bestehende CSS-!important-Regeln müssen der Editor-Skalierung folgen.
     element.style.setProperty(
