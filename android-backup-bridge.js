@@ -24,6 +24,29 @@
         return prefix + '-' + Date.now() + '-' + requestCounter;
     }
 
+    function decodeStreamChunks(chunks, expectedBytes) {
+        if (!Number.isInteger(expectedBytes) || expectedBytes < 0 ||
+            expectedBytes > MAX_BACKUP_BYTES) {
+            throw new RangeError('Die ausgewählte Sicherungsdatei hat eine ungültige Größe.');
+        }
+
+        const output = new Uint8Array(expectedBytes);
+        let offset = 0;
+        chunks.forEach(encoded => {
+            const binary = window.atob(encoded);
+            if (offset + binary.length > output.length) {
+                throw new Error('Die Sicherungsdatei wurde unvollständig übertragen.');
+            }
+            for (let index = 0; index < binary.length; index += 1) {
+                output[offset++] = binary.charCodeAt(index);
+            }
+        });
+        if (offset !== expectedBytes) {
+            throw new Error('Die Sicherungsdatei wurde unvollständig übertragen.');
+        }
+        return new TextDecoder('utf-8').decode(output);
+    }
+
     function handleNativeMessage(event) {
         let message;
         try {
@@ -34,22 +57,65 @@
         }
 
         if (!message || typeof message !== 'object') return;
-        const pending = pendingRequests.get(String(message.requestId || ''));
+        const requestId = String(message.requestId || '');
+        const pending = pendingRequests.get(requestId);
         if (!pending) return;
 
-        pendingRequests.delete(String(message.requestId));
-        window.clearTimeout(pending.timeout);
-
-        if (message.ok === false || message.type === 'backup.export.error') {
-            pending.reject(new Error(message.error || 'Die Android-Sicherung ist fehlgeschlagen.'));
-        } else {
-            pending.resolve(message);
+        if (message.ok === false || message.type === 'backup.export.error' ||
+            message.type === 'backup.file.read.error') {
+            pendingRequests.delete(requestId);
+            window.clearTimeout(pending.timeout);
+            pending.reject(new Error(message.error || 'Der Android-Dateizugriff ist fehlgeschlagen.'));
+            return;
         }
+
+        if (pending.stream) {
+            if (message.type === pending.stream.startType) {
+                pending.metadata = message;
+                pending.chunks = [];
+                return;
+            }
+            if (message.type === pending.stream.chunkType) {
+                if (!Array.isArray(pending.chunks) ||
+                    typeof message.data !== 'string' ||
+                    message.data.length > 48 * 1024) {
+                    pendingRequests.delete(requestId);
+                    window.clearTimeout(pending.timeout);
+                    pending.reject(new Error('Ein Teil der Sicherungsdatei ist ungültig.'));
+                    return;
+                }
+                pending.chunks.push(message.data);
+                return;
+            }
+            if (message.type === pending.stream.completeType) {
+                pendingRequests.delete(requestId);
+                window.clearTimeout(pending.timeout);
+                if (message.cancelled) {
+                    pending.resolve(message);
+                    return;
+                }
+                try {
+                    const metadata = pending.metadata || {};
+                    const content = decodeStreamChunks(
+                        pending.chunks || [],
+                        Number(metadata.totalBytes)
+                    );
+                    pending.resolve(Object.assign({}, metadata, message, { content }));
+                } catch (error) {
+                    pending.reject(error);
+                }
+                return;
+            }
+        }
+
+        pendingRequests.delete(requestId);
+        window.clearTimeout(pending.timeout);
+        pending.resolve(message);
     }
 
     nativeBridge.addEventListener('message', handleNativeMessage);
 
-    function nativeRequest(type, payload, timeoutMs) {
+    function nativeRequest(type, payload, timeoutMs, stream) {
         const requestId = nextId('backup');
         const timeout = Number(timeoutMs) || 30000;
 
@@ -59,7 +125,7 @@
                 reject(new Error('Die Android-Sicherung antwortet nicht mehr.'));
             }, timeout);
 
-            pendingRequests.set(requestId, { resolve, reject, timeout: timer });
+            pendingRequests.set(requestId, { resolve, reject, timeout: timer, stream: stream || null, chunks: stream ? [] : null, metadata: null });
             try {
                 nativeBridge.postMessage(JSON.stringify(Object.assign({
                     type,
@@ -85,7 +151,7 @@
         return window.btoa(binary);
     }
 
-    async function saveTourBackupNative(json, suggestedFileName) {
+    async function saveTourBackupNative(json, suggestedFileName, options) {
         if (typeof json !== 'string' || !json) {
             throw new Error('Die Sicherung enthält keine Daten.');
         }
@@ -104,6 +170,13 @@
         const fileName = String(suggestedFileName || 'Touren-Backup.json')
             .replace(/[^A-Za-z0-9._-]/g, '_')
             .slice(0, 80) || 'Touren-Backup.json';
+        const saveOptions = options && typeof options === 'object' ? options : {};
+        const targetUri = typeof saveOptions.targetUri === 'string' ? saveOptions.targetUri : '';
+        const linkOnSave = saveOptions.linkOnSave === true;
+        if (targetUri && !targetUri.startsWith('content://')) {
+            throw new Error('Die verknüpfte Sicherungsdatei ist ungültig.');
+        }
+
         const transferId = nextId('backup-transfer');
         const totalChunks = Math.ceil(bytes.length / CHUNK_BYTES);
         let finishStarted = false;
@@ -113,7 +186,9 @@
                 transferId,
                 fileName,
                 totalBytes: bytes.length,
-                totalChunks
+                totalChunks,
+                targetUri,
+                linkOnSave
             }, 30000);
 
             for (let index = 0; index < totalChunks; index += 1) {
@@ -142,7 +217,8 @@
             return {
                 handled: true,
                 saved: true,
-                fileName: result.fileName || fileName
+                fileName: result.fileName || fileName,
+                uri: result.uri || targetUri || null
             };
         } catch (error) {
             if (!finishStarted) {
@@ -152,5 +228,49 @@
         }
     }
 
+
+    async function openTourBackupNative() {
+        const ping = await nativeRequest('bridge.ping', {}, 10000);
+        const features = Array.isArray(ping.features) ? ping.features : [];
+        if (!features.includes('backup.file.link.v1')) return { handled: false };
+
+        const result = await nativeRequest('backup.file.open', {}, 5 * 60 * 1000, {
+            startType: 'backup.file.read.start',
+            chunkType: 'backup.file.read.chunk',
+            completeType: 'backup.file.read.complete'
+        });
+        if (result.cancelled) return { handled: true, cancelled: true };
+        return {
+            handled: true,
+            opened: true,
+            uri: result.uri,
+            fileName: result.fileName || 'Touren-Backup.json',
+            content: result.content
+        };
+    }
+
+    async function readTourBackupNative(uri) {
+        if (typeof uri !== 'string' || !uri.startsWith('content://')) {
+            throw new Error('Die verknüpfte Sicherungsdatei ist ungültig.');
+        }
+        const ping = await nativeRequest('bridge.ping', {}, 10000);
+        const features = Array.isArray(ping.features) ? ping.features : [];
+        if (!features.includes('backup.file.link.v1')) return { handled: false };
+
+        const result = await nativeRequest('backup.file.read', { uri }, 5 * 60 * 1000, {
+            startType: 'backup.file.read.start',
+            chunkType: 'backup.file.read.chunk',
+            completeType: 'backup.file.read.complete'
+        });
+        return {
+            handled: true,
+            uri: result.uri || uri,
+            fileName: result.fileName || 'Touren-Backup.json',
+            content: result.content
+        };
+    }
+
     window.saveTourBackupNative = saveTourBackupNative;
+    window.openTourBackupNative = openTourBackupNative;
+    window.readTourBackupNative = readTourBackupNative;
 })();
