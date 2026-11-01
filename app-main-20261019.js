@@ -22358,10 +22358,10 @@ function getThemeEditorCanvasFont(size, weight = '400', style = 'normal') {
 
 function rememberOriginalInlineFontSize(element) {
     if (!themeEditorOriginalInlineFontSizes.has(element)) {
-        themeEditorOriginalInlineFontSizes.set(
-            element,
-            element.style.fontSize
-        );
+        themeEditorOriginalInlineFontSizes.set(element, {
+            value: element.style.getPropertyValue('font-size'),
+            priority: element.style.getPropertyPriority('font-size')
+        });
     }
 }
 
@@ -22370,11 +22370,16 @@ function restoreOriginalInlineFontSize(element) {
         return;
     }
 
-    const originalValue =
-        themeEditorOriginalInlineFontSizes.get(element);
+    const original = themeEditorOriginalInlineFontSizes.get(element);
+    const originalValue = original && typeof original === 'object'
+        ? original.value
+        : original;
+    const originalPriority = original && typeof original === 'object'
+        ? original.priority
+        : '';
 
     if (originalValue) {
-        element.style.fontSize = originalValue;
+        element.style.setProperty('font-size', originalValue, originalPriority || '');
     } else {
         element.style.removeProperty('font-size');
     }
@@ -22442,9 +22447,12 @@ function applyThemeEditorFontSizeToSubtree(root, value) {
 
     // Nur mit den unskalierten Ausgangsgrößen rechnen.
     originalSizes.forEach(({ element, originalSize }) => {
+        // Inline !important ist nötig, damit gezielte CSS-!important-Regeln
+        // die vom Editor vorgegebene globale Schriftgröße nicht aushebeln.
         element.style.setProperty(
             'font-size',
-            `${originalSize * (percent / 100)}px`
+            `${originalSize * (percent / 100)}px`,
+            'important'
         );
     });
 
@@ -22517,9 +22525,11 @@ originalSizes.forEach(({ element, originalSize }) => {
     const scaledSize =
         originalSize * (percent / 100);
 
+    // Auch bestehende CSS-!important-Regeln müssen der Editor-Skalierung folgen.
     element.style.setProperty(
         'font-size',
-        `${scaledSize}px`
+        `${scaledSize}px`,
+        'important'
     );
 });
 
