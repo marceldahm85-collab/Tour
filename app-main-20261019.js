@@ -108,17 +108,35 @@ applyThemeEditorFontSize(
         try {
             const payload = await buildAppDataPayload();
             const json = JSON.stringify(payload, null, 2);
+            const date = new Date().toISOString().slice(0, 10);
+            const fileName = `Touren-${date}.json`;
+
+            // Android WebView kann Blob-Downloads nicht wie Chrome/PWA speichern.
+            // In der APK übernimmt deshalb die native Dokumentauswahl den Export.
+            if (typeof window.saveTourBackupNative === 'function') {
+                const nativeResult = await window.saveTourBackupNative(json, fileName);
+                if (nativeResult && nativeResult.handled) {
+                    if (nativeResult.saved) {
+                        markBackupSavedNow();
+                        updateFileStatus(`Gespeichert: ${nativeResult.fileName || fileName}`);
+                        showToast('Sicherung gespeichert ✓', { type: 'success', duration: 2500 });
+                    } else if (nativeResult.cancelled) {
+                        showToast('Sicherung abgebrochen.', { type: 'info', duration: 2200 });
+                    }
+                    return;
+                }
+            }
+
+            // Browser-/PWA-Fallback mit verzögerter URL-Freigabe.
             const blob = new Blob([json], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
-
-            const date = new Date().toISOString().slice(0, 10);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `Touren-${date}.json`;
+            a.download = fileName;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            window.setTimeout(() => URL.revokeObjectURL(url), 1500);
             markBackupSavedNow();
 
             showToast('Datei heruntergeladen ✓', { type: 'success', duration: 2000 });
@@ -144,6 +162,7 @@ applyThemeEditorFontSize(
             const text = await file.text();
             const payload = JSON.parse(text);
             await applyAppDataPayload(payload);
+            updateFileStatus(`Geladen: ${file.name}`);
             showToast('Daten erfolgreich importiert ✓', { type: 'success', duration: 3000 });
         } catch (err) {
             console.error(err);
@@ -2501,6 +2520,10 @@ function updateFileStatus(text) {
 
 async function createNewDataFile() {
     if (!window.showSaveFilePicker) {
+        if (typeof window.saveTourBackupNative === 'function') {
+            document.getElementById('simple-download-btn')?.click();
+            return;
+        }
         showToast(
     'Dieser Browser unterstützt die Datendatei-Funktion leider nicht vollständig.',
     {
@@ -2546,6 +2569,10 @@ async function createNewDataFile() {
 
 async function openExistingDataFile() {
     if (!window.showOpenFilePicker) {
+        if (typeof window.saveTourBackupNative === 'function') {
+            document.getElementById('simple-import-input')?.click();
+            return;
+        }
         showToast(
     'Dieser Browser unterstützt das Öffnen bestehender Datendateien leider nicht vollständig.',
     {
@@ -2593,6 +2620,10 @@ async function openExistingDataFile() {
 
 async function saveDataToLinkedFile(silent = false) {
     if (!linkedFileHandle) {
+        if (typeof window.saveTourBackupNative === 'function') {
+            document.getElementById('simple-download-btn')?.click();
+            return false;
+        }
         if (!silent) {
     showToast(
         'Bitte zuerst eine Datei anlegen oder öffnen.',
@@ -2650,6 +2681,10 @@ async function saveDataToLinkedFile(silent = false) {
 
 async function loadDataFromLinkedFile() {
     if (!linkedFileHandle) {
+        if (typeof window.saveTourBackupNative === 'function') {
+            document.getElementById('simple-import-input')?.click();
+            return;
+        }
         showToast(
     'Bitte zuerst eine bestehende Datei öffnen oder eine Datei anlegen.',
     {
