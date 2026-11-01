@@ -34763,19 +34763,22 @@ function getWrappedFontFamily() {
 
 function getWrappedFontScale() {
     let appScale = 1;
+    let profileScale = 1;
 
     if (typeof getThemeEditorFontSizeScale === 'function') {
-        appScale =
-            Number(getThemeEditorFontSizeScale()) / 100;
+        appScale = Number(getThemeEditorFontSizeScale()) / 100;
+    }
+    if (typeof getThemeEditorFontProfile === 'function') {
+        profileScale = Number(getThemeEditorFontProfile().scale) || 1;
     }
 
     /*
-     * Begrenzung verhindert, dass das Canvas-Layout
-     * bei sehr großen globalen Schriftgrößen zerbricht.
+     * Auch die Jahresrückblick-Canvas-Ausgabe verwendet die individuelle
+     * Größenkalibrierung der ausgewählten Schrift.
      */
     return Math.max(
         0.8,
-        Math.min(1.3, appScale)
+        Math.min(1.3, appScale * profileScale)
     );
 }
 
