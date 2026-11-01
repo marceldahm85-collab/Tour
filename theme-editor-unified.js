@@ -297,13 +297,15 @@
     ];
 
     const SOFT_SURFACES = [
-        '.stats-list li', '.peak-tour-list li', '.tour-search-result', '.chart-stat-tile',
-        '.dash-stat-tile', '.dash-milestone-tile', '.tour-profile-summary-card',
-        '.development-metric-card', '.best-form-card', '.activity-summary-card',
-        '.peak-summary-card', '.stats-structure-typical-card', '.stats-structure-type-card',
+        '.stats-list li:not(.highlight-rank-gold):not(.highlight-rank-silver):not(.highlight-rank-bronze)',
+        '.peak-tour-list li:not(.highlight-rank-gold):not(.highlight-rank-silver):not(.highlight-rank-bronze)',
+        '.tour-search-result', '.chart-stat-tile:not(.active)',
+        '.dash-stat-tile', '.dash-milestone-tile', '.dash-tour-list li',
+        '.tour-profile-summary-card', '.development-metric-card', '.best-form-card',
+        '.activity-summary-card', '.peak-summary-card',
+        '.stats-structure-typical-card', '.stats-structure-type-card',
         '.stats-structure-burden-card', '.tour-history-summary > div',
         '.activity-detail-stat-grid > div', '.backup-status-item',
-        '.activity-detail-stat-grid > div', 
         '#theme-view .theme-editor-option', '#theme-view .theme-editor-panel'
     ];
 
@@ -343,42 +345,86 @@
         'button', 'input[type="color"]', 'input[type="range"]', 'select', 'textarea'
     ];
 
-    function gradientFor(direction, transition, accent, accent2, soft) {
-        // Der Übergangspunkt gilt für beide globalen Akzentfarben und damit
-        // ausdrücklich auch für die Hauptnavigation.
+    function gradientFor(direction, transition, accent, accent2, soft, alpha = 1) {
+        // Ein Generator für deckende Aktionsverläufe und transparente Flächentönungen.
         const t = clamp(transition, 10, 90, 55);
         const accentColor = validHex(accent) ? accent : DEFAULT_ACCENT;
         const end = validHex(accent2) ? accent2 : DEFAULT_ACCENT_2;
         const start = soft ? blendHex(accentColor, end, 0.32) : accentColor;
+        const opacity = clamp(alpha, 0, 1, 1);
+        const cssColor = color => opacity >= 0.999 ? color : rgba(color, opacity);
 
         if (direction === 'radial') {
-            return 'radial-gradient(circle at 28% 18%, ' + start + ' 0%, ' +
-                start + ' ' + t + '%, ' + end + ' 100%)';
+            return 'radial-gradient(circle at 28% 18%, ' + cssColor(start) + ' 0%, ' +
+                cssColor(start) + ' ' + t + '%, ' + cssColor(end) + ' 100%)';
         }
-        return 'linear-gradient(' + direction + ', ' + start + ' 0%, ' +
-            start + ' ' + t + '%, ' + end + ' 100%)';
+        return 'linear-gradient(' + direction + ', ' + cssColor(start) + ' 0%, ' +
+            cssColor(start) + ' ' + t + '%, ' + cssColor(end) + ' 100%)';
+    }
+
+    function buildSurfaceGradient(settings, soft) {
+        // Der Akzentverlauf liegt transparent über einer dunklen Glasfläche.
+        // So bleiben die realen Alpenbilder sichtbar, ohne die Lesbarkeit zu verlieren.
+        const tint = gradientFor(
+            settings.gradientDirection,
+            settings.transition,
+            settings.accent,
+            settings.accent2,
+            soft,
+            soft ? 0.10 : 0.16
+        );
+        const surfaceTop = soft
+            ? 'rgba(25,30,39,0.58)'
+            : 'rgba(25,30,39,0.72)';
+        const surfaceBottom = soft
+            ? 'rgba(13,21,31,0.48)'
+            : 'rgba(13,21,31,0.62)';
+        const material = 'linear-gradient(145deg, ' + surfaceTop + ' 0%, ' +
+            surfaceBottom + ' 100%)';
+        return tint + ', ' + material;
     }
 
     function buildUnifiedLiveCss() {
         const settings = ensureDraft();
         const viewScope = ':is(body.gold) :is(#dashboard-view, #app-view, #chart-view, #tour-view, #map-view, #filter-view, #backup-view, #theme-view, #achievements-view, #wrapped-view, #more-menu)';
-        const bigGradient = gradientFor(settings.gradientDirection, settings.transition, settings.accent, settings.accent2, false);
-        const softGradient = gradientFor(settings.gradientDirection, settings.transition, settings.accent, settings.accent2, true);
+        const bigGradient = buildSurfaceGradient(settings, false);
+        const softGradient = buildSurfaceGradient(settings, true);
+        const navGradient = buildSurfaceGradient(settings, true);
         const radius = settings.radius + 'px';
         const selectors = (items) => items.map(item =>
             item.startsWith('#') ? 'body.gold ' + item : viewScope + ' ' + item
-        ).join(',\n');
+        ).join(',\\n');
+        const globalSelectors = (items) => items.map(item =>
+            'body.gold ' + item
+        ).join(',\\n');
+
+        const GLOBAL_BIG_SURFACES = [
+            '.modal-card:not(.highlight-modal-gold):not(.highlight-modal-silver):not(.highlight-modal-bronze)',
+            '.mob-sel-sheet',
+            '#more-menu'
+        ];
+        const GLOBAL_SOFT_SURFACES = [
+            '.mob-sel-hdr',
+            '.mob-sel-opt:not(.selected)'
+        ];
 
         let css = '';
         css += selectors(BIG_SURFACES) + ' { background: ' + bigGradient +
-            ' !important; border-radius: ' + radius + ' !important; }\n';
+            ' !important; border-radius: ' + radius + ' !important; }\\n';
         css += selectors(SOFT_SURFACES) + ' { background: ' + softGradient +
-            ' !important; border-radius: ' + radius + ' !important; }\n';
-        css += selectors(RADIUS_SURFACES) + ' { border-radius: ' + radius + ' !important; }\n';
-        css += 'body.gold :is(#dashboard-view, #app-view, #chart-view, #map-view, #tour-view, #backup-view, #wrapped-view, #achievements-view, #theme-view, #filter-view) :is([class*="-card"], [class*="-tile"]:not(.leaflet-tile), [class*="-panel"], [class*="-section"], [class*="-btn"], [class*="-button"], [class*="-nav"], [class*="-list"] > li, button, input[type="text"], input[type="number"], input[type="date"], input[type="search"], input[type="time"], input[type="email"], input[type="tel"], input[type="color"], input[type="range"], select, textarea, details > summary) { border-radius: ' + radius + ' !important; }\n';
-        css += 'body.gold .top-main-nav { background: linear-gradient(145deg, var(--theme-palette-surface-strong), var(--theme-palette-surface-card)) !important; border-color: rgba(225,232,242,.10) !important; border-radius: ' + radius + 'px !important; }\n';
-        css += 'body.gold .top-main-nav :is(button, a, .top-main-nav-item) { color: var(--theme-palette-text, #f3f7fb) !important; }\n';
-        css += 'body.gold #theme-view .theme-editor-card, body.gold #theme-view .dashboard-editor-section { border-radius: ' + radius + 'px !important; }\n';
+            ' !important; border-radius: ' + radius + ' !important; }\\n';
+        css += globalSelectors(GLOBAL_BIG_SURFACES) + ' { background: ' + bigGradient +
+            ' !important; border-color: var(--theme-palette-border, rgba(225,232,242,.12)) !important; }\\n';
+        css += globalSelectors(GLOBAL_SOFT_SURFACES) + ' { background: ' + softGradient +
+            ' !important; }\\n';
+        css += selectors(RADIUS_SURFACES) + ' { border-radius: ' + radius + ' !important; }\\n';
+        css += 'body.gold :is(#dashboard-view, #app-view, #chart-view, #map-view, #tour-view, #backup-view, #wrapped-view, #achievements-view, #theme-view, #filter-view) :is([class*="-card"], [class*="-tile"]:not(.leaflet-tile), [class*="-panel"], [class*="-section"], [class*="-btn"], [class*="-button"], [class*="-nav"], [class*="-list"] > li, button, input[type="text"], input[type="number"], input[type="date"], input[type="search"], input[type="time"], input[type="email"], input[type="tel"], input[type="color"], input[type="range"], select, textarea, details > summary) { border-radius: ' + radius + ' !important; }\\n';
+        css += 'body.gold .top-main-nav { background: ' + navGradient +
+            ' !important; background-image: ' + navGradient +
+            ' !important; border-color: color-mix(in srgb, ' + settings.accent +
+            ' 26%, rgba(225,232,242,.10)) !important; border-radius: ' + radius + 'px !important; }\\n';
+        css += 'body.gold .top-main-nav :is(button, a, .top-main-nav-item) { color: var(--theme-palette-text, #f3f7fb) !important; }\\n';
+        css += 'body.gold #theme-view .theme-editor-card, body.gold #theme-view .dashboard-editor-section { border-radius: ' + radius + 'px !important; }\\n';
         return css;
     }
 
@@ -673,8 +719,8 @@
                 isDark: true,
                 dotFill: '#121b26',
                 gradientStops: [
-                    [0, blendHex(settings.accent, settings.accent2, 0.78)],
-                    [0.5, blendHex(settings.accent, settings.accent2, 0.38)],
+                    [0, settings.accent],
+                    [clamp(settings.transition, 10, 90, 55) / 100, settings.accent],
                     [1, settings.accent2]
                 ]
             };
