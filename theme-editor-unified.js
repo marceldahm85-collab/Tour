@@ -311,7 +311,7 @@
 
     const RADIUS_SURFACES = [
         '.box', '.box-header', '.box-content', '.dash-section', '.filter-simple-card',
-        '[class*="-card"]', ':not(.leaflet-tile)[class*="-tile"]', '[class*="-panel"]',
+        '[class*="-card"]', ':not(.leaflet-container *):not(.leaflet-tile)[class*="-tile"]', '[class*="-panel"]',
         '[class*="-section"]', '[class*="-btn"]', '[class*="-button"]',
         '[class*="-nav"]', '[class*="-list"] > li',
         '.dash-stat-tile', '.chart-stat-tile', '.dash-milestone-tile', '.chart-card', '.chart-tab',
@@ -325,7 +325,7 @@
         '.backup-file-status', '#backup-view .backup-card', '#backup-view .backup-view-inner',
         '#chart-view .stats-year-filter-wrap', '#chart-view .stats-section-switch',
         '#chart-view .stats-section-switch .stats-section-btn',
-        '#chart-view .stats-year-filter-wrap > select',
+        '#chart-view .stats-year-filter-wrap > select', '#tour-map',
         '#wrapped-view .bergwelt-side-nav', '#wrapped-view .bergwelt-tab',
         '#theme-view .theme-editor-card', '#theme-view .theme-editor-option',
         '#theme-view .theme-editor-panel', '#theme-view details > summary',
@@ -407,6 +407,13 @@
             '.mob-sel-hdr',
             '.mob-sel-opt:not(.selected)'
         ];
+        const GLOBAL_RADIUS_SURFACES = [
+            '.modal-card', '.modal-content', '.mob-sel-sheet', '.mob-sel-hdr', '.mob-sel-opt',
+            '#more-menu', '.more-menu-item', '.top-main-nav', '.top-main-nav button',
+            '.accordion-header', '#tour-map',
+            '.modal-card :is(button, input, select, textarea)',
+            '.mob-sel-sheet :is(button, input, select, textarea)'
+        ];
 
         let css = '';
         css += selectors(BIG_SURFACES) + ' { background: ' + bigGradient +
@@ -418,13 +425,14 @@
         css += globalSelectors(GLOBAL_SOFT_SURFACES) + ' { background: ' + softGradient +
             ' !important; }\n';
         css += selectors(RADIUS_SURFACES) + ' { border-radius: ' + radius + ' !important; }\n';
-        css += 'body.gold :is(#dashboard-view, #app-view, #chart-view, #map-view, #tour-view, #backup-view, #wrapped-view, #achievements-view, #theme-view, #filter-view) :is([class*="-card"], [class*="-tile"]:not(.leaflet-tile), [class*="-panel"], [class*="-section"], [class*="-btn"], [class*="-button"], [class*="-nav"], [class*="-list"] > li, button, input[type="text"], input[type="number"], input[type="date"], input[type="search"], input[type="time"], input[type="email"], input[type="tel"], input[type="color"], input[type="range"], select, textarea, details > summary) { border-radius: ' + radius + ' !important; }\n';
+        css += globalSelectors(GLOBAL_RADIUS_SURFACES) + ' { border-radius: ' + radius + ' !important; }\n';
+        css += 'body.gold :is(#dashboard-view, #app-view, #chart-view, #map-view, #tour-view, #backup-view, #wrapped-view, #achievements-view, #theme-view, #filter-view) :is([class*="-card"], [class*="-tile"]:not(.leaflet-tile), [class*="-panel"], [class*="-section"], [class*="-btn"], [class*="-button"], [class*="-nav"], [class*="-list"] > li, button, input[type="text"], input[type="number"], input[type="date"], input[type="search"], input[type="time"], input[type="email"], input[type="tel"], input[type="color"], input[type="range"], select, textarea, details > summary):not(.leaflet-container):not(.leaflet-container *) { border-radius: ' + radius + ' !important; }\n';
         css += 'body.gold .top-main-nav { background: ' + navGradient +
             ' !important; background-image: ' + navGradient +
             ' !important; border-color: color-mix(in srgb, ' + settings.accent +
-            ' 26%, rgba(225,232,242,.10)) !important; border-radius: ' + radius + 'px !important; }\n';
+            ' 26%, rgba(225,232,242,.10)) !important; border-radius: ' + radius + ' !important; }\n';
         css += 'body.gold .top-main-nav :is(button, a, .top-main-nav-item) { color: var(--theme-palette-text, #f3f7fb) !important; }\n';
-        css += 'body.gold #theme-view .theme-editor-card, body.gold #theme-view .dashboard-editor-section { border-radius: ' + radius + 'px !important; }\n';
+        css += 'body.gold #theme-view .theme-editor-card, body.gold #theme-view .dashboard-editor-section { border-radius: ' + radius + ' !important; }\n';
         return css;
     }
 
