@@ -135,7 +135,7 @@ public final class YearStatsWidgetProvider extends AppWidgetProvider {
             views.setInt(R.id.widget_year_stats_time_icon, "setColorFilter", accent);
 
             Intent open = new Intent(context, MainActivity.class);
-            open.setAction(MainActivity.ACTION_OPEN_YEAR_STATS);
+            open.setAction(MainActivity.ACTION_OPEN_DASHBOARD);
             open.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             PendingIntent pending = PendingIntent.getActivity(context, 0, open,
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
