@@ -2926,6 +2926,79 @@ async function restoreLinkedFileHandleOnStartup() {
         if (savedNativeFile) {
             linkedNativeBackupFile = savedNativeFile;
             updateFileStatus(`Verbunden: ${savedNativeFile.fileName}`);
+
+            // Wie in der PWA werden beim Start nur Editor-/Hintergrunddaten
+            // aus der verknüpften Datei übernommen, nicht die Touren selbst.
+            try {
+                const nativeFile = await window.readTourBackupNative(savedNativeFile.uri);
+                if (!nativeFile || !nativeFile.handled || typeof nativeFile.content !== 'string') {
+                    throw new Error('Die verknüpfte Sicherungsdatei konnte nicht gelesen werden.');
+                }
+                const payload = JSON.parse(nativeFile.content);
+
+                try {
+                    await restoreBackgroundImageFromPayload(payload);
+                } catch (backgroundError) {
+                    console.warn(
+                        '[Hintergrund] Hintergrund aus verknüpfter Android-Datei konnte nicht wiederhergestellt werden:',
+                        backgroundError
+                    );
+                }
+
+                if (payload?.meta?.themeEditorSettings) {
+                    appStorage.set(THEME_EDITOR_KEY, payload.meta.themeEditorSettings);
+                    if (typeof invalidateThemeEditorDraft === 'function') {
+                        invalidateThemeEditorDraft();
+                    }
+                }
+
+                const fileFont = payload?.meta?.font;
+                if (typeof fileFont === 'string' &&
+                    Object.prototype.hasOwnProperty.call(THEME_EDITOR_FONT_PRESETS, fileFont)) {
+                    appStorage.set(THEME_EDITOR_FONT_KEY, fileFont);
+                    if (typeof applyThemeEditorFont === 'function') {
+                        applyThemeEditorFont(fileFont, false);
+                    }
+                }
+
+                const fileFontSize = Number(payload?.meta?.fontSize);
+                if (Number.isFinite(fileFontSize)) {
+                    appStorage.set(
+                        THEME_EDITOR_FONT_SIZE_KEY,
+                        Math.max(80, Math.min(130, fileFontSize))
+                    );
+                    if (typeof applyThemeEditorFontSize === 'function') {
+                        applyThemeEditorFontSize(fileFontSize, false);
+                    }
+                }
+
+                document.body.classList.remove('gold', 'dark', 'green', 'summit');
+                document.body.classList.add('gold');
+                appStorage.set('theme', 'gold');
+                try {
+                    localStorage.setItem('tourtracker-theme', 'gold');
+                    sessionStorage.setItem('tourtracker-theme', 'gold');
+                } catch (storageError) {
+                    console.warn('[Theme] Theme aus Android-Sicherung konnte nicht lokal synchronisiert werden:', storageError);
+                }
+
+                document.querySelectorAll('[data-theme-choice]').forEach(option => {
+                    const active = option.dataset.themeChoice === 'gold';
+                    option.classList.toggle('active', active);
+                    option.setAttribute('aria-pressed', active ? 'true' : 'false');
+                });
+
+                if (typeof applyThemeEditorSettingsToDom === 'function') {
+                    applyThemeEditorSettingsToDom();
+                }
+                if (typeof refreshThemeDependentUi === 'function') {
+                    refreshThemeDependentUi();
+                }
+            } catch (error) {
+                console.warn('[Sicherung] Editor-Einstellungen aus verknüpfter Android-Datei konnten nicht gelesen werden:', error);
+            }
+
+            updateFileStatus(`Verbunden: ${savedNativeFile.fileName}`);
             return;
         }
     }
