@@ -63,6 +63,8 @@ public final class MainActivity extends Activity {
     private static final String BRIDGE_NAME = "TourNative";
     public static final String ACTION_OPEN_YEAR_STATS =
             "at.marcel.bergtouren.action.OPEN_YEAR_STATS";
+    public static final String ACTION_OPEN_DASHBOARD =
+            "at.marcel.bergtouren.action.OPEN_DASHBOARD";
 
     private static final Uri APP_URI = Uri.parse(BuildConfig.WEB_APP_URL);
     private static final String APP_ORIGIN =
@@ -76,7 +78,7 @@ public final class MainActivity extends Activity {
     private ValueCallback<Uri[]> pendingFileChooser;
     private boolean bridgeAvailable;
     private boolean webPageLoaded;
-    private boolean pendingOpenYearStats;
+    private boolean pendingOpenDashboard;
     private Object backInvokedCallback;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final ExecutorService galleryExecutor = Executors.newSingleThreadExecutor();
@@ -99,8 +101,9 @@ public final class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        pendingOpenYearStats = getIntent() != null
-                && ACTION_OPEN_YEAR_STATS.equals(getIntent().getAction());
+        pendingOpenDashboard = isWidgetDashboardAction(
+                getIntent() != null ? getIntent().getAction() : null
+        );
 
         configureSystemBars();
         createWebViewLayout();
@@ -270,7 +273,7 @@ public final class MainActivity extends Activity {
                 webPageLoaded = true;
                 progressBar.setVisibility(View.GONE);
                 sendBridgeHandshake();
-                deliverPendingYearStatsWidgetNavigation();
+                deliverPendingDashboardWidgetNavigation();
             }
 
             @Override
@@ -1369,30 +1372,36 @@ public final class MainActivity extends Activity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-        if (intent != null && ACTION_OPEN_YEAR_STATS.equals(intent.getAction())) {
-            pendingOpenYearStats = true;
-            deliverPendingYearStatsWidgetNavigation();
+        if (intent != null && isWidgetDashboardAction(intent.getAction())) {
+            pendingOpenDashboard = true;
+            deliverPendingDashboardWidgetNavigation();
         }
     }
 
-    private void deliverPendingYearStatsWidgetNavigation() {
-        if (!pendingOpenYearStats || !webPageLoaded || webView == null) return;
+    private boolean isWidgetDashboardAction(String action) {
+        // Die alte Action bleibt als Kompatibilität für bereits angelegte Widgets
+        // erhalten. Auch diese öffnen ab jetzt das Dashboard statt der Statistik.
+        return ACTION_OPEN_DASHBOARD.equals(action)
+                || ACTION_OPEN_YEAR_STATS.equals(action);
+    }
+
+    private void deliverPendingDashboardWidgetNavigation() {
+        if (!pendingOpenDashboard || !webPageLoaded || webView == null) return;
 
         webView.evaluateJavascript(
                 "(function(){try{"
-                        + "if(typeof window.__openYearStatsFromNativeWidget==='function'){"
-                        + "return window.__openYearStatsFromNativeWidget();"
+                        + "if(typeof window.__openDashboardFromNativeWidget==='function'){"
+                        + "return window.__openDashboardFromNativeWidget();"
                         + "}}catch(e){}return 'unavailable';})()",
                 result -> {
                     if (result != null && (result.contains("opened") || result.contains("queued"))) {
-                        pendingOpenYearStats = false;
+                        pendingOpenDashboard = false;
                     } else {
-                        Log.w(TAG, "Jahresstatistik-Navigation aus dem Widget ist noch nicht verfügbar.");
+                        Log.w(TAG, "Dashboard-Navigation aus dem Widget ist noch nicht verfügbar.");
                     }
                 }
         );
     }
-
     @Override
     protected void onDestroy() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
