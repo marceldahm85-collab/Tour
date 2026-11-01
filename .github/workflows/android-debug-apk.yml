@@ -7,6 +7,7 @@ on:
     paths:
       - "android/**"
       - "app-main-20261019.js"
+      - "android-backup-bridge.js"
       - "android-gallery-photos.js"
       - "android-gallery-photos.css"
       - "background-image-manager.js"
