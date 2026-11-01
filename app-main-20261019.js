@@ -27203,16 +27203,9 @@ function syncNativeYearStatsWidget(entries = null) {
         getYearFromDate(entry?.date) === year
     );
 
-    let totalDistance = 0;
-    let totalAscent = 0;
-    yearEntries.forEach(entry => {
-        totalDistance += entry?.strecke
-            ? parseFloat(String(entry.strecke).replace(',', '.')) || 0
-            : 0;
-        totalAscent += entry?.aufstieg
-            ? parseFloat(String(entry.aufstieg).replace(',', '.')) || 0
-            : 0;
-    });
+    // Dieselbe zentrale Berechnung wie in der Statistik verwenden, damit
+    // Gipfel, Schritte und Gehzeit einschließlich Mehrtagestouren identisch sind.
+    const stats = computeStatsSummary(yearEntries);
 
     let accent = '#ad7d12';
     try {
@@ -27230,9 +27223,12 @@ function syncNativeYearStatsWidget(entries = null) {
     const payload = {
         type: 'widget.yearStats.update',
         year,
-        tours: countDistinctTours(yearEntries),
-        distance: Number(totalDistance.toFixed(3)),
-        ascent: Number(totalAscent.toFixed(1)),
+        tours: stats.totalTours,
+        distance: Number(stats.totalDistance.toFixed(3)),
+        ascent: Number(stats.totalAscent.toFixed(1)),
+        peaks: Math.max(0, Math.round(stats.totalPeaks)),
+        steps: Math.max(0, Math.round(stats.totalSteps)),
+        walkingMinutes: Math.max(0, Math.round(stats.totalMinutes)),
         accent
     };
 

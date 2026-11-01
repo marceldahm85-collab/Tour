@@ -6,37 +6,224 @@
     android:background="@drawable/widget_year_stats_surface"
     android:clipToOutline="true"
     android:contentDescription="@string/widget_year_stats_description">
+
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@null"
         android:scaleType="centerCrop"
         android:src="@drawable/widget_alpine_background" />
+
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@null"
         android:scaleType="fitXY"
         android:src="@drawable/widget_year_stats_scrim" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+
         <ImageView
             android:id="@+id/widget_year_stats_accent_line"
             android:layout_width="match_parent"
             android:layout_height="3dp"
             android:contentDescription="@null"
             android:background="#AD7D12" />
+
+        <!-- One-row layout: year plus the three core values. -->
         <LinearLayout
+            android:id="@+id/widget_year_stats_compact"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:paddingStart="14dp"
-            android:paddingTop="8dp"
-            android:paddingEnd="14dp"
-            android:paddingBottom="8dp">
+            android:paddingStart="10dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="4dp">
+
+            <TextView
+                android:id="@+id/widget_year_stats_compact_heading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans"
+                android:includeFontPadding="false"
+                android:letterSpacing="0.06"
+                android:text="BERGJAHR 2026"
+                android:textColor="#E8FFFFFF"
+                android:textSize="9sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="2dp"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:id="@+id/widget_year_stats_compact_tours_icon"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/widget_ic_tours" />
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/widget_year_stats_compact_tours_value"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans"
+                            android:includeFontPadding="false"
+                            android:singleLine="true"
+                            android:ellipsize="end"
+                            android:text="0"
+                            android:textColor="#FFFFFFFF"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="0.04"
+                            android:singleLine="true"
+                            android:text="TOUREN"
+                            android:textColor="#D5DEE5"
+                            android:textSize="7sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="1dp"
+                    android:layout_height="22dp"
+                    android:contentDescription="@null"
+                    android:background="#44FFFFFF" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:id="@+id/widget_year_stats_compact_distance_icon"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/widget_ic_distance" />
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/widget_year_stats_compact_distance_value"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans"
+                            android:includeFontPadding="false"
+                            android:singleLine="true"
+                            android:ellipsize="end"
+                            android:text="0,0"
+                            android:textColor="#FFFFFFFF"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="0.04"
+                            android:singleLine="true"
+                            android:text="KM"
+                            android:textColor="#D5DEE5"
+                            android:textSize="7sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="1dp"
+                    android:layout_height="22dp"
+                    android:contentDescription="@null"
+                    android:background="#44FFFFFF" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:id="@+id/widget_year_stats_compact_ascent_icon"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/widget_ic_ascent" />
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/widget_year_stats_compact_ascent_value"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans"
+                            android:includeFontPadding="false"
+                            android:singleLine="true"
+                            android:ellipsize="end"
+                            android:text="0"
+                            android:textColor="#FFFFFFFF"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="0.04"
+                            android:singleLine="true"
+                            android:text="HM"
+                            android:textColor="#D5DEE5"
+                            android:textSize="7sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Two-row layout: first row keeps the core metrics, second adds peaks, steps and walking time. -->
+        <LinearLayout
+            android:id="@+id/widget_year_stats_expanded"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingStart="10dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="4dp"
+            android:visibility="gone">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -44,170 +231,336 @@
                 android:orientation="horizontal">
                 <ImageView
                     android:id="@+id/widget_year_stats_heading_icon"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
+                    android:layout_width="17dp"
+                    android:layout_height="17dp"
                     android:contentDescription="@null"
                     android:src="@drawable/widget_ic_ascent" />
-                <LinearLayout
-                    android:layout_width="0dp"
+                <TextView
+                    android:id="@+id/widget_year_stats_heading"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-                    <TextView
-                        android:id="@+id/widget_year_stats_heading"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="0.07"
-                        android:text="BERGJAHR 2026"
-                        android:textColor="#FFFFFFFF"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:fontFamily="sans"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="0.11"
-                        android:text="DEINE JAHRESBILANZ"
-                        android:textColor="#C9D3DB"
-                        android:textSize="8sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
+                    android:layout_marginStart="6dp"
+                    android:fontFamily="sans"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="0.07"
+                    android:text="BERGJAHR 2026"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
             </LinearLayout>
+
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="2dp"
                 android:contentDescription="@null"
                 android:background="#55FFFFFF" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginTop="6dp"
                 android:layout_weight="1"
-                android:gravity="center"
+                android:gravity="center_vertical"
                 android:orientation="horizontal">
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
                     <ImageView
                         android:id="@+id/widget_year_stats_tours_icon"
-                        android:layout_width="19dp"
-                        android:layout_height="19dp"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
                         android:contentDescription="@null"
                         android:src="@drawable/widget_ic_tours" />
-                    <TextView
-                        android:id="@+id/widget_year_stats_tours_value"
-                        android:layout_width="match_parent"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:fontFamily="sans"
-                        android:gravity="center"
-                        android:includeFontPadding="false"
-                        android:text="0"
-                        android:textColor="#FFFFFFFF"
-                        android:textSize="21sp"
-                        android:textStyle="bold" />
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans"
-                        android:gravity="center"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="0.08"
-                        android:text="TOUREN"
-                        android:textColor="#D5DEE5"
-                        android:textSize="9sp"
-                        android:textStyle="bold" />
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/widget_year_stats_tours_value"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans"
+                            android:includeFontPadding="false"
+                            android:singleLine="true"
+                            android:ellipsize="end"
+                            android:text="0"
+                            android:textColor="#FFFFFFFF"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="0.04"
+                            android:singleLine="true"
+                            android:text="TOUREN"
+                            android:textColor="#D5DEE5"
+                            android:textSize="7sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
                 </LinearLayout>
+
                 <ImageView
                     android:layout_width="1dp"
-                    android:layout_height="48dp"
+                    android:layout_height="22dp"
                     android:contentDescription="@null"
                     android:background="#44FFFFFF" />
+
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1.15"
-                    android:gravity="center"
-                    android:orientation="vertical">
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
                     <ImageView
                         android:id="@+id/widget_year_stats_distance_icon"
-                        android:layout_width="19dp"
-                        android:layout_height="19dp"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
                         android:contentDescription="@null"
                         android:src="@drawable/widget_ic_distance" />
-                    <TextView
-                        android:id="@+id/widget_year_stats_distance_value"
-                        android:layout_width="match_parent"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:fontFamily="sans"
-                        android:gravity="center"
-                        android:includeFontPadding="false"
-                        android:text="0,0"
-                        android:textColor="#FFFFFFFF"
-                        android:textSize="21sp"
-                        android:textStyle="bold" />
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans"
-                        android:gravity="center"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="0.08"
-                        android:text="KILOMETER"
-                        android:textColor="#D5DEE5"
-                        android:textSize="9sp"
-                        android:textStyle="bold" />
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/widget_year_stats_distance_value"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans"
+                            android:includeFontPadding="false"
+                            android:singleLine="true"
+                            android:ellipsize="end"
+                            android:text="0,0"
+                            android:textColor="#FFFFFFFF"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="0.04"
+                            android:singleLine="true"
+                            android:text="KILOMETER"
+                            android:textColor="#D5DEE5"
+                            android:textSize="7sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
                 </LinearLayout>
+
                 <ImageView
                     android:layout_width="1dp"
-                    android:layout_height="48dp"
+                    android:layout_height="22dp"
                     android:contentDescription="@null"
                     android:background="#44FFFFFF" />
+
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1.15"
-                    android:gravity="center"
-                    android:orientation="vertical">
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
                     <ImageView
                         android:id="@+id/widget_year_stats_ascent_icon"
-                        android:layout_width="19dp"
-                        android:layout_height="19dp"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
                         android:contentDescription="@null"
                         android:src="@drawable/widget_ic_ascent" />
-                    <TextView
-                        android:id="@+id/widget_year_stats_ascent_value"
-                        android:layout_width="match_parent"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:fontFamily="sans"
-                        android:gravity="center"
-                        android:includeFontPadding="false"
-                        android:text="0"
-                        android:textColor="#FFFFFFFF"
-                        android:textSize="21sp"
-                        android:textStyle="bold" />
-                    <TextView
-                        android:layout_width="match_parent"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/widget_year_stats_ascent_value"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans"
+                            android:includeFontPadding="false"
+                            android:singleLine="true"
+                            android:ellipsize="end"
+                            android:text="0"
+                            android:textColor="#FFFFFFFF"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="0.04"
+                            android:singleLine="true"
+                            android:text="HÖHENMETER"
+                            android:textColor="#D5DEE5"
+                            android:textSize="7sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:contentDescription="@null"
+                android:background="#55FFFFFF" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:id="@+id/widget_year_stats_peaks_icon"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/widget_ic_peaks" />
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:fontFamily="sans"
-                        android:gravity="center"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="0.08"
-                        android:text="HÖHENMETER"
-                        android:textColor="#D5DEE5"
-                        android:textSize="9sp"
-                        android:textStyle="bold" />
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/widget_year_stats_peaks_value"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans"
+                            android:includeFontPadding="false"
+                            android:singleLine="true"
+                            android:ellipsize="end"
+                            android:text="0"
+                            android:textColor="#FFFFFFFF"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="0.04"
+                            android:singleLine="true"
+                            android:text="GIPFEL"
+                            android:textColor="#D5DEE5"
+                            android:textSize="7sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="1dp"
+                    android:layout_height="22dp"
+                    android:contentDescription="@null"
+                    android:background="#44FFFFFF" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:id="@+id/widget_year_stats_steps_icon"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/widget_ic_steps" />
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/widget_year_stats_steps_value"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans"
+                            android:includeFontPadding="false"
+                            android:singleLine="true"
+                            android:ellipsize="end"
+                            android:text="0"
+                            android:textColor="#FFFFFFFF"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="0.04"
+                            android:singleLine="true"
+                            android:text="SCHRITTE"
+                            android:textColor="#D5DEE5"
+                            android:textSize="7sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="1dp"
+                    android:layout_height="22dp"
+                    android:contentDescription="@null"
+                    android:background="#44FFFFFF" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:id="@+id/widget_year_stats_time_icon"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/widget_ic_time" />
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/widget_year_stats_time_value"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans"
+                            android:includeFontPadding="false"
+                            android:singleLine="true"
+                            android:ellipsize="end"
+                            android:text="0:00"
+                            android:textColor="#FFFFFFFF"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="0.04"
+                            android:singleLine="true"
+                            android:text="GEHZEIT"
+                            android:textColor="#D5DEE5"
+                            android:textSize="7sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>

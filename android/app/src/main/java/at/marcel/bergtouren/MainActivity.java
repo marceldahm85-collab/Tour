@@ -384,6 +384,7 @@ public final class MainActivity extends Activity {
                                 features.put("gallery.image.full.v1");
                                 features.put("gallery.video.player.v1");
                                 features.put("widget.yearStats.v1");
+                                features.put("widget.yearStats.v2");
                                 response.put("features", features);
                                 replyToBridge(replyProxy, response);
                                 Log.i(TAG, "Sichere JavaScript-Bridge ist erreichbar (Request-ID bestätigt).");
@@ -409,15 +410,20 @@ public final class MainActivity extends Activity {
                                 int tours = request.optInt("tours", -1);
                                 double distance = request.optDouble("distance", Double.NaN);
                                 double ascent = request.optDouble("ascent", Double.NaN);
+                                long peaks = request.optLong("peaks", -1L);
+                                long steps = request.optLong("steps", -1L);
+                                long walkingMinutes = request.optLong("walkingMinutes", -1L);
                                 String accent = request.optString("accent", "#ad7d12");
 
                                 if (year >= 2000 && year <= 9999
                                         && tours >= 0
                                         && Double.isFinite(distance) && distance >= 0
                                         && Double.isFinite(ascent) && ascent >= 0
+                                        && peaks >= 0 && steps >= 0 && walkingMinutes >= 0
                                         && accent.matches("#[0-9a-fA-F]{6}")) {
                                     YearStatsWidgetProvider.updateStats(
-                                            MainActivity.this, year, tours, distance, ascent, accent);
+                                            MainActivity.this, year, tours, distance, ascent,
+                                            peaks, steps, walkingMinutes, accent);
                                 } else {
                                     Log.w(TAG, "Ungültige Jahresstatistik für das Widget verworfen.");
                                 }
