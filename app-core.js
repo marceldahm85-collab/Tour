@@ -21197,10 +21197,32 @@ function getWrappedDataForYear(year) {
 
 function getWrappedMonthlyToursCount(entries) {
     const counts = Array(12).fill(0);
+    const uniqueTours = (entries || [])
+        .map((entry, index) => {
+            const date = parseStatsCalendarDate(entry?.date);
+            if (!date) return null;
 
-    entries.forEach(entry => {
-        const date = parseStatsCalendarDate(entry?.date);
-        if (date) counts[date.getMonth()]++;
+            return {
+                entry,
+                date,
+                identity: typeof tourIdentity === 'function'
+                    ? tourIdentity(entry, index)
+                    : (entry?.tourGroup
+                        ? 'group:' + String(entry.tourGroup)
+                        : (entry?.id
+                            ? 'id:' + String(entry.id)
+                            : 'entry:' + [entry?.date, entry?.tourname, entry?.region].map(value => String(value ?? '').trim()).join('|')))
+            };
+        })
+        .filter(Boolean)
+        // Mehrtagestouren werden dem Monat ihrer ersten Etappe zugeordnet.
+        .sort((a, b) => a.date - b.date);
+
+    const countedTours = new Set();
+    uniqueTours.forEach(item => {
+        if (countedTours.has(item.identity)) return;
+        countedTours.add(item.identity);
+        counts[item.date.getMonth()]++;
     });
 
     return counts;
