@@ -4578,11 +4578,14 @@ function collectNewBergweltRankUnlocks(beforeTours, afterTours, entryYear) {
 
     if (Number.isInteger(Number(entryYear)) && Number(entryYear) >= 1000) {
         const year = Number(entryYear);
+        const yearFromEntry = entry => typeof window.__tourDataRules?.yearFromDate === 'function'
+            ? window.__tourDataRules.yearFromDate(entry?.date)
+            : getYearFromDate(entry?.date);
         periods.push({
             key: String(year),
             label: 'Jahr ' + year,
-            beforeEntries: before.filter(entry => getYearFromDate(entry?.date) === year),
-            afterEntries: after.filter(entry => getYearFromDate(entry?.date) === year),
+            beforeEntries: before.filter(entry => yearFromEntry(entry) === year),
+            afterEntries: after.filter(entry => yearFromEntry(entry) === year),
             allYears: false
         });
     }
@@ -4630,7 +4633,7 @@ function collectNewBergweltRankUnlocks(beforeTours, afterTours, entryYear) {
         }
     ];
 
-    const events = [];
+    const eventsByRank = new Map();
     periods.forEach(period => {
         const beforeValues = getBergweltSpecializationValues(period.beforeEntries);
         const afterValues = getBergweltSpecializationValues(period.afterEntries);
@@ -4642,24 +4645,39 @@ function collectNewBergweltRankUnlocks(beforeTours, afterTours, entryYear) {
 
             tiers.forEach((tier, index) => {
                 if (beforeValue >= tier[0] || afterValue < tier[0]) return;
-                const threshold = Number(tier[0]).toLocaleString('de-AT');
-                events.push({
-                    id: 'bergwelt:' + period.key + ':' + definition.key + ':' + index,
-                    categoryId: definition.categoryId,
-                    categoryLabel: definition.name + ' · ' + period.label,
-                    name: tier[1],
-                    description: period.label + ' · ' + definition.name + ': ' + threshold + ' ' + definition.unit + ' erreicht.',
-                    image: CELEBRATION_ART_ASSETS[definition.categoryId === 'ascent' ? 'asc' :
+                const key = definition.key + ':' + tier[0];
+                let event = eventsByRank.get(key);
+                if (!event) {
+                    const artKey = definition.categoryId === 'ascent' ? 'asc' :
                         definition.categoryId === 'peaks' ? 'peaks' :
                         definition.categoryId === 'time' ? 'time' :
-                        definition.categoryId === 'steepness' ? 'steps' : 'dist'],
-                    destination: 'bergwelt'
-                });
+                        definition.categoryId === 'steepness' ? 'steps' : 'dist';
+                    event = {
+                        id: 'bergwelt:' + key,
+                        categoryId: definition.categoryId,
+                        categoryLabel: definition.name,
+                        name: tier[1],
+                        threshold: tier[0],
+                        unit: definition.unit,
+                        rankIndex: index + 1,
+                        image: CELEBRATION_ART_ASSETS[artKey],
+                        destination: 'bergwelt',
+                        contexts: []
+                    };
+                    eventsByRank.set(key, event);
+                }
+                if (!event.contexts.includes(period.label)) event.contexts.push(period.label);
             });
         });
     });
 
-    return events;
+    return [...eventsByRank.values()].map(event => ({
+        ...event,
+        categoryLabel: event.categoryLabel + ' · ' + event.contexts.join(' + '),
+        description: 'Rang ' + event.rankIndex + ' von 5 · ' +
+            event.threshold.toLocaleString('de-AT') + ' ' + event.unit +
+            ' erreicht (' + event.contexts.join(' + ') + ').'
+    }));
 }
 
 function queueNewBergweltRankUnlocks(beforeTours, afterTours, entryYear) {
