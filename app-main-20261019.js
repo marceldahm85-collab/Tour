@@ -4100,6 +4100,399 @@ function collectNewMilestoneEvents(before, after, opts = {}) {
     return events;
 }
 
+const CELEBRATION_ART_ASSETS = {
+    dist: './assets/milestones/milestone-dist.svg?v=5',
+    asc: './assets/milestones/milestone-asc.svg?v=5',
+    peaks: './assets/milestones/milestone-peaks.svg?v=5',
+    steps: './assets/milestones/milestone-steps.svg?v=5',
+    time: './assets/milestones/milestone-time.svg?v=5'
+};
+
+const ACHIEVEMENT_CELEBRATION_ART = {
+    tourCount: 'dist',
+    bigTours: 'peaks',
+    uniquePeaks: 'peaks',
+    peakHeight: 'peaks',
+    regions: 'dist',
+    tourTypes: 'steps',
+    consistency: 'time',
+    performance: 'asc'
+};
+
+const celebrationDispatcher = {
+    pending: [],
+    queue: [],
+    flushTimer: null,
+    isShowing: false
+};
+
+function getAchievementCelebrationAsset(categoryId) {
+    const artKey = ACHIEVEMENT_CELEBRATION_ART[categoryId] || 'peaks';
+    return CELEBRATION_ART_ASSETS[artKey] || CELEBRATION_ART_ASSETS.peaks;
+}
+
+function createCelebrationNode(tagName, className, textContent) {
+    const node = document.createElement(tagName);
+    if (className) node.className = className;
+    if (textContent !== undefined && textContent !== null) {
+        node.textContent = String(textContent);
+    }
+    return node;
+}
+
+function enqueueCelebrationGroup(kind, items) {
+    if (!Array.isArray(items) || !items.length) return;
+
+    celebrationDispatcher.pending.push({ kind, items: items.slice() });
+
+    if (celebrationDispatcher.flushTimer !== null) {
+        clearTimeout(celebrationDispatcher.flushTimer);
+    }
+
+    // Benachrichtigungen, die beim Speichern derselben Tour entstehen,
+    // werden kurz gesammelt und gemeinsam statt übereinander angezeigt.
+    celebrationDispatcher.flushTimer = setTimeout(flushCelebrationGroups, 520);
+}
+
+function flushCelebrationGroups() {
+    celebrationDispatcher.flushTimer = null;
+    if (!celebrationDispatcher.pending.length) return;
+
+    const groups = celebrationDispatcher.pending.splice(0);
+    const batch = {
+        milestones: [],
+        achievements: [],
+        records: [],
+        notices: []
+    };
+
+    groups.forEach(group => {
+        if (Object.prototype.hasOwnProperty.call(batch, group.kind)) {
+            batch[group.kind].push(...group.items);
+        }
+    });
+
+    const uniqueBy = (items, getKey) => {
+        const seen = new Set();
+        return items.filter(item => {
+            const key = getKey(item);
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+    };
+
+    batch.milestones = uniqueBy(batch.milestones, item => item.type + ':' + item.milestone);
+    batch.achievements = uniqueBy(batch.achievements, item => item.id || item.name);
+    batch.records = uniqueBy(batch.records, item => item.name);
+    batch.notices = uniqueBy(batch.notices, item => item.message);
+
+    if (
+        !batch.milestones.length &&
+        !batch.achievements.length &&
+        !batch.records.length &&
+        !batch.notices.length
+    ) return;
+
+    celebrationDispatcher.queue.push(batch);
+    showNextCelebration();
+}
+
+function showNextCelebration() {
+    if (celebrationDispatcher.isShowing || !celebrationDispatcher.queue.length) return;
+
+    celebrationDispatcher.isShowing = true;
+    const batch = celebrationDispatcher.queue.shift();
+    const finish = () => {
+        celebrationDispatcher.isShowing = false;
+        setTimeout(showNextCelebration, 220);
+    };
+
+    if (batch.achievements.length) {
+        showAchievementUnlockCelebration(batch, finish);
+    } else {
+        showMilestoneCelebrationToast(batch, finish);
+    }
+}
+
+function openCelebrationDestination(batch) {
+    if (batch.achievements.length) {
+        const categories = [...new Set(batch.achievements.map(item => item.categoryId).filter(Boolean))];
+        achievementsYearFilter = 'all';
+        goToView('achievements');
+        populateAchievementsYearSelect();
+        const yearSelect = document.getElementById('achievements-year-select');
+        if (yearSelect) yearSelect.value = 'all';
+        renderAchievementsView();
+        if (categories.length === 1) {
+            openAchievementCategoryModal(categories[0]);
+        }
+        return;
+    }
+
+    if (batch.milestones.length) {
+        goToView('dashboard');
+        const types = [...new Set(batch.milestones.map(item => item.type))];
+        if (types.length === 1) {
+            requestAnimationFrame(() => openMilestoneModal(types[0]));
+        }
+        return;
+    }
+
+    if (batch.records.length) {
+        goToView('chart');
+        requestAnimationFrame(() => {
+            document.querySelector('#stats-section-switch [data-stats-section="highlights"]')?.click();
+        });
+    }
+}
+
+function showMilestoneCelebrationToast(batch, onFinish) {
+    const host = createCelebrationNode('div', 'success-celebration-toast-host');
+    host.setAttribute('aria-live', 'polite');
+    host.setAttribute('aria-atomic', 'true');
+
+    const card = createCelebrationNode('section', 'success-celebration-toast');
+    card.setAttribute('role', 'status');
+
+    const mainMilestone = batch.milestones[0] || null;
+    const image = createCelebrationNode('img', 'success-celebration-art');
+    image.src = mainMilestone
+        ? (CELEBRATION_ART_ASSETS[mainMilestone.type] || CELEBRATION_ART_ASSETS.peaks)
+        : CELEBRATION_ART_ASSETS.peaks;
+    image.alt = '';
+    image.setAttribute('aria-hidden', 'true');
+    image.setAttribute('draggable', 'false');
+
+    const copy = createCelebrationNode('div', 'success-celebration-copy');
+    let kickerText = 'NEUER ERFOLG';
+    let titleText = 'Dein persönlicher Fortschritt';
+    let detailText = '';
+
+    if (batch.milestones.length === 1) {
+        kickerText = 'MEILENSTEIN ERREICHT';
+        titleText = Number(mainMilestone.milestone).toLocaleString('de-AT') + ' ' + (MILESTONE_UNITS[mainMilestone.type] || '');
+        detailText = (MILESTONE_LABELS[mainMilestone.type] || 'Meilenstein') + ' gemeistert';
+    } else if (batch.milestones.length > 1) {
+        kickerText = 'MEILENSTEINE ERREICHT';
+        titleText = batch.milestones.length + ' neue Ziele erreicht';
+        detailText = 'Deine Touren bringen dich weiter.';
+    } else if (batch.records.length) {
+        kickerText = batch.records.length === 1 ? 'NEUER REKORD' : 'NEUE REKORDE';
+        titleText = batch.records.length === 1 ? batch.records[0].name : batch.records.length + ' persönliche Rekorde';
+        detailText = 'Ein neuer Bestwert in deiner Tourengeschichte.';
+    } else if (batch.notices.length) {
+        titleText = batch.notices[0].message;
+        detailText = 'Erfolgreich abgeschlossen';
+    }
+
+    copy.append(
+        createCelebrationNode('span', 'success-celebration-kicker', kickerText),
+        createCelebrationNode('strong', 'success-celebration-title', titleText),
+        createCelebrationNode('span', 'success-celebration-detail', detailText)
+    );
+
+    if (batch.milestones.length > 1) {
+        const list = createCelebrationNode('div', 'success-celebration-list');
+        batch.milestones.slice(0, 4).forEach(item => {
+            const row = createCelebrationNode('div', 'success-celebration-list-row');
+            row.append(
+                createCelebrationNode('span', '', MILESTONE_LABELS[item.type] || 'Meilenstein'),
+                createCelebrationNode('strong', '', Number(item.milestone).toLocaleString('de-AT') + ' ' + (MILESTONE_UNITS[item.type] || ''))
+            );
+            list.appendChild(row);
+        });
+        if (batch.milestones.length > 4) {
+            list.appendChild(createCelebrationNode('small', '', '+' + (batch.milestones.length - 4) + ' weitere Meilensteine'));
+        }
+        copy.appendChild(list);
+    } else if (mainMilestone?.contexts?.length) {
+        copy.appendChild(createCelebrationNode('span', 'success-celebration-context', mainMilestone.contexts.join(' · ')));
+    }
+
+    if (batch.records.length && batch.milestones.length) {
+        const recordNames = batch.records.map(item => item.name);
+        copy.appendChild(createCelebrationNode('span', 'success-celebration-context', 'Zusätzlich: ' + recordNames.join(' · ')));
+    } else if (batch.records.length && batch.records[0].contexts?.length) {
+        copy.appendChild(createCelebrationNode('span', 'success-celebration-context', batch.records[0].contexts.join(' · ')));
+    }
+
+    const closeButton = createCelebrationNode('button', 'success-celebration-close', '×');
+    closeButton.type = 'button';
+    closeButton.setAttribute('aria-label', 'Meldung schließen');
+
+    const progress = createCelebrationNode('span', 'success-celebration-progress');
+    card.append(image, copy, closeButton, progress);
+    host.appendChild(card);
+    document.body.appendChild(host);
+
+    const actionButton = createCelebrationNode(
+        'button',
+        'success-celebration-action',
+        batch.milestones.length ? 'ANSEHEN' : batch.records.length ? 'STATISTIKEN' : 'OK'
+    );
+    actionButton.type = 'button';
+    if (batch.milestones.length || batch.records.length) copy.appendChild(actionButton);
+
+    const duration = 5200;
+    let closed = false;
+    let timer = null;
+
+    const close = (openTarget = false) => {
+        if (closed) return;
+        closed = true;
+        if (timer) clearTimeout(timer);
+        host.classList.add('is-closing');
+        setTimeout(() => {
+            host.remove();
+            onFinish?.();
+            if (openTarget) openCelebrationDestination(batch);
+        }, 260);
+    };
+
+    closeButton.addEventListener('click', () => close(false));
+    actionButton.addEventListener('click', () => close(true));
+    progress.style.transition = 'transform ' + duration + 'ms linear';
+    requestAnimationFrame(() => { progress.style.transform = 'scaleX(0)'; });
+    timer = setTimeout(() => close(false), duration);
+
+    hapticFeedback(batch.milestones.length > 1 ? [18, 42, 18] : 22);
+}
+
+function showAchievementUnlockCelebration(batch, onFinish) {
+    const overlay = createCelebrationNode('div', 'achievement-unlock-overlay');
+    overlay.setAttribute('role', 'presentation');
+
+    const backdrop = createCelebrationNode('button', 'achievement-unlock-backdrop');
+    backdrop.type = 'button';
+    backdrop.setAttribute('aria-label', 'Auszeichnung schließen');
+
+    const card = createCelebrationNode('section', 'achievement-unlock-card');
+    card.setAttribute('role', 'dialog');
+    card.setAttribute('aria-modal', 'true');
+    card.setAttribute('aria-labelledby', 'achievement-unlock-title');
+
+    const closeButton = createCelebrationNode('button', 'achievement-unlock-close', '×');
+    closeButton.type = 'button';
+    closeButton.setAttribute('aria-label', 'Auszeichnung schließen');
+
+    const kicker = createCelebrationNode('span', 'achievement-unlock-kicker', 'NEUE AUSZEICHNUNG');
+    const mainAchievement = batch.achievements[0];
+    const artStage = createCelebrationNode('div', 'achievement-unlock-art-stage');
+    const art = createCelebrationNode('img', 'achievement-unlock-art');
+    art.src = mainAchievement.image || getAchievementCelebrationAsset(mainAchievement.categoryId);
+    art.alt = '';
+    art.setAttribute('aria-hidden', 'true');
+    art.setAttribute('draggable', 'false');
+    artStage.appendChild(art);
+
+    const title = createCelebrationNode(
+        'h2',
+        'achievement-unlock-title',
+        batch.achievements.length === 1 ? mainAchievement.name : batch.achievements.length + ' Auszeichnungen freigeschaltet'
+    );
+    title.id = 'achievement-unlock-title';
+
+    const category = createCelebrationNode(
+        'div',
+        'achievement-unlock-category',
+        batch.achievements.length === 1
+            ? (mainAchievement.categoryLabel || 'Deine Tourenleistung')
+            : 'Deine Tourenleistung wird belohnt'
+    );
+
+    const description = createCelebrationNode(
+        'p',
+        'achievement-unlock-description',
+        batch.achievements.length === 1
+            ? 'Du hast dir diese Auszeichnung mit deinen gespeicherten Touren verdient.'
+            : 'Mehrere neue Erfolge wurden bei deiner letzten Tour erreicht.'
+    );
+
+    card.append(closeButton, kicker, artStage, title, category, description);
+
+    if (batch.achievements.length > 1) {
+        const list = createCelebrationNode('div', 'achievement-unlock-extra-list');
+        batch.achievements.slice(1, 4).forEach(item => {
+            const row = createCelebrationNode('div', 'achievement-unlock-extra-row');
+            const miniArt = createCelebrationNode('img', 'achievement-unlock-extra-art');
+            miniArt.src = item.image || getAchievementCelebrationAsset(item.categoryId);
+            miniArt.alt = '';
+            miniArt.setAttribute('aria-hidden', 'true');
+            row.append(
+                miniArt,
+                createCelebrationNode('span', '', item.name),
+                createCelebrationNode('small', '', item.categoryLabel || '')
+            );
+            list.appendChild(row);
+        });
+        if (batch.achievements.length > 4) {
+            list.appendChild(createCelebrationNode('small', 'achievement-unlock-more', '+' + (batch.achievements.length - 4) + ' weitere Auszeichnungen'));
+        }
+        card.appendChild(list);
+    }
+
+    if (batch.milestones.length) {
+        card.appendChild(createCelebrationNode(
+            'p',
+            'achievement-unlock-extra-note',
+            'Zusätzlich ' + batch.milestones.length + (batch.milestones.length === 1 ? ' Meilenstein' : ' Meilensteine') + ' erreicht.'
+        ));
+    }
+    if (batch.records.length) {
+        card.appendChild(createCelebrationNode(
+            'p',
+            'achievement-unlock-extra-note',
+            'Außerdem: ' + batch.records.map(item => item.name).join(' · ')
+        ));
+    }
+
+    const actionButton = createCelebrationNode('button', 'achievement-unlock-action', 'ACHIEVEMENTS ANSEHEN');
+    actionButton.type = 'button';
+    card.appendChild(actionButton);
+
+    overlay.append(backdrop, card);
+    document.body.appendChild(overlay);
+    document.body.classList.add('achievement-celebration-open');
+
+    const previousFocus = document.activeElement;
+    const duration = 7200;
+    let closed = false;
+    let timer = null;
+
+    const close = (openTarget = false) => {
+        if (closed) return;
+        closed = true;
+        if (timer) clearTimeout(timer);
+        window.removeEventListener('keydown', onKeyDown);
+        overlay.classList.add('is-closing');
+        setTimeout(() => {
+            overlay.remove();
+            document.body.classList.remove('achievement-celebration-open');
+            if (previousFocus instanceof HTMLElement && previousFocus.isConnected) {
+                previousFocus.focus({ preventScroll: true });
+            }
+            onFinish?.();
+            if (openTarget) openCelebrationDestination(batch);
+        }, 300);
+    };
+
+    const onKeyDown = event => {
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            close(false);
+        }
+    };
+
+    backdrop.addEventListener('click', () => close(false));
+    closeButton.addEventListener('click', () => close(false));
+    actionButton.addEventListener('click', () => close(true));
+    window.addEventListener('keydown', onKeyDown);
+
+    timer = setTimeout(() => close(false), duration);
+    hapticFeedback([24, 58, 26]);
+}
+
 function showNewMilestoneNotifications(lifetimeEvents = [], yearEvents = [], dashboardEvents = []) {
     const mergedByKey = new Map();
 
@@ -4113,8 +4506,7 @@ function showNewMilestoneNotifications(lifetimeEvents = [], yearEvents = [], das
                 milestone: event.milestone,
                 scopes: new Set(),
                 years: new Set(),
-                dashboardFilters: new Set(),
-                delay: event.delay || 0
+                dashboardFilters: new Set()
             };
             mergedByKey.set(key, merged);
         }
@@ -4126,138 +4518,97 @@ function showNewMilestoneNotifications(lifetimeEvents = [], yearEvents = [], das
         if (event.scope === 'dashboard' && event.filterLabel) {
             merged.dashboardFilters.add(event.filterLabel);
         }
-        merged.delay = Math.min(merged.delay, event.delay || 0);
     });
 
     // Neue Dashboard-Schwellen vormerken, auch wenn die Tour aus einer anderen
     // Ansicht gespeichert wurde. Die Kachel feiert beim nächsten Dashboard-Rendern.
     dashboardEvents.forEach(event => pendingMilestoneTileCelebrations.add(event.type));
 
-    [...mergedByKey.values()].forEach(event => {
-        setTimeout(() => {
-            const amount = event.milestone.toLocaleString('de-AT');
-            const unit = MILESTONE_UNITS[event.type];
-            const label = MILESTONE_LABELS[event.type];
-            const icon = MILESTONE_ICONS[event.type];
-            const years = [...event.years].sort((a, b) => a - b);
-            const hasLifetime = event.scopes.has('lifetime');
-            const dashboardFilters = [...event.dashboardFilters];
-            const contexts = [];
-            if (hasLifetime) contexts.push('Gesamt');
-            years.forEach(year => contexts.push('Jahr ' + year));
-            dashboardFilters.forEach(filter => contexts.push(filter));
-            const uniqueContexts = [...new Set(contexts)];
-            let message;
+    const items = [...mergedByKey.values()].map(event => {
+        const contexts = [];
+        if (event.scopes.has('lifetime')) contexts.push('Gesamt');
+        [...event.years].sort((a, b) => a - b).forEach(year => contexts.push('Jahr ' + year));
+        [...event.dashboardFilters].forEach(label => contexts.push(label));
 
-            if (uniqueContexts.length > 1) {
-                message = icon + ' ' + label + ': ' + amount + ' ' + unit +
-                    ' erreicht (' + uniqueContexts.join(' + ') + ').';
-            } else if (years.length) {
-                message = icon + ' ' + label + ' ' + years[0] + ': ' + amount + ' ' + unit + ' in diesem Jahr erreicht!';
-            } else if (dashboardFilters.length && !hasLifetime) {
-                message = icon + ' ' + label + ': ' + amount + ' ' + unit +
-                    ' im Filter „' + dashboardFilters[0] + '“ erreicht!';
-            } else {
-                message = icon + ' ' + label + ': ' + amount + ' ' + unit + ' erreicht!';
-            }
-
-            if (dashboardFilters.length) {
-                showDashboardMilestoneCelebrationToast({
-                    type: event.type,
-                    milestone: event.milestone,
-                    contexts: uniqueContexts
-                });
-            } else {
-                showAchievementToast(message);
-            }
-        }, event.delay);
+        return {
+            type: event.type,
+            milestone: event.milestone,
+            contexts: [...new Set(contexts)]
+        };
     });
 
-    return mergedByKey.size;
+    if (items.length) enqueueCelebrationGroup('milestones', items);
+    return items.length;
 }
 
 function showDashboardMilestoneCelebrationToast(event) {
-    const container = getToastContainer();
-    const toast = document.createElement('div');
-    toast.className = 'toast toast-achievement toast-milestone-epic';
-    toast.setAttribute('role', 'status');
-    toast.setAttribute('aria-live', 'polite');
-
-    const crest = document.createElement('div');
-    crest.className = 'milestone-epic-crest';
-    crest.setAttribute('aria-hidden', 'true');
-    crest.innerHTML = '<span>' + (event.type === 'peaks' ? '🏔️' : (MILESTONE_ICONS[event.type] || '🏆')) +
-        '</span><i>✦</i><b>✦</b>';
-
-    const copy = document.createElement('div');
-    copy.className = 'milestone-epic-copy';
-
-    const kicker = document.createElement('span');
-    kicker.className = 'milestone-epic-kicker';
-    kicker.textContent = 'DEIN GIPFELMOMENT';
-
-    const value = document.createElement('strong');
-    value.className = 'milestone-epic-value';
-    value.textContent = Number(event.milestone).toLocaleString('de-AT') + ' ' + (MILESTONE_UNITS[event.type] || '');
-
-    const title = document.createElement('span');
-    title.className = 'milestone-epic-title';
-    title.textContent = (MILESTONE_LABELS[event.type] || 'Meilenstein') + ' gemeistert';
-
-    const context = document.createElement('span');
-    context.className = 'milestone-epic-context';
-    context.textContent = Array.isArray(event.contexts) && event.contexts.length
-        ? event.contexts.join(' · ')
-        : 'Deine persönliche Tourengeschichte';
-
-    copy.append(kicker, value, title, context);
-
-    const sweep = document.createElement('span');
-    sweep.className = 'milestone-epic-sweep';
-    sweep.setAttribute('aria-hidden', 'true');
-
-    const bar = document.createElement('div');
-    bar.className = 'toast-bar';
-
-    toast.append(crest, copy, sweep, bar);
-    container.appendChild(toast);
-
-    const duration = 5600;
-    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    if (!reduceMotion) {
-        requestAnimationFrame(() => {
-            bar.style.transition = 'transform ' + duration + 'ms linear';
-            bar.style.transform = 'scaleX(0)';
-        });
-    }
-    setTimeout(() => removeToast(toast), duration);
+    if (!event) return;
+    enqueueCelebrationGroup('milestones', [{
+        type: event.type,
+        milestone: event.milestone,
+        contexts: Array.isArray(event.contexts) ? event.contexts : []
+    }]);
 }
 
 function showAchievementToast(message) {
-    const container = getToastContainer();
-
-    const toast = document.createElement('div');
-    toast.className = 'toast toast-achievement';
-
-    toast.innerHTML = `
-        <span class="toast-icon toast-achievement-icon">🏆</span>
-        <span class="toast-msg">${message}</span>
-        <div class="toast-bar"></div>
-        <div class="light-sweep toast-achievement-sweep"></div>
-    `;
-
-    container.appendChild(toast);
-
-    const bar = toast.querySelector('.toast-bar');
-    const duration = 5000;
-    requestAnimationFrame(() => {
-        bar.style.transition = `transform ${duration}ms linear`;
-        bar.style.transform = 'scaleX(0)';
-    });
-
-    setTimeout(() => removeToast(toast), duration);
+    enqueueCelebrationGroup('notices', [{ message: String(message || 'Erfolg erreicht') }]);
 }
 
+let pendingRecordCelebrations = new Map();
+let pendingRecordFlushTimer = null;
+
+function queueRecordCelebration(records, scope = 'lifetime', year = null, delay = 0) {
+    if (!Array.isArray(records) || !records.length) return;
+
+    setTimeout(() => {
+        const scopeLabel = scope === 'year' && year
+            ? 'Jahresrekord ' + year
+            : 'Gesamt';
+
+        records.forEach(name => {
+            if (!pendingRecordCelebrations.has(name)) {
+                pendingRecordCelebrations.set(name, new Set());
+            }
+            pendingRecordCelebrations.get(name).add(scopeLabel);
+        });
+
+        if (pendingRecordFlushTimer !== null) clearTimeout(pendingRecordFlushTimer);
+        // Lebenszeit- und Jahresrekorde derselben Tour werden als eine Meldung gezeigt.
+        pendingRecordFlushTimer = setTimeout(() => {
+            pendingRecordFlushTimer = null;
+            const items = [...pendingRecordCelebrations.entries()].map(([name, scopes]) => ({
+                name,
+                contexts: [...scopes]
+            }));
+            pendingRecordCelebrations.clear();
+            enqueueCelebrationGroup('records', items);
+        }, 650);
+    }, Math.max(0, Number(delay) || 0));
+}
+
+function triggerAchievementUnlockCelebration(badges) {
+    const list = (Array.isArray(badges) ? badges : [badges]).filter(Boolean);
+    if (!list.length) return;
+
+    const items = list.map(badge => {
+        const definition = ACHIEVEMENT_CATEGORIES[badge.categoryId]?.badges.find(item => item.id === badge.id) || badge;
+        const category = ACHIEVEMENT_CATEGORIES[definition.categoryId] || {};
+        const name = definition.nameFn
+            ? definition.nameFn(definition.threshold)
+            : (definition.id || 'Achievement');
+
+        return {
+            id: definition.id,
+            categoryId: definition.categoryId,
+            categoryLabel: category.label || 'Achievement',
+            name,
+            icon: definition.icon || category.icon || '🏅',
+            image: getAchievementCelebrationAsset(definition.categoryId)
+        };
+    });
+
+    enqueueCelebrationGroup('achievements', items);
+}
 
 tourImagePickBtn?.addEventListener('click', () => {
     tourImageInput?.click();
@@ -20018,7 +20369,7 @@ function recomputeAndSyncAchievements({ silent = false } = {}) {
 
     appStorage.set(ACHIEVEMENTS_KEY, nextStored);
 
-    newlyUnlocked.forEach(badge => triggerAchievementUnlockCelebration(badge));
+    if (newlyUnlocked.length) triggerAchievementUnlockCelebration(newlyUnlocked);
 
     return { freshResults, newlyUnlocked, isFirstRun };
 }
@@ -31460,11 +31811,7 @@ function checkAndTriggerRecordConfetti(existingTours, newEntry, opts = {}) {
     if (newPeak > 0 && newPeak > prevMaxPeak) brokenRecords.push('höchster Gipfel');
 
     if (brokenRecords.length > 0) {
-        triggerConfetti();
-        setTimeout(() => {
-            const label = scope === 'year' ? `Jahresrekord ${year}` : 'Neuer Rekord';
-            showAchievementToast(`🎉 ${label}: ${brokenRecords.join(', ')}!`);
-        }, delay);
+        queueRecordCelebration(brokenRecords, scope, year, delay);
     }
 }
 
