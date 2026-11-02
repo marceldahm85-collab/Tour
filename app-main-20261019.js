@@ -36691,8 +36691,6 @@ function renderWrappedSlide(index, transition = null) {
     }
 }
 let wrappedCanvasResizeFrame = 0;
-
-let wrappedCanvasResizeFrame = 0;
 window.addEventListener('resize', () => {
     const view = document.getElementById('wrapped-view');
     if (!view?.classList.contains('visible') || !wrappedSlides.length) return;
