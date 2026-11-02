@@ -2,8 +2,8 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261102-bergwelt-experience-only-flat-panels') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261102-bergwelt-experience-only-flat-panels';
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261102-bergwelt-experience-controls') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261102-bergwelt-experience-controls';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
