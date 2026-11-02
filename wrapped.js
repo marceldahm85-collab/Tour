@@ -784,7 +784,14 @@ function renderWrappedIntroSlide(ctx, w, h, colors, data) {
     ctx.fillText(data.tourCount === 1 ? 'TOUR' : 'TOUREN', center, h*0.625);
     setWrappedFont(ctx, 34, 'normal');
     ctx.fillStyle = 'rgba(255,255,255,0.94)';
-    ctx.fillText('Dein Jahr. Deine Gipfel. Deine Geschichte.', center, h*0.725);
+    wrapWrappedText(
+        ctx,
+        'Viele Wege, beeindruckende Aufstiege und unvergessliche Ausblicke – Erinnerungen, die bleiben.',
+        center,
+        h * 0.725,
+        w * 0.78,
+        46
+    );
     ctx.restore();
 }
 
