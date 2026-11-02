@@ -9062,3 +9062,428 @@ body.summit .top-main-nav [aria-current="page"] {
     animation-duration: 4.2s !important;
 }
 
+/* =========================================================
+   Premium Alpine – Meilenstein- und Achievement-Freischaltung
+   ========================================================= */
+.success-celebration-toast-host {
+    position: fixed;
+    z-index: 10200;
+    left: 50%;
+    bottom: 28px;
+    width: min(440px, calc(100vw - 24px));
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+.success-celebration-toast {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 12px 13px 15px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--accent-color, var(--accent, #c6a76a)) 48%, rgba(255,255,255,.14));
+    border-radius: var(--app-radius, 20px);
+    background:
+        radial-gradient(ellipse at 0% 0%, color-mix(in srgb, var(--accent-color, var(--accent, #c6a76a)) 20%, transparent), transparent 66%),
+        linear-gradient(145deg, rgba(27,35,43,.97), rgba(10,16,23,.97));
+    color: #f5f7fa;
+    box-shadow: 0 16px 42px rgba(0,0,0,.42), 0 0 24px color-mix(in srgb, var(--accent-color, var(--accent, #c6a76a)) 12%, transparent);
+    -webkit-backdrop-filter: blur(22px);
+    backdrop-filter: blur(22px);
+    pointer-events: auto;
+    animation: premiumCelebrationToastIn .42s cubic-bezier(.18,.78,.2,1) both;
+}
+.success-celebration-toast-host.is-closing .success-celebration-toast {
+    animation: premiumCelebrationToastOut .24s ease both;
+}
+.success-celebration-art {
+    display: block;
+    flex: 0 0 66px;
+    width: 66px;
+    height: 66px;
+    object-fit: contain;
+    border-radius: 50%;
+    filter: drop-shadow(0 4px 11px color-mix(in srgb, var(--accent-color, var(--accent, #c6a76a)) 28%, transparent));
+}
+.success-celebration-copy {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    min-width: 0;
+    padding-right: 2px;
+}
+.success-celebration-kicker {
+    color: var(--accent-color, var(--accent, #d8bd7b));
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: .15em;
+    line-height: 1.3;
+}
+.success-celebration-title {
+    color: #fff;
+    font-size: clamp(16px, 4.3vw, 21px);
+    font-weight: 900;
+    line-height: 1.12;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
+.success-celebration-detail {
+    color: rgba(239,244,248,.84);
+    font-size: 11px;
+    font-weight: 650;
+    line-height: 1.3;
+}
+.success-celebration-context {
+    color: rgba(220,229,237,.67);
+    font-size: 9px;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+.success-celebration-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: 100%;
+    margin-top: 4px;
+}
+.success-celebration-list-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    color: rgba(241,245,248,.84);
+    font-size: 10px;
+    line-height: 1.3;
+}
+.success-celebration-list-row strong {
+    flex: 0 0 auto;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+}
+.success-celebration-list > small {
+    color: rgba(220,229,237,.62);
+    font-size: 9px;
+}
+.success-celebration-close {
+    position: absolute;
+    top: 5px;
+    right: 7px;
+    display: grid;
+    place-items: center;
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,.08);
+    color: rgba(255,255,255,.72);
+    font-size: 19px;
+    line-height: 1;
+    cursor: pointer;
+}
+.success-celebration-action {
+    align-self: flex-start;
+    margin-top: 4px;
+    padding: 4px 8px;
+    border: 1px solid color-mix(in srgb, var(--accent-color, var(--accent, #c6a76a)) 48%, transparent);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--accent-color, var(--accent, #c6a76a)) 14%, transparent);
+    color: #f5e6bd;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    cursor: pointer;
+}
+.success-celebration-progress {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    transform: scaleX(1);
+    transform-origin: left center;
+    background: var(--accent-gradient, linear-gradient(90deg, #9c814a, #e2cf9b));
+    box-shadow: 0 0 12px color-mix(in srgb, var(--accent-color, var(--accent, #c6a76a)) 34%, transparent);
+}
+@keyframes premiumCelebrationToastIn {
+    from { opacity: 0; transform: translateY(20px) scale(.965); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes premiumCelebrationToastOut {
+    to { opacity: 0; transform: translateY(12px) scale(.98); }
+}
+
+/* Zentrale Freischaltung für echte Achievements */
+.achievement-celebration-open {
+    overflow: hidden !important;
+}
+.achievement-unlock-overlay {
+    position: fixed;
+    z-index: 10300;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    overflow-y: auto;
+    padding: 18px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+    isolation: isolate;
+    animation: achievementUnlockBackdropIn .28s ease both;
+}
+.achievement-unlock-backdrop {
+    position: fixed;
+    z-index: -1;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background:
+        radial-gradient(ellipse at 50% 38%, rgba(30,46,57,.42), transparent 58%),
+        rgba(3,8,13,.84);
+    -webkit-backdrop-filter: blur(13px);
+    backdrop-filter: blur(13px);
+}
+.achievement-unlock-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: min(430px, 100%);
+    max-height: min(90svh, 780px);
+    min-width: 0;
+    padding: 28px 22px 22px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border: 1px solid color-mix(in srgb, var(--accent-color, var(--accent, #c6a76a)) 56%, rgba(255,255,255,.2));
+    border-radius: var(--app-radius, 26px);
+    background:
+        radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--accent-color, var(--accent, #c6a76a)) 21%, transparent), transparent 57%),
+        linear-gradient(155deg, rgba(30,39,48,.985), rgba(8,14,21,.99) 72%);
+    color: #f6f7f8;
+    text-align: center;
+    box-shadow:
+        0 28px 90px rgba(0,0,0,.62),
+        0 0 42px color-mix(in srgb, var(--accent-color, var(--accent, #c6a76a)) 15%, transparent),
+        inset 0 1px 0 rgba(255,255,255,.11);
+    animation: achievementUnlockCardIn .58s cubic-bezier(.16,.82,.2,1) both;
+}
+.achievement-unlock-card::before {
+    position: absolute;
+    top: 0;
+    left: 14%;
+    width: 72%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent-color, var(--accent, #c6a76a)) 78%, white), transparent);
+    content: "";
+}
+.achievement-unlock-close {
+    position: absolute;
+    z-index: 2;
+    top: 10px;
+    right: 10px;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(255,255,255,.13);
+    border-radius: 50%;
+    background: rgba(255,255,255,.07);
+    color: rgba(255,255,255,.78);
+    font-size: 21px;
+    line-height: 1;
+    cursor: pointer;
+}
+.achievement-unlock-kicker {
+    display: block;
+    margin-bottom: 12px;
+    color: var(--accent-color, var(--accent, #d8bd7b));
+    font-size: 10px;
+    font-weight: 950;
+    letter-spacing: .2em;
+    line-height: 1.4;
+}
+.achievement-unlock-art-stage {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 13px;
+    border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent-color, var(--accent, #c6a76a)) 20%, transparent), transparent 69%);
+    animation: achievementUnlockStageIn .62s cubic-bezier(.18,.85,.2,1) .08s both;
+}
+.achievement-unlock-art-stage::before {
+    position: absolute;
+    inset: 7px;
+    border: 1px solid color-mix(in srgb, var(--accent-color, var(--accent, #c6a76a)) 42%, transparent);
+    border-radius: 50%;
+    box-shadow: 0 0 24px color-mix(in srgb, var(--accent-color, var(--accent, #c6a76a)) 18%, transparent), inset 0 0 20px rgba(255,255,255,.035);
+    content: "";
+    animation: achievementUnlockRing 7s linear infinite;
+}
+.achievement-unlock-art-stage::after {
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: conic-gradient(from 15deg, transparent 0 23%, rgba(255,255,255,.55) 25%, transparent 29% 61%, color-mix(in srgb, var(--accent-color, var(--accent, #c6a76a)) 58%, transparent) 64%, transparent 69% 100%);
+    opacity: .42;
+    filter: blur(9px);
+    content: "";
+    animation: achievementUnlockHalo 2.8s ease-in-out infinite;
+}
+.achievement-unlock-art {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 126px;
+    height: 126px;
+    object-fit: contain;
+    border-radius: 50%;
+    filter: drop-shadow(0 9px 19px rgba(0,0,0,.42)) drop-shadow(0 0 15px color-mix(in srgb, var(--accent-color, var(--accent, #c6a76a)) 28%, transparent));
+    animation: achievementUnlockEmblemPop .78s cubic-bezier(.16,.9,.22,1.15) .12s both;
+}
+.achievement-unlock-title {
+    width: 100%;
+    margin: 0;
+    color: #fff;
+    font-size: clamp(21px, 5.4vw, 29px);
+    font-weight: 900;
+    letter-spacing: -.025em;
+    line-height: 1.12;
+    overflow-wrap: anywhere;
+    text-shadow: 0 2px 22px rgba(0,0,0,.42);
+}
+.achievement-unlock-category {
+    margin-top: 8px;
+    color: var(--accent-color, var(--accent, #d8bd7b));
+    font-size: 11px;
+    font-weight: 850;
+    letter-spacing: .07em;
+}
+.achievement-unlock-description {
+    max-width: 31em;
+    margin: 10px auto 0;
+    color: rgba(231,238,243,.76);
+    font-size: 12px;
+    line-height: 1.5;
+}
+.achievement-unlock-extra-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    margin-top: 15px;
+    padding: 10px;
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: calc(var(--app-radius, 20px) * .72);
+    background: rgba(255,255,255,.035);
+    text-align: left;
+}
+.achievement-unlock-extra-row {
+    display: grid;
+    grid-template-columns: 34px minmax(0,1fr) auto;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    color: #f1f4f6;
+    font-size: 11px;
+    font-weight: 750;
+}
+.achievement-unlock-extra-art {
+    display: block;
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+    border-radius: 50%;
+}
+.achievement-unlock-extra-row > span {
+    overflow-wrap: anywhere;
+}
+.achievement-unlock-extra-row > small {
+    color: rgba(225,233,239,.58);
+    font-size: 9px;
+    text-align: right;
+}
+.achievement-unlock-more {
+    display: block;
+    padding: 3px 0 0 43px;
+    color: rgba(225,233,239,.62);
+    font-size: 10px;
+}
+.achievement-unlock-extra-note {
+    margin: 10px 0 0;
+    color: rgba(227,235,241,.68);
+    font-size: 10px;
+    line-height: 1.35;
+}
+.achievement-unlock-action {
+    width: 100%;
+    min-height: 44px;
+    margin-top: 19px;
+    padding: 11px 16px;
+    border: 1px solid color-mix(in srgb, var(--accent-color, var(--accent, #c6a76a)) 62%, rgba(255,255,255,.2));
+    border-radius: calc(var(--app-radius, 20px) * .72);
+    background: linear-gradient(110deg, color-mix(in srgb, var(--accent-color, var(--accent, #c6a76a)) 92%, white 8%), var(--accent-color, var(--accent, #c6a76a)));
+    color: #101820;
+    font-size: 11px;
+    font-weight: 950;
+    letter-spacing: .1em;
+    box-shadow: 0 7px 23px color-mix(in srgb, var(--accent-color, var(--accent, #c6a76a)) 22%, transparent);
+    cursor: pointer;
+}
+@keyframes achievementUnlockBackdropIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes achievementUnlockCardIn {
+    from { opacity: 0; transform: translateY(28px) scale(.94); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes achievementUnlockStageIn {
+    from { opacity: 0; transform: translateY(10px) scale(.88); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes achievementUnlockEmblemPop {
+    0% { opacity: 0; transform: scale(.58) rotate(-13deg); }
+    65% { opacity: 1; transform: scale(1.09) rotate(4deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+@keyframes achievementUnlockRing {
+    to { transform: rotate(360deg); }
+}
+@keyframes achievementUnlockHalo {
+    0%,100% { opacity: .22; transform: scale(.96); }
+    50% { opacity: .62; transform: scale(1.04); }
+}
+@media (max-width: 768px) {
+    .success-celebration-toast-host {
+        bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+        width: calc(100vw - 22px);
+        max-width: 440px;
+    }
+    .success-celebration-toast { gap: 10px; padding: 10px 10px 13px; }
+    .success-celebration-art { flex-basis: 58px; width: 58px; height: 58px; }
+    .success-celebration-title { font-size: clamp(15px, 4.2vw, 19px); }
+    .achievement-unlock-overlay { padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px)); }
+    .achievement-unlock-card { width: min(420px, 100%); padding: 25px 17px 17px; }
+    .achievement-unlock-art-stage { width: 132px; height: 132px; margin-bottom: 10px; }
+    .achievement-unlock-art { width: 112px; height: 112px; }
+    .achievement-unlock-description { font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .success-celebration-toast,
+    .success-celebration-toast-host.is-closing .success-celebration-toast,
+    .achievement-unlock-overlay,
+    .achievement-unlock-card,
+    .achievement-unlock-art-stage,
+    .achievement-unlock-art-stage::before,
+    .achievement-unlock-art-stage::after,
+    .achievement-unlock-art {
+        animation: none !important;
+    }
+    .success-celebration-progress { transition: none !important; }
+}
