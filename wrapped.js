@@ -894,6 +894,17 @@ function renderWrappedActiveMonthSlide(ctx, w, h, colors, data) {
     setWrappedFont(ctx, 42);
     ctx.fillStyle = colors.text;
     ctx.fillText(`${data.monthlyTours[data.activeMonthIndex]} Touren`, w / 2, chartY - 30);
+
+    setWrappedFont(ctx, 32, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    wrapWrappedText(
+        ctx,
+        'In diesem Monat zog es dich besonders oft hinaus – jeder Ausflug brachte neue Wege, Eindrücke und Gipfelmomente.',
+        w / 2,
+        1360,
+        w * 0.78,
+        46
+    );
 }
 
 function renderWrappedBestTourSlide(ctx, w, h, colors, data) {
