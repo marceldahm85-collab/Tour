@@ -1728,3 +1728,18 @@ body.wrapped-mobile-fullscreen-active .top-main-nav .top-nav-btn.more-view-activ
         margin: 0 auto !important;
     }
 }
+
+
+/* Die historische Vollbild-Ausblendung der Bergwelt-Tabs mit gleicher Spezifität übersteuern. */
+#wrapped-view.bergwelt-ready.wrapped-mobile-fullscreen .bergwelt-tabs {
+    display: grid !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    overflow: visible !important;
+}
