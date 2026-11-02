@@ -35865,7 +35865,7 @@ const endHold = () => {
             document.head.appendChild(premiumStyleLink);
         }
         const script = document.createElement('script');
-        script.src = './bergwelt-badges-20261019.js?v=3';
+        script.src = './bergwelt-badges-20261019.js?v=4';
         script.onload = () => {
             window.__BERGWELT_BADGE_LOADING__ = false;
             window.__BERGWELT_LOADING__ = false;
