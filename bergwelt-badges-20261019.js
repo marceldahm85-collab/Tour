@@ -2,8 +2,8 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261102-bergwelt-three-sections') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261102-bergwelt-three-sections';
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261102-bergwelt-experience-only-flat-panels') return;
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261102-bergwelt-experience-only-flat-panels';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
@@ -32,7 +32,7 @@
         });
     };
     syncExperienceActions();
-    let showOriginalStory = false;
+    let showOriginalStory = true;
 
     const getTours = () => {
         try {
@@ -352,7 +352,7 @@
             if (['erlebnis', 'tourbuch', 'achievements'].includes(requestedTab)) {
                 activeTab = requestedTab;
                 window.__bergweltRequestedTab = null;
-                showOriginalStory = false;
+                showOriginalStory = activeTab === 'erlebnis';
                 syncExperienceActions();
                 tabs.querySelectorAll('[data-bergwelt-tab]').forEach(tab => {
                     const active = tab.dataset.bergweltTab === activeTab;
@@ -393,7 +393,7 @@
         const button = event.target.closest('[data-bergwelt-tab]');
         if (!button) return;
         activeTab = button.dataset.bergweltTab;
-        showOriginalStory = false;
+        showOriginalStory = activeTab === 'erlebnis';
         syncExperienceActions();
         tabs.querySelectorAll('[data-bergwelt-tab]').forEach(tab => {
             const active = tab === button;
@@ -404,7 +404,7 @@
     });
     document.getElementById('wrapped-toggle')?.addEventListener('click', () => {
         activeTab = 'erlebnis';
-        showOriginalStory = false;
+        showOriginalStory = true;
         syncExperienceActions();
         tabs.querySelectorAll('[data-bergwelt-tab]').forEach(tab => {
             const active = tab.dataset.bergweltTab === 'erlebnis';
