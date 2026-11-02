@@ -20353,7 +20353,14 @@ function recomputeAndSyncAchievements({ silent = false } = {}) {
     recordCount: current.recordCount || undefined
 };
 
-            if (!isFirstRun && !silent && !ACHIEVEMENT_SILENT_CATEGORIES.has(badge.categoryId)) {
+            if (
+                !isFirstRun &&
+                !silent &&
+                !ACHIEVEMENT_SILENT_CATEGORIES.has(badge.categoryId) &&
+                badge.id !== 'performance_recordBroken'
+            ) {
+                // Rekordmeldungen kommen gesammelt aus checkAndTriggerRecordConfetti().
+                // Das verhindert eine doppelte Auszeichnung für denselben Rekord.
                 newlyUnlocked.push(badge);
             }
         } else if (isUnlocked) {
