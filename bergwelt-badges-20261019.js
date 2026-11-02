@@ -3,7 +3,7 @@
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
     if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261102-premium-alpine-complete') return;
-    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261102-premium-photo-specialization-badges';
+    window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261102-premium-alpine-complete';
     window.__BERGWELT_MODULE_READY__ = true;
 
     const root = document.getElementById('wrapped-view');
