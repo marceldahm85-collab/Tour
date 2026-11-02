@@ -1430,3 +1430,100 @@
         box-sizing: border-box !important;
     }
 }
+
+
+/* BERGWELT – eigenständige untere View-Navigation, strukturell wie Stats und Planen. */
+/* Die Tabs sind ein direktes letztes Kind von #wrapped-view. Damit hängt ihre
+   Position nicht mehr von display:contents oder dem Side-Nav-Wrapper ab. */
+@media (max-width: 768px) and (orientation: portrait) and (pointer: coarse) {
+    #wrapped-view.bergwelt-ready:not(.wrapped-mobile-fullscreen) {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        gap: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        max-height: 100% !important;
+        margin: 0 !important;
+        padding: 0 20px 28px !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Der Header bleibt als oberer View-Bereich eigenständig. */
+    #wrapped-view.bergwelt-ready:not(.wrapped-mobile-fullscreen) .bergwelt-side-nav {
+        display: flex !important;
+        flex: 0 0 auto !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        order: 1 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    #wrapped-view.bergwelt-ready:not(.wrapped-mobile-fullscreen) .bergwelt-panel:not([hidden]) {
+        display: block !important;
+        order: 2 !important;
+        flex: 1 1 0 !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        box-sizing: border-box !important;
+    }
+
+    #wrapped-view.bergwelt-ready:not(.wrapped-mobile-fullscreen) .wrapped-progress-bar {
+        order: 3 !important;
+        flex: 0 0 auto !important;
+        min-height: 0 !important;
+    }
+
+    #wrapped-view.bergwelt-ready:not(.wrapped-mobile-fullscreen) .wrapped-stage {
+        order: 4 !important;
+        flex: 1 1 0 !important;
+        min-height: 0 !important;
+    }
+
+    #wrapped-view.bergwelt-ready:not(.wrapped-mobile-fullscreen) .wrapped-controls {
+        order: 5 !important;
+        flex: 0 0 auto !important;
+    }
+
+    /* Exakt wie Stats: 6 px Abstand oben und 14 px View-Innenabstand unten.
+       Die View selbst besitzt zusätzlich denselben 28-px-Fußabstand wie andere Views. */
+    #wrapped-view.bergwelt-ready:not(.wrapped-mobile-fullscreen) > .bergwelt-tabs {
+        display: grid !important;
+        order: 6 !important;
+        flex: 0 0 auto !important;
+        align-self: center !important;
+        width: 100% !important;
+        max-width: 430px !important;
+        margin: 6px auto 14px !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Während Erlebnis läuft: Foto bleibt mittig, Stopp/Pause vor der Navigation. */
+    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .wrapped-progress-bar {
+        order: 2 !important;
+    }
+    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .wrapped-stage {
+        order: 3 !important;
+    }
+    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .wrapped-controls {
+        order: 4 !important;
+    }
+    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) > .bergwelt-tabs {
+        order: 5 !important;
+        margin: 6px auto 14px !important;
+        padding: 0 !important;
+    }
+}
