@@ -328,7 +328,7 @@
         achievementsPanel.hidden = true;
         tourbookPanel.hidden = false;
         root.classList.add('bergwelt-mode');
-        root.classList.remove('bergwelt-active-achievements');
+        root.classList.remove('bergwelt-story-playing', 'bergwelt-active-achievements');
         if (!tourbookPanel.querySelector('.bergwelt-tourbook-hero')) {
             const hero = document.createElement('section');
             hero.className = 'bergwelt-tourbook-hero';
