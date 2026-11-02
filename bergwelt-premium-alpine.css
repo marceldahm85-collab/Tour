@@ -1597,9 +1597,9 @@ body.wrapped-mobile-fullscreen-active .accordion-header {
 /* Jahreswahl, Vor/Zurück und Teilen ausblenden; das X bleibt oben rechts. */
 #wrapped-view.bergwelt-ready.wrapped-mobile-fullscreen .wrapped-header {
     position: absolute !important;
-    top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
+    top: env(safe-area-inset-top, 0px) !important;
     left: auto !important;
-    right: 10px !important;
+    right: 2px !important;
     z-index: 40 !important;
     display: flex !important;
     align-items: center !important;
@@ -1673,7 +1673,7 @@ body.wrapped-mobile-fullscreen-active .accordion-header {
     height: auto !important;
     min-height: 0 !important;
     margin: 0 !important;
-    padding: 6px 12px calc(env(safe-area-inset-bottom, 0px) + 4px) !important;
+    padding: 2px 8px max(4px, calc(env(safe-area-inset-bottom, 0px) - 8px)) !important;
     gap: 10px !important;
     border: 0 !important;
     background: transparent !important;
@@ -1705,11 +1705,11 @@ body.wrapped-mobile-fullscreen-active .accordion-header {
 
 @media (orientation: landscape) and (pointer: coarse) {
     #wrapped-view.bergwelt-ready.wrapped-mobile-fullscreen .wrapped-header {
-        top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
-        right: 12px !important;
+        top: env(safe-area-inset-top, 0px) !important;
+        right: 2px !important;
     }
 
     #wrapped-view.bergwelt-ready.wrapped-mobile-fullscreen .wrapped-controls {
-        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 4px) !important;
+        padding-bottom: max(4px, calc(env(safe-area-inset-bottom, 0px) - 8px)) !important;
     }
 }
