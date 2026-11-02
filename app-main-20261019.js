@@ -15058,6 +15058,7 @@ function goToView(targetView, animate = true) {
 }
 
 if (previousView === 'wrapped' && targetView !== 'wrapped') {
+    stopWrappedPhotoMotion();
     clearWrappedAutoAdvance();
     exitWrappedFullscreenIfActive();
 }
@@ -35646,6 +35647,7 @@ async function shareAllWrappedSlides(year) {
 }
 
 async function openWrappedView(year) {
+    stopWrappedPhotoMotion();
     if (wrappedTransitionState) finishWrappedTransition(false, false);
     wrappedPendingAutoAdvanceIndex = null;
     wrappedInitialRevealPending = true;
@@ -35757,6 +35759,7 @@ function startWrappedAutoAdvance() {
     wrappedAutoAdvanceTimer = setTimeout(() => {
         goToWrappedSlide(wrappedSlideIndex + 1);
     }, wrappedAutoAdvanceRemaining);
+    startWrappedPhotoMotionForCurrentSlide(wrappedAutoAdvanceRemaining);
 }
 
 function animateWrappedCurrentSegment(duration) {
@@ -35783,6 +35786,7 @@ function pauseWrappedAutoAdvance() {
         return;
     }
 
+    pauseWrappedPhotoMotion();
     const elapsed = Date.now() - wrappedAutoAdvanceStart;
     wrappedAutoAdvanceRemaining = Math.max(0, wrappedAutoAdvanceRemaining - elapsed);
 
@@ -35801,6 +35805,12 @@ function resumeWrappedAutoAdvance() {
     if (!wrappedPaused) return;
     wrappedPaused = false;
 
+    if (wrappedTransitionState && wrappedTransitionState.toIndex === wrappedSlideIndex) {
+        wrappedPendingAutoAdvanceIndex = wrappedSlideIndex;
+        updateWrappedPauseButtonLabel();
+        return;
+    }
+
     wrappedAutoAdvanceStart = Date.now();
     animateWrappedCurrentSegment(wrappedAutoAdvanceRemaining);
 
@@ -35808,6 +35818,7 @@ function resumeWrappedAutoAdvance() {
         goToWrappedSlide(wrappedSlideIndex + 1);
     }, wrappedAutoAdvanceRemaining);
 
+    resumeWrappedPhotoMotion();
     updateWrappedPauseButtonLabel();
 }
 
@@ -35829,6 +35840,7 @@ function goToWrappedSlide(index) {
     if (index < 0 || index === wrappedSlideIndex) return;
 
     if (index >= wrappedSlides.length) {
+        stopWrappedPhotoMotion();
         clearWrappedAutoAdvance();
         wrappedPendingAutoAdvanceIndex = null;
         if (wrappedTransitionState) finishWrappedTransition(true, false);
@@ -35837,6 +35849,7 @@ function goToWrappedSlide(index) {
         return;
     }
 
+    stopWrappedPhotoMotion();
     clearWrappedAutoAdvance();
     wrappedPendingAutoAdvanceIndex = null;
     if (wrappedTransitionState) finishWrappedTransition(true, false);
@@ -35914,6 +35927,7 @@ const endHold = () => {
     }, { passive: true });
 
     document.getElementById('wrapped-stop-btn').addEventListener('click', () => {
+    stopWrappedPhotoMotion();
     clearWrappedAutoAdvance();
     wrappedPendingAutoAdvanceIndex = null;
     if (wrappedTransitionState) finishWrappedTransition(true, false);
@@ -36238,6 +36252,153 @@ let wrappedTransitionCanvas = null;
 let wrappedTransitionState = null;
 let wrappedInitialRevealPending = false;
 let wrappedPendingAutoAdvanceIndex = null;
+let wrappedPhotoMotionState = null;
+
+function stopWrappedPhotoMotion() {
+    const state = wrappedPhotoMotionState;
+    if (state?.frameId) cancelAnimationFrame(state.frameId);
+    wrappedPhotoMotionState = null;
+}
+
+function drawWrappedPhotoMotionFrame(state, progress) {
+    const canvas = document.getElementById('wrapped-canvas');
+    const slide = wrappedSlides[state?.slideIndex];
+    if (!canvas || !slide || slide.key !== 'tourPhoto' || !slide.photoImg) return;
+
+    const verticalScale = canvas.height / WRAPPED_CANVAS_BASE_HEIGHT;
+    const w = canvas.width / verticalScale;
+    const h = WRAPPED_CANVAS_BASE_HEIGHT;
+    const imageX = 66;
+    const imageY = 285;
+    const imageW = w - 132;
+    const imageH = h - 610;
+    const radius = 28;
+    const image = slide.photoImg;
+
+    // Sehr langsame, kaum wahrnehmbare Kamerafahrt: maximal 3,5 % Zoom
+    // und rund 1,2 % Schwenk innerhalb der Bildfläche.
+    const t = 0.5 - Math.cos(Math.PI * Math.max(0, Math.min(1, progress))) / 2;
+    const fitScale = Math.min(imageW / image.width, imageH / image.height);
+    const scale = fitScale * (1 + 0.035 * t);
+    const drawW = image.width * scale;
+    const drawH = image.height * scale;
+    const canPanX = drawW > imageW + 0.5;
+    const canPanY = drawH > imageH + 0.5;
+
+    const directions = [
+        { x: -1, y: 0 },
+        { x: 1, y: 0 },
+        { x: 0, y: -1 },
+        { x: 0, y: 1 }
+    ];
+    const direction = directions[(Math.max(1, Number(slide.data?.photoIndex) || 1) - 1) % directions.length];
+    let moveX = canPanX ? direction.x : 0;
+    let moveY = canPanY ? direction.y : 0;
+    if (!moveX && !moveY) {
+        if (canPanX) moveX = -1;
+        else if (canPanY) moveY = 1;
+    }
+
+    const offsetX = moveX * imageW * 0.012 * t;
+    const offsetY = moveY * imageH * 0.012 * t;
+    const x = imageX + (imageW - drawW) / 2 + offsetX;
+    const y = imageY + (imageH - drawH) / 2 + offsetY;
+
+    const ctx = canvas.getContext('2d');
+    ctx.save();
+    ctx.setTransform(verticalScale, 0, 0, verticalScale, 0, 0);
+    ctx.beginPath();
+    ctx.moveTo(imageX + radius, imageY);
+    ctx.arcTo(imageX + imageW, imageY, imageX + imageW, imageY + imageH, radius);
+    ctx.arcTo(imageX + imageW, imageY + imageH, imageX, imageY + imageH, radius);
+    ctx.arcTo(imageX, imageY + imageH, imageX, imageY, radius);
+    ctx.arcTo(imageX, imageY, imageX + imageW, imageY, radius);
+    ctx.closePath();
+    ctx.clip();
+    ctx.fillStyle = 'rgba(9,31,42,0.38)';
+    ctx.fillRect(imageX, imageY, imageW, imageH);
+    ctx.drawImage(image, x, y, drawW, drawH);
+    ctx.restore();
+}
+
+function startWrappedPhotoMotionForCurrentSlide(durationOverride = null) {
+    stopWrappedPhotoMotion();
+    if (wrappedTransitionState || wrappedPaused) return;
+
+    const slide = wrappedSlides[wrappedSlideIndex];
+    if (!slide || slide.key !== 'tourPhoto' || !slide.photoImg) return;
+
+    const duration = Math.max(
+        500,
+        Number(durationOverride) || Number(slide.duration) || 8500
+    );
+    const state = {
+        slideIndex: wrappedSlideIndex,
+        duration,
+        startTime: performance.now(),
+        progress: 0,
+        frameId: 0
+    };
+    wrappedPhotoMotionState = state;
+    drawWrappedPhotoMotionFrame(state, 0);
+
+    const tick = now => {
+        if (wrappedPhotoMotionState !== state || wrappedSlideIndex !== state.slideIndex) return;
+        const progress = Math.min(1, (now - state.startTime) / state.duration);
+        state.progress = progress;
+        drawWrappedPhotoMotionFrame(state, progress);
+        if (progress >= 1) {
+            state.frameId = 0;
+            return;
+        }
+        state.frameId = requestAnimationFrame(tick);
+    };
+    state.frameId = requestAnimationFrame(tick);
+}
+
+function pauseWrappedPhotoMotion() {
+    const state = wrappedPhotoMotionState;
+    if (!state || !state.frameId) return;
+
+    state.progress = Math.max(0, Math.min(
+        1,
+        (performance.now() - state.startTime) / state.duration
+    ));
+    cancelAnimationFrame(state.frameId);
+    state.frameId = 0;
+    drawWrappedPhotoMotionFrame(state, state.progress);
+}
+
+function getWrappedCurrentSlideRemaining() {
+    const slide = wrappedSlides[wrappedSlideIndex];
+    if (!slide) return 8500;
+    if (wrappedAutoAdvanceTimer === null) return slide.duration;
+    const elapsed = Date.now() - wrappedAutoAdvanceStart;
+    return Math.max(500, wrappedAutoAdvanceRemaining - elapsed);
+}
+
+function resumeWrappedPhotoMotion() {
+    const state = wrappedPhotoMotionState;
+    if (!state || state.slideIndex !== wrappedSlideIndex) {
+        startWrappedPhotoMotionForCurrentSlide(getWrappedCurrentSlideRemaining());
+        return;
+    }
+    if (state.progress >= 1 || state.frameId) return;
+
+    state.startTime = performance.now() - state.progress * state.duration;
+    const tick = now => {
+        if (wrappedPhotoMotionState !== state || wrappedSlideIndex !== state.slideIndex) return;
+        const progress = Math.min(1, (now - state.startTime) / state.duration);
+        state.progress = progress;
+        drawWrappedPhotoMotionFrame(state, progress);
+        if (progress >= 1) {
+            state.frameId = 0;
+            return;
+        }
+        state.frameId = requestAnimationFrame(tick);
+    };
+    state.frameId = requestAnimationFrame(tick);
+}
 
 function getWrappedTransitionDuration(type) {
     if (type === 'center') return WRAPPED_TRANSITION_DURATIONS.center;
@@ -36597,7 +36758,10 @@ function drawWrappedSlideIntoCanvas(index, targetCanvas) {
             slide.photoRefreshAttached = false;
             if (wrappedSlides[index] !== slide) return;
             if (wrappedSlideIndex === index) {
-                renderWrappedSlide(index, image ? { type: 'fade', duration: 360 } : null);
+                renderWrappedSlide(index);
+                if (image && !wrappedPaused && !wrappedTransitionState && wrappedAutoAdvanceTimer !== null) {
+                    startWrappedPhotoMotionForCurrentSlide(getWrappedCurrentSlideRemaining());
+                }
             } else if (image) {
                 releaseWrappedGalleryPhoto(slide);
             }
