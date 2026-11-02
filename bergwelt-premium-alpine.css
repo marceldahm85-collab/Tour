@@ -1161,22 +1161,21 @@
 
 
 /* Erlebnis – keine äußeren Sammelflächen um Kopf und Wiedergabesteuerung. */
-#wrapped-view.bergwelt-ready.bergwelt-story-playing .wrapped-header {
+#wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .wrapped-header {
     border: 0 !important;
     border-radius: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
 }
 
-#wrapped-view.bergwelt-ready.bergwelt-story-playing .wrapped-side-nav,
-#wrapped-view.bergwelt-ready.bergwelt-story-playing .bergwelt-side-nav {
+#wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .bergwelt-side-nav {
     border: 0 !important;
     border-radius: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
 }
 
-#wrapped-view.bergwelt-ready.bergwelt-story-playing .wrapped-controls {
+#wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .wrapped-controls {
     margin: 0 !important;
     padding: 1px 12px 0 !important;
     border: 0 !important;
@@ -1186,7 +1185,7 @@
 }
 
 @media (orientation: portrait) {
-    #wrapped-view.bergwelt-ready.bergwelt-story-playing .bergwelt-tabs {
+    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .bergwelt-tabs {
         margin-top: 2px !important;
     }
 }
