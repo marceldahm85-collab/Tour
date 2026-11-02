@@ -940,6 +940,17 @@ function renderWrappedHighestPeakSlide(ctx, w, h, colors, data) {
     wrapWrappedText(ctx, data.peak.name, w / 2, 650, w - 160, 75);
 
     drawWrappedBigNumber(ctx, data.peak.height.toLocaleString('de-DE'), 'Meter', 1000, colors.text, w);
+
+    setWrappedFont(ctx, 32, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    wrapWrappedText(
+        ctx,
+        'Jeder Gipfel hat seine eigene Geschichte. Dieser markiert den höchsten Punkt deines Bergjahres – erreicht mit Ausdauer und Entschlossenheit. Hier oben werden Anstrengung und die Schönheit der Berge zu einem besonderen Moment und einem Ausblick, der in Erinnerung bleibt.',
+        w / 2,
+        1240,
+        w * 0.78,
+        46
+    );
 }
 
 function renderWrappedTopRegionSlide(ctx, w, h, colors, data) {
