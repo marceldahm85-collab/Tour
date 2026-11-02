@@ -309,11 +309,6 @@
     <span>Bergwelt</span>
 </button>
 
-<button type="button" class="more-menu-item" id="achievements-toggle">
-    <span class="more-menu-icon-svg" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="9" r="6.2"/><path d="m9 14-1.5 7 4.5-2.5 4.5 2.5L15 14"/><path d="m12 5.5 1.1 2.1 2.4.3-1.75 1.7.4 2.4L12 10.9l-2.15 1.1.4-2.4L8.5 7.9l2.4-.3z"/></svg></span>
-    <span>Achievements</span>
-</button>
-
 <button
                     id="filter-toggle"
                     class="more-menu-item"
@@ -2569,21 +2564,6 @@
     </div>
 </div>
 
-<div id="achievements-view" class="view">
-    <div class="achievements-inner dashboard-inner">
-
-        <div class="dash-year-filter-wrap achievements-year-filter-wrap">
-            <select id="achievements-year-select" aria-label="Achievement-Jahr auswählen"></select>
-            <button type="button" id="achievements-year-prev-btn" class="dash-year-arrow-btn" aria-label="Vorheriges Jahr">◀</button>
-            <button type="button" id="achievements-year-next-btn" class="dash-year-arrow-btn" aria-label="Nächstes Jahr">▶</button>
-        </div>
-
-        <div class="achievements-overview-summary" id="achievements-summary-value">0 / 0 freigeschaltet</div>
-
-        <div id="achievements-categories"></div>
-    </div>
-</div>
-
 <div id="wrapped-view" class="view">
     <div class="bergwelt-side-nav">
     <div class="wrapped-header">
@@ -2595,16 +2575,27 @@
     </div>
 
     <nav class="bergwelt-tabs" id="bergwelt-tabs" aria-label="Bergwelt-Bereiche">
-        <button type="button" class="bergwelt-tab is-active" data-bergwelt-tab="bergwelt" aria-selected="true">Bergwelt</button>
-        <button type="button" class="bergwelt-tab" data-bergwelt-tab="erlebnis" aria-selected="false">Erlebnis</button>
-        <button type="button" class="bergwelt-tab" data-bergwelt-tab="hoehenwelt" aria-selected="false">Höhenwelt</button>
-        <button type="button" class="bergwelt-tab" data-bergwelt-tab="level" aria-selected="false">Level</button>
+        <button type="button" class="bergwelt-tab is-active" data-bergwelt-tab="erlebnis" aria-selected="true">Erlebnis</button>
         <button type="button" class="bergwelt-tab" data-bergwelt-tab="tourbuch" aria-selected="false">Tourbuch</button>
+        <button type="button" class="bergwelt-tab" data-bergwelt-tab="achievements" aria-selected="false">Achievements</button>
     </nav>
     </div>
 
     <div class="bergwelt-panel" id="bergwelt-panel" hidden></div>
     <div class="bergwelt-panel bergwelt-tourbuch-panel" id="bergwelt-tourbuch-panel" hidden></div>
+    <div class="bergwelt-panel bergwelt-achievements-panel" id="bergwelt-achievements-panel" hidden>
+        <div id="achievements-view">
+            <div class="achievements-inner dashboard-inner">
+                <div class="dash-year-filter-wrap achievements-year-filter-wrap">
+                    <select id="achievements-year-select" aria-label="Achievement-Jahr auswählen"></select>
+                    <button type="button" id="achievements-year-prev-btn" class="dash-year-arrow-btn" aria-label="Vorheriges Jahr">◀</button>
+                    <button type="button" id="achievements-year-next-btn" class="dash-year-arrow-btn" aria-label="Nächstes Jahr">▶</button>
+                </div>
+                <div class="achievements-overview-summary" id="achievements-summary-value">0 / 0 freigeschaltet</div>
+                <div id="achievements-categories"></div>
+            </div>
+        </div>
+    </div>
     <div class="wrapped-progress-bar" id="wrapped-progress-bar"></div>
 
     <div class="wrapped-stage" id="wrapped-stage">
@@ -2620,7 +2611,7 @@
 </div>
 
 <script src="./android-backup-bridge.js?v=3" defer></script>
-<script src="./app-main-20261019.js?v=44" defer></script>
+<script src="./app-main-20261019.js?v=45" defer></script>
 <script src="./stats-premium-alpine.js?v=10" defer></script>
 <script src="./theme-editor-unified.js?v=25" defer></script>
 <script src="./background-image-manager.js?v=7" defer></script>
