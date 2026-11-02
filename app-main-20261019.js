@@ -35561,7 +35561,7 @@ function renderWrappedSlideToCanvas(slide, width, height) {
     const logicalHeight = WRAPPED_CANVAS_BASE_HEIGHT;
     const logicalWidth = width / wrappedCanvasVerticalScale;
 
-    const colors = drawWrappedBackground(ctx, logicalWidth, logicalHeight, slide.photoImg || null, slide.key);
+    const colors = drawWrappedBackground(ctx, logicalWidth, logicalHeight, slide.photoImg || null, slide.key, slide.data);
 
     switch (slide.key) {
         case 'intro': renderWrappedIntroSlide(ctx, logicalWidth, logicalHeight, colors, slide.data, !slide.photoImg); break;
@@ -35591,6 +35591,7 @@ function canvasToBlobAsync(canvas) {
 async function shareAllWrappedSlides(year) {
     if (!wrappedSlides.length) return;
 
+    await preloadWrappedBackgroundImages();
     showToast?.('Bilder werden vorbereitet…', { type: 'info', duration: 2000 });
 
     const refCanvas = document.getElementById('wrapped-canvas');
@@ -35655,6 +35656,7 @@ async function openWrappedView(year) {
     wrappedLastRenderedSlideIndex = null;
     wrappedCurrentYear = year;
     wrappedSlides = buildWrappedSlideData(year);
+    preloadWrappedBackgroundImages();
     wrappedSlideIndex = 0;
 
     // Rückblick startet grundsätzlich pausiert.
@@ -36107,16 +36109,105 @@ async function ensureWrappedGalleryPhotoLoaded(slide) {
     return slide.photoLoadPromise;
 }
 
-function drawWrappedBackground(ctx, w, h, photoImg, slideKey) {
-    const colors = getWrappedThemeColors();
+const WRAPPED_BACKGROUND_IMAGE_SOURCES = Object.freeze({
+    distance: 'https://images.unsplash.com/photo-1632665099926-094c0d6b92bb?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
+    ascent: 'https://images.unsplash.com/photo-1516733745173-62e8f8651711?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
+    peaks: 'https://images.unsplash.com/photo-1789909145224-b12f9ac21ab9?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
+    time: 'https://images.unsplash.com/photo-1486068720048-47715511ce71?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
+    activeMonth: 'https://images.unsplash.com/photo-1636043982206-a2255072410e?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
+    highestPeak: 'https://images.unsplash.com/photo-1642520175002-90a1168a0d57?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
+    topRegion: 'https://images.unsplash.com/photo-1789414297236-295409dfeb37?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
+    'highlights-1': 'https://images.unsplash.com/photo-1699448095339-c07828dee7c4?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
+    'highlights-2': 'https://images.unsplash.com/photo-1762375212956-46c0a0964336?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
+    'highlights-3': 'https://images.unsplash.com/photo-1757330878011-418ff67dd845?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
+    bestTour: 'https://images.unsplash.com/photo-1628091864452-095d137137e0?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
+    top3: 'https://images.unsplash.com/photo-1666567693318-27238d192d6a?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
+    topCompanion: 'https://images.unsplash.com/photo-1792928442695-aaa9c0bf9cd5?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200'
+});
 
-    if (photoImg) {
-        drawWrappedCoverImage(ctx, photoImg, w, h);
+const wrappedBackgroundImageCache = new Map();
+
+function getWrappedBackgroundImageKey(slideKey, slideData) {
+    if (slideKey === 'highlights') {
+        const page = Math.max(1, Math.min(3, Number(slideData?.page) || 1));
+        return 'highlights-' + page;
+    }
+    return slideKey;
+}
+
+function getWrappedBackgroundImage(slideKey, slideData) {
+    const key = getWrappedBackgroundImageKey(slideKey, slideData);
+    const source = WRAPPED_BACKGROUND_IMAGE_SOURCES[key];
+    if (!source) return null;
+
+    let entry = wrappedBackgroundImageCache.get(key);
+    if (!entry) {
+        const image = new Image();
+        entry = { image, status: 'loading', promise: null };
+        wrappedBackgroundImageCache.set(key, entry);
+
+        entry.promise = new Promise(resolve => {
+            image.crossOrigin = 'anonymous';
+            image.decoding = 'async';
+            image.onload = () => {
+                entry.status = 'loaded';
+                resolve(image);
+
+                const currentSlide = wrappedSlides?.[wrappedSlideIndex];
+                if (!currentSlide || getWrappedBackgroundImageKey(currentSlide.key, currentSlide.data) !== key) return;
+
+                if (wrappedTransitionState && wrappedTransitionState.toIndex === wrappedSlideIndex) {
+                    if (drawWrappedSlideIntoCanvas(wrappedSlideIndex, wrappedTransitionState.sourceCanvas)) {
+                        drawWrappedTransitionFrame(wrappedTransitionState, wrappedTransitionState.progress);
+                    }
+                } else if (!wrappedTransitionState) {
+                    renderWrappedSlide(wrappedSlideIndex);
+                }
+            };
+            image.onerror = () => {
+                entry.status = 'error';
+                resolve(null);
+                console.warn('[Jahresrückblick] Hintergrundmotiv konnte nicht geladen werden:', key);
+            };
+            image.src = source;
+        });
+    }
+
+    return entry.status === 'loaded' && entry.image.naturalWidth > 0 ? entry.image : null;
+}
+
+function preloadWrappedBackgroundImages() {
+    Object.keys(WRAPPED_BACKGROUND_IMAGE_SOURCES).forEach(key => {
+        getWrappedBackgroundImage(key);
+    });
+    return Promise.all(
+        Array.from(wrappedBackgroundImageCache.values()).map(entry => entry.promise)
+    );
+}
+
+function drawWrappedBackground(ctx, w, h, photoImg, slideKey, slideData) {
+    const colors = getWrappedThemeColors();
+    const backgroundImage = photoImg ? null : getWrappedBackgroundImage(slideKey, slideData);
+    const imageToDraw = photoImg || backgroundImage;
+
+    if (imageToDraw) {
+        // Zugeordnete Tourbilder behalten ihren bisherigen weichen Hintergrund;
+        // neue Statistikmotive werden dagegen vollständig scharf gezeichnet.
+        drawWrappedCoverImage(ctx, imageToDraw, w, h, !photoImg);
 
         const overlay = ctx.createLinearGradient(0, 0, 0, h);
-        if (slideKey === 'top3') {
-            // Das Landschaftsbild bleibt sichtbar; nur der untere Bereich
-            // erhält eine sanfte Abdunklung für die Karten und Kennzahlen.
+        if (slideKey === 'top3' && backgroundImage) {
+            overlay.addColorStop(0, 'rgba(4,12,18,0.24)');
+            overlay.addColorStop(0.38, 'rgba(4,12,18,0.32)');
+            overlay.addColorStop(0.72, 'rgba(4,12,18,0.48)');
+            overlay.addColorStop(1, 'rgba(3,8,12,0.68)');
+        } else if (backgroundImage) {
+            // Lesbarkeit der vorhandenen Texte bei weiterhin gut sichtbaren Details.
+            overlay.addColorStop(0, 'rgba(3,9,14,0.32)');
+            overlay.addColorStop(0.36, 'rgba(3,9,14,0.36)');
+            overlay.addColorStop(0.72, 'rgba(3,9,14,0.52)');
+            overlay.addColorStop(1, 'rgba(2,6,10,0.72)');
+        } else if (slideKey === 'top3') {
             overlay.addColorStop(0, 'rgba(5,18,25,0.12)');
             overlay.addColorStop(0.52, 'rgba(5,18,25,0.22)');
             overlay.addColorStop(1, 'rgba(5,18,25,0.48)');
@@ -36130,8 +36221,6 @@ function drawWrappedBackground(ctx, w, h, photoImg, slideKey) {
     } else {
         const gradient = ctx.createLinearGradient(0, 0, w, h);
         if (slideKey === 'top3') {
-            // Eigenständige alpine Farbgebung als Fallback, falls das Jahr
-            // kein Tourfoto für den Hintergrund enthält.
             gradient.addColorStop(0, '#71888a');
             gradient.addColorStop(0.52, '#415c64');
             gradient.addColorStop(1, '#20343c');
@@ -36146,7 +36235,7 @@ function drawWrappedBackground(ctx, w, h, photoImg, slideKey) {
     return colors;
 }
 
-function drawWrappedCoverImage(ctx, img, w, h) {
+function drawWrappedCoverImage(ctx, img, w, h, keepSharp = false) {
     const imgRatio = img.width / img.height;
     const boxRatio = w / h;
     let sx, sy, sw, sh;
@@ -36163,7 +36252,9 @@ function drawWrappedCoverImage(ctx, img, w, h) {
         sy = (img.height - sh) / 2;
     }
 
-    ctx.filter = 'blur(2px) brightness(0.9)';
+    ctx.filter = keepSharp
+        ? 'brightness(0.94) saturate(1.05)'
+        : 'blur(2px) brightness(0.9)';
     ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
     ctx.filter = 'none';
 }
