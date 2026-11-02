@@ -24114,10 +24114,10 @@ function initThemeEditor() {
 
 const WRAPPED_REMINDER_KEY = 'wrappedReminderShown_v1';
 const WRAPPED_SLIDE_DURATIONS = {
-    intro: 4500,
-    outro: 4500,
-    default: 5500,
-    heavy: 7500
+    intro: 5500,
+    outro: 5500,
+    default: 7000,
+    heavy: 9000
 };
 
 let wrappedCurrentYear = null;
@@ -24616,7 +24616,7 @@ function buildWrappedSlideData(year) {
                 photoSlides.push({
                     key: 'tourPhoto',
                     type: 'photo',
-                    duration: 6500,
+                    duration: 7500,
                     data: { entry, source: 'cover' }
                 });
             }
@@ -24639,7 +24639,7 @@ function buildWrappedSlideData(year) {
             photoSlides.push({
                 key: 'tourPhoto',
                 type: 'photo',
-                duration: 6500,
+                duration: 7500,
                 data: { entry, source: 'gallery', media }
             });
         });
@@ -35564,7 +35564,6 @@ function renderWrappedSlideToCanvas(slide, width, height) {
         case 'outro': renderWrappedOutroSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
     }
 
-    drawWrappedFooter(ctx, logicalWidth, logicalHeight, wrappedCurrentYear);
     wrappedCanvasVerticalScale = previousVerticalScale;
     return canvas;
 }
@@ -36140,17 +36139,7 @@ function drawWrappedBigNumber(ctx, value, unit, y, color, w) {
     );
 }
 
-function drawWrappedFooter(ctx, w, h, year) {
-    ctx.fillStyle = 'rgba(255,255,255,0.7)';
-    setWrappedFont(ctx, 30, 'normal');
-    ctx.textAlign = 'center';
 
-    ctx.fillText(
-        `Jahresrückblick ${year}`,
-        w / 2,
-        h - 60
-    );
-}
 
 function getWrappedDistanceComparison(km) {
     const refKm = 860;
@@ -36229,7 +36218,6 @@ function renderWrappedSlide(index) {
         case 'outro': renderWrappedOutroSlide(ctx, w, h, colors, slide.data); break;
     }
 
-    drawWrappedFooter(ctx, w, h, wrappedCurrentYear);
 }
 
 let wrappedCanvasResizeFrame = 0;
