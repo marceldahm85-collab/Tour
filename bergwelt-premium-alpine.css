@@ -1551,15 +1551,21 @@
         background: transparent !important;
     }
 
+    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) {
+        padding-left: 7px !important;
+        padding-right: 7px !important;
+    }
+
     #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .wrapped-stage {
         background: transparent !important;
-        padding: 7px 14px 8px !important;
+        padding: 4px 5px 6px !important;
     }
 
     #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) #wrapped-canvas {
-        width: auto !important;
+        display: block !important;
+        width: 100% !important;
         height: auto !important;
-        max-width: min(100%, 430px) !important;
+        max-width: 460px !important;
         max-height: 100% !important;
         aspect-ratio: 9 / 16 !important;
         object-fit: contain !important;
