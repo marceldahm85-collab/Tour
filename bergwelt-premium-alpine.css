@@ -1042,7 +1042,7 @@
 @media (orientation: portrait) {
     #wrapped-view.bergwelt-ready .bergwelt-tabs {
         display: grid !important;
-        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
         align-items: stretch !important;
         gap: 4px !important;
         width: 100% !important;
