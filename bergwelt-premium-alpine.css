@@ -1587,3 +1587,144 @@
         box-shadow: none !important;
     }
 }
+
+
+/* ERLEBNIS-VOLLBILD – Hauptnavigation oben, Bergwelt-Navigation unten.
+   Die Fortschrittssegmente entfallen; Bedienelemente bleiben ohne schwarze Schattenflächen. */
+body.wrapped-mobile-fullscreen-active .app-wrapper {
+    overflow: visible !important;
+}
+
+body.wrapped-mobile-fullscreen-active .accordion-header {
+    position: fixed !important;
+    top: env(safe-area-inset-top, 0px) !important;
+    left: 10px !important;
+    right: 10px !important;
+    z-index: 2147483002 !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+body.wrapped-mobile-fullscreen-active .top-main-nav {
+    width: 100% !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+}
+
+body.wrapped-mobile-fullscreen-active .top-main-nav .top-nav-btn,
+body.wrapped-mobile-fullscreen-active .top-main-nav .top-nav-save,
+body.wrapped-mobile-fullscreen-active .top-main-nav .top-nav-btn.view-active,
+body.wrapped-mobile-fullscreen-active .top-main-nav .top-nav-btn.more-view-active {
+    box-shadow: none !important;
+    filter: none !important;
+    text-shadow: none !important;
+}
+
+#wrapped-view.wrapped-mobile-fullscreen .wrapped-progress-bar {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+}
+
+#wrapped-view.wrapped-mobile-fullscreen .wrapped-header {
+    top: calc(env(safe-area-inset-top, 0px) + 66px) !important;
+    left: 10px !important;
+    right: 10px !important;
+    width: auto !important;
+    padding: 4px 2px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    filter: none !important;
+}
+
+#wrapped-view.wrapped-mobile-fullscreen .wrapped-header *,
+#wrapped-view.wrapped-mobile-fullscreen .wrapped-controls *,
+#wrapped-view.wrapped-mobile-fullscreen .bergwelt-tabs * {
+    box-shadow: none !important;
+    filter: none !important;
+    text-shadow: none !important;
+}
+
+#wrapped-view.wrapped-mobile-fullscreen .wrapped-controls {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 60px) !important;
+    padding: 8px 12px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    filter: none !important;
+}
+
+#wrapped-view.wrapped-mobile-fullscreen .wrapped-control-btn {
+    box-shadow: none !important;
+    filter: none !important;
+    text-shadow: none !important;
+}
+
+#wrapped-view.wrapped-mobile-fullscreen .bergwelt-tabs {
+    position: fixed !important;
+    top: auto !important;
+    left: 10px !important;
+    right: 10px !important;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 8px) !important;
+    z-index: 2147483002 !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    align-items: stretch !important;
+    gap: 4px !important;
+    width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+#wrapped-view.wrapped-mobile-fullscreen .bergwelt-tabs > .bergwelt-tab {
+    min-width: 0 !important;
+    min-height: 38px !important;
+    box-shadow: none !important;
+    filter: none !important;
+    text-shadow: none !important;
+}
+
+@media (orientation: landscape) and (pointer: coarse) {
+    body.wrapped-mobile-fullscreen-active .accordion-header {
+        top: env(safe-area-inset-top, 0px) !important;
+        left: 8px !important;
+        right: 8px !important;
+        max-width: 64px !important;
+    }
+
+    #wrapped-view.wrapped-mobile-fullscreen .wrapped-header {
+        top: 8px !important;
+        left: 82px !important;
+        right: 8px !important;
+    }
+
+    #wrapped-view.wrapped-mobile-fullscreen .bergwelt-tabs {
+        left: 82px !important;
+        right: 8px !important;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 8px) !important;
+        max-width: 430px !important;
+        margin: 0 auto !important;
+    }
+}
