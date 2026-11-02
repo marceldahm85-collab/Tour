@@ -1110,3 +1110,31 @@
         font-size: 9.5px !important;
     }
 }
+
+/* STRUCTURE: hide Erlebnis-only controls when another Bergwelt section is active. */
+#wrapped-view.bergwelt-ready.bergwelt-active-tourbuch .wrapped-header,
+#wrapped-view.bergwelt-ready.bergwelt-active-achievements .wrapped-header {
+    display: none !important;
+}
+
+#wrapped-view.bergwelt-ready.bergwelt-active-achievements #achievements-view {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+}
+
+#wrapped-view.bergwelt-ready.bergwelt-active-achievements #achievements-view .achievements-inner {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 auto !important;
+    padding: 0 0 18px !important;
+    box-sizing: border-box !important;
+}
