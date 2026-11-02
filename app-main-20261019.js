@@ -4528,7 +4528,10 @@ function getBergweltSpecializationValues(entries) {
         );
         return values.length ? values.reduce((sum, value) => sum + value, 0) : null;
     };
-    const ascentValue = entry => readTourMetricNumber(entry?.aufstieg);
+    const readMetric = value => typeof window.__tourDataRules?.readMetric === 'function'
+        ? window.__tourDataRules.readMetric(value)
+        : readTourMetricNumber(value);
+    const ascentValue = entry => readMetric(entry?.aufstieg);
     const minutesValue = entry => {
         if (typeof window.__tourDataRules?.parseMinutes === 'function') {
             return window.__tourDataRules.parseMinutes(entry?.zeit);
@@ -4537,7 +4540,7 @@ function getBergweltSpecializationValues(entries) {
         const match = raw.match(/^(\d{1,4}):([0-5]?\d)$/);
         return match ? Number(match[1]) * 60 + Number(match[2]) : null;
     };
-    const peaksValue = entry => readTourMetricNumber(entry?.gipfel);
+    const peaksValue = entry => readMetric(entry?.gipfel);
 
     const ascent = sumKnown(ascentValue);
     const totalMinutes = sumKnown(minutesValue);
