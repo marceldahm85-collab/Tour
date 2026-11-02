@@ -35781,7 +35781,10 @@ function resumeWrappedAutoAdvance() {
 function updateWrappedPauseButtonLabel() {
     const btn = document.getElementById('wrapped-pause-btn');
     if (!btn) return;
-    btn.textContent = wrappedPaused ? '▶ Fortsetzen' : '⏸ Pause';
+    const fullscreen = !!document.getElementById('wrapped-view')?.classList.contains('wrapped-mobile-fullscreen');
+    btn.textContent = wrappedPaused
+        ? (fullscreen ? '▶ Start' : '▶ Fortsetzen')
+        : '⏸ Pause';
 }
 
 function clearWrappedAutoAdvance() {
@@ -36872,6 +36875,7 @@ function updateWrappedFullscreenState() {
 
     el?.classList.toggle('wrapped-is-fullscreen', isFullscreen);
     if (btn) btn.textContent = isFullscreen ? '✕' : '⛶';
+    updateWrappedPauseButtonLabel();
     if (!isFullscreen) {
         clearTimeout(wrappedFullscreenHideTimer);
         el?.classList.remove('wrapped-controls-hidden', 'wrapped-mobile-fullscreen');
