@@ -2,7 +2,7 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261025-bergwelt-highlight-tour-links') return;
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261102-premium-photo-specialization-badges') return;
     window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261025-bergwelt-highlight-tour-links';
     window.__BERGWELT_MODULE_READY__ = true;
 
@@ -654,18 +654,18 @@
         // Die fünf Original-Abzeichen: farbige, eigenständige Illustrationen
         // auf weißem, abgerundetem Quadrat – identisch in Galerie und Entwicklung.
         // Fünf bewusst klare Illustrationen: jede Geometrie hat eine erkennbare Funktion.
-        const badgeIcons = [
-            // Höhenmeter-Spezialist: gestaffelte Bergflanken, echte Schneekappen und Höhenlinien.
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" focusable="false"><rect width="72" height="72" rx="15" fill="#fff"/><circle cx="36" cy="36" r="25" fill="#c3e7e8" stroke="#355c68" stroke-width="2"/><path d="M12 42 23 26 31 34 43 17 59 39 59 49 13 49Z" fill="#709eaa" stroke="#244e5d" stroke-width="1.6" stroke-linejoin="round"/><path d="m17.5 34 5.5-8 5.2 6.8-4.1-1.7-2.6 2.1-1.4-1.3ZM35.3 28.5 43 17l6.6 9.2-5.4-3.1-2.6 3.1-2.4-1.4Z" fill="#f8ffff" stroke="#355c68" stroke-width="1.1" stroke-linejoin="round"/><path d="M12.5 43.5 23.5 35 32 49 39 37 59.5 45V51c-13.2 10.2-32.1 10.2-47 0Z" fill="#2e6e83" stroke="#244e5d" stroke-width="1.4" stroke-linejoin="round"/><path d="M13 49.5 22 44l8.8 12.3 7.8-7.9 8.8 5.2 5-3.4 6.1 3.8c-13.8 7.9-31.5 8-45.5.2Z" fill="#9eb844" stroke="#345d35" stroke-width="1.4" stroke-linejoin="round"/><path d="m18.8 49 5.4 1.9m4.8 1.6 5.1-2.7m8.5-.1 4.4 2.2m-17.7 2.2 2.3 2.9m7.8-8.6-.8 6.7" fill="none" stroke="#e8df82" stroke-width="1.2" stroke-linecap="round"/></svg>',
-            // Gipfelsammler: drei klar unterscheidbare Gipfel und eine Flagge am höchsten Punkt.
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" focusable="false"><rect width="72" height="72" rx="15" fill="#fff"/><path d="M9 50 22 34 30 43 39 29 52 50Z" fill="#e7f2ff" stroke="#668bb7" stroke-width="1.45" stroke-linejoin="round"/><path d="M24 50 42 23 61 50Z" fill="#c8e2fb" stroke="#668bb7" stroke-width="1.5" stroke-linejoin="round"/><path d="m38.7 28 3.3-5 4 6-3.5-1.6-1.8 1.8Z" fill="#fff" stroke="#668bb7" stroke-width="1.05" stroke-linejoin="round"/><path d="m16 41.5 6-7.5 4.6 5.2-4-1.4-2.1 2.3-1.7-1.2Z" fill="#fff" stroke="#668bb7" stroke-width="1" stroke-linejoin="round"/><path d="M42 23V11" stroke="#567ca8" stroke-width="1.6" stroke-linecap="round"/><path d="M42.3 11.5H55l-4.1 3.8 4.1 3.8H42.3Z" fill="#7da7d4" stroke="#567ca8" stroke-width="1.2" stroke-linejoin="round"/><path d="M11 50h51" stroke="#668bb7" stroke-width="1.4" stroke-linecap="round"/></svg>',
-            // Ausdauer-Alpinist: sauberer Kompassring; Bergsilhouette oben, Richtungsnadel im eigenen Zifferblatt.
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" focusable="false"><rect width="72" height="72" rx="15" fill="#fff"/><circle cx="36" cy="36" r="25" fill="#f8fcf8" stroke="#215b3d" stroke-width="1.9"/><circle cx="36" cy="36" r="20.5" fill="none" stroke="#5b916b" stroke-width="1.2"/><path d="M36 12v4m0 40v4M12 36h4m40 0h4M19 19l2.8 2.8m28.4 28.4L53 53M53 19l-2.8 2.8M21.8 50.2 19 53" fill="none" stroke="#215b3d" stroke-width="1.35" stroke-linecap="round"/><path d="M17.5 31.5 25 21.5 29.5 27 34 19.5 41 30 45 24.5 54.5 34" fill="#b5d2b5" stroke="#286344" stroke-width="1.35" stroke-linejoin="round"/><path d="M23 34 28 29.5 33 34.5 37 29.5 42 35" fill="none" stroke="#286344" stroke-width="1.1" stroke-linecap="round"/><circle cx="36" cy="43" r="11.3" fill="#e5f1e7" stroke="#286344" stroke-width="1.5"/><circle cx="36" cy="43" r="7.5" fill="none" stroke="#679875" stroke-width="1" stroke-dasharray="1.8 1.8"/><path d="m37.5 33.4-7.2 12.2 7.1-2.2 4.8-9.1-4.7-.9Z" fill="#2b805b" stroke="#215b3d" stroke-width="1.1" stroke-linejoin="round"/><path d="m37.5 33.4-.1 10 4.8-9.1Z" fill="#c5dfeb"/><circle cx="36" cy="43" r="1.7" fill="#fff" stroke="#215b3d" stroke-width="1"/></svg>',
-            // Steilheits-Profi: steile, kantige Felswand und getrennt lesbarer gelber Blitz.
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" focusable="false"><rect width="72" height="72" rx="15" fill="#fff"/><circle cx="36" cy="36" r="26" fill="#ffd43b"/><path d="M12 56 15.5 45 22 42.5 23.5 34 30 35.8 33.4 25.5 39.2 29.5 42 19.8 47 25 50.6 22.6 52.2 34.3 57.4 38.2 60 56Z" fill="#292c2d" stroke="#181a1c" stroke-width="1.7" stroke-linejoin="round"/><path d="m17.3 54 3.3-8.1 5.6 1.5 2.5-9.2 4-1.7 3-7.1-1.2 10.4-4.4 5.1-1.4 9.1Z" fill="#53595b" stroke="#181a1c" stroke-width="1.1" stroke-linejoin="round"/><path d="m43 25.4-8.3 14.1h5.6l-4.1 14 12.6-19.2h-6.4l2.8-8.9Z" fill="#ffdf4f" stroke="#242628" stroke-width="1.5" stroke-linejoin="round"/><path d="m48.8 33.6 3.3 3.6 1.2 9.8" fill="none" stroke="#9b9fa0" stroke-width="1.2" stroke-linecap="round"/></svg>',
-            // Vielseitiger Wanderer: ein gerader Wegweiserpfosten, drei getrennte Pfeile in verschiedene Richtungen.
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" focusable="false"><rect width="72" height="72" rx="15" fill="#fff"/><path d="M33.6 12h5.5v53h-5.5Z" fill="#f5c442" stroke="#25292d" stroke-width="1.8" stroke-linejoin="round"/><path d="M32.2 11.8h8.3" stroke="#25292d" stroke-width="2.1" stroke-linecap="round"/><circle cx="36.4" cy="8.2" r="3.2" fill="#f5c442" stroke="#25292d" stroke-width="1.6"/><path d="M34 18H17.5L8.7 25.4l8.8 7.4H34Z" fill="#5e9de3" stroke="#25292d" stroke-width="1.8" stroke-linejoin="round"/><path d="M39.1 29.3h16.2l8.7 7.3-8.7 7.5H39.1Z" fill="#ef795f" stroke="#25292d" stroke-width="1.8" stroke-linejoin="round"/><path d="M34 40.5H17.5l-8.8 7.4 8.8 7.4H34Z" fill="#f2a34f" stroke="#25292d" stroke-width="1.8" stroke-linejoin="round"/><path d="M27.5 25.5h-8.1m-2.3 0 2.4-2.1m-2.4 2.1 2.4 2.1m27 11.1h8m2.5 0-2.5-2.1m2.5 2.1-2.5 2.1m-29.7 9.2h-5.8m-2.3 0 2.4-2.1m-2.4 2.1 2.4 2.1" fill="none" stroke="#fff" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+        // Einheitliche Premium-Fotografie wie bei den fünf Dashboard-Meilensteinen.
+        // Die Motive bleiben den fünf Spezialisierungen semantisch eindeutig zugeordnet.
+        const badgeIconAssets = [
+            './assets/milestones/milestone-asc.svg?v=3',   // Höhenmeter-Spezialist
+            './assets/milestones/milestone-peaks.svg?v=3', // Gipfelsammler
+            './assets/milestones/milestone-time.svg?v=3',  // Ausdauer-Alpinist
+            './assets/milestones/milestone-steps.svg?v=3', // Steilheits-Profi
+            './assets/milestones/milestone-dist.svg?v=3'   // Vielseitiger Wanderer
         ];
+        const badgeIcons = badgeIconAssets.map((src, index) =>
+            '<img class="bergwelt-badge-photo" src="' + src + '" alt="" aria-hidden="true" decoding="async" draggable="false" data-bergwelt-badge-index="' + index + '">'
+        );
 
         const levelDigits = level => level.name === 'Ausdauer-Alpinist' || level.name === 'Steilheits-Profi' ? 1 : 0;
 
