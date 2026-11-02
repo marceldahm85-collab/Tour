@@ -657,11 +657,11 @@
         // Einheitliche Premium-Fotografie wie bei den fünf Dashboard-Meilensteinen.
         // Die Motive bleiben den fünf Spezialisierungen semantisch eindeutig zugeordnet.
         const badgeIconAssets = [
-            './assets/milestones/milestone-asc.svg?v=3',   // Höhenmeter-Spezialist
-            './assets/milestones/milestone-peaks.svg?v=3', // Gipfelsammler
-            './assets/milestones/milestone-time.svg?v=3',  // Ausdauer-Alpinist
-            './assets/milestones/milestone-steps.svg?v=3', // Steilheits-Profi
-            './assets/milestones/milestone-dist.svg?v=3'   // Vielseitiger Wanderer
+            './assets/milestones/milestone-asc.svg?v=5',   // Höhenmeter-Spezialist
+            './assets/milestones/milestone-peaks.svg?v=5', // Gipfelsammler
+            './assets/milestones/milestone-time.svg?v=5',  // Ausdauer-Alpinist
+            './assets/milestones/milestone-steps.svg?v=5', // Steilheits-Profi
+            './assets/milestones/milestone-dist.svg?v=5'   // Vielseitiger Wanderer
         ];
         const badgeIcons = badgeIconAssets.map((src, index) =>
             '<img class="bergwelt-badge-photo" src="' + src + '" alt="" aria-hidden="true" decoding="async" draggable="false" data-bergwelt-badge-index="' + index + '">'
