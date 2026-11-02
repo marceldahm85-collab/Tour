@@ -1207,94 +1207,145 @@
 }
 
 
-/* Erlebnis im Normalmodus: Die Fotopräsentation läuft vollflächig vom oberen bis
-   zum unteren Viewport-Rand. Jahr, Fortschritt, Pause/Stopp und Unternavigation
-   bleiben als transparente bzw. kompakte Ebenen darüber bedienbar. */
-@media (orientation: portrait) {
+/* Erlebnis im Normalmodus: Kopf- und Fußsteuerung liegen außerhalb der Fotofläche.
+   Die Canvas nutzt ausschließlich den freien Mittelbereich zwischen App-Navigation
+   und den unteren Bedienflächen; die Safe-Area des Android-Systems bleibt frei. */
+@media (max-width: 768px) and (orientation: portrait) and (pointer: coarse) {
     #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) {
         position: relative !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        gap: 0 !important;
         width: 100% !important;
         height: 100% !important;
         min-height: 0 !important;
+        max-height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
         overflow: hidden !important;
+        box-sizing: border-box !important;
         background: #050a0f !important;
     }
 
-    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .wrapped-stage {
-        position: absolute !important;
-        inset: 0 !important;
-        z-index: 0 !important;
-        display: block !important;
+    /* Header und Tabs aus dem gemeinsamen Wrapper in den View-Flow auflösen. */
+    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .bergwelt-side-nav {
+        display: contents !important;
+    }
+
+    /* Jahresauswahl und Präsentationsaktionen: eigene Zeile direkt unter der Hauptnavigation. */
+    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .wrapped-header {
+        position: relative !important;
+        inset: auto !important;
+        order: 1 !important;
+        flex: 0 0 auto !important;
         width: 100% !important;
-        height: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 6px 10px 4px !important;
+        box-sizing: border-box !important;
+        z-index: 2 !important;
+        border-bottom: 1px solid var(--bw-border, rgba(255,255,255,.12)) !important;
+        background: linear-gradient(145deg, var(--bw-surface-strong, rgba(12,20,29,.98)), var(--bw-surface-card, rgba(8,15,23,.96))) !important;
+    }
+
+    /* Fortschrittsanzeige bleibt im oberen Bedienbereich, nicht auf dem Foto. */
+    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .wrapped-progress-bar {
+        position: relative !important;
+        inset: auto !important;
+        order: 2 !important;
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 2px 10px 7px !important;
+        box-sizing: border-box !important;
+        z-index: 2 !important;
+        background: var(--bw-surface-card, rgba(8,15,23,.96)) !important;
+    }
+
+    /* Ausschließlich dieser mittlere Bereich gehört zur Präsentationsgrafik. */
+    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .wrapped-stage {
+        position: relative !important;
+        inset: auto !important;
+        order: 3 !important;
+        display: flex !important;
+        flex: 1 1 0 !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        height: auto !important;
         min-width: 0 !important;
         min-height: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
         overflow: hidden !important;
+        box-sizing: border-box !important;
+        z-index: 1 !important;
+        background: #050a0f !important;
     }
 
     #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) #wrapped-canvas {
         display: block !important;
         width: 100% !important;
         height: 100% !important;
-        max-width: none !important;
-        max-height: none !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
         aspect-ratio: auto !important;
+        object-fit: contain !important;
         border-radius: 0 !important;
     }
 
-    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .wrapped-header {
-        position: absolute !important;
-        top: env(safe-area-inset-top, 0px) !important;
-        left: 0 !important;
-        right: 0 !important;
-        z-index: 22 !important;
-        margin: 0 !important;
-        padding: 7px 10px !important;
-        background: linear-gradient(180deg, rgba(0,0,0,.34), transparent) !important;
+    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .wrapped-tap-zone {
+        top: 0 !important;
+        bottom: 0 !important;
+        z-index: 5 !important;
     }
 
-    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .wrapped-progress-bar {
-        position: absolute !important;
-        top: calc(env(safe-area-inset-top, 0px) + 47px) !important;
-        left: 0 !important;
-        right: 0 !important;
-        z-index: 21 !important;
+    /* Bergwelt-Unterseiten bleiben unmittelbar unter der Fotofläche erreichbar. */
+    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .bergwelt-tabs {
+        position: relative !important;
+        inset: auto !important;
+        order: 4 !important;
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        min-width: 0 !important;
         margin: 0 !important;
-        padding: 0 9px !important;
-        background: transparent !important;
+        padding: 4px 8px 5px !important;
+        box-sizing: border-box !important;
+        z-index: 2 !important;
+        border-top: 1px solid var(--bw-border, rgba(255,255,255,.12)) !important;
+        background: var(--bw-surface-subtle, rgba(5,12,20,.98)) !important;
     }
 
+    /* Stopp/Pause sitzen als letzte Zeile direkt oberhalb der Android-Systemnavigation. */
     #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .wrapped-controls {
-        position: absolute !important;
-        left: 0 !important;
-        right: 0 !important;
-        bottom: calc(48px + env(safe-area-inset-bottom, 0px)) !important;
-        z-index: 23 !important;
+        position: relative !important;
+        inset: auto !important;
+        order: 5 !important;
         display: flex !important;
+        flex: 0 0 auto !important;
+        align-items: center !important;
         justify-content: center !important;
         gap: 9px !important;
-        margin: 0 !important;
-        padding: 4px 12px !important;
-        background: linear-gradient(0deg, rgba(0,0,0,.34), transparent) !important;
-    }
-
-    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .bergwelt-tabs {
-        position: absolute !important;
-        left: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        z-index: 24 !important;
         width: 100% !important;
+        min-width: 0 !important;
+        min-height: 54px !important;
         margin: 0 !important;
-        padding: 5px 8px max(7px, env(safe-area-inset-bottom)) !important;
-        background: linear-gradient(180deg, rgba(3,9,15,.12), rgba(3,9,15,.86)) !important;
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
+        padding: 5px 12px max(8px, env(safe-area-inset-bottom, 0px)) !important;
+        box-sizing: border-box !important;
+        z-index: 2 !important;
+        border-top: 1px solid var(--bw-border, rgba(255,255,255,.12)) !important;
+        background: var(--bw-surface-subtle, rgba(5,12,20,.98)) !important;
     }
 
-    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .wrapped-tap-zone {
-        z-index: 5 !important;
+    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .wrapped-controls > .wrapped-control-btn {
+        flex: 0 1 156px !important;
+        width: auto !important;
+        max-width: 156px !important;
+        min-width: 112px !important;
+        min-height: 40px !important;
+        margin: 0 !important;
     }
 }
