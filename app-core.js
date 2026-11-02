@@ -21268,10 +21268,18 @@ function getWrappedHighestPeak(entries) {
 
 function getWrappedTopRegion(entries) {
     const counts = {};
+    const countedTourRegions = new Set();
 
-    entries.forEach(entry => {
+    (entries || []).forEach((entry, index) => {
         const raw = String(entry?.region || '').trim();
         if (!raw) return;
+
+        // Eine Mehrtagestour zählt innerhalb derselben Region nur einmal.
+        // Falls Etappen verschiedene Regionen enthalten, zählt sie je Region einmal.
+        const tourRegionKey = JSON.stringify([tourIdentity(entry, index), raw]);
+        if (countedTourRegions.has(tourRegionKey)) return;
+
+        countedTourRegions.add(tourRegionKey);
         counts[raw] = (counts[raw] || 0) + 1;
     });
 
