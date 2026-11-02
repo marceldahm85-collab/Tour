@@ -2574,11 +2574,6 @@
         <button type="button" id="wrapped-fullscreen-btn" class="wrapped-share-btn bergwelt-header-control" title="Vollbild" aria-label="Vollbild">⛶</button>
     </div>
 
-    <nav class="bergwelt-tabs" id="bergwelt-tabs" aria-label="Bergwelt-Bereiche">
-        <button type="button" class="bergwelt-tab is-active" data-bergwelt-tab="erlebnis" aria-selected="true">Erlebnis</button>
-        <button type="button" class="bergwelt-tab" data-bergwelt-tab="tourbuch" aria-selected="false">Tourbuch</button>
-        <button type="button" class="bergwelt-tab" data-bergwelt-tab="achievements" aria-selected="false">Achievements</button>
-    </nav>
     </div>
 
     <div class="bergwelt-panel" id="bergwelt-panel" hidden></div>
@@ -2608,10 +2603,17 @@
         <button type="button" id="wrapped-stop-btn" class="wrapped-control-btn">⏹ Stopp</button>
         <button type="button" id="wrapped-pause-btn" class="wrapped-control-btn">⏸ Pause</button>
     </div>
+
+    <!-- Eigenständiger View-Footer wie bei Stats und Tour planen. -->
+    <nav class="bergwelt-tabs" id="bergwelt-tabs" aria-label="Bergwelt-Bereiche">
+        <button type="button" class="bergwelt-tab is-active" data-bergwelt-tab="erlebnis" aria-selected="true">Erlebnis</button>
+        <button type="button" class="bergwelt-tab" data-bergwelt-tab="tourbuch" aria-selected="false">Tourbuch</button>
+        <button type="button" class="bergwelt-tab" data-bergwelt-tab="achievements" aria-selected="false">Achievements</button>
+    </nav>
 </div>
 
 <script src="./android-backup-bridge.js?v=3" defer></script>
-<script src="./app-main-20261019.js?v=53" defer></script>
+<script src="./app-main-20261019.js?v=54" defer></script>
 <script src="./stats-premium-alpine.js?v=10" defer></script>
 <script src="./theme-editor-unified.js?v=25" defer></script>
 <script src="./background-image-manager.js?v=7" defer></script>
