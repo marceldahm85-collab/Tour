@@ -1158,3 +1158,51 @@
     box-shadow: none !important;
     outline: 0 !important;
 }
+
+
+/* Erlebnis – keine äußeren Sammelflächen um Kopf und Wiedergabesteuerung. */
+#wrapped-view.bergwelt-ready.bergwelt-story-playing .wrapped-header {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+#wrapped-view.bergwelt-ready.bergwelt-story-playing .wrapped-side-nav,
+#wrapped-view.bergwelt-ready.bergwelt-story-playing .bergwelt-side-nav {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+#wrapped-view.bergwelt-ready.bergwelt-story-playing .wrapped-controls {
+    margin: 0 !important;
+    padding: 1px 12px 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+@media (orientation: portrait) {
+    #wrapped-view.bergwelt-ready.bergwelt-story-playing .bergwelt-tabs {
+        margin-top: 2px !important;
+    }
+}
+
+/* Vollbild: Die Bergwelt-Unterseitenavigation darf nicht wieder durch den
+   später geladenen Premium-Tabstil sichtbar werden. */
+#wrapped-view.bergwelt-ready.wrapped-mobile-fullscreen .bergwelt-side-nav > .bergwelt-tabs,
+#wrapped-view.bergwelt-ready.wrapped-mobile-fullscreen .bergwelt-tabs {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    overflow: hidden !important;
+}
