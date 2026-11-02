@@ -24250,6 +24250,10 @@ function getWrappedTopCompanion(entries) {
 }
 
 let wrappedPhotoCache = new Map();
+let wrappedCanvasVerticalScale = 1;
+let wrappedLastRenderedSlideIndex = null;
+const WRAPPED_CANVAS_BASE_WIDTH = 1080;
+const WRAPPED_CANVAS_BASE_HEIGHT = 1920;
 
 function loadWrappedImage(dataUrl) {
     if (!dataUrl) return Promise.resolve(null);
@@ -24309,38 +24313,36 @@ function createWrappedPhotoAllocator(photoEntries) {
 async function attachWrappedPhotos(slides, year) {
     // Nur Kopien für den gewählten Jahresrückblick laden. Fotos bleiben
     // außerhalb des synchronen Tour-Caches, auch nachdem Wrapped geschlossen wird.
-    const yearEntries = (getWrappedDataForYear(year) || [])
-        .map(entry => ({ ...entry }));
+    const yearEntries = (getWrappedDataForYear(year) || []).map(entry => ({ ...entry }));
     await loadTourImagesForEntries(yearEntries);
 
     const photoEntries = yearEntries.filter(entry => entry.imageData);
     const photosById = new Map(
-        photoEntries
-            .filter(entry => entry.id)
-            .map(entry => [String(entry.id), entry])
+        photoEntries.filter(entry => entry.id).map(entry => [String(entry.id), entry])
     );
     const photoForEntry = entry => {
         if (!entry) return null;
-        if (entry.id && photosById.has(String(entry.id))) {
-            return photosById.get(String(entry.id));
-        }
+        if (entry.id && photosById.has(String(entry.id))) return photosById.get(String(entry.id));
         return entry.imageData ? entry : null;
     };
-
-    if (!photoEntries.length) {
-        slides.forEach(slide => {
-            slide.photoImg = null;
-            (slide.data?.top3 || []).forEach(item => item.photoImg = null);
-        });
-        return slides;
-    }
 
     const top3Slots = [];
     const specificBackgroundSlots = [];
     const genericBackgroundSlots = [];
+    const tourPhotoSlots = [];
 
     for (const slide of slides) {
         slide.photoImg = null;
+        if (slide.key === 'tourPhoto') {
+            if (slide.data?.source === 'cover') {
+                tourPhotoSlots.push({
+                    slide,
+                    preferred: photoForEntry(slide.data?.entry)
+                });
+            }
+            // Galerie-Referenzen werden erst beim Aufrufen ihrer Fotofolie geladen.
+            continue;
+        }
         if (slide.key === 'top3') {
             for (const item of (slide.data?.top3 || [])) {
                 item.photoImg = null;
@@ -24361,10 +24363,6 @@ async function attachWrappedPhotos(slides, year) {
         }
     }
 
-    // Fotos zu konkreten Touren sind absichtlich wiederverwendbar: etwa auf
-    // "Beste Tour" bzw. "Höchster Gipfel" und zusätzlich bei derselben Tour in Top 3.
-    // Solche Tourfotos werden deshalb direkt zugeordnet und aus dem Pool für die
-    // allgemeinen Statistik-Hintergründe herausgehalten.
     const reservedImageData = new Set([
         ...specificBackgroundSlots,
         ...top3Slots
@@ -24376,11 +24374,6 @@ async function attachWrappedPhotos(slides, year) {
     const nonReservedPhotos = uniquePhotoEntries.filter(
         entry => !reservedImageData.has(entry.imageData)
     );
-
-    // Verteile zunächst Fotos, die keiner Tour-spezifischen Folie/Top-3-Karte
-    // zugeordnet sind. Nur wenn diese Auswahl aufgebraucht ist, müssen sie sich
-    // wiederholen. Falls alle Bilder reserviert sind, bleibt Wiederverwendung
-    // möglich, damit jede Folie weiterhin einen fotografischen Hintergrund hat.
     const takeFallbackPhoto = createWrappedPhotoAllocator(
         nonReservedPhotos.length ? nonReservedPhotos : uniquePhotoEntries
     );
@@ -24393,6 +24386,11 @@ async function attachWrappedPhotos(slides, year) {
         return imageCache.get(entry.imageData);
     };
 
+    for (const slot of tourPhotoSlots) {
+        slot.slide.photoImg = await getPhotoImage(slot.preferred);
+        slot.slide.photoLoadFailed = !slot.slide.photoImg;
+    }
+
     const slots = [
         ...specificBackgroundSlots.map(slot => ({ ...slot, type: 'background' })),
         ...top3Slots.map(slot => ({ ...slot, type: 'top3' })),
@@ -24400,23 +24398,16 @@ async function attachWrappedPhotos(slides, year) {
     ];
 
     for (const slot of slots) {
-        // Tourfolien und Top-3-Karten dürfen das eigene Tourfoto wiederverwenden.
-        // Bei Top 3 kein Ersatzfoto einer anderen Tour einsetzen: ohne eigenes Bild
-        // bleibt der Fotobereich dieser Karte bewusst leer.
         const photoEntry = slot.type === 'top3'
             ? slot.preferred
             : (slot.preferred || takeFallbackPhoto());
         const photoImg = await getPhotoImage(photoEntry);
-        if (slot.type === 'top3') {
-            slot.item.photoImg = photoImg;
-        } else {
-            slot.slide.photoImg = photoImg;
-        }
+        if (slot.type === 'top3') slot.item.photoImg = photoImg;
+        else slot.slide.photoImg = photoImg;
     }
 
     return slides;
 }
-
 function getWrappedTop3(entries) {
     // Globalen Stats-Cache sichern, bevor wir ihn für Wrapped-Zwecke
     // vorübergehend mit den jahresgefilterten Daten überschreiben.
@@ -24563,8 +24554,6 @@ function getWrappedSeasonTitle(totals) {
 
 function buildWrappedSlideData(year) {
     const entries = getWrappedDataForYear(year);
-    const previousEntries = getWrappedDataForYear(year - 1);
-
     const totals = getWrappedTotals(entries);
     const monthlyTours = getWrappedMonthlyToursCount(entries);
     const bestTour = getWrappedBestTour(entries);
@@ -24573,56 +24562,105 @@ function buildWrappedSlideData(year) {
     const highlights = getWrappedHighlights(entries);
     const top3 = getWrappedTop3(entries);
     const topCompanion = getWrappedTopCompanion(entries);
-    const previousTotals = previousEntries.length
-        ? getWrappedTotals(previousEntries)
-        : null;
-
     const activeMonthIndex = monthlyTours.indexOf(Math.max(...monthlyTours));
+
+    const photoSlides = [];
+    const orderedPhotoEntries = entries.slice().sort((a, b) => {
+        const dateA = parseStatsCalendarDate(a?.date);
+        const dateB = parseStatsCalendarDate(b?.date);
+        return (dateA?.getTime?.() || 0) - (dateB?.getTime?.() || 0);
+    });
+    const seenCoverImages = new Set();
+    const seenGalleryUris = new Set();
+
+    orderedPhotoEntries.forEach(entry => {
+        const hasCover = Boolean(entry?.hasImage || (typeof entry?.imageData === 'string' && entry.imageData));
+        if (hasCover) {
+            const coverKey = typeof entry.imageData === 'string' && entry.imageData
+                ? entry.imageData
+                : 'cover:' + String(entry.id || [entry.date, entry.tourname, entry.region].join('|'));
+            if (!seenCoverImages.has(coverKey)) {
+                seenCoverImages.add(coverKey);
+                photoSlides.push({
+                    key: 'tourPhoto',
+                    type: 'photo',
+                    duration: 6500,
+                    data: { entry, source: 'cover' }
+                });
+            }
+        }
+
+        if (typeof window.__tourGalleryLoadPhotoThumbnail !== 'function') return;
+        const galleryPhotos = (Array.isArray(entry?.galleryPhotos) ? entry.galleryPhotos : [])
+            .filter(media => media && typeof media.uri === 'string' &&
+                media.uri.includes('/images/media/') && media.mediaType !== 'video')
+            .slice()
+            .sort((a, b) => {
+                const timeA = Number(a.dateTaken) || Number(a.dateAdded) || 0;
+                const timeB = Number(b.dateTaken) || Number(b.dateAdded) || 0;
+                return timeA - timeB;
+            });
+
+        galleryPhotos.forEach(media => {
+            if (seenGalleryUris.has(media.uri)) return;
+            seenGalleryUris.add(media.uri);
+            photoSlides.push({
+                key: 'tourPhoto',
+                type: 'photo',
+                duration: 6500,
+                data: { entry, source: 'gallery', media }
+            });
+        });
+    });
+
+    photoSlides.forEach((slide, index) => {
+        slide.data.photoIndex = index + 1;
+        slide.data.photoCount = photoSlides.length;
+    });
+
+    const highlightPageCount = Math.ceil(highlights.length / 2);
+    const highlightSlides = Array.from({ length: highlightPageCount }, (_, index) => ({
+        key: 'highlights',
+        type: 'heavy',
+        duration: WRAPPED_SLIDE_DURATIONS.heavy,
+        data: {
+            highlights: highlights.slice(index * 2, index * 2 + 2),
+            page: index + 1,
+            pageCount: highlightPageCount
+        }
+    }));
 
     const slides = [
         { key: 'intro', type: 'intro', duration: WRAPPED_SLIDE_DURATIONS.intro,
           data: { year, tourCount: totals.tourCount, seasonTitle: getWrappedSeasonTitle(totals) } },
-
         { key: 'distance', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
           data: { distance: totals.distance } },
-
         { key: 'ascent', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
           data: { ascent: totals.ascent } },
-
+        { key: 'peaks', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
+          data: { peaks: totals.peaks } },
         { key: 'time', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
           data: { minutes: totals.minutes } },
-
-        previousTotals ? { key: 'yearCompare', type: 'heavy', duration: WRAPPED_SLIDE_DURATIONS.heavy,
-          data: { current: totals, previous: previousTotals, previousYear: year - 1 } } : null,
-
         { key: 'activeMonth', type: 'heavy', duration: WRAPPED_SLIDE_DURATIONS.heavy,
           data: { monthlyTours, activeMonthIndex } },
-
         highestPeak ? { key: 'highestPeak', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
           data: { peak: highestPeak } } : null,
-
         topRegion ? { key: 'topRegion', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
           data: { region: topRegion } } : null,
-
-        highlights.length ? { key: 'highlights', type: 'heavy', duration: WRAPPED_SLIDE_DURATIONS.heavy,
-          data: { highlights } } : null,
-
+        ...highlightSlides,
         bestTour ? { key: 'bestTour', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
           data: { entry: bestTour.entry, score: bestTour.score } } : null,
-
         top3.length ? { key: 'top3', type: 'heavy', duration: WRAPPED_SLIDE_DURATIONS.heavy,
           data: { top3 } } : null,
-
         topCompanion ? { key: 'topCompanion', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
           data: { companion: topCompanion } } : null,
-
+        ...photoSlides,
         { key: 'outro', type: 'outro', duration: WRAPPED_SLIDE_DURATIONS.outro,
           data: { year, tourCount: totals.tourCount } }
     ].filter(Boolean);
 
     return slides;
 }
-
 function checkWrappedJanuaryReminder() {
     const now = new Date();
     const isJanuaryWindow = now.getMonth() === 0 && now.getDate() <= 7;
@@ -35451,8 +35489,9 @@ function setWrappedFont(
     weight = 'normal',
     style = 'normal'
 ) {
+    const verticalCorrection = Math.max(0.5, Number(wrappedCanvasVerticalScale) || 1);
     const scaledSize = Math.round(
-        Number(size) * getWrappedFontScale()
+        Number(size) * getWrappedFontScale() / verticalCorrection
     );
 
     ctx.font =
@@ -35464,26 +35503,37 @@ function renderWrappedSlideToCanvas(slide, width, height) {
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext('2d');
+    const previousVerticalScale = wrappedCanvasVerticalScale;
+    wrappedCanvasVerticalScale = height / WRAPPED_CANVAS_BASE_HEIGHT;
+    ctx.setTransform(
+        wrappedCanvasVerticalScale, 0,
+        0, wrappedCanvasVerticalScale,
+        0, 0
+    );
+    const logicalHeight = WRAPPED_CANVAS_BASE_HEIGHT;
+    const logicalWidth = width / wrappedCanvasVerticalScale;
 
-    const colors = drawWrappedBackground(ctx, width, height, slide.photoImg || null);
+    const colors = drawWrappedBackground(ctx, logicalWidth, logicalHeight, slide.photoImg || null);
 
     switch (slide.key) {
-        case 'intro': renderWrappedIntroSlide(ctx, width, height, colors, slide.data, !slide.photoImg); break;
-        case 'distance': renderWrappedDistanceSlide(ctx, width, height, colors, slide.data); break;
-        case 'ascent': renderWrappedAscentSlide(ctx, width, height, colors, slide.data); break;
-        case 'time': renderWrappedTimeSlide(ctx, width, height, colors, slide.data); break;
-        case 'activeMonth': renderWrappedActiveMonthSlide(ctx, width, height, colors, slide.data); break;
-        case 'bestTour': renderWrappedBestTourSlide(ctx, width, height, colors, slide.data); break;
-        case 'highestPeak': renderWrappedHighestPeakSlide(ctx, width, height, colors, slide.data); break;
-        case 'topRegion': renderWrappedTopRegionSlide(ctx, width, height, colors, slide.data); break;
-        case 'highlights': renderWrappedHighlightsSlide(ctx, width, height, colors, slide.data); break;
-        case 'yearCompare': renderWrappedYearCompareSlide(ctx, width, height, colors, slide.data); break;
-        case 'top3': renderWrappedTop3Slide(ctx, width, height, colors, slide.data); break;
-        case 'topCompanion': renderWrappedTopCompanionSlide(ctx, width, height, colors, slide.data); break;
-        case 'outro': renderWrappedOutroSlide(ctx, width, height, colors, slide.data); break;
+        case 'intro': renderWrappedIntroSlide(ctx, logicalWidth, logicalHeight, colors, slide.data, !slide.photoImg); break;
+        case 'distance': renderWrappedDistanceSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
+        case 'ascent': renderWrappedAscentSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
+        case 'peaks': renderWrappedPeakCountSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
+        case 'time': renderWrappedTimeSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
+        case 'activeMonth': renderWrappedActiveMonthSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
+        case 'bestTour': renderWrappedBestTourSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
+        case 'highestPeak': renderWrappedHighestPeakSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
+        case 'topRegion': renderWrappedTopRegionSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
+        case 'highlights': renderWrappedHighlightsSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
+        case 'tourPhoto': renderWrappedTourPhotoSlide(ctx, logicalWidth, logicalHeight, colors, slide.data, slide.photoImg || null, Boolean(slide.photoLoadFailed)); break;
+        case 'top3': renderWrappedTop3Slide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
+        case 'topCompanion': renderWrappedTopCompanionSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
+        case 'outro': renderWrappedOutroSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
     }
 
-    drawWrappedFooter(ctx, width, height, wrappedCurrentYear);
+    drawWrappedFooter(ctx, logicalWidth, logicalHeight, wrappedCurrentYear);
+    wrappedCanvasVerticalScale = previousVerticalScale;
     return canvas;
 }
 
@@ -35504,11 +35554,17 @@ async function shareAllWrappedSlides(year) {
 
     for (let i = 0; i < wrappedSlides.length; i++) {
         const slide = wrappedSlides[i];
+        if (slide.key === 'tourPhoto' && slide.data?.source === 'gallery') {
+            await ensureWrappedGalleryPhotoLoaded(slide);
+        }
         const canvas = renderWrappedSlideToCanvas(slide, width, height);
         const blob = await canvasToBlobAsync(canvas);
         if (!blob) continue;
         const filename = `jahresrueckblick-${year}-${String(i + 1).padStart(2, '0')}-${slide.key}.png`;
         files.push(new File([blob], filename, { type: 'image/png' }));
+        if (slide.key === 'tourPhoto' && slide.data?.source === 'gallery') {
+            releaseWrappedGalleryPhoto(slide);
+        }
     }
 
     if (!files.length) return;
@@ -35544,6 +35600,8 @@ async function shareAllWrappedSlides(year) {
 }
 
 async function openWrappedView(year) {
+    wrappedSlides.forEach(releaseWrappedGalleryPhoto);
+    wrappedLastRenderedSlideIndex = null;
     wrappedCurrentYear = year;
     wrappedSlides = buildWrappedSlideData(year);
     wrappedSlideIndex = 0;
@@ -35857,11 +35915,11 @@ const endHold = () => {
             styleLink.dataset.bergweltBadgeStyles = '20261022-year-ascent-donut';
             document.head.appendChild(styleLink);
         }
-        if (!document.querySelector('link[data-bergwelt-premium-styles="20261102-premium-alpine-experience-controls"]')) {
+        if (!document.querySelector('link[data-bergwelt-premium-styles="20261102-premium-alpine-fullbleed-photos"]')) {
             const premiumStyleLink = document.createElement('link');
             premiumStyleLink.rel = 'stylesheet';
-            premiumStyleLink.href = './bergwelt-premium-alpine.css?v=3';
-            premiumStyleLink.dataset.bergweltPremiumStyles = '20261102-premium-alpine-experience-controls';
+            premiumStyleLink.href = './bergwelt-premium-alpine.css?v=4';
+            premiumStyleLink.dataset.bergweltPremiumStyles = '20261102-premium-alpine-fullbleed-photos';
             document.head.appendChild(premiumStyleLink);
         }
         const script = document.createElement('script');
@@ -35903,6 +35961,44 @@ function getWrappedThemeColors() {
         summit: { bg1: '#2980b9', bg2: '#2c3e50', text: '#ffffff', accent: '#f5f5f5' }
     };
     return palettes[theme] || palettes.gold;
+}
+
+function releaseWrappedGalleryPhoto(slide) {
+    if (!slide || slide.key !== 'tourPhoto' || slide.data?.source !== 'gallery') return;
+    if (slide.photoCacheKey) wrappedPhotoCache.delete(slide.photoCacheKey);
+    slide.photoCacheKey = null;
+    slide.photoImg = null;
+    slide.photoLoadPromise = null;
+}
+
+async function ensureWrappedGalleryPhotoLoaded(slide) {
+    if (!slide || slide.key !== 'tourPhoto' || slide.data?.source !== 'gallery') {
+        return slide?.photoImg || null;
+    }
+    if (slide.photoImg) return slide.photoImg;
+    if (slide.photoLoadPromise) return slide.photoLoadPromise;
+
+    const loadThumbnail = window.__tourGalleryLoadPhotoThumbnail;
+    if (typeof loadThumbnail !== 'function') {
+        slide.photoLoadFailed = true;
+        return null;
+    }
+
+    slide.photoLoadPromise = (async () => {
+        try {
+            const dataUrl = await loadThumbnail(slide.data.media);
+            const image = dataUrl ? await loadWrappedImage(dataUrl) : null;
+            slide.photoCacheKey = dataUrl || null;
+            slide.photoImg = image;
+            slide.photoLoadFailed = !image;
+            return image;
+        } catch (error) {
+            console.warn('[Jahresrückblick] Tourfoto konnte nicht geladen werden.', error);
+            slide.photoLoadFailed = true;
+            return null;
+        }
+    })();
+    return slide.photoLoadPromise;
 }
 
 function drawWrappedBackground(ctx, w, h, photoImg) {
@@ -36030,11 +36126,43 @@ function getWrappedElevationComparison(meters) {
 
 function renderWrappedSlide(index) {
     const canvas = document.getElementById('wrapped-canvas');
+    const stage = document.getElementById('wrapped-stage');
+    if (!canvas) return;
+
+    const stageRect = stage?.getBoundingClientRect();
+    const logicalWidth = WRAPPED_CANVAS_BASE_WIDTH;
+    const stageRatio = stageRect && stageRect.width > 0 && stageRect.height > 0
+        ? stageRect.height / stageRect.width
+        : WRAPPED_CANVAS_BASE_HEIGHT / WRAPPED_CANVAS_BASE_WIDTH;
+    const pixelHeight = Math.max(720, Math.round(logicalWidth * stageRatio));
+    if (canvas.width !== logicalWidth) canvas.width = logicalWidth;
+    if (canvas.height !== pixelHeight) canvas.height = pixelHeight;
+
     const ctx = canvas.getContext('2d');
-    const w = canvas.width;
-    const h = canvas.height;
+    wrappedCanvasVerticalScale = pixelHeight / WRAPPED_CANVAS_BASE_HEIGHT;
+    const w = logicalWidth / wrappedCanvasVerticalScale;
+    const h = WRAPPED_CANVAS_BASE_HEIGHT;
+    ctx.setTransform(
+        wrappedCanvasVerticalScale, 0,
+        0, wrappedCanvasVerticalScale,
+        0, 0
+    );
+
+    if (wrappedLastRenderedSlideIndex !== null && wrappedLastRenderedSlideIndex !== index) {
+        releaseWrappedGalleryPhoto(wrappedSlides[wrappedLastRenderedSlideIndex]);
+    }
+    wrappedLastRenderedSlideIndex = index;
+
     const slide = wrappedSlides[index];
     if (!slide) return;
+
+    if (slide.key === 'tourPhoto' && slide.data?.source === 'gallery' && !slide.photoImg && !slide.photoLoadFailed) {
+        ensureWrappedGalleryPhotoLoaded(slide).then(image => {
+            if (image && wrappedSlides[index] === slide && wrappedSlideIndex === index) {
+                renderWrappedSlide(index);
+            }
+        });
+    }
 
     const colors = drawWrappedBackground(ctx, w, h, slide.photoImg || null);
 
@@ -36042,13 +36170,14 @@ function renderWrappedSlide(index) {
         case 'intro': renderWrappedIntroSlide(ctx, w, h, colors, slide.data, !slide.photoImg); break;
         case 'distance': renderWrappedDistanceSlide(ctx, w, h, colors, slide.data); break;
         case 'ascent': renderWrappedAscentSlide(ctx, w, h, colors, slide.data); break;
+        case 'peaks': renderWrappedPeakCountSlide(ctx, w, h, colors, slide.data); break;
         case 'time': renderWrappedTimeSlide(ctx, w, h, colors, slide.data); break;
         case 'activeMonth': renderWrappedActiveMonthSlide(ctx, w, h, colors, slide.data); break;
         case 'bestTour': renderWrappedBestTourSlide(ctx, w, h, colors, slide.data); break;
         case 'highestPeak': renderWrappedHighestPeakSlide(ctx, w, h, colors, slide.data); break;
         case 'topRegion': renderWrappedTopRegionSlide(ctx, w, h, colors, slide.data); break;
         case 'highlights': renderWrappedHighlightsSlide(ctx, w, h, colors, slide.data); break;
-        case 'yearCompare': renderWrappedYearCompareSlide(ctx, w, h, colors, slide.data); break;
+        case 'tourPhoto': renderWrappedTourPhotoSlide(ctx, w, h, colors, slide.data, slide.photoImg || null, Boolean(slide.photoLoadFailed)); break;
         case 'top3': renderWrappedTop3Slide(ctx, w, h, colors, slide.data); break;
         case 'topCompanion': renderWrappedTopCompanionSlide(ctx, w, h, colors, slide.data); break;
         case 'outro': renderWrappedOutroSlide(ctx, w, h, colors, slide.data); break;
@@ -36056,6 +36185,17 @@ function renderWrappedSlide(index) {
 
     drawWrappedFooter(ctx, w, h, wrappedCurrentYear);
 }
+
+let wrappedCanvasResizeFrame = 0;
+window.addEventListener('resize', () => {
+    const view = document.getElementById('wrapped-view');
+    if (!view?.classList.contains('visible') || !wrappedSlides.length) return;
+    if (wrappedCanvasResizeFrame) cancelAnimationFrame(wrappedCanvasResizeFrame);
+    wrappedCanvasResizeFrame = requestAnimationFrame(() => {
+        wrappedCanvasResizeFrame = 0;
+        renderWrappedSlide(wrappedSlideIndex);
+    });
+}, { passive: true });
 
 function renderWrappedIntroSlide(ctx, w, h, colors, data, showAlpineArtwork = true) {
     // Bei vorhandenen Tourfotos bleibt das Foto frei von zusätzlichen Bergformen.
@@ -36145,6 +36285,43 @@ function renderWrappedBestTourSlide(ctx, w, h, colors, data) {
     ctx.fillText(data.entry.date || '', w / 2, 650);
 
     drawWrappedBigNumber(ctx, data.score.toFixed(0), 'Leistungsindex', 1000, colors.text, w);
+}
+
+function renderWrappedPeakCountSlide(ctx, w, h, colors, data) {
+    drawWrappedCenteredTitle(ctx, 'Deine Gipfel', 350, 70, colors.text, w);
+    drawWrappedBigNumber(ctx, Math.round(Number(data.peaks) || 0).toLocaleString('de-DE'), 'Gipfel', h * 0.58, colors.text, w);
+}
+
+function renderWrappedTourPhotoSlide(ctx, w, h, colors, data, photoImg, loadFailed = false) {
+    const title = data.entry?.tourname || data.entry?.region || 'Tourfoto';
+    drawWrappedCenteredTitle(ctx, title, 185, 58, colors.text, w);
+
+    const imageX = 66;
+    const imageY = 285;
+    const imageW = w - 132;
+    const imageH = h - 610;
+    drawWrappedContainedImage(ctx, photoImg || null, imageX, imageY, imageW, imageH, 28);
+
+    if (!photoImg) {
+        setWrappedFont(ctx, 36, 'bold');
+        ctx.fillStyle = colors.text;
+        ctx.textAlign = 'center';
+        ctx.fillText(loadFailed ? 'Foto nicht verfügbar' : 'Foto wird geladen …', w / 2, h * 0.56);
+    }
+
+    const meta = [data.entry?.date || '', data.entry?.region || ''].filter(Boolean).join(' · ');
+    if (meta) {
+        setWrappedFont(ctx, 29, 'normal');
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.textAlign = 'center';
+        wrapWrappedText(ctx, meta, w / 2, h - 235, w - 140, 38);
+    }
+    if (data.photoCount > 1) {
+        setWrappedFont(ctx, 22, 'normal');
+        ctx.fillStyle = 'rgba(255,255,255,0.72)';
+        ctx.textAlign = 'center';
+        ctx.fillText((data.photoIndex || 1) + ' / ' + data.photoCount, w / 2, h - 145);
+    }
 }
 
 function renderWrappedHighestPeakSlide(ctx, w, h, colors, data) {
@@ -36386,45 +36563,46 @@ function drawWrappedContainedImage(ctx, img, x, y, width, height, radius) {
 
 function renderWrappedHighlightsSlide(ctx, w, h, colors, data) {
     drawWrappedCenteredTitle(ctx, 'Deine Highlights', 230, 58, colors.text, w);
-
     const items = data.highlights || [];
-    const cardW = 450;
-    const cardH = 360;
-    const gapX = 50;
-    const gapY = 55;
-    const startX = (w - (cardW * 2 + gapX)) / 2;
-    const startY = 390;
+    const cardX = 76;
+    const cardW = w - 152;
+    const cardH = 515;
+    const gapY = 78;
+    const startY = 430;
 
-    items.slice(0, 6).forEach((item, i) => {
-        const col = i % 2;
-        const row = Math.floor(i / 2);
-        const x = startX + col * (cardW + gapX);
-        const y = startY + row * (cardH + gapY);
-
-        ctx.fillStyle = 'rgba(0,0,0,0.16)';
+    items.slice(0, 2).forEach((item, i) => {
+        const x = cardX;
+        const y = startY + i * (cardH + gapY);
+        ctx.fillStyle = 'rgba(0,0,0,0.20)';
         ctx.beginPath();
-        ctx.roundRect(x, y, cardW, cardH, 32);
+        ctx.roundRect(x, y, cardW, cardH, 34);
         ctx.fill();
 
-        setWrappedFont(ctx, 52, 'bold');
+        setWrappedFont(ctx, 66, 'bold');
         ctx.fillStyle = colors.accent;
         ctx.textAlign = 'left';
-        ctx.fillText(item.icon, x + 28, y + 70);
+        ctx.fillText(item.icon, x + 42, y + 105);
 
-        setWrappedFont(ctx, 25, 'bold');
+        setWrappedFont(ctx, 34, 'bold');
         ctx.fillStyle = colors.text;
-        ctx.fillText(item.label, x + 28, y + 115);
+        ctx.fillText(item.label, x + 42, y + 190);
 
-        setWrappedFont(ctx, 56, 'bold');
+        setWrappedFont(ctx, 70, 'bold');
         ctx.fillStyle = colors.accent;
-        wrapWrappedText(ctx, item.value, x + 28, y + 205, cardW - 56, 68);
+        wrapWrappedText(ctx, item.value, x + 42, y + 320, cardW - 84, 82);
 
-        setWrappedFont(ctx, 22, 'normal');
-        ctx.fillStyle = 'rgba(255,255,255,0.82)';
-        wrapWrappedText(ctx, item.entry?.tourname || item.entry?.region || 'Tour', x + 28, y + 295, cardW - 56, 30);
+        setWrappedFont(ctx, 27, 'normal');
+        ctx.fillStyle = 'rgba(255,255,255,0.84)';
+        wrapWrappedText(ctx, item.entry?.tourname || item.entry?.region || 'Tour', x + 42, y + 430, cardW - 84, 36);
     });
-}
 
+    if (data.pageCount > 1) {
+        setWrappedFont(ctx, 23, 'normal');
+        ctx.fillStyle = 'rgba(255,255,255,0.72)';
+        ctx.textAlign = 'center';
+        ctx.fillText((data.page || 1) + ' / ' + data.pageCount, w / 2, h - 112);
+    }
+}
 function renderWrappedTop3Slide(ctx, w, h, colors, data) {
     drawWrappedCenteredTitle(ctx, 'Top 3 der Saison', 190, 58, colors.text, w);
 
@@ -36542,6 +36720,7 @@ function toggleWrappedFullscreen() {
         el.classList.remove('wrapped-mobile-fullscreen', 'wrapped-controls-hidden', 'wrapped-is-fullscreen');
         document.body.classList.remove('wrapped-mobile-fullscreen-active');
         updateWrappedFullscreenState();
+        renderWrappedSlide(wrappedSlideIndex);
         return;
     }
 
@@ -36553,6 +36732,7 @@ function toggleWrappedFullscreen() {
     el.classList.remove('wrapped-controls-hidden');
     document.body.classList.add('wrapped-mobile-fullscreen-active');
     updateWrappedFullscreenState();
+    renderWrappedSlide(wrappedSlideIndex);
     scheduleWrappedFullscreenControlsHide();
 }
 
