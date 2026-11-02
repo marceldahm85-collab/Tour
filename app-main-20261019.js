@@ -24154,10 +24154,23 @@ function getWrappedDataForYear(year) {
 
 function getWrappedMonthlyToursCount(entries) {
     const counts = Array(12).fill(0);
+    const uniqueTours = (entries || [])
+        .map((entry, index) => {
+            const date = parseStatsCalendarDate(entry?.date);
+            if (!date) return null;
+            return {
+                date,
+                identity: tourIdentity(entry, index)
+            };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.date - b.date);
 
-    entries.forEach(entry => {
-        const date = parseStatsCalendarDate(entry?.date);
-        if (date) counts[date.getMonth()]++;
+    const countedTours = new Set();
+    uniqueTours.forEach(item => {
+        if (countedTours.has(item.identity)) return;
+        countedTours.add(item.identity);
+        counts[item.date.getMonth()]++;
     });
 
     return counts;
@@ -24203,10 +24216,18 @@ function getWrappedHighestPeak(entries) {
 
 function getWrappedTopRegion(entries) {
     const counts = {};
+    const countedTourRegions = new Set();
 
-    entries.forEach(entry => {
+    (entries || []).forEach((entry, index) => {
         const raw = String(entry?.region || '').trim();
         if (!raw) return;
+
+        // Eine Mehrtagestour zählt innerhalb derselben Region nur einmal.
+        // Verschiedene tatsächlich gespeicherte Regionen zählen jeweils einmal.
+        const tourRegionKey = JSON.stringify([tourIdentity(entry, index), raw]);
+        if (countedTourRegions.has(tourRegionKey)) return;
+
+        countedTourRegions.add(tourRegionKey);
         counts[raw] = (counts[raw] || 0) + 1;
     });
 
@@ -36133,14 +36154,20 @@ function drawWrappedFooter(ctx, w, h, year) {
 
 function getWrappedDistanceComparison(km) {
     const refKm = 860;
-    const factor = (km / refKm).toFixed(1);
+    const factor = (km / refKm).toFixed(2).replace('.', ',');
     return `Das ist wie ${factor}× Lienz → Düsseldorf!`;
 }
 
 function getWrappedElevationComparison(meters) {
     const grossglockner = 3798;
-    const factor = (meters / grossglockner).toFixed(1);
+    const factor = (meters / grossglockner).toFixed(2).replace('.', ',');
     return `Das ist wie ${factor}× auf den Großglockner!`;
+}
+
+function getWrappedEverestComparison(meters) {
+    const everest = 8848;
+    const factor = (meters / everest).toFixed(2).replace('.', ',');
+    return `Das ist wie ${factor}× auf den Mount Everest!`;
 }
 
 function renderWrappedSlide(index) {
@@ -36217,21 +36244,35 @@ window.addEventListener('resize', () => {
 }, { passive: true });
 
 function renderWrappedIntroSlide(ctx, w, h, colors, data, showAlpineArtwork = true) {
-    // Bei vorhandenen Tourfotos bleibt das Foto frei von zusätzlichen Bergformen.
-    // Die alte, künstlich wirkende Vektorillustration wird nicht mehr verwendet.
+    // Der alpine Hintergrund bzw. das jeweilige Tourfoto bleibt erhalten.
+    drawWrappedCenteredTitle(ctx, 'DEIN ALPINES JAHR', 320, 76, colors.accent, w);
 
-    drawWrappedCenteredTitle(ctx, `Dein Jahr ${data.year}`, 330, 90, colors.text, w);
-    setWrappedFont(ctx, Math.max(36, Math.min(58, w * 0.055)), 'bold');
-    ctx.fillStyle = colors.accent;
-    ctx.textAlign = 'center';
-    wrapWrappedText(ctx, data.seasonTitle || 'Dein Jahr in den Bergen', w / 2, h * 0.36, w * 0.82, 64);
-    drawWrappedBigNumber(ctx, data.tourCount, 'Touren', h * 0.68, colors.text, w);
-    setWrappedFont(ctx, 42);
+    setWrappedFont(ctx, 100, 'bold');
     ctx.fillStyle = colors.text;
     ctx.textAlign = 'center';
-    ctx.fillText('Stolzer Blick zurück... 🏔️', w / 2, h * 0.79);
-}
+    ctx.fillText(String(data.year), w / 2, 590);
 
+    drawWrappedBigNumber(
+        ctx,
+        data.tourCount,
+        data.tourCount === 1 ? 'TOUR' : 'TOUREN',
+        h * 0.66,
+        colors.text,
+        w
+    );
+
+    setWrappedFont(ctx, 38, 'normal');
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    wrapWrappedText(
+        ctx,
+        'Viele Wege, beeindruckende Aufstiege und unvergessliche Ausblicke – Erinnerungen, die bleiben.',
+        w / 2,
+        h * 0.80,
+        w * 0.82,
+        50
+    );
+}
 function renderWrappedDistanceSlide(ctx, w, h, colors, data) {
     drawWrappedCenteredTitle(ctx, 'Deine Strecke', 350, 70, colors.text, w);
     drawWrappedBigNumber(ctx, data.distance.toFixed(1), 'km', 800, colors.text, w);
@@ -36239,28 +36280,60 @@ function renderWrappedDistanceSlide(ctx, w, h, colors, data) {
     ctx.fillStyle = colors.accent;
     ctx.textAlign = 'center';
     wrapWrappedText(ctx, getWrappedDistanceComparison(data.distance), w / 2, 1000, w - 160, 50);
-}
 
+    setWrappedFont(ctx, 32, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    wrapWrappedText(
+        ctx,
+        'Jeder Kilometer war ein Teil deines Weges – durch Täler, über Höhen und immer ein Stück weiter.',
+        w / 2,
+        1150,
+        w * 0.78,
+        46
+    );
+}
 function renderWrappedAscentSlide(ctx, w, h, colors, data) {
     drawWrappedCenteredTitle(ctx, 'Deine Höhenmeter', 350, 70, colors.text, w);
     drawWrappedBigNumber(ctx, Math.round(data.ascent).toLocaleString('de-DE'), 'Hm', 800, colors.text, w);
-    setWrappedFont(ctx, 38);
+
+    setWrappedFont(ctx, 38, 'normal');
     ctx.fillStyle = colors.accent;
     ctx.textAlign = 'center';
     wrapWrappedText(ctx, getWrappedElevationComparison(data.ascent), w / 2, 1000, w - 160, 50);
-}
+    wrapWrappedText(ctx, getWrappedEverestComparison(data.ascent), w / 2, 1070, w - 160, 50);
 
+    setWrappedFont(ctx, 32, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    wrapWrappedText(
+        ctx,
+        'Meter für Meter dem Himmel entgegen – und mit jedem Aufstieg ein Stück näher an neuen Perspektiven und unvergesslichen Ausblicken.',
+        w / 2,
+        1220,
+        w * 0.78,
+        46
+    );
+}
 function renderWrappedTimeSlide(ctx, w, h, colors, data) {
     const hours = Math.floor(data.minutes / 60);
-    const days = (hours / 24).toFixed(1);
+    const days = (data.minutes / (60 * 24)).toFixed(2).replace('.', ',');
     drawWrappedCenteredTitle(ctx, 'Zeit unterwegs', 350, 70, colors.text, w);
     drawWrappedBigNumber(ctx, hours.toLocaleString('de-DE'), 'Stunden', 800, colors.text, w);
     setWrappedFont(ctx, 38);
     ctx.fillStyle = colors.accent;
     ctx.textAlign = 'center';
     ctx.fillText(`Das sind ${days} Tage am Berg! ⏱️`, w / 2, 1000);
-}
 
+    setWrappedFont(ctx, 32, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    wrapWrappedText(
+        ctx,
+        'Stunden fernab vom Alltag, mitten in der Natur. Zeit zum Durchatmen, Weitergehen und Genießen.',
+        w / 2,
+        1150,
+        w * 0.78,
+        46
+    );
+}
 function renderWrappedActiveMonthSlide(ctx, w, h, colors, data) {
     const monthNames = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
     drawWrappedCenteredTitle(ctx, 'Dein aktivster Monat', 300, 70, colors.text, w);
@@ -36290,8 +36363,18 @@ function renderWrappedActiveMonthSlide(ctx, w, h, colors, data) {
     setWrappedFont(ctx, 42);
     ctx.fillStyle = colors.text;
     ctx.fillText(`${data.monthlyTours[data.activeMonthIndex]} Touren`, w / 2, chartY - 30);
-}
 
+    setWrappedFont(ctx, 32, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    wrapWrappedText(
+        ctx,
+        'In diesem Monat zog es dich besonders oft hinaus – jeder Ausflug brachte neue Wege, Eindrücke und Gipfelmomente.',
+        w / 2,
+        1360,
+        w * 0.78,
+        46
+    );
+}
 function renderWrappedBestTourSlide(ctx, w, h, colors, data) {
     drawWrappedCenteredTitle(ctx, 'Deine leistungsbeste Tour', 300, 70, colors.text, w);
     setWrappedFont(ctx, 54, 'bold');
@@ -36304,8 +36387,18 @@ function renderWrappedBestTourSlide(ctx, w, h, colors, data) {
     ctx.fillText(data.entry.date || '', w / 2, 650);
 
     drawWrappedBigNumber(ctx, data.score.toFixed(0), 'Leistungsindex', 1000, colors.text, w);
-}
 
+    setWrappedFont(ctx, 32, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    wrapWrappedText(
+        ctx,
+        'Diese Tour vereint alles, was dein Bergjahr ausmacht – Ausdauer, Höhenmeter und den Willen, immer weiterzugehen.',
+        w / 2,
+        1240,
+        w * 0.78,
+        46
+    );
+}
 function renderWrappedPeakCountSlide(ctx, w, h, colors, data) {
     drawWrappedCenteredTitle(ctx, 'Deine Gipfel', 350, 70, colors.text, w);
     drawWrappedBigNumber(ctx, Math.round(Number(data.peaks) || 0).toLocaleString('de-DE'), 'Gipfel', h * 0.58, colors.text, w);
@@ -36351,8 +36444,18 @@ function renderWrappedHighestPeakSlide(ctx, w, h, colors, data) {
     wrapWrappedText(ctx, data.peak.name, w / 2, 650, w - 160, 75);
 
     drawWrappedBigNumber(ctx, data.peak.height.toLocaleString('de-DE'), 'Meter', 1000, colors.text, w);
-}
 
+    setWrappedFont(ctx, 32, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    wrapWrappedText(
+        ctx,
+        'Jeder Gipfel hat seine eigene Geschichte. Dieser markiert den höchsten Punkt deines Bergjahres – erreicht mit Ausdauer und Entschlossenheit. Hier oben werden Anstrengung und die Schönheit der Berge zu einem besonderen Moment und einem Ausblick, der in Erinnerung bleibt.',
+        w / 2,
+        1240,
+        w * 0.78,
+        46
+    );
+}
 function renderWrappedTopRegionSlide(ctx, w, h, colors, data) {
     drawWrappedCenteredTitle(ctx, 'Deine Lieblingsregion', 400, 70, colors.text, w);
     setWrappedFont(ctx, 72, 'bold');
@@ -36363,8 +36466,18 @@ function renderWrappedTopRegionSlide(ctx, w, h, colors, data) {
     setWrappedFont(ctx, 42);
     ctx.fillStyle = colors.text;
     ctx.fillText(`${data.region.count} Touren hier! 📍`, w / 2, 900);
-}
 
+    setWrappedFont(ctx, 32, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    wrapWrappedText(
+        ctx,
+        'Zwischen bekannten Pfaden und neuen Gipfelzielen: Hier hat es dich in diesem Jahr besonders oft hingezogen.',
+        w / 2,
+        1080,
+        w * 0.78,
+        46
+    );
+}
 function renderWrappedTopCompanionSlide(ctx, w, h, colors, data) {
     drawWrappedCenteredTitle(ctx, 'Dein Wanderbuddy des Jahres', 400, 64, colors.text, w);
 
