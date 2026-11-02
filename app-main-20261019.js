@@ -4310,6 +4310,22 @@ function showMilestoneCelebrationToast(batch, onFinish) {
         copy.appendChild(createCelebrationNode('span', 'success-celebration-context', mainMilestone.contexts.join(' · ')));
     }
 
+    if (batch.records.length > 1) {
+        const recordList = createCelebrationNode('div', 'success-celebration-list');
+        batch.records.slice(0, 3).forEach(item => {
+            const row = createCelebrationNode('div', 'success-celebration-list-row');
+            row.append(
+                createCelebrationNode('span', '', item.name),
+                createCelebrationNode('strong', '', (item.contexts || []).join(' · '))
+            );
+            recordList.appendChild(row);
+        });
+        if (batch.records.length > 3) {
+            recordList.appendChild(createCelebrationNode('small', '', '+' + (batch.records.length - 3) + ' weitere Rekorde'));
+        }
+        copy.appendChild(recordList);
+    }
+
     if (batch.records.length && batch.milestones.length) {
         const recordNames = batch.records.map(item => item.name);
         copy.appendChild(createCelebrationNode('span', 'success-celebration-context', 'Zusätzlich: ' + recordNames.join(' · ')));
