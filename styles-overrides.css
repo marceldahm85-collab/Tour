@@ -8965,3 +8965,90 @@ body.summit .top-main-nav [aria-current="page"] {
         margin-top: 4px !important;
     }
 }
+
+
+/* =========================================================
+   TOP-3 METALL-EFFEKTE – Vorrang vor den globalen App-Flächen
+   Die Rangklassen und ihre Animation bleiben in der App-Logik
+   unverändert. Diese Regeln stellen nur die überdeckten
+   Bronze-, Silber- und Goldflächen in Ranglisten/ Tourdetails
+   wieder her.
+   ========================================================= */
+
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+#tour-list-modal #tl-body .stats-list li.highlight-rank-bronze {
+    background: var(--metal-bronze-bg, linear-gradient(135deg, rgba(146,62,14,.24), rgba(224,124,45,.42), rgba(146,62,14,.24))) !important;
+    border-color: color-mix(in srgb, var(--metal-bronze-border, #a95724) 58%, var(--app-surface-border, rgba(255,255,255,.18))) !important;
+    border-left: 4px solid var(--metal-bronze-border, #a95724) !important;
+}
+
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+#tour-list-modal #tl-body .stats-list li.highlight-rank-silver {
+    background: var(--metal-silver-bg, linear-gradient(135deg, rgba(78,98,112,.22), rgba(187,204,216,.46), rgba(78,98,112,.22))) !important;
+    border-color: color-mix(in srgb, var(--metal-silver-border, #7895aa) 58%, var(--app-surface-border, rgba(255,255,255,.18))) !important;
+    border-left: 4px solid var(--metal-silver-border, #7895aa) !important;
+}
+
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+#tour-list-modal #tl-body .stats-list li.highlight-rank-gold {
+    background: var(--metal-gold-bg, linear-gradient(135deg, rgba(162,111,0,.24), rgba(244,192,25,.48), rgba(162,111,0,.24))) !important;
+    border-color: color-mix(in srgb, var(--metal-gold-border, #c79200) 58%, var(--app-surface-border, rgba(255,255,255,.18))) !important;
+    border-left: 4px solid var(--metal-gold-border, #c79200) !important;
+}
+
+/* Auch die geöffnete Einzeltour erhält ihren Rang-Look über der
+   globalen Modal-Glasfläche. Die Karte behält ihre normale Größe,
+   Position, Inhalte und Schließ-/Swipe-Animation. */
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+#tour-detail-modal .modal-card.highlight-modal-bronze {
+    background:
+        radial-gradient(circle at 16% 8%, color-mix(in srgb, var(--metal-bronze-border, #a95724) 30%, transparent), transparent 54%),
+        var(--metal-bronze-bg, linear-gradient(135deg, rgba(146,62,14,.24), rgba(224,124,45,.42), rgba(146,62,14,.24))) !important;
+    border-color: color-mix(in srgb, var(--metal-bronze-border, #a95724) 62%, var(--app-surface-border, rgba(255,255,255,.18))) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255,235,210,.34),
+        inset 0 -3px 9px rgba(95,35,8,.18),
+        0 0 20px color-mix(in srgb, var(--metal-bronze-border, #a95724) 18%, transparent),
+        0 16px 36px rgba(0,0,0,.30) !important;
+}
+
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+#tour-detail-modal .modal-card.highlight-modal-silver {
+    background:
+        radial-gradient(circle at 16% 8%, color-mix(in srgb, var(--metal-silver-border, #7895aa) 32%, transparent), transparent 54%),
+        var(--metal-silver-bg, linear-gradient(135deg, rgba(78,98,112,.22), rgba(187,204,216,.46), rgba(78,98,112,.22))) !important;
+    border-color: color-mix(in srgb, var(--metal-silver-border, #7895aa) 62%, var(--app-surface-border, rgba(255,255,255,.18))) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.52),
+        inset 0 -3px 9px rgba(65,90,110,.16),
+        0 0 20px color-mix(in srgb, var(--metal-silver-border, #7895aa) 18%, transparent),
+        0 16px 36px rgba(0,0,0,.30) !important;
+}
+
+:is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold))
+#tour-detail-modal .modal-card.highlight-modal-gold {
+    background:
+        radial-gradient(circle at 16% 8%, color-mix(in srgb, var(--metal-gold-border, #c79200) 34%, transparent), transparent 54%),
+        var(--metal-gold-bg, linear-gradient(135deg, rgba(162,111,0,.24), rgba(244,192,25,.48), rgba(162,111,0,.24))) !important;
+    border-color: color-mix(in srgb, var(--metal-gold-border, #c79200) 62%, var(--app-surface-border, rgba(255,255,255,.18))) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255,250,205,.54),
+        inset 0 -3px 9px rgba(100,70,0,.18),
+        0 0 22px color-mix(in srgb, var(--metal-gold-border, #c79200) 20%, transparent),
+        0 16px 36px rgba(0,0,0,.30) !important;
+}
+
+/* Die bestehenden Metall-Pulszeiten explizit beibehalten. */
+#tour-list-modal #tl-body .stats-list li.highlight-rank-bronze,
+#tour-detail-modal .modal-card.highlight-modal-bronze {
+    animation-duration: 3.2s !important;
+}
+#tour-list-modal #tl-body .stats-list li.highlight-rank-silver,
+#tour-detail-modal .modal-card.highlight-modal-silver {
+    animation-duration: 3.7s !important;
+}
+#tour-list-modal #tl-body .stats-list li.highlight-rank-gold,
+#tour-detail-modal .modal-card.highlight-modal-gold {
+    animation-duration: 4.2s !important;
+}
+
