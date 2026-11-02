@@ -24114,10 +24114,16 @@ function initThemeEditor() {
 
 const WRAPPED_REMINDER_KEY = 'wrappedReminderShown_v1';
 const WRAPPED_SLIDE_DURATIONS = {
-    intro: 5500,
-    outro: 5500,
-    default: 7000,
-    heavy: 9000
+    intro: 8000,
+    outro: 8000,
+    default: 9000,
+    heavy: 12000,
+    activeMonth: 11000,
+    detail: 10000,
+    bestTour: 11000,
+    top3: 14000,
+    topCompanion: 11000,
+    photo: 8500
 };
 
 let wrappedCurrentYear = null;
@@ -24619,7 +24625,7 @@ function buildWrappedSlideData(year) {
                 photoSlides.push({
                     key: 'tourPhoto',
                     type: 'photo',
-                    duration: 7500,
+                    duration: WRAPPED_SLIDE_DURATIONS.photo,
                     data: { entry, source: 'cover' }
                 });
             }
@@ -24642,7 +24648,7 @@ function buildWrappedSlideData(year) {
             photoSlides.push({
                 key: 'tourPhoto',
                 type: 'photo',
-                duration: 7500,
+                duration: WRAPPED_SLIDE_DURATIONS.photo,
                 data: { entry, source: 'gallery', media }
             });
         });
@@ -24676,18 +24682,18 @@ function buildWrappedSlideData(year) {
           data: { peaks: totals.peaks } },
         { key: 'time', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
           data: { minutes: totals.minutes } },
-        { key: 'activeMonth', type: 'heavy', duration: WRAPPED_SLIDE_DURATIONS.heavy,
+        { key: 'activeMonth', type: 'heavy', duration: WRAPPED_SLIDE_DURATIONS.activeMonth,
           data: { monthlyTours, activeMonthIndex } },
-        highestPeak ? { key: 'highestPeak', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
+        highestPeak ? { key: 'highestPeak', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.detail,
           data: { peak: highestPeak } } : null,
-        topRegion ? { key: 'topRegion', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
+        topRegion ? { key: 'topRegion', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.detail,
           data: { region: topRegion } } : null,
         ...highlightSlides,
-        bestTour ? { key: 'bestTour', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
+        bestTour ? { key: 'bestTour', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.bestTour,
           data: { entry: bestTour.entry, score: bestTour.score } } : null,
-        top3.length ? { key: 'top3', type: 'heavy', duration: WRAPPED_SLIDE_DURATIONS.heavy,
+        top3.length ? { key: 'top3', type: 'heavy', duration: WRAPPED_SLIDE_DURATIONS.top3,
           data: { top3 } } : null,
-        topCompanion ? { key: 'topCompanion', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
+        topCompanion ? { key: 'topCompanion', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.topCompanion,
           data: { companion: topCompanion } } : null,
         ...photoSlides,
         { key: 'outro', type: 'outro', duration: WRAPPED_SLIDE_DURATIONS.outro,
