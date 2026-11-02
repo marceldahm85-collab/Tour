@@ -36731,6 +36731,20 @@ function renderWrappedHighlightsSlide(ctx, w, h, colors, data) {
         wrapWrappedText(ctx, item.entry?.tourname || item.entry?.region || 'Tour', x + 42, y + 430, cardW - 84, 36);
     });
 
+    if (data.page === 1) {
+        setWrappedFont(ctx, 32, 'normal');
+        ctx.fillStyle = 'rgba(255,255,255,0.92)';
+        ctx.textAlign = 'center';
+        wrapWrappedText(
+            ctx,
+            'Weite Wege, beeindruckende Bergkulissen und das Gefühl, ganz bei sich zu sein. Es sind die Augenblicke zwischen Gipfeln, Tälern und weitem Himmel, die für immer bleiben.',
+            w / 2,
+            1635,
+            w * 0.78,
+            46
+        );
+    }
+
     if (data.pageCount > 1) {
         setWrappedFont(ctx, 23, 'normal');
         ctx.fillStyle = 'rgba(255,255,255,0.72)';
