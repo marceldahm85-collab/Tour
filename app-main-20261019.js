@@ -36515,6 +36515,18 @@ function renderWrappedTopCompanionSlide(ctx, w, h, colors, data) {
         w / 2,
         900
     );
+
+    setWrappedFont(ctx, 32, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.textAlign = 'center';
+    wrapWrappedText(
+        ctx,
+        'Die schönsten Gipfelmomente sind oft die, die man nicht allein erlebt. Gemeinsame Wege, gegenseitige Motivation und unvergessliche Augenblicke machen aus einzelnen Touren gemeinsame Geschichten. Denn manche Erinnerungen entstehen erst, wenn man sie miteinander teilt.',
+        w / 2,
+        1120,
+        w * 0.82,
+        48
+    );
 }
 
 function formatWrappedCompareValue(kind, value) {
