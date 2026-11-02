@@ -1138,3 +1138,23 @@
     padding: 0 0 18px !important;
     box-sizing: border-box !important;
 }
+
+
+/* Bergwelt: Erlebnis direkt als immersive Story anzeigen und Sammelflächen entfernen. */
+#wrapped-view.bergwelt-ready.bergwelt-active-tourbuch #bergwelt-tourbuch-panel {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+}
+
+#wrapped-view.bergwelt-ready.bergwelt-active-achievements #bergwelt-achievements-panel,
+#wrapped-view.bergwelt-ready.bergwelt-active-achievements #achievements-view,
+#wrapped-view.bergwelt-ready.bergwelt-active-achievements #achievements-view .achievements-inner {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+}
