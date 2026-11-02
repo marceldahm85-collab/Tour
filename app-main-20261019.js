@@ -4116,7 +4116,12 @@ const ACHIEVEMENT_CELEBRATION_ART = {
     regions: 'dist',
     tourTypes: 'steps',
     consistency: 'time',
-    performance: 'asc'
+    performance: 'asc',
+    ascent: 'asc',
+    peaks: 'peaks',
+    time: 'time',
+    steepness: 'steps',
+    variety: 'dist'
 };
 
 const celebrationDispatcher = {
@@ -4217,6 +4222,11 @@ function showNextCelebration() {
 
 function openCelebrationDestination(batch) {
     if (batch.achievements.length) {
+        if (batch.achievements.some(item => item.destination === 'bergwelt')) {
+            window.__bergweltOpenLevelTabOnLoad = true;
+            goToView('wrapped');
+            return;
+        }
         const categories = [...new Set(batch.achievements.map(item => item.categoryId).filter(Boolean))];
         achievementsYearFilter = 'all';
         goToView('achievements');
@@ -4417,12 +4427,13 @@ function showAchievementUnlockCelebration(batch, onFinish) {
             : 'Deine Tourenleistung wird belohnt'
     );
 
+    const isBergweltRankUnlock = batch.achievements.some(item => item.destination === 'bergwelt');
     const description = createCelebrationNode(
         'p',
         'achievement-unlock-description',
-        batch.achievements.length === 1
+        mainAchievement.description || (batch.achievements.length === 1
             ? 'Du hast dir diese Auszeichnung mit deinen gespeicherten Touren verdient.'
-            : 'Mehrere neue Erfolge wurden bei deiner letzten Tour erreicht.'
+            : 'Mehrere neue Erfolge wurden bei deiner letzten Tour erreicht.')
     );
 
     card.append(closeButton, kicker, artStage, title, category, description);
@@ -4463,7 +4474,7 @@ function showAchievementUnlockCelebration(batch, onFinish) {
         ));
     }
 
-    const actionButton = createCelebrationNode('button', 'achievement-unlock-action', 'ACHIEVEMENTS ANSEHEN');
+    const actionButton = createCelebrationNode('button', 'achievement-unlock-action', isBergweltRankUnlock ? 'BERGWELT ANSEHEN' : 'ACHIEVEMENTS ANSEHEN');
     actionButton.type = 'button';
     card.appendChild(actionButton);
 
@@ -4507,6 +4518,154 @@ function showAchievementUnlockCelebration(batch, onFinish) {
 
     timer = setTimeout(() => close(false), duration);
     hapticFeedback([24, 58, 26]);
+}
+
+function getBergweltSpecializationValues(entries) {
+    const source = Array.isArray(entries) ? entries : [];
+    const sumKnown = getter => {
+        const values = source.map(getter).filter(value =>
+            value !== null && value !== undefined && Number.isFinite(value)
+        );
+        return values.length ? values.reduce((sum, value) => sum + value, 0) : null;
+    };
+    const ascentValue = entry => readTourMetricNumber(entry?.aufstieg);
+    const minutesValue = entry => {
+        if (typeof window.__tourDataRules?.parseMinutes === 'function') {
+            return window.__tourDataRules.parseMinutes(entry?.zeit);
+        }
+        const raw = String(entry?.zeit ?? '').trim();
+        const match = raw.match(/^(\d{1,4}):([0-5]?\d)$/);
+        return match ? Number(match[1]) * 60 + Number(match[2]) : null;
+    };
+    const peaksValue = entry => readTourMetricNumber(entry?.gipfel);
+
+    const ascent = sumKnown(ascentValue);
+    const totalMinutes = sumKnown(minutesValue);
+    const peaks = sumKnown(peaksValue);
+
+    const ascentRates = source.map(entry => {
+        const hm = ascentValue(entry);
+        const durationMinutes = minutesValue(entry);
+        if (hm === null || durationMinutes === null || durationMinutes <= 0) return null;
+        const hours = durationMinutes / 60;
+        const adjustedHours = entry.useFullDistanceForGradient ? hours : hours / 2;
+        return adjustedHours > 0 ? hm / adjustedHours : null;
+    }).filter(value => value !== null && Number.isFinite(value));
+
+    const activityTypes = new Set(source
+        .map(entry => String(entry?.difficulty || '').trim().toLocaleLowerCase())
+        .filter(type => type && type !== 'mehrtägig'));
+
+    return {
+        ascent,
+        peaks,
+        hours: totalMinutes === null ? null : totalMinutes / 60,
+        steepness: ascentRates.length ? Math.max(...ascentRates) : null,
+        variety: activityTypes.size ? activityTypes.size : null
+    };
+}
+
+function collectNewBergweltRankUnlocks(beforeTours, afterTours, entryYear) {
+    const before = Array.isArray(beforeTours) ? beforeTours : [];
+    const after = Array.isArray(afterTours) ? afterTours : [];
+    const periods = [{
+        key: 'all',
+        label: 'Alle Jahre',
+        beforeEntries: before,
+        afterEntries: after,
+        allYears: true
+    }];
+
+    if (Number.isInteger(Number(entryYear)) && Number(entryYear) >= 1000) {
+        const year = Number(entryYear);
+        periods.push({
+            key: String(year),
+            label: 'Jahr ' + year,
+            beforeEntries: before.filter(entry => getYearFromDate(entry?.date) === year),
+            afterEntries: after.filter(entry => getYearFromDate(entry?.date) === year),
+            allYears: false
+        });
+    }
+
+    const definitions = [
+        {
+            key: 'ascent',
+            name: 'Höhenmeter-Spezialist',
+            categoryId: 'ascent',
+            unit: 'hm',
+            allTiers: [[50000, 'Höhenmeter-Sammler'], [100000, 'Bergauf unterwegs'], [200000, 'Höhenmeter-Spezialist'], [350000, 'Höhenprofi'], [500000, 'Höhenlegende']],
+            yearTiers: [[5000, 'Höhenmeter-Sammler'], [10000, 'Bergauf unterwegs'], [15000, 'Höhenmeter-Spezialist'], [25000, 'Höhenprofi'], [35000, 'Höhenlegende']]
+        },
+        {
+            key: 'peaks',
+            name: 'Gipfelsammler',
+            categoryId: 'peaks',
+            unit: 'Gipfel',
+            allTiers: [[25, 'Gipfel entdeckt'], [50, 'Gipfelsammler'], [100, 'Gipfeljäger'], [200, 'Gipfelkenner'], [350, 'Gipfellegende']],
+            yearTiers: [[5, 'Gipfel entdeckt'], [10, 'Gipfelsammler'], [15, 'Gipfeljäger'], [25, 'Gipfelkenner'], [35, 'Gipfellegende']]
+        },
+        {
+            key: 'hours',
+            name: 'Ausdauer-Alpinist',
+            categoryId: 'time',
+            unit: 'h',
+            allTiers: [[100, 'Ausdauer-Einsteiger'], [250, 'Ausdauerstark'], [500, 'Ausdauer-Alpinist'], [1000, 'Langstrecken-Profi'], [2000, 'Ausdauerlegende']],
+            yearTiers: [[25, 'Ausdauer-Einsteiger'], [50, 'Ausdauerstark'], [100, 'Ausdauer-Alpinist'], [150, 'Langstrecken-Profi'], [200, 'Ausdauerlegende']]
+        },
+        {
+            key: 'steepness',
+            name: 'Steilheits-Profi',
+            categoryId: 'steepness',
+            unit: 'hm/h',
+            allTiers: [[300, 'Vertikal unterwegs'], [350, 'Starker Aufstieg'], [400, 'Aufstiegs-Profi'], [500, 'Vertikal-Elite'], [600, 'Vertikallegende']],
+            yearTiers: [[300, 'Vertikal unterwegs'], [350, 'Starker Aufstieg'], [400, 'Aufstiegs-Profi'], [500, 'Vertikal-Elite'], [600, 'Vertikallegende']]
+        },
+        {
+            key: 'variety',
+            name: 'Vielseitiger Wanderer',
+            categoryId: 'variety',
+            unit: 'Typen',
+            allTiers: [[1, 'Erster Stil'], [2, 'Abwechslungsreich'], [3, 'Vielseitiger Wanderer'], [4, 'Allrounder'], [5, 'Bergwelt-Allrounder']],
+            yearTiers: [[1, 'Erster Stil'], [2, 'Abwechslungsreich'], [3, 'Vielseitiger Wanderer'], [4, 'Allrounder'], [5, 'Bergwelt-Allrounder']]
+        }
+    ];
+
+    const events = [];
+    periods.forEach(period => {
+        const beforeValues = getBergweltSpecializationValues(period.beforeEntries);
+        const afterValues = getBergweltSpecializationValues(period.afterEntries);
+
+        definitions.forEach(definition => {
+            const tiers = period.allYears ? definition.allTiers : definition.yearTiers;
+            const beforeValue = beforeValues[definition.key] ?? 0;
+            const afterValue = afterValues[definition.key] ?? 0;
+
+            tiers.forEach((tier, index) => {
+                if (beforeValue >= tier[0] || afterValue < tier[0]) return;
+                const threshold = Number(tier[0]).toLocaleString('de-AT');
+                events.push({
+                    id: 'bergwelt:' + period.key + ':' + definition.key + ':' + index,
+                    categoryId: definition.categoryId,
+                    categoryLabel: definition.name + ' · ' + period.label,
+                    name: tier[1],
+                    description: period.label + ' · ' + definition.name + ': ' + threshold + ' ' + definition.unit + ' erreicht.',
+                    image: CELEBRATION_ART_ASSETS[definition.categoryId === 'ascent' ? 'asc' :
+                        definition.categoryId === 'peaks' ? 'peaks' :
+                        definition.categoryId === 'time' ? 'time' :
+                        definition.categoryId === 'steepness' ? 'steps' : 'dist'],
+                    destination: 'bergwelt'
+                });
+            });
+        });
+    });
+
+    return events;
+}
+
+function queueNewBergweltRankUnlocks(beforeTours, afterTours, entryYear) {
+    const events = collectNewBergweltRankUnlocks(beforeTours, afterTours, entryYear);
+    if (events.length) enqueueCelebrationGroup('achievements', events);
+    return events.length;
 }
 
 function showNewMilestoneNotifications(lifetimeEvents = [], yearEvents = [], dashboardEvents = []) {
@@ -14666,6 +14825,7 @@ gipfelDetails: (gipfelDetails || []).map(g => ({
         yearMilestoneEvents,
         dashboardMilestoneEvents
     );
+    queueNewBergweltRankUnlocks(toursBeforeSave, data, entryYear);
 
     // Tabelle aktualisieren
     loadData();
@@ -35849,10 +36009,15 @@ const endHold = () => {
     // Bergwelt bleibt ein optionales Modul und wird erst beim Öffnen geladen.
     function loadBergweltModule() {
         window.__bergweltGetTours = () => appStorage.get('touren') || [];
-        if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261022-year-ascent-donut-theme-colors' || window.__BERGWELT_BADGE_LOADING__) {
+        if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261102-premium-photo-specialization-badges') {
             window.__bergweltRender?.();
+            if (window.__bergweltOpenLevelTabOnLoad) {
+                window.__bergweltOpenLevelTabOnLoad = false;
+                document.querySelector('#bergwelt-tabs [data-bergwelt-tab="level"]')?.click();
+            }
             return;
         }
+        if (window.__BERGWELT_BADGE_LOADING__) return;
         window.__BERGWELT_BADGE_LOADING__ = true;
         window.__BERGWELT_LOADING__ = true;
         if (!document.querySelector('link[data-bergwelt-badge-styles="20261022-year-ascent-donut"]')) {
@@ -35863,11 +36028,15 @@ const endHold = () => {
             document.head.appendChild(styleLink);
         }
         const script = document.createElement('script');
-        script.src = './bergwelt-badges-20261019.js?v=1';
+        script.src = './bergwelt-badges-20261019.js?v=2';
         script.onload = () => {
             window.__BERGWELT_BADGE_LOADING__ = false;
             window.__BERGWELT_LOADING__ = false;
             window.__bergweltRender?.();
+            if (window.__bergweltOpenLevelTabOnLoad) {
+                window.__bergweltOpenLevelTabOnLoad = false;
+                document.querySelector('#bergwelt-tabs [data-bergwelt-tab="level"]')?.click();
+            }
         };
         script.onerror = () => {
             window.__BERGWELT_BADGE_LOADING__ = false;
