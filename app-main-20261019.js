@@ -36393,6 +36393,18 @@ function renderWrappedBestTourSlide(ctx, w, h, colors, data) {
 function renderWrappedPeakCountSlide(ctx, w, h, colors, data) {
     drawWrappedCenteredTitle(ctx, 'Deine Gipfel', 350, 70, colors.text, w);
     drawWrappedBigNumber(ctx, Math.round(Number(data.peaks) || 0).toLocaleString('de-DE'), 'Gipfel', h * 0.58, colors.text, w);
+
+    setWrappedFont(ctx, 32, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.textAlign = 'center';
+    wrapWrappedText(
+        ctx,
+        'Jeder Gipfel ein eigenes Ziel. Jeder Aufstieg ein neuer Blick auf die Berge.',
+        w / 2,
+        1350,
+        w * 0.78,
+        46
+    );
 }
 
 function renderWrappedTourPhotoSlide(ctx, w, h, colors, data, photoImg, loadFailed = false) {
