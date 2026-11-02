@@ -963,6 +963,17 @@ function renderWrappedTopRegionSlide(ctx, w, h, colors, data) {
     setWrappedFont(ctx, 42);
     ctx.fillStyle = colors.text;
     ctx.fillText(`${data.region.count} Touren hier! 📍`, w / 2, 900);
+
+    setWrappedFont(ctx, 32, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    wrapWrappedText(
+        ctx,
+        'Zwischen bekannten Pfaden und neuen Gipfelzielen: Hier hat es dich in diesem Jahr besonders oft hingezogen.',
+        w / 2,
+        1080,
+        w * 0.78,
+        46
+    );
 }
 
 function renderWrappedTopCompanionSlide(ctx, w, h, colors, data) {
