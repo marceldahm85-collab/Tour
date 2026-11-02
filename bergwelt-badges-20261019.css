@@ -2923,3 +2923,89 @@ body.green .leaf {
         rgba(var(--bw-surface-rgb, 3,27,25),.98),
         rgb(var(--bw-surface-rgb, 3,27,25)) 100%);
 }
+
+/* Premium-Fotografie für die fünf Bergwelt-Spezialisierungen.
+   Dieselben kreisförmigen, gerahmten Motive wie auf den Dashboard-Meilensteinen. */
+#wrapped-view .bergwelt-badge-art {
+    display: grid !important;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+#wrapped-view .bergwelt-badge-photo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1;
+    object-fit: contain;
+    border-radius: 50%;
+    overflow: visible;
+    transform: translateZ(0);
+}
+#wrapped-view .bergwelt-level-badge .bergwelt-level-badge-emblem {
+    flex: 0 0 68px !important;
+    width: 68px !important;
+    height: 68px !important;
+    min-width: 68px !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    background: transparent !important;
+    overflow: visible !important;
+}
+#wrapped-view .bergwelt-level-badge.is-unlocked .bergwelt-badge-photo {
+    filter: drop-shadow(0 4px 10px color-mix(in srgb, var(--accent-color, currentColor) 24%, transparent));
+}
+#wrapped-view .bergwelt-level-badge.is-locked .bergwelt-badge-photo {
+    filter: saturate(.68) brightness(.9);
+    opacity: .84;
+}
+#wrapped-view .bergwelt-level-emblem {
+    display: grid !important;
+    place-items: center;
+    width: 58px !important;
+    height: 58px !important;
+    min-width: 58px !important;
+    flex: 0 0 58px !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    background: transparent !important;
+    overflow: visible !important;
+}
+#bergwelt-level-detail-modal .bergwelt-level-modal-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 76px;
+    width: 76px;
+    height: 76px;
+    overflow: visible;
+}
+#bergwelt-level-detail-modal .bergwelt-level-modal-icon .bergwelt-badge-photo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+    filter: drop-shadow(0 5px 12px color-mix(in srgb, var(--accent-color, currentColor) 22%, transparent));
+}
+@media (max-width: 560px) {
+    #wrapped-view .bergwelt-level-badge .bergwelt-level-badge-emblem {
+        flex-basis: 58px !important;
+        width: 58px !important;
+        height: 58px !important;
+        min-width: 58px !important;
+    }
+    #wrapped-view .bergwelt-level-emblem {
+        flex-basis: 50px !important;
+        width: 50px !important;
+        height: 50px !important;
+        min-width: 50px !important;
+    }
+    #bergwelt-level-detail-modal .bergwelt-level-modal-icon {
+        flex-basis: 68px;
+        width: 68px;
+        height: 68px;
+    }
+}
