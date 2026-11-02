@@ -919,6 +919,17 @@ function renderWrappedBestTourSlide(ctx, w, h, colors, data) {
     ctx.fillText(data.entry.date || '', w / 2, 650);
 
     drawWrappedBigNumber(ctx, data.score.toFixed(0), 'Leistungsindex', 1000, colors.text, w);
+
+    setWrappedFont(ctx, 32, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    wrapWrappedText(
+        ctx,
+        'Diese Tour vereint alles, was dein Bergjahr ausmacht – Ausdauer, Höhenmeter und den Willen, immer weiterzugehen.',
+        w / 2,
+        1240,
+        w * 0.78,
+        46
+    );
 }
 
 function renderWrappedHighestPeakSlide(ctx, w, h, colors, data) {
