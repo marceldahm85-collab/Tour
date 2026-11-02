@@ -36745,6 +36745,20 @@ function renderWrappedHighlightsSlide(ctx, w, h, colors, data) {
         );
     }
 
+    if (data.page === 2) {
+        setWrappedFont(ctx, 32, 'normal');
+        ctx.fillStyle = 'rgba(255,255,255,0.92)';
+        ctx.textAlign = 'center';
+        wrapWrappedText(
+            ctx,
+            'Auf schmalen Steigen windet sich der Weg zwischen schroffen Felsen bergauf, bis sich die Landschaft weit vor dir öffnet. Oben bleibt mehr als ein Ausblick – ein Gefühl, das lange nachklingt.',
+            w / 2,
+            1635,
+            w * 0.78,
+            46
+        );
+    }
+
     if (data.pageCount > 1) {
         setWrappedFont(ctx, 23, 'normal');
         ctx.fillStyle = 'rgba(255,255,255,0.72)';
