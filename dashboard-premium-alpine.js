@@ -21,6 +21,15 @@
         time: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Alpenpanorama_bei_Sonnenuntergang.jpg/1280px-Alpenpanorama_bei_Sonnenuntergang.jpg'
     };
 
+    /* Dieselben Bildausschnitte wie auf den fünf Dashboard-Meilensteinen. */
+    const MODAL_BACKDROP_POSITIONS = {
+        asc: '68% 57%',
+        dist: '54% center',
+        peaks: '56% 38%',
+        steps: '52% center',
+        time: '66% 76%'
+    };
+
     const TITLE_MARK = '<svg viewBox="0 0 34 24" role="presentation" focusable="false"><path d="M1.5 21 10.5 8.3l4.2 5.1L22 2.5l10.5 18.5H1.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m7.3 21 3.2-4.5 2.3 2.1M18 9.4l4 4.9 2.2-2.2 4.1 7.2" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" opacity=".72"/></svg>';
     const TOUR_HISTORY_MARK = '<svg viewBox="4.5 0 25 24" role="presentation" focusable="false"><path d="M26.46 14.54 A9.8 9.8 0 0 1 17 21.8 A9.8 9.8 0 0 1 7.2 12 A9.8 9.8 0 0 1 17 2.2 A9.8 9.8 0 0 1 23.93 5.07" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.59 3.74 23.93 5.07 22.6 1.73" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 6.35V12l4.13 2.48" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="17" cy="12" r="1.06" fill="currentColor"/></svg>';
 
@@ -146,11 +155,26 @@
         return null;
     }
 
+    function applyMilestoneModalBackdrop(modal, type) {
+        const body = modal.querySelector('#milestone-modal-body');
+        const image = BACKDROP_ASSETS[type];
+        if (!body || !image) return;
+
+        body.dataset.milestoneModalType = type;
+        body.style.setProperty('--milestone-modal-image', 'url("' + image + '")');
+        body.style.setProperty(
+            '--milestone-modal-image-position',
+            MODAL_BACKDROP_POSITIONS[type] || 'center'
+        );
+    }
+
     function enhanceMilestoneModalTitle() {
         const modal = document.getElementById('milestone-modal');
         const title = document.getElementById('milestone-modal-title');
         const type = getMilestoneModalType();
         if (!modal || !title || !type) return;
+
+        applyMilestoneModalBackdrop(modal, type);
 
         const titleText = MILESTONE_MODAL_TITLES[type];
         const currentText = title.querySelector('.milestone-modal-title-text');
