@@ -36759,6 +36759,20 @@ function renderWrappedHighlightsSlide(ctx, w, h, colors, data) {
         );
     }
 
+    if (data.page === 3) {
+        setWrappedFont(ctx, 32, 'normal');
+        ctx.fillStyle = 'rgba(255,255,255,0.92)';
+        ctx.textAlign = 'center';
+        wrapWrappedText(
+            ctx,
+            'Manchmal vergeht die Zeit Schritt für Schritt, während der Alltag weit zurückbleibt. Zwischen Waldpfaden, Fels und Gipfelblicken entstehen stille Stunden, die sich besonders tief ins Gedächtnis schreiben.',
+            w / 2,
+            1635,
+            w * 0.78,
+            46
+        );
+    }
+
     if (data.pageCount > 1) {
         setWrappedFont(ctx, 23, 'normal');
         ctx.fillStyle = 'rgba(255,255,255,0.72)';
