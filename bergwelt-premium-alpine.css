@@ -1037,3 +1037,76 @@
         animation-duration: .01ms !important;
     }
 }
+
+/* FINAL NAV OVERRIDE — match the Stats sub-navigation exactly */
+@media (orientation: portrait) {
+    #wrapped-view.bergwelt-ready .bergwelt-tabs {
+        display: grid !important;
+        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+        align-items: stretch !important;
+        gap: 4px !important;
+        width: 100% !important;
+        max-width: 430px !important;
+        margin: 6px auto 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        box-sizing: border-box !important;
+    }
+
+    #wrapped-view.bergwelt-ready .bergwelt-tabs > .bergwelt-tab {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 38px !important;
+        margin: 0 !important;
+        padding: 5px 3px !important;
+        border: 1px solid var(--app-surface-border, rgba(255,255,255,.14)) !important;
+        border-radius: var(--editor-radius, var(--premium-radius-control, 12px)) !important;
+        background: linear-gradient(180deg, var(--app-surface-card, rgba(17,26,37,.74)), var(--app-surface-subtle, rgba(13,21,31,.62))) !important;
+        color: var(--app-text-primary, var(--bw-text, #f3f7fb)) !important;
+        font: inherit !important;
+        font-size: 10px !important;
+        font-weight: 650 !important;
+        line-height: 1.2 !important;
+        letter-spacing: 0 !important;
+        text-align: center !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        opacity: .88 !important;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.05) !important;
+        -webkit-tap-highlight-color: transparent !important;
+        transition: background .18s ease, border-color .18s ease, opacity .18s ease, transform .14s ease !important;
+    }
+
+    #wrapped-view.bergwelt-ready .bergwelt-tabs > .bergwelt-tab.is-active {
+        background: var(--accent-gradient, linear-gradient(145deg, var(--bw-accent), color-mix(in srgb, var(--bw-accent) 72%, #171717))) !important;
+        color: var(--accent-text-color, var(--theme-palette-accent-text, #fff)) !important;
+        border-color: var(--accent, var(--bw-accent)) !important;
+        opacity: 1 !important;
+        font-weight: 750 !important;
+        box-shadow: 0 4px 12px var(--accent-soft, color-mix(in srgb, var(--bw-accent) 26%, transparent)), inset 0 1px 0 rgba(255,255,255,.18) !important;
+    }
+
+    #wrapped-view.bergwelt-ready .bergwelt-tabs > .bergwelt-tab:active {
+        transform: scale(.97);
+    }
+}
+
+@media (max-width: 390px) and (orientation: portrait) {
+    #wrapped-view.bergwelt-ready .bergwelt-tabs {
+        gap: 3px !important;
+    }
+    #wrapped-view.bergwelt-ready .bergwelt-tabs > .bergwelt-tab {
+        min-height: 36px !important;
+        padding: 4px 2px !important;
+        font-size: 9.5px !important;
+    }
+}
