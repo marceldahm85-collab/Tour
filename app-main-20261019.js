@@ -35743,15 +35743,18 @@ function updateWrappedProgressSegments() {
 
 function startWrappedAutoAdvance() {
     clearWrappedAutoAdvance();
+    const slide = wrappedSlides[wrappedSlideIndex];
+    if (!slide) return;
+
+    // Die Dauer der Zielseite bereits vormerken, auch wenn der Übergang
+    // noch läuft und die automatische Wiedergabe erst danach starten darf.
     if (wrappedTransitionState && wrappedTransitionState.toIndex === wrappedSlideIndex) {
+        wrappedAutoAdvanceRemaining = slide.duration;
         wrappedPendingAutoAdvanceIndex = wrappedSlideIndex;
         return;
     }
 
     wrappedPendingAutoAdvanceIndex = null;
-    const slide = wrappedSlides[wrappedSlideIndex];
-    if (!slide) return;
-
     wrappedAutoAdvanceRemaining = slide.duration;
     wrappedAutoAdvanceStart = Date.now();
     animateWrappedCurrentSegment(wrappedAutoAdvanceRemaining);
@@ -35806,6 +35809,8 @@ function resumeWrappedAutoAdvance() {
     wrappedPaused = false;
 
     if (wrappedTransitionState && wrappedTransitionState.toIndex === wrappedSlideIndex) {
+        const slide = wrappedSlides[wrappedSlideIndex];
+        if (slide) wrappedAutoAdvanceRemaining = slide.duration;
         wrappedPendingAutoAdvanceIndex = wrappedSlideIndex;
         updateWrappedPauseButtonLabel();
         return;
@@ -36683,6 +36688,19 @@ function finishWrappedTransition(commit = true, allowAutoAdvance = true) {
         !wrappedPaused
     ) {
         startWrappedAutoAdvance();
+    }
+
+    // Tourfotos können erst nach dem Übergang fertig geladen sein.
+    // In diesem Fall beginnt ihre dezente Kamerabewegung direkt nach
+    // dem Lade-Fade und nutzt nur die noch verbleibende Seitenzeit.
+    const currentSlide = wrappedSlides[wrappedSlideIndex];
+    if (
+        !wrappedPaused &&
+        currentSlide?.key === 'tourPhoto' &&
+        currentSlide.photoImg &&
+        (!wrappedPhotoMotionState || wrappedPhotoMotionState.slideIndex !== wrappedSlideIndex)
+    ) {
+        startWrappedPhotoMotionForCurrentSlide(getWrappedCurrentSlideRemaining());
     }
 }
 
