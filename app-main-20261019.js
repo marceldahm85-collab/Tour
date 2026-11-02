@@ -20381,14 +20381,6 @@ function recomputeAndSyncAchievements({ silent = false } = {}) {
     return { freshResults, newlyUnlocked, isFirstRun };
 }
 
-function triggerAchievementUnlockCelebration(badge) {
-    const def = ACHIEVEMENT_CATEGORIES[badge.categoryId]?.badges.find(b => b.id === badge.id) || badge;
-    const name = def.nameFn ? def.nameFn(def.threshold) : (def.id || 'Achievement');
-
-    triggerConfetti();
-    showAchievementToast(`${def.icon || '🏅'} Achievement freigeschaltet: ${name}`);
-}
-
 let achievementsYearFilter = 'all';
 
 function populateAchievementsYearSelect() {
