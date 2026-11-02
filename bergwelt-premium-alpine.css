@@ -1713,3 +1713,29 @@ body.wrapped-mobile-fullscreen-active .accordion-header {
         padding-bottom: max(4px, calc(env(safe-area-inset-bottom, 0px) - 8px)) !important;
     }
 }
+
+
+/* Jahresfilm: zweite Canvas-Ebene für flüssige Folienübergänge. */
+#wrapped-view #wrapped-stage {
+    isolation: isolate;
+}
+
+#wrapped-view #wrapped-canvas {
+    position: relative;
+    z-index: 1;
+}
+
+#wrapped-view #wrapped-transition-canvas {
+    position: absolute !important;
+    inset: 0 !important;
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    aspect-ratio: auto !important;
+    object-fit: contain !important;
+    border-radius: 0 !important;
+    pointer-events: none !important;
+    z-index: 4 !important;
+}

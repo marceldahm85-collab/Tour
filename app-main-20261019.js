@@ -15034,8 +15034,10 @@ function goToView(targetView, animate = true) {
 
         wrappedSlideIndex = 0;
         wrappedPaused = true;
+        wrappedInitialRevealPending = true;
 
         clearWrappedAutoAdvance();
+        wrappedPendingAutoAdvanceIndex = null;
         populateWrappedYearSelect();
         renderWrappedProgressBar();
         updateWrappedProgressSegments();
@@ -15046,7 +15048,11 @@ function goToView(targetView, animate = true) {
             wrappedSlides,
             wrappedCurrentYear
         ).then(() => {
-            renderWrappedSlide(wrappedSlideIndex);
+            if (wrappedSlideIndex === 0) {
+                renderWrappedSlide(0, { type: 'fade', duration: 360 });
+            } else {
+                renderWrappedSlide(wrappedSlideIndex);
+            }
         });
     }
 }
@@ -35640,6 +35646,9 @@ async function shareAllWrappedSlides(year) {
 }
 
 async function openWrappedView(year) {
+    if (wrappedTransitionState) finishWrappedTransition(false, false);
+    wrappedPendingAutoAdvanceIndex = null;
+    wrappedInitialRevealPending = true;
     wrappedSlides.forEach(releaseWrappedGalleryPhoto);
     wrappedLastRenderedSlideIndex = null;
     wrappedCurrentYear = year;
@@ -35659,7 +35668,11 @@ async function openWrappedView(year) {
     updateWrappedPauseButtonLabel();
 
     await attachWrappedPhotos(wrappedSlides, year);
-    renderWrappedSlide(wrappedSlideIndex);
+    if (wrappedSlideIndex === 0) {
+        renderWrappedSlide(0, { type: 'fade', duration: 360 });
+    } else {
+        renderWrappedSlide(wrappedSlideIndex);
+    }
 }
 
 function populateWrappedYearSelect() {
@@ -35728,6 +35741,12 @@ function updateWrappedProgressSegments() {
 
 function startWrappedAutoAdvance() {
     clearWrappedAutoAdvance();
+    if (wrappedTransitionState && wrappedTransitionState.toIndex === wrappedSlideIndex) {
+        wrappedPendingAutoAdvanceIndex = wrappedSlideIndex;
+        return;
+    }
+
+    wrappedPendingAutoAdvanceIndex = null;
     const slide = wrappedSlides[wrappedSlideIndex];
     if (!slide) return;
 
@@ -35758,6 +35777,11 @@ function pauseWrappedAutoAdvance() {
     if (wrappedPaused) return;
     wrappedPaused = true;
     clearTimeout(wrappedAutoAdvanceTimer);
+
+    if (wrappedTransitionState && wrappedTransitionState.toIndex === wrappedSlideIndex) {
+        updateWrappedPauseButtonLabel();
+        return;
+    }
 
     const elapsed = Date.now() - wrappedAutoAdvanceStart;
     wrappedAutoAdvanceRemaining = Math.max(0, wrappedAutoAdvanceRemaining - elapsed);
@@ -35802,23 +35826,32 @@ function clearWrappedAutoAdvance() {
 }
 
 function goToWrappedSlide(index) {
-    if (index < 0) return;
+    if (index < 0 || index === wrappedSlideIndex) return;
 
     if (index >= wrappedSlides.length) {
         clearWrappedAutoAdvance();
+        wrappedPendingAutoAdvanceIndex = null;
+        if (wrappedTransitionState) finishWrappedTransition(true, false);
         wrappedPaused = true;
         updateWrappedPauseButtonLabel();
         return;
     }
 
+    clearWrappedAutoAdvance();
+    wrappedPendingAutoAdvanceIndex = null;
+    if (wrappedTransitionState) finishWrappedTransition(true, false);
+
+    const previousIndex = wrappedSlideIndex;
+    const transition = getWrappedSlideTransition(previousIndex, index);
     wrappedSlideIndex = index;
 
     updateWrappedProgressSegments();
-    renderWrappedSlide(wrappedSlideIndex);
+    renderWrappedSlide(wrappedSlideIndex, transition);
 
     /*
      * Beim manuellen Durchblättern bleibt der Rückblick pausiert,
-     * sofern er vorher pausiert war.
+     * sofern er vorher pausiert war. Während eines Übergangs beginnt
+     * die Anzeigedauer erst nach dessen vollständigem Abschluss.
      */
     if (!wrappedPaused) {
         startWrappedAutoAdvance();
@@ -35882,8 +35915,11 @@ const endHold = () => {
 
     document.getElementById('wrapped-stop-btn').addEventListener('click', () => {
     clearWrappedAutoAdvance();
+    wrappedPendingAutoAdvanceIndex = null;
+    if (wrappedTransitionState) finishWrappedTransition(true, false);
     wrappedPaused = true;
     wrappedSlideIndex = 0;
+    wrappedInitialRevealPending = true;
     updateWrappedProgressSegments();
     renderWrappedSlide(0);
     updateWrappedPauseButtonLabel();
@@ -36187,10 +36223,353 @@ function getWrappedEverestComparison(meters) {
     return `Das ist wie ${factor}× auf den Mount Everest!`;
 }
 
-function renderWrappedSlide(index) {
-    const canvas = document.getElementById('wrapped-canvas');
+const WRAPPED_TRANSITION_DURATIONS = {
+    center: 1000,
+    slide: 650,
+    diagonal: 750,
+    curtain: 760,
+    zoom: 800,
+    fade: 720,
+    wave: 900,
+    photoZoom: 850
+};
+
+let wrappedTransitionCanvas = null;
+let wrappedTransitionState = null;
+let wrappedInitialRevealPending = false;
+let wrappedPendingAutoAdvanceIndex = null;
+
+function getWrappedTransitionDuration(type) {
+    if (type === 'center') return WRAPPED_TRANSITION_DURATIONS.center;
+    if (type === 'curtain') return WRAPPED_TRANSITION_DURATIONS.curtain;
+    if (type === 'zoom-fade') return WRAPPED_TRANSITION_DURATIONS.zoom;
+    if (type === 'photo-zoom') return WRAPPED_TRANSITION_DURATIONS.photoZoom;
+    if (type === 'wave-left' || type === 'wave-right') return WRAPPED_TRANSITION_DURATIONS.wave;
+    if (type === 'diagonal-left' || type === 'diagonal-right') return WRAPPED_TRANSITION_DURATIONS.diagonal;
+    if (type === 'fade') return WRAPPED_TRANSITION_DURATIONS.fade;
+    return WRAPPED_TRANSITION_DURATIONS.slide;
+}
+
+function reverseWrappedTransitionType(type) {
+    const reverse = {
+        'slide-left': 'slide-right',
+        'slide-right': 'slide-left',
+        'slide-up': 'slide-down',
+        'slide-down': 'slide-up',
+        'diagonal-left': 'diagonal-right',
+        'diagonal-right': 'diagonal-left',
+        'wave-left': 'wave-right',
+        'wave-right': 'wave-left'
+    };
+    return reverse[type] || type;
+}
+
+function getWrappedSlideTransition(fromIndex, toIndex) {
+    const from = wrappedSlides[fromIndex];
+    const to = wrappedSlides[toIndex];
+    if (!from || !to || fromIndex === toIndex) return null;
+
+    const forward = toIndex > fromIndex;
+    const useDirection = type => forward ? type : reverseWrappedTransitionType(type);
+    const make = (type, extra = {}) => ({
+        type: useDirection(type),
+        duration: getWrappedTransitionDuration(type),
+        ...extra
+    });
+
+    // Diese drei Übergänge markieren die großen Abschnitte des Jahresfilms.
+    if (to.key === 'intro' || to.key === 'outro' || from.key === 'outro') {
+        return make('center');
+    }
+    if ((from.key === 'tourPhoto') !== (to.key === 'tourPhoto')) {
+        return make('center');
+    }
+
+    // Alle Highlight-Seiten bleiben durch dieselbe Wellenbewegung erkennbar.
+    // Die Wellenrichtung und -phase wechseln von Seite zu Seite.
+    if (from.key === 'highlights' && to.key === 'highlights') {
+        const page = Number(to.data?.page) || 2;
+        const type = page % 2 === 0 ? 'wave-right' : 'wave-left';
+        return make(type, { phase: page % 2 === 0 ? 0 : Math.PI * 0.65 });
+    }
+    if (to.key === 'highlights') return make('fade');
+    if (from.key === 'highlights') return make('diagonal-left');
+
+    // Die einzelnen Tourfotos erhalten eine eigene, nicht direkt
+    // wiederholende Abfolge aus Zoom, Schieben, Diagonale und Überblendung.
+    if (from.key === 'tourPhoto' && to.key === 'tourPhoto') {
+        const photoPattern = [
+            'photo-zoom',
+            'slide-left',
+            'slide-up',
+            'diagonal-left',
+            'slide-right',
+            'slide-down',
+            'fade'
+        ];
+        const fromPhoto = Number(from.data?.photoIndex) || 1;
+        const toPhoto = Number(to.data?.photoIndex) || fromPhoto + (forward ? 1 : -1);
+        const edge = Math.max(1, Math.min(fromPhoto, toPhoto));
+        const type = photoPattern[(edge - 1) % photoPattern.length];
+        return make(type);
+    }
+
+    if (from.key === 'bestTour' && to.key === 'top3') return make('slide-left');
+    if (from.key === 'top3' && to.key === 'topCompanion') return make('zoom-fade');
+
+    // Für den Statistikteil werden die Grundrichtungen bewusst variiert.
+    // Die Rückwärtsnavigation verwendet jeweils die Gegenrichtung.
+    const statisticPattern = [
+        'slide-right',
+        'slide-up',
+        'diagonal-left',
+        'slide-down',
+        'zoom-fade',
+        'slide-left',
+        'curtain',
+        'fade'
+    ];
+    const edgeIndex = Math.min(fromIndex, toIndex);
+    const type = statisticPattern[edgeIndex % statisticPattern.length];
+    return make(type);
+}
+
+function ensureWrappedTransitionCanvas(baseCanvas) {
     const stage = document.getElementById('wrapped-stage');
-    if (!canvas) return;
+    if (!stage || !baseCanvas) return null;
+
+    let overlay = document.getElementById('wrapped-transition-canvas');
+    if (!overlay) {
+        overlay = document.createElement('canvas');
+        overlay.id = 'wrapped-transition-canvas';
+        overlay.setAttribute('aria-hidden', 'true');
+        overlay.style.position = 'absolute';
+        overlay.style.inset = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.maxWidth = '100%';
+        overlay.style.maxHeight = '100%';
+        overlay.style.objectFit = 'contain';
+        overlay.style.pointerEvents = 'none';
+        overlay.style.zIndex = '4';
+        overlay.style.display = 'none';
+        stage.appendChild(overlay);
+    }
+
+    if (overlay.width !== baseCanvas.width) overlay.width = baseCanvas.width;
+    if (overlay.height !== baseCanvas.height) overlay.height = baseCanvas.height;
+    overlay.style.display = 'block';
+    wrappedTransitionCanvas = overlay;
+    return overlay;
+}
+
+function getWrappedEase(progress) {
+    const t = Math.max(0, Math.min(1, progress));
+    return t < 0.5
+        ? 4 * t * t * t
+        : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function drawWrappedTransitionFrame(state, progress) {
+    if (!state || !state.overlayCanvas || !state.sourceCanvas) return;
+    const canvas = state.overlayCanvas;
+    const source = state.sourceCanvas;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+    const t = getWrappedEase(progress);
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    ctx.save();
+
+    switch (state.type) {
+        case 'center': {
+            ctx.beginPath();
+            ctx.arc(w / 2, h / 2, Math.hypot(w, h) * t, 0, Math.PI * 2);
+            ctx.clip();
+            ctx.drawImage(source, 0, 0, w, h);
+            break;
+        }
+        case 'slide-left':
+            ctx.drawImage(source, w * (1 - t), 0, w, h);
+            break;
+        case 'slide-right':
+            ctx.drawImage(source, -w * (1 - t), 0, w, h);
+            break;
+        case 'slide-up':
+            ctx.drawImage(source, 0, h * (1 - t), w, h);
+            break;
+        case 'slide-down':
+            ctx.drawImage(source, 0, -h * (1 - t), w, h);
+            break;
+        case 'diagonal-left':
+        case 'diagonal-right': {
+            const skew = h * 0.22;
+            const edgeTop = t * (w + skew) - skew;
+            const edgeBottom = edgeTop + skew;
+            ctx.beginPath();
+            if (state.type === 'diagonal-left') {
+                ctx.moveTo(0, 0);
+                ctx.lineTo(edgeTop, 0);
+                ctx.lineTo(edgeBottom, h);
+                ctx.lineTo(0, h);
+            } else {
+                ctx.moveTo(w, 0);
+                ctx.lineTo(w - edgeTop, 0);
+                ctx.lineTo(w - edgeBottom, h);
+                ctx.lineTo(w, h);
+            }
+            ctx.closePath();
+            ctx.clip();
+            ctx.drawImage(source, 0, 0, w, h);
+            break;
+        }
+        case 'curtain': {
+            const visibleHeight = h * t;
+            const top = (h - visibleHeight) / 2;
+            ctx.beginPath();
+            ctx.rect(0, top, w, visibleHeight);
+            ctx.clip();
+            ctx.drawImage(source, 0, 0, w, h);
+            break;
+        }
+        case 'wave-left':
+        case 'wave-right': {
+            const amplitude = w * 0.055 * Math.sin(Math.PI * t);
+            const phase = Number(state.phase) || 0;
+            const edgeAt = y => Math.max(0, Math.min(
+                w,
+                w * t + Math.sin((y / h) * Math.PI * 4 + phase) * amplitude
+            ));
+            ctx.beginPath();
+            if (state.type === 'wave-right') {
+                ctx.moveTo(0, 0);
+                ctx.lineTo(edgeAt(0), 0);
+                for (let y = 12; y < h; y += 12) ctx.lineTo(edgeAt(y), y);
+                ctx.lineTo(edgeAt(h), h);
+                ctx.lineTo(0, h);
+            } else {
+                ctx.moveTo(w, 0);
+                ctx.lineTo(edgeAt(0), 0);
+                for (let y = 12; y < h; y += 12) ctx.lineTo(edgeAt(y), y);
+                ctx.lineTo(edgeAt(h), h);
+                ctx.lineTo(w, h);
+            }
+            ctx.closePath();
+            ctx.clip();
+            ctx.drawImage(source, 0, 0, w, h);
+            break;
+        }
+        case 'zoom-fade':
+        case 'photo-zoom': {
+            const startScale = state.type === 'photo-zoom' ? 1.035 : 1.06;
+            const scale = startScale - (startScale - 1) * t;
+            const drawWidth = w * scale;
+            const drawHeight = h * scale;
+            ctx.globalAlpha = t;
+            ctx.drawImage(
+                source,
+                (w - drawWidth) / 2,
+                (h - drawHeight) / 2,
+                drawWidth,
+                drawHeight
+            );
+            break;
+        }
+        case 'fade':
+        default:
+            ctx.globalAlpha = t;
+            ctx.drawImage(source, 0, 0, w, h);
+            break;
+    }
+
+    ctx.restore();
+    state.progress = progress;
+}
+
+function finishWrappedTransition(commit = true, allowAutoAdvance = true) {
+    const state = wrappedTransitionState;
+    if (!state) return;
+
+    if (state.frameId) cancelAnimationFrame(state.frameId);
+    wrappedTransitionState = null;
+
+    const baseCanvas = document.getElementById('wrapped-canvas');
+    if (commit && baseCanvas && state.sourceCanvas) {
+        if (baseCanvas.width !== state.sourceCanvas.width) baseCanvas.width = state.sourceCanvas.width;
+        if (baseCanvas.height !== state.sourceCanvas.height) baseCanvas.height = state.sourceCanvas.height;
+        const baseCtx = baseCanvas.getContext('2d');
+        baseCtx.setTransform(1, 0, 0, 1, 0, 0);
+        baseCtx.clearRect(0, 0, baseCanvas.width, baseCanvas.height);
+        baseCtx.drawImage(state.sourceCanvas, 0, 0);
+    }
+
+    const overlay = state.overlayCanvas || wrappedTransitionCanvas;
+    if (overlay) {
+        const overlayCtx = overlay.getContext('2d');
+        overlayCtx.setTransform(1, 0, 0, 1, 0, 0);
+        overlayCtx.clearRect(0, 0, overlay.width, overlay.height);
+        overlay.style.display = 'none';
+    }
+
+    const pendingIndex = wrappedPendingAutoAdvanceIndex;
+    wrappedPendingAutoAdvanceIndex = null;
+    if (
+        allowAutoAdvance &&
+        pendingIndex === state.toIndex &&
+        pendingIndex === wrappedSlideIndex &&
+        !wrappedPaused
+    ) {
+        startWrappedAutoAdvance();
+    }
+}
+
+function startWrappedTransition(type, sourceCanvas, toIndex, options = {}) {
+    const baseCanvas = document.getElementById('wrapped-canvas');
+    const overlayCanvas = ensureWrappedTransitionCanvas(baseCanvas);
+    if (!baseCanvas || !overlayCanvas || !sourceCanvas) {
+        if (baseCanvas && sourceCanvas) {
+            const ctx = baseCanvas.getContext('2d');
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.clearRect(0, 0, baseCanvas.width, baseCanvas.height);
+            ctx.drawImage(sourceCanvas, 0, 0);
+        }
+        return;
+    }
+
+    const duration = Math.max(180, Number(options.duration) || getWrappedTransitionDuration(type));
+    const state = {
+        type,
+        phase: Number(options.phase) || 0,
+        sourceCanvas,
+        overlayCanvas,
+        toIndex,
+        duration,
+        startTime: performance.now(),
+        frameId: 0,
+        progress: 0
+    };
+    wrappedTransitionState = state;
+    drawWrappedTransitionFrame(state, 0);
+
+    const tick = now => {
+        if (wrappedTransitionState !== state) return;
+        const progress = Math.min(1, (now - state.startTime) / state.duration);
+        drawWrappedTransitionFrame(state, progress);
+        if (progress >= 1) {
+            finishWrappedTransition(true, true);
+            return;
+        }
+        state.frameId = requestAnimationFrame(tick);
+    };
+    state.frameId = requestAnimationFrame(tick);
+}
+
+function drawWrappedSlideIntoCanvas(index, targetCanvas) {
+    const baseCanvas = document.getElementById('wrapped-canvas');
+    const stage = document.getElementById('wrapped-stage');
+    if (!baseCanvas || !targetCanvas) return false;
 
     const stageRect = stage?.getBoundingClientRect();
     const logicalWidth = WRAPPED_CANVAS_BASE_WIDTH;
@@ -36198,10 +36577,34 @@ function renderWrappedSlide(index) {
         ? stageRect.height / stageRect.width
         : WRAPPED_CANVAS_BASE_HEIGHT / WRAPPED_CANVAS_BASE_WIDTH;
     const pixelHeight = Math.max(720, Math.round(logicalWidth * stageRatio));
-    if (canvas.width !== logicalWidth) canvas.width = logicalWidth;
-    if (canvas.height !== pixelHeight) canvas.height = pixelHeight;
 
-    const ctx = canvas.getContext('2d');
+    if (baseCanvas.width !== logicalWidth) baseCanvas.width = logicalWidth;
+    if (baseCanvas.height !== pixelHeight) baseCanvas.height = pixelHeight;
+    if (targetCanvas.width !== logicalWidth) targetCanvas.width = logicalWidth;
+    if (targetCanvas.height !== pixelHeight) targetCanvas.height = pixelHeight;
+
+    const slide = wrappedSlides[index];
+    if (!slide) return false;
+
+    if (wrappedLastRenderedSlideIndex !== null && wrappedLastRenderedSlideIndex !== index) {
+        releaseWrappedGalleryPhoto(wrappedSlides[wrappedLastRenderedSlideIndex]);
+    }
+    wrappedLastRenderedSlideIndex = index;
+
+    if (slide.key === 'tourPhoto' && !slide.photoImg && !slide.photoLoadFailed && !slide.photoRefreshAttached) {
+        slide.photoRefreshAttached = true;
+        ensureWrappedGalleryPhotoLoaded(slide).then(image => {
+            slide.photoRefreshAttached = false;
+            if (wrappedSlides[index] !== slide) return;
+            if (wrappedSlideIndex === index) {
+                renderWrappedSlide(index, image ? { type: 'fade', duration: 360 } : null);
+            } else if (image) {
+                releaseWrappedGalleryPhoto(slide);
+            }
+        });
+    }
+
+    const ctx = targetCanvas.getContext('2d');
     wrappedCanvasVerticalScale = pixelHeight / WRAPPED_CANVAS_BASE_HEIGHT;
     const w = logicalWidth / wrappedCanvasVerticalScale;
     const h = WRAPPED_CANVAS_BASE_HEIGHT;
@@ -36210,22 +36613,6 @@ function renderWrappedSlide(index) {
         0, wrappedCanvasVerticalScale,
         0, 0
     );
-
-    if (wrappedLastRenderedSlideIndex !== null && wrappedLastRenderedSlideIndex !== index) {
-        releaseWrappedGalleryPhoto(wrappedSlides[wrappedLastRenderedSlideIndex]);
-    }
-    wrappedLastRenderedSlideIndex = index;
-
-    const slide = wrappedSlides[index];
-    if (!slide) return;
-
-    if (slide.key === 'tourPhoto' && !slide.photoImg && !slide.photoLoadFailed) {
-        ensureWrappedGalleryPhotoLoaded(slide).then(image => {
-            if (image && wrappedSlides[index] === slide && wrappedSlideIndex === index) {
-                renderWrappedSlide(index);
-            }
-        });
-    }
 
     const colors = drawWrappedBackground(ctx, w, h, slide.photoImg || null, slide.key);
 
@@ -36246,7 +36633,64 @@ function renderWrappedSlide(index) {
         case 'outro': renderWrappedOutroSlide(ctx, w, h, colors, slide.data); break;
     }
 
+    return true;
 }
+
+function renderWrappedSlide(index, transition = null) {
+    const baseCanvas = document.getElementById('wrapped-canvas');
+    if (!baseCanvas) return;
+
+    const updatingCurrentTransition = !!(
+        wrappedTransitionState &&
+        wrappedTransitionState.toIndex === index
+    );
+
+    if (wrappedTransitionState && !updatingCurrentTransition) {
+        finishWrappedTransition(true, false);
+    }
+
+    let request = transition;
+    if (typeof request === 'string') request = { type: request };
+
+    if (!request && wrappedInitialRevealPending && index === 0) {
+        request = { type: 'center', duration: WRAPPED_TRANSITION_DURATIONS.center, fromEmpty: true };
+        wrappedInitialRevealPending = false;
+    }
+
+    if (updatingCurrentTransition) {
+        if (drawWrappedSlideIntoCanvas(index, wrappedTransitionState.sourceCanvas)) {
+            drawWrappedTransitionFrame(wrappedTransitionState, wrappedTransitionState.progress);
+        }
+        return;
+    }
+
+    const shouldAnimate = !!(request && request.type);
+    let targetCanvas = baseCanvas;
+    if (shouldAnimate) {
+        targetCanvas = document.createElement('canvas');
+        targetCanvas.width = baseCanvas.width || WRAPPED_CANVAS_BASE_WIDTH;
+        targetCanvas.height = baseCanvas.height || WRAPPED_CANVAS_BASE_HEIGHT;
+    }
+
+    if (shouldAnimate && request.fromEmpty) {
+        const baseCtx = baseCanvas.getContext('2d');
+        baseCtx.setTransform(1, 0, 0, 1, 0, 0);
+        baseCtx.fillStyle = '#050a0f';
+        baseCtx.fillRect(0, 0, baseCanvas.width, baseCanvas.height);
+    }
+
+    if (!drawWrappedSlideIntoCanvas(index, targetCanvas)) return;
+
+    if (shouldAnimate) {
+        startWrappedTransition(
+            request.type,
+            targetCanvas,
+            index,
+            request
+        );
+    }
+}
+let wrappedCanvasResizeFrame = 0;
 
 let wrappedCanvasResizeFrame = 0;
 window.addEventListener('resize', () => {
@@ -36255,6 +36699,7 @@ window.addEventListener('resize', () => {
     if (wrappedCanvasResizeFrame) cancelAnimationFrame(wrappedCanvasResizeFrame);
     wrappedCanvasResizeFrame = requestAnimationFrame(() => {
         wrappedCanvasResizeFrame = 0;
+        if (wrappedTransitionState) finishWrappedTransition(true, true);
         renderWrappedSlide(wrappedSlideIndex);
     });
 }, { passive: true });
