@@ -35946,11 +35946,11 @@ const endHold = () => {
             styleLink.dataset.bergweltBadgeStyles = '20261022-year-ascent-donut';
             document.head.appendChild(styleLink);
         }
-        if (!document.querySelector('link[data-bergwelt-premium-styles="20261102-premium-alpine-bottom-nav"]')) {
+        if (!document.querySelector('link[data-bergwelt-premium-styles="20261102-premium-alpine-direct-footer"]')) {
             const premiumStyleLink = document.createElement('link');
             premiumStyleLink.rel = 'stylesheet';
-            premiumStyleLink.href = './bergwelt-premium-alpine.css?v=6';
-            premiumStyleLink.dataset.bergweltPremiumStyles = '20261102-premium-alpine-bottom-nav';
+            premiumStyleLink.href = './bergwelt-premium-alpine.css?v=7';
+            premiumStyleLink.dataset.bergweltPremiumStyles = '20261102-premium-alpine-direct-footer';
             document.head.appendChild(premiumStyleLink);
         }
         const script = document.createElement('script');
