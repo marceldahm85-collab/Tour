@@ -15031,6 +15031,7 @@ function goToView(targetView, animate = true) {
             buildWrappedSlideData(
                 wrappedCurrentYear
             );
+        preloadWrappedBackgroundImages();
 
         wrappedSlideIndex = 0;
         wrappedPaused = true;
@@ -36110,19 +36111,19 @@ async function ensureWrappedGalleryPhotoLoaded(slide) {
 }
 
 const WRAPPED_BACKGROUND_IMAGE_SOURCES = Object.freeze({
-    distance: 'https://images.unsplash.com/photo-1632665099926-094c0d6b92bb?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
-    ascent: 'https://images.unsplash.com/photo-1516733745173-62e8f8651711?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
-    peaks: 'https://images.unsplash.com/photo-1789909145224-b12f9ac21ab9?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
-    time: 'https://images.unsplash.com/photo-1486068720048-47715511ce71?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
-    activeMonth: 'https://images.unsplash.com/photo-1636043982206-a2255072410e?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
-    highestPeak: 'https://images.unsplash.com/photo-1642520175002-90a1168a0d57?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
-    topRegion: 'https://images.unsplash.com/photo-1789414297236-295409dfeb37?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
-    'highlights-1': 'https://images.unsplash.com/photo-1699448095339-c07828dee7c4?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
-    'highlights-2': 'https://images.unsplash.com/photo-1762375212956-46c0a0964336?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
-    'highlights-3': 'https://images.unsplash.com/photo-1757330878011-418ff67dd845?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
-    bestTour: 'https://images.unsplash.com/photo-1628091864452-095d137137e0?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
-    top3: 'https://images.unsplash.com/photo-1666567693318-27238d192d6a?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200',
-    topCompanion: 'https://images.unsplash.com/photo-1792928442695-aaa9c0bf9cd5?fit=crop&crop=entropy&fm=jpg&q=84&w=1800&h=3200'
+    distance: 'https://images.unsplash.com/photo-1632665099926-094c0d6b92bb?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    ascent: 'https://images.unsplash.com/photo-1516733745173-62e8f8651711?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    peaks: 'https://images.unsplash.com/photo-1789909145224-b12f9ac21ab9?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    time: 'https://images.unsplash.com/photo-1486068720048-47715511ce71?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    activeMonth: 'https://images.unsplash.com/photo-1636043982206-a2255072410e?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    highestPeak: 'https://images.unsplash.com/photo-1642520175002-90a1168a0d57?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    topRegion: 'https://images.unsplash.com/photo-1789414297236-295409dfeb37?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    'highlights-1': 'https://images.unsplash.com/photo-1699448095339-c07828dee7c4?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    'highlights-2': 'https://images.unsplash.com/photo-1762375212956-46c0a0964336?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    'highlights-3': 'https://images.unsplash.com/photo-1757330878011-418ff67dd845?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    bestTour: 'https://images.unsplash.com/photo-1628091864452-095d137137e0?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    top3: 'https://images.unsplash.com/photo-1666567693318-27238d192d6a?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    topCompanion: 'https://images.unsplash.com/photo-1792928442695-aaa9c0bf9cd5?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560'
 });
 
 const wrappedBackgroundImageCache = new Map();
@@ -36141,6 +36142,10 @@ function getWrappedBackgroundImage(slideKey, slideData) {
     if (!source) return null;
 
     let entry = wrappedBackgroundImageCache.get(key);
+    if (entry?.status === 'error') {
+        wrappedBackgroundImageCache.delete(key);
+        entry = null;
+    }
     if (!entry) {
         const image = new Image();
         entry = { image, status: 'loading', promise: null };
