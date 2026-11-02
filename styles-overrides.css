@@ -6285,7 +6285,7 @@ body.green #achievements-view .achievements-summary-main strong {
     .modal:not(.hidden) .modal-card.highlight-modal-silver:not(.is-dragging),
     .modal:not(.hidden) .modal-card.highlight-modal-bronze:not(.is-dragging) {
         animation-name: modalSlideUp, metal-tone-breathe-strong !important;
-        animation-duration: 680ms, 3.4s !important;
+        animation-duration: 850ms, 3.4s !important;
         animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1), linear !important;
         animation-delay: 0s, 0s !important;
         animation-iteration-count: 1, infinite !important;
@@ -9038,17 +9038,27 @@ body.summit .top-main-nav [aria-current="page"] {
         0 16px 36px rgba(0,0,0,.30) !important;
 }
 
-/* Die bestehenden Metall-Pulszeiten explizit beibehalten. */
-#tour-list-modal #tl-body .stats-list li.highlight-rank-bronze,
+/* Gemeinsame Einblendzeit für normale und metallische Tour-Modale:
+   850 ms wirkt etwas ruhiger als der bisherige Slide-up, bleibt aber direkt.
+   Die zweite Dauer steuert ausschließlich den weiterlaufenden Metall-Pulseffekt. */
 #tour-detail-modal .modal-card.highlight-modal-bronze {
+    animation-duration: 850ms, 3.2s !important;
+}
+#tour-detail-modal .modal-card.highlight-modal-silver {
+    animation-duration: 850ms, 3.7s !important;
+}
+#tour-detail-modal .modal-card.highlight-modal-gold {
+    animation-duration: 850ms, 4.2s !important;
+}
+
+/* Die drei Ranglisten-Einträge behalten ihre eigenen Pulszeiten. */
+#tour-list-modal #tl-body .stats-list li.highlight-rank-bronze {
     animation-duration: 3.2s !important;
 }
-#tour-list-modal #tl-body .stats-list li.highlight-rank-silver,
-#tour-detail-modal .modal-card.highlight-modal-silver {
+#tour-list-modal #tl-body .stats-list li.highlight-rank-silver {
     animation-duration: 3.7s !important;
 }
-#tour-list-modal #tl-body .stats-list li.highlight-rank-gold,
-#tour-detail-modal .modal-card.highlight-modal-gold {
+#tour-list-modal #tl-body .stats-list li.highlight-rank-gold {
     animation-duration: 4.2s !important;
 }
 
