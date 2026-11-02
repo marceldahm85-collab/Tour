@@ -802,6 +802,17 @@ function renderWrappedDistanceSlide(ctx, w, h, colors, data) {
     ctx.fillStyle = colors.accent;
     ctx.textAlign = 'center';
     wrapWrappedText(ctx, getWrappedDistanceComparison(data.distance), w / 2, 1000, w - 160, 50);
+
+    setWrappedFont(ctx, 32, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    wrapWrappedText(
+        ctx,
+        'Jeder Kilometer war ein Teil deines Weges – durch Täler, über Höhen und immer ein Stück weiter.',
+        w / 2,
+        1150,
+        w * 0.78,
+        46
+    );
 }
 
 function renderWrappedAscentSlide(ctx, w, h, colors, data) {
