@@ -36837,6 +36837,18 @@ function renderWrappedTop3Slide(ctx, w, h, colors, data) {
             wrapWrappedText(ctx, 'Top 3: ' + topReasons.map(x => x.name).join(' · '), cardX + 350, y + 370, cardW - 385, 25);
         }
     });
+
+    setWrappedFont(ctx, 30, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.textAlign = 'center';
+    wrapWrappedText(
+        ctx,
+        'Manche Tage bleiben besonders lebendig. Wegen der Landschaft, der gemeinsamen Augenblicke oder einfach wegen des Gefühls, genau am richtigen Ort zu sein.',
+        w / 2,
+        1740,
+        w * 0.82,
+        40
+    );
 }
 
 function renderWrappedOutroSlide(ctx, w, h, colors, data) {
