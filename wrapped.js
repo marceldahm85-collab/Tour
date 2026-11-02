@@ -680,7 +680,7 @@ function drawWrappedFooter(ctx, w, h, year) {
 
 function getWrappedDistanceComparison(km) {
     const refKm = 860;
-    const factor = (km / refKm).toFixed(1);
+    const factor = (km / refKm).toFixed(2);
     return `Das ist wie ${factor}× Lienz → Düsseldorf!`;
 }
 
