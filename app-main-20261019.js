@@ -24368,6 +24368,9 @@ async function attachWrappedPhotos(slides, year) {
                 item.photoImg = null;
                 top3Slots.push({ slide, item, preferred: photoForEntry(item.entry) });
             }
+            // Zusätzlich ein eigenes Jahres-Tourfoto als großflächigen Hintergrund
+            // reservieren; die drei Ranglistenfotos bleiben in ihren Karten.
+            specificBackgroundSlots.push({ slide, preferred: null });
         } else if (slide.key === 'bestTour') {
             specificBackgroundSlots.push({
                 slide,
@@ -35545,7 +35548,7 @@ function renderWrappedSlideToCanvas(slide, width, height) {
     const logicalHeight = WRAPPED_CANVAS_BASE_HEIGHT;
     const logicalWidth = width / wrappedCanvasVerticalScale;
 
-    const colors = drawWrappedBackground(ctx, logicalWidth, logicalHeight, slide.photoImg || null);
+    const colors = drawWrappedBackground(ctx, logicalWidth, logicalHeight, slide.photoImg || null, slide.key);
 
     switch (slide.key) {
         case 'intro': renderWrappedIntroSlide(ctx, logicalWidth, logicalHeight, colors, slide.data, !slide.photoImg); break;
@@ -36043,22 +36046,38 @@ async function ensureWrappedGalleryPhotoLoaded(slide) {
     return slide.photoLoadPromise;
 }
 
-function drawWrappedBackground(ctx, w, h, photoImg) {
+function drawWrappedBackground(ctx, w, h, photoImg, slideKey) {
     const colors = getWrappedThemeColors();
 
     if (photoImg) {
         drawWrappedCoverImage(ctx, photoImg, w, h);
 
         const overlay = ctx.createLinearGradient(0, 0, 0, h);
-        overlay.addColorStop(0, 'rgba(0,0,0,0.55)');
-        overlay.addColorStop(0.5, 'rgba(0,0,0,0.30)');
-        overlay.addColorStop(1, 'rgba(0,0,0,0.65)');
+        if (slideKey === 'top3') {
+            // Das Landschaftsbild bleibt sichtbar; nur der untere Bereich
+            // erhält eine sanfte Abdunklung für die Karten und Kennzahlen.
+            overlay.addColorStop(0, 'rgba(5,18,25,0.12)');
+            overlay.addColorStop(0.52, 'rgba(5,18,25,0.22)');
+            overlay.addColorStop(1, 'rgba(5,18,25,0.48)');
+        } else {
+            overlay.addColorStop(0, 'rgba(0,0,0,0.55)');
+            overlay.addColorStop(0.5, 'rgba(0,0,0,0.30)');
+            overlay.addColorStop(1, 'rgba(0,0,0,0.65)');
+        }
         ctx.fillStyle = overlay;
         ctx.fillRect(0, 0, w, h);
     } else {
         const gradient = ctx.createLinearGradient(0, 0, w, h);
-        gradient.addColorStop(0, colors.bg1);
-        gradient.addColorStop(1, colors.bg2);
+        if (slideKey === 'top3') {
+            // Eigenständige alpine Farbgebung als Fallback, falls das Jahr
+            // kein Tourfoto für den Hintergrund enthält.
+            gradient.addColorStop(0, '#71888a');
+            gradient.addColorStop(0.52, '#415c64');
+            gradient.addColorStop(1, '#20343c');
+        } else {
+            gradient.addColorStop(0, colors.bg1);
+            gradient.addColorStop(1, colors.bg2);
+        }
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, w, h);
     }
@@ -36202,7 +36221,7 @@ function renderWrappedSlide(index) {
         });
     }
 
-    const colors = drawWrappedBackground(ctx, w, h, slide.photoImg || null);
+    const colors = drawWrappedBackground(ctx, w, h, slide.photoImg || null, slide.key);
 
     switch (slide.key) {
         case 'intro': renderWrappedIntroSlide(ctx, w, h, colors, slide.data, !slide.photoImg); break;
@@ -36683,7 +36702,7 @@ function drawWrappedContainedImage(ctx, img, x, y, width, height, radius) {
     ctx.closePath();
     ctx.clip();
 
-    ctx.fillStyle = 'rgba(0,0,0,0.22)';
+    ctx.fillStyle = 'rgba(9,31,42,0.38)';
     ctx.fillRect(x, y, width, height);
 
     if (img) {
@@ -36787,10 +36806,19 @@ function renderWrappedTop3Slide(ctx, w, h, colors, data) {
     (data.top3 || []).slice(0, 3).forEach((item, i) => {
         const y = startY + i * (cardH + gap);
 
-        ctx.fillStyle = 'rgba(0,0,0,0.20)';
+        const cardGradient = ctx.createLinearGradient(cardX, y, cardX + cardW, y + cardH);
+        cardGradient.addColorStop(0, 'rgba(16,46,55,0.55)');
+        cardGradient.addColorStop(1, 'rgba(7,25,34,0.72)');
+        ctx.fillStyle = cardGradient;
         ctx.beginPath();
         ctx.roundRect(cardX, y, cardW, cardH, 34);
         ctx.fill();
+        ctx.save();
+        ctx.globalAlpha = 0.42;
+        ctx.strokeStyle = colors.accent;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.restore();
 
         const imageX = cardX + 24;
         const imageY = y + 24;
