@@ -36383,7 +36383,7 @@ function renderWrappedBestTourSlide(ctx, w, h, colors, data) {
     ctx.fillStyle = 'rgba(255,255,255,0.92)';
     wrapWrappedText(
         ctx,
-        'Diese Tour vereint alles, was dein Bergjahr ausmacht – Ausdauer, Höhenmeter und den Willen, immer weiterzugehen.',
+        'Nicht jede besondere Tour lässt sich in Zahlen fassen. Manchmal sind es die Weite der Berge, der Blick vom Gipfel und das Gefühl dieses einen Tages, die in Erinnerung bleiben.',
         w / 2,
         1240,
         w * 0.78,
@@ -36773,12 +36773,6 @@ function renderWrappedHighlightsSlide(ctx, w, h, colors, data) {
         );
     }
 
-    if (data.pageCount > 1) {
-        setWrappedFont(ctx, 23, 'normal');
-        ctx.fillStyle = 'rgba(255,255,255,0.72)';
-        ctx.textAlign = 'center';
-        ctx.fillText((data.page || 1) + ' / ' + data.pageCount, w / 2, h - 112);
-    }
 }
 function renderWrappedTop3Slide(ctx, w, h, colors, data) {
     drawWrappedCenteredTitle(ctx, 'Top 3 der Saison', 190, 58, colors.text, w);
