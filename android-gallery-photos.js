@@ -1061,6 +1061,25 @@
         window.buildAppDataPayload = wrappedBuild;
     }
 
+    // Für den Jahresrückblick: einzelne, temporäre Foto-Vorschaudaten laden.
+    // Die Galerie-Originale bleiben unangetastet und werden nicht in App-Speicher kopiert.
+    window.__tourGalleryLoadPhotoThumbnail = async function (media) {
+        const item = cleanMedia(media);
+        if (!item || item.mediaType !== 'photo') return null;
+        try {
+            if (!nativeFeatures.has('gallery.thumbnail.v1')) {
+                const available = await checkNativeGalleryBridge();
+                if (!available) return null;
+            }
+            const response = await nativeRequest('gallery.thumbnail', { uri: item.uri }, 30000);
+            if (!response || response.status !== 'ok' || !response.data) return null;
+            return 'data:' + (response.mimeType || 'image/jpeg') + ';base64,' + response.data;
+        } catch (error) {
+            console.warn('[Jahresrückblick] Tourfoto-Vorschau konnte nicht geladen werden.', error);
+            return null;
+        }
+    };
+
     installTourDetailHook();
     installTourDetailObserver();
     excludeDeviceReferencesFromBackup();
