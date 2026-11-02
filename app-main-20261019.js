@@ -36454,9 +36454,16 @@ function getWrappedSlideTransition(fromIndex, toIndex) {
     // Alle Highlight-Seiten bleiben durch dieselbe Wellenbewegung erkennbar.
     // Die Wellenrichtung und -phase wechseln von Seite zu Seite.
     if (from.key === 'highlights' && to.key === 'highlights') {
-        const page = Number(to.data?.page) || 2;
-        const type = page % 2 === 0 ? 'wave-right' : 'wave-left';
-        return make(type, { phase: page % 2 === 0 ? 0 : Math.PI * 0.65 });
+        const fromPage = Number(from.data?.page) || 1;
+        const toPage = Number(to.data?.page) || fromPage + (forward ? 1 : -1);
+        const pageBoundary = Math.min(fromPage, toPage);
+        const baseType = pageBoundary % 2 === 1 ? 'wave-right' : 'wave-left';
+        const type = forward ? baseType : reverseWrappedTransitionType(baseType);
+        return {
+            type,
+            duration: WRAPPED_TRANSITION_DURATIONS.wave,
+            phase: pageBoundary % 2 === 0 ? Math.PI * 0.65 : 0
+        };
     }
     if (to.key === 'highlights') return make('fade');
     if (from.key === 'highlights') return make('diagonal-left');
@@ -36604,18 +36611,24 @@ function drawWrappedTransitionFrame(state, progress) {
         case 'wave-right': {
             const amplitude = w * 0.055 * Math.sin(Math.PI * t);
             const phase = Number(state.phase) || 0;
-            const edgeAt = y => Math.max(0, Math.min(
-                w,
-                w * t + Math.sin((y / h) * Math.PI * 4 + phase) * amplitude
-            ));
+            // Beide Masken starten mit null sichtbarer Fläche und enden vollflächig.
+            const edgeAt = y => {
+                const base = state.type === 'wave-right'
+                    ? w * t
+                    : w * (1 - t);
+                const wave = Math.sin((y / h) * Math.PI * 4 + phase) * amplitude;
+                return Math.max(0, Math.min(w, base + wave));
+            };
             ctx.beginPath();
             if (state.type === 'wave-right') {
+                // Von links nach rechts: links der Wellenkante wird aufgedeckt.
                 ctx.moveTo(0, 0);
                 ctx.lineTo(edgeAt(0), 0);
                 for (let y = 12; y < h; y += 12) ctx.lineTo(edgeAt(y), y);
                 ctx.lineTo(edgeAt(h), h);
                 ctx.lineTo(0, h);
             } else {
+                // Von rechts nach links: rechts der Wellenkante wird aufgedeckt.
                 ctx.moveTo(w, 0);
                 ctx.lineTo(edgeAt(0), 0);
                 for (let y = 12; y < h; y += 12) ctx.lineTo(edgeAt(y), y);
