@@ -680,14 +680,20 @@ function drawWrappedFooter(ctx, w, h, year) {
 
 function getWrappedDistanceComparison(km) {
     const refKm = 860;
-    const factor = (km / refKm).toFixed(2);
+    const factor = (km / refKm).toFixed(2).replace('.', ',');
     return `Das ist wie ${factor}× Lienz → Düsseldorf!`;
 }
 
 function getWrappedElevationComparison(meters) {
     const grossglockner = 3798;
-    const factor = (meters / grossglockner).toFixed(1);
+    const factor = (meters / grossglockner).toFixed(2).replace('.', ',');
     return `Das ist wie ${factor}× auf den Großglockner!`;
+}
+
+function getWrappedEverestComparison(meters) {
+    const everest = 8848;
+    const factor = (meters / everest).toFixed(2).replace('.', ',');
+    return `Das ist wie ${factor}× auf den Mount Everest!`;
 }
 
 function renderWrappedSlide(index) {
@@ -818,10 +824,23 @@ function renderWrappedDistanceSlide(ctx, w, h, colors, data) {
 function renderWrappedAscentSlide(ctx, w, h, colors, data) {
     drawWrappedCenteredTitle(ctx, 'Deine Höhenmeter', 350, 70, colors.text, w);
     drawWrappedBigNumber(ctx, Math.round(data.ascent).toLocaleString('de-DE'), 'Hm', 800, colors.text, w);
-    setWrappedFont(ctx, 38);
+
+    setWrappedFont(ctx, 38, 'normal');
     ctx.fillStyle = colors.accent;
     ctx.textAlign = 'center';
     wrapWrappedText(ctx, getWrappedElevationComparison(data.ascent), w / 2, 1000, w - 160, 50);
+    wrapWrappedText(ctx, getWrappedEverestComparison(data.ascent), w / 2, 1070, w - 160, 50);
+
+    setWrappedFont(ctx, 32, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    wrapWrappedText(
+        ctx,
+        'Meter für Meter dem Himmel entgegen – und mit jedem Aufstieg ein Stück näher an neuen Perspektiven und unvergesslichen Ausblicken.',
+        w / 2,
+        1220,
+        w * 0.78,
+        46
+    );
 }
 
 function renderWrappedTimeSlide(ctx, w, h, colors, data) {
