@@ -35843,7 +35843,7 @@ const endHold = () => {
     // Bergwelt bleibt ein optionales Modul und wird erst beim Öffnen geladen.
     function loadBergweltModule() {
         window.__bergweltGetTours = () => appStorage.get('touren') || [];
-        if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261102-bergwelt-three-sections') {
+        if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261102-bergwelt-experience-controls') {
             window.__bergweltRender?.();
             return;
         }
@@ -35857,15 +35857,15 @@ const endHold = () => {
             styleLink.dataset.bergweltBadgeStyles = '20261022-year-ascent-donut';
             document.head.appendChild(styleLink);
         }
-        if (!document.querySelector('link[data-bergwelt-premium-styles="20261102-premium-alpine"]')) {
+        if (!document.querySelector('link[data-bergwelt-premium-styles="20261102-premium-alpine-experience-controls"]')) {
             const premiumStyleLink = document.createElement('link');
             premiumStyleLink.rel = 'stylesheet';
-            premiumStyleLink.href = './bergwelt-premium-alpine.css?v=2';
-            premiumStyleLink.dataset.bergweltPremiumStyles = '20261102-premium-alpine';
+            premiumStyleLink.href = './bergwelt-premium-alpine.css?v=3';
+            premiumStyleLink.dataset.bergweltPremiumStyles = '20261102-premium-alpine-experience-controls';
             document.head.appendChild(premiumStyleLink);
         }
         const script = document.createElement('script');
-        script.src = './bergwelt-badges-20261019.js?v=4';
+        script.src = './bergwelt-badges-20261019.js?v=5';
         script.onload = () => {
             window.__BERGWELT_BADGE_LOADING__ = false;
             window.__BERGWELT_LOADING__ = false;
