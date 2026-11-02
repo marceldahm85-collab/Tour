@@ -24283,47 +24283,47 @@ function shuffleWrappedPhotos(photoEntries) {
 function createWrappedPhotoAllocator(photoEntries) {
     const uniquePhotos = [...new Map(
         photoEntries
-            .filter(entry => entry?.imageData)
-            .map(entry => [entry.imageData, entry])
+            .filter(entry => entry && (entry.hasImage || entry.imageData))
+            .map(entry => [String(entry.id || entry.imageData || ''), entry])
     ).values()];
     let available = shuffleWrappedPhotos(uniquePhotos);
-    let lastImageData = null;
+    let lastPhotoIdentity = null;
 
     return function takeWrappedPhoto() {
         if (!uniquePhotos.length) return null;
 
-        // Zuerst alle nicht reservierten Bilder einmal nutzen. Erst danach werden
-        // diese Bilder erneut verteilt; direkt aufeinanderfolgende Duplikate vermeiden.
         if (!available.length) {
             available = shuffleWrappedPhotos(uniquePhotos);
-            if (available.length > 1 && available[0].imageData === lastImageData) {
-                const swapIndex = available.findIndex(entry => entry.imageData !== lastImageData);
-                if (swapIndex > 0) {
-                    [available[0], available[swapIndex]] = [available[swapIndex], available[0]];
+            if (available.length > 1) {
+                const firstIdentity = String(available[0]?.id || available[0]?.imageData || '');
+                if (firstIdentity === lastPhotoIdentity) {
+                    const swapIndex = available.findIndex(entry =>
+                        String(entry?.id || entry?.imageData || '') !== lastPhotoIdentity
+                    );
+                    if (swapIndex > 0) {
+                        [available[0], available[swapIndex]] = [available[swapIndex], available[0]];
+                    }
                 }
             }
         }
 
         const [picked] = available.splice(0, 1);
-        lastImageData = picked?.imageData || null;
+        lastPhotoIdentity = String(picked?.id || picked?.imageData || '');
         return picked || null;
     };
 }
-
 async function attachWrappedPhotos(slides, year) {
-    // Nur Kopien für den gewählten Jahresrückblick laden. Fotos bleiben
-    // außerhalb des synchronen Tour-Caches, auch nachdem Wrapped geschlossen wird.
+    // Nur die Bildreferenzen des gewählten Jahres vorbereiten. Die eigentlichen
+    // Bilddaten werden pro Folie geladen, damit große Fotojahre wenig RAM belegen.
     const yearEntries = (getWrappedDataForYear(year) || []).map(entry => ({ ...entry }));
-    await loadTourImagesForEntries(yearEntries);
-
-    const photoEntries = yearEntries.filter(entry => entry.imageData);
+    const photoEntries = yearEntries.filter(entry => entry.hasImage || entry.imageData);
     const photosById = new Map(
         photoEntries.filter(entry => entry.id).map(entry => [String(entry.id), entry])
     );
     const photoForEntry = entry => {
         if (!entry) return null;
         if (entry.id && photosById.has(String(entry.id))) return photosById.get(String(entry.id));
-        return entry.imageData ? entry : null;
+        return entry.hasImage || entry.imageData ? entry : null;
     };
 
     const top3Slots = [];
@@ -24340,7 +24340,6 @@ async function attachWrappedPhotos(slides, year) {
                     preferred: photoForEntry(slide.data?.entry)
                 });
             }
-            // Galerie-Referenzen werden erst beim Aufrufen ihrer Fotofolie geladen.
             continue;
         }
         if (slide.key === 'top3') {
@@ -24363,32 +24362,41 @@ async function attachWrappedPhotos(slides, year) {
         }
     }
 
-    const reservedImageData = new Set([
+    // Tour- und Highlight-Seiten nutzen bevorzugt das jeweilige Tourbild.
+    const reservedIds = new Set([
         ...specificBackgroundSlots,
-        ...top3Slots
-    ].map(slot => slot.preferred?.imageData).filter(Boolean));
+        ...top3Slots,
+        ...tourPhotoSlots
+    ].map(slot => String(slot.preferred?.id || slot.preferred?.imageData || '')).filter(Boolean));
 
     const uniquePhotoEntries = [...new Map(
-        photoEntries.map(entry => [entry.imageData, entry])
+        photoEntries.map(entry => [String(entry.id || entry.imageData || ''), entry])
     ).values()];
     const nonReservedPhotos = uniquePhotoEntries.filter(
-        entry => !reservedImageData.has(entry.imageData)
+        entry => !reservedIds.has(String(entry.id || entry.imageData || ''))
     );
     const takeFallbackPhoto = createWrappedPhotoAllocator(
         nonReservedPhotos.length ? nonReservedPhotos : uniquePhotoEntries
     );
+
     const imageCache = new Map();
     const getPhotoImage = async entry => {
-        if (!entry?.imageData) return null;
-        if (!imageCache.has(entry.imageData)) {
-            imageCache.set(entry.imageData, await loadWrappedImage(entry.imageData));
+        if (!entry) return null;
+        const copy = { ...entry };
+        await loadTourImageData(copy);
+        if (!copy.imageData) return null;
+
+        if (!imageCache.has(copy.imageData)) {
+            imageCache.set(copy.imageData, await loadWrappedImage(copy.imageData));
         }
-        return imageCache.get(entry.imageData);
+        return imageCache.get(copy.imageData);
     };
 
     for (const slot of tourPhotoSlots) {
-        slot.slide.photoImg = await getPhotoImage(slot.preferred);
-        slot.slide.photoLoadFailed = !slot.slide.photoImg;
+        // Nur Referenz und Metadaten ablegen. Das konkrete Bild wird beim
+        // Erreichen der Folie aus IndexedDB geladen.
+        slot.slide.photoEntry = slot.preferred ? { ...slot.preferred } : null;
+        slot.slide.photoLoadFailed = !slot.slide.photoEntry;
     }
 
     const slots = [
@@ -24402,8 +24410,11 @@ async function attachWrappedPhotos(slides, year) {
             ? slot.preferred
             : (slot.preferred || takeFallbackPhoto());
         const photoImg = await getPhotoImage(photoEntry);
-        if (slot.type === 'top3') slot.item.photoImg = photoImg;
-        else slot.slide.photoImg = photoImg;
+        if (slot.type === 'top3') {
+            slot.item.photoImg = photoImg;
+        } else {
+            slot.slide.photoImg = photoImg;
+        }
     }
 
     return slides;
@@ -35554,7 +35565,7 @@ async function shareAllWrappedSlides(year) {
 
     for (let i = 0; i < wrappedSlides.length; i++) {
         const slide = wrappedSlides[i];
-        if (slide.key === 'tourPhoto' && slide.data?.source === 'gallery') {
+        if (slide.key === 'tourPhoto') {
             await ensureWrappedGalleryPhotoLoaded(slide);
         }
         const canvas = renderWrappedSlideToCanvas(slide, width, height);
@@ -35562,7 +35573,7 @@ async function shareAllWrappedSlides(year) {
         if (!blob) continue;
         const filename = `jahresrueckblick-${year}-${String(i + 1).padStart(2, '0')}-${slide.key}.png`;
         files.push(new File([blob], filename, { type: 'image/png' }));
-        if (slide.key === 'tourPhoto' && slide.data?.source === 'gallery') {
+        if (slide.key === 'tourPhoto') {
             releaseWrappedGalleryPhoto(slide);
         }
     }
@@ -35964,7 +35975,7 @@ function getWrappedThemeColors() {
 }
 
 function releaseWrappedGalleryPhoto(slide) {
-    if (!slide || slide.key !== 'tourPhoto' || slide.data?.source !== 'gallery') return;
+    if (!slide || slide.key !== 'tourPhoto') return;
     if (slide.photoCacheKey) wrappedPhotoCache.delete(slide.photoCacheKey);
     slide.photoCacheKey = null;
     slide.photoImg = null;
@@ -35972,25 +35983,33 @@ function releaseWrappedGalleryPhoto(slide) {
 }
 
 async function ensureWrappedGalleryPhotoLoaded(slide) {
-    if (!slide || slide.key !== 'tourPhoto' || slide.data?.source !== 'gallery') {
-        return slide?.photoImg || null;
-    }
+    if (!slide || slide.key !== 'tourPhoto') return slide?.photoImg || null;
     if (slide.photoImg) return slide.photoImg;
     if (slide.photoLoadPromise) return slide.photoLoadPromise;
 
-    const loadThumbnail = window.__tourGalleryLoadPhotoThumbnail;
-    if (typeof loadThumbnail !== 'function') {
-        slide.photoLoadFailed = true;
-        return null;
-    }
-
     slide.photoLoadPromise = (async () => {
         try {
-            const dataUrl = await loadThumbnail(slide.data.media);
+            let dataUrl = null;
+            if (slide.data?.source === 'gallery') {
+                const loadThumbnail = window.__tourGalleryLoadPhotoThumbnail;
+                if (typeof loadThumbnail !== 'function') {
+                    slide.photoLoadFailed = true;
+                    return null;
+                }
+                dataUrl = await loadThumbnail(slide.data.media);
+            } else if (slide.data?.source === 'cover') {
+                const entry = slide.photoEntry ? { ...slide.photoEntry } : null;
+                if (entry) {
+                    await loadTourImageData(entry);
+                    dataUrl = entry.imageData || null;
+                }
+            }
+
             const image = dataUrl ? await loadWrappedImage(dataUrl) : null;
             slide.photoCacheKey = dataUrl || null;
             slide.photoImg = image;
             slide.photoLoadFailed = !image;
+            if (slide.photoEntry && slide.photoEntry.imageData) delete slide.photoEntry.imageData;
             return image;
         } catch (error) {
             console.warn('[Jahresrückblick] Tourfoto konnte nicht geladen werden.', error);
@@ -36156,7 +36175,7 @@ function renderWrappedSlide(index) {
     const slide = wrappedSlides[index];
     if (!slide) return;
 
-    if (slide.key === 'tourPhoto' && slide.data?.source === 'gallery' && !slide.photoImg && !slide.photoLoadFailed) {
+    if (slide.key === 'tourPhoto' && !slide.photoImg && !slide.photoLoadFailed) {
         ensureWrappedGalleryPhotoLoaded(slide).then(image => {
             if (image && wrappedSlides[index] === slide && wrappedSlideIndex === index) {
                 renderWrappedSlide(index);
