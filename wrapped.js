@@ -845,13 +845,24 @@ function renderWrappedAscentSlide(ctx, w, h, colors, data) {
 
 function renderWrappedTimeSlide(ctx, w, h, colors, data) {
     const hours = Math.floor(data.minutes / 60);
-    const days = (hours / 24).toFixed(1);
+    const days = (data.minutes / (60 * 24)).toFixed(2).replace('.', ',');
     drawWrappedCenteredTitle(ctx, 'Zeit unterwegs', 350, 70, colors.text, w);
     drawWrappedBigNumber(ctx, hours.toLocaleString('de-DE'), 'Stunden', 800, colors.text, w);
     setWrappedFont(ctx, 38);
     ctx.fillStyle = colors.accent;
     ctx.textAlign = 'center';
     ctx.fillText(`Das sind ${days} Tage am Berg! ⏱️`, w / 2, 1000);
+
+    setWrappedFont(ctx, 32, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    wrapWrappedText(
+        ctx,
+        'Stunden fernab vom Alltag, mitten in der Natur. Zeit zum Durchatmen, Weitergehen und Genießen.',
+        w / 2,
+        1150,
+        w * 0.78,
+        46
+    );
 }
 
 function renderWrappedActiveMonthSlide(ctx, w, h, colors, data) {
