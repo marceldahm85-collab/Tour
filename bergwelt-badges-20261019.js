@@ -2,7 +2,7 @@
     'use strict';
     // Eigene Versionskennung verhindert, dass ein bereits geladenes älteres
     // Bergwelt-Modul die aktualisierten Abzeichen vorzeitig blockiert.
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261102-premium-photo-specialization-badges') return;
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261102-premium-alpine-complete') return;
     window.__BERGWELT_BADGE_MODULE_VERSION__ = '20261102-premium-photo-specialization-badges';
     window.__BERGWELT_MODULE_READY__ = true;
 
@@ -332,6 +332,22 @@
         panel.hidden = true;
         tourbookPanel.hidden = false;
         root.classList.add('bergwelt-mode');
+        if (!tourbookPanel.querySelector('.bergwelt-tourbook-hero')) {
+            const hero = document.createElement('section');
+            hero.className = 'bergwelt-tourbook-hero';
+            hero.setAttribute('aria-labelledby', 'bergwelt-tourbook-heading');
+            hero.innerHTML =
+                '<div class="bergwelt-tourbook-hero-content">' +
+                    '<p>DEIN PERSÖNLICHES TOURBUCH</p>' +
+                    '<h2 id="bergwelt-tourbook-heading">Deine Touren. Deine Geschichte.</h2>' +
+                    '<span>Stelle Zeitraum, Inhalte und Gestaltung zusammen und erstelle daraus dein persönliches Tourbuch als PDF.</span>' +
+                '</div>';
+            if (tourbookCard && tourbookCard.parentNode === tourbookPanel) {
+                tourbookPanel.insertBefore(hero, tourbookCard);
+            } else {
+                tourbookPanel.prepend(hero);
+            }
+        }
     }
     function renderHoehenwelt(openModal = false) {
         const selectedYear = getYear();
@@ -433,6 +449,29 @@
                 }).join('');
             })()
             : '';
+        const heightHeroMarkup =
+            '<section class="bergwelt-height-hero" aria-labelledby="bergwelt-height-title">' +
+                '<div class="bergwelt-height-hero-shade" aria-hidden="true"></div>' +
+                '<div class="bergwelt-height-hero-content">' +
+                    '<p class="bergwelt-height-hero-kicker">DEINE HÖHENREISE</p>' +
+                    '<h2 id="bergwelt-height-title">Jeder Aufstieg zählt.</h2>' +
+                    '<p class="bergwelt-height-hero-copy">' +
+                        (selectedYear === 'all'
+                            ? 'Dein gesamter Aufstieg über alle gespeicherten Touren.'
+                            : 'Dein Beitrag im Jahr ' + escapeHTML(yearLabel) + ' – im Verhältnis zu deiner gesamten Bergzeit.') +
+                    '</p>' +
+                    '<div class="bergwelt-height-hero-metrics">' +
+                        '<div><small>Gesamter Aufstieg</small><strong>' + fmtKnown(careerAscent) + '<i> hm</i></strong></div>' +
+                        (selectedYear === 'all' ? '' :
+                            '<div><small>Im Jahr ' + escapeHTML(yearLabel) + '</small><strong>' + fmtKnown(yearAscent) + '<i> hm</i></strong></div>') +
+                    '</div>' +
+                    '<span class="bergwelt-height-hero-note">' +
+                        (selectedYear === 'all'
+                            ? 'Fünf Höhenmarken auf deiner persönlichen Bergreise'
+                            : (yearShare === null ? 'Jahresanteil derzeit nicht bestimmbar' : fmt(yearShare, 1) + ' % deines Gesamtaufstiegs')) +
+                    '</span>' +
+                '</div>' +
+            '</section>';
         const milestoneMarkup = selectedYear === 'all'
             ? '<div class="bergwelt-height-milestones" aria-label="Interaktive Höhenmarken">' +
                 milestones.map((m, i) => {
@@ -472,7 +511,8 @@
                     '<div class="bergwelt-height-years-chart-center"><strong>' + fmtKnown(careerAscent) + '</strong><span>hm Gesamtaufstieg</span></div>' +
                 '</div>' +
             '</section>';
-        panel.innerHTML = milestoneMarkup +
+        panel.innerHTML = heightHeroMarkup +
+            milestoneMarkup +
             selectedYearDonutMarkup +
             annualChartMarkup;
 
@@ -651,6 +691,9 @@
             return { ...levelDefinition, current, next, pct, rankTours };
         });
         const earnedCount = levels.filter(level => level.current).length;
+        const earnedRankCount = levels.reduce((count, level) =>
+            count + (level.value === null ? 0 : level.tiers.filter(tier => level.value >= tier[0]).length), 0);
+        const totalRankCount = levels.reduce((count, level) => count + level.tiers.length, 0);
         // Die fünf Original-Abzeichen: farbige, eigenständige Illustrationen
         // auf weißem, abgerundetem Quadrat – identisch in Galerie und Entwicklung.
         // Fünf bewusst klare Illustrationen: jede Geometrie hat eine erkennbare Funktion.
@@ -713,8 +756,20 @@
         };
         const developmentCards = levels.map(renderDevelopmentCard);
 
-        panel.innerHTML = intro('Deine Erfolge · ' + getYearLabel(), 'Dein Bergsteiger-Level', '') +
-            '<div class="bergwelt-level-badges">' +
+        const levelCompletion = totalRankCount > 0 ? earnedRankCount / totalRankCount * 100 : 0;
+        panel.innerHTML =
+            '<section class="bergwelt-level-hero" aria-labelledby="bergwelt-level-heading" style="--level-completion:' + levelCompletion + '%">' +
+                '<div class="bergwelt-level-hero-copy">' +
+                    '<p class="bergwelt-level-hero-kicker">DEINE ERFOLGE · ' + escapeHTML(getYearLabel()) + '</p>' +
+                    '<h2 id="bergwelt-level-heading">Dein Bergsteiger-Level</h2>' +
+                    '<p>Fünf Spezialisierungen. Fünf Rangstufen. Dein Fortschritt auf einen Blick.</p>' +
+                    '<span>' + earnedCount + ' von ' + levels.length + ' Spezialisierungen mit Rang</span>' +
+                '</div>' +
+                '<div class="bergwelt-level-hero-ring" role="img" aria-label="' + earnedRankCount + ' von ' + totalRankCount + ' Rangstufen erreicht">' +
+                    '<strong>' + earnedRankCount + '</strong><span>/' + totalRankCount + '</span>' +
+                '</div>' +
+            '</section>' +
+            '<div class="bergwelt-level-badges">';
             levels.map((l, i) => {
                 const valueText = l.value === null ? '– ' + l.unit : fmt(l.value, levelDigits(l)) + ' ' + l.unit;
                 const unlocked = Boolean(l.current);
@@ -726,6 +781,7 @@
                     '<span class="bergwelt-level-badge-emblem" aria-hidden="true"><span class="bergwelt-badge-art">' + badgeIcons[i] + '</span></span>' +
                     '<span class="bergwelt-level-badge-body"><span class="bergwelt-level-badge-name">' + escapeHTML(l.name) + '</span><strong>' + escapeHTML(badgeTitle) + '</strong><small>' + escapeHTML(badgeStatus) + '</small>' +
                     (unlocked ? '<span class="bergwelt-level-badge-value">' + valueText + '</span>' : l.value === null ? '<span class="bergwelt-level-badge-value">Keine gültigen Werte</span>' : '<span class="bergwelt-level-badge-value">' + fmt(Math.max(0, l.next[0] - l.value), levelDigits(l)) + ' ' + l.unit + ' bis zum Rang</span>') +
+                    '<span class="bergwelt-level-badge-progress" aria-hidden="true"><span style="width:' + (l.pct === null ? 0 : l.pct) + '%"></span></span>' +
                     '</span></button>';
             }).join('') +
             '</div>';
