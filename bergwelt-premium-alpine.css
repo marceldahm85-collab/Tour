@@ -1864,3 +1864,162 @@ body.wrapped-mobile-fullscreen-active .accordion-header {
         box-shadow: none !important;
     }
 }
+
+
+/* =========================================================
+   Achievement-Ränge – feste Farben für Bronze bis Diamant
+   Unabhängig von der Akzentfarbe des Theme-Editors.
+   ========================================================= */
+.achievement-tier-bronze {
+    --achievement-tier-color: #A66A42;
+    --achievement-tier-deep: #8C5A35;
+}
+.achievement-tier-silber {
+    --achievement-tier-color: #AEB9C4;
+    --achievement-tier-deep: #78838E;
+}
+.achievement-tier-gold {
+    --achievement-tier-color: #D6AA45;
+    --achievement-tier-deep: #A78332;
+}
+.achievement-tier-platin {
+    --achievement-tier-color: #83B6D5;
+    --achievement-tier-deep: #527D9E;
+}
+.achievement-tier-diamant {
+    --achievement-tier-color: #AE91E8;
+    --achievement-tier-deep: #644A91;
+}
+
+/* Puzzle-Kacheln: das Alpenmotiv bleibt dominant; Rangfarbe liegt nur als
+   feiner Lichtsaum und dezente Tönung über dem Bild. */
+#achievements-view .achievement-puzzle-tile.achievement-tier-bronze,
+#achievements-view .achievement-puzzle-tile.achievement-tier-silber,
+#achievements-view .achievement-puzzle-tile.achievement-tier-gold,
+#achievements-view .achievement-puzzle-tile.achievement-tier-platin,
+#achievements-view .achievement-puzzle-tile.achievement-tier-diamant {
+    background-image:
+        linear-gradient(155deg, rgba(7,20,34,.16), rgba(7,20,34,.38)),
+        linear-gradient(135deg, color-mix(in srgb, var(--achievement-tier-color) var(--achievement-tier-wash, 8%), transparent), transparent 74%),
+        url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1800&q=85") !important;
+    background-repeat: no-repeat, no-repeat, no-repeat !important;
+    background-size: 100% 100%, 100% 100%, 300% 500% !important;
+    background-position: center, center, var(--puzzle-x,50%) var(--puzzle-y,50%) !important;
+}
+#achievements-view .achievement-puzzle-tile.has-tier-reached {
+    --achievement-tier-wash: 19%;
+    filter:
+        drop-shadow(0 0 1.45px var(--achievement-tier-color))
+        drop-shadow(0 0 4px color-mix(in srgb, var(--achievement-tier-color) 38%, transparent))
+        drop-shadow(0 3px 5px rgba(0,0,0,.30)) !important;
+}
+#achievements-view .achievement-puzzle-tile.is-tier-preview {
+    --achievement-tier-wash: 7%;
+    filter:
+        drop-shadow(0 0 .75px color-mix(in srgb, var(--achievement-tier-color) 58%, rgba(246,251,255,.9)))
+        drop-shadow(0 3px 5px rgba(0,0,0,.30)) !important;
+}
+#achievements-view .achievement-puzzle-tile.has-tier-reached .achievement-puzzle-tile-state {
+    background: color-mix(in srgb, var(--achievement-tier-color) 88%, #fff 12%) !important;
+    color: #17232c !important;
+    box-shadow: 0 0 9px color-mix(in srgb, var(--achievement-tier-color) 48%, transparent);
+}
+#achievements-view .achievement-puzzle-tile.is-tier-preview .achievement-puzzle-tile-state {
+    background: color-mix(in srgb, var(--achievement-tier-color) 34%, rgba(248,252,244,.94)) !important;
+    color: #24313a !important;
+    box-shadow: none !important;
+}
+#achievements-view .achievement-puzzle-tile.has-tier-reached .achievement-category-progress-bar {
+    background: linear-gradient(90deg,
+        color-mix(in srgb, var(--achievement-tier-deep) 82%, var(--achievement-tier-color)),
+        var(--achievement-tier-color)) !important;
+    box-shadow: 0 0 8px color-mix(in srgb, var(--achievement-tier-color) 42%, transparent);
+}
+#achievements-view .achievement-puzzle-tile.is-tier-preview .achievement-category-progress-bar {
+    background: color-mix(in srgb, var(--achievement-tier-color) 62%, rgba(255,255,255,.55)) !important;
+}
+
+/* Rangfarbe im Kategorien-Dialog: dezente Zeilenfläche, farbiger Marker und
+   eine schmale Fortschrittslinie für jede einzelne Stufe. */
+#achievement-category-modal .achievement-inline-row.achievement-tier-bronze,
+#achievement-category-modal .achievement-inline-row.achievement-tier-silber,
+#achievement-category-modal .achievement-inline-row.achievement-tier-gold,
+#achievement-category-modal .achievement-inline-row.achievement-tier-platin,
+#achievement-category-modal .achievement-inline-row.achievement-tier-diamant {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(90deg,
+        color-mix(in srgb, var(--achievement-tier-color) 10%, transparent),
+        transparent 72%) !important;
+    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--achievement-tier-color) 48%, transparent);
+}
+#achievement-category-modal .achievement-inline-row.achievement-tier-bronze.is-unlocked,
+#achievement-category-modal .achievement-inline-row.achievement-tier-silber.is-unlocked,
+#achievement-category-modal .achievement-inline-row.achievement-tier-gold.is-unlocked,
+#achievement-category-modal .achievement-inline-row.achievement-tier-platin.is-unlocked,
+#achievement-category-modal .achievement-inline-row.achievement-tier-diamant.is-unlocked {
+    background: linear-gradient(90deg,
+        color-mix(in srgb, var(--achievement-tier-color) 18%, transparent),
+        transparent 76%) !important;
+    box-shadow: inset 3px 0 0 var(--achievement-tier-color);
+}
+#achievement-category-modal .achievement-inline-row.achievement-tier-bronze::after,
+#achievement-category-modal .achievement-inline-row.achievement-tier-silber::after,
+#achievement-category-modal .achievement-inline-row.achievement-tier-gold::after,
+#achievement-category-modal .achievement-inline-row.achievement-tier-platin::after,
+#achievement-category-modal .achievement-inline-row.achievement-tier-diamant::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    width: var(--achievement-tier-progress, 0%);
+    background: linear-gradient(90deg, var(--achievement-tier-deep), var(--achievement-tier-color));
+    opacity: .86;
+    pointer-events: none;
+    content: "";
+}
+#achievement-category-modal .achievement-tier-label {
+    display: inline-block;
+    padding: 2px 6px;
+    border: 1px solid color-mix(in srgb, var(--achievement-tier-color) 54%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--achievement-tier-color) 19%, transparent);
+    color: var(--achievement-tier-color);
+    font-size: .78em;
+    font-weight: 950;
+    letter-spacing: .035em;
+    line-height: 1.25;
+    vertical-align: .04em;
+}
+#achievement-category-modal .achievement-inline-row.is-locked .achievement-tier-label {
+    border-color: color-mix(in srgb, var(--achievement-tier-color) 32%, transparent);
+    background: color-mix(in srgb, var(--achievement-tier-color) 9%, transparent);
+    opacity: .72;
+}
+#achievement-category-modal.achievement-tier-bronze .modal-card,
+#achievement-category-modal.achievement-tier-silber .modal-card,
+#achievement-category-modal.achievement-tier-gold .modal-card,
+#achievement-category-modal.achievement-tier-platin .modal-card,
+#achievement-category-modal.achievement-tier-diamant .modal-card {
+    border-top-color: var(--achievement-tier-color) !important;
+}
+#achievement-category-modal.achievement-tier-bronze #achievement-category-title,
+#achievement-category-modal.achievement-tier-silber #achievement-category-title,
+#achievement-category-modal.achievement-tier-gold #achievement-category-title,
+#achievement-category-modal.achievement-tier-platin #achievement-category-title,
+#achievement-category-modal.achievement-tier-diamant #achievement-category-title {
+    color: var(--achievement-tier-color) !important;
+}
+#achievement-category-modal.is-tier-preview #achievement-category-title {
+    opacity: .76;
+}
+
+/* Auch die große Freischaltungsanimation übernimmt die erreichte Rangfarbe. */
+.achievement-unlock-card.achievement-tier-bronze,
+.achievement-unlock-card.achievement-tier-silber,
+.achievement-unlock-card.achievement-tier-gold,
+.achievement-unlock-card.achievement-tier-platin,
+.achievement-unlock-card.achievement-tier-diamant {
+    --accent-color: var(--achievement-tier-color);
+}
