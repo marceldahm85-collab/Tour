@@ -15,6 +15,7 @@
     }
 
     const MAX_BACKUP_BYTES = 48 * 1024 * 1024;
+    const MAX_PDF_BYTES = 64 * 1024 * 1024;
     const CHUNK_BYTES = 36 * 1024; // Durch 3 teilbar; Base64-Blöcke bleiben unabhängig dekodierbar.
     const pendingRequests = new Map();
     let requestCounter = 0;
@@ -244,8 +245,8 @@
             return { handled: false };
         }
 
-        if (!Number.isFinite(Number(blob.size)) || blob.size <= 0 || blob.size > MAX_BACKUP_BYTES) {
-            throw new RangeError('Die PDF-Datei ist leer oder größer als 48 MB.');
+        if (!Number.isFinite(Number(blob.size)) || blob.size <= 0 || blob.size > MAX_PDF_BYTES) {
+            throw new RangeError('Die PDF-Datei ist leer oder größer als 64 MB.');
         }
 
         let arrayBuffer;

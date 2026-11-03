@@ -58,6 +58,7 @@ public final class MainActivity extends Activity {
     private static final int BACKUP_SAVE_REQUEST_CODE = 4304;
     private static final int BACKUP_OPEN_REQUEST_CODE = 4305;
     private static final int MAX_BACKUP_BYTES = 48 * 1024 * 1024;
+    private static final int MAX_PDF_BYTES = 64 * 1024 * 1024;
     private static final int MAX_BACKUP_CHUNKS = 2048;
     private static final int MAX_BACKUP_CHUNK_CHARS = 48 * 1024;
     private static final String BRIDGE_NAME = "TourNative";
@@ -521,8 +522,10 @@ public final class MainActivity extends Activity {
         int totalBytes = request.optInt("totalBytes", -1);
         int totalChunks = request.optInt("totalChunks", -1);
 
+        int maxAllowedBytes = "application/pdf".equals(mimeType)
+                ? MAX_PDF_BYTES : MAX_BACKUP_BYTES;
         if (transferId.isEmpty() || transferId.length() > 100
-                || totalBytes <= 0 || totalBytes > MAX_BACKUP_BYTES
+                || totalBytes <= 0 || totalBytes > maxAllowedBytes
                 || totalChunks <= 0 || totalChunks > MAX_BACKUP_CHUNKS
                 || !fileName.matches("[A-Za-z0-9._-]{1,80}")
                 || (!"application/json".equals(mimeType) && !"application/pdf".equals(mimeType))
