@@ -234,7 +234,7 @@
 
 
     async function saveTourPdfNative(blob, suggestedFileName) {
-        if (!blob || typeof blob.arrayBuffer !== 'function') {
+        if (!blob || !Number.isFinite(Number(blob.size))) {
             throw new TypeError('Der PDF-Export hat keine gültige Datei erzeugt.');
         }
 

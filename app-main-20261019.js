@@ -29070,7 +29070,13 @@ function initPdfExportFeature() {
             toYear = Math.max(from, to);
         }
 
-        generateTourbookPdf(fromYear, toYear);
+        generateTourbookPdf(fromYear, toYear).catch(error => {
+            console.error('[PDF-Tourbuch] Export fehlgeschlagen:', error);
+            showToast(
+                error && error.message ? 'PDF-Erstellung fehlgeschlagen: ' + error.message : 'PDF konnte nicht erstellt werden.',
+                { type: 'error', duration: 6000 }
+            );
+        });
     });
 
     setPdfExportRangeMode('single');
