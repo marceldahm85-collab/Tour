@@ -87,6 +87,7 @@ public final class MainActivity extends Activity {
     private ByteArrayOutputStream pendingBackupStream;
     private String pendingBackupTransferId;
     private String pendingBackupFileName;
+    private String pendingBackupMimeType;
     private Uri pendingBackupTargetUri;
     private boolean pendingBackupLinkOnSave;
     private JavaScriptReplyProxy pendingBackupOpenReply;
@@ -414,6 +415,7 @@ public final class MainActivity extends Activity {
                                 features.put("widget.yearStats.v1");
                                 features.put("widget.yearStats.v2");
                                 features.put("backup.export.v1");
+                                features.put("pdf.export.v1");
                                 features.put("backup.file.link.v1");
                                 response.put("features", features);
                                 replyToBridge(replyProxy, response);
@@ -515,13 +517,16 @@ public final class MainActivity extends Activity {
 
         String transferId = request.optString("transferId", "");
         String fileName = request.optString("fileName", "Touren-Backup.json");
+        String mimeType = request.optString("mimeType", "application/json");
         int totalBytes = request.optInt("totalBytes", -1);
         int totalChunks = request.optInt("totalChunks", -1);
 
         if (transferId.isEmpty() || transferId.length() > 100
                 || totalBytes <= 0 || totalBytes > MAX_BACKUP_BYTES
                 || totalChunks <= 0 || totalChunks > MAX_BACKUP_CHUNKS
-                || !fileName.matches("[A-Za-z0-9._-]{1,80}")) {
+                || !fileName.matches("[A-Za-z0-9._-]{1,80}")
+                || (!"application/json".equals(mimeType) && !"application/pdf".equals(mimeType))
+                || ("application/pdf".equals(mimeType) && !fileName.endsWith(".pdf"))) {
             replyBackupExport(replyProxy, "backup.export.error", requestId,
                     false, "Die Sicherungsdaten sind ungültig oder überschreiten die erlaubte Größe.");
             return;
@@ -540,6 +545,7 @@ public final class MainActivity extends Activity {
         }
 
         pendingBackupFileName = fileName;
+        pendingBackupMimeType = mimeType;
         pendingBackupTargetUri = targetUri;
         pendingBackupLinkOnSave = request.optBoolean("linkOnSave", false);
         pendingBackupExpectedBytes = totalBytes;
@@ -615,7 +621,7 @@ public final class MainActivity extends Activity {
             try {
                 Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
-                intent.setType("application/json");
+                intent.setType(pendingBackupMimeType != null ? pendingBackupMimeType : "application/json");
                 intent.putExtra(Intent.EXTRA_TITLE, pendingBackupFileName);
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
                         | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
@@ -722,6 +728,7 @@ public final class MainActivity extends Activity {
         pendingBackupStream = null;
         pendingBackupTransferId = null;
         pendingBackupFileName = null;
+        pendingBackupMimeType = null;
         pendingBackupTargetUri = null;
         pendingBackupLinkOnSave = false;
         pendingBackupExpectedBytes = 0;

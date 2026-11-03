@@ -173,13 +173,10 @@
             var el = document.getElementById('pdf-book-opt-' + name);
             return el ? !!el.checked : fallback;
         }
-        var sortEl = document.getElementById('pdf-book-opt-sort');
         var layoutEl = document.getElementById('pdf-book-opt-layout');
         var styleEl = document.getElementById('pdf-book-opt-style');
-        var allowedSorts = ['default', 'date-asc', 'date-desc', 'distance-desc', 'ascent-desc', 'performance-desc'];
         var allowedLayouts = ['magazine', 'compact', 'detail'];
         var allowedStyles = ['theme', 'alpine', 'mono'];
-        var sort = sortEl && allowedSorts.indexOf(sortEl.value) >= 0 ? sortEl.value : 'default';
         var layout = layoutEl && allowedLayouts.indexOf(layoutEl.value) >= 0 ? layoutEl.value : 'magazine';
         var style = styleEl && allowedStyles.indexOf(styleEl.value) >= 0 ? styleEl.value : 'theme';
         return {
@@ -192,7 +189,6 @@
             notes: checked('notes', true),
             extras: checked('extras', true),
             milestones: checked('milestones', true),
-            sort: sort,
             layout: layout,
             style: style
         };
@@ -220,44 +216,6 @@
             };
         }
         return base;
-    }
-
-    function parseSortDate(value) {
-        var raw = st(value);
-        var match = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
-        if (match) return Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
-        match = raw.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})$/);
-        if (match) return Date.UTC(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
-        var parsed = Date.parse(raw);
-        return Number.isFinite(parsed) ? parsed : null;
-    }
-
-    function sortTourEntries(entries, mode) {
-        if (!mode || mode === 'default') return entries;
-        function numeric(value) {
-            var parsed = parseFloat(String(value == null ? '' : value).replace(/\s/g, '').replace(',', '.'));
-            return Number.isFinite(parsed) ? parsed : null;
-        }
-        var direction = mode === 'date-asc' ? 1 : -1;
-        var prepared = entries.map(function(entry, index) {
-            var value = null;
-            if (mode === 'date-asc' || mode === 'date-desc') value = parseSortDate(entry.date);
-            else if (mode === 'distance-desc') value = numeric(entry.strecke);
-            else if (mode === 'ascent-desc') value = numeric(entry.aufstieg);
-            else if (mode === 'performance-desc') {
-                var result = perf(entry);
-                value = result ? numeric(result.score) : null;
-            }
-            return { entry: entry, index: index, value: value };
-        });
-        prepared.sort(function(a, b) {
-            if (a.value == null && b.value == null) return a.index - b.index;
-            if (a.value == null) return 1;
-            if (b.value == null) return -1;
-            var delta = (a.value - b.value) * direction;
-            return delta || a.index - b.index;
-        });
-        return prepared.map(function(item) { return item.entry; });
     }
 
     function dataFor(e, profile, options) {
@@ -1031,27 +989,44 @@
         await ensurePdfLibraries();
         var options = getExportOptions();
         var js=window.jspdf.jsPDF, doc=new js({unit:'mm',format:'a4'}), colors=colorsForExport(tc(), options.style);
+        // Die Reihenfolge aus der App-Datenquelle bleibt unverändert im PDF erhalten.
         var entries=window.getToursInYearRange(from,to), label=from===to?String(from):from+'–'+to;
-        entries = sortTourEntries(entries, options.sort);
         if ((options.photos || options.coverPhoto) && typeof window.loadTourImagesForEntries === 'function') {
             await window.loadTourImagesForEntries(entries);
         }
         if(typeof window.showToast==='function') window.showToast('Magazin-Tourenbuch wird erstellt…',{type:'info',duration:2500});
         if(!entries.length){
             await cover(doc,[],{totalTours:0,totalDistance:0,totalAscent:0,totalPeaks:0,totalSteps:0,totalTimeText:'0:00',bigTours:0},label,colors,null,options);
-            footer(doc,label); save(doc,from,to); return;
+            footer(doc,label); await save(doc,from,to); return;
         }
         var stats=window.computeStatsSummary(entries), rep=options.coverPhoto ? (typeof window.getPdfRepresentativePhoto==='function'?window.getPdfRepresentativePhoto(entries):entries.find(function(e){return e.imageData;})||null) : null;
         await cover(doc,entries,stats,label,colors,rep,options);
         doc.addPage(); summary(doc,entries,stats,label,colors,options);
         if(from!==to){ doc.addPage(); yearsPage(doc,from,to,colors,options); }
         await renderTours(doc,entries,from,to,colors,options);
-        footer(doc,label); save(doc,from,to);
+        footer(doc,label); await save(doc,from,to);
     }
 
-    function save(doc,from,to){
+    async function save(doc,from,to){
         var filename=from===to?'tourenbuch-'+from+'.pdf':'tourenbuch-'+from+'-'+to+'.pdf';
-        var blob=doc.output('blob'), file=new File([blob],filename,{type:'application/pdf'});
+        var blob=doc.output('blob');
+
+        // Android-WebView unterstützt den normalen Download eines blob:-Links nicht zuverlässig.
+        // Die APK übergibt das fertige PDF deshalb an den nativen Speicherdialog.
+        if(typeof window.saveTourPdfNative==='function'){
+            var nativeResult=await window.saveTourPdfNative(blob,filename);
+            if(nativeResult&&nativeResult.handled){
+                if(nativeResult.cancelled)return;
+                if(!nativeResult.saved)throw new Error('Android hat das Speichern der PDF-Datei nicht bestätigt.');
+                if(typeof window.showToast==='function'){
+                    window.showToast('PDF wurde gespeichert: '+(nativeResult.fileName||filename),{type:'success',duration:3500});
+                }
+                return;
+            }
+        }
+
+        // Browser/PWA: Freigabe oder klassischer Download wie bisher.
+        var file=new File([blob],filename,{type:'application/pdf'});
         try{
             if(navigator.canShare&&navigator.canShare({files:[file]})&&navigator.share){
                 navigator.share({files:[file],title:filename}).catch(function(err){if(!err||err.name!=='AbortError')download(blob,filename);});
@@ -1085,7 +1060,11 @@
             }
             generate(from,to).catch(function(err){
                 console.error('PDF-Magazin:',err);
-                if(typeof window.showToast==='function')window.showToast('PDF konnte nicht erstellt werden.',{type:'error',duration:3500});
+                var detail = err && err.message ? String(err.message) : '';
+                if(typeof window.showToast==='function')window.showToast(
+                    detail ? 'PDF-Erstellung fehlgeschlagen: '+detail : 'PDF konnte nicht erstellt werden.',
+                    {type:'error',duration:6000}
+                );
             });
         },true);
     }

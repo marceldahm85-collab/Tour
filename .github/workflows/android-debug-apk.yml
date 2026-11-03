@@ -7,6 +7,9 @@ on:
     paths:
       - "android/**"
       - "app-main-20261019.js"
+      - "pdf-magazine.js"
+      - "bergwelt-premium-alpine.css"
+      - "styles.css"
       - "android-backup-bridge.js"
       - "android-gallery-photos.js"
       - "android-gallery-photos.css"
@@ -120,6 +123,7 @@ jobs:
             exit 1
           fi
           node --check app-main-20261019.js
+          node --check pdf-magazine.js
           node --check android-backup-bridge.js
           node --check android-gallery-photos.js
           node --check background-image-manager.js

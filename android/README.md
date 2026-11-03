@@ -12,6 +12,7 @@ Die Android-App ist eine native Hülle um dieselbe, zentral veröffentlichte Ber
 - Der Theme-Editor unterstützt die gleichen Akzent-, Radius-, Schrift-, Verlaufs- und Haptik-Einstellungen wie die PWA. Die Android-App besitzt dafür die normale Vibrationsberechtigung.
 - Hintergrundmotive und selbst ausgewählte Hintergrundbilder werden lokal in IndexedDB gespeichert. Eigene Bilder werden vor dem Speichern auf maximal 1920 Pixel und höchstens 15 MB optimiert.
 - Die Galerie-Funktion liest Fotos und Videos nach ausdrücklicher Freigabe aus Android MediaStore. Originalmedien bleiben an ihrem bisherigen Speicherort.
+- Der PDF-Tourbuch-Export verwendet in der APK den nativen Android-Speicherdialog. Das fertige PDF wird in bestätigten Datenblöcken an die WebView-Bridge übertragen und als `application/pdf` gespeichert; der Browser-Download über einen `blob:`-Link wird in der APK nicht benötigt.
 - Das native Startbildschirm-Widget **Bergjahr** zeigt abgeschlossene Touren, Gesamtkilometer und Aufstieg des aktuellen Kalenderjahres. Mehrtagestouren zählen einmal als Tour; die Strecken und Aufstiege aller Etappen fließen in die Summen ein.
 - Das Widget speichert ausschließlich einen kleinen Statistik-Schnappschuss in Android SharedPreferences. Die eigentlichen Tourdaten verbleiben unverändert im bestehenden App-Speicher.
 - Nach dem Speichern, Bearbeiten, Löschen oder Importieren von Touren aktualisiert die App das Widget. Die Akzentfarbe aus dem Editor wird übernommen; beim Jahreswechsel wechselt die Anzeige automatisch auf das neue Jahr.

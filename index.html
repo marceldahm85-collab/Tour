@@ -122,7 +122,7 @@
 
 
 <link rel="stylesheet" href="./fonts.css?v=1">
-<link rel="stylesheet" href="./styles.css?v=17">
+<link rel="stylesheet" href="./styles.css?v=18">
 <link rel="stylesheet" href="./styles-overrides.css?v=93">
 <link rel="stylesheet" href="./background-image-picker.css?v=2">
 <link rel="stylesheet" href="./android-gallery-photos.css?v=5">
@@ -132,7 +132,7 @@
 <link rel="stylesheet" href="./appview-premium-alpine.css?v=18">
 <link rel="stylesheet" href="./plan-premium-alpine.css?v=16">
 <link rel="stylesheet" href="./typography-profiles.css?v=1">
-<link rel="stylesheet" href="./bergwelt-premium-alpine.css?v=16" data-bergwelt-premium-styles="20261103-subpage-bottom-safe-area">
+<link rel="stylesheet" href="./bergwelt-premium-alpine.css?v=17" data-bergwelt-premium-styles="20261103-subpage-bottom-safe-area">
 
 </head>
 <body>
@@ -2332,17 +2332,6 @@
                         </select>
                     </div>
                 </div>
-                <div class="pdf-book-sort">
-                    <label for="pdf-book-opt-sort">Touren sortieren</label>
-                    <select id="pdf-book-opt-sort" data-pdf-book-option="sort">
-                        <option value="default">Wie bisher (Standardreihenfolge)</option>
-                        <option value="date-asc">Datum: älteste zuerst</option>
-                        <option value="date-desc">Datum: neueste zuerst</option>
-                        <option value="distance-desc">Längste Strecke zuerst</option>
-                        <option value="ascent-desc">Größter Aufstieg zuerst</option>
-                        <option value="performance-desc">Höchster Leistungsindex zuerst</option>
-                    </select>
-                </div>
             </div>
 
             <button
@@ -2613,8 +2602,8 @@
     </nav>
 </div>
 
-<script src="./android-backup-bridge.js?v=3" defer></script>
-<script src="./app-main-20261019.js?v=76" defer></script>
+<script src="./android-backup-bridge.js?v=4" defer></script>
+<script src="./app-main-20261019.js?v=77" defer></script>
 <script src="./stats-premium-alpine.js?v=10" defer></script>
 <script src="./theme-editor-unified.js?v=25" defer></script>
 <script src="./background-image-manager.js?v=7" defer></script>
@@ -2834,7 +2823,7 @@ if ('serviceWorker' in navigator) {
 
         pdfMagazinePromise = new Promise((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = './pdf-magazine.js?v=1';
+            script.src = './pdf-magazine.js?v=2';
             script.async = true;
             script.dataset.lazyPdfMagazine = 'true';
 

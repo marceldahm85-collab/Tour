@@ -233,6 +233,70 @@
     }
 
 
+    async function saveTourPdfNative(blob, suggestedFileName) {
+        if (!blob || typeof blob.arrayBuffer !== 'function') {
+            throw new TypeError('Der PDF-Export hat keine gültige Datei erzeugt.');
+        }
+
+        const ping = await nativeRequest('bridge.ping', {}, 10000);
+        const features = Array.isArray(ping.features) ? ping.features : [];
+        if (!features.includes('pdf.export.v1') || !features.includes('backup.export.v1')) {
+            return { handled: false };
+        }
+
+        if (!Number.isFinite(Number(blob.size)) || blob.size <= 0 || blob.size > MAX_BACKUP_BYTES) {
+            throw new RangeError('Die PDF-Datei ist leer oder größer als 48 MB.');
+        }
+
+        const bytes = new Uint8Array(await blob.arrayBuffer());
+        if (bytes.length !== Number(blob.size) || !bytes.length) {
+            throw new Error('Die PDF-Datei konnte nicht vollständig vorbereitet werden.');
+        }
+
+        const fileName = String(suggestedFileName || 'Tourenbuch.pdf')
+            .replace(/[^A-Za-z0-9._-]/g, '_')
+            .slice(0, 80) || 'Tourenbuch.pdf';
+        const pdfName = fileName.toLowerCase().endsWith('.pdf') ? fileName : fileName + '.pdf';
+        const transferId = nextId('pdf-transfer');
+        const totalChunks = Math.ceil(bytes.length / CHUNK_BYTES);
+        let finishStarted = false;
+
+        try {
+            await nativeRequest('backup.export.start', {
+                transferId,
+                fileName: pdfName,
+                mimeType: 'application/pdf',
+                totalBytes: bytes.length,
+                totalChunks,
+                targetUri: '',
+                linkOnSave: false
+            }, 30000);
+
+            for (let index = 0; index < totalChunks; index += 1) {
+                const start = index * CHUNK_BYTES;
+                const end = Math.min(bytes.length, start + CHUNK_BYTES);
+                const data = encodeChunk(bytes, start, end);
+                await nativeRequest('backup.export.chunk', { transferId, index, data }, 45000);
+            }
+
+            finishStarted = true;
+            const result = await nativeRequest('backup.export.finish', { transferId }, 5 * 60 * 1000);
+            if (result.type === 'backup.export.cancelled') {
+                return { handled: true, cancelled: true };
+            }
+            if (result.type !== 'backup.export.complete') {
+                throw new Error('Android hat das Speichern des Tourbuch-PDFs nicht bestätigt.');
+            }
+            return { handled: true, saved: true, fileName: result.fileName || pdfName };
+        } catch (error) {
+            if (!finishStarted) {
+                nativeRequest('backup.export.abort', { transferId }, 5000).catch(() => {});
+            }
+            throw error;
+        }
+    }
+
+
     async function openTourBackupNative() {
         const ping = await nativeRequest('bridge.ping', {}, 10000);
         const features = Array.isArray(ping.features) ? ping.features : [];
@@ -275,6 +339,7 @@
     }
 
     window.saveTourBackupNative = saveTourBackupNative;
+    window.saveTourPdfNative = saveTourPdfNative;
     window.openTourBackupNative = openTourBackupNative;
     window.readTourBackupNative = readTourBackupNative;
 })();

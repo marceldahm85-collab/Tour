@@ -817,14 +817,12 @@
 }
 
 #wrapped-view.bergwelt-ready #pdf-export-card .form-group,
-#wrapped-view.bergwelt-ready #pdf-export-card .pdf-book-design-field,
-#wrapped-view.bergwelt-ready #pdf-export-card .pdf-book-sort {
+#wrapped-view.bergwelt-ready #pdf-export-card .pdf-book-design-field {
     min-width: 0;
 }
 
 #wrapped-view.bergwelt-ready #pdf-export-card label,
-#wrapped-view.bergwelt-ready #pdf-export-card .pdf-book-design-field > label,
-#wrapped-view.bergwelt-ready #pdf-export-card .pdf-book-sort > label {
+#wrapped-view.bergwelt-ready #pdf-export-card .pdf-book-design-field > label {
     color: var(--bw-muted);
     font-size: .76rem;
     font-weight: 700;

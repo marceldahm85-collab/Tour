@@ -20735,12 +20735,6 @@ body.wrapped-mobile-fullscreen-active {
     margin: 1px 0 0;
     accent-color: var(--accent, #4f9272);
 }
-#pdf-export-card .pdf-book-sort {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-top: 14px;
-}
 #pdf-export-card .pdf-book-options-note {
     margin: 9px 0 0;
     color: var(--text-soft, currentColor);
@@ -20810,8 +20804,7 @@ body.wrapped-mobile-fullscreen-active {
     gap: 6px;
     min-width: 0;
 }
-#pdf-export-card .pdf-book-design-field > label,
-#pdf-export-card .pdf-book-sort > label {
+#pdf-export-card .pdf-book-design-field > label {
     display: block;
     margin: 0;
     color: var(--text-main, currentColor);
@@ -20829,7 +20822,7 @@ body.wrapped-mobile-fullscreen-active {
 }
 
 
-/* Tourbuch: Layout, Farbgestaltung und Sortierung bleiben außerhalb des
+/* Tourbuch: Seitenlayout und Farbgestaltung bleiben außerhalb des
    einklappbaren Optionsbereichs permanent sichtbar. */
 #pdf-export-card .pdf-book-export-controls {
     margin: 12px 0 14px;

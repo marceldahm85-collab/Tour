@@ -28982,12 +28982,21 @@ function initPdfBookOptions() {
     const controls = [...document.querySelectorAll('[data-pdf-book-option]')];
     if (!controls.length) return;
 
-    const validSorts = new Set(['default', 'date-asc', 'date-desc', 'distance-desc', 'ascent-desc', 'performance-desc']);
     let saved = {};
     try {
         saved = JSON.parse(localStorage.getItem(PDF_BOOK_OPTIONS_STORAGE_KEY) || '{}') || {};
     } catch (_) {
         saved = {};
+    }
+
+    // Alte PDF-Sortierwerte werden entfernt; die App-Reihenfolge ist verbindlich.
+    if (Object.prototype.hasOwnProperty.call(saved, 'sort')) {
+        delete saved.sort;
+        try {
+            localStorage.setItem(PDF_BOOK_OPTIONS_STORAGE_KEY, JSON.stringify(saved));
+        } catch (_) {
+            // Die übrigen PDF-Einstellungen bleiben auch ohne Webspeicher bedienbar.
+        }
     }
 
     controls.forEach(control => {
@@ -28996,7 +29005,7 @@ function initPdfBookOptions() {
             if (control.type === 'checkbox' && typeof saved[key] === 'boolean') {
                 control.checked = saved[key];
             } else if (control.tagName === 'SELECT' && typeof saved[key] === 'string') {
-                const allowed = key === 'sort' ? validSorts : new Set([...control.options].map(option => option.value));
+                const allowed = new Set([...control.options].map(option => option.value));
                 if (allowed.has(saved[key])) control.value = saved[key];
             }
         }
