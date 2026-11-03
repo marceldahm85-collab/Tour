@@ -125,7 +125,7 @@
 <link rel="stylesheet" href="./styles.css?v=18">
 <link rel="stylesheet" href="./styles-overrides.css?v=95">
 <link rel="stylesheet" href="./background-image-picker.css?v=2">
-<link rel="stylesheet" href="./theme-editor-workflow.css?v=3">
+<link rel="stylesheet" href="./theme-editor-workflow.css?v=4">
 <link rel="stylesheet" href="./android-gallery-photos.css?v=5">
 <link rel="stylesheet" href="./dashboard-premium-alpine.css?v=23">
 <link rel="stylesheet" href="./stats-premium-alpine.css?v=16">
@@ -2538,6 +2538,7 @@
 <details class="theme-editor-panel dashboard-editor-section theme-editor-extra-section theme-editor-section-card" id="theme-editor-presets-section" data-theme-editor-accordion="presets"><summary class="theme-editor-panel-title">◆ Design-Presets</summary><div class="theme-editor-extra-body"><p class="theme-editor-description">Speichere eine vollständige Kombination aus Farben, Schrift, Hintergrund, Dashboard und Widget. Eigene Bilder werden nicht dupliziert; Presets verweisen auf das lokal gespeicherte Motiv.</p><label for="te-preset-select">Gespeichertes Preset</label><select id="te-preset-select"><option value="">Kein Preset ausgewählt</option></select><label for="te-preset-name">Name des Presets</label><input type="text" id="te-preset-name" maxlength="32" placeholder="z. B. Gold Alpine"><div class="theme-editor-preset-actions"><button type="button" class="save-btn" id="te-preset-save">Preset speichern</button><button type="button" class="save-btn" id="te-preset-load">Preset laden</button><button type="button" class="save-btn theme-editor-preset-delete" id="te-preset-delete">Preset löschen</button></div><div id="te-preset-status" class="theme-editor-description" aria-live="polite"></div></div></details>
     </div>
 
+<div class="theme-editor-savebar theme-editor-save-nav" id="theme-editor-savebar" hidden><div class="theme-editor-savebar-status" id="theme-editor-savebar-status">Alle Änderungen gespeichert</div><button type="button" class="save-btn" id="theme-editor-save" disabled>Änderungen speichern</button></div>
 </div>
 
 <div id="wrapped-view" class="view">
@@ -2804,6 +2805,5 @@ if ('serviceWorker' in navigator) {
 
 </div>
 </div>
-<div class="theme-editor-savebar" id="theme-editor-savebar" hidden><div class="theme-editor-savebar-status" id="theme-editor-savebar-status">Alle Änderungen gespeichert</div><button type="button" class="save-btn" id="theme-editor-save" disabled>Änderungen speichern</button></div>
 </body>
 </html>

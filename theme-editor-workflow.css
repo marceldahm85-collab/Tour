@@ -1,4 +1,10 @@
-/* Unified Editor layout: the app view itself remains the only scroll container. */
+/* =========================================================
+   Theme Editor – native app-view layout
+   The view owns the footer; only the settings area scrolls.
+   This mirrors the proven #tour-view layout:
+   flexible scroll content + non-scrolling bottom navigation.
+   ========================================================= */
+
 #theme-view {
   align-items: stretch !important;
 }
@@ -18,7 +24,7 @@
   overflow: visible;
 }
 
-/* Every top-level editor section uses one shared card and summary treatment. */
+/* All top-level editor sections share one card and summary treatment. */
 #theme-view .theme-editor-section-card {
   display: flex;
   flex-direction: column;
@@ -87,7 +93,7 @@
   line-height: 1.25 !important;
 }
 
-/* Nested settings accordions use the same restrained Alpine card language. */
+/* Nested settings accordions. */
 #theme-view summary::-webkit-details-marker {
   display: none;
 }
@@ -245,27 +251,33 @@
   padding: 0 12px 12px;
 }
 
-#theme-editor-savebar {
-  position: fixed;
-  z-index: 8500;
-  left: 50%;
-  bottom: calc(9px + env(safe-area-inset-bottom, 0px));
+/* A real footer inside #theme-view; never fixed to the window. */
+#theme-view > #theme-editor-savebar {
+  position: static !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  flex: 0 0 auto !important;
+  align-self: center;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(150px, 1.05fr);
   align-items: center;
   gap: 10px;
-  width: min(620px, calc(100vw - 22px));
+  width: min(620px, 100%);
   max-width: 620px;
-  margin: 0;
+  margin: 6px auto 14px;
   padding: 9px 10px;
   border: 1px solid color-mix(in srgb, var(--theme-palette-accent, #ad7d12) 36%, rgba(255,255,255,.18));
   border-radius: var(--app-radius, 14px);
   background: linear-gradient(145deg, rgba(24,33,42,.96), rgba(7,13,20,.97));
   box-shadow: 0 10px 34px rgba(0,0,0,.45);
-  transform: translateX(-50%);
+  transform: none !important;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   box-sizing: border-box;
+  z-index: 2;
 }
 
 #theme-editor-savebar[hidden] {
@@ -322,41 +334,79 @@ body[data-app-density="comfortable"] #theme-view .dashboard-editor-list {
   gap: 12px !important;
 }
 
-/* Portrait: #theme-view scrolls as one normal app view.
-   The external savebar stays fixed and the view reserves its own footer space. */
+/* Portrait: same content/footer flow as Tour planen. */
 @media (max-width: 768px) and (orientation: portrait) and (pointer: coarse) {
   #theme-view {
+    display: flex !important;
+    flex-direction: column !important;
     align-items: stretch !important;
     height: 100% !important;
     min-height: 0 !important;
     max-height: 100% !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    padding: 6px 12px calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+    overflow: hidden !important;
+    padding: 6px 12px 0 !important;
     box-sizing: border-box !important;
     gap: 0 !important;
   }
 
-  #theme-view .theme-editor-inner {
-    flex: 0 0 auto !important;
+  #theme-view > .theme-editor-inner {
+    flex: 1 1 auto !important;
     align-self: stretch !important;
     width: 100% !important;
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
-    overflow: visible !important;
-    padding: 6px 2px 14px !important;
+    margin: 0 auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    padding: 6px 2px 10px !important;
   }
 
-  #theme-editor-savebar {
-    bottom: calc(9px + env(safe-area-inset-bottom, 0px)) !important;
-    left: 50% !important;
-    width: min(620px, calc(100vw - 22px)) !important;
-    margin: 0 !important;
+  #theme-view > #theme-editor-savebar {
+    flex: 0 0 auto !important;
+    align-self: stretch !important;
+    width: 100% !important;
+    max-width: 620px !important;
+    margin: 6px auto 14px !important;
+    padding: 9px 10px;
+    transform: none !important;
   }
 
   #theme-editor-savebar-status {
     font-size: 9px;
+  }
+}
+
+/* Landscape also keeps the save action in the view footer. */
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+  #theme-view {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+    gap: 0 !important;
+  }
+
+  #theme-view > .theme-editor-inner {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #theme-view > #theme-editor-savebar {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 6px auto 8px !important;
   }
 }
 
