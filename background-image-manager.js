@@ -6,6 +6,8 @@
 
     const SETTINGS_KEY = 'appBackgroundSettings_v1';
     const CUSTOM_IMAGE_STORAGE_KEY = '~backgroundImage:custom-active';
+    const CUSTOM_IMAGE_ASSET_PREFIX = '~backgroundImage:asset:';
+    const LEGACY_CUSTOM_IMAGE_ID = 'legacy';
     const CURRENT_PRESET_ID = 'alpine-classic';
     const CURRENT_IMAGE_URL =
         'https://images.unsplash.com/photo-1694968537484-d4e1733301b5?auto=format&fit=crop&w=1400&q=85';
@@ -114,6 +116,7 @@
         mode: 'preset',
         presetId: CURRENT_PRESET_ID,
         customImageName: '',
+        customImageId: '',
         positionX: 56,
         positionY: 50,
         mobilePositionX: 59,
@@ -122,7 +125,9 @@
         fit: 'cover'
     });
 
-    let currentSettings=null,customImageObjectUrl='';let editorDraftActive=false,editorOriginalSettings=null,editorOriginalBlob=null,pendingCustomBlob=null,pendingCustomDelete=false;
+    let currentSettings=null,customImageObjectUrl='';
+    let editorDraftActive=false,editorOriginalSettings=null,editorOriginalBlob=null;
+    let pendingCustomBlob=null,pendingCustomImageId='';
     let initializationPromise = null;
     let sizingImage = null;
     let sizingImageUrl = '';
@@ -140,17 +145,36 @@
         return PRESETS.find(preset => preset.id === id) || PRESETS[0];
     }
 
+    function customImageStorageKey(id) {
+        const safeId = typeof id === 'string' && /^[a-zA-Z0-9_-]{1,80}$/.test(id) ? id : LEGACY_CUSTOM_IMAGE_ID;
+        return safeId === LEGACY_CUSTOM_IMAGE_ID ? CUSTOM_IMAGE_STORAGE_KEY : CUSTOM_IMAGE_ASSET_PREFIX + safeId;
+    }
+
+    function createCustomImageId() {
+        try {
+            if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+                return 'img-' + window.crypto.randomUUID();
+            }
+        } catch (_) {}
+        return 'img-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12);
+    }
+
     function normalizeSettings(value) {
         const source = value && typeof value === 'object' ? value : {};
         const preset = findPreset(source.presetId);
+        const mode = source.mode === 'custom' ? 'custom' : 'preset';
+        const imageId = typeof source.customImageId === 'string' && /^[a-zA-Z0-9_-]{1,80}$/.test(source.customImageId)
+            ? source.customImageId
+            : LEGACY_CUSTOM_IMAGE_ID;
 
         return {
             version: 1,
-            mode: source.mode === 'custom' ? 'custom' : 'preset',
+            mode,
             presetId: preset.id,
             customImageName: typeof source.customImageName === 'string'
                 ? source.customImageName.slice(0, 180)
                 : '',
+            customImageId: mode === 'custom' ? imageId : '',
             positionX: clamp(source.positionX, 0, 100, DEFAULT_SETTINGS.positionX),
             positionY: clamp(source.positionY, 0, 100, DEFAULT_SETTINGS.positionY),
             mobilePositionX: clamp(
@@ -282,9 +306,10 @@
     }
 
     function persistSettings(){if(editorDraftActive)return;if(typeof appStorage!=='undefined'&&appStorage?.set)appStorage.set(SETTINGS_KEY,getSettingsSnapshot());}
-    async function beginEditorDraft(){if(!currentSettings)await initialize();if(editorDraftActive)return getSettingsSnapshot();editorOriginalSettings=getSettingsSnapshot();editorOriginalBlob=await getCustomImageBlob();pendingCustomBlob=null;pendingCustomDelete=false;editorDraftActive=true;return getSettingsSnapshot();}
-    async function commitEditorDraft(){if(!editorDraftActive)return getSettingsSnapshot();if(currentSettings?.mode==='custom'&&pendingCustomBlob instanceof Blob)await _idbSet(CUSTOM_IMAGE_STORAGE_KEY,pendingCustomBlob);else if(pendingCustomDelete&&typeof _idbDel==='function')await _idbDel(CUSTOM_IMAGE_STORAGE_KEY);if(typeof appStorage!=='undefined'&&appStorage?.set)appStorage.set(SETTINGS_KEY,getSettingsSnapshot());editorDraftActive=false;editorOriginalSettings=null;editorOriginalBlob=null;pendingCustomBlob=null;pendingCustomDelete=false;return getSettingsSnapshot();}
-    async function discardEditorDraft(){if(!editorDraftActive)return getSettingsSnapshot();revokeCustomObjectUrl();currentSettings=normalizeSettings(editorOriginalSettings||DEFAULT_SETTINGS);if(currentSettings.mode==='custom'&&editorOriginalBlob instanceof Blob)customImageObjectUrl=URL.createObjectURL(editorOriginalBlob);editorDraftActive=false;editorOriginalSettings=null;editorOriginalBlob=null;pendingCustomBlob=null;pendingCustomDelete=false;applySettingsToDom();return getSettingsSnapshot();}
+    async function beginEditorDraft(){if(!currentSettings)await initialize();if(editorDraftActive)return getSettingsSnapshot();editorOriginalSettings=getSettingsSnapshot();editorOriginalBlob=await getCustomImageBlob();pendingCustomBlob=null;pendingCustomImageId='';editorDraftActive=true;return getSettingsSnapshot();}
+    async function persistDraftAsset(){if(!(pendingCustomBlob instanceof Blob)||!pendingCustomImageId)return false;await _idbSet(customImageStorageKey(pendingCustomImageId),pendingCustomBlob);pendingCustomBlob=null;pendingCustomImageId='';return true;}
+    async function commitEditorDraft(){if(!editorDraftActive)return getSettingsSnapshot();await persistDraftAsset();if(typeof appStorage!=='undefined'&&appStorage?.set)appStorage.set(SETTINGS_KEY,getSettingsSnapshot());editorDraftActive=false;editorOriginalSettings=null;editorOriginalBlob=null;pendingCustomBlob=null;pendingCustomImageId='';return getSettingsSnapshot();}
+    async function discardEditorDraft(){if(!editorDraftActive)return getSettingsSnapshot();revokeCustomObjectUrl();currentSettings=normalizeSettings(editorOriginalSettings||DEFAULT_SETTINGS);if(currentSettings.mode==='custom'&&editorOriginalBlob instanceof Blob)customImageObjectUrl=URL.createObjectURL(editorOriginalBlob);editorDraftActive=false;editorOriginalSettings=null;editorOriginalBlob=null;pendingCustomBlob=null;pendingCustomImageId='';applySettingsToDom();return getSettingsSnapshot();}
     async function setSettingsSnapshot(v){currentSettings=normalizeSettings(v);revokeCustomObjectUrl();if(currentSettings.mode==='custom'){const blob=await getCustomImageBlob();if(blob instanceof Blob)customImageObjectUrl=URL.createObjectURL(blob);}applySettingsToDom();persistSettings();return getSettingsSnapshot();}
 
     function revokeCustomObjectUrl() {
@@ -308,7 +333,7 @@
 
             if (currentSettings.mode === 'custom') {
                 try {
-                    const blob = await _idbGet(CUSTOM_IMAGE_STORAGE_KEY);
+                    const blob = await _idbGet(customImageStorageKey(currentSettings.customImageId));
                     if (blob instanceof Blob && blob.type.startsWith('image/')) {
                         revokeCustomObjectUrl();
                         customImageObjectUrl = URL.createObjectURL(blob);
@@ -316,7 +341,8 @@
                         currentSettings = normalizeSettings({
                             ...currentSettings,
                             mode: 'preset',
-                            customImageName: ''
+                            customImageName: '',
+                            customImageId: ''
                         });
                         persistSettings();
                     }
@@ -328,7 +354,8 @@
                     currentSettings = normalizeSettings({
                         ...currentSettings,
                         mode: 'preset',
-                        customImageName: ''
+                        customImageName: '',
+                        customImageId: ''
                     });
                     persistSettings();
                 }
@@ -354,6 +381,7 @@
             mode: 'preset',
             presetId: preset.id,
             customImageName: '',
+            customImageId: '',
             positionX: preset.positionX,
             positionY: preset.positionY,
             mobilePositionX: preset.mobilePositionX,
@@ -398,15 +426,18 @@
             ? options.fileName.slice(0, 180)
             : '';
 
-        // Das optimierte Bild wird getrennt von den kleinen Einstellungen gespeichert.
-        // Erst nach erfolgreichem IndexedDB-Schreiben wird es zur aktiven Auswahl.
-        if(editorDraftActive){pendingCustomBlob=blob;pendingCustomDelete=false;}else await _idbSet(CUSTOM_IMAGE_STORAGE_KEY,blob);
+        // Jedes importierte Motiv erhält eine eigene ID. Presets verweisen auf
+        // dieselbe IndexedDB-Datei, statt das Foto pro Preset zu duplizieren.
+        const customImageId = createCustomImageId();
+        if(editorDraftActive){pendingCustomBlob=blob;pendingCustomImageId=customImageId;}
+        else await _idbSet(customImageStorageKey(customImageId),blob);
         revokeCustomObjectUrl();
         customImageObjectUrl = URL.createObjectURL(blob);
         currentSettings = normalizeSettings({
             ...settings,
             mode: 'custom',
             customImageName: fileName,
+            customImageId,
             // Ein neu gewähltes Foto startet mittig; danach kann jede Ansicht
             // unabhängig horizontal und alle gemeinsam vertikal justiert werden.
             positionX: 50,
@@ -421,10 +452,18 @@
         return getSettingsSnapshot();
     }
 
-    async function getCustomImageBlob(){if(pendingCustomDelete)return null;if(pendingCustomBlob instanceof Blob)return pendingCustomBlob;if(typeof _idbGet!=='function')return null;const blob=await _idbGet(CUSTOM_IMAGE_STORAGE_KEY);return blob instanceof Blob?blob:null;}
+    async function getCustomImageBlob(){
+        if(!currentSettings||currentSettings.mode!=='custom')return null;
+        const id=currentSettings.customImageId||LEGACY_CUSTOM_IMAGE_ID;
+        if(pendingCustomBlob instanceof Blob && pendingCustomImageId===id)return pendingCustomBlob;
+        if(typeof _idbGet!=='function')return null;
+        const blob=await _idbGet(customImageStorageKey(id));
+        return blob instanceof Blob?blob:null;
+    }
 
     async function clearCustomImage() {
-        if(editorDraftActive){pendingCustomDelete=true;pendingCustomBlob=null;}else if(typeof _idbDel==='function')await _idbDel(CUSTOM_IMAGE_STORAGE_KEY);
+        // Das Bild bleibt gespeichert, falls ein Design-Preset darauf verweist.
+        if(pendingCustomBlob instanceof Blob && pendingCustomImageId===currentSettings?.customImageId){pendingCustomBlob=null;pendingCustomImageId='';}
         revokeCustomObjectUrl();
         const existing = currentSettings || DEFAULT_SETTINGS;
         const preset = findPreset(existing.presetId || CURRENT_PRESET_ID);
@@ -433,6 +472,7 @@
             mode: 'preset',
             presetId: preset.id,
             customImageName: '',
+            customImageId: '',
             positionX: preset.positionX,
             positionY: preset.positionY,
             mobilePositionX: preset.mobilePositionX,
@@ -487,24 +527,25 @@
             throw new RangeError('Das Hintergrundbild in der Sicherungsdatei ist ungültig oder zu groß.');
         }
 
-        if (validBlob) {
-            // Bild und Metadaten getrennt speichern; das Bild bleibt vom normalen
-            // App-Startcache ausgeschlossen und wird nur bei Bedarf geladen.
-            await _idbSet(CUSTOM_IMAGE_STORAGE_KEY, blob);
+        let restoredSettings = next;
+        if (validBlob && next.mode === 'custom') {
+            // Importierte Sicherungsbilder erhalten eine neue Asset-ID, damit
+            // vorhandene Presets auf dem Gerät unverändert bleiben.
+            const restoredImageId = createCustomImageId();
+            await _idbSet(customImageStorageKey(restoredImageId), blob);
             revokeCustomObjectUrl();
             customImageObjectUrl = URL.createObjectURL(blob);
-        } else {
-            await _idbDel(CUSTOM_IMAGE_STORAGE_KEY);
+            restoredSettings = normalizeSettings({ ...next, customImageId: restoredImageId });
+        } else if (!validBlob) {
             revokeCustomObjectUrl();
         }
-
-        let restoredSettings = next;
         if (next.mode === 'custom' && !validBlob) {
             const fallbackPreset = findPreset(next.presetId || CURRENT_PRESET_ID);
             restoredSettings = normalizeSettings({
                 mode: 'preset',
                 presetId: fallbackPreset.id,
                 customImageName: '',
+                customImageId: '',
                 positionX: fallbackPreset.positionX,
                 positionY: fallbackPreset.positionY,
                 mobilePositionX: fallbackPreset.mobilePositionX,
@@ -660,6 +701,7 @@
     };
     window.getAppBackgroundSettings=getSettingsSnapshot;
     window.beginAppBackgroundEditorDraft=beginEditorDraft;
+    window.persistAppBackgroundDraftAsset=persistDraftAsset;
     window.commitAppBackgroundEditorDraft=commitEditorDraft;
     window.discardAppBackgroundEditorDraft=discardEditorDraft;
     window.setAppBackgroundSettingsSnapshot=setSettingsSnapshot;
