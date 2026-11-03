@@ -4400,8 +4400,6 @@ function showAchievementUnlockCelebration(batch, onFinish) {
 
     const kicker = createCelebrationNode('span', 'achievement-unlock-kicker', 'NEUE AUSZEICHNUNG');
     const mainAchievement = batch.achievements[0];
-    const mainTierKey = getAchievementTierKey(mainAchievement?.tierLabel);
-    if (mainTierKey) card.classList.add(`achievement-tier-${mainTierKey}`);
     const artStage = createCelebrationNode('div', 'achievement-unlock-art-stage');
     const art = createCelebrationNode('img', 'achievement-unlock-art');
     art.src = mainAchievement.image || getAchievementCelebrationAsset(mainAchievement.categoryId);
@@ -4629,7 +4627,6 @@ function triggerAchievementUnlockCelebration(badges) {
             categoryId: definition.categoryId,
             categoryLabel: category.label || 'Achievement',
             achievementYear: definition.achievementYear || null,
-            tierLabel: definition.tierLabel || null,
             name,
             icon: definition.icon || category.icon || '🏅',
             image: getAchievementCelebrationAsset(definition.categoryId)
@@ -20671,26 +20668,6 @@ function getAchievementPuzzleLayout() {
     return { landscape, columns, rows: Math.ceil(total / columns) };
 }
 
-function getAchievementTierKey(tierLabel) {
-    const key = String(tierLabel || '').trim().toLowerCase();
-    return ['bronze', 'silber', 'gold', 'platin', 'diamant'].includes(key) ? key : '';
-}
-
-function getAchievementTierSummary(badges, results) {
-    const tieredBadges = (Array.isArray(badges) ? badges : [])
-        .filter(badge => getAchievementTierKey(badge.tierLabel));
-    const highestUnlocked = tieredBadges.reduce(
-        (highest, badge) => results[badge.id]?.unlocked ? badge : highest,
-        null
-    );
-    const nextTier = tieredBadges.find(badge => !results[badge.id]?.unlocked) || null;
-    const visibleTier = highestUnlocked || nextTier;
-    return {
-        key: getAchievementTierKey(visibleTier?.tierLabel),
-        reached: !!highestUnlocked
-    };
-}
-
 function renderAchievementsView() {
     const container = document.getElementById('achievements-categories');
     const summaryValue = document.getElementById('achievements-summary-value');
@@ -20733,13 +20710,9 @@ function renderAchievementsView() {
                 const categoryPercent = categoryTotal ? Math.round(categoryUnlocked / categoryTotal * 100) : 0;
                 const isComplete = categoryUnlocked === categoryTotal;
                 const stateClass = isComplete ? 'complete' : categoryUnlocked > 0 ? 'started' : 'empty';
-                const tierSummary = getAchievementTierSummary(cat.badges, results);
-                const tierClass = tierSummary.key
-                    ? `achievement-tier-${tierSummary.key} ${tierSummary.reached ? 'has-tier-reached' : 'is-tier-preview'}`
-                    : '';
                 return `
                     <button type="button"
-                        class="achievement-category-tile achievement-puzzle-tile ${stateClass} ${tierClass}" style="clip-path:url(#achievement-puzzle-clip-${index}); -webkit-clip-path:url(#achievement-puzzle-clip-${index}); --tile-index:${index}; --photo-x:${(index % puzzleColumns) / Math.max(1, puzzleColumns - 1) * 100}%; --photo-y:${Math.floor(index / puzzleColumns) / Math.max(1, puzzleRows - 1) * 100}%; z-index:${(Math.floor(index / puzzleColumns) + (index % puzzleColumns)) % 2 === 0 ? 2 : 1}"
+                        class="achievement-category-tile achievement-puzzle-tile ${stateClass}" style="clip-path:url(#achievement-puzzle-clip-${index}); -webkit-clip-path:url(#achievement-puzzle-clip-${index}); --tile-index:${index}; --photo-x:${(index % puzzleColumns) / Math.max(1, puzzleColumns - 1) * 100}%; --photo-y:${Math.floor(index / puzzleColumns) / Math.max(1, puzzleRows - 1) * 100}%; z-index:${(Math.floor(index / puzzleColumns) + (index % puzzleColumns)) % 2 === 0 ? 2 : 1}"
                         data-category-id="${catId}"
                         aria-label="${escapeHtmlAttribute(cat.label)}: ${categoryUnlocked} von ${categoryTotal} erreicht. Achievement-Liste öffnen">
                         <span class="achievement-puzzle-tile-top">
@@ -20775,21 +20748,6 @@ function openAchievementCategoryModal(categoryId, resultsInput = null) {
     const badgesContainer = document.getElementById('achievement-category-badges');
     if (!modal || !title || !badgesContainer) return;
 
-    const tierSummary = getAchievementTierSummary(cat.badges, results);
-    modal.classList.remove(
-        'achievement-tier-bronze',
-        'achievement-tier-silber',
-        'achievement-tier-gold',
-        'achievement-tier-platin',
-        'achievement-tier-diamant',
-        'has-tier-reached',
-        'is-tier-preview'
-    );
-    if (tierSummary.key) {
-        modal.classList.add(`achievement-tier-${tierSummary.key}`);
-        modal.classList.add(tierSummary.reached ? 'has-tier-reached' : 'is-tier-preview');
-    }
-
     title.textContent = `${cat.icon} ${cat.label}`;
 
     badgesContainer.innerHTML = `
@@ -20802,11 +20760,6 @@ function openAchievementCategoryModal(categoryId, resultsInput = null) {
                 const isUnlocked = !!r.unlocked;
                 const baseName = badge.nameFn ? badge.nameFn(badge.threshold) : badge.id;
                 const name = badge.tierLabel ? `${badge.tierLabel} · ${baseName}` : baseName;
-                const tierKey = getAchievementTierKey(badge.tierLabel);
-                const tierClass = tierKey ? `achievement-tier-${tierKey}` : '';
-                const tierNameMarkup = tierKey
-                    ? `<span class="achievement-tier-label">${escapeHtml(badge.tierLabel)}</span><span class="achievement-tier-separator"> · </span>${escapeHtml(baseName)}`
-                    : escapeHtml(name);
                 const unlockDate = r.unlockedAt ? new Date(r.unlockedAt) : null;
                 const dateLabel = unlockDate && !Number.isNaN(unlockDate.getTime())
                     ? unlockDate.toLocaleDateString('de-AT') : '–';
@@ -20817,11 +20770,6 @@ function openAchievementCategoryModal(categoryId, resultsInput = null) {
                 if (!isUnlocked && Number.isFinite(target) && target > 0) {
                     progressLabel = `Fortschritt ${Math.round(Number.isFinite(current) ? current : 0).toLocaleString('de-AT')} / ${target.toLocaleString('de-AT')}`;
                 }
-                const progressRatio = isUnlocked ? 100 : (
-                    Number.isFinite(target) && target > 0
-                        ? Math.max(0, Math.min(100, (Number.isFinite(current) ? current : 0) / target * 100))
-                        : 0
-                );
 
                 let tourMarkup = '';
                 if (isUnlocked && r.unlockedTourId) {
@@ -20844,11 +20792,11 @@ function openAchievementCategoryModal(categoryId, resultsInput = null) {
                         : escapeHtml(progressLabel));
 
                 return `
-                    <article class="achievement-inline-row ${isUnlocked ? 'is-unlocked' : 'is-locked'} ${tierClass}" ${tierKey ? `style="--achievement-tier-progress:${progressRatio.toFixed(1)}%"` : ''}>
+                    <article class="achievement-inline-row ${isUnlocked ? 'is-unlocked' : 'is-locked'}">
                         <div class="achievement-row-main">
                             <span class="achievement-row-icon" aria-hidden="true">${isUnlocked ? badge.icon : '🔒'}</span>
                             <span class="achievement-row-copy">
-                                <strong>${tierNameMarkup}</strong>
+                                <strong>${escapeHtml(name)}</strong>
                                 <small class="achievement-row-subline">${sublineMarkup}</small>
                             </span>
                         </div>

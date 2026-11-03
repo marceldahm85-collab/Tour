@@ -2023,3 +2023,19 @@ body.wrapped-mobile-fullscreen-active .accordion-header {
 .achievement-unlock-card.achievement-tier-diamant {
     --accent-color: var(--achievement-tier-color);
 }
+
+
+/* ERLEBNIS-KORREKTUR – den Präsentationsbereich wieder vergrößern.
+   Der 28-px-View-Fußabstand war zusätzlich zum Footer-Abstand aktiv und
+   hat die Unternavigation nach oben gedrückt. Tourbuch/Achievements bleiben
+   von dieser ausschließlich auf die laufende Story begrenzten Regel unberührt. */
+@media (max-width: 768px) and (orientation: portrait) and (pointer: coarse) {
+    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) {
+        padding-bottom: 0 !important;
+    }
+
+    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) > .bergwelt-tabs {
+        order: 6 !important;
+        margin: 6px auto 14px !important;
+    }
+}
