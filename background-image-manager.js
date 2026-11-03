@@ -122,8 +122,7 @@
         fit: 'cover'
     });
 
-    let currentSettings = null;
-    let customImageObjectUrl = '';
+    let currentSettings=null,customImageObjectUrl='';let editorDraftActive=false,editorOriginalSettings=null,editorOriginalBlob=null,pendingCustomBlob=null,pendingCustomDelete=false;
     let initializationPromise = null;
     let sizingImage = null;
     let sizingImageUrl = '';
@@ -282,12 +281,11 @@
         if (image.complete && image.naturalWidth) applyDimensions();
     }
 
-    function persistSettings() {
-        if (typeof appStorage !== 'undefined' &&
-            appStorage && typeof appStorage.set === 'function') {
-            appStorage.set(SETTINGS_KEY, getSettingsSnapshot());
-        }
-    }
+    function persistSettings(){if(editorDraftActive)return;if(typeof appStorage!=='undefined'&&appStorage?.set)appStorage.set(SETTINGS_KEY,getSettingsSnapshot());}
+    async function beginEditorDraft(){if(!currentSettings)await initialize();if(editorDraftActive)return getSettingsSnapshot();editorOriginalSettings=getSettingsSnapshot();editorOriginalBlob=await getCustomImageBlob();pendingCustomBlob=null;pendingCustomDelete=false;editorDraftActive=true;return getSettingsSnapshot();}
+    async function commitEditorDraft(){if(!editorDraftActive)return getSettingsSnapshot();if(currentSettings?.mode==='custom'&&pendingCustomBlob instanceof Blob)await _idbSet(CUSTOM_IMAGE_STORAGE_KEY,pendingCustomBlob);else if(pendingCustomDelete&&typeof _idbDel==='function')await _idbDel(CUSTOM_IMAGE_STORAGE_KEY);if(typeof appStorage!=='undefined'&&appStorage?.set)appStorage.set(SETTINGS_KEY,getSettingsSnapshot());editorDraftActive=false;editorOriginalSettings=null;editorOriginalBlob=null;pendingCustomBlob=null;pendingCustomDelete=false;return getSettingsSnapshot();}
+    async function discardEditorDraft(){if(!editorDraftActive)return getSettingsSnapshot();revokeCustomObjectUrl();currentSettings=normalizeSettings(editorOriginalSettings||DEFAULT_SETTINGS);if(currentSettings.mode==='custom'&&editorOriginalBlob instanceof Blob)customImageObjectUrl=URL.createObjectURL(editorOriginalBlob);editorDraftActive=false;editorOriginalSettings=null;editorOriginalBlob=null;pendingCustomBlob=null;pendingCustomDelete=false;applySettingsToDom();return getSettingsSnapshot();}
+    async function setSettingsSnapshot(v){currentSettings=normalizeSettings(v);revokeCustomObjectUrl();if(currentSettings.mode==='custom'){const blob=await getCustomImageBlob();if(blob instanceof Blob)customImageObjectUrl=URL.createObjectURL(blob);}applySettingsToDom();persistSettings();return getSettingsSnapshot();}
 
     function revokeCustomObjectUrl() {
         if (!customImageObjectUrl) return;
@@ -402,8 +400,7 @@
 
         // Das optimierte Bild wird getrennt von den kleinen Einstellungen gespeichert.
         // Erst nach erfolgreichem IndexedDB-Schreiben wird es zur aktiven Auswahl.
-        await _idbSet(CUSTOM_IMAGE_STORAGE_KEY, blob);
-
+        if(editorDraftActive){pendingCustomBlob=blob;pendingCustomDelete=false;}else await _idbSet(CUSTOM_IMAGE_STORAGE_KEY,blob);
         revokeCustomObjectUrl();
         customImageObjectUrl = URL.createObjectURL(blob);
         currentSettings = normalizeSettings({
@@ -424,16 +421,10 @@
         return getSettingsSnapshot();
     }
 
-    async function getCustomImageBlob() {
-        if (typeof _idbGet !== 'function') return null;
-        const blob = await _idbGet(CUSTOM_IMAGE_STORAGE_KEY);
-        return blob instanceof Blob ? blob : null;
-    }
+    async function getCustomImageBlob(){if(pendingCustomDelete)return null;if(pendingCustomBlob instanceof Blob)return pendingCustomBlob;if(typeof _idbGet!=='function')return null;const blob=await _idbGet(CUSTOM_IMAGE_STORAGE_KEY);return blob instanceof Blob?blob:null;}
 
     async function clearCustomImage() {
-        if (typeof _idbDel === 'function') {
-            await _idbDel(CUSTOM_IMAGE_STORAGE_KEY);
-        }
+        if(editorDraftActive){pendingCustomDelete=true;pendingCustomBlob=null;}else if(typeof _idbDel==='function')await _idbDel(CUSTOM_IMAGE_STORAGE_KEY);
         revokeCustomObjectUrl();
         const existing = currentSettings || DEFAULT_SETTINGS;
         const preset = findPreset(existing.presetId || CURRENT_PRESET_ID);
@@ -667,7 +658,11 @@
             licenseUrl: preset.licenseUrl || ''
         }));
     };
-    window.getAppBackgroundSettings = getSettingsSnapshot;
+    window.getAppBackgroundSettings=getSettingsSnapshot;
+    window.beginAppBackgroundEditorDraft=beginEditorDraft;
+    window.commitAppBackgroundEditorDraft=commitEditorDraft;
+    window.discardAppBackgroundEditorDraft=discardEditorDraft;
+    window.setAppBackgroundSettingsSnapshot=setSettingsSnapshot;
     window.applyAppBackgroundSettingsToDom = applySettingsToDom;
     window.setAppBackgroundPreset = setPreset;
     window.setAppBackgroundImagePosition = setImagePosition;

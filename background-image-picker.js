@@ -241,9 +241,7 @@
         const settings = getSettings();
         if (!(blob instanceof Blob) || !blob.type.startsWith('image/')) {
             revokeCustomPreviewUrl();
-            customPanel.hidden = true;
-            if (positionPanel) positionPanel.hidden = true;
-            return;
+            customPanel.hidden=true;if(positionPanel)positionPanel.hidden=false;syncPositionControls();return;
         }
 
         revokeCustomPreviewUrl();
@@ -265,7 +263,7 @@
         }
         if (removeCustomButton) removeCustomButton.hidden = false;
         customPanel.hidden = false;
-        if (positionPanel) positionPanel.hidden = settings.mode !== 'custom';
+        if(positionPanel)positionPanel.hidden=false;
     }
 
     function getActiveHorizontalField(settings) {

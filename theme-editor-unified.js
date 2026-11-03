@@ -23,7 +23,9 @@
         fontSize: 100,
         haptics: true,
         gradientDirection: '180deg',
-        transition: 55
+        transition: 55,
+        glassOpacity: 68,
+        density: 'standard'
     };
 
     const originalGetThemeEditorSettings =
@@ -166,7 +168,9 @@
             gradientDirection: DIRECTIONS.includes(settings.gradientDirection)
                 ? settings.gradientDirection
                 : DEFAULTS.gradientDirection,
-            transition: clamp(settings.transition, 10, 90, DEFAULTS.transition)
+            transition: clamp(settings.transition, 10, 90, DEFAULTS.transition),
+            glassOpacity: clamp(settings.glassOpacity, 35, 78, DEFAULTS.glassOpacity),
+            density: ['compact','standard','comfortable'].includes(settings.density) ? settings.density : DEFAULTS.density
         };
     }
 
@@ -375,12 +379,10 @@
             soft,
             soft ? 0.10 : 0.16
         );
-        const surfaceTop = soft
-            ? 'rgba(25,30,39,0.58)'
-            : 'rgba(25,30,39,0.72)';
-        const surfaceBottom = soft
-            ? 'rgba(13,21,31,0.48)'
-            : 'rgba(13,21,31,0.62)';
+        // Glas-Deckkraft separat steuerbar; der Farbverlauf erstreckt sich weiterhin über die volle Achse.
+        const strength=clamp(settings.glassOpacity,35,78,68)/100;
+        const surfaceTop=soft?'rgba(25,30,39,'+Math.max(.30,strength-.10).toFixed(2)+')':'rgba(25,30,39,'+strength.toFixed(2)+')';
+        const surfaceBottom=soft?'rgba(13,21,31,'+Math.max(.22,strength-.20).toFixed(2)+')':'rgba(13,21,31,'+Math.max(.25,strength-.10).toFixed(2)+')';
         const material = 'linear-gradient(145deg, ' + surfaceTop + ' 0%, ' +
             surfaceBottom + ' 100%)';
         return tint + ', ' + material;
@@ -476,6 +478,8 @@
         setImportant(body, '--accordion-glow', soft);
         setImportant(body, '--accent-gradient', accentGradient);
         setImportant(body, '--accent-text-color', accentText);
+        body.dataset.appDensity=settings.density||'standard';
+        setImportant(root,'--app-density-scale',settings.density==='compact'?'0.90':settings.density==='comfortable'?'1.10':'1');
 
         // Beide Akzentfarben sind global einstellbar; Richtung und Übergangspunkt
         // steuern den Verlauf konsistent auf Flächen und Hauptnavigation.
@@ -565,12 +569,15 @@
         setValue('te-font-size', settings.fontSize);
         setValue('te-unified-direction', settings.gradientDirection);
         setValue('te-unified-transition', settings.transition);
+        setValue('te-unified-glass-opacity', settings.glassOpacity);
+        setValue('te-unified-density', settings.density);
 
         const radiusValue = document.getElementById('te-unified-radius-value');
         const transitionValue = document.getElementById('te-unified-transition-value');
         const fontSizeValue = document.getElementById('te-font-size-value');
         if (radiusValue) radiusValue.textContent = settings.radius + ' px';
         if (transitionValue) transitionValue.textContent = settings.transition + ' %';
+        const glassValue=document.getElementById('te-unified-glass-opacity-value');if(glassValue)glassValue.textContent=settings.glassOpacity+' %';
         if (fontSizeValue) fontSizeValue.textContent = settings.fontSize + ' %';
 
         const haptics = document.getElementById('haptic-feedback-toggle');
@@ -591,6 +598,8 @@
         if (value('haptic-feedback-toggle')) settings.haptics = value('haptic-feedback-toggle').checked;
         if (value('te-unified-direction')) settings.gradientDirection = value('te-unified-direction').value;
         if (value('te-unified-transition')) settings.transition = Number(value('te-unified-transition').value);
+        if(value('te-unified-glass-opacity'))settings.glassOpacity=Number(value('te-unified-glass-opacity').value);
+        if(value('te-unified-density'))settings.density=value('te-unified-density').value;
         return normalizeSettings(settings);
     }
 
@@ -613,7 +622,7 @@
 
         const controls = [
             'te-unified-accent', 'te-unified-accent2', 'te-unified-radius',
-            'te-unified-direction', 'te-unified-transition'
+            'te-unified-direction', 'te-unified-transition', 'te-unified-glass-opacity', 'te-unified-density'
         ];
 
         controls.forEach(id => {
@@ -624,80 +633,37 @@
             const update = () => {
                 draft = readForm();
                 const radiusValue = document.getElementById('te-unified-radius-value');
-                const transitionValue = document.getElementById('te-unified-transition-value');
-                if (radiusValue) radiusValue.textContent = draft.radius + ' px';
-                if (transitionValue) transitionValue.textContent = draft.transition + ' %';
-                applyUnifiedSettings(id === 'te-unified-accent' || id === 'te-unified-accent2');
+                const transitionValue=document.getElementById('te-unified-transition-value'),glassValue=document.getElementById('te-unified-glass-opacity-value');
+                if(radiusValue)radiusValue.textContent=draft.radius+' px';if(transitionValue)transitionValue.textContent=draft.transition+' %';if(glassValue)glassValue.textContent=draft.glassOpacity+' %';
+                if(id==='te-unified-density')document.body.dataset.appDensity=draft.density;
+                applyUnifiedSettings(id==='te-unified-accent'||id==='te-unified-accent2');
             };
             element.addEventListener('input', update);
             element.addEventListener('change', update);
         });
 
-        // Weiterhin die bestehende, bereits erprobte globale Schriftlogik nutzen.
-        if (typeof window.initThemeEditorFontSelector === 'function') {
-            window.initThemeEditorFontSelector();
-        }
-        if (typeof window.initThemeEditorFontSizeSelector === 'function') {
-            window.initThemeEditorFontSizeSelector();
-        }
-
-        ['te-font-family', 'te-font-size'].forEach(id => {
-            const element = document.getElementById(id);
-            if (!element || element.dataset.unifiedEditorSync === 'true') return;
-            element.dataset.unifiedEditorSync = 'true';
-            const field = id === 'te-font-family' ? 'fontFamily' : 'fontSize';
-            const updateFontPreference = () => {
-                draft = readForm();
-                persistSingleSetting(field, draft[field]);
-                applyUnifiedSettings(true);
-            };
-            element.addEventListener('input', updateFontPreference);
-            element.addEventListener('change', updateFontPreference);
-        });
+        // Schriftart und -größe bleiben Entwürfe bis zum zentralen Speichern.
+        const fontSelect=document.getElementById('te-font-family');
+        if(fontSelect){window.applyThemeEditorFont?.(fontSelect.value||ensureDraft().fontFamily,false);if(fontSelect.dataset.unifiedEditorSync!=='true'){fontSelect.dataset.unifiedEditorSync='true';fontSelect.addEventListener('change',()=>{draft=readForm();window.applyThemeEditorFont?.(draft.fontFamily,false);applyUnifiedSettings(false);});}}
+        const fontSize=document.getElementById('te-font-size');
+        if(fontSize){window.applyThemeEditorFontSize?.(Number(fontSize.value||ensureDraft().fontSize),false);if(fontSize.dataset.unifiedEditorSync!=='true'){fontSize.dataset.unifiedEditorSync='true';fontSize.addEventListener('input',()=>{draft=readForm();window.applyThemeEditorFontSize?.(draft.fontSize,false);const o=document.getElementById('te-font-size-value');if(o)o.textContent=draft.fontSize+' %';});}}
 
         const haptics = document.getElementById('haptic-feedback-toggle');
         if (haptics && haptics.dataset.unifiedEditorBound !== 'true') {
             haptics.dataset.unifiedEditorBound = 'true';
             haptics.addEventListener('change', () => {
                 draft = readForm();
-                // Haptik ist eine Bedienpräferenz und wird unmittelbar gespeichert.
-                const saved = readStored(SETTINGS_KEY);
-                const next = normalizeSettings(
-                    saved && typeof saved === 'object' ? saved : migrateLegacySettings()
-                );
-                next.haptics = draft.haptics;
-                writeStored(SETTINGS_KEY, next);
-                writeStored(HAPTIC_KEY, next.haptics);
-                writeStored(LEGACY_HAPTIC_KEY, next.haptics ? 'on' : 'off');
+                // Haptik wird gemeinsam mit den übrigen Einstellungen gespeichert.
                 applyUnifiedSettings(false);
             });
         }
 
-        document.getElementById('theme-editor-save')?.addEventListener('click', () => {
-            draft = persistSettings(readForm());
-            applyUnifiedSettings(true);
-            showToastSafe('Editor-Einstellungen gespeichert ✓', 'success');
+        document.getElementById('theme-editor-save')?.addEventListener('click', async () => {
+            draft=readForm();try{if(typeof window.__commitPremiumEditorSettings==='function')await window.__commitPremiumEditorSettings();else draft=persistSettings(draft);applyUnifiedSettings(true);showToastSafe('Alle Editor-Einstellungen gespeichert ✓','success');}
+            catch(error){console.error('[Editor] Speichern fehlgeschlagen:',error);showToastSafe('Speichern fehlgeschlagen. Bitte erneut versuchen.','error');}
         });
 
-        document.getElementById('theme-editor-reset')?.addEventListener('click', () => {
-            draft = normalizeSettings({
-                ...DEFAULTS,
-                accent: DEFAULT_ACCENT,
-                fontFamily: DEFAULTS.fontFamily,
-                fontSize: DEFAULTS.fontSize
-            });
-            persistSettings(draft);
-            fillForm();
-            applyUnifiedSettings(true);
-            // Die vorhandene Schriftlogik erst bei einer bewussten Nutzeraktion anwenden.
-            if (typeof window.applyThemeEditorFont === 'function') {
-                window.applyThemeEditorFont(draft.fontFamily, false);
-            }
-            if (typeof window.applyThemeEditorFontSize === 'function') {
-                window.applyThemeEditorFontSize(draft.fontSize, false);
-            }
-            showToastSafe('Editor auf die Grundeinstellungen zurückgesetzt ✓', 'info');
-        });
+        // Grundeinstellungen werden über ein Preset verwaltet.
 
         fillForm();
         applyUnifiedSettings(false);
@@ -706,7 +672,10 @@
 
     // Die bisherige API bleibt erreichbar, liefert aber für alle alten Theme-Keys
     // identische Werte. Damit bleiben Diagramme und PDF-Export kompatibel.
-    window.getThemeEditorSettings = getUnifiedLegacySettings;
+    window.getThemeEditorSettings=getUnifiedLegacySettings;
+    window.getThemeEditorUnifiedSettings=()=>normalizeSettings(readForm());
+    window.setThemeEditorUnifiedSettings=v=>{draft=normalizeSettings(v);fillForm();window.applyThemeEditorFont?.(draft.fontFamily,false);window.applyThemeEditorFontSize?.(draft.fontSize,false);document.body.dataset.appDensity=draft.density;applyUnifiedSettings(true);return{...draft};};
+    window.persistThemeEditorUnifiedSettings=()=>{draft=persistSettings(readForm());document.body.dataset.appDensity=draft.density;applyUnifiedSettings(true);return{...draft};};
     window.buildThemeEditorLiveCss = buildUnifiedLiveCss;
     window.applyThemeEditorSettingsToDom = function () {
         applyUnifiedSettings(false);

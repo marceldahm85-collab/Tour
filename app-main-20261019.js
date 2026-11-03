@@ -21207,16 +21207,12 @@ function renderDashboardEditor() {
             </div>
         </section>
 
-        <div class="dashboard-editor-actions">
-            <button type="button" class="save-btn dashboard-editor-secondary" id="dashboard-editor-reset">Standard</button>
-            <button type="button" class="save-btn dashboard-editor-secondary" id="dashboard-editor-cancel">Verwerfen</button>
-            <button type="button" class="save-btn" id="dashboard-editor-save">Übernehmen</button>
-        </div>
+        <p class="dashboard-editor-save-note">Änderungen werden gemeinsam mit den übrigen Editor-Einstellungen gespeichert.</p>
     `;
 }
 
-function applyDashboardEditorPreferences() {
-    const preferences = getDashboardEditorPreferences();
+function applyDashboardEditorPreferences(preferencesOverride=null){
+    const preferences=normalizeDashboardEditorPreferences(preferencesOverride||getDashboardEditorPreferences());
     const inner = document.querySelector('#dashboard-view .dashboard-inner');
     const recent = document.getElementById('dash-recent-section');
     const milestones = document.getElementById('dash-milestones-section');
@@ -21249,13 +21245,8 @@ function initDashboardEditor() {
     accordion.addEventListener('toggle', () => {
         if (accordion.open) {
             // Jede Öffnung beginnt mit den zuletzt gespeicherten Einstellungen.
-            dashboardEditorDraft = normalizeDashboardEditorPreferences(
-                getDashboardEditorPreferences()
-            );
-            renderDashboardEditor();
-        } else {
-            // Nicht gespeicherte Änderungen beim Schließen verwerfen.
-            dashboardEditorDraft = null;
+            if(!dashboardEditorDraft)dashboardEditorDraft=normalizeDashboardEditorPreferences(getDashboardEditorPreferences());
+            renderDashboardEditor();applyDashboardEditorPreferences(dashboardEditorDraft);
         }
     });
 
@@ -21272,38 +21263,12 @@ function initDashboardEditor() {
         } else if (!dashboardEditorDraft[key].includes(id)) {
             dashboardEditorDraft[key].push(id);
         }
+        applyDashboardEditorPreferences(dashboardEditorDraft);
     });
 
     body.addEventListener('click', event => {
         const button = event.target.closest('button');
         if (!button || !dashboardEditorDraft) return;
-
-        if (button.id === 'dashboard-editor-reset') {
-            dashboardEditorDraft = getDefaultDashboardEditorPreferences();
-            renderDashboardEditor();
-            return;
-        }
-
-        if (button.id === 'dashboard-editor-cancel') {
-            dashboardEditorDraft = normalizeDashboardEditorPreferences(
-                getDashboardEditorPreferences()
-            );
-            renderDashboardEditor();
-            return;
-        }
-
-        if (button.id === 'dashboard-editor-save') {
-            appStorage.set(
-                'dashboardPreferences',
-                normalizeDashboardEditorPreferences(dashboardEditorDraft)
-            );
-            renderDashboard();
-            dashboardEditorDraft = normalizeDashboardEditorPreferences(
-                getDashboardEditorPreferences()
-            );
-            renderDashboardEditor();
-            return;
-        }
 
         const moveButton = button.closest('[data-editor-move]');
         if (!moveButton || moveButton.disabled) return;
@@ -21314,9 +21279,14 @@ function initDashboardEditor() {
         if (!['tileOrder', 'sectionOrder'].includes(key)) return;
 
         moveDashboardEditorItem(dashboardEditorDraft[key], id, direction);
-        renderDashboardEditor();
+        renderDashboardEditor();applyDashboardEditorPreferences(dashboardEditorDraft);
     });
 }
+window.__beginDashboardEditorDraft=function(){dashboardEditorDraft=normalizeDashboardEditorPreferences(getDashboardEditorPreferences());renderDashboardEditor();applyDashboardEditorPreferences(dashboardEditorDraft);return JSON.parse(JSON.stringify(dashboardEditorDraft));};
+window.__getDashboardEditorDraft=function(){return JSON.parse(JSON.stringify(dashboardEditorDraft||normalizeDashboardEditorPreferences(getDashboardEditorPreferences())));};
+window.__setDashboardEditorDraft=function(v){dashboardEditorDraft=normalizeDashboardEditorPreferences(v);renderDashboardEditor();applyDashboardEditorPreferences(dashboardEditorDraft);return JSON.parse(JSON.stringify(dashboardEditorDraft));};
+window.__commitDashboardEditorDraft=function(){if(!dashboardEditorDraft)return normalizeDashboardEditorPreferences(getDashboardEditorPreferences());const saved=normalizeDashboardEditorPreferences(dashboardEditorDraft);appStorage.set('dashboardPreferences',saved);dashboardEditorDraft=saved;renderDashboard();renderDashboardEditor();applyDashboardEditorPreferences(saved);return JSON.parse(JSON.stringify(saved));};
+window.__discardDashboardEditorDraft=function(){dashboardEditorDraft=normalizeDashboardEditorPreferences(getDashboardEditorPreferences());renderDashboardEditor();applyDashboardEditorPreferences(dashboardEditorDraft);};
 
 function renderDashboard() {
     const allTours   = appStorage.get('touren')       || [];
