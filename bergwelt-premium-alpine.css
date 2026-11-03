@@ -1739,3 +1739,15 @@ body.wrapped-mobile-fullscreen-active .accordion-header {
     pointer-events: none !important;
     z-index: 4 !important;
 }
+
+/* BERGWELT – Tourbuch und Achievements: regulären View-Fußabstand wiederherstellen.
+   Die gemeinsame mobile Flex-Ansicht setzt den unteren Innenabstand auf 0.
+   Dadurch rutscht der Footer dieser beiden Unterseiten in die Android-Systemleiste.
+   Der 28-px-Abstand entspricht dem unteren Innenabstand der übrigen mobilen Views;
+   das aktive Panel bleibt scrollbar und die Erlebnis-Präsentation unverändert. */
+@media (max-width: 768px) and (orientation: portrait) and (pointer: coarse) {
+    #wrapped-view.bergwelt-ready.bergwelt-active-tourbuch:not(.wrapped-mobile-fullscreen),
+    #wrapped-view.bergwelt-ready.bergwelt-active-achievements:not(.wrapped-mobile-fullscreen) {
+        padding-bottom: max(28px, env(safe-area-inset-bottom, 0px)) !important;
+    }
+}
