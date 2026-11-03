@@ -35626,7 +35626,7 @@ function populateWrappedYearSelect() {
     const years =
         getWrappedAvailableYears();
 
-    select.innerHTML = '<option value="all">Alle Jahre</option>' + years.map(year =>
+    select.innerHTML = years.map(year =>
         `<option value="${year}" ${
             year === wrappedCurrentYear
                 ? 'selected'
@@ -35652,12 +35652,6 @@ function updateWrappedYearButtons(availableYears = null) {
     if (!years.length) {
         prevBtn.disabled = true;
         nextBtn.disabled = true;
-        return;
-    }
-
-    if (select.value === 'all') {
-        prevBtn.disabled = false;
-        nextBtn.disabled = false;
         return;
     }
 
@@ -35894,10 +35888,6 @@ const endHold = () => {
 
     document.getElementById('wrapped-year-select').addEventListener('change', e => {
         updateWrappedYearButtons();
-        if (e.target.value === 'all') {
-            window.__bergweltRender?.();
-            return;
-        }
         openWrappedView(Number(e.target.value));
         window.__bergweltRender?.();
     });
@@ -35911,18 +35901,14 @@ const endHold = () => {
             return;
         }
 
-        let newYear;
-        if (select.value === 'all' || select.value === 'past') {
-            // Wie im Dashboard: rechts zum neuesten, links zum ältesten Jahr.
-            newYear = direction === 'next' ? years[0] : years[years.length - 1];
-        } else {
-            const current = Number(select.value);
-            const index = years.indexOf(current);
-            if (index < 0) return;
-            const nextIndex = direction === 'next' ? index - 1 : index + 1;
-            if (nextIndex < 0 || nextIndex >= years.length) return;
-            newYear = years[nextIndex];
-        }
+        const current = Number(select.value);
+        const index = years.indexOf(current);
+        if (index < 0) return;
+
+        const nextIndex = direction === 'next' ? index - 1 : index + 1;
+        if (nextIndex < 0 || nextIndex >= years.length) return;
+
+        const newYear = years[nextIndex];
 
         if (String(newYear) === select.value) return;
         select.value = String(newYear);
