@@ -19695,7 +19695,7 @@ const MILESTONE_DEFS = {
     ]
 };
 
-function computeMilestones(toursInput = null) {
+function computeMilestones(toursInput = null, milestoneDefs = MILESTONE_DEFS) {
     const allTours = toursInput ?? (appStorage.get('touren') || []);
 
     // Nur Touren mit gültigem Datum können einen zeitlich zuordenbaren Meilenstein auslösen.
@@ -19728,10 +19728,10 @@ function computeMilestones(toursInput = null) {
         if (entrySteps !== null) { totals.steps += entrySteps; knownEntries.steps++; }
 
         const values = { dist: totals.dist, asc: totals.asc, time: totals.time / 60, peaks: totals.peaks, steps: totals.steps };
-        Object.keys(MILESTONE_DEFS).forEach(type => {
-            while (nextIdx[type] < MILESTONE_DEFS[type].length && values[type] >= MILESTONE_DEFS[type][nextIdx[type]]) {
+        Object.keys(milestoneDefs).forEach(type => {
+            while (nextIdx[type] < milestoneDefs[type].length && values[type] >= milestoneDefs[type][nextIdx[type]]) {
                 reached[type].push({
-                    milestone: MILESTONE_DEFS[type][nextIdx[type]],
+                    milestone: milestoneDefs[type][nextIdx[type]],
                     date: entry.date,
                     tourname: entry.tourname || '–',
                     entry
@@ -19743,7 +19743,7 @@ function computeMilestones(toursInput = null) {
 
     const resultFor = (type, total) => ({
         reached: reached[type],
-        next: MILESTONE_DEFS[type][nextIdx[type]] ?? null,
+        next: milestoneDefs[type][nextIdx[type]] ?? null,
         total,
         knownEntries: knownEntries[type],
         hasData: knownEntries[type] > 0
@@ -19920,8 +19920,56 @@ const ACHIEVEMENT_CATEGORIES = {
     }
 };
 
-function getAllAchievementBadgeDefs() {
-    return Object.values(ACHIEVEMENT_CATEGORIES).flatMap(cat => cat.badges);
+
+const ANNUAL_ACHIEVEMENT_THRESHOLDS = {
+    dist: [100, 250, 500, 750, 1000],
+    asc: [5000, 10000, 25000, 40000, 50000],
+    time: [25, 50, 100, 175, 250],
+    peaks: [5, 10, 15, 30, 50],
+    steps: [100000, 250000, 750000, 1250000, 1500000]
+};
+
+const ACHIEVEMENT_TIER_LABELS = ['Bronze', 'Silber', 'Gold', 'Platin', 'Diamant'];
+
+function getAchievementCategoriesForMode(mode = 'all') {
+    if (mode !== 'year') return ACHIEVEMENT_CATEGORIES;
+
+    const categories = Object.fromEntries(Object.entries(ACHIEVEMENT_CATEGORIES).map(([id, category]) => [
+        id,
+        { ...category, badges: category.badges.map(badge => ({ ...badge })) }
+    ]));
+    const replaceTiers = (categoryId, thresholds, nameFn = null) => {
+        const original = categories[categoryId].badges[0];
+        categories[categoryId].badges = buildTieredBadges(categoryId, thresholds, {
+            icon: original.icon,
+            nameFn: nameFn || original.nameFn
+        }).map((badge, index) => ({ ...badge, tierLabel: ACHIEVEMENT_TIER_LABELS[index] }));
+    };
+
+    replaceTiers('distance', [100, 250, 500, 750, 1000]);
+    replaceTiers('ascent', [5000, 10000, 25000, 40000, 50000]);
+    replaceTiers('time', [25, 50, 100, 175, 250]);
+    replaceTiers('peaks', [5, 10, 15, 30, 50]);
+    replaceTiers('steps', [100000, 250000, 750000, 1250000, 1500000]);
+    replaceTiers('tourCount', [10, 20, 30, 60, 100]);
+    replaceTiers('bigTours', [1, 5, 10, 15, 25]);
+    replaceTiers('uniquePeaks', [5, 10, 15, 25, 40]);
+    replaceTiers('peakHeight', [1500, 2000, 2500, 3000, 3500]);
+    replaceTiers('regions', [1, 3, 5, 10, 14]);
+    replaceTiers('longestTour', [5, 10, 15, 20, 25]);
+    replaceTiers('dailyAscent', [500, 750, 1000, 1500, 2000]);
+    replaceTiers('performance', [50, 60, 70, 80, 90], t => `Score ≥ ${t}`);
+    categories.consistency.badges = buildTieredBadges('consistency', [2, 4, 6, 9, 12], {
+        icon: '📅',
+        nameFn: t => `${t} aktive Monate`
+    }).map((badge, index) => ({ ...badge, tierLabel: ACHIEVEMENT_TIER_LABELS[index], annualActiveMonths: true }));
+    categories.performance.badges.push({ ...ACHIEVEMENT_CATEGORIES.performance.badges.find(badge => badge.isRecordCounter) });
+
+    return categories;
+}
+
+function getAllAchievementBadgeDefs(categories = ACHIEVEMENT_CATEGORIES) {
+    return Object.values(categories).flatMap(cat => cat.badges);
 }
 
 function getAchievementConsistencyMilestone(entries, threshold, fullYear = false) {
@@ -20050,9 +20098,14 @@ function computePerformanceRecordHistory(entries) {
     return { records, maxScore: maxScore === -Infinity ? 0 : maxScore };
 }
 
-function computeAllAchievements(toursInput = null) {
+function computeAllAchievements(toursInput = null, options = {}) {
+    const mode = options.mode === 'year' ? 'year' : 'all';
+    const year = Number(options.year) || null;
+    const contextTours = options.contextTours || (appStorage.get('touren') || []);
     const allTours = toursInput ?? (appStorage.get('touren') || []);
-    const ms = computeMilestones(allTours);
+    const categories = getAchievementCategoriesForMode(mode);
+    const milestoneDefs = mode === 'year' ? ANNUAL_ACHIEVEMENT_THRESHOLDS : MILESTONE_DEFS;
+    const ms = computeMilestones(allTours, milestoneDefs);
     const results = {};
 
     ['dist', 'asc', 'time', 'peaks', 'steps'].forEach((msKey, i) => {
@@ -20084,7 +20137,7 @@ function computeAllAchievements(toursInput = null) {
         uniqueTourEntries.push(entry);
     });
 
-    ACHIEVEMENT_CATEGORIES.tourCount.badges.forEach(badge => {
+    categories.tourCount.badges.forEach(badge => {
         const reachedAt = uniqueTourEntries[badge.threshold - 1];
         results[badge.id] = {
             unlocked: uniqueTourEntries.length >= badge.threshold,
@@ -20101,7 +20154,7 @@ function computeAllAchievements(toursInput = null) {
         const a = parseFloat(String(e.aufstieg || '').replace(',', '.')) || 0;
         return d >= 10 && a >= 1000;
     });
-    ACHIEVEMENT_CATEGORIES.bigTours.badges.forEach(badge => {
+    categories.bigTours.badges.forEach(badge => {
         const reachedAt = bigTours[badge.threshold - 1];
 
 results[badge.id] = {
@@ -20128,7 +20181,7 @@ results[badge.id] = {
         });
     });
     const uniquePeakEntries = [...peakFirstSeen.values()].sort((a, b) => parseTourDateValue(a.date) - parseTourDateValue(b.date));
-    ACHIEVEMENT_CATEGORIES.uniquePeaks.badges.forEach(badge => {
+    categories.uniquePeaks.badges.forEach(badge => {
         const reachedAt = uniquePeakEntries[badge.threshold - 1];
         results[badge.id] = {
             unlocked: peakFirstSeen.size >= badge.threshold,
@@ -20155,7 +20208,7 @@ progressCurrent: peakFirstSeen.size,
         });
     });
     const maxPeakHeight = peakHeightEvents.reduce((max, event) => Math.max(max, event.height), 0);
-    ACHIEVEMENT_CATEGORIES.peakHeight.badges.forEach((badge, badgeIndex, badges) => {
+    categories.peakHeight.badges.forEach((badge, badgeIndex, badges) => {
         const nextThreshold = badges[badgeIndex + 1]?.threshold ?? null;
         const reachedAny = peakHeightEvents.some(event => event.height >= badge.threshold);
         const tierTour = peakHeightEvents.find(event =>
@@ -20185,7 +20238,7 @@ sortedByDate.forEach(entry => {
     }
 });
     const regionEntries = [...regionFirstSeen.values()].sort((a, b) => parseTourDateValue(a.date) - parseTourDateValue(b.date));
-    ACHIEVEMENT_CATEGORIES.regions.badges.forEach(badge => {
+    categories.regions.badges.forEach(badge => {
         const reachedAt = regionEntries[badge.threshold - 1];
         results[badge.id] = {
             unlocked: regionFirstSeen.size >= badge.threshold,
@@ -20207,7 +20260,7 @@ progressCurrent: regionFirstSeen.size,
 };
     });
 
-    ACHIEVEMENT_CATEGORIES.tourTypes.badges.forEach(badge => {
+    categories.tourTypes.badges.forEach(badge => {
         if (badge.isAllrounder) {
             const requiredTypes = ['wandern', 'Klettersteig', 'Radtour', 'Hike & Climb', 'Bike & Hike'];
             const allPresent = requiredTypes.every(t => typeFirstSeen[t]);
@@ -20235,27 +20288,46 @@ unlockedTourId: match?.id || null,
         }
     });
 
-    const longestStreak = computeLongestMonthStreak(allTours);
-    ACHIEVEMENT_CATEGORIES.consistency.badges.forEach(badge => {
-        const milestone = getAchievementConsistencyMilestone(
-            allTours,
-            badge.threshold || 1,
-            !!badge.isFullYear
-        );
-        const achieved = !!milestone;
-
-        results[badge.id] = {
-            unlocked: achieved,
-            unlockedAt: milestone?.date || null,
-            unlockedTour: null,
-            unlockedTourId: null,
-            unlockedPeriod: milestone?.period || null,
-            progressCurrent: badge.isFullYear
-                ? (computeFullYearActive(allTours) ? 1 : 0)
-                : longestStreak,
-            progressTarget: badge.isFullYear ? 1 : badge.threshold
-        };
-    });
+    if (mode === 'year') {
+        const firstTourByMonth = new Map();
+        allTours.forEach((entry, index) => {
+            const date = parseStatsCalendarDate(entry?.date);
+            if (!date || date.getFullYear() !== year) return;
+            const key = date.getMonth() + 1;
+            if (!firstTourByMonth.has(key) || date < firstTourByMonth.get(key).date) {
+                firstTourByMonth.set(key, { entry, date, index });
+            }
+        });
+        const activeMonths = [...firstTourByMonth.keys()].sort((a, b) => a - b);
+        categories.consistency.badges.forEach(badge => {
+            const reachedMonth = activeMonths[badge.threshold - 1];
+            const reached = reachedMonth ? firstTourByMonth.get(reachedMonth) : null;
+            results[badge.id] = {
+                unlocked: !!reached,
+                unlockedAt: reached?.entry.date || null,
+                unlockedTour: null,
+                unlockedTourId: null,
+                unlockedPeriod: reached ? new Intl.DateTimeFormat('de-AT', { month: 'long', year: 'numeric' }).format(reached.date) : null,
+                progressCurrent: activeMonths.length,
+                progressTarget: badge.threshold
+            };
+        });
+    } else {
+        const longestStreak = computeLongestMonthStreak(allTours);
+        categories.consistency.badges.forEach(badge => {
+            const milestone = getAchievementConsistencyMilestone(allTours, badge.threshold || 1, !!badge.isFullYear);
+            const achieved = !!milestone;
+            results[badge.id] = {
+                unlocked: achieved,
+                unlockedAt: milestone?.date || null,
+                unlockedTour: null,
+                unlockedTourId: null,
+                unlockedPeriod: milestone?.period || null,
+                progressCurrent: badge.isFullYear ? (computeFullYearActive(allTours) ? 1 : 0) : longestStreak,
+                progressTarget: badge.isFullYear ? 1 : badge.threshold
+            };
+        });
+    }
 
     const distanceEvents = sortedByDate.map(entry => ({
         id: entry.id || null,
@@ -20265,7 +20337,7 @@ unlockedTourId: match?.id || null,
     })).filter(event => event.val > 0);
     const maxDistance = distanceEvents.reduce((max, event) => Math.max(max, event.val), 0);
 
-    ACHIEVEMENT_CATEGORIES.longestTour.badges.forEach((badge, badgeIndex, badges) => {
+    categories.longestTour.badges.forEach((badge, badgeIndex, badges) => {
         const nextThreshold = badges[badgeIndex + 1]?.threshold ?? null;
         const tierTour = distanceEvents.find(event =>
             event.val >= badge.threshold &&
@@ -20289,7 +20361,7 @@ unlockedTourId: match?.id || null,
     })).filter(event => event.val > 0);
     const maxAscent = ascentEvents.reduce((max, event) => Math.max(max, event.val), 0);
 
-    ACHIEVEMENT_CATEGORIES.dailyAscent.badges.forEach((badge, badgeIndex, badges) => {
+    categories.dailyAscent.badges.forEach((badge, badgeIndex, badges) => {
         const nextThreshold = badges[badgeIndex + 1]?.threshold ?? null;
         const tierTour = ascentEvents.find(event =>
             event.val >= badge.threshold &&
@@ -20305,7 +20377,11 @@ unlockedTourId: match?.id || null,
         };
     });
 
-    const { records: perfRecords, maxScore } = computePerformanceRecordHistory(allTours);
+    const performanceHistory = computePerformanceRecordHistory(mode === 'year' ? contextTours : allTours);
+    const perfRecords = mode === 'year'
+        ? performanceHistory.records.filter(record => getYearFromDate(record.date) === year)
+        : performanceHistory.records;
+    const maxScore = performanceHistory.maxScore;
     const performanceEvents = sortedByDate.map(entry => {
         const performance = calculatePerformanceIndex(entry);
         const score = performance && Number.isFinite(performance.score) ? performance.score : null;
@@ -20317,7 +20393,7 @@ unlockedTourId: match?.id || null,
         };
     }).filter(event => event.score !== null);
 
-    ACHIEVEMENT_CATEGORIES.performance.badges.forEach((badge, badgeIndex, badges) => {
+    categories.performance.badges.forEach((badge, badgeIndex, badges) => {
         if (badge.isRecordCounter) {
             const lastRecord = perfRecords[perfRecords.length - 1];
             results[badge.id] = {
@@ -20400,7 +20476,61 @@ function recomputeAndSyncAchievements({ silent = false } = {}) {
 
     appStorage.set(ACHIEVEMENTS_KEY, nextStored);
 
+    const allTours = appStorage.get('touren') || [];
+    const yearlyStored = appStorage.get(ACHIEVEMENTS_YEARLY_KEY) || {};
+    const nextYearlyStored = { ...yearlyStored };
+    const yearlyNewlyUnlocked = [];
+    const yearsToSync = new Set(getWrappedAvailableYears());
+    yearsToSync.add(new Date().getFullYear());
+
+    yearsToSync.forEach(year => {
+        const yearKey = String(year);
+        const yearTours = allTours.filter(entry => getYearFromDate(entry?.date) === year);
+        const yearResults = computeAllAchievements(yearTours, { mode: 'year', year, contextTours: allTours });
+        const previousYear = yearlyStored[yearKey] || {};
+        const isFirstRunYear = !Object.prototype.hasOwnProperty.call(yearlyStored, yearKey);
+        const nextYear = { ...previousYear };
+        const yearCategories = getAchievementCategoriesForMode('year');
+
+        getAllAchievementBadgeDefs(yearCategories).forEach(badge => {
+            const current = yearResults[badge.id];
+            if (!current) return;
+            const wasUnlocked = !!previousYear[badge.id]?.unlocked;
+            const isUnlocked = !!current.unlocked;
+            const previousCount = previousYear[badge.id]?.recordCount || 0;
+            const currentCount = current.recordCount || 0;
+            const counterIncreased = badge.isRecordCounter ? currentCount > previousCount : false;
+
+            if (isUnlocked && (!wasUnlocked || counterIncreased)) {
+                nextYear[badge.id] = {
+                    unlocked: true,
+                    unlockedAt: current.unlockedAt,
+                    unlockedTour: current.unlockedTour,
+                    unlockedTourId: current.unlockedTourId || null,
+                    recordCount: current.recordCount || undefined
+                };
+                if (!isFirstRunYear && !silent && !ACHIEVEMENT_SILENT_CATEGORIES.has(badge.categoryId) && badge.id !== 'performance_recordBroken') {
+                    yearlyNewlyUnlocked.push({ ...badge, achievementYear: year });
+                }
+            } else if (isUnlocked) {
+                nextYear[badge.id] = nextYear[badge.id] || {
+                    unlocked: true,
+                    unlockedAt: current.unlockedAt,
+                    unlockedTour: current.unlockedTour,
+                    unlockedTourId: current.unlockedTourId || null,
+                    recordCount: current.recordCount || undefined
+                };
+            }
+        });
+        nextYearlyStored[yearKey] = nextYear;
+    });
+
+    appStorage.set(ACHIEVEMENTS_YEARLY_KEY, nextYearlyStored);
+
     if (newlyUnlocked.length) triggerAchievementUnlockCelebration(newlyUnlocked);
+    const lifetimeIds = new Set(newlyUnlocked.map(badge => badge.id));
+    const distinctYearlyUnlocks = yearlyNewlyUnlocked.filter(badge => !lifetimeIds.has(badge.id));
+    if (distinctYearlyUnlocks.length) triggerAchievementUnlockCelebration(distinctYearlyUnlocks);
 
     return { freshResults, newlyUnlocked, isFirstRun };
 }
@@ -20534,12 +20664,15 @@ function renderAchievementsView() {
     const summaryValue = document.getElementById('achievements-summary-value');
     if (!container) return;
 
-    const results = computeAllAchievements(getAchievementsFilteredTours());
-    const categories = Object.entries(ACHIEVEMENT_CATEGORIES);
+    const mode = achievementsYearFilter === 'all' ? 'all' : 'year';
+    const selectedYear = mode === 'year' ? Number(achievementsYearFilter) : null;
+    const categoryDefinitions = getAchievementCategoriesForMode(mode);
+    const results = computeAllAchievements(getAchievementsFilteredTours(), { mode, year: selectedYear, contextTours: appStorage.get('touren') || [] });
+    const categories = Object.entries(categoryDefinitions);
     const puzzleLayout = getAchievementPuzzleLayout();
     const puzzleColumns = puzzleLayout.columns;
     const puzzleRows = puzzleLayout.rows;
-    const allBadges = getAllAchievementBadgeDefs();
+    const allBadges = getAllAchievementBadgeDefs(categoryDefinitions);
     const unlockedCount = allBadges.filter(badge => results[badge.id]?.unlocked).length;
     const totalCount = allBadges.length;
     const totalPercent = totalCount > 0 ? Math.round(unlockedCount / totalCount * 100) : 0;
@@ -20594,8 +20727,11 @@ function renderAchievementsView() {
 }
 
 function openAchievementCategoryModal(categoryId, resultsInput = null) {
-    const results = resultsInput || computeAllAchievements(getAchievementsFilteredTours());
-    const cat = ACHIEVEMENT_CATEGORIES[categoryId];
+    const mode = achievementsYearFilter === 'all' ? 'all' : 'year';
+    const year = mode === 'year' ? Number(achievementsYearFilter) : null;
+    const categories = getAchievementCategoriesForMode(mode);
+    const results = resultsInput || computeAllAchievements(getAchievementsFilteredTours(), { mode, year, contextTours: appStorage.get('touren') || [] });
+    const cat = categories[categoryId];
     if (!cat) return;
 
     const modal = document.getElementById('achievement-category-modal');
@@ -20613,7 +20749,8 @@ function openAchievementCategoryModal(categoryId, resultsInput = null) {
             ${cat.badges.map(badge => {
                 const r = results[badge.id] || {};
                 const isUnlocked = !!r.unlocked;
-                const name = badge.nameFn ? badge.nameFn(badge.threshold) : badge.id;
+                const baseName = badge.nameFn ? badge.nameFn(badge.threshold) : badge.id;
+                const name = badge.tierLabel ? `${badge.tierLabel} · ${baseName}` : baseName;
                 const unlockDate = r.unlockedAt ? new Date(r.unlockedAt) : null;
                 const dateLabel = unlockDate && !Number.isNaN(unlockDate.getTime())
                     ? unlockDate.toLocaleDateString('de-AT') : '–';
