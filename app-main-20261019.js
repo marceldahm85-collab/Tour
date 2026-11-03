@@ -4188,7 +4188,7 @@ function flushCelebrationGroups() {
     };
 
     batch.milestones = uniqueBy(batch.milestones, item => item.type + ':' + item.milestone);
-    batch.achievements = uniqueBy(batch.achievements, item => item.id || item.name);
+    batch.achievements = uniqueBy(batch.achievements, item => `${item.id || item.name}:${item.achievementYear || 'all'}`);
     batch.records = uniqueBy(batch.records, item => item.name);
     batch.notices = uniqueBy(batch.notices, item => item.message);
 
@@ -4223,11 +4223,12 @@ function showNextCelebration() {
 function openCelebrationDestination(batch) {
     if (batch.achievements.length) {
         const categories = [...new Set(batch.achievements.map(item => item.categoryId).filter(Boolean))];
-        achievementsYearFilter = 'all';
+        const achievementYears = [...new Set(batch.achievements.map(item => item.achievementYear).filter(Boolean))];
+        achievementsYearFilter = achievementYears.length === 1 ? String(achievementYears[0]) : 'all';
         goToView('achievements');
         populateAchievementsYearSelect();
         const yearSelect = document.getElementById('achievements-year-select');
-        if (yearSelect) yearSelect.value = 'all';
+        if (yearSelect) yearSelect.value = achievementsYearFilter;
         renderAchievementsView();
         if (categories.length === 1) {
             openAchievementCategoryModal(categories[0]);
@@ -4612,16 +4613,20 @@ function triggerAchievementUnlockCelebration(badges) {
     if (!list.length) return;
 
     const items = list.map(badge => {
-        const definition = ACHIEVEMENT_CATEGORIES[badge.categoryId]?.badges.find(item => item.id === badge.id) || badge;
+        const definition = badge.achievementYear
+            ? badge
+            : (ACHIEVEMENT_CATEGORIES[badge.categoryId]?.badges.find(item => item.id === badge.id) || badge);
         const category = ACHIEVEMENT_CATEGORIES[definition.categoryId] || {};
-        const name = definition.nameFn
+        const baseName = definition.nameFn
             ? definition.nameFn(definition.threshold)
             : (definition.id || 'Achievement');
+        const name = definition.tierLabel ? `${definition.tierLabel} · ${baseName}` : baseName;
 
         return {
             id: definition.id,
             categoryId: definition.categoryId,
             categoryLabel: category.label || 'Achievement',
+            achievementYear: definition.achievementYear || null,
             name,
             icon: definition.icon || category.icon || '🏅',
             image: getAchievementCelebrationAsset(definition.categoryId)
@@ -35565,11 +35570,16 @@ function getCurrentMondayDateString() {
 
 function getRecentlyUnlockedAchievements(days = 7) {
     const unlocked = appStorage.get(ACHIEVEMENTS_KEY) || {};
+    const yearly = appStorage.get(ACHIEVEMENTS_YEARLY_KEY) || {};
     const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
 
-    return Object.entries(unlocked)
-        .filter(([id, info]) => info?.unlockedAt && new Date(info.unlockedAt).getTime() >= cutoff)
-        .map(([id, info]) => ({ id, ...info }));
+    const lifetimeEntries = Object.entries(unlocked).map(([id, info]) => ({ id, ...info, scope: 'all' }));
+    const yearlyEntries = Object.entries(yearly).flatMap(([year, badges]) =>
+        Object.entries(badges || {}).map(([id, info]) => ({ id, ...info, year: Number(year), scope: 'year' }))
+    );
+
+    return [...lifetimeEntries, ...yearlyEntries]
+        .filter(info => info.unlockedAt && new Date(info.unlockedAt).getTime() >= cutoff);
 }
 
 function showAchievementsWeeklyBanner(count) {
