@@ -2,7 +2,7 @@
 
 Die Motive werden ausschließlich als Hintergrundbilder der Statistik- und Wanderbuddy-Folien verwendet. Die bestehenden Kennzahlen, Texte und zugeordneten Tourfotos bleiben davon getrennt.
 
-Die Bilddateien werden zur Laufzeit von Unsplash geladen und vom Service Worker nach dem ersten Abruf im App-Cache gespeichert.
+Die 13 Hintergrundmotive werden von Unsplash geladen und beim Installieren bzw. Aktualisieren des Service Workers vorab in den App-Cache übernommen. Nach erfolgreichem Cache-Aufbau sind sie auch offline verfügbar. Die Originaldateien bleiben bei Unsplash; im Repository liegen die Quellen und Zuordnungen, nicht die Bilddateien selbst.
 
 | Folie | Motiv / Urheber | Quelle |
 |---|---|---|
