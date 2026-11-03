@@ -59,3 +59,8 @@ Der zentrale Workflow liegt unter `.github/workflows/android-debug-apk.yml` und 
 - AndroidX WebKit 1.18.0
 
 Das Android-Projekt liegt im Verzeichnis `android/`.
+
+
+## PDF-Tourbuch in der Android-App
+
+Der PDF-Magazin-Renderer wird als reguläres App-Script eingebunden, statt erst beim ersten Button-Klick nachgeladen zu werden. Die jsPDF-Bibliotheken bleiben weiterhin bedarfsgesteuert. Sowohl der Magazin-Renderer als auch der ältere PDF-Export verwenden in der Android-WebView denselben nativen Android-Speicherdialog. Wenn die native Bridge nicht verfügbar ist, wird in der APK ein verständlicher Fehler angezeigt statt ein nicht funktionierender Browser-Blob-Download gestartet.

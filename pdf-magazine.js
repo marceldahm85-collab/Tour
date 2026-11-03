@@ -986,6 +986,7 @@
     }
 
     async function generate(from,to){
+        if(typeof window.showToast==='function')window.showToast('PDF-Export wird vorbereitet…',{type:'info',duration:2500});
         await ensurePdfLibraries();
         var options = getExportOptions();
         var js=window.jspdf.jsPDF, doc=new js({unit:'mm',format:'a4'}), colors=colorsForExport(tc(), options.style);
@@ -1023,6 +1024,9 @@
                 }
                 return;
             }
+        }
+        if(document.documentElement.classList.contains('android-native-shell')){
+            throw new Error('Die native Android-PDF-Schnittstelle ist nicht verfügbar. Bitte die aktuelle APK-Version installieren.');
         }
 
         // Browser/PWA: Freigabe oder klassischer Download wie bisher.

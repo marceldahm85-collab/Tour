@@ -248,7 +248,19 @@
             throw new RangeError('Die PDF-Datei ist leer oder größer als 48 MB.');
         }
 
-        const bytes = new Uint8Array(await blob.arrayBuffer());
+        let arrayBuffer;
+        if (typeof blob.arrayBuffer === 'function') {
+            arrayBuffer = await blob.arrayBuffer();
+        } else {
+            arrayBuffer = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(reader.error || new Error('Die PDF-Datei konnte nicht gelesen werden.'));
+                reader.onabort = () => reject(new Error('Das Lesen der PDF-Datei wurde abgebrochen.'));
+                reader.readAsArrayBuffer(blob);
+            });
+        }
+        const bytes = new Uint8Array(arrayBuffer);
         if (bytes.length !== Number(blob.size) || !bytes.length) {
             throw new Error('Die PDF-Datei konnte nicht vollständig vorbereitet werden.');
         }

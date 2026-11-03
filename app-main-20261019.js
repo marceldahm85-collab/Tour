@@ -28605,22 +28605,37 @@ function pdfExportDownloadBlob(blob, filename) {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function pdfExportSaveOrShare(doc, fromYear, toYear) {
+async function pdfExportSaveOrShare(doc, fromYear, toYear) {
     const filename = fromYear === toYear
         ? `tourenbuch-${fromYear}.pdf`
         : `tourenbuch-${fromYear}-${toYear}.pdf`;
 
     const blob = doc.output('blob');
+
+    if (typeof window.saveTourPdfNative === 'function') {
+        const nativeResult = await window.saveTourPdfNative(blob, filename);
+        if (nativeResult && nativeResult.handled) {
+            if (nativeResult.cancelled) return;
+            if (!nativeResult.saved) throw new Error('Android hat das Speichern des Tourbuch-PDFs nicht bestätigt.');
+            showToast('PDF wurde gespeichert: ' + (nativeResult.fileName || filename), { type: 'success', duration: 3500 });
+            return;
+        }
+    }
+    if (document.documentElement.classList.contains('android-native-shell')) {
+        throw new Error('Die native Android-PDF-Schnittstelle ist nicht verfügbar. Bitte die aktuelle APK-Version installieren.');
+    }
+
     const file = new File([blob], filename, { type: 'application/pdf' });
     const canUseShare = navigator.canShare && navigator.canShare({ files: [file] });
 
     if (canUseShare) {
-        navigator.share({ files: [file], title: filename }).catch(err => {
-            if (err.name !== 'AbortError') pdfExportDownloadBlob(blob, filename);
-        });
-        return;
+        try {
+            await navigator.share({ files: [file], title: filename });
+            return;
+        } catch (err) {
+            if (err && err.name === 'AbortError') return;
+        }
     }
-
     pdfExportDownloadBlob(blob, filename);
 }
 
@@ -28777,7 +28792,7 @@ async function generateTourbookPdf(fromYear, toYear) {
         doc.setFontSize(11);
         doc.setTextColor(40, 40, 40);
         doc.text('Keine Touren in diesem Zeitraum gefunden.', margin, headerH + 15);
-        pdfExportSaveOrShare(doc, fromYear, toYear);
+        await pdfExportSaveOrShare(doc, fromYear, toYear);
         return;
     }
 
@@ -28939,7 +28954,7 @@ async function generateTourbookPdf(fromYear, toYear) {
     highlightTop3CacheRevision = savedHighlightRevision;
     highlightTop3CacheYearFilter = savedHighlightYearFilter;
 
-    pdfExportSaveOrShare(doc, fromYear, toYear);
+    await pdfExportSaveOrShare(doc, fromYear, toYear);
 }
 
     
