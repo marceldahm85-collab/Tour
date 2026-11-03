@@ -19762,6 +19762,7 @@ function computeMilestones(toursInput = null, milestoneDefs = MILESTONE_DEFS) {
    ========================================================= */
 
 const ACHIEVEMENTS_KEY = 'achievementsUnlocked_v1';
+const ACHIEVEMENTS_YEARLY_KEY = 'achievementsUnlockedByYear_v1';
 
 const ACHIEVEMENT_SILENT_CATEGORIES = new Set([
     'distance', 'ascent', 'time', 'peaks', 'steps',
@@ -20111,7 +20112,7 @@ function computeAllAchievements(toursInput = null, options = {}) {
     ['dist', 'asc', 'time', 'peaks', 'steps'].forEach((msKey, i) => {
         const catId = ['distance', 'ascent', 'time', 'peaks', 'steps'][i];
         const msData = ms[msKey];
-        ACHIEVEMENT_CATEGORIES[catId].badges.forEach(badge => {
+        categories[catId].badges.forEach(badge => {
             const reachedItem = msData.reached.find(r => r.milestone === badge.threshold);
             results[badge.id] = {
                 unlocked: !!reachedItem,
@@ -20381,7 +20382,7 @@ unlockedTourId: match?.id || null,
     const perfRecords = mode === 'year'
         ? performanceHistory.records.filter(record => getYearFromDate(record.date) === year)
         : performanceHistory.records;
-    const maxScore = performanceHistory.maxScore;
+    const allTimeMaxScore = performanceHistory.maxScore;
     const performanceEvents = sortedByDate.map(entry => {
         const performance = calculatePerformanceIndex(entry);
         const score = performance && Number.isFinite(performance.score) ? performance.score : null;
@@ -20392,6 +20393,9 @@ unlockedTourId: match?.id || null,
             score
         };
     }).filter(event => event.score !== null);
+    const maxScore = mode === 'year'
+        ? performanceEvents.reduce((max, event) => Math.max(max, event.score), 0)
+        : allTimeMaxScore;
 
     categories.performance.badges.forEach((badge, badgeIndex, badges) => {
         if (badge.isRecordCounter) {
