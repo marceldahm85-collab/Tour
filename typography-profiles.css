@@ -1,0 +1,9 @@
+/*
+ * Einheitliche Schriftfamilie für sämtliche Textbereiche der Anwendung.
+ * Die individuelle Größenkalibrierung pro Schriftfamilie erfolgt zentral
+ * in app-main-20261019.js und gilt auch für Canvas-/Diagrammtexte.
+ */
+html body,
+html body * {
+    font-family: var(--app-font, system-ui, sans-serif) !important;
+}

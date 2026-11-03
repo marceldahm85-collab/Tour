@@ -1,0 +1,565 @@
+/* =========================================================
+   PREMIUM ALPINE — Dashboard-Meilensteine
+   Dezente Bergsilhouetten und einheitliche, akzentfarbene SVG-Symbole.
+   Ausschließlich Darstellung; die bestehende Meilensteinlogik bleibt aktiv.
+   ========================================================= */
+
+#dashboard-view #dash-milestones-section .dash-section-title,
+#dashboard-view #dash-recent-section .dash-section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#dashboard-view #dash-milestones-section .dash-section-mountain-mark,
+#dashboard-view #dash-recent-section .dash-section-mountain-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 20px;
+    width: 20px;
+    height: 18px;
+    color: var(--theme-palette-accent, var(--accent, #ad7d12));
+    opacity: .98;
+    filter:
+        drop-shadow(0 1px 0 color-mix(in srgb, white 18%, transparent))
+        drop-shadow(0 2px 3px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 34%, transparent));
+}
+
+#dashboard-view #dash-milestones-section .dash-section-mountain-mark svg,
+#dashboard-view #dash-recent-section .dash-section-mountain-mark svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+#dashboard-view #dash-milestones-section .dash-milestone-tile {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: 7px 10px;
+    border-color: color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 24%, var(--app-surface-border, rgba(255,255,255,.08)));
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.075),
+        0 4px 12px rgba(0,0,0,.20);
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-watermark {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    display: block;
+    width: auto;
+    height: auto;
+    color: var(--theme-palette-accent, var(--accent, #ad7d12));
+    pointer-events: none;
+    overflow: hidden;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-watermark > img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 68% center;
+    opacity: .92;
+    filter: saturate(1.12) contrast(1.22) brightness(1.10);
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-watermark::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    background:
+        linear-gradient(90deg,
+            rgba(2,9,12,.92) 0%,
+            rgba(2,9,12,.72) 34%,
+            rgba(2,9,12,.38) 68%,
+            rgba(2,9,12,.20) 100%),
+        linear-gradient(0deg, rgba(2,8,10,.28), transparent 74%),
+        radial-gradient(
+            ellipse at 78% 22%,
+            color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 30%, transparent),
+            transparent 62%
+        );
+    opacity: 1;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-top,
+#dashboard-view #dash-milestones-section .dash-ms-progress-wrap,
+#dashboard-view #dash-milestones-section .dash-ms-progress-text {
+    position: relative;
+    z-index: 1;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-top {
+    gap: 8px;
+    margin-bottom: 0;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-info {
+    min-width: 0;
+    gap: 1px;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-info .dash-ms-progress-wrap {
+    width: 100%;
+    height: 4px;
+    flex: 0 0 4px;
+    margin-top: 5px;
+    margin-bottom: 0;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    color: var(--theme-palette-accent, var(--accent, #ad7d12));
+    font-size: 0 !important;
+    line-height: 1;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-symbol-svg {
+    display: block;
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 50%;
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 42%, transparent),
+        0 2px 7px rgba(0,0,0,.52),
+        0 0 10px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 22%, transparent);
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-label {
+    color: #fff !important;
+    font-weight: 800;
+    letter-spacing: .01em;
+    text-shadow: 0 1px 2px rgba(0,0,0,.72);
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-current {
+    color: #fff !important;
+    font-variant-numeric: tabular-nums;
+    font-weight: 750;
+    text-shadow: 0 1px 2px rgba(0,0,0,.72);
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-progress-text {
+    color: rgba(255,255,255,.98) !important;
+    opacity: 1;
+    font-variant-numeric: tabular-nums;
+    font-weight: 650;
+    text-shadow: 0 1px 2px rgba(0,0,0,.72);
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-progress-wrap {
+    border: 1px solid color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 13%, transparent);
+    background: color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 7%, transparent);
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-progress-bar {
+    background: var(--theme-palette-accent-gradient, var(--accent-gradient));
+}
+
+
+/* Individuelle Bildausschnitte für die fünf fotografischen Alpenmotive. */
+#dashboard-view #dash-milestones-section .dash-ms-watermark--asc > img {
+    object-position: 68% 57%;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-watermark--dist > img {
+    object-position: 54% center;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-watermark--peaks > img {
+    object-position: 56% 38%;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-watermark--steps > img {
+    object-position: 52% center;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-watermark--time > img {
+    object-position: 66% 76%;
+}
+
+@media (max-width: 380px) {
+    #dashboard-view #dash-milestones-section .dash-ms-icon {
+        flex-basis: 38px;
+        width: 38px;
+        height: 38px;
+    }
+
+    #dashboard-view #dash-milestones-section .dash-ms-symbol-svg {
+        width: 38px;
+        height: 38px;
+    }
+
+    #dashboard-view #dash-milestones-section .dash-ms-label {
+        font-size: 12px;
+        line-height: 1.15;
+    }
+
+    #dashboard-view #dash-milestones-section .dash-ms-current {
+        font-size: 10px;
+        line-height: 1.15;
+    }
+
+    #dashboard-view #dash-milestones-section .dash-ms-progress-wrap {
+        margin-top: 4px;
+    }
+
+    #dashboard-view #dash-milestones-section .dash-ms-watermark > img {
+        opacity: .86;
+        object-position: 72% center;
+    }
+
+    #dashboard-view #dash-milestones-section .dash-ms-watermark::before {
+        background:
+            linear-gradient(90deg, rgba(2,9,12,.93) 0%, rgba(2,9,12,.72) 44%, rgba(2,9,12,.30) 100%),
+            linear-gradient(0deg, rgba(2,8,10,.24), transparent 74%),
+            radial-gradient(ellipse at 78% 22%, color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 28%, transparent), transparent 62%);
+    }
+}
+
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    #dashboard-view #dash-milestones-section .dash-ms-icon {
+        flex-basis: 36px;
+        width: 36px;
+        height: 36px;
+    }
+
+    #dashboard-view #dash-milestones-section .dash-ms-symbol-svg {
+        width: 36px;
+        height: 36px;
+    }
+
+    #dashboard-view #dash-milestones-section .dash-ms-label {
+        font-size: 11px;
+    }
+
+    #dashboard-view #dash-milestones-section .dash-ms-current {
+        font-size: 9px;
+    }
+
+    #dashboard-view #dash-milestones-section .dash-ms-watermark > img {
+        opacity: .80;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #dashboard-view #dash-milestones-section .dash-ms-symbol-svg {
+        filter: none;
+    }
+}
+
+
+/* Premium-Alpine-Line-Art: Akzentfarbe explizit aus dem Editor übernehmen.
+   Nicht --theme-palette-accent verwenden: das kann je nach Theme hell/weiß sein. */
+#dashboard-view .dash-stat-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 22px;
+    width: 22px;
+    height: 22px;
+    color: var(--accent, #D5A64C) !important;
+    font-size: 0 !important;
+    line-height: 1;
+    opacity: 1;
+    filter:
+        drop-shadow(0 0 1px color-mix(in srgb, var(--accent, #D5A64C) 45%, transparent))
+        drop-shadow(0 2px 4px color-mix(in srgb, var(--accent, #D5A64C) 28%, transparent));
+}
+
+#dashboard-view .dash-stat-icon svg {
+    display: block;
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    fill: none !important;
+    stroke: var(--accent, #D5A64C) !important;
+    stroke-width: 1.65 !important;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    overflow: visible;
+}
+
+/* Accent marks remain filled; they do not introduce a thinner, inconsistent outline. */
+#dashboard-view .dash-stat-icon svg .icon-accent-fill {
+    fill: color-mix(in srgb, var(--accent, #D5A64C) 24%, transparent) !important;
+    stroke: none !important;
+    stroke-width: 0 !important;
+}
+
+@media (max-width: 768px), (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    #dashboard-view .dash-stat-icon {
+        flex-basis: 18px;
+        width: 18px;
+        height: 18px;
+    }
+
+    #dashboard-view .dash-stat-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+
+
+
+
+/* Meilenstein-Fortschritt: platzsparend rechts neben dem Symbol,
+   aber unabhängig von Textbreite und Prozentangabe bis zur rechten Kachel-Innenkante. */
+#dashboard-view #dash-milestones-section .dash-milestone-tile .dash-ms-top {
+    --dash-ms-track-icon-size: 44px;
+    --dash-ms-track-gap: 8px;
+    position: relative !important;
+    width: 100%;
+    min-width: 0;
+}
+
+#dashboard-view #dash-milestones-section .dash-milestone-tile .dash-ms-top > .dash-ms-progress-wrap {
+    display: block !important;
+    position: absolute !important;
+    left: calc(var(--dash-ms-track-icon-size) + var(--dash-ms-track-gap)) !important;
+    right: 0 !important;
+    bottom: 4px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 4px !important;
+    margin: 0 !important;
+    flex: none !important;
+    box-sizing: border-box !important;
+    border: 1px solid rgba(255, 255, 255, .24) !important;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .16) !important;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .22) !important;
+}
+
+#dashboard-view #dash-milestones-section .dash-milestone-tile .dash-ms-top > .dash-ms-progress-wrap > .dash-ms-progress-bar {
+    display: block;
+    max-width: none;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+/* Match the horizontal offset to the smaller Alpine symbol on narrow screens. */
+@media (max-width: 380px) {
+    #dashboard-view #dash-milestones-section .dash-ms-top {
+        --dash-ms-track-icon-size: 38px;
+    }
+}
+
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    #dashboard-view #dash-milestones-section .dash-ms-top {
+        --dash-ms-track-icon-size: 36px;
+    }
+}
+
+
+/* Letzte Touren: Portrait zeigt wie bisher drei Einträge.
+   Einträge vier und fünf bleiben im DOM, damit das Querformat sie nutzen kann. */
+#dashboard-view #dash-recent-section .dash-tour-list > .dash-recent-item:nth-child(n + 4) {
+    display: none !important;
+}
+
+/* Mobiles Querformat: fünf Touren in der verfügbaren linken Dashboard-Spalte.
+   Die Liste füllt den bestehenden Bereich; zusätzliche Zeilen erzeugen keinen
+   neuen Seitenabschnitt und verändern die Meilensteine rechts nicht. */
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    #dashboard-view #dash-recent-section {
+        display: flex;
+        flex-direction: column;
+        align-self: stretch;
+        height: 100%;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    #dashboard-view #dash-recent-section .dash-section-title {
+        flex: 0 0 auto;
+    }
+
+    #dashboard-view #dash-recent-section .dash-section-body {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: hidden;
+        box-sizing: border-box;
+        padding: 0 6px 4px;
+    }
+
+    #dashboard-view #dash-recent-section .dash-tour-list {
+        display: grid;
+        grid-template-rows: repeat(5, minmax(0, 1fr));
+        gap: 2px;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    #dashboard-view #dash-recent-section .dash-tour-list > .dash-recent-item {
+        display: grid !important;
+        grid-template-columns: max-content minmax(0, 1fr);
+        align-items: center;
+        align-content: center;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        margin: 0;
+        padding: 2px 3px;
+        column-gap: 5px;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    #dashboard-view #dash-recent-section .dash-tour-list > .dash-recent-item:nth-child(n + 4) {
+        display: grid !important;
+    }
+
+    #dashboard-view #dash-recent-section .dash-tour-list .tour-date,
+    #dashboard-view #dash-recent-section .dash-tour-list .tour-name {
+        min-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        line-height: 1.05;
+    }
+
+    #dashboard-view #dash-recent-section .dash-tour-list .tour-date {
+        font-size: 9px;
+    }
+
+    #dashboard-view #dash-recent-section .dash-tour-list .tour-name {
+        font-size: 10px;
+    }
+}
+
+/* Dashboard-Meilenstein-Modal: Abzeichen im Titel und passendes Alpenmotiv hinter den Einträgen.
+   Die globale Modalpositionierung aus styles.css bleibt unberührt. */
+#milestone-modal .modal-card > .modal-header {
+    position: relative !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    height: 108px !important;
+    min-height: 108px !important;
+    margin: 0 0 2px !important;
+    padding: 0 !important;
+}
+
+#milestone-modal #milestone-modal-title {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 112px !important;
+    height: 104px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    text-align: center !important;
+    line-height: 1 !important;
+    z-index: 1 !important;
+}
+
+#milestone-modal .milestone-modal-title-badge {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    display: block !important;
+    width: 100px !important;
+    height: 100px !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: contain !important;
+    opacity: 1 !important;
+    filter: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    pointer-events: none !important;
+    user-select: none !important;
+    z-index: 0 !important;
+}
+
+#milestone-modal .milestone-modal-title-text {
+    position: relative !important;
+    z-index: 1 !important;
+    display: block !important;
+    max-width: 84px !important;
+    padding: 3px 5px !important;
+    border-radius: 5px !important;
+    color: #ffffff !important;
+    font-size: 13px !important;
+    font-weight: 850 !important;
+    line-height: 1.15 !important;
+    text-align: center !important;
+    overflow-wrap: anywhere;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, .98), 0 0 6px rgba(0, 0, 0, .95) !important;
+    -webkit-text-stroke: .2px rgba(0, 0, 0, .55);
+}
+
+#milestone-modal #milestone-modal-close {
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    z-index: 3 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 34px !important;
+    height: 34px !important;
+    margin: 0 !important;
+    padding: 7px !important;
+    flex-shrink: 0 !important;
+}
+
+#milestone-modal .modal-card > .modal-body {
+    position: relative;
+    z-index: 1;
+    margin-top: 0;
+    isolation: isolate;
+    border-radius: 13px;
+}
+
+/* Das Bild liegt als eigene Ebene hinter der Liste. Die Eintragsflächen und
+   deren Klickbereiche bleiben darüber unverändert erhalten. */
+#milestone-modal #milestone-modal-body::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    border-radius: inherit;
+    background-color: rgba(2, 9, 12, .78);
+    background-image:
+        linear-gradient(90deg,
+            rgba(2, 9, 12, .72) 0%,
+            rgba(2, 9, 12, .52) 42%,
+            rgba(2, 9, 12, .30) 100%),
+        linear-gradient(0deg, rgba(2, 8, 10, .24), rgba(2, 8, 10, .04)),
+        var(--milestone-modal-image, none);
+    background-repeat: no-repeat;
+    background-size: 100% 100%, 100% 100%, cover;
+    background-position:
+        0 0,
+        0 0,
+        var(--milestone-modal-image-position, center);
+    pointer-events: none;
+}

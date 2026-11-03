@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Bergtouren</string>
+    <string name="widget_year_stats_title">Bergjahr</string>
+    <string name="widget_year_stats_description">Touren, Strecke, Aufstieg und weitere Jahreswerte im aktuellen Kalenderjahr.</string>
+</resources>

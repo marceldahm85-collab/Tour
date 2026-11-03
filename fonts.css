@@ -1,0 +1,5 @@
+/* Local WOFF2 fonts for PWA and Android WebView. */
+@font-face{font-family:"Tour Inter";font-style:normal;font-display:swap;font-weight:100 900;src:url("./fonts/inter-latin-wght-normal.woff2") format("woff2");}
+@font-face{font-family:"Tour Roboto Condensed";font-style:normal;font-display:swap;font-weight:100 900;src:url("./fonts/roboto-condensed-latin-wght-normal.woff2") format("woff2");}
+@font-face{font-family:"Tour Nunito Sans";font-style:normal;font-display:swap;font-weight:200 1000;src:url("./fonts/nunito-sans-latin-wght-normal.woff2") format("woff2");}
+@font-face{font-family:"Tour Righteous";font-style:normal;font-display:swap;font-weight:400;src:url("./fonts/righteous-latin-400-normal.woff2") format("woff2");}
