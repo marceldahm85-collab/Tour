@@ -36566,37 +36566,29 @@ function drawWrappedOsttirolMotionFrame(state, progress) {
     ctx.save();
     ctx.setTransform(verticalScale, 0, 0, verticalScale, 0, 0);
 
-    for (let trail = 3; trail >= 1; trail--) {
-        const back = Math.max(0, position - trail * 0.16);
-        const backIndex = Math.min(segments - 1, Math.floor(back));
-        const backLocal = back - backIndex;
-        const a = points[backIndex];
-        const b = points[backIndex + 1];
-        const tx = a.x + (b.x - a.x) * backLocal;
-        const ty = a.y + (b.y - a.y) * backLocal;
-        ctx.globalAlpha = 0.18 + (3 - trail) * 0.14;
-        ctx.fillStyle = '#fff0bd';
-        ctx.beginPath();
-        ctx.arc(tx, ty, 5 + (3 - trail), 0, Math.PI * 2);
-        ctx.fill();
-    }
-
     ctx.globalAlpha = 1;
-    const halo = ctx.createRadialGradient(x, y, 2, x, y, 42);
-    halo.addColorStop(0, 'rgba(255,250,220,0.95)');
-    halo.addColorStop(0.20, 'rgba(255,217,130,0.82)');
+    const halo = ctx.createRadialGradient(x, y, 1, x, y, 16);
+    halo.addColorStop(0, 'rgba(255,250,220,0.78)');
+    halo.addColorStop(0.28, 'rgba(255,217,130,0.42)');
     halo.addColorStop(1, 'rgba(255,193,75,0)');
     ctx.fillStyle = halo;
     ctx.beginPath();
-    ctx.arc(x, y, 42, 0, Math.PI * 2);
+    ctx.arc(x, y, 16, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.shadowColor = '#ffe4a1';
-    ctx.shadowBlur = 24;
+    ctx.shadowBlur = 9;
     ctx.fillStyle = '#fff8df';
     ctx.beginPath();
-    ctx.arc(x, y, 8, 0, Math.PI * 2);
+    ctx.arc(x, y, 3.2, 0, Math.PI * 2);
     ctx.fill();
+
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(255,248,225,0.92)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(x, y, 5.2, 0, Math.PI * 2);
+    ctx.stroke();
     ctx.restore();
 }
 
@@ -37392,9 +37384,9 @@ function getWrappedOsttirolMapLayout(w, h) {
     const centerLat = (minLat + maxLat) / 2;
     const longitudeScale = Math.cos(centerLat * Math.PI / 180);
     const left = w * 0.14;
-    const top = h * 0.205;
+    const top = h * 0.185;
     const boxWidth = w * 0.72;
-    const boxHeight = h * 0.355;
+    const boxHeight = h * 0.39;
     const geographicWidth = (maxLon - minLon) * longitudeScale;
     const geographicHeight = maxLat - minLat;
     const scale = Math.min(boxWidth / geographicWidth, boxHeight / geographicHeight);
@@ -37420,10 +37412,6 @@ function renderWrappedOsttirolSlide(ctx, w, h, colors, data) {
     const accent = '#e7bd61';
 
     drawWrappedCenteredTitle(ctx, 'Einmal rund um Osttirol', 245, 66, colors.text, w);
-    setWrappedFont(ctx, 34, 'normal');
-    ctx.fillStyle = 'rgba(255,255,255,0.88)';
-    ctx.textAlign = 'center';
-    ctx.fillText('Die gesamte Außengrenze des Bezirks Lienz', center, 325);
 
     ctx.save();
     ctx.beginPath();
@@ -37441,69 +37429,50 @@ function renderWrappedOsttirolSlide(ctx, w, h, colors, data) {
 
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
-    ctx.strokeStyle = 'rgba(231,189,97,0.28)';
-    ctx.lineWidth = 22;
-    ctx.shadowColor = 'rgba(231,189,97,0.62)';
-    ctx.shadowBlur = 32;
+    ctx.strokeStyle = 'rgba(231,189,97,0.22)';
+    ctx.lineWidth = 13;
+    ctx.shadowColor = 'rgba(231,189,97,0.48)';
+    ctx.shadowBlur = 22;
     ctx.stroke();
 
     ctx.shadowBlur = 0;
     ctx.strokeStyle = accent;
-    ctx.lineWidth = 5;
+    ctx.lineWidth = 4;
     ctx.stroke();
 
     ctx.strokeStyle = 'rgba(255,248,225,0.78)';
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 1.2;
     ctx.stroke();
 
     const lienz = layout.project([12.76, 46.83]);
     ctx.shadowColor = accent;
-    ctx.shadowBlur = 18;
+    ctx.shadowBlur = 12;
     ctx.fillStyle = '#fff4cf';
     ctx.beginPath();
-    ctx.arc(lienz.x, lienz.y, 8, 0, Math.PI * 2);
+    ctx.arc(lienz.x, lienz.y, 5.5, 0, Math.PI * 2);
     ctx.fill();
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'rgba(255,255,255,0.96)';
-    ctx.textAlign = 'left';
+    ctx.textAlign = 'right';
     setWrappedFont(ctx, 26, 'bold');
-    ctx.fillText('LIENZ', lienz.x + 17, lienz.y + 9);
+    ctx.fillText('LIENZ', lienz.x - 15, lienz.y + 9);
     ctx.restore();
-
-    setWrappedFont(ctx, 118, 'bold');
-    ctx.fillStyle = accent;
-    ctx.textAlign = 'center';
-    ctx.shadowColor = 'rgba(0,0,0,0.35)';
-    ctx.shadowBlur = 20;
-    ctx.fillText(`${WRAPPED_OSTTIROL_BORDER_KM} km`, center, 1280);
-    ctx.shadowBlur = 0;
-
-    setWrappedFont(ctx, 28, 'bold');
-    ctx.fillStyle = 'rgba(255,255,255,0.72)';
-    ctx.fillText('ENTLANG DER BEZIRKSGRENZE', center, 1340);
 
     const distance = Math.max(0, Number(data?.distance) || 0);
     const laps = distance / WRAPPED_OSTTIROL_BORDER_KM;
-    const lapsText = laps.toFixed(1).replace('.', ',');
+    const lapsText = laps.toFixed(2).replace('.', ',');
 
-    setWrappedFont(ctx, 154, 'bold');
+    setWrappedFont(ctx, 158, 'bold');
     ctx.fillStyle = colors.text;
-    ctx.fillText(`${lapsText}×`, center, 1545);
+    ctx.textAlign = 'center';
+    ctx.shadowColor = 'rgba(0,0,0,0.42)';
+    ctx.shadowBlur = 22;
+    ctx.fillText(`${lapsText}×`, center, 1450);
+    ctx.shadowBlur = 0;
 
     setWrappedFont(ctx, 38, 'bold');
     ctx.fillStyle = colors.accent;
-    ctx.fillText('Osttirol umrundet', center, 1630);
-
-    setWrappedFont(ctx, 30, 'normal');
-    ctx.fillStyle = 'rgba(255,255,255,0.9)';
-    wrapWrappedText(
-        ctx,
-        `Deine ${distance.toFixed(1).replace('.', ',')} km entsprechen ${lapsText} kompletten Umrundungen.`,
-        center,
-        1710,
-        w * 0.82,
-        42
-    );
+    ctx.fillText('Osttirol umrundet', center, 1535);
 }
 
 function renderWrappedAscentSlide(ctx, w, h, colors, data) {
