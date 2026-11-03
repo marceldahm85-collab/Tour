@@ -19956,7 +19956,7 @@ function getAchievementCategoriesForMode(mode = 'all') {
     replaceTiers('ascent', [5000, 10000, 25000, 40000, 50000]);
     replaceTiers('time', [25, 50, 100, 175, 250]);
     replaceTiers('peaks', [5, 10, 15, 30, 50]);
-    replaceTiers('steps', [100000, 250000, 750000, 1250000, 1500000]);
+    replaceTiers('steps', [100000, 250000, 750000, 1250000, 1500000], t => `${t.toLocaleString('de-AT')} Schritte`);
     replaceTiers('tourCount', [10, 20, 30, 60, 100]);
     replaceTiers('bigTours', [1, 5, 10, 15, 25]);
     replaceTiers('uniquePeaks', [5, 10, 15, 25, 40]);
