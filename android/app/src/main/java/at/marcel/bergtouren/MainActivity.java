@@ -415,6 +415,7 @@ public final class MainActivity extends Activity {
                                 features.put("gallery.video.player.v1");
                                 features.put("widget.yearStats.v1");
                                 features.put("widget.yearStats.v2");
+                                features.put("widget.yearStats.config.v1");
                                 features.put("backup.export.v1");
                                 features.put("pdf.export.v1");
                                 features.put("backup.file.link.v1");
@@ -450,6 +451,24 @@ public final class MainActivity extends Activity {
                                 openBackupFilePicker(replyProxy, requestId);
                             } else if ("backup.file.read".equals(type)) {
                                 readBackupFile(request, replyProxy, requestId);
+                            } else if ("widget.yearStats.settings".equals(type)) {
+                                String title = request.optString("title", "BERGJAHR");
+                                String background = request.optString("background", "alpine");
+                                boolean showTours = request.optBoolean("showTours", true);
+                                boolean showDistance = request.optBoolean("showDistance", true);
+                                boolean showAscent = request.optBoolean("showAscent", true);
+                                boolean showPeaks = request.optBoolean("showPeaks", true);
+                                boolean showSteps = request.optBoolean("showSteps", true);
+                                boolean showTime = request.optBoolean("showTime", true);
+                                boolean hasMetric = showTours || showDistance || showAscent || showPeaks || showSteps || showTime;
+                                if (title.length() <= 20 && hasMetric
+                                        && ("alpine".equals(background) || "dark".equals(background))) {
+                                    YearStatsWidgetProvider.updateConfiguration(
+                                            MainActivity.this, title, showTours, showDistance,
+                                            showAscent, showPeaks, showSteps, showTime, background);
+                                } else {
+                                    Log.w(TAG, "Ungültige Widget-Konfiguration verworfen.");
+                                }
                             } else if ("widget.yearStats.update".equals(type)) {
                                 int year = request.optInt("year", -1);
                                 int tours = request.optInt("tours", -1);

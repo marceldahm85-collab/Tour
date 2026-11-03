@@ -8,6 +8,7 @@
     android:contentDescription="@string/widget_year_stats_description">
 
     <ImageView
+        android:id="@+id/widget_year_stats_background_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@null"
@@ -15,6 +16,7 @@
         android:src="@drawable/widget_alpine_background" />
 
     <ImageView
+        android:id="@+id/widget_year_stats_scrim_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@null"
@@ -70,7 +72,8 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                        android:id="@+id/widget_year_stats_compact_tours_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_compact_tours_icon"
                         android:layout_width="14dp"
@@ -120,7 +123,8 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                        android:id="@+id/widget_year_stats_compact_distance_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_compact_distance_icon"
                         android:layout_width="14dp"
@@ -170,7 +174,8 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                        android:id="@+id/widget_year_stats_compact_ascent_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_compact_ascent_icon"
                         android:layout_width="14dp"
@@ -267,7 +272,8 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                        android:id="@+id/widget_year_stats_tours_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_tours_icon"
                         android:layout_width="16dp"
@@ -317,7 +323,8 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                        android:id="@+id/widget_year_stats_distance_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_distance_icon"
                         android:layout_width="16dp"
@@ -367,7 +374,8 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                        android:id="@+id/widget_year_stats_ascent_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_ascent_icon"
                         android:layout_width="16dp"
@@ -424,7 +432,8 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                        android:id="@+id/widget_year_stats_peaks_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_peaks_icon"
                         android:layout_width="16dp"
@@ -474,7 +483,8 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                        android:id="@+id/widget_year_stats_steps_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_steps_icon"
                         android:layout_width="16dp"
@@ -524,7 +534,8 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                        android:id="@+id/widget_year_stats_time_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_time_icon"
                         android:layout_width="16dp"

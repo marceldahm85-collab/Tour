@@ -20,6 +20,7 @@ public final class YearStatsWidgetProvider extends AppWidgetProvider {
     private static final String PREFS = "year_stats_widget";
     private static final String DEFAULT_ACCENT = "#ad7d12";
     private static final int EXPANDED_HEIGHT_DP = 100;
+    private static final String DEFAULT_WIDGET_TITLE = "BERGJAHR";
 
     public static void updateStats(Context context, int year, int tours,
                                    double distance, double ascent, long peaks,
@@ -42,6 +43,30 @@ public final class YearStatsWidgetProvider extends AppWidgetProvider {
                 .putString("accent", safeAccent)
                 .apply();
         updateAll(app);
+    }
+
+    public static void updateConfiguration(Context context, String title,
+            boolean showTours, boolean showDistance, boolean showAscent,
+            boolean showPeaks, boolean showSteps, boolean showTime, String background) {
+        if (context == null) return;
+        String safeTitle = title == null ? DEFAULT_WIDGET_TITLE : title.trim();
+        if (safeTitle.isEmpty()) safeTitle = DEFAULT_WIDGET_TITLE;
+        if (safeTitle.length() > 20) safeTitle = safeTitle.substring(0, 20);
+        if (!showTours && !showDistance && !showAscent && !showPeaks && !showSteps && !showTime) {
+            showTours = true;
+        }
+        String safeBackground = "dark".equals(background) ? "dark" : "alpine";
+        context.getApplicationContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+                .putString("widget_title", safeTitle)
+                .putBoolean("show_tours", showTours)
+                .putBoolean("show_distance", showDistance)
+                .putBoolean("show_ascent", showAscent)
+                .putBoolean("show_peaks", showPeaks)
+                .putBoolean("show_steps", showSteps)
+                .putBoolean("show_time", showTime)
+                .putString("widget_background", safeBackground)
+                .apply();
+        updateAll(context.getApplicationContext());
     }
 
     @Override public void onUpdate(Context context, AppWidgetManager manager, int[] ids) {
@@ -83,6 +108,14 @@ public final class YearStatsWidgetProvider extends AppWidgetProvider {
         long steps = sameYear ? prefs.getLong("steps", 0L) : 0L;
         long walkingMinutes = sameYear ? prefs.getLong("walking_minutes", 0L) : 0L;
         int accent = parseAccent(prefs.getString("accent", DEFAULT_ACCENT));
+        String widgetTitle = prefs.getString("widget_title", DEFAULT_WIDGET_TITLE);
+        boolean showTours = prefs.getBoolean("show_tours", true);
+        boolean showDistance = prefs.getBoolean("show_distance", true);
+        boolean showAscent = prefs.getBoolean("show_ascent", true);
+        boolean showPeaks = prefs.getBoolean("show_peaks", true);
+        boolean showSteps = prefs.getBoolean("show_steps", true);
+        boolean showTime = prefs.getBoolean("show_time", true);
+        boolean alpineBackground = !"dark".equals(prefs.getString("widget_background", "alpine"));
 
         NumberFormat integer = NumberFormat.getIntegerInstance(Locale.GERMANY);
         NumberFormat km = NumberFormat.getNumberInstance(Locale.GERMANY);
@@ -109,12 +142,12 @@ public final class YearStatsWidgetProvider extends AppWidgetProvider {
             views.setViewVisibility(R.id.widget_year_stats_expanded,
                     expanded ? View.VISIBLE : View.GONE);
 
-            views.setTextViewText(R.id.widget_year_stats_compact_heading, "BERGJAHR " + year);
+            views.setTextViewText(R.id.widget_year_stats_compact_heading, widgetTitle.toUpperCase(Locale.GERMANY) + " " + year);
             views.setTextViewText(R.id.widget_year_stats_compact_tours_value, toursText);
             views.setTextViewText(R.id.widget_year_stats_compact_distance_value, distanceText);
             views.setTextViewText(R.id.widget_year_stats_compact_ascent_value, ascentText);
 
-            views.setTextViewText(R.id.widget_year_stats_heading, "BERGJAHR " + year);
+            views.setTextViewText(R.id.widget_year_stats_heading, widgetTitle.toUpperCase(Locale.GERMANY) + " " + year);
             views.setTextViewText(R.id.widget_year_stats_tours_value, toursText);
             views.setTextViewText(R.id.widget_year_stats_distance_value, distanceText);
             views.setTextViewText(R.id.widget_year_stats_ascent_value, ascentText);
@@ -123,6 +156,20 @@ public final class YearStatsWidgetProvider extends AppWidgetProvider {
             views.setTextViewText(R.id.widget_year_stats_time_value, walkingTimeText);
 
             views.setInt(R.id.widget_year_stats_accent_line, "setBackgroundColor", accent);
+            views.setViewVisibility(R.id.widget_year_stats_background_image,
+                    alpineBackground ? View.VISIBLE : View.GONE);
+            views.setViewVisibility(R.id.widget_year_stats_scrim_image,
+                    alpineBackground ? View.VISIBLE : View.GONE);
+            views.setInt(R.id.widget_year_stats_root, "setBackgroundColor", Color.rgb(7, 12, 18));
+            setMetricVisibility(views, showTours,
+                    R.id.widget_year_stats_compact_tours_group, R.id.widget_year_stats_tours_group);
+            setMetricVisibility(views, showDistance,
+                    R.id.widget_year_stats_compact_distance_group, R.id.widget_year_stats_distance_group);
+            setMetricVisibility(views, showAscent,
+                    R.id.widget_year_stats_compact_ascent_group, R.id.widget_year_stats_ascent_group);
+            setMetricVisibility(views, showPeaks, R.id.widget_year_stats_peaks_group);
+            setMetricVisibility(views, showSteps, R.id.widget_year_stats_steps_group);
+            setMetricVisibility(views, showTime, R.id.widget_year_stats_time_group);
             views.setInt(R.id.widget_year_stats_compact_tours_icon, "setColorFilter", accent);
             views.setInt(R.id.widget_year_stats_compact_distance_icon, "setColorFilter", accent);
             views.setInt(R.id.widget_year_stats_compact_ascent_icon, "setColorFilter", accent);
@@ -141,6 +188,12 @@ public final class YearStatsWidgetProvider extends AppWidgetProvider {
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             views.setOnClickPendingIntent(R.id.widget_year_stats_root, pending);
             manager.updateAppWidget(id, views);
+        }
+    }
+
+    private static void setMetricVisibility(RemoteViews views, boolean visible, int... ids) {
+        for (int id : ids) {
+            views.setViewVisibility(id, visible ? View.VISIBLE : View.GONE);
         }
     }
 
