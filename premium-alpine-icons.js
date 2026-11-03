@@ -132,6 +132,8 @@
         if (!pattern.test(value)) return;
         pattern.lastIndex = 0;
 
+        const parent = node.parentElement;
+        const forceIcon = Boolean(parent?.closest('.big-tour-flag,.highlight-title-flag,.gradient-flag'));
         const fragment = document.createDocumentFragment();
         let cursor = 0;
         let match;
@@ -139,6 +141,13 @@
             const token = match[0];
             const key = TOKEN_TO_ICON[token];
             if (!key) continue;
+
+            // Nur ikonische Präfixe bzw. Symbole nach UI-Trennzeichen ersetzen.
+            // So bleiben Emojis innerhalb frei eingegebener Namen/Beschreibungen erhalten.
+            const prefix = value.slice(0, match.index);
+            const isUiPrefix = prefix.trim() === '' || /[·•|]\s*$/.test(prefix);
+            if (!forceIcon && !isUiPrefix) continue;
+
             if (match.index > cursor) {
                 fragment.appendChild(document.createTextNode(value.slice(cursor, match.index)));
             }
