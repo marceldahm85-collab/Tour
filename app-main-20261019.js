@@ -24341,6 +24341,7 @@ const WRAPPED_SLIDE_DURATIONS = {
     bestTour: 11000,
     top3: 14000,
     topCompanion: 11000,
+    osttirol: 14000,
     photo: 8500
 };
 
@@ -24831,6 +24832,8 @@ function buildWrappedSlideData(year) {
           data: { year, tourCount: totals.tourCount, seasonTitle: getWrappedSeasonTitle(totals) } },
         { key: 'distance', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
           data: { distance: totals.distance } },
+        { key: 'osttirolLoop', type: 'heavy', duration: WRAPPED_SLIDE_DURATIONS.osttirol,
+          data: { distance: totals.distance, borderKm: WRAPPED_OSTTIROL_BORDER_KM } },
         { key: 'ascent', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
           data: { ascent: totals.ascent } },
         { key: 'peaks', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
@@ -35749,6 +35752,7 @@ function renderWrappedSlideToCanvas(slide, width, height) {
     switch (slide.key) {
         case 'intro': renderWrappedIntroSlide(ctx, logicalWidth, logicalHeight, colors, slide.data, !slide.photoImg); break;
         case 'distance': renderWrappedDistanceSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
+        case 'osttirolLoop': renderWrappedOsttirolSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
         case 'ascent': renderWrappedAscentSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
         case 'peaks': renderWrappedPeakCountSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
         case 'time': renderWrappedTimeSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
@@ -35942,6 +35946,7 @@ function startWrappedAutoAdvance() {
         goToWrappedSlide(wrappedSlideIndex + 1);
     }, wrappedAutoAdvanceRemaining);
     startWrappedPhotoMotionForCurrentSlide(wrappedAutoAdvanceRemaining);
+    startWrappedOsttirolMotionForCurrentSlide(wrappedAutoAdvanceRemaining);
 }
 
 function animateWrappedCurrentSegment(duration) {
@@ -35969,6 +35974,7 @@ function pauseWrappedAutoAdvance() {
     }
 
     pauseWrappedPhotoMotion();
+    pauseWrappedOsttirolMotion();
     const elapsed = Date.now() - wrappedAutoAdvanceStart;
     wrappedAutoAdvanceRemaining = Math.max(0, wrappedAutoAdvanceRemaining - elapsed);
 
@@ -36003,6 +36009,7 @@ function resumeWrappedAutoAdvance() {
     }, wrappedAutoAdvanceRemaining);
 
     resumeWrappedPhotoMotion();
+    resumeWrappedOsttirolMotion();
     updateWrappedPauseButtonLabel();
 }
 
@@ -36528,7 +36535,143 @@ let wrappedInitialRevealPending = false;
 let wrappedPendingAutoAdvanceIndex = null;
 let wrappedPhotoMotionState = null;
 
+
+let wrappedOsttirolMotionState = null;
+
+function stopWrappedOsttirolMotion() {
+    const state = wrappedOsttirolMotionState;
+    if (state?.frameId) cancelAnimationFrame(state.frameId);
+    wrappedOsttirolMotionState = null;
+}
+
+function drawWrappedOsttirolMotionFrame(state, progress) {
+    const canvas = document.getElementById('wrapped-canvas');
+    const slide = wrappedSlides[state?.slideIndex];
+    if (!canvas || !slide || slide.key !== 'osttirolLoop') return;
+
+    const verticalScale = canvas.height / WRAPPED_CANVAS_BASE_HEIGHT;
+    const logicalWidth = canvas.width / verticalScale;
+    const layout = getWrappedOsttirolMapLayout(logicalWidth, WRAPPED_CANVAS_BASE_HEIGHT);
+    const points = layout.points;
+    const segments = points.length - 1;
+    const position = Math.max(0, Math.min(1, progress)) * segments;
+    const index = Math.min(segments - 1, Math.floor(position));
+    const local = position - index;
+    const from = points[index];
+    const to = points[index + 1];
+    const x = from.x + (to.x - from.x) * local;
+    const y = from.y + (to.y - from.y) * local;
+
+    const ctx = canvas.getContext('2d');
+    ctx.save();
+    ctx.setTransform(verticalScale, 0, 0, verticalScale, 0, 0);
+
+    for (let trail = 3; trail >= 1; trail--) {
+        const back = Math.max(0, position - trail * 0.16);
+        const backIndex = Math.min(segments - 1, Math.floor(back));
+        const backLocal = back - backIndex;
+        const a = points[backIndex];
+        const b = points[backIndex + 1];
+        const tx = a.x + (b.x - a.x) * backLocal;
+        const ty = a.y + (b.y - a.y) * backLocal;
+        ctx.globalAlpha = 0.18 + (3 - trail) * 0.14;
+        ctx.fillStyle = '#fff0bd';
+        ctx.beginPath();
+        ctx.arc(tx, ty, 5 + (3 - trail), 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    ctx.globalAlpha = 1;
+    const halo = ctx.createRadialGradient(x, y, 2, x, y, 42);
+    halo.addColorStop(0, 'rgba(255,250,220,0.95)');
+    halo.addColorStop(0.20, 'rgba(255,217,130,0.82)');
+    halo.addColorStop(1, 'rgba(255,193,75,0)');
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(x, y, 42, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.shadowColor = '#ffe4a1';
+    ctx.shadowBlur = 24;
+    ctx.fillStyle = '#fff8df';
+    ctx.beginPath();
+    ctx.arc(x, y, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+function startWrappedOsttirolMotionForCurrentSlide(durationOverride = null) {
+    stopWrappedOsttirolMotion();
+    if (wrappedTransitionState || wrappedPaused) return;
+
+    const slide = wrappedSlides[wrappedSlideIndex];
+    if (!slide || slide.key !== 'osttirolLoop') return;
+
+    const duration = Math.max(
+        500,
+        Number(durationOverride) || Number(slide.duration) || 14000
+    );
+    const state = {
+        slideIndex: wrappedSlideIndex,
+        duration,
+        startTime: performance.now(),
+        progress: 0,
+        frameId: 0
+    };
+    wrappedOsttirolMotionState = state;
+    drawWrappedOsttirolMotionFrame(state, 0);
+
+    const tick = now => {
+        if (wrappedOsttirolMotionState !== state || wrappedSlideIndex !== state.slideIndex) return;
+        const progress = Math.min(1, (now - state.startTime) / state.duration);
+        state.progress = progress;
+        drawWrappedOsttirolMotionFrame(state, progress);
+        if (progress >= 1) {
+            state.frameId = 0;
+            return;
+        }
+        state.frameId = requestAnimationFrame(tick);
+    };
+    state.frameId = requestAnimationFrame(tick);
+}
+
+function pauseWrappedOsttirolMotion() {
+    const state = wrappedOsttirolMotionState;
+    if (!state || !state.frameId) return;
+    state.progress = Math.max(0, Math.min(
+        1,
+        (performance.now() - state.startTime) / state.duration
+    ));
+    cancelAnimationFrame(state.frameId);
+    state.frameId = 0;
+    drawWrappedOsttirolMotionFrame(state, state.progress);
+}
+
+function resumeWrappedOsttirolMotion() {
+    const state = wrappedOsttirolMotionState;
+    if (!state || state.slideIndex !== wrappedSlideIndex) {
+        startWrappedOsttirolMotionForCurrentSlide(getWrappedCurrentSlideRemaining());
+        return;
+    }
+    if (state.progress >= 1 || state.frameId) return;
+
+    state.startTime = performance.now() - state.progress * state.duration;
+    const tick = now => {
+        if (wrappedOsttirolMotionState !== state || wrappedSlideIndex !== state.slideIndex) return;
+        const progress = Math.min(1, (now - state.startTime) / state.duration);
+        state.progress = progress;
+        drawWrappedOsttirolMotionFrame(state, progress);
+        if (progress >= 1) {
+            state.frameId = 0;
+            return;
+        }
+        state.frameId = requestAnimationFrame(tick);
+    };
+    state.frameId = requestAnimationFrame(tick);
+}
+
 function stopWrappedPhotoMotion() {
+    stopWrappedOsttirolMotion();
     const state = wrappedPhotoMotionState;
     if (state?.frameId) cancelAnimationFrame(state.frameId);
     wrappedPhotoMotionState = null;
@@ -37083,6 +37226,7 @@ function drawWrappedSlideIntoCanvas(index, targetCanvas) {
     switch (slide.key) {
         case 'intro': renderWrappedIntroSlide(ctx, w, h, colors, slide.data, !slide.photoImg); break;
         case 'distance': renderWrappedDistanceSlide(ctx, w, h, colors, slide.data); break;
+        case 'osttirolLoop': renderWrappedOsttirolSlide(ctx, w, h, colors, slide.data); break;
         case 'ascent': renderWrappedAscentSlide(ctx, w, h, colors, slide.data); break;
         case 'peaks': renderWrappedPeakCountSlide(ctx, w, h, colors, slide.data); break;
         case 'time': renderWrappedTimeSlide(ctx, w, h, colors, slide.data); break;
@@ -37215,6 +37359,153 @@ function renderWrappedDistanceSlide(ctx, w, h, colors, data) {
         46
     );
 }
+
+// Bezirksgrenze Lienz (Osttirol), aus der vereinfachten Bezirksgeometrie
+// GeoJSON-TopoJSON-Austria, 2021/simplified-99.9/bezirke_999_geo.json
+const WRAPPED_OSTTIROL_BORDER_KM = 195;
+const WRAPPED_OSTTIROL_BOUNDARY = [
+    [12.708906,46.736370],[12.687815,46.657688],[12.628216,46.662106],
+    [12.548422,46.659475],[12.424215,46.699807],[12.374798,46.723019],
+    [12.354608,46.775685],[12.306142,46.785706],[12.289025,46.865910],
+    [12.271071,46.884938],[12.215310,46.874468],[12.165534,46.939001],
+    [12.135445,46.957186],[12.118352,47.006780],[12.144590,47.025616],
+    [12.202046,47.027692],[12.237925,47.069884],[12.280957,47.093265],
+    [12.342796,47.109985],[12.360455,47.142099],[12.396702,47.153516],
+    [12.462737,47.145068],[12.480700,47.158560],[12.563556,47.136739],
+    [12.589417,47.125587],[12.654016,47.100231],[12.707698,47.049148],
+    [12.752065,47.025576],[12.738266,46.969703],[12.756753,46.957326],
+    [12.783590,46.940277],[12.790856,46.927196],[12.805634,46.923314],
+    [12.819010,46.917532],[12.838341,46.861694],[12.892781,46.826521],
+    [12.902647,46.823345],[12.904298,46.823388],[12.960671,46.799363],
+    [12.928610,46.764757],[12.896567,46.777562],[12.854022,46.760884],
+    [12.838408,46.750051],[12.807098,46.756998],[12.793001,46.756056],
+    [12.745381,46.748165],[12.708906,46.736370]
+];
+
+function getWrappedOsttirolMapLayout(w, h) {
+    const longitudes = WRAPPED_OSTTIROL_BOUNDARY.map(point => point[0]);
+    const latitudes = WRAPPED_OSTTIROL_BOUNDARY.map(point => point[1]);
+    const minLon = Math.min(...longitudes);
+    const maxLon = Math.max(...longitudes);
+    const minLat = Math.min(...latitudes);
+    const maxLat = Math.max(...latitudes);
+    const centerLat = (minLat + maxLat) / 2;
+    const longitudeScale = Math.cos(centerLat * Math.PI / 180);
+    const left = w * 0.14;
+    const top = h * 0.205;
+    const boxWidth = w * 0.72;
+    const boxHeight = h * 0.355;
+    const geographicWidth = (maxLon - minLon) * longitudeScale;
+    const geographicHeight = maxLat - minLat;
+    const scale = Math.min(boxWidth / geographicWidth, boxHeight / geographicHeight);
+    const drawWidth = geographicWidth * scale;
+    const drawHeight = geographicHeight * scale;
+    const offsetX = left + (boxWidth - drawWidth) / 2;
+    const offsetY = top + (boxHeight - drawHeight) / 2;
+    const project = ([lon, lat]) => ({
+        x: offsetX + (lon - minLon) * longitudeScale * scale,
+        y: offsetY + (maxLat - lat) * scale
+    });
+    return {
+        points: WRAPPED_OSTTIROL_BOUNDARY.map(project),
+        project,
+        bounds: { left: offsetX, top: offsetY, width: drawWidth, height: drawHeight }
+    };
+}
+
+function renderWrappedOsttirolSlide(ctx, w, h, colors, data) {
+    const center = w / 2;
+    const layout = getWrappedOsttirolMapLayout(w, h);
+    const points = layout.points;
+    const accent = '#e7bd61';
+
+    drawWrappedCenteredTitle(ctx, 'Einmal rund um Osttirol', 245, 66, colors.text, w);
+    setWrappedFont(ctx, 34, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.88)';
+    ctx.textAlign = 'center';
+    ctx.fillText('Die gesamte Außengrenze des Bezirks Lienz', center, 325);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+    ctx.closePath();
+
+    const fill = ctx.createLinearGradient(0, layout.bounds.top, 0, layout.bounds.top + layout.bounds.height);
+    fill.addColorStop(0, 'rgba(54,94,100,0.72)');
+    fill.addColorStop(1, 'rgba(16,42,50,0.76)');
+    ctx.fillStyle = fill;
+    ctx.shadowColor = 'rgba(231,189,97,0.27)';
+    ctx.shadowBlur = 48;
+    ctx.fill();
+
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = 'rgba(231,189,97,0.28)';
+    ctx.lineWidth = 22;
+    ctx.shadowColor = 'rgba(231,189,97,0.62)';
+    ctx.shadowBlur = 32;
+    ctx.stroke();
+
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = accent;
+    ctx.lineWidth = 5;
+    ctx.stroke();
+
+    ctx.strokeStyle = 'rgba(255,248,225,0.78)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    const lienz = layout.project([12.76, 46.83]);
+    ctx.shadowColor = accent;
+    ctx.shadowBlur = 18;
+    ctx.fillStyle = '#fff4cf';
+    ctx.beginPath();
+    ctx.arc(lienz.x, lienz.y, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(255,255,255,0.96)';
+    ctx.textAlign = 'left';
+    setWrappedFont(ctx, 26, 'bold');
+    ctx.fillText('LIENZ', lienz.x + 17, lienz.y + 9);
+    ctx.restore();
+
+    setWrappedFont(ctx, 118, 'bold');
+    ctx.fillStyle = accent;
+    ctx.textAlign = 'center';
+    ctx.shadowColor = 'rgba(0,0,0,0.35)';
+    ctx.shadowBlur = 20;
+    ctx.fillText(`${WRAPPED_OSTTIROL_BORDER_KM} km`, center, 1280);
+    ctx.shadowBlur = 0;
+
+    setWrappedFont(ctx, 28, 'bold');
+    ctx.fillStyle = 'rgba(255,255,255,0.72)';
+    ctx.fillText('ENTLANG DER BEZIRKSGRENZE', center, 1340);
+
+    const distance = Math.max(0, Number(data?.distance) || 0);
+    const laps = distance / WRAPPED_OSTTIROL_BORDER_KM;
+    const lapsText = laps.toFixed(1).replace('.', ',');
+
+    setWrappedFont(ctx, 154, 'bold');
+    ctx.fillStyle = colors.text;
+    ctx.fillText(`${lapsText}×`, center, 1545);
+
+    setWrappedFont(ctx, 38, 'bold');
+    ctx.fillStyle = colors.accent;
+    ctx.fillText('Osttirol umrundet', center, 1630);
+
+    setWrappedFont(ctx, 30, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    wrapWrappedText(
+        ctx,
+        `Deine ${distance.toFixed(1).replace('.', ',')} km entsprechen ${lapsText} kompletten Umrundungen.`,
+        center,
+        1710,
+        w * 0.82,
+        42
+    );
+}
+
 function renderWrappedAscentSlide(ctx, w, h, colors, data) {
     drawWrappedCenteredTitle(ctx, 'Deine Höhenmeter', 350, 70, colors.text, w);
     drawWrappedBigNumber(ctx, Math.round(data.ascent).toLocaleString('de-DE'), 'Hm', 800, colors.text, w);
