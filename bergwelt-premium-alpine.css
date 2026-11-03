@@ -1748,4 +1748,13 @@ body.wrapped-mobile-fullscreen-active .accordion-header {
     #wrapped-view.bergwelt-ready.bergwelt-active-achievements:not(.wrapped-mobile-fullscreen) {
         padding-bottom: max(28px, env(safe-area-inset-bottom, 0px)) !important;
     }
+
+    /* Die frühere Touch-Regel setzt den View mit padding:0 zurück.
+       Für das Tourbuch stellen wir den regulären 20-px-View-Innenabstand
+       mit höherer Spezifität wieder her, ohne die Erlebnis-Story zu verändern. */
+    #wrapped-view.bergwelt-ready.bergwelt-active-tourbuch:not(.wrapped-mobile-fullscreen):not(.bergwelt-story-playing) {
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+        box-sizing: border-box !important;
+    }
 }
