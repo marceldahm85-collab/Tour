@@ -430,7 +430,7 @@
             ' !important; }\n';
         css += selectors(RADIUS_SURFACES) + ' { border-radius: ' + radius + ' !important; }\n';
         css += globalSelectors(GLOBAL_RADIUS_SURFACES) + ' { border-radius: ' + radius + ' !important; }\n';
-        css += 'body.gold :is(#dashboard-view, #app-view, #chart-view, #map-view, #tour-view, #backup-view, #wrapped-view, #achievements-view, #theme-view, #filter-view) :is([class*="-card"], [class*="-tile"]:not(.leaflet-tile), [class*="-panel"], [class*="-section"], [class*="-btn"], [class*="-button"], [class*="-nav"], [class*="-list"] > li, button, input[type="text"], input[type="number"], input[type="date"], input[type="search"], input[type="time"], input[type="email"], input[type="tel"], input[type="color"], input[type="range"], select, textarea, details > summary):not(.leaflet-container):not(.leaflet-container *) { border-radius: ' + radius + ' !important; }\n';
+        css += 'body.gold :is(#dashboard-view, #app-view, #chart-view, #map-view, #tour-view, #backup-view, #wrapped-view, #achievements-view, #theme-view, #filter-view) :is([class*="-card"], [class*="-tile"]:not(.leaflet-tile), [class*="-panel"], [class*="-section"], [class*="-btn"], [class*="-button"], [class*="-nav"], [class*="-list"] > li, button, input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]), select, textarea, details > summary):not(.leaflet-container):not(.leaflet-container *) { border-radius: ' + radius + ' !important; }\n';
         css += 'body.gold .top-main-nav { background: ' + navGradient +
             ' !important; background-image: ' + navGradient +
             ' !important; border-color: color-mix(in srgb, ' + settings.accent +
