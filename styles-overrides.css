@@ -9487,3 +9487,38 @@ body.summit .top-main-nav [aria-current="page"] {
     }
     .success-celebration-progress { transition: none !important; }
 }
+
+/* Einheitliche Pfeilgrafik für alle Vor-/Zurück-Buttons in den Views.
+   Beide Richtungen verwenden exakt dasselbe SVG; der rechte Pfeil wird
+   lediglich um 180 Grad gedreht. So hängt die Form nicht vom Android-Font ab. */
+.view-nav-arrow {
+    display: block;
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+    overflow: visible;
+    color: currentColor;
+    pointer-events: none;
+}
+
+.view-nav-arrow path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.35;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.view-nav-arrow.is-next {
+    transform: rotate(180deg);
+    transform-origin: 50% 50%;
+}
+
+.dash-year-arrow-btn,
+.yc-metric-arrow-btn,
+#planned-peaks-prev,
+#planned-peaks-next {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
