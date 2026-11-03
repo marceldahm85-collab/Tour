@@ -417,3 +417,49 @@ body[data-app-density="compact"] #theme-view .theme-editor-settings-grid {
 body[data-app-density="comfortable"] #theme-view .theme-editor-settings-grid {
   gap: 12px;
 }
+
+
+/* =========================================================
+   Editor accordion content sizing – regression fix
+   The inner area is the scroll viewport, but its cards must
+   remain in normal document flow and keep their full content
+   height. The view footer/navigation is intentionally untouched.
+   ========================================================= */
+
+/* One-column normal flow avoids grid auto-track compression inside the scroller. */
+#theme-view > .theme-editor-inner {
+  display: block !important;
+}
+
+#theme-view > .theme-editor-inner > .theme-editor-section-card {
+  display: flex;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  flex: 0 0 auto;
+  margin: 0 0 12px;
+}
+
+#theme-view > .theme-editor-inner > .theme-editor-section-card:last-child {
+  margin-bottom: 0;
+}
+
+/* Once opened, every main card must expand to its full natural content height. */
+#theme-view > .theme-editor-inner > details.theme-editor-section-card[open] {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  align-self: stretch !important;
+  flex: 0 0 auto !important;
+}
+
+/* The nested settings accordions follow the same rule. */
+#theme-view .theme-editor-subgroup[open],
+#theme-view details.background-image-credits[open] {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
