@@ -20405,16 +20405,26 @@ function recomputeAndSyncAchievements({ silent = false } = {}) {
     return { freshResults, newlyUnlocked, isFirstRun };
 }
 
-let achievementsYearFilter = 'all';
+let achievementsYearFilter = String(new Date().getFullYear());
+
+function getAchievementsAvailableYears() {
+    const years = getWrappedAvailableYears();
+    const currentYear = new Date().getFullYear();
+    if (!years.includes(currentYear)) years.push(currentYear);
+    return years.sort((a, b) => b - a);
+}
 
 function populateAchievementsYearSelect() {
     const select = document.getElementById('achievements-year-select');
     if (!select) return;
 
-    const years = getWrappedAvailableYears();
+    const years = getAchievementsAvailableYears();
     select.innerHTML = `<option value="all">Alle Jahre</option>` +
         years.map(y => `<option value="${y}">${y}</option>`).join('');
 
+    if (achievementsYearFilter !== 'all' && !years.includes(Number(achievementsYearFilter))) {
+        achievementsYearFilter = String(new Date().getFullYear());
+    }
     select.value = achievementsYearFilter;
     updateAchievementsYearButtons();
 }
@@ -20425,7 +20435,7 @@ function updateAchievementsYearButtons() {
     const nextBtn = document.getElementById('achievements-year-next-btn');
     if (!select || !prevBtn || !nextBtn) return;
 
-    const years = getWrappedAvailableYears();
+    const years = getAchievementsAvailableYears();
     if (!years.length) {
         prevBtn.disabled = true;
         nextBtn.disabled = true;
@@ -20447,7 +20457,7 @@ function shiftAchievementsYear(direction) {
     const select = document.getElementById('achievements-year-select');
     if (!select) return;
 
-    const years = getWrappedAvailableYears();
+    const years = getAchievementsAvailableYears();
     if (!years.length) return;
 
     const current = select.value;
@@ -20485,30 +20495,32 @@ function buildAchievementPuzzleClipPath(index, total, columns = 3) {
     const bottom = row + 1 >= rows || index + columns >= total ? 'flat' : seam(row, col, 'vertical');
     const left = col === 0 ? 'flat' : opposite(seam(row, col - 1, 'horizontal'));
 
+    // Die Außenkante liegt näher am Zellenrand: Die sichtbaren Puzzleteile
+    // schließen enger aneinander an, ohne die Tab-/Socket-Geometrie aufzugeben.
     const edge = {
         top: {
-            flat: 'L 0.95 0.05',
-            tab: 'L 0.32 0.05 C 0.37 0.05 0.37 0.00 0.43 0.00 C 0.49 0.00 0.51 0.00 0.57 0.00 C 0.63 0.00 0.63 0.05 0.68 0.05 L 0.95 0.05',
-            socket: 'L 0.32 0.05 C 0.37 0.05 0.37 0.10 0.43 0.10 C 0.49 0.10 0.51 0.10 0.57 0.10 C 0.63 0.10 0.63 0.05 0.68 0.05 L 0.95 0.05'
+            flat: 'L 0.98 0.02',
+            tab: 'L 0.32 0.02 C 0.37 0.02 0.37 0.00 0.43 0.00 C 0.49 0.00 0.51 0.00 0.57 0.00 C 0.63 0.00 0.63 0.02 0.68 0.02 L 0.98 0.02',
+            socket: 'L 0.32 0.02 C 0.37 0.02 0.37 0.10 0.43 0.10 C 0.49 0.10 0.51 0.10 0.57 0.10 C 0.63 0.10 0.63 0.02 0.68 0.02 L 0.98 0.02'
         },
         right: {
-            flat: 'L 0.95 0.95',
-            tab: 'L 0.95 0.32 C 0.95 0.37 1.00 0.37 1.00 0.43 C 1.00 0.49 1.00 0.51 1.00 0.57 C 1.00 0.63 0.95 0.63 0.95 0.68 L 0.95 0.95',
-            socket: 'L 0.95 0.32 C 0.95 0.37 0.90 0.37 0.90 0.43 C 0.90 0.49 0.90 0.51 0.90 0.57 C 0.90 0.63 0.95 0.63 0.95 0.68 L 0.95 0.95'
+            flat: 'L 0.98 0.98',
+            tab: 'L 0.98 0.32 C 0.98 0.37 1.00 0.37 1.00 0.43 C 1.00 0.49 1.00 0.51 1.00 0.57 C 1.00 0.63 0.98 0.63 0.98 0.68 L 0.98 0.98',
+            socket: 'L 0.98 0.32 C 0.98 0.37 0.90 0.37 0.90 0.43 C 0.90 0.49 0.90 0.51 0.90 0.57 C 0.90 0.63 0.98 0.63 0.98 0.68 L 0.98 0.98'
         },
         bottom: {
-            flat: 'L 0.05 0.95',
-            tab: 'L 0.68 0.95 C 0.63 0.95 0.63 1.00 0.57 1.00 C 0.51 1.00 0.49 1.00 0.43 1.00 C 0.37 1.00 0.37 0.95 0.32 0.95 L 0.05 0.95',
-            socket: 'L 0.68 0.95 C 0.63 0.95 0.63 0.90 0.57 0.90 C 0.51 0.90 0.49 0.90 0.43 0.90 C 0.37 0.90 0.37 0.95 0.32 0.95 L 0.05 0.95'
+            flat: 'L 0.02 0.98',
+            tab: 'L 0.68 0.98 C 0.63 0.98 0.63 1.00 0.57 1.00 C 0.51 1.00 0.49 1.00 0.43 1.00 C 0.37 1.00 0.37 0.98 0.32 0.98 L 0.02 0.98',
+            socket: 'L 0.68 0.98 C 0.63 0.98 0.63 0.90 0.57 0.90 C 0.51 0.90 0.49 0.90 0.43 0.90 C 0.37 0.90 0.37 0.98 0.32 0.98 L 0.02 0.98'
         },
         left: {
-            flat: 'L 0.05 0.05',
-            tab: 'L 0.05 0.68 C 0.05 0.63 0.00 0.63 0.00 0.57 C 0.00 0.51 0.00 0.49 0.00 0.43 C 0.00 0.37 0.05 0.37 0.05 0.32 L 0.05 0.05',
-            socket: 'L 0.05 0.68 C 0.05 0.63 0.10 0.63 0.10 0.57 C 0.10 0.51 0.10 0.49 0.10 0.43 C 0.10 0.37 0.05 0.37 0.05 0.32 L 0.05 0.05'
+            flat: 'L 0.02 0.02',
+            tab: 'L 0.02 0.68 C 0.02 0.63 0.00 0.63 0.00 0.57 C 0.00 0.51 0.00 0.49 0.00 0.43 C 0.00 0.37 0.02 0.37 0.02 0.32 L 0.02 0.02',
+            socket: 'L 0.02 0.68 C 0.02 0.63 0.10 0.63 0.10 0.57 C 0.10 0.51 0.10 0.49 0.10 0.43 C 0.10 0.37 0.02 0.37 0.02 0.32 L 0.02 0.02'
         }
     };
 
-    return 'M 0.05 0.05 ' + edge.top[top] + ' ' + edge.right[right] + ' ' + edge.bottom[bottom] + ' ' + edge.left[left] + ' Z';
+    return 'M 0.02 0.02 ' + edge.top[top] + ' ' + edge.right[right] + ' ' + edge.bottom[bottom] + ' ' + edge.left[left] + ' Z';
 }
 function getAchievementPuzzleLayout() {
     const landscape = window.matchMedia('(max-width: 1024px) and (orientation: landscape)').matches;

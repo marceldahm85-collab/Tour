@@ -1758,3 +1758,109 @@ body.wrapped-mobile-fullscreen-active .accordion-header {
         box-sizing: border-box !important;
     }
 }
+
+
+/* BERGWELT – identische Unternavigation in Erlebnis, Tourbuch und Achievements.
+   Die drei Views verwenden dieselbe Flex-Reihenfolge, denselben Fußabstand und
+   eine feste Buttonhöhe; so ändern sich weder Größe noch horizontale Position. */
+@media (max-width: 768px) and (orientation: portrait) and (pointer: coarse) {
+    #wrapped-view.bergwelt-ready:not(.wrapped-mobile-fullscreen) {
+        padding-bottom: max(28px, env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    #wrapped-view.bergwelt-ready:not(.wrapped-mobile-fullscreen) .bergwelt-side-nav {
+        display: contents !important;
+    }
+
+    #wrapped-view.bergwelt-ready:not(.wrapped-mobile-fullscreen) .wrapped-header {
+        order: 1 !important;
+        flex: 0 0 auto !important;
+    }
+
+    #wrapped-view.bergwelt-ready:not(.wrapped-mobile-fullscreen) > .bergwelt-panel:not([hidden]) {
+        order: 2 !important;
+        flex: 1 1 0 !important;
+        min-height: 0 !important;
+    }
+
+    #wrapped-view.bergwelt-ready:not(.wrapped-mobile-fullscreen) .wrapped-progress-bar {
+        order: 3 !important;
+        flex: 0 0 auto !important;
+    }
+
+    #wrapped-view.bergwelt-ready:not(.wrapped-mobile-fullscreen) .wrapped-stage {
+        order: 4 !important;
+        flex: 1 1 0 !important;
+        min-height: 0 !important;
+    }
+
+    #wrapped-view.bergwelt-ready:not(.wrapped-mobile-fullscreen) .wrapped-controls {
+        order: 5 !important;
+        flex: 0 0 auto !important;
+    }
+
+    #wrapped-view.bergwelt-ready:not(.wrapped-mobile-fullscreen) > .bergwelt-tabs {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        order: 6 !important;
+        flex: 0 0 auto !important;
+        align-self: center !important;
+        width: calc(100vw - 40px) !important;
+        max-width: 430px !important;
+        margin: 6px auto 14px !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    #wrapped-view.bergwelt-ready:not(.wrapped-mobile-fullscreen) > .bergwelt-tabs > .bergwelt-tab {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex: 1 1 0 !important;
+        width: 100% !important;
+        height: 40px !important;
+        min-height: 40px !important;
+        max-height: 40px !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 5px 3px !important;
+        box-sizing: border-box !important;
+        font-size: 11px !important;
+        line-height: 1.05 !important;
+        white-space: nowrap !important;
+        text-align: center !important;
+    }
+
+    /* Achievements erhält denselben regulären 20-px-Seitenabstand wie Tourbuch. */
+    #wrapped-view.bergwelt-ready.bergwelt-active-achievements:not(.wrapped-mobile-fullscreen):not(.bergwelt-story-playing) {
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* In der Erlebnis-Story gelten ältere, spezifischere Footer-Regeln.
+       Diese werden für Reihenfolge und Abstände gezielt vereinheitlicht. */
+    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) {
+        padding-bottom: max(28px, env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) .wrapped-controls {
+        order: 5 !important;
+    }
+
+    #wrapped-view.bergwelt-ready.bergwelt-story-playing:not(.wrapped-mobile-fullscreen) > .bergwelt-tabs {
+        order: 6 !important;
+        flex: 0 0 auto !important;
+        align-self: center !important;
+        width: calc(100vw - 40px) !important;
+        max-width: 430px !important;
+        margin: 6px auto 14px !important;
+        padding: 0 !important;
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+}
