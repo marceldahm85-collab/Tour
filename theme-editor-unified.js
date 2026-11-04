@@ -24,8 +24,7 @@
         haptics: true,
         gradientDirection: '180deg',
         transition: 55,
-        glassOpacity: 68,
-        density: 'standard'
+        glassOpacity: 68
     };
 
     const originalGetThemeEditorSettings =
@@ -169,8 +168,7 @@
                 ? settings.gradientDirection
                 : DEFAULTS.gradientDirection,
             transition: clamp(settings.transition, 10, 90, DEFAULTS.transition),
-            glassOpacity: clamp(settings.glassOpacity, 35, 78, DEFAULTS.glassOpacity),
-            density: ['compact','standard','comfortable'].includes(settings.density) ? settings.density : DEFAULTS.density
+            glassOpacity: clamp(settings.glassOpacity, 35, 78, DEFAULTS.glassOpacity)
         };
     }
 
@@ -478,8 +476,6 @@
         setImportant(body, '--accordion-glow', soft);
         setImportant(body, '--accent-gradient', accentGradient);
         setImportant(body, '--accent-text-color', accentText);
-        body.dataset.appDensity=settings.density||'standard';
-        setImportant(root,'--app-density-scale',settings.density==='compact'?'0.90':settings.density==='comfortable'?'1.10':'1');
 
         // Beide Akzentfarben sind global einstellbar; Richtung und Übergangspunkt
         // steuern den Verlauf konsistent auf Flächen und Hauptnavigation.
@@ -570,7 +566,6 @@
         setValue('te-unified-direction', settings.gradientDirection);
         setValue('te-unified-transition', settings.transition);
         setValue('te-unified-glass-opacity', settings.glassOpacity);
-        setValue('te-unified-density', settings.density);
 
         const radiusValue = document.getElementById('te-unified-radius-value');
         const transitionValue = document.getElementById('te-unified-transition-value');
@@ -599,7 +594,6 @@
         if (value('te-unified-direction')) settings.gradientDirection = value('te-unified-direction').value;
         if (value('te-unified-transition')) settings.transition = Number(value('te-unified-transition').value);
         if(value('te-unified-glass-opacity'))settings.glassOpacity=Number(value('te-unified-glass-opacity').value);
-        if(value('te-unified-density'))settings.density=value('te-unified-density').value;
         return normalizeSettings(settings);
     }
 
@@ -622,7 +616,7 @@
 
         const controls = [
             'te-unified-accent', 'te-unified-accent2', 'te-unified-radius',
-            'te-unified-direction', 'te-unified-transition', 'te-unified-glass-opacity', 'te-unified-density'
+            'te-unified-direction', 'te-unified-transition', 'te-unified-glass-opacity'
         ];
 
         controls.forEach(id => {
@@ -635,9 +629,7 @@
                 const radiusValue = document.getElementById('te-unified-radius-value');
                 const transitionValue=document.getElementById('te-unified-transition-value'),glassValue=document.getElementById('te-unified-glass-opacity-value');
                 if(radiusValue)radiusValue.textContent=draft.radius+' px';if(transitionValue)transitionValue.textContent=draft.transition+' %';if(glassValue)glassValue.textContent=draft.glassOpacity+' %';
-                if(id==='te-unified-density')document.body.dataset.appDensity=draft.density;
                 applyUnifiedSettings(id==='te-unified-accent'||id==='te-unified-accent2');
-                if(id==='te-unified-density')window.refreshAppSurfaceDensity?.();
             };
             element.addEventListener('input', update);
             element.addEventListener('change', update);
@@ -675,8 +667,8 @@
     // identische Werte. Damit bleiben Diagramme und PDF-Export kompatibel.
     window.getThemeEditorSettings=getUnifiedLegacySettings;
     window.getThemeEditorUnifiedSettings=()=>normalizeSettings(readForm());
-    window.setThemeEditorUnifiedSettings=v=>{draft=normalizeSettings(v);fillForm();window.applyThemeEditorFont?.(draft.fontFamily,false);window.applyThemeEditorFontSize?.(draft.fontSize,false);document.body.dataset.appDensity=draft.density;applyUnifiedSettings(true);window.refreshAppSurfaceDensity?.();return{...draft};};
-    window.persistThemeEditorUnifiedSettings=()=>{draft=persistSettings(readForm());document.body.dataset.appDensity=draft.density;applyUnifiedSettings(true);window.refreshAppSurfaceDensity?.();return{...draft};};
+    window.setThemeEditorUnifiedSettings=v=>{draft=normalizeSettings(v);fillForm();window.applyThemeEditorFont?.(draft.fontFamily,false);window.applyThemeEditorFontSize?.(draft.fontSize,false);applyUnifiedSettings(true);return{...draft};};
+    window.persistThemeEditorUnifiedSettings=()=>{draft=persistSettings(readForm());applyUnifiedSettings(true);return{...draft};};
     window.buildThemeEditorLiveCss = buildUnifiedLiveCss;
     window.applyThemeEditorSettingsToDom = function () {
         applyUnifiedSettings(false);
