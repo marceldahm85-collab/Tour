@@ -105,7 +105,7 @@ public final class YearStatsWidgetProvider extends AppWidgetProvider {
 
     @Override public void onUpdate(Context context,AppWidgetManager manager,int[] ids){updateWidgets(context,manager,ids);}
     @Override public void onAppWidgetOptionsChanged(Context context,AppWidgetManager manager,int appWidgetId,Bundle newOptions){super.onAppWidgetOptionsChanged(context,manager,appWidgetId,newOptions);updateWidgets(context,manager,new int[]{appWidgetId});}
-    @Override public void onReceive(Context context,Intent intent){super.onReceive(context,intent);if(intent==null)return;String action=intent.getAction();if(Intent.ACTION_DATE_CHANGED.equals(action)||"android.intent.action.TIME_SET".equals(action)||Intent.ACTION_TIMEZONE_CHANGED.equals(action))updateAll(context);}
+    @Override public void onReceive(Context context,Intent intent){super.onReceive(context,intent);if(intent==null)return;String action=intent.getAction();if(Intent.ACTION_MY_PACKAGE_REPLACED.equals(action)||Intent.ACTION_DATE_CHANGED.equals(action)||"android.intent.action.TIME_SET".equals(action)||Intent.ACTION_TIMEZONE_CHANGED.equals(action))updateAll(context);}
     public static int getInstalledWidgetCount(Context context){if(context==null)return 0;int[] ids=AppWidgetManager.getInstance(context.getApplicationContext()).getAppWidgetIds(new ComponentName(context,YearStatsWidgetProvider.class));return ids==null?0:ids.length;}
     private static void updateAll(Context context){AppWidgetManager manager=AppWidgetManager.getInstance(context);int[] ids=manager.getAppWidgetIds(new ComponentName(context,YearStatsWidgetProvider.class));if(ids!=null&&ids.length>0)updateWidgets(context,manager,ids);}
 
