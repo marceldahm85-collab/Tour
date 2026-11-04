@@ -16,7 +16,7 @@
     };
 
     const SURFACE_PATTERN =
-        /(?:^|[\s_-])(box|card|tile|panel|section|sheet|modal|nav|list|item|row|form|field|filter|accordion|summary|header|content|group|wrap|option|btn|button|control|metric|metrics|stat|stats|entry|toolbar|subnav|tab|view|result|grid|badge|chip|search|overview)(?:$|[\s_-])/i;
+        /(?:^|[\s_-])(box|boxes|card|cards|tile|tiles|panel|panels|section|sections|sheet|sheets|modal|modals|nav|navs|list|lists|item|items|row|rows|form|forms|field|fields|filter|filters|accordion|accordions|summary|summaries|header|headers|content|contents|group|groups|wrap|wraps|option|options|btn|button|buttons|control|controls|metric|metrics|stat|stats|entry|entries|toolbar|subnav|tab|tabs|view|views|result|results|grid|grids|container|containers|badge|badges|chip|chips|search|overview)(?:$|[\s_-])/i;
 
     const MARGIN_PATTERN =
         /(?:^|[\s_-])(section|list|item|form|field|header|heading|title|summary|group|wrap|content|accordion|nav)(?:$|[\s_-])/i;
