@@ -13,32 +13,18 @@ function readWidget(){const n={...widget},t=document.getElementById('te-widget-t
 function fillWidget(v){widget={...DEF,...(v&&typeof v==='object'?v:{})};const t=document.getElementById('te-widget-title'),bg=document.getElementById('te-widget-background');if(t)t.value=widget.title||'BERGJAHR';if(bg)bg.value=widget.background==='dark'?'dark':'alpine';const order=Array.isArray(widget.metricOrder)?widget.metricOrder:DEF.metricOrder,rows=choices(),map=new Map(rows.map(r=>[r.dataset.widgetChoice,r]));list()?.replaceChildren(...[...new Set([...order,...METRICS])].map(id=>map.get(id)).filter(Boolean));rows.forEach(r=>{const id=r.dataset.widgetChoice,box=r.querySelector('[data-widget-metric]');if(box)box.checked=widget[FLAGS[id]]===true;});let on=checked();if(!on.length&&rows[0])rows[0].querySelector('[data-widget-metric]').checked=true;on=checked();if(on.length>6)on.slice(6).forEach(r=>r.querySelector('[data-widget-metric]').checked=false);sortChoices();}
 let widgetRequestCounter=0;
 function sendWidget(v){
- const bridge=window.TourNative;
- if(!bridge?.postMessage){if(isNativeAndroidShell())return Promise.reject(new Error('Die sichere Android-Verbindung zum Startbildschirm-Widget ist nicht verfügbar.'));return Promise.resolve({status:'not-native'});}
- if(typeof bridge.addEventListener!=='function')return Promise.reject(new Error('Die Android-Widget-Verbindung ist nicht verfügbar.'));
- const c={...DEF,...v},requestId='widget-settings-'+Date.now()+'-'+(++widgetRequestCounter);
- const payload={type:'widget.yearStats.settings',requestId,title:String(c.title||'BERGJAHR').slice(0,20),background:c.background==='dark'?'dark':'alpine',metricOrder:(c.metricOrder||DEF.metricOrder).filter(id=>METRICS.includes(id))};
+ const nativeRequest=window.__androidNativeRequest;
+ if(typeof nativeRequest!=='function'){
+  if(isNativeAndroidShell())return Promise.reject(new Error('Die gemeinsame Android-Nachrichtenverbindung ist nicht verfügbar.'));
+  return Promise.resolve({status:'not-native'});
+ }
+ const c={...DEF,...v};
+ const payload={title:String(c.title||'BERGJAHR').slice(0,20),background:c.background==='dark'?'dark':'alpine',metricOrder:(c.metricOrder||DEF.metricOrder).filter(id=>METRICS.includes(id))};
  METRICS.forEach(id=>payload[FLAGS[id]]=!!c[FLAGS[id]]);
- return new Promise((resolve,reject)=>{
-  let finished=false;
-  const finish=(error,value)=>{
-   if(finished)return;finished=true;
-   window.clearTimeout(timer);
-   try{bridge.removeEventListener?.('message',onMessage);}catch(_){}
-   if(error)reject(error);else resolve(value);
-  };
-  const onMessage=event=>{
-   let message;
-   try{message=typeof event.data==='string'?JSON.parse(event.data):event.data;}catch(_){return;}
-   if(!message||message.requestId!==requestId||message.type!=='widget.yearStats.settings.result')return;
-   if(message.ok===true)finish(null,{status:'synced'});
-   else finish(new Error(message.error||'Android hat die Widget-Einstellungen nicht übernommen.'));
-  };
-  const timer=window.setTimeout(()=>finish(new Error('Android hat die Widget-Einstellungen nicht bestätigt. Bitte erneut speichern.')),12000);
-  try{
-   bridge.addEventListener('message',onMessage);
-   bridge.postMessage(JSON.stringify(payload));
-  }catch(error){finish(error);}
+ return nativeRequest('widget.yearStats.settings',payload,12000).then(message=>{
+  if(!message||message.type!=='widget.yearStats.settings.result')throw new Error('Android hat eine unerwartete Antwort auf die Widget-Konfiguration gesendet.');
+  if(message.ok!==true)throw new Error(message.error||'Android hat die Widget-Einstellungen nicht übernommen.');
+  return {status:'synced',widgetCount:Number(message.widgetCount)||0};
  });
 }
 function allPresets(){const p=get(PK);return p&&typeof p==='object'&&!Array.isArray(p)?p:{};}
