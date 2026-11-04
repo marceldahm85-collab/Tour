@@ -228,10 +228,13 @@
 
         candidates.forEach((baseValue, property) => {
             rememberOriginalInlineStyle(element, record, property);
-            const stableValue = Number(baseValue.toFixed(3));
+            const scale = getDensityScale();
+            const scaledValue = Number((baseValue * scale).toFixed(2));
+            // Direktes Pixelmaß statt CSS-Multiplikation: maximale Kompatibilität
+            // mit Android System WebView und älteren Chromium-Versionen.
             element.style.setProperty(
                 property,
-                'calc(' + stableValue + 'px * var(--app-density-scale, 1))',
+                scaledValue + 'px',
                 'important'
             );
             record.activeProperties.add(property);
@@ -312,7 +315,7 @@
                 });
             });
 
-            if (densityChanged) updateScaleVariable();
+            if (densityChanged) scheduleRefresh();
         });
 
         observer.observe(document.body, {
