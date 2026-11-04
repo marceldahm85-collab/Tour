@@ -37,7 +37,7 @@
   overflow: hidden;
 }
 
-#theme-view .theme-editor-section-card > summary {
+#theme-view .theme-editor-section-card > summary:not(.stats-analysis-title) {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -60,7 +60,7 @@
   display: none;
 }
 
-#theme-view .theme-editor-section-card[open] > summary {
+#theme-view .theme-editor-section-card[open] > summary:not(.stats-analysis-title) {
   margin-bottom: 8px !important;
 }
 
@@ -74,7 +74,7 @@
   overflow: hidden !important;
 }
 
-#theme-view details.theme-editor-section-card:not([open]) > summary {
+#theme-view details.theme-editor-section-card:not([open]) > summary:not(.stats-analysis-title) {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
@@ -510,27 +510,13 @@ body[data-app-density="comfortable"] #theme-view .theme-editor-settings-grid {
   overflow: hidden !important;
 }
 #theme-view > .theme-editor-inner > details.theme-editor-section-card:last-child { margin-bottom: 0 !important; }
-#theme-view .theme-editor-section-card > summary {
+/* Gemeinsamer Statistik-Header: hier nur der Editor-Platz für das Chevron. */
+#theme-view .theme-editor-section-card > summary.stats-analysis-title {
   position: relative !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  flex-wrap: nowrap !important;
-  gap: 8px !important;
   width: 100% !important;
-  min-height: 30px !important;
-  height: auto !important;
-  margin: 0 0 11px !important;
-  padding: 0 26px 8px 0 !important;
-  border: 0 !important;
-  border-bottom: 1px solid var(--premium-border, rgba(255,255,255,.12)) !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  color: var(--app-text-primary, var(--text-main, #f3f7fb)) !important;
-  font-size: 13px !important;
-  font-weight: 800 !important;
-  line-height: 1.25 !important;
+  padding-top: 0 !important;
+  padding-right: 26px !important;
+  padding-left: 0 !important;
   text-align: left !important;
   list-style: none !important;
   cursor: pointer;
@@ -541,11 +527,11 @@ body[data-app-density="comfortable"] #theme-view .theme-editor-settings-grid {
   padding-bottom: 0 !important;
   border-bottom-color: transparent !important;
 }
-#theme-view .theme-editor-section-card > summary::after {
+#theme-view .theme-editor-section-card > summary.stats-analysis-title::after {
   content: "" !important;
   position: absolute !important;
-  right: 4px !important;
-  top: calc(50% - 6px) !important;
+  right: 5px !important;
+  top: calc(50% - 5px) !important;
   flex: 0 0 8px !important;
   width: 8px !important;
   height: 8px !important;
@@ -560,33 +546,11 @@ body[data-app-density="comfortable"] #theme-view .theme-editor-settings-grid {
   transition: transform 160ms ease, top 160ms ease;
   opacity: .95;
 }
-#theme-view .theme-editor-section-card[open] > summary::after {
+#theme-view .theme-editor-section-card[open] > summary.stats-analysis-title::after {
   top: calc(50% - 2px) !important;
   transform: rotate(225deg) !important;
 }
-#theme-view .theme-editor-title-icon {
-  display: inline-flex;
-  flex: 0 0 18px;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  color: var(--accent, #D5A64C);
-  opacity: .98;
-  filter: drop-shadow(0 1px 3px color-mix(in srgb, var(--accent, #D5A64C) 22%, transparent));
-}
-#theme-view .theme-editor-title-icon svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.55;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  overflow: visible;
-}
-#theme-view .theme-editor-title-text { min-width: 0; }
+/* Icongröße, Kontur, Akzentfarbe und Glow kommen zentral aus stats-premium-alpine.css. */
 
 /* Auch die kleineren Editor-Unterbereiche nutzen die gleiche Titel- und Pfeillogik. */
 #theme-view .theme-editor-subgroup > summary {
