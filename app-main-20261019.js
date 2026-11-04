@@ -2431,9 +2431,20 @@ function readBackupBrowserPreferences() {
                 pdfBookOptions = parsed;
             }
         }
+
+        let statsCollapseState = {};
+        const rawStatsCollapseState = localStorage.getItem('tour.stats.collapsible-sections.v1');
+        if (rawStatsCollapseState) {
+            const parsed = JSON.parse(rawStatsCollapseState);
+            if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                statsCollapseState = parsed;
+            }
+        }
+
         return {
             haptics: localStorage.getItem(HAPTIC_FEEDBACK_STORAGE_KEY) === 'off' ? 'off' : 'on',
-            pdfBookOptions
+            pdfBookOptions,
+            statsCollapseState
         };
     } catch (error) {
         throw new Error('Die lokalen App-Einstellungen konnten nicht vollständig ausgelesen werden. Die Sicherung wurde nicht erstellt.');
@@ -2613,6 +2624,18 @@ async function applyAppDataPayload(payload) {
                 throw new Error('Die Tourbuch-PDF-Einstellungen konnten nicht wiederhergestellt werden.');
             }
         }
+
+        const collapseState = payload.browserPreferences.statsCollapseState;
+        if (collapseState && typeof collapseState === 'object' && !Array.isArray(collapseState)) {
+            try {
+                localStorage.setItem(
+                    'tour.stats.collapsible-sections.v1',
+                    JSON.stringify(collapseState)
+                );
+            } catch (error) {
+                throw new Error('Die Aufklapp-Einstellungen der Statistik konnten nicht wiederhergestellt werden.');
+            }
+        }
     }
 
     tablePage = 1;
@@ -2625,7 +2648,7 @@ async function applyAppDataPayload(payload) {
     // UI-Zustände wie Filter, Unternavigation und Checkliste werden beim Start
     // initialisiert. Nach einer Vollwiederherstellung werden sie sauber neu geladen.
     if (payload.appState) {
-        window.setTimeout(() => window.location.reload(), 1400);
+        window.setTimeout(() => window.location.reload(), 3500);
     }
 }
 
@@ -31449,8 +31472,8 @@ const appStorage = {
         queueStorageWrite(
             () => _idbDel(key)
         );
-    }
-,
+    },
+
     async exportAll() {
         await _storageWriteQueue;
         const entries = await _idbGetAllFromDB();
@@ -31464,11 +31487,15 @@ const appStorage = {
             'bergTourenHaptics',
             'tourbook-pdf-options-v1',
             'tourtracker-theme',
-            'tourtracker-linked-native-backup-v1'
+            'tourtracker-linked-native-backup-v1',
+            'tour.stats.collapsible-sections.v1'
         ]);
         const isPortableKey = key =>
             typeof key === 'string' &&
             key.length > 0 &&
+            key !== '__proto__' &&
+            key !== 'constructor' &&
+            key !== 'prototype' &&
             !excluded.has(key) &&
             !key.startsWith('__') &&
             !key.startsWith(APP_BACKGROUND_IMAGE_STORAGE_PREFIX) &&
@@ -31501,12 +31528,15 @@ const appStorage = {
             'bergTourenHaptics',
             'tourbook-pdf-options-v1',
             'tourtracker-theme',
-            'tourtracker-linked-native-backup-v1'
+            'tourtracker-linked-native-backup-v1',
+            'tour.stats.collapsible-sections.v1'
         ]);
         const isPortableKey = key =>
             typeof key === 'string' &&
             key.length > 0 &&
             key !== '__proto__' &&
+            key !== 'constructor' &&
+            key !== 'prototype' &&
             !excluded.has(key) &&
             !key.startsWith('__') &&
             !key.startsWith(APP_BACKGROUND_IMAGE_STORAGE_PREFIX) &&
