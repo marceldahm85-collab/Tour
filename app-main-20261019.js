@@ -2405,17 +2405,102 @@ async function restoreBackgroundImageFromPayload(payload) {
     return true;
 }
 
+function stripGalleryReferencesFromBackup(value) {
+    if (Array.isArray(value)) {
+        return value.map(stripGalleryReferencesFromBackup);
+    }
+    if (!value || typeof value !== 'object') {
+        return value;
+    }
+
+    const clean = Object.create(null);
+    Object.entries(value).forEach(([key, child]) => {
+        if (key === 'galleryPhotos' || key === 'galleryVideos') return;
+        clean[key] = stripGalleryReferencesFromBackup(child);
+    });
+    return clean;
+}
+
+function readBackupBrowserPreferences() {
+    try {
+        let pdfBookOptions = {};
+        const rawPdfOptions = localStorage.getItem(PDF_BOOK_OPTIONS_STORAGE_KEY);
+        if (rawPdfOptions) {
+            const parsed = JSON.parse(rawPdfOptions);
+            if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                pdfBookOptions = parsed;
+            }
+        }
+        return {
+            haptics: localStorage.getItem(HAPTIC_FEEDBACK_STORAGE_KEY) === 'off' ? 'off' : 'on',
+            pdfBookOptions
+        };
+    } catch (error) {
+        throw new Error('Die lokalen App-Einstellungen konnten nicht vollständig ausgelesen werden. Die Sicherung wurde nicht erstellt.');
+    }
+}
+
+async function getNativeWidgetConfigurationForBackup() {
+    if (!window.TourNative) return null;
+    if (typeof window.__androidNativeRequest !== 'function') {
+        throw new Error('Die Android-Verbindung für die Widget-Sicherung ist nicht verfügbar. Bitte starte die App erneut und versuche es noch einmal.');
+    }
+
+    const ping = await window.__androidNativeRequest('bridge.ping', {}, 10000);
+    const features = Array.isArray(ping?.features) ? ping.features : [];
+    if (!features.includes('widget.yearStats.backup.v1')) {
+        throw new Error('Die installierte Android-App unterstützt die vollständige Widget-Sicherung noch nicht. Bitte aktualisiere die App.');
+    }
+
+    const result = await window.__androidNativeRequest('widget.yearStats.backup.get', {}, 15000);
+    if (!result?.ok || !result.configuration || typeof result.configuration !== 'object') {
+        throw new Error(result?.error || 'Die Widget-Konfiguration konnte nicht in die Sicherung aufgenommen werden.');
+    }
+    return result.configuration;
+}
+
+async function restoreNativeWidgetConfigurationFromBackup(configuration) {
+    if (!configuration || !window.TourNative) return false;
+    if (typeof window.__androidNativeRequest !== 'function') {
+        throw new Error('Die Android-Verbindung für die Widget-Wiederherstellung ist nicht verfügbar.');
+    }
+
+    const ping = await window.__androidNativeRequest('bridge.ping', {}, 10000);
+    const features = Array.isArray(ping?.features) ? ping.features : [];
+    if (!features.includes('widget.yearStats.backup.v1')) {
+        throw new Error('Die installierte Android-App unterstützt die Widget-Wiederherstellung noch nicht. Bitte aktualisiere die App.');
+    }
+
+    const result = await window.__androidNativeRequest(
+        'widget.yearStats.backup.restore',
+        { configuration },
+        15000
+    );
+    if (!result?.ok) {
+        throw new Error(result?.error || 'Die Widget-Konfiguration konnte nicht wiederhergestellt werden.');
+    }
+    return true;
+}
+
 async function buildAppDataPayload() {
-    // Export nutzt Kopien, damit das Nachladen der Fotos den Start-Cache
-    // nicht unnötig mit allen Bilddaten füllt.
+    // Die Tourbilder liegen separat in IndexedDB und werden für die Datei
+    // wieder in die Tourdatensätze aufgenommen. Galerie-URIs bleiben draußen.
     const touren = (appStorage.get('touren') || []).map(entry => ({ ...entry }));
     await loadTourImagesForEntries(touren);
 
+    const appState = await appStorage.exportAll();
+    const nativeWidgetConfiguration = await getNativeWidgetConfigurationForBackup();
+
     return {
-        version: 1,
+        version: 2,
         updatedAt: new Date().toISOString(),
-        touren,
-        plannedTours: appStorage.get('plannedTours') || [],
+        touren: stripGalleryReferencesFromBackup(touren),
+        plannedTours: stripGalleryReferencesFromBackup(appStorage.get('plannedTours') || []),
+        appState,
+        browserPreferences: readBackupBrowserPreferences(),
+        native: nativeWidgetConfiguration
+            ? { widgetConfiguration: nativeWidgetConfiguration }
+            : {},
         backgroundImage: await buildBackgroundImageBackupData(),
         meta: {
             theme: document.body.classList.contains('dark')
@@ -2433,92 +2518,60 @@ async function buildAppDataPayload() {
 }
 
 async function applyAppDataPayload(payload) {
-    if (!payload || typeof payload !== 'object') {
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
         throw new Error('Ungültige Datendatei');
     }
 
-    const importedTours =
-        ensureUniqueEntryIds(
-            Array.isArray(payload.touren)
-                ? payload.touren
-                : [],
-            'tour'
-        ).entries;
+    const cleanTours = stripGalleryReferencesFromBackup(
+        Array.isArray(payload.touren) ? payload.touren : []
+    );
+    const cleanPlannedTours = stripGalleryReferencesFromBackup(
+        Array.isArray(payload.plannedTours) ? payload.plannedTours : []
+    );
+    const importedTours = ensureUniqueEntryIds(cleanTours, 'tour').entries;
+    const importedPlannedTours = ensureUniqueEntryIds(cleanPlannedTours, 'plan').entries;
 
-    const importedPlannedTours =
-        ensureUniqueEntryIds(
-            Array.isArray(payload.plannedTours)
-                ? payload.plannedTours
-                : [],
-            'plan'
-        ).entries;
-
+    // Medienauswahl aus der Android-Gerätegalerie ist nicht Bestandteil des Backups.
     // Hintergrunddaten vor den übrigen Änderungen validieren und wiederherstellen.
-    // Eine beschädigte Bilddatei darf keinen halbfertigen Tourdaten-Import auslösen.
     await restoreBackgroundImageFromPayload(payload);
+
+    if (payload.native?.widgetConfiguration) {
+        await restoreNativeWidgetConfigurationFromBackup(payload.native.widgetConfiguration);
+    }
+
+    if (payload.appState && typeof payload.appState === 'object' && !Array.isArray(payload.appState)) {
+        await appStorage.replaceAll(payload.appState);
+    }
 
     appStorage.set('touren', importedTours);
     appStorage.set('plannedTours', importedPlannedTours);
 
-    if (payload.meta?.themeEditorSettings) {
+    if (payload.meta?.themeEditorSettings &&
+        typeof payload.meta.themeEditorSettings === 'object') {
         appStorage.set(THEME_EDITOR_KEY, payload.meta.themeEditorSettings);
-
         if (typeof invalidateThemeEditorDraft === 'function') {
             invalidateThemeEditorDraft();
         }
     }
 
     if (payload.meta?.theme) {
+        const validThemes = ['gold', 'dark', 'green', 'summit'];
+        const theme = validThemes.includes(payload.meta.theme) ? payload.meta.theme : 'gold';
+        document.body.classList.remove('gold', 'dark', 'green', 'summit');
+        document.body.classList.add(theme);
+        appStorage.set('theme', theme);
 
-    const ICONS = {
-        gold: '🟡',
-        dark: '🌙',
-        green: '🌿',
-        summit: '⛰️'
-    };
+        try {
+            localStorage.setItem('tourtracker-theme', theme);
+            sessionStorage.setItem('tourtracker-theme', theme);
+        } catch (error) {
+            console.warn('[Theme] Theme-Mirror konnte nicht aktualisiert werden:', error);
+        }
 
-    const validThemes = ['gold'];
-    let theme = 'gold';
-
-    if (!validThemes.includes(theme)) {
-        theme = 'gold';
+        if (typeof applyThemeEditorSettingsToDom === 'function') {
+            applyThemeEditorSettingsToDom();
+        }
     }
-
-    document.body.classList.remove('gold', 'dark', 'green', 'summit');
-
-    if (theme === 'gold') {
-        document.body.classList.add('gold');
-    } else if (theme === 'dark') {
-        document.body.classList.add('dark');
-    } else if (theme === 'green') {
-        document.body.classList.add('green');
-    } else if (theme === 'summit') {
-        document.body.classList.add('summit');
-    }
-
-    appStorage.set('theme', theme);
-
-
-
-    try {
-
-
-        localStorage.setItem('tourtracker-theme', theme);
-
-
-    } catch (error) {
-
-
-        console.warn('[Theme] localStorage-Sicherung fehlgeschlagen:', error);
-
-
-    }
-
-    if (typeof applyThemeEditorSettingsToDom === 'function') {
-        applyThemeEditorSettingsToDom();
-    }
-
-}
 
     const importedFont = payload.meta?.font;
     if (
@@ -2542,11 +2595,38 @@ async function applyAppDataPayload(payload) {
         }
     }
 
+    if (payload.browserPreferences && typeof payload.browserPreferences === 'object') {
+        const haptics = payload.browserPreferences.haptics;
+        if (haptics === 'on' || haptics === 'off') {
+            try {
+                localStorage.setItem(HAPTIC_FEEDBACK_STORAGE_KEY, haptics);
+            } catch (error) {
+                throw new Error('Die Haptik-Einstellung konnte nicht wiederhergestellt werden.');
+            }
+        }
+
+        const pdfOptions = payload.browserPreferences.pdfBookOptions;
+        if (pdfOptions && typeof pdfOptions === 'object' && !Array.isArray(pdfOptions)) {
+            try {
+                localStorage.setItem(PDF_BOOK_OPTIONS_STORAGE_KEY, JSON.stringify(pdfOptions));
+            } catch (error) {
+                throw new Error('Die Tourbuch-PDF-Einstellungen konnten nicht wiederhergestellt werden.');
+            }
+        }
+    }
+
     tablePage = 1;
     loadData();
     loadPlannedTours();
     updatePlannedPeaks();
+    await appStorage.flush();
     updateBackupStatusSummary();
+
+    // UI-Zustände wie Filter, Unternavigation und Checkliste werden beim Start
+    // initialisiert. Nach einer Vollwiederherstellung werden sie sauber neu geladen.
+    if (payload.appState) {
+        window.setTimeout(() => window.location.reload(), 1400);
+    }
 }
 
 function updateFileStatus(text) {
@@ -31370,6 +31450,107 @@ const appStorage = {
             () => _idbDel(key)
         );
     }
+,
+    async exportAll() {
+        await _storageWriteQueue;
+        const entries = await _idbGetAllFromDB();
+        const excluded = new Set([
+            'touren',
+            'plannedTours',
+            '__migrated__',
+            TOUR_IMAGE_SPLIT_MARKER,
+            STARTUP_IGNORED_STORAGE_KEY,
+            'backupLastSavedAt_v1',
+            'bergTourenHaptics',
+            'tourbook-pdf-options-v1',
+            'tourtracker-theme',
+            'tourtracker-linked-native-backup-v1'
+        ]);
+        const isPortableKey = key =>
+            typeof key === 'string' &&
+            key.length > 0 &&
+            !excluded.has(key) &&
+            !key.startsWith('__') &&
+            !key.startsWith(APP_BACKGROUND_IMAGE_STORAGE_PREFIX) &&
+            !key.startsWith(TOUR_IMAGE_STORAGE_PREFIX);
+
+        const snapshot = Object.create(null);
+        entries.forEach(({ key, value }) => {
+            const name = String(key);
+            if (isPortableKey(name)) snapshot[name] = cloneStorageValue(value);
+        });
+        Object.keys(_cache).forEach(key => {
+            if (isPortableKey(key)) snapshot[key] = cloneStorageValue(_cache[key]);
+        });
+        return snapshot;
+    },
+
+    async replaceAll(snapshot) {
+        if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
+            throw new TypeError('Der gesicherte App-Zustand ist ungültig.');
+        }
+
+        await _storageWriteQueue;
+        const excluded = new Set([
+            'touren',
+            'plannedTours',
+            '__migrated__',
+            TOUR_IMAGE_SPLIT_MARKER,
+            STARTUP_IGNORED_STORAGE_KEY,
+            'backupLastSavedAt_v1',
+            'bergTourenHaptics',
+            'tourbook-pdf-options-v1',
+            'tourtracker-theme',
+            'tourtracker-linked-native-backup-v1'
+        ]);
+        const isPortableKey = key =>
+            typeof key === 'string' &&
+            key.length > 0 &&
+            key !== '__proto__' &&
+            !excluded.has(key) &&
+            !key.startsWith('__') &&
+            !key.startsWith(APP_BACKGROUND_IMAGE_STORAGE_PREFIX) &&
+            !key.startsWith(TOUR_IMAGE_STORAGE_PREFIX);
+
+        const entries = Object.entries(snapshot)
+            .filter(([key]) => isPortableKey(key))
+            .map(([key, value]) => [key, cloneStorageValue(value)]);
+        const keysToWrite = new Set(entries.map(([key]) => key));
+        const existing = await _idbGetAllFromDB();
+        const knownKeys = new Set([
+            ...existing.map(({ key }) => String(key)),
+            ...Object.keys(_cache)
+        ]);
+        const keysToRemove = [...knownKeys].filter(key =>
+            isPortableKey(key) && !keysToWrite.has(key)
+        );
+
+        const db = await _openDB();
+        await new Promise((resolve, reject) => {
+            const tx = db.transaction(IDB_STORE, 'readwrite');
+            const store = tx.objectStore(IDB_STORE);
+            keysToRemove.forEach(key => store.delete(key));
+            entries.forEach(([key, value]) => store.put(value, key));
+            tx.oncomplete = resolve;
+            tx.onerror = () => reject(tx.error || new Error('App-Einstellungen konnten nicht geschrieben werden.'));
+            tx.onabort = () => reject(tx.error || new Error('Wiederherstellung der App-Einstellungen wurde abgebrochen.'));
+        });
+
+        keysToRemove.forEach(key => delete _cache[key]);
+        entries.forEach(([key, value]) => {
+            _cache[key] = cloneStorageValue(value);
+        });
+
+        if (typeof markStorageDependentViewsDirty === 'function') {
+            [...new Set([...keysToRemove, ...entries.map(([key]) => key)])]
+                .forEach(key => markStorageDependentViewsDirty(key));
+        }
+    },
+
+    flush() {
+        return _storageWriteQueue;
+    }
+
 };
 
 // ── Einmalige Migration von localStorage ────────────────
