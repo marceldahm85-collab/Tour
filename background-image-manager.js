@@ -620,23 +620,36 @@
     async function createBackupData() {
         await initialize();
         const settings = getSettingsSnapshot();
+        let customImageDataUrl = '';
 
+        // Das aktive Bild wird genau einmal unter dem bisherigen Feld gesichert,
+        // damit ältere App-Versionen es weiterhin wiederherstellen können.
+        if (settings.mode === 'custom') {
+            const blob = await getCustomImageBlob();
+            if (!(blob instanceof Blob) || !blob.type.startsWith('image/') ||
+                blob.size <= 0 || blob.size > 15 * 1024 * 1024) {
+                throw new Error('Das eigene Hintergrundbild konnte nicht vollständig gesichert werden.');
+            }
+            customImageDataUrl = await blobToDataUrl(blob);
+        }
+
+        // Zusätzliche Bilder werden nur aufgenommen, wenn ein gespeichertes
+        // Editor-Preset tatsächlich auf sie verweist.
         const imageIds = new Set();
-        const addCustomImageId = backgroundSettings => {
+        const addPresetImageId = backgroundSettings => {
             if (!backgroundSettings || backgroundSettings.mode !== 'custom') return;
             const id = backgroundSettings.customImageId;
             if (typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,80}$/.test(id)) {
-                throw new Error('Ein eigenes Hintergrundbild in den Editor-Einstellungen hat keine gültige Kennung. Die Sicherung wurde nicht erstellt.');
+                throw new Error('Ein eigenes Hintergrundbild in einem Editor-Preset hat keine gültige Kennung. Die Sicherung wurde nicht erstellt.');
             }
             imageIds.add(id);
         };
-        addCustomImageId(settings);
 
         const editorPresets = typeof appStorage !== 'undefined' && appStorage
             ? appStorage.get('themeEditorPresets_v1')
             : null;
         if (editorPresets && typeof editorPresets === 'object' && !Array.isArray(editorPresets)) {
-            Object.values(editorPresets).forEach(preset => addCustomImageId(preset?.background));
+            Object.values(editorPresets).forEach(preset => addPresetImageId(preset?.background));
         }
 
         const customImages = [];
@@ -656,6 +669,7 @@
         return {
             version: 2,
             settings,
+            customImageDataUrl,
             customImages
         };
     }
