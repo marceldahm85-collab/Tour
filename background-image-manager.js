@@ -515,9 +515,6 @@
         };
 
         let blob = data.customImageBlob instanceof Blob ? data.customImageBlob : null;
-        if (!blob && typeof data.customImageDataUrl === 'string' && data.customImageDataUrl) {
-            blob = decodeDataUrl(data.customImageDataUrl);
-        }
 
         const customImages = [];
         if (Array.isArray(data.customImages)) {
@@ -539,6 +536,14 @@
             }
         }
 
+        if (!blob && typeof data.customImageDataUrl === 'string' && data.customImageDataUrl) {
+            blob = decodeDataUrl(data.customImageDataUrl);
+        }
+        if (!blob && next.mode === 'custom') {
+            const activeAsset = customImages.find(image => image.id === next.customImageId);
+            if (activeAsset) blob = activeAsset.blob;
+        }
+
         const validBlob = Boolean(
             blob &&
             blob.type.startsWith('image/') &&
@@ -558,13 +563,24 @@
 
         let restoredSettings = next;
         if (validBlob && next.mode === 'custom') {
-            // Das aktive Bild bekommt eine neue ID, damit bereits vorhandene
-            // Preset-Verknüpfungen auf dem Zielgerät nicht überschrieben werden.
-            const restoredImageId = createCustomImageId();
-            await _idbSet(customImageStorageKey(restoredImageId), blob);
-            revokeCustomObjectUrl();
-            customImageObjectUrl = URL.createObjectURL(blob);
-            restoredSettings = normalizeSettings({ ...next, customImageId: restoredImageId });
+            const importedActiveAssetExists = customImages.some(
+                image => image.id === next.customImageId
+            );
+            if (importedActiveAssetExists) {
+                // Die vollständige Sicherung bringt die ursprüngliche Asset-ID mit,
+                // auf die auch gespeicherte Editor-Presets verweisen.
+                revokeCustomObjectUrl();
+                customImageObjectUrl = URL.createObjectURL(blob);
+                restoredSettings = next;
+            } else {
+                // Alte Sicherungen ohne Asset-Liste bekommen eine neue ID, damit
+                // vorhandene lokale Preset-Verknüpfungen nicht überschrieben werden.
+                const restoredImageId = createCustomImageId();
+                await _idbSet(customImageStorageKey(restoredImageId), blob);
+                revokeCustomObjectUrl();
+                customImageObjectUrl = URL.createObjectURL(blob);
+                restoredSettings = normalizeSettings({ ...next, customImageId: restoredImageId });
+            }
         } else if (!validBlob) {
             revokeCustomObjectUrl();
         }
@@ -604,25 +620,15 @@
     async function createBackupData() {
         await initialize();
         const settings = getSettingsSnapshot();
-        let customImageDataUrl = '';
-
-        if (settings.mode === 'custom') {
-            const blob = await getCustomImageBlob();
-            if (!(blob instanceof Blob) || !blob.type.startsWith('image/') ||
-                blob.size <= 0 || blob.size > 15 * 1024 * 1024) {
-                throw new Error('Das eigene Hintergrundbild konnte nicht vollständig gesichert werden.');
-            }
-            customImageDataUrl = await blobToDataUrl(blob);
-        }
 
         const imageIds = new Set();
         const addCustomImageId = backgroundSettings => {
-            const id = backgroundSettings && backgroundSettings.mode === 'custom'
-                ? backgroundSettings.customImageId
-                : '';
-            if (typeof id === 'string' && /^[a-zA-Z0-9_-]{1,80}$/.test(id)) {
-                imageIds.add(id);
+            if (!backgroundSettings || backgroundSettings.mode !== 'custom') return;
+            const id = backgroundSettings.customImageId;
+            if (typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,80}$/.test(id)) {
+                throw new Error('Ein eigenes Hintergrundbild in den Editor-Einstellungen hat keine gültige Kennung. Die Sicherung wurde nicht erstellt.');
             }
+            imageIds.add(id);
         };
         addCustomImageId(settings);
 
@@ -650,7 +656,6 @@
         return {
             version: 2,
             settings,
-            customImageDataUrl,
             customImages
         };
     }
