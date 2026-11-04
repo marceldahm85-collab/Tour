@@ -51,6 +51,41 @@ function setSavebarVisible(v){const el=document.getElementById('theme-editor-sav
 function mark(){if(active&&!saving){dirty=true;paint();}}
 function handleMetricChange(box){if(!box)return;const on=checked();if(box.checked&&on.length>6){box.checked=false;window.showToast?.('Es können höchstens sechs Kennzahlen ausgewählt werden.');}if(!box.checked&&checked().length===0){box.checked=true;window.showToast?.('Mindestens eine Kennzahl muss ausgewählt bleiben.');}sortChoices();widget=readWidget();}
 async function begin(){if(active)return;active=true;setSavebarVisible(true);dirty=false;try{await window.beginAppBackgroundEditorDraft?.();}catch(e){console.warn('[Editor] Bildentwurf:',e);}window.__beginDashboardEditorDraft?.();fillWidget(get(WK));renderPresets();preview();paint();if(bound)return;bound=true;const root=document.getElementById('theme-view');root?.addEventListener('input',e=>{if(e.target.closest('.theme-editor-card,#theme-editor-widget-section,#dashboard-editor-body')){if(e.target.matches('[data-widget-metric]'))handleMetricChange(e.target);mark();preview();if(e.target.matches('[data-widget-metric],#te-widget-title,#te-widget-background'))widget=readWidget();}});root?.addEventListener('change',e=>{if(e.target.closest('.theme-editor-card,#theme-editor-widget-section,#dashboard-editor-body')){if(e.target.matches('[data-widget-metric]'))handleMetricChange(e.target);mark();preview();if(e.target.matches('[data-widget-metric],#te-widget-title,#te-widget-background'))widget=readWidget();}});root?.addEventListener('click',e=>{const move=e.target.closest('[data-widget-move]');if(move){moveMetric(move);return;}if(e.target.closest('#background-image-presets,#background-image-choose-file,#background-image-remove-custom,#background-image-activate-custom,#background-image-center-position,[data-background-profile],[data-editor-move]')){mark();preview();}});document.getElementById('te-preset-save')?.addEventListener('click',async()=>{const n=(document.getElementById('te-preset-name')?.value||'').trim().slice(0,32),s=document.getElementById('te-preset-status');if(!n){if(s)s.textContent='Bitte zuerst einen Preset-Namen eingeben.';return;}try{await window.persistAppBackgroundDraftAsset?.();const p=allPresets();p[n]=snapshot();set(PK,p);renderPresets(n);if(s)s.textContent='Preset „'+n+'“ gespeichert.';}catch(e){console.error('[Editor] Preset-Bild konnte nicht gespeichert werden:',e);if(s)s.textContent='Preset konnte nicht gespeichert werden. Bitte erneut versuchen.';}});document.getElementById('te-preset-load')?.addEventListener('click',async()=>{const n=document.getElementById('te-preset-select')?.value;if(n)await loadPreset(n);});document.getElementById('te-preset-delete')?.addEventListener('click',()=>{const n=document.getElementById('te-preset-select')?.value;if(!n)return;const p=allPresets();delete p[n];set(PK,p);renderPresets();const s=document.getElementById('te-preset-status');if(s)s.textContent='Preset „'+n+'“ gelöscht.';});}
-async function commit(){if(saving)return;saving=true;paint();try{widget=readWidget();await window.commitAppBackgroundEditorDraft?.();window.persistThemeEditorUnifiedSettings?.();window.__commitDashboardEditorDraft?.();set(WK,widget);await sendWidget(widget);dirty=false;active=false;}catch(e){saving=false;paint();throw e;}saving=false;paint();await begin();}
+async function commit(){
+  if(saving)return {saved:false};
+  saving=true;paint();
+  let savedWidget;
+  try{
+    widget=readWidget();
+    // App-Einstellungen und Editor-Entwürfe sind der eigentliche Speichervorgang.
+    // Die native Startbildschirm-Kachel wird davon unabhängig aktualisiert.
+    await window.commitAppBackgroundEditorDraft?.();
+    window.persistThemeEditorUnifiedSettings?.();
+    window.__commitDashboardEditorDraft?.();
+    savedWidget={...widget,metricOrder:[...(widget.metricOrder||[])]};
+    set(WK,savedWidget);
+    dirty=false;
+    active=false;
+  }catch(error){
+    saving=false;paint();
+    throw error;
+  }
+  saving=false;paint();
+  await begin();
+
+  // Ein Fehler bei der optionalen Android-Widget-Synchronisierung darf bereits
+  // dauerhaft gespeicherte Editor-Einstellungen nicht als fehlgeschlagen markieren.
+  try{
+    Promise.resolve(sendWidget(savedWidget)).catch(error=>{
+      console.warn('[Editor] Einstellungen gespeichert; Android-Widget konnte nicht aktualisiert werden:',error);
+      try{
+        window.showToast?.('Editor-Einstellungen gespeichert. Das Android-Widget konnte nicht aktualisiert werden.',{type:'warning',duration:3500});
+      }catch(_){}
+    });
+  }catch(error){
+    console.warn('[Editor] Native Widget-Synchronisierung nicht verfügbar:',error);
+  }
+  return {saved:true};
+}
 async function discard(){if(!active||saving)return;setSavebarVisible(false);await window.discardAppBackgroundEditorDraft?.();window.setThemeEditorUnifiedSettings?.(get('themeEditorUnifiedSettings_v1')||{});window.__discardDashboardEditorDraft?.();fillWidget(get(WK));dirty=false;active=false;paint();}
 window.__commitPremiumEditorSettings=commit;const init=window.initThemeEditor;if(typeof init==='function'&&!init.__premiumWorkflowWrapped){const wrap=function(){const r=init.apply(this,arguments);begin().catch(console.warn);return r;};wrap.__premiumWorkflowWrapped=true;window.initThemeEditor=wrap;}const nav=window.goToView;if(typeof nav==='function'&&!nav.__premiumWorkflowWrapped){const wrap=function(v){const was=document.getElementById('theme-view')?.classList.contains('visible')||document.getElementById('theme-view')?.classList.contains('active');if(was&&v!=='theme'&&v!=='theme-view')discard();return nav.apply(this,arguments);};wrap.__premiumWorkflowWrapped=true;window.goToView=wrap;}document.addEventListener('DOMContentLoaded',paint,{once:true});})();
