@@ -1,6 +1,6 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Der PDF-Magazin-Renderer wird direkt über index.html geladen.
-const CACHE_NAME = 'bergtouren-cache-premium-alpine-v293';
+const CACHE_NAME = 'bergtouren-cache-premium-alpine-v294';
 
 const APP_SHELL = [
   './',
@@ -16,7 +16,7 @@ const APP_SHELL = [
   './osttirol-slide-background.js?v=1',
   './assets/osttirol-lienz-background.webp',
   './stats-premium-alpine.js?v=10',
-  './theme-editor-unified.js?v=30',
+  './theme-editor-unified.js?v=31',
   './background-image-manager.js?v=12',
   './background-image-picker.js?v=8',
   './background-image-picker.css?v=3',
@@ -26,7 +26,6 @@ const APP_SHELL = [
   './app-navigation-history.js?v=1',
   './android-gallery-photos.js?v=9',
   './premium-alpine-icons.js?v=2',
-  './surface-density.js?v=4',
   './android-gallery-photos.css?v=5',
   './bergwelt-badges-20261019.css?v=1',
   './bergwelt-premium-alpine.css?v=22',
@@ -136,7 +135,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   const isCriticalAppAsset = requestUrl.origin === self.location.origin &&
-    /\/(?:index\.html|app-main(?:-20261019)?\.js|theme-editor-unified\.js|surface-density\.js|background-image-(?:manager|picker)\.js|android-gallery-photos\.js|bergwelt(?:-badges-20261019)?\.(?:js|css))$/.test(requestUrl.pathname);
+    /\/(?:index\.html|app-main(?:-20261019)?\.js|theme-editor-unified\.js|background-image-(?:manager|picker)\.js|android-gallery-photos\.js|bergwelt(?:-badges-20261019)?\.(?:js|css))$/.test(requestUrl.pathname);
 
   // App-Einstieg und kritische Module netzwerkzuerst laden. Bei Offline-Betrieb
   // wird auf die im aktuellen Cache gespeicherte Datei zurückgegriffen.
