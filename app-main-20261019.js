@@ -2501,6 +2501,9 @@ async function buildAppDataPayload() {
 
     const appState = await appStorage.exportAll();
     const nativeWidgetConfiguration = await getNativeWidgetConfigurationForBackup();
+    const savedWidgetConfiguration = nativeWidgetConfiguration ||
+        appStorage.get('nativeWidgetSettings_v1') ||
+        null;
 
     return {
         version: 2,
@@ -2509,8 +2512,8 @@ async function buildAppDataPayload() {
         plannedTours: stripGalleryReferencesFromBackup(appStorage.get('plannedTours') || []),
         appState,
         browserPreferences: readBackupBrowserPreferences(),
-        native: nativeWidgetConfiguration
-            ? { widgetConfiguration: nativeWidgetConfiguration }
+        native: savedWidgetConfiguration
+            ? { widgetConfiguration: savedWidgetConfiguration }
             : {},
         backgroundImage: await buildBackgroundImageBackupData(),
         meta: {
@@ -2546,8 +2549,11 @@ async function applyAppDataPayload(payload) {
     // Hintergrunddaten vor den übrigen Änderungen validieren und wiederherstellen.
     await restoreBackgroundImageFromPayload(payload);
 
-    if (payload.native?.widgetConfiguration) {
-        await restoreNativeWidgetConfigurationFromBackup(payload.native.widgetConfiguration);
+    const importedWidgetConfiguration = payload.native?.widgetConfiguration ||
+        payload.appState?.nativeWidgetSettings_v1 ||
+        null;
+    if (importedWidgetConfiguration) {
+        await restoreNativeWidgetConfigurationFromBackup(importedWidgetConfiguration);
     }
 
     if (payload.appState && typeof payload.appState === 'object' && !Array.isArray(payload.appState)) {
