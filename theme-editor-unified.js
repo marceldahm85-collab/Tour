@@ -659,7 +659,7 @@
         }
 
         document.getElementById('theme-editor-save')?.addEventListener('click', async () => {
-            draft=readForm();try{const result=typeof window.__commitPremiumEditorSettings==='function'?await window.__commitPremiumEditorSettings():(draft=persistSettings(draft),null);applyUnifiedSettings(true);if(result?.widgetSync?.status==='failed')showToastSafe('Editor-Einstellungen gespeichert. Widget nicht aktualisiert: '+result.widgetSync.message,'warning');else showToastSafe('Alle Editor-Einstellungen gespeichert ✓','success');}
+            draft=readForm();try{const result=typeof window.__commitPremiumEditorSettings==='function'?await window.__commitPremiumEditorSettings():(draft=persistSettings(draft),null);applyUnifiedSettings(true);if(result?.widgetSync?.status==='failed')showToastSafe('Editor-Einstellungen gespeichert. Widget nicht aktualisiert: '+result.widgetSync.message,'warning');else if(result?.widgetSync?.status==='not-native')showToastSafe('Editor gespeichert. Das Android-Widget kann nur aus der nativen Bergtouren-App aktualisiert werden.','warning');else showToastSafe('Alle Editor-Einstellungen gespeichert ✓','success');}
             catch(error){console.error('[Editor] Speichern fehlgeschlagen:',error);showToastSafe('Speichern fehlgeschlagen. Bitte erneut versuchen.','error');}
         });
 
