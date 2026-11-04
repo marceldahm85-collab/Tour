@@ -1276,3 +1276,38 @@
     outline-offset: 3px !important;
     border-radius: 5px !important;
 }
+
+/* =========================================================
+   GEMEINSAME TRENNLINIE: Stats und Editor
+   Die Linie wird in beiden Views als identischer 1-px-Streifen
+   gezeichnet, nicht als Element-Border. So gibt es keinen
+   Unterschied zwischen Stats-DIV und Editor-SUMMARY.
+   ========================================================= */
+#chart-view .stats-analysis-title,
+#theme-view .theme-editor-section-card > summary.stats-analysis-title,
+#theme-view .theme-editor-subgroup > summary.stats-analysis-title {
+    border-bottom: 0 !important;
+    background-color: transparent !important;
+    background-image: linear-gradient(
+        to bottom,
+        var(--premium-border, rgba(255,255,255,.12)),
+        var(--premium-border, rgba(255,255,255,.12))
+    ) !important;
+    background-size: 100% 1px !important;
+    background-position: left bottom !important;
+    background-repeat: no-repeat !important;
+}
+
+#stats-statistics-page .stats-section-collapsible.is-collapsed > .stats-analysis-title,
+#stats-development-page .stats-section-collapsible.is-collapsed > .stats-analysis-title,
+#stats-peaks-page .stats-section-collapsible.is-collapsed > .stats-analysis-title,
+#theme-view .theme-editor-section-card:not([open]) > summary.stats-analysis-title,
+#theme-view .theme-editor-subgroup:not([open]) > summary.stats-analysis-title {
+    background-image: none !important;
+}
+
+#theme-view .theme-editor-section-card > summary.stats-analysis-title,
+#theme-view .theme-editor-subgroup > summary.stats-analysis-title {
+    width: auto !important;
+    box-sizing: border-box !important;
+}
