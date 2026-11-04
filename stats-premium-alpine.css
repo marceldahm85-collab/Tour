@@ -96,7 +96,8 @@
 
 /* Überschriften: individuelle alpine Line-Art statt eines identischen Bergsymbols. */
 #chart-view .stats-analysis-title,
-#chart-view .chart-title {
+#chart-view .chart-title,
+#theme-view .theme-editor-section-card > .stats-analysis-title {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -114,14 +115,16 @@
     display: none !important;
 }
 
-#chart-view .stats-premium-title-label {
+#chart-view .stats-premium-title-label,
+#theme-view .stats-premium-title-label {
     display: inline-flex;
     align-items: center;
     min-width: 0;
     gap: 7px;
 }
 
-#chart-view .stats-premium-title-icon {
+#chart-view .stats-premium-title-icon,
+#theme-view .stats-premium-title-icon {
     display: inline-flex;
     flex: 0 0 18px;
     align-items: center;
@@ -134,7 +137,8 @@
     filter: drop-shadow(0 1px 3px color-mix(in srgb, var(--accent, #D5A64C) 22%, transparent));
 }
 
-#chart-view .stats-premium-title-icon svg {
+#chart-view .stats-premium-title-icon svg,
+#theme-view .stats-premium-title-icon svg {
     display: block;
     width: 100%;
     height: 100%;
@@ -346,19 +350,22 @@
 
 @media (max-width: 380px) {
     #chart-view .stats-analysis-title,
-    #chart-view .chart-title {
+    #chart-view .chart-title,
+    #theme-view .theme-editor-section-card > .stats-analysis-title {
         gap: 6px;
         padding-bottom: 7px;
         margin-bottom: 9px;
     }
 
-    #chart-view .stats-premium-title-icon {
+    #chart-view .stats-premium-title-icon,
+    #theme-view .stats-premium-title-icon {
         flex-basis: 16px;
         width: 16px;
         height: 16px;
     }
 
-    #chart-view .stats-premium-title-label {
+    #chart-view .stats-premium-title-label,
+    #theme-view .stats-premium-title-label {
         gap: 6px;
     }
 
@@ -381,24 +388,28 @@
 
 /* Premium Alpine — alle neuen Line-Art-Grafiken konsequent in der Editor-Akzentfarbe. */
 #chart-view .stats-premium-title-icon,
+#theme-view .stats-premium-title-icon,
 #chart-view .stats-premium-content-icon {
     color: var(--accent, #D5A64C) !important;
 }
 
 #chart-view .stats-premium-title-icon svg,
+#theme-view .stats-premium-title-icon svg,
 #chart-view .stats-premium-content-icon svg {
     stroke: var(--accent, #D5A64C) !important;
 }
 
 /* Titel: derselbe Akzentton, aber mit etwas mehr Kontur und Licht. */
-#chart-view .stats-premium-title-icon {
+#chart-view .stats-premium-title-icon,
+#theme-view .stats-premium-title-icon {
     opacity: 1 !important;
     filter:
         drop-shadow(0 0 2px color-mix(in srgb, var(--accent, #D5A64C) 52%, transparent))
         drop-shadow(0 1px 4px color-mix(in srgb, var(--accent, #D5A64C) 32%, transparent)) !important;
 }
 
-#chart-view .stats-premium-title-icon svg {
+#chart-view .stats-premium-title-icon svg,
+#theme-view .stats-premium-title-icon svg {
     stroke-width: 1.8 !important;
 }
 
