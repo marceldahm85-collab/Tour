@@ -5381,7 +5381,7 @@ body.summit .achievement-category-tile.empty {
     display: none;
 }
 
-#theme-view details[data-theme-editor-accordion] > summary:not(.stats-analysis-title):not(.stats-analysis-title)::after {
+#theme-view details[data-theme-editor-accordion] > summary:not(.stats-analysis-title)::after {
     content: "⌄";
     display: inline-flex;
     flex: 0 0 24px;
@@ -5398,7 +5398,7 @@ body.summit .achievement-category-tile.empty {
     transition: transform 0.18s ease, background 0.18s ease;
 }
 
-#theme-view details[data-theme-editor-accordion][open] > summary:not(.stats-analysis-title):not(.stats-analysis-title)::after {
+#theme-view details[data-theme-editor-accordion][open] > summary:not(.stats-analysis-title)::after {
     transform: rotate(0deg);
     background: var(--accent-soft);
 }
@@ -5437,7 +5437,7 @@ body.green #theme-view .theme-editor-panel {
 }
 
 body.green #theme-view details.theme-editor-col > summary,
-body.green #theme-view details.theme-editor-panel > summary:not(.stats-analysis-title):not(.stats-analysis-title) {
+body.green #theme-view details.theme-editor-panel > summary:not(.stats-analysis-title) {
     color: #e6f8ed;
 }
 
@@ -5480,7 +5480,7 @@ body.green #theme-view #theme-editor-tabs button.active {
         margin-bottom: 10px;
     }
 
-    #theme-view details[data-theme-editor-accordion] > summary:not(.stats-analysis-title):not(.stats-analysis-title)::after {
+    #theme-view details[data-theme-editor-accordion] > summary:not(.stats-analysis-title)::after {
         flex-basis: 26px;
         width: 26px;
         height: 26px;
@@ -5550,13 +5550,13 @@ body.green #theme-view .theme-editor-panel {
 }
 
 body.green #theme-view .theme-editor-col > summary,
-body.green #theme-view .theme-editor-panel > summary {
+body.green #theme-view .theme-editor-panel > summary:not(.stats-analysis-title) {
     color: #e9fff1;
     background: linear-gradient(90deg, rgba(82,183,136,0.17), rgba(82,183,136,0.06));
     border-color: rgba(82,183,136,0.34);
 }
 
-body.green #theme-view details[data-theme-editor-accordion][open] > summary:not(.stats-analysis-title):not(.stats-analysis-title) {
+body.green #theme-view details[data-theme-editor-accordion][open] > summary:not(.stats-analysis-title) {
     background: linear-gradient(90deg, rgba(82,183,136,0.30), rgba(35,111,70,0.30));
     border-color: rgba(130,225,164,0.55);
 }
@@ -5573,7 +5573,7 @@ body.green #theme-view .theme-editor-contrast-row {
         font-size: 12.5px;
     }
 
-    #theme-view details[data-theme-editor-accordion] > summary:not(.stats-analysis-title):not(.stats-analysis-title)::after {
+    #theme-view details[data-theme-editor-accordion] > summary:not(.stats-analysis-title)::after {
         flex-basis: 28px;
         width: 28px;
         height: 28px;
