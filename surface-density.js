@@ -16,7 +16,7 @@
     };
 
     const SURFACE_PATTERN =
-        /(?:^|[\\s_-])(box|card|tile|panel|section|sheet|modal|nav|list|item|row|form|field|filter|accordion|summary|header|content|group|wrap|option|btn|button|control|metric|stat|entry|toolbar|subnav|tab|view)(?:$|[\\s_-])/i;
+        /(?:^|[\\s_-])(box|card|tile|panel|section|sheet|modal|nav|list|item|row|form|field|filter|accordion|summary|header|content|group|wrap|option|btn|button|control|metric|metrics|stat|stats|entry|toolbar|subnav|tab|view|result|grid|badge|chip|search|overview)(?:$|[\\s_-])/i;
 
     const MARGIN_PATTERN =
         /(?:^|[\\s_-])(section|list|item|form|field|header|heading|title|summary|group|wrap|content|accordion|nav)(?:$|[\\s_-])/i;
