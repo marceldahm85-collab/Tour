@@ -174,7 +174,7 @@
                 : 'Aktiv: ' + (activePreset ? activePreset.name : 'Alpenpanorama');
         }
 
-        renderCredits(catalog);
+        if (positionPanel) positionPanel.hidden = false;
         syncPositionControls();
     }
 
@@ -207,9 +207,13 @@
         if (requestId !== customPreviewRequest) return;
 
         const settings = getSettings();
+        if (positionPanel) positionPanel.hidden = false;
         if (!(blob instanceof Blob) || !blob.type.startsWith('image/')) {
             revokeCustomPreviewUrl();
-            customPanel.hidden=true;if(positionPanel)positionPanel.hidden=false;syncPositionControls();return;
+            customPanel.hidden = true;
+            if (positionPanel) positionPanel.hidden = false;
+            syncPositionControls();
+            return;
         }
 
         revokeCustomPreviewUrl();
@@ -231,7 +235,7 @@
         }
         if (removeCustomButton) removeCustomButton.hidden = false;
         customPanel.hidden = false;
-        if(positionPanel)positionPanel.hidden=false;
+        if (positionPanel) positionPanel.hidden = false;
     }
 
     function getActiveHorizontalField(settings) {
