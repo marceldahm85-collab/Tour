@@ -83,6 +83,10 @@
         });
     }
 
+    // Gemeinsame Request-/Response-Pipeline auch für das native Startbildschirm-Widget.
+    // Sie verwendet denselben dauerhaft registrierten Listener wie die funktionierende Galerie.
+    window.__androidNativeRequest = nativeRequest;
+
     async function checkNativeGalleryBridge() {
         try {
             const reply = await nativeRequest('bridge.ping', {}, 8000);
