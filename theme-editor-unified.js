@@ -637,6 +637,7 @@
                 if(radiusValue)radiusValue.textContent=draft.radius+' px';if(transitionValue)transitionValue.textContent=draft.transition+' %';if(glassValue)glassValue.textContent=draft.glassOpacity+' %';
                 if(id==='te-unified-density')document.body.dataset.appDensity=draft.density;
                 applyUnifiedSettings(id==='te-unified-accent'||id==='te-unified-accent2');
+                if(id==='te-unified-density')window.refreshAppSurfaceDensity?.();
             };
             element.addEventListener('input', update);
             element.addEventListener('change', update);
@@ -674,8 +675,8 @@
     // identische Werte. Damit bleiben Diagramme und PDF-Export kompatibel.
     window.getThemeEditorSettings=getUnifiedLegacySettings;
     window.getThemeEditorUnifiedSettings=()=>normalizeSettings(readForm());
-    window.setThemeEditorUnifiedSettings=v=>{draft=normalizeSettings(v);fillForm();window.applyThemeEditorFont?.(draft.fontFamily,false);window.applyThemeEditorFontSize?.(draft.fontSize,false);document.body.dataset.appDensity=draft.density;applyUnifiedSettings(true);return{...draft};};
-    window.persistThemeEditorUnifiedSettings=()=>{draft=persistSettings(readForm());document.body.dataset.appDensity=draft.density;applyUnifiedSettings(true);return{...draft};};
+    window.setThemeEditorUnifiedSettings=v=>{draft=normalizeSettings(v);fillForm();window.applyThemeEditorFont?.(draft.fontFamily,false);window.applyThemeEditorFontSize?.(draft.fontSize,false);document.body.dataset.appDensity=draft.density;applyUnifiedSettings(true);window.refreshAppSurfaceDensity?.();return{...draft};};
+    window.persistThemeEditorUnifiedSettings=()=>{draft=persistSettings(readForm());document.body.dataset.appDensity=draft.density;applyUnifiedSettings(true);window.refreshAppSurfaceDensity?.();return{...draft};};
     window.buildThemeEditorLiveCss = buildUnifiedLiveCss;
     window.applyThemeEditorSettingsToDom = function () {
         applyUnifiedSettings(false);
