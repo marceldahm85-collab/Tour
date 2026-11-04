@@ -49,14 +49,15 @@
 
             <TextView
                 android:id="@+id/widget_year_stats_compact_heading"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans"
                 android:includeFontPadding="false"
                 android:letterSpacing="0.06"
+                android:gravity="center"
                 android:text="BERGJAHR 2026"
                 android:textColor="#E8FFFFFF"
-                android:textSize="9sp"
+                android:textSize="11sp"
                 android:textStyle="bold" />
 
             <LinearLayout
@@ -311,30 +312,29 @@
             android:paddingBottom="4dp"
             android:visibility="gone">
 
-            <LinearLayout
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content">
                 <ImageView
                     android:id="@+id/widget_year_stats_heading_icon"
                     android:layout_width="17dp"
                     android:layout_height="17dp"
+                    android:layout_gravity="start|center_vertical"
                     android:contentDescription="@null"
                     android:src="@drawable/widget_ic_ascent" />
                 <TextView
                     android:id="@+id/widget_year_stats_heading"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
                     android:fontFamily="sans"
+                    android:gravity="center"
                     android:includeFontPadding="false"
                     android:letterSpacing="0.07"
                     android:text="BERGJAHR 2026"
                     android:textColor="#FFFFFFFF"
-                    android:textSize="11sp"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
-            </LinearLayout>
+            </FrameLayout>
 
             <ImageView
                 android:layout_width="match_parent"
