@@ -2651,11 +2651,7 @@ async function applyAppDataPayload(payload) {
     await appStorage.flush();
     updateBackupStatusSummary();
 
-    // UI-Zustände wie Filter, Unternavigation und Checkliste werden beim Start
-    // initialisiert. Nach einer Vollwiederherstellung werden sie sauber neu geladen.
-    if (payload.appState) {
-        window.setTimeout(() => window.location.reload(), 3500);
-    }
+    // Die umschließende Hintergrund-Backup-Integration lädt nach vollständiger Wiederherstellung neu.
 }
 
 function updateFileStatus(text) {
