@@ -21094,7 +21094,8 @@ function getDefaultDashboardEditorPreferences() {
         tileOrder: [...DASHBOARD_EDITOR_DEFAULT_TILE_ORDER],
         hiddenTiles: [],
         sectionOrder: [...DASHBOARD_EDITOR_DEFAULT_SECTION_ORDER],
-        hiddenSections: []
+        hiddenSections: [],
+        recentTourCount: 3
     };
 }
 
@@ -21117,7 +21118,10 @@ function normalizeDashboardEditorPreferences(value) {
         tileOrder: [...tileOrder, ...defaults.tileOrder.filter(id => !tileOrder.includes(id))],
         hiddenTiles: uniqueValid(source.hiddenTiles, DASHBOARD_EDITOR_TILE_META.map(tile => tile.id)),
         sectionOrder: [...sectionOrder, ...defaults.sectionOrder.filter(id => !sectionOrder.includes(id))],
-        hiddenSections: uniqueValid(source.hiddenSections, validSectionIds)
+        hiddenSections: uniqueValid(source.hiddenSections, validSectionIds),
+        recentTourCount: Number.isFinite(Number(source.recentTourCount))
+            ? Math.max(1, Math.min(5, Math.round(Number(source.recentTourCount))))
+            : defaults.recentTourCount
     };
 }
 
@@ -21202,6 +21206,15 @@ function renderDashboardEditor() {
                 )}
             </div>
         </section>
+        <section class="dashboard-editor-group dashboard-editor-recent-group">
+            <h3 class="dashboard-editor-group-title">Letzte Touren</h3>
+            <label class="dashboard-editor-recent-setting" for="dashboard-editor-recent-count">
+                <span>Anzahl der angezeigten Einträge</span>
+                <select id="dashboard-editor-recent-count" aria-label="Anzahl der angezeigten Touren">
+                    ${[1,2,3,4,5].map(count => `<option value="${count}" ${dashboardEditorDraft.recentTourCount===count?'selected':''}>${count} ${count===1?'Tour':'Touren'}</option>`).join('')}
+                </select>
+            </label>
+        </section>
     `;
 }
 
@@ -21218,6 +21231,10 @@ function applyDashboardEditorPreferences(preferencesOverride=null){
             element.style.display = preferences.hiddenSections.includes(section.id) ? 'none' : '';
         }
     });
+    if (recent) {
+        recent.dataset.recentCount = String(preferences.recentTourCount);
+        recent.style.setProperty('--dashboard-recent-count', String(preferences.recentTourCount));
+    }
 
     preferences.sectionOrder.forEach(id => {
         const element = sections[id];
@@ -21225,8 +21242,8 @@ function applyDashboardEditorPreferences(preferencesOverride=null){
     });
 }
 
-function applyDashboardEditorPreferencesToRenderedView() {
-    applyDashboardEditorPreferences();
+function applyDashboardEditorPreferencesToRenderedView(preferencesOverride = null) {
+    applyDashboardEditorPreferences(preferencesOverride);
 }
 
 function initDashboardEditor() {
@@ -21245,6 +21262,14 @@ function initDashboardEditor() {
     });
 
     body.addEventListener('change', event => {
+        const recentCountSelect = event.target.closest('#dashboard-editor-recent-count');
+        if (recentCountSelect && dashboardEditorDraft) {
+            dashboardEditorDraft.recentTourCount = Math.max(1, Math.min(5, Number(recentCountSelect.value) || 3));
+            renderDashboard(dashboardEditorDraft);
+            applyDashboardEditorPreferences(dashboardEditorDraft);
+            return;
+        }
+
         const input = event.target.closest('[data-editor-visible]');
         if (!input || !dashboardEditorDraft) return;
 
@@ -21278,13 +21303,16 @@ function initDashboardEditor() {
 }
 window.__beginDashboardEditorDraft=function(){dashboardEditorDraft=normalizeDashboardEditorPreferences(getDashboardEditorPreferences());renderDashboardEditor();applyDashboardEditorPreferences(dashboardEditorDraft);return JSON.parse(JSON.stringify(dashboardEditorDraft));};
 window.__getDashboardEditorDraft=function(){return JSON.parse(JSON.stringify(dashboardEditorDraft||normalizeDashboardEditorPreferences(getDashboardEditorPreferences())));};
-window.__setDashboardEditorDraft=function(v){dashboardEditorDraft=normalizeDashboardEditorPreferences(v);renderDashboardEditor();applyDashboardEditorPreferences(dashboardEditorDraft);return JSON.parse(JSON.stringify(dashboardEditorDraft));};
+window.__setDashboardEditorDraft=function(v){dashboardEditorDraft=normalizeDashboardEditorPreferences(v);renderDashboardEditor();renderDashboard(dashboardEditorDraft);applyDashboardEditorPreferences(dashboardEditorDraft);return JSON.parse(JSON.stringify(dashboardEditorDraft));};
 window.__commitDashboardEditorDraft=function(){if(!dashboardEditorDraft)return normalizeDashboardEditorPreferences(getDashboardEditorPreferences());const saved=normalizeDashboardEditorPreferences(dashboardEditorDraft);appStorage.set('dashboardPreferences',saved);dashboardEditorDraft=saved;renderDashboard();renderDashboardEditor();applyDashboardEditorPreferences(saved);return JSON.parse(JSON.stringify(saved));};
-window.__discardDashboardEditorDraft=function(){dashboardEditorDraft=normalizeDashboardEditorPreferences(getDashboardEditorPreferences());renderDashboardEditor();applyDashboardEditorPreferences(dashboardEditorDraft);};
+window.__discardDashboardEditorDraft=function(){dashboardEditorDraft=normalizeDashboardEditorPreferences(getDashboardEditorPreferences());renderDashboardEditor();renderDashboard(dashboardEditorDraft);applyDashboardEditorPreferences(dashboardEditorDraft);};
 
-function renderDashboard() {
+function renderDashboard(preferencesOverride = null) {
     const allTours   = appStorage.get('touren')       || [];
     const allPlanned = appStorage.get('plannedTours') || [];
+    const dashboardPreferences = normalizeDashboardEditorPreferences(
+        preferencesOverride || getDashboardEditorPreferences()
+    );
 
     // Jahres-Dropdown befüllen
     const yearSel = document.getElementById('dash-year-select');
@@ -21502,7 +21530,7 @@ const recentForYear = filterToursForDashboardYear(recentGrouped, dashYearFilter)
 const recent =
     recentForYear
         .sort((a, b) => parseTourDateValue(b.date) - parseTourDateValue(a.date))
-        .slice(0, 5);
+        .slice(0, dashboardPreferences.recentTourCount);
 
         const listHTML = recent.length === 0
             ? '<li style="opacity:.6;padding:6px 0;font-size:13px;list-style:none;">Keine Touren vorhanden</li>'
@@ -21517,6 +21545,8 @@ const recent =
             <div class="dash-section-title">🕐 Letzte Touren</div>
             <div class="dash-section-body"><ul class="dash-tour-list">${listHTML}</ul></div>
         `;
+        recentSection.dataset.recentCount = String(dashboardPreferences.recentTourCount);
+        recentSection.style.setProperty('--dashboard-recent-count', String(dashboardPreferences.recentTourCount));
         recentSection.querySelectorAll('.dash-recent-item').forEach(li => {
             const i = parseInt(li.dataset.i);
             li.style.cursor = 'pointer';
@@ -21719,7 +21749,7 @@ ${msTileHTML('steps')}
      * nachdem das Dashboard vollständig gerendert wurde.
      */
 
-    applyDashboardEditorPreferencesToRenderedView();
+    applyDashboardEditorPreferencesToRenderedView(dashboardPreferences);
     markDerivedViewClean('dashboard');
 }
 

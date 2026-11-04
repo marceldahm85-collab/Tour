@@ -472,16 +472,28 @@ public final class MainActivity extends Activity {
                                 JSONArray orderJson = request.optJSONArray("metricOrder");
                                 String[] metricOrder = new String[orderJson == null ? 0 : orderJson.length()];
                                 if (orderJson != null) {
-                                    for (int i = 0; i < orderJson.length(); i++) metricOrder[i] = orderJson.optString(i, "");
+                                    for (int i = 0; i < orderJson.length(); i++) {
+                                        metricOrder[i] = orderJson.optString(i, "");
+                                    }
                                 }
-                                if (title.length() <= 20 && selectedCount >= 1 && selectedCount <= 6
-                                        && ("alpine".equals(background) || "dark".equals(background))) {
-                                    YearStatsWidgetProvider.updateConfiguration(
-                                            MainActivity.this, title, showTours, showDistance, showAscent,
-                                            showPeaks, showSteps, showTime, showSpeed, showGradient,
-                                            showAscentRate, metricOrder, background);
+                                boolean valid = title.length() <= 20 && selectedCount >= 1 && selectedCount <= 6
+                                        && ("alpine".equals(background) || "dark".equals(background));
+                                boolean saved = valid && YearStatsWidgetProvider.updateConfiguration(
+                                        MainActivity.this, title, showTours, showDistance, showAscent,
+                                        showPeaks, showSteps, showTime, showSpeed, showGradient,
+                                        showAscentRate, metricOrder, background);
+                                JSONObject response = createGalleryResponse("widget.yearStats.settings.result", requestId);
+                                response.put("ok", saved);
+                                if (!saved) {
+                                    response.put("error", valid
+                                            ? "Android konnte die Widget-Einstellungen nicht dauerhaft speichern."
+                                            : "Die Widget-Auswahl ist ungültig. Wähle eine bis sechs Kennzahlen.");
+                                }
+                                replyToBridge(replyProxy, response);
+                                if (saved) {
+                                    Log.i(TAG, "Widget-Konfiguration dauerhaft gespeichert und Widget-Aktualisierung ausgelöst.");
                                 } else {
-                                    Log.w(TAG, "Ungültige Widget-Konfiguration verworfen.");
+                                    Log.w(TAG, "Widget-Konfiguration wurde nicht gespeichert.");
                                 }
                             } else if ("widget.yearStats.update".equals(type)) {
                                 int year = request.optInt("year", -1);

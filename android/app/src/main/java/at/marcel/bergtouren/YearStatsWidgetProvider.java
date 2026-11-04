@@ -53,22 +53,32 @@ public final class YearStatsWidgetProvider extends AppWidgetProvider {
         updateAll(app);
     }
 
-    public static void updateConfiguration(Context context,String title,boolean showTours,boolean showDistance,boolean showAscent,boolean showPeaks,boolean showSteps,boolean showTime,boolean showSpeed,boolean showGradient,boolean showAscentRate,String[] metricOrder,String background) {
-        if(context==null)return;
+    public static boolean updateConfiguration(Context context,String title,boolean showTours,boolean showDistance,boolean showAscent,boolean showPeaks,boolean showSteps,boolean showTime,boolean showSpeed,boolean showGradient,boolean showAscentRate,String[] metricOrder,String background) {
+        if(context==null)return false;
         String safeTitle=title==null?DEFAULT_WIDGET_TITLE:title.trim();
         if(safeTitle.isEmpty())safeTitle=DEFAULT_WIDGET_TITLE;
         if(safeTitle.length()>20)safeTitle=safeTitle.substring(0,20);
         boolean[] selected={showTours,showDistance,showAscent,showPeaks,showSteps,showTime,showSpeed,showGradient,showAscentRate};
         List<String> safeOrder=normalizeOrder(metricOrder,selected);
-        if(safeOrder.isEmpty()||safeOrder.size()>6)return;
+        if(safeOrder.isEmpty()||safeOrder.size()>6)return false;
         String safeBackground="dark".equals(background)?"dark":"alpine";
-        context.getApplicationContext().getSharedPreferences(PREFS,Context.MODE_PRIVATE).edit()
-                .putString("widget_title",safeTitle).putBoolean("show_tours",showTours).putBoolean("show_distance",showDistance)
-                .putBoolean("show_ascent",showAscent).putBoolean("show_peaks",showPeaks).putBoolean("show_steps",showSteps)
-                .putBoolean("show_time",showTime).putBoolean("show_speed",showSpeed).putBoolean("show_gradient",showGradient)
-                .putBoolean("show_ascentRate",showAscentRate).putString("metric_order",joinOrder(safeOrder))
-                .putString("widget_background",safeBackground).apply();
+        boolean persisted=context.getApplicationContext().getSharedPreferences(PREFS,Context.MODE_PRIVATE).edit()
+                .putString("widget_title",safeTitle)
+                .putBoolean("show_tours",showTours)
+                .putBoolean("show_distance",showDistance)
+                .putBoolean("show_ascent",showAscent)
+                .putBoolean("show_peaks",showPeaks)
+                .putBoolean("show_steps",showSteps)
+                .putBoolean("show_time",showTime)
+                .putBoolean("show_speed",showSpeed)
+                .putBoolean("show_gradient",showGradient)
+                .putBoolean("show_ascentRate",showAscentRate)
+                .putString("metric_order",joinOrder(safeOrder))
+                .putString("widget_background",safeBackground)
+                .commit();
+        if(!persisted)return false;
         updateAll(context.getApplicationContext());
+        return true;
     }
 
     private static List<String> normalizeOrder(String[] requested,boolean[] selected) {

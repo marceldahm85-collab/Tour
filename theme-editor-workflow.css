@@ -487,3 +487,153 @@ body[data-app-density="comfortable"] #theme-view .theme-editor-settings-grid {
 #theme-view .theme-editor-widget-count { margin:-4px 0 2px; color:var(--theme-palette-accent,#ad7d12); font-size:10px; font-weight:800; text-align:right; }
 #theme-view .background-image-selected-label { margin:0 0 10px; }
 #theme-editor-savebar button { min-height:38px !important; }
+/* Editor-Header wie die einklappbaren Statistikbereiche: Kartenfläche, Titelzeile und Akzent-Chevron. */
+#theme-view > .theme-editor-inner > details.theme-editor-section-card,
+#theme-view > .theme-editor-inner > details.theme-editor-section-card:not([open]) {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 0 0 12px !important;
+  padding: 10px 12px 12px !important;
+  border: 1px solid var(--premium-border, rgba(255,255,255,.13)) !important;
+  border-radius: var(--editor-radius, var(--premium-radius-card, 16px)) !important;
+  background:
+    radial-gradient(ellipse at 98% 0%, color-mix(in srgb, var(--accent, #D5A64C) 7%, transparent), transparent 42%),
+    linear-gradient(150deg, var(--app-surface-strong, rgba(255,255,255,.055)), var(--app-surface-card, rgba(10,16,23,.8))) !important;
+  box-shadow: var(--premium-shadow-card, 0 8px 22px rgba(0,0,0,.18)), inset 0 1px 0 rgba(255,255,255,.035) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+#theme-view > .theme-editor-inner > details.theme-editor-section-card:last-child { margin-bottom: 0 !important; }
+#theme-view .theme-editor-section-card > summary {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
+  width: 100% !important;
+  min-height: 30px !important;
+  height: auto !important;
+  margin: 0 0 11px !important;
+  padding: 0 26px 8px 0 !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--premium-border, rgba(255,255,255,.12)) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--app-text-primary, var(--text-main, #f3f7fb)) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+  text-align: left !important;
+  list-style: none !important;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+#theme-view .theme-editor-section-card:not([open]) > summary {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+  border-bottom-color: transparent !important;
+}
+#theme-view .theme-editor-section-card > summary::after {
+  content: "" !important;
+  position: absolute !important;
+  right: 4px !important;
+  top: calc(50% - 6px) !important;
+  flex: 0 0 8px !important;
+  width: 8px !important;
+  height: 8px !important;
+  border: 0 !important;
+  border-right: 1.8px solid var(--theme-palette-accent, var(--accent, #D5A64C)) !important;
+  border-bottom: 1.8px solid var(--theme-palette-accent, var(--accent, #D5A64C)) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: rotate(45deg) !important;
+  transform-origin: center;
+  transition: transform 160ms ease, top 160ms ease;
+  opacity: .95;
+}
+#theme-view .theme-editor-section-card[open] > summary::after {
+  top: calc(50% - 2px) !important;
+  transform: rotate(225deg) !important;
+}
+#theme-view .theme-editor-title-icon {
+  display: inline-flex;
+  flex: 0 0 18px;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: var(--accent, #D5A64C);
+  opacity: .98;
+  filter: drop-shadow(0 1px 3px color-mix(in srgb, var(--accent, #D5A64C) 22%, transparent));
+}
+#theme-view .theme-editor-title-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  overflow: visible;
+}
+#theme-view .theme-editor-title-text { min-width: 0; }
+
+/* Auch die kleineren Editor-Unterbereiche nutzen die gleiche Titel- und Pfeillogik. */
+#theme-view .theme-editor-subgroup > summary {
+  position: relative;
+  justify-content: flex-start;
+  min-height: 30px;
+  margin: 0 0 9px;
+  padding: 0 24px 7px 0;
+  border-bottom: 1px solid var(--premium-border, rgba(255,255,255,.12));
+  font-size: 12px;
+  line-height: 1.25;
+}
+#theme-view .theme-editor-subgroup:not([open]) > summary {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom-color: transparent;
+}
+#theme-view .theme-editor-subgroup > summary::after {
+  position: absolute;
+  right: 4px;
+  top: calc(50% - 6px);
+  transform: rotate(45deg);
+  border-color: var(--theme-palette-accent, var(--accent, #D5A64C));
+}
+#theme-view .theme-editor-subgroup[open] > summary::after {
+  top: calc(50% - 2px);
+  transform: rotate(225deg);
+}
+
+#theme-view .dashboard-editor-recent-setting {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(100px, 150px);
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: var(--app-text-primary, #f3f7fb);
+  font-size: 11px;
+  font-weight: 700;
+}
+#theme-view .dashboard-editor-recent-setting select {
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  padding: 7px 10px;
+  border: 1px solid var(--app-surface-border, rgba(225,232,242,.14));
+  border-radius: var(--app-radius, 14px);
+  background: var(--app-surface-strong, rgba(25,30,39,.82));
+  color: var(--app-text-primary, #f3f7fb);
+  box-sizing: border-box;
+}
