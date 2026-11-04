@@ -8,6 +8,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Typeface;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.StyleSpan;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -30,7 +36,6 @@ public final class YearStatsWidgetProvider extends AppWidgetProvider {
     private static final int[] COMPACT_GROUPS = {R.id.widget_year_stats_compact_tours_group,R.id.widget_year_stats_compact_distance_group,R.id.widget_year_stats_compact_ascent_group};
     private static final int[] COMPACT_ICONS = {R.id.widget_year_stats_compact_tours_icon,R.id.widget_year_stats_compact_distance_icon,R.id.widget_year_stats_compact_ascent_icon};
     private static final int[] COMPACT_VALUES = {R.id.widget_year_stats_compact_tours_value,R.id.widget_year_stats_compact_distance_value,R.id.widget_year_stats_compact_ascent_value};
-    private static final int[] COMPACT_LABELS = {R.id.widget_year_stats_compact_tours_label,R.id.widget_year_stats_compact_distance_label,R.id.widget_year_stats_compact_ascent_label};
     private static final int[] COMPACT_DIVIDERS = {R.id.widget_year_stats_compact_divider_1,R.id.widget_year_stats_compact_divider_2};
     private static final int[] EXPANDED_GROUPS = {R.id.widget_year_stats_tours_group,R.id.widget_year_stats_distance_group,R.id.widget_year_stats_ascent_group,R.id.widget_year_stats_peaks_group,R.id.widget_year_stats_steps_group,R.id.widget_year_stats_time_group};
     private static final int[] EXPANDED_ICONS = {R.id.widget_year_stats_tours_icon,R.id.widget_year_stats_distance_icon,R.id.widget_year_stats_ascent_icon,R.id.widget_year_stats_peaks_icon,R.id.widget_year_stats_steps_icon,R.id.widget_year_stats_time_icon};
@@ -134,7 +139,7 @@ public final class YearStatsWidgetProvider extends AppWidgetProvider {
                 views.setViewVisibility(EXPANDED_DIVIDERS[0],topCount>1?View.VISIBLE:View.GONE);views.setViewVisibility(EXPANDED_DIVIDERS[1],topCount>2?View.VISIBLE:View.GONE);
                 views.setViewVisibility(EXPANDED_DIVIDERS[2],bottomCount>1?View.VISIBLE:View.GONE);views.setViewVisibility(EXPANDED_DIVIDERS[3],bottomCount>2?View.VISIBLE:View.GONE);
             }else{
-                int count=Math.min(3,order.size());for(int i=0;i<COMPACT_GROUPS.length;i++){boolean visible=i<count;views.setViewVisibility(COMPACT_GROUPS[i],visible?View.VISIBLE:View.GONE);if(visible)applyMetric(views,order.get(i),COMPACT_ICONS[i],COMPACT_VALUES[i],COMPACT_LABELS[i],accent,integer,decimal,distance,ascent,tours,peaks,steps,duration,avgSpeed,avgGradient,avgAscentRate);}
+                int count=Math.min(3,order.size());for(int i=0;i<COMPACT_GROUPS.length;i++){boolean visible=i<count;views.setViewVisibility(COMPACT_GROUPS[i],visible?View.VISIBLE:View.GONE);if(visible)applyCompactMetric(views,order.get(i),COMPACT_ICONS[i],COMPACT_VALUES[i],accent,integer,decimal,distance,ascent,tours,peaks,steps,duration,avgSpeed,avgGradient,avgAscentRate);}
                 views.setViewVisibility(COMPACT_DIVIDERS[0],count>1?View.VISIBLE:View.GONE);views.setViewVisibility(COMPACT_DIVIDERS[1],count>2?View.VISIBLE:View.GONE);
             }
             Intent open=new Intent(context,MainActivity.class);open.setAction(MainActivity.ACTION_OPEN_DASHBOARD);open.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -143,20 +148,35 @@ public final class YearStatsWidgetProvider extends AppWidgetProvider {
         }
     }
 
-    private static void applyMetric(RemoteViews views,String id,int iconId,int valueId,int labelId,int accent,NumberFormat integer,NumberFormat decimal,double distance,double ascent,int tours,long peaks,long steps,String duration,double avgSpeed,double avgGradient,double avgAscentRate) {
-        MetricValue m;
+    private static void applyCompactMetric(RemoteViews views,String id,int iconId,int valueId,int accent,NumberFormat integer,NumberFormat decimal,double distance,double ascent,int tours,long peaks,long steps,String duration,double avgSpeed,double avgGradient,double avgAscentRate) {
+        MetricValue m=metricValue(id,integer,decimal,distance,ascent,tours,peaks,steps,duration,avgSpeed,avgGradient,avgAscentRate);
+        int split=m.value.length();
+        SpannableString display=new SpannableString(m.value+"\\n"+m.label);
+        display.setSpan(new RelativeSizeSpan(0.62f),split+1,display.length(),Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        display.setSpan(new ForegroundColorSpan(Color.rgb(213,222,229)),split+1,display.length(),Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        display.setSpan(new StyleSpan(Typeface.BOLD),split+1,display.length(),Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        views.setTextViewText(valueId,display);
+        views.setImageViewResource(iconId,m.icon);
+        views.setInt(iconId,"setColorFilter",accent);
+    }
+
+    private static MetricValue metricValue(String id,NumberFormat integer,NumberFormat decimal,double distance,double ascent,int tours,long peaks,long steps,String duration,double avgSpeed,double avgGradient,double avgAscentRate) {
         switch(id){
-            case "tours":m=new MetricValue(integer.format(tours),"TOUREN",R.drawable.widget_ic_tours);break;
-            case "distance":m=new MetricValue(decimal.format(distance),"KM",R.drawable.widget_ic_distance);break;
-            case "ascent":m=new MetricValue(integer.format(Math.round(ascent)),"HM",R.drawable.widget_ic_ascent);break;
-            case "peaks":m=new MetricValue(integer.format(peaks),"GIPFEL",R.drawable.widget_ic_peaks);break;
-            case "steps":m=new MetricValue(integer.format(steps),"SCHRITTE",R.drawable.widget_ic_steps);break;
-            case "time":m=new MetricValue(duration,"GEHZEIT",R.drawable.widget_ic_time);break;
-            case "speed":m=new MetricValue(decimal.format(avgSpeed),"Ø KM/H",R.drawable.widget_ic_speed);break;
-            case "gradient":m=new MetricValue(integer.format(Math.round(avgGradient)),"Ø HM/KM",R.drawable.widget_ic_gradient);break;
-            case "ascentRate":m=new MetricValue(integer.format(Math.round(avgAscentRate)),"Ø HM/H",R.drawable.widget_ic_ascent_rate);break;
-            default:m=new MetricValue("0","TOUREN",R.drawable.widget_ic_tours);break;
+            case "tours":return new MetricValue(integer.format(tours),"TOUREN",R.drawable.widget_ic_tours);
+            case "distance":return new MetricValue(decimal.format(distance),"KM",R.drawable.widget_ic_distance);
+            case "ascent":return new MetricValue(integer.format(Math.round(ascent)),"HM",R.drawable.widget_ic_ascent);
+            case "peaks":return new MetricValue(integer.format(peaks),"GIPFEL",R.drawable.widget_ic_peaks);
+            case "steps":return new MetricValue(integer.format(steps),"SCHRITTE",R.drawable.widget_ic_steps);
+            case "time":return new MetricValue(duration,"GEHZEIT",R.drawable.widget_ic_time);
+            case "speed":return new MetricValue(decimal.format(avgSpeed),"Ø KM/H",R.drawable.widget_ic_speed);
+            case "gradient":return new MetricValue(integer.format(Math.round(avgGradient)),"Ø HM/KM",R.drawable.widget_ic_gradient);
+            case "ascentRate":return new MetricValue(integer.format(Math.round(avgAscentRate)),"Ø HM/H",R.drawable.widget_ic_ascent_rate);
+            default:return new MetricValue("0","TOUREN",R.drawable.widget_ic_tours);
         }
+    }
+
+    private static void applyMetric(RemoteViews views,String id,int iconId,int valueId,int labelId,int accent,NumberFormat integer,NumberFormat decimal,double distance,double ascent,int tours,long peaks,long steps,String duration,double avgSpeed,double avgGradient,double avgAscentRate) {
+        MetricValue m=metricValue(id,integer,decimal,distance,ascent,tours,peaks,steps,duration,avgSpeed,avgGradient,avgAscentRate);
         views.setTextViewText(valueId,m.value);views.setTextViewText(labelId,m.label);views.setImageViewResource(iconId,m.icon);views.setInt(iconId,"setColorFilter",accent);
     }
     private static String formatDuration(long totalMinutes){long hours=totalMinutes/60L,minutes=totalMinutes%60L;return NumberFormat.getIntegerInstance(Locale.GERMANY).format(hours)+":"+String.format(Locale.GERMANY,"%02d",minutes);}
