@@ -71,20 +71,21 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:orientation="vertical"
                         android:id="@+id/widget_year_stats_compact_tours_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_compact_tours_icon"
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
                         android:contentDescription="@null"
+                        android:layout_gravity="center_horizontal"
                         android:src="@drawable/widget_ic_tours" />
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:layout_weight="1"
+                        android:layout_marginTop="1dp"
+                        android:gravity="center_horizontal"
                         android:orientation="vertical">
                         <TextView
                             android:id="@+id/widget_year_stats_compact_tours_value"
@@ -96,7 +97,8 @@
                             android:ellipsize="end"
                             android:text="0"
                             android:textColor="#FFFFFFFF"
-                            android:textSize="15sp"
+                            android:textSize="17sp"
+                            android:gravity="center"
                             android:textStyle="bold" />
                         <TextView
                             android:id="@+id/widget_year_stats_compact_tours_label"
@@ -108,7 +110,8 @@
                             android:singleLine="true"
                             android:text="TOUREN"
                             android:textColor="#D5DEE5"
-                            android:textSize="7sp"
+                            android:textSize="8sp"
+                            android:gravity="center"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
@@ -124,20 +127,21 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:orientation="vertical"
                         android:id="@+id/widget_year_stats_compact_distance_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_compact_distance_icon"
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
                         android:contentDescription="@null"
+                        android:layout_gravity="center_horizontal"
                         android:src="@drawable/widget_ic_distance" />
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:layout_weight="1"
+                        android:layout_marginTop="1dp"
+                        android:gravity="center_horizontal"
                         android:orientation="vertical">
                         <TextView
                             android:id="@+id/widget_year_stats_compact_distance_value"
@@ -149,7 +153,8 @@
                             android:ellipsize="end"
                             android:text="0,0"
                             android:textColor="#FFFFFFFF"
-                            android:textSize="15sp"
+                            android:textSize="17sp"
+                            android:gravity="center"
                             android:textStyle="bold" />
                         <TextView
                             android:id="@+id/widget_year_stats_compact_distance_label"
@@ -161,7 +166,8 @@
                             android:singleLine="true"
                             android:text="KM"
                             android:textColor="#D5DEE5"
-                            android:textSize="7sp"
+                            android:textSize="8sp"
+                            android:gravity="center"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
@@ -177,20 +183,21 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:orientation="vertical"
                         android:id="@+id/widget_year_stats_compact_ascent_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_compact_ascent_icon"
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
                         android:contentDescription="@null"
+                        android:layout_gravity="center_horizontal"
                         android:src="@drawable/widget_ic_ascent" />
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:layout_weight="1"
+                        android:layout_marginTop="1dp"
+                        android:gravity="center_horizontal"
                         android:orientation="vertical">
                         <TextView
                             android:id="@+id/widget_year_stats_compact_ascent_value"
@@ -202,7 +209,8 @@
                             android:ellipsize="end"
                             android:text="0"
                             android:textColor="#FFFFFFFF"
-                            android:textSize="15sp"
+                            android:textSize="17sp"
+                            android:gravity="center"
                             android:textStyle="bold" />
                         <TextView
                             android:id="@+id/widget_year_stats_compact_ascent_label"
@@ -214,7 +222,8 @@
                             android:singleLine="true"
                             android:text="HM"
                             android:textColor="#D5DEE5"
-                            android:textSize="7sp"
+                            android:textSize="8sp"
+                            android:gravity="center"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
@@ -277,20 +286,21 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:orientation="vertical"
                         android:id="@+id/widget_year_stats_tours_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_tours_icon"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
                         android:contentDescription="@null"
+                        android:layout_gravity="center_horizontal"
                         android:src="@drawable/widget_ic_tours" />
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:layout_weight="1"
+                        android:layout_marginTop="1dp"
+                        android:gravity="center_horizontal"
                         android:orientation="vertical">
                         <TextView
                             android:id="@+id/widget_year_stats_tours_value"
@@ -302,7 +312,8 @@
                             android:ellipsize="end"
                             android:text="0"
                             android:textColor="#FFFFFFFF"
-                            android:textSize="15sp"
+                            android:textSize="18sp"
+                            android:gravity="center"
                             android:textStyle="bold" />
                         <TextView
                             android:id="@+id/widget_year_stats_tours_label"
@@ -314,7 +325,8 @@
                             android:singleLine="true"
                             android:text="TOUREN"
                             android:textColor="#D5DEE5"
-                            android:textSize="7sp"
+                            android:textSize="8sp"
+                            android:gravity="center"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
@@ -330,20 +342,21 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:orientation="vertical"
                         android:id="@+id/widget_year_stats_distance_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_distance_icon"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
                         android:contentDescription="@null"
+                        android:layout_gravity="center_horizontal"
                         android:src="@drawable/widget_ic_distance" />
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:layout_weight="1"
+                        android:layout_marginTop="1dp"
+                        android:gravity="center_horizontal"
                         android:orientation="vertical">
                         <TextView
                             android:id="@+id/widget_year_stats_distance_value"
@@ -355,7 +368,8 @@
                             android:ellipsize="end"
                             android:text="0,0"
                             android:textColor="#FFFFFFFF"
-                            android:textSize="15sp"
+                            android:textSize="18sp"
+                            android:gravity="center"
                             android:textStyle="bold" />
                         <TextView
                             android:id="@+id/widget_year_stats_distance_label"
@@ -367,7 +381,8 @@
                             android:singleLine="true"
                             android:text="KILOMETER"
                             android:textColor="#D5DEE5"
-                            android:textSize="7sp"
+                            android:textSize="8sp"
+                            android:gravity="center"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
@@ -383,20 +398,21 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:orientation="vertical"
                         android:id="@+id/widget_year_stats_ascent_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_ascent_icon"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
                         android:contentDescription="@null"
+                        android:layout_gravity="center_horizontal"
                         android:src="@drawable/widget_ic_ascent" />
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:layout_weight="1"
+                        android:layout_marginTop="1dp"
+                        android:gravity="center_horizontal"
                         android:orientation="vertical">
                         <TextView
                             android:id="@+id/widget_year_stats_ascent_value"
@@ -408,7 +424,8 @@
                             android:ellipsize="end"
                             android:text="0"
                             android:textColor="#FFFFFFFF"
-                            android:textSize="15sp"
+                            android:textSize="18sp"
+                            android:gravity="center"
                             android:textStyle="bold" />
                         <TextView
                             android:id="@+id/widget_year_stats_ascent_label"
@@ -420,7 +437,8 @@
                             android:singleLine="true"
                             android:text="HÖHENMETER"
                             android:textColor="#D5DEE5"
-                            android:textSize="7sp"
+                            android:textSize="8sp"
+                            android:gravity="center"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
@@ -444,20 +462,21 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:orientation="vertical"
                         android:id="@+id/widget_year_stats_peaks_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_peaks_icon"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
                         android:contentDescription="@null"
+                        android:layout_gravity="center_horizontal"
                         android:src="@drawable/widget_ic_peaks" />
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:layout_weight="1"
+                        android:layout_marginTop="1dp"
+                        android:gravity="center_horizontal"
                         android:orientation="vertical">
                         <TextView
                             android:id="@+id/widget_year_stats_peaks_value"
@@ -469,7 +488,8 @@
                             android:ellipsize="end"
                             android:text="0"
                             android:textColor="#FFFFFFFF"
-                            android:textSize="15sp"
+                            android:textSize="18sp"
+                            android:gravity="center"
                             android:textStyle="bold" />
                         <TextView
                             android:id="@+id/widget_year_stats_peaks_label"
@@ -481,7 +501,8 @@
                             android:singleLine="true"
                             android:text="GIPFEL"
                             android:textColor="#D5DEE5"
-                            android:textSize="7sp"
+                            android:textSize="8sp"
+                            android:gravity="center"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
@@ -497,20 +518,21 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:orientation="vertical"
                         android:id="@+id/widget_year_stats_steps_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_steps_icon"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
                         android:contentDescription="@null"
+                        android:layout_gravity="center_horizontal"
                         android:src="@drawable/widget_ic_steps" />
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:layout_weight="1"
+                        android:layout_marginTop="1dp"
+                        android:gravity="center_horizontal"
                         android:orientation="vertical">
                         <TextView
                             android:id="@+id/widget_year_stats_steps_value"
@@ -523,6 +545,7 @@
                             android:text="0"
                             android:textColor="#FFFFFFFF"
                             android:textSize="14sp"
+                            android:gravity="center"
                             android:textStyle="bold" />
                         <TextView
                             android:id="@+id/widget_year_stats_steps_label"
@@ -534,7 +557,8 @@
                             android:singleLine="true"
                             android:text="SCHRITTE"
                             android:textColor="#D5DEE5"
-                            android:textSize="7sp"
+                            android:textSize="8sp"
+                            android:gravity="center"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
@@ -550,20 +574,21 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:orientation="vertical"
                         android:id="@+id/widget_year_stats_time_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_time_icon"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
                         android:contentDescription="@null"
+                        android:layout_gravity="center_horizontal"
                         android:src="@drawable/widget_ic_time" />
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:layout_weight="1"
+                        android:layout_marginTop="1dp"
+                        android:gravity="center_horizontal"
                         android:orientation="vertical">
                         <TextView
                             android:id="@+id/widget_year_stats_time_value"
@@ -576,6 +601,7 @@
                             android:text="0:00"
                             android:textColor="#FFFFFFFF"
                             android:textSize="14sp"
+                            android:gravity="center"
                             android:textStyle="bold" />
                         <TextView
                             android:id="@+id/widget_year_stats_time_label"
@@ -587,7 +613,8 @@
                             android:singleLine="true"
                             android:text="GEHZEIT"
                             android:textColor="#D5DEE5"
-                            android:textSize="7sp"
+                            android:textSize="8sp"
+                            android:gravity="center"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
