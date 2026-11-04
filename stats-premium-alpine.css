@@ -1235,3 +1235,44 @@
         gap: 6px !important;
     }
 }
+
+/* =========================================================
+   EDITOR-HEADER: gleiche Karten-Innengeometrie wie Stats
+   - Hauptbereiche: 12 px Karten-Innenabstand
+   - Untergruppen: Header mit 12 px Abstand zum eigenen Kartenrand
+   - Geschlossen: Trennlinie und unterer Headerabstand wie bei
+     .stats-section-collapsible.is-collapsed entfernen
+   ========================================================= */
+#theme-view > .theme-editor-inner > details.theme-editor-section-card {
+    padding: 12px !important;
+    box-sizing: border-box !important;
+}
+
+#theme-view .theme-editor-subgroup > summary.stats-analysis-title {
+    width: auto !important;
+    margin: 12px 12px 11px !important;
+    box-sizing: border-box !important;
+}
+
+#theme-view .theme-editor-section-card:not([open]) > summary.stats-analysis-title,
+#theme-view .theme-editor-subgroup:not([open]) > summary.stats-analysis-title {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    border-bottom-color: transparent !important;
+}
+
+#theme-view .theme-editor-subgroup:not([open]) {
+    padding-bottom: 12px !important;
+    box-sizing: border-box !important;
+}
+
+#theme-view .theme-editor-subgroup:not([open]) > summary.stats-analysis-title {
+    margin-bottom: 0 !important;
+}
+
+#theme-view .theme-editor-section-card > summary.stats-analysis-title:focus-visible,
+#theme-view .theme-editor-subgroup > summary.stats-analysis-title:focus-visible {
+    outline: 2px solid var(--theme-palette-accent, var(--accent, #D5A64C)) !important;
+    outline-offset: 3px !important;
+    border-radius: 5px !important;
+}
