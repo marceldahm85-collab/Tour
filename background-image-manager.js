@@ -494,26 +494,49 @@
         }
 
         const next = normalizeSettings(data.settings);
-        let blob = data.customImageBlob instanceof Blob ? data.customImageBlob : null;
-
-        // JSON-Sicherungen übertragen das eigene Hintergrundbild als Data-URL,
-        // damit PWA und eigenständige Android-WebView denselben Editorzustand nutzen.
-        if (!blob && typeof data.customImageDataUrl === 'string' && data.customImageDataUrl) {
-            const encoded = data.customImageDataUrl;
-            const match = /^data:(image\/[a-z0-9.+-]+);base64,([a-z0-9+/=]+)$/i.exec(encoded);
+        const decodeDataUrl = encoded => {
+            if (typeof encoded !== 'string' || !encoded) {
+                throw new TypeError('Ein Hintergrundbild in der Sicherungsdatei fehlt.');
+            }
+            const match = /^data:(image\\/[a-z0-9.+-]+);base64,([a-z0-9+/=]+)$/i.exec(encoded);
             const maxEncodedLength = Math.ceil((15 * 1024 * 1024) * 4 / 3) + 128;
             if (!match || encoded.length > maxEncodedLength) {
-                throw new TypeError('Das Hintergrundbild in der Sicherungsdatei ist ungültig oder zu groß.');
+                throw new TypeError('Ein Hintergrundbild in der Sicherungsdatei ist ungültig oder zu groß.');
             }
             const binary = atob(match[2]);
             if (binary.length > 15 * 1024 * 1024) {
-                throw new RangeError('Das Hintergrundbild in der Sicherungsdatei ist größer als 15 MB.');
+                throw new RangeError('Ein Hintergrundbild in der Sicherungsdatei ist größer als 15 MB.');
             }
             const bytes = new Uint8Array(binary.length);
             for (let index = 0; index < binary.length; index++) {
                 bytes[index] = binary.charCodeAt(index);
             }
-            blob = new Blob([bytes], { type: match[1] });
+            return new Blob([bytes], { type: match[1] });
+        };
+
+        let blob = data.customImageBlob instanceof Blob ? data.customImageBlob : null;
+        if (!blob && typeof data.customImageDataUrl === 'string' && data.customImageDataUrl) {
+            blob = decodeDataUrl(data.customImageDataUrl);
+        }
+
+        const customImages = [];
+        if (Array.isArray(data.customImages)) {
+            if (data.customImages.length > 100) {
+                throw new RangeError('Die Sicherungsdatei enthält zu viele Editor-Hintergrundbilder.');
+            }
+            const seenImageIds = new Set();
+            for (const image of data.customImages) {
+                const id = typeof image?.id === 'string' ? image.id : '';
+                if (!/^[a-zA-Z0-9_-]{1,80}$/.test(id) || seenImageIds.has(id)) {
+                    throw new TypeError('Ein Editor-Hintergrundbild in der Sicherungsdatei hat eine ungültige Kennung.');
+                }
+                seenImageIds.add(id);
+                const imageBlob = decodeDataUrl(image.dataUrl);
+                if (Number.isFinite(Number(image.size)) && Number(image.size) !== imageBlob.size) {
+                    throw new Error('Die Größe eines Editor-Hintergrundbildes stimmt nicht mit den Sicherungsdaten überein.');
+                }
+                customImages.push({ id, blob: imageBlob });
+            }
         }
 
         const validBlob = Boolean(
@@ -527,10 +550,16 @@
             throw new RangeError('Das Hintergrundbild in der Sicherungsdatei ist ungültig oder zu groß.');
         }
 
+        // Zuerst die von gespeicherten Editor-Presets referenzierten Assets
+        // unter ihren bisherigen IDs wiederherstellen.
+        for (const image of customImages) {
+            await _idbSet(customImageStorageKey(image.id), image.blob);
+        }
+
         let restoredSettings = next;
         if (validBlob && next.mode === 'custom') {
-            // Importierte Sicherungsbilder erhalten eine neue Asset-ID, damit
-            // vorhandene Presets auf dem Gerät unverändert bleiben.
+            // Das aktive Bild bekommt eine neue ID, damit bereits vorhandene
+            // Preset-Verknüpfungen auf dem Zielgerät nicht überschrieben werden.
             const restoredImageId = createCustomImageId();
             await _idbSet(customImageStorageKey(restoredImageId), blob);
             revokeCustomObjectUrl();
@@ -586,10 +615,43 @@
             customImageDataUrl = await blobToDataUrl(blob);
         }
 
+        const imageIds = new Set();
+        const addCustomImageId = backgroundSettings => {
+            const id = backgroundSettings && backgroundSettings.mode === 'custom'
+                ? backgroundSettings.customImageId
+                : '';
+            if (typeof id === 'string' && /^[a-zA-Z0-9_-]{1,80}$/.test(id)) {
+                imageIds.add(id);
+            }
+        };
+        addCustomImageId(settings);
+
+        const editorPresets = typeof appStorage !== 'undefined' && appStorage
+            ? appStorage.get('themeEditorPresets_v1')
+            : null;
+        if (editorPresets && typeof editorPresets === 'object' && !Array.isArray(editorPresets)) {
+            Object.values(editorPresets).forEach(preset => addCustomImageId(preset?.background));
+        }
+
+        const customImages = [];
+        for (const id of imageIds) {
+            const imageBlob = await _idbGet(customImageStorageKey(id));
+            if (!(imageBlob instanceof Blob) || !imageBlob.type.startsWith('image/') ||
+                imageBlob.size <= 0 || imageBlob.size > 15 * 1024 * 1024) {
+                throw new Error('Ein eigenes Hintergrundbild eines gespeicherten Editor-Presets fehlt oder ist ungültig. Die Sicherung wurde nicht erstellt.');
+            }
+            customImages.push({
+                id,
+                size: imageBlob.size,
+                dataUrl: await blobToDataUrl(imageBlob)
+            });
+        }
+
         return {
-            version: 1,
+            version: 2,
             settings,
-            customImageDataUrl
+            customImageDataUrl,
+            customImages
         };
     }
 
@@ -626,8 +688,8 @@
 
         const originalApply = window.applyAppDataPayload;
         if (typeof originalApply === 'function' && !originalApply.__appBackgroundBackup) {
-            const wrappedApply = function (payload) {
-                const result = originalApply.apply(this, arguments);
+            const wrappedApply = async function (payload) {
+                const result = await originalApply.apply(this, arguments);
                 const meta = payload && typeof payload === 'object' &&
                     payload.meta && typeof payload.meta === 'object'
                     ? payload.meta
@@ -662,22 +724,26 @@
                 }
 
                 if (meta.appBackground && typeof meta.appBackground === 'object') {
-                    restoreBackupData(meta.appBackground)
-                        .then(() => {
-                            if (typeof window.refreshAppBackgroundPicker === 'function') {
-                                return window.refreshAppBackgroundPicker();
-                            }
-                            return null;
-                        })
-                        .catch(error => {
-                            console.error('[Editor-Sicherung] Hintergrundbild konnte nicht wiederhergestellt werden.', error);
-                            if (typeof window.showToast === 'function') {
-                                window.showToast('Hintergrundbild konnte nicht aus der Sicherung übernommen werden.', {
-                                    type: 'error',
-                                    duration: 3500
-                                });
-                            }
-                        });
+                    try {
+                        await restoreBackupData(meta.appBackground);
+                        if (typeof window.refreshAppBackgroundPicker === 'function') {
+                            await window.refreshAppBackgroundPicker();
+                        }
+                    } catch (error) {
+                        console.error('[Editor-Sicherung] Hintergrundbilder konnten nicht vollständig wiederhergestellt werden.', error);
+                        if (typeof window.showToast === 'function') {
+                            window.showToast('Hintergrundbilder der Editor-Presets konnten nicht vollständig wiederhergestellt werden.', {
+                                type: 'error',
+                                duration: 4500
+                            });
+                        }
+                        throw error;
+                    }
+                }
+
+                if (payload && payload.appState && typeof appStorage?.flush === 'function') {
+                    await appStorage.flush();
+                    window.setTimeout(() => window.location.reload(), 3200);
                 }
 
                 return result;
