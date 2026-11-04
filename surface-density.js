@@ -260,15 +260,9 @@
 
     function refreshAll() {
         updateScaleVariable();
-        managedElements.forEach(element => {
-            if (!element.isConnected) {
-                managedElements.delete(element);
-                records.delete(element);
-                return;
-            }
-            processElement(element, true);
-        });
-        processTree(document.body, false);
+        // Alle Elemente neu messen, damit auch bisher nicht verwaltete
+        // Elemente nach einem Breakpoint-Wechsel erfasst werden.
+        processTree(document.body, true);
     }
 
     function scheduleRefresh() {
