@@ -16,10 +16,10 @@
     };
 
     const SURFACE_PATTERN =
-        /(?:^|[\\s_-])(box|card|tile|panel|section|sheet|modal|nav|list|item|row|form|field|filter|accordion|summary|header|content|group|wrap|option|btn|button|control|metric|metrics|stat|stats|entry|toolbar|subnav|tab|view|result|grid|badge|chip|search|overview)(?:$|[\\s_-])/i;
+        /(?:^|[\s_-])(box|card|tile|panel|section|sheet|modal|nav|list|item|row|form|field|filter|accordion|summary|header|content|group|wrap|option|btn|button|control|metric|metrics|stat|stats|entry|toolbar|subnav|tab|view|result|grid|badge|chip|search|overview)(?:$|[\s_-])/i;
 
     const MARGIN_PATTERN =
-        /(?:^|[\\s_-])(section|list|item|form|field|header|heading|title|summary|group|wrap|content|accordion|nav)(?:$|[\\s_-])/i;
+        /(?:^|[\s_-])(section|list|item|form|field|header|heading|title|summary|group|wrap|content|accordion|nav)(?:$|[\s_-])/i;
 
     const EXCLUDED_ANCESTORS = [
         '.leaflet-container',
@@ -78,12 +78,12 @@
         if (SURFACE_PATTERN.test(signature)) return true;
         const parent = element.parentElement;
         if (!parent) return false;
-        return /(?:^|[\\s_-])(list|tour-list|stats-list|peak-tour-list)(?:$|[\\s_-])/i
+        return /(?:^|[\s_-])(list|tour-list|stats-list|peak-tour-list)(?:$|[\s_-])/i
             .test(elementSignature(parent));
     }
 
     function isPixelValue(value) {
-        return typeof value === 'string' && /^-?(?:\\d+\\.?\\d*|\\.\\d+)px$/i.test(value.trim());
+        return typeof value === 'string' && /^-?(?:\d+\.?\d*|\.\d+)px$/i.test(value.trim());
     }
 
     function positivePixel(value, min, max) {
@@ -171,7 +171,7 @@
             add('height', computed.height, 26, 90);
         } else if (listRow) {
             add('min-height', computed.minHeight, 28, 110);
-        } else if (surface && /(?:^|[\\s_-])(tab|nav-item|list-item)(?:$|[\\s_-])/i.test(signature)) {
+        } else if (surface && /(?:^|[\s_-])(tab|nav-item|list-item)(?:$|[\s_-])/i.test(signature)) {
             add('min-height', computed.minHeight, 28, 90);
         }
 
