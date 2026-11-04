@@ -111,7 +111,7 @@
   background: var(--app-surface-subtle, rgba(13,21,31,.42));
 }
 
-#theme-view .theme-editor-subgroup > summary {
+#theme-view .theme-editor-subgroup > summary:not(.stats-analysis-title) {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -128,7 +128,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-#theme-view .theme-editor-subgroup > summary::after {
+#theme-view .theme-editor-subgroup > summary:not(.stats-analysis-title)::after {
   content: "";
   flex: 0 0 8px;
   width: 8px;
@@ -138,7 +138,7 @@
   transform: rotate(45deg) translateY(-2px);
 }
 
-#theme-view .theme-editor-subgroup[open] > summary::after {
+#theme-view .theme-editor-subgroup[open] > summary:not(.stats-analysis-title)::after {
   transform: rotate(225deg) translate(-1px,-1px);
 }
 
@@ -470,7 +470,7 @@ body[data-app-density="comfortable"] #theme-view .theme-editor-settings-grid {
 
 #theme-view > .theme-editor-inner > details.theme-editor-section-card:not([open]) { margin:0 0 12px !important; }
 #theme-view > .theme-editor-inner > details.theme-editor-section-card:last-child { margin-bottom:0 !important; }
-#theme-view .theme-editor-section-card > summary { justify-content:center !important; text-align:center !important; }
+#theme-view .theme-editor-section-card > summary:not(.stats-analysis-title) { justify-content:center !important; text-align:center !important; }
 #theme-view .dashboard-editor-item,
 #theme-view .dashboard-editor-move-btn { border-radius:var(--app-radius,14px) !important; }
 #theme-view .background-image-presets-accordion,
@@ -522,7 +522,7 @@ body[data-app-density="comfortable"] #theme-view .theme-editor-settings-grid {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-#theme-view .theme-editor-section-card:not([open]) > summary {
+#theme-view .theme-editor-section-card:not([open]) > summary:not(.stats-analysis-title) {
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
   border-bottom-color: transparent !important;
@@ -553,7 +553,7 @@ body[data-app-density="comfortable"] #theme-view .theme-editor-settings-grid {
 /* Icongröße, Kontur, Akzentfarbe und Glow kommen zentral aus stats-premium-alpine.css. */
 
 /* Auch die kleineren Editor-Unterbereiche nutzen die gleiche Titel- und Pfeillogik. */
-#theme-view .theme-editor-subgroup > summary {
+#theme-view .theme-editor-subgroup > summary:not(.stats-analysis-title) {
   position: relative;
   justify-content: flex-start;
   min-height: 30px;
@@ -563,19 +563,19 @@ body[data-app-density="comfortable"] #theme-view .theme-editor-settings-grid {
   font-size: 12px;
   line-height: 1.25;
 }
-#theme-view .theme-editor-subgroup:not([open]) > summary {
+#theme-view .theme-editor-subgroup:not([open]) > summary:not(.stats-analysis-title) {
   margin-bottom: 0;
   padding-bottom: 0;
   border-bottom-color: transparent;
 }
-#theme-view .theme-editor-subgroup > summary::after {
+#theme-view .theme-editor-subgroup > summary:not(.stats-analysis-title)::after {
   position: absolute;
   right: 4px;
   top: calc(50% - 6px);
   transform: rotate(45deg);
   border-color: var(--theme-palette-accent, var(--accent, #D5A64C));
 }
-#theme-view .theme-editor-subgroup[open] > summary::after {
+#theme-view .theme-editor-subgroup[open] > summary:not(.stats-analysis-title)::after {
   top: calc(50% - 2px);
   transform: rotate(225deg);
 }
