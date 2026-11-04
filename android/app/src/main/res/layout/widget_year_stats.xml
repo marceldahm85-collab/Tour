@@ -72,20 +72,20 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:orientation="vertical"
-                        android:id="@+id/widget_year_stats_compact_tours_group">
+                    android:orientation="horizontal"
+                    android:id="@+id/widget_year_stats_compact_tours_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_compact_tours_icon"
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
                         android:contentDescription="@null"
-                        android:layout_gravity="center_horizontal"
                         android:src="@drawable/widget_ic_tours" />
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="1dp"
-                        android:gravity="center_horizontal"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:gravity="center_vertical"
                         android:orientation="vertical">
                         <TextView
                             android:id="@+id/widget_year_stats_compact_tours_value"
@@ -97,7 +97,7 @@
                             android:ellipsize="end"
                             android:text="0"
                             android:textColor="#FFFFFFFF"
-                            android:textSize="17sp"
+                            android:textSize="16sp"
                             android:gravity="center"
                             android:textStyle="bold" />
                         <TextView
@@ -128,20 +128,20 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:orientation="vertical"
-                        android:id="@+id/widget_year_stats_compact_distance_group">
+                    android:orientation="horizontal"
+                    android:id="@+id/widget_year_stats_compact_distance_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_compact_distance_icon"
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
                         android:contentDescription="@null"
-                        android:layout_gravity="center_horizontal"
                         android:src="@drawable/widget_ic_distance" />
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="1dp"
-                        android:gravity="center_horizontal"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:gravity="center_vertical"
                         android:orientation="vertical">
                         <TextView
                             android:id="@+id/widget_year_stats_compact_distance_value"
@@ -153,7 +153,7 @@
                             android:ellipsize="end"
                             android:text="0,0"
                             android:textColor="#FFFFFFFF"
-                            android:textSize="17sp"
+                            android:textSize="16sp"
                             android:gravity="center"
                             android:textStyle="bold" />
                         <TextView
@@ -184,20 +184,20 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:orientation="vertical"
-                        android:id="@+id/widget_year_stats_compact_ascent_group">
+                    android:orientation="horizontal"
+                    android:id="@+id/widget_year_stats_compact_ascent_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_compact_ascent_icon"
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
                         android:contentDescription="@null"
-                        android:layout_gravity="center_horizontal"
                         android:src="@drawable/widget_ic_ascent" />
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="1dp"
-                        android:gravity="center_horizontal"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:gravity="center_vertical"
                         android:orientation="vertical">
                         <TextView
                             android:id="@+id/widget_year_stats_compact_ascent_value"
@@ -209,7 +209,7 @@
                             android:ellipsize="end"
                             android:text="0"
                             android:textColor="#FFFFFFFF"
-                            android:textSize="17sp"
+                            android:textSize="16sp"
                             android:gravity="center"
                             android:textStyle="bold" />
                         <TextView
