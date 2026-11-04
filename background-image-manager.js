@@ -498,7 +498,7 @@
             if (typeof encoded !== 'string' || !encoded) {
                 throw new TypeError('Ein Hintergrundbild in der Sicherungsdatei fehlt.');
             }
-            const match = /^data:(image\\/[a-z0-9.+-]+);base64,([a-z0-9+/=]+)$/i.exec(encoded);
+            const match = /^data:(image\/[a-z0-9.+-]+);base64,([a-z0-9+/=]+)$/i.exec(encoded);
             const maxEncodedLength = Math.ceil((15 * 1024 * 1024) * 4 / 3) + 128;
             if (!match || encoded.length > maxEncodedLength) {
                 throw new TypeError('Ein Hintergrundbild in der Sicherungsdatei ist ungültig oder zu groß.');
@@ -741,8 +741,10 @@
                     }
                 }
 
-                if (payload && payload.appState && typeof appStorage?.flush === 'function') {
+                if (typeof appStorage?.flush === 'function') {
                     await appStorage.flush();
+                }
+                if (payload && payload.appState) {
                     window.setTimeout(() => window.location.reload(), 3200);
                 }
 
