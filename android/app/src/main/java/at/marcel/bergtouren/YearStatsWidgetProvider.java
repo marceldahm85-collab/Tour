@@ -123,7 +123,7 @@ public final class YearStatsWidgetProvider extends AppWidgetProvider {
             Bundle options=manager.getAppWidgetOptions(id);int minHeight=options!=null?options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,0):0;boolean expanded=minHeight>=EXPANDED_HEIGHT_DP;
             RemoteViews views=new RemoteViews(context.getPackageName(),R.layout.widget_year_stats);
             views.setViewVisibility(R.id.widget_year_stats_compact,expanded?View.GONE:View.VISIBLE);views.setViewVisibility(R.id.widget_year_stats_expanded,expanded?View.VISIBLE:View.GONE);
-            String heading=widgetTitle.toUpperCase(Locale.GERMANY)+" "+year;views.setTextViewText(R.id.widget_year_stats_compact_heading,heading);views.setTextViewText(R.id.widget_year_stats_heading,heading);
+            String heading=widgetTitle.toUpperCase(Locale.GERMANY)+" "+year;views.setTextViewText(R.id.widget_year_stats_compact_heading,heading);views.setTextViewText(R.id.widget_year_stats_heading,heading);views.setTextColor(R.id.widget_year_stats_compact_heading,accent);views.setTextColor(R.id.widget_year_stats_heading,accent);views.setInt(R.id.widget_year_stats_heading_icon,"setColorFilter",accent);
             views.setInt(R.id.widget_year_stats_accent_line,"setBackgroundColor",accent);views.setViewVisibility(R.id.widget_year_stats_background_image,alpineBackground?View.VISIBLE:View.GONE);
             views.setViewVisibility(R.id.widget_year_stats_scrim_image,alpineBackground?View.VISIBLE:View.GONE);views.setInt(R.id.widget_year_stats_root,"setBackgroundColor",Color.rgb(7,12,18));
             if(expanded){
