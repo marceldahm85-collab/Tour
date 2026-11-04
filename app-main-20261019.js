@@ -21152,8 +21152,6 @@ function renderDashboardEditorListItems(items, orderKey, hiddenKey, metadata, fi
                     <span class="dashboard-editor-item-icon" aria-hidden="true">${item.icon || '▧'}</span>
                     <span class="dashboard-editor-item-text">
                         <span class="dashboard-editor-item-title">${item.label}</span>
-                        ${item.description ? `<span class="dashboard-editor-item-description">${item.description}</span>` : ''}
-                        ${fixed ? '<span class="dashboard-editor-item-description">Bleibt neben der Jahresauswahl</span>' : ''}
                     </span>
                 </label>
                 <div class="dashboard-editor-move">
@@ -21180,8 +21178,6 @@ function renderDashboardEditor() {
         .filter(Boolean);
 
     body.innerHTML = `
-        <p class="dashboard-editor-intro">Wähle aus, welche Kennzahlen und Bereiche auf deinem Dashboard erscheinen und ordne sie nach deinen Prioritäten. Die Änderungen werden erst mit „Übernehmen“ gespeichert.</p>
-
         <section class="dashboard-editor-group">
             <h3 class="dashboard-editor-group-title">Statistik-Kacheln</h3>
             <div class="dashboard-editor-list">
@@ -21206,8 +21202,6 @@ function renderDashboardEditor() {
                 )}
             </div>
         </section>
-
-        <p class="dashboard-editor-save-note">Änderungen werden gemeinsam mit den übrigen Editor-Einstellungen gespeichert.</p>
     `;
 }
 
@@ -28108,6 +28102,9 @@ function syncNativeYearStatsWidget(entries = null) {
         peaks: Math.max(0, Math.round(stats.totalPeaks)),
         steps: Math.max(0, Math.round(stats.totalSteps)),
         walkingMinutes: Math.max(0, Math.round(stats.totalMinutes)),
+        avgSpeed: Number(stats.avgSpeed.toFixed(3)),
+        avgGradient: Number(stats.avgGradient.toFixed(1)),
+        avgAscentRate: Number(stats.avgAscentPerHour.toFixed(1)),
         accent
     };
 

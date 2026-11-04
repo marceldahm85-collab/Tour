@@ -99,6 +99,7 @@
                             android:textSize="15sp"
                             android:textStyle="bold" />
                         <TextView
+                            android:id="@+id/widget_year_stats_compact_tours_label"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="sans"
@@ -113,6 +114,7 @@
                 </LinearLayout>
 
                 <ImageView
+                    android:id="@+id/widget_year_stats_compact_divider_1"
                     android:layout_width="1dp"
                     android:layout_height="22dp"
                     android:contentDescription="@null"
@@ -150,6 +152,7 @@
                             android:textSize="15sp"
                             android:textStyle="bold" />
                         <TextView
+                            android:id="@+id/widget_year_stats_compact_distance_label"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="sans"
@@ -164,6 +167,7 @@
                 </LinearLayout>
 
                 <ImageView
+                    android:id="@+id/widget_year_stats_compact_divider_2"
                     android:layout_width="1dp"
                     android:layout_height="22dp"
                     android:contentDescription="@null"
@@ -201,6 +205,7 @@
                             android:textSize="15sp"
                             android:textStyle="bold" />
                         <TextView
+                            android:id="@+id/widget_year_stats_compact_ascent_label"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="sans"
@@ -262,6 +267,7 @@
                 android:background="#55FFFFFF" />
 
             <LinearLayout
+                android:id="@+id/widget_year_stats_expanded_first_row"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -299,6 +305,7 @@
                             android:textSize="15sp"
                             android:textStyle="bold" />
                         <TextView
+                            android:id="@+id/widget_year_stats_tours_label"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="sans"
@@ -313,6 +320,7 @@
                 </LinearLayout>
 
                 <ImageView
+                    android:id="@+id/widget_year_stats_expanded_divider_1"
                     android:layout_width="1dp"
                     android:layout_height="22dp"
                     android:contentDescription="@null"
@@ -350,6 +358,7 @@
                             android:textSize="15sp"
                             android:textStyle="bold" />
                         <TextView
+                            android:id="@+id/widget_year_stats_distance_label"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="sans"
@@ -364,6 +373,7 @@
                 </LinearLayout>
 
                 <ImageView
+                    android:id="@+id/widget_year_stats_expanded_divider_2"
                     android:layout_width="1dp"
                     android:layout_height="22dp"
                     android:contentDescription="@null"
@@ -401,6 +411,7 @@
                             android:textSize="15sp"
                             android:textStyle="bold" />
                         <TextView
+                            android:id="@+id/widget_year_stats_ascent_label"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="sans"
@@ -416,12 +427,14 @@
             </LinearLayout>
 
             <ImageView
+                android:id="@+id/widget_year_stats_expanded_row_divider"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:contentDescription="@null"
                 android:background="#55FFFFFF" />
 
             <LinearLayout
+                android:id="@+id/widget_year_stats_expanded_second_row"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -459,6 +472,7 @@
                             android:textSize="15sp"
                             android:textStyle="bold" />
                         <TextView
+                            android:id="@+id/widget_year_stats_peaks_label"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="sans"
@@ -473,6 +487,7 @@
                 </LinearLayout>
 
                 <ImageView
+                    android:id="@+id/widget_year_stats_expanded_divider_4"
                     android:layout_width="1dp"
                     android:layout_height="22dp"
                     android:contentDescription="@null"
@@ -510,6 +525,7 @@
                             android:textSize="14sp"
                             android:textStyle="bold" />
                         <TextView
+                            android:id="@+id/widget_year_stats_steps_label"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="sans"
@@ -524,6 +540,7 @@
                 </LinearLayout>
 
                 <ImageView
+                    android:id="@+id/widget_year_stats_expanded_divider_5"
                     android:layout_width="1dp"
                     android:layout_height="22dp"
                     android:contentDescription="@null"
@@ -561,6 +578,7 @@
                             android:textSize="14sp"
                             android:textStyle="bold" />
                         <TextView
+                            android:id="@+id/widget_year_stats_time_label"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="sans"

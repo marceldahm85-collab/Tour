@@ -1,6 +1,6 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Der PDF-Magazin-Renderer wird direkt über index.html geladen.
-const CACHE_NAME = 'bergtouren-cache-premium-alpine-v268';
+const CACHE_NAME = 'bergtouren-cache-premium-alpine-v269';
 
 const APP_SHELL = [
   './',
@@ -11,17 +11,17 @@ const APP_SHELL = [
   './fonts/nunito-sans-latin-wght-normal.woff2',
   './fonts/righteous-latin-400-normal.woff2',
   './android-backup-bridge.js?v=5',
-  './app-main-20261019.js?v=85',
+  './app-main-20261019.js?v=86',
   './more-menu-navigation-fix.js?v=1',
   './osttirol-slide-background.js?v=1',
   './assets/osttirol-lienz-background.webp',
   './stats-premium-alpine.js?v=10',
   './theme-editor-unified.js?v=27',
   './background-image-manager.js?v=9',
-  './background-image-picker.js?v=6',
-  './background-image-picker.css?v=2',
-  './theme-editor-workflow.css?v=5',
-  './theme-editor-workflow.js?v=2',
+  './background-image-picker.js?v=7',
+  './background-image-picker.css?v=3',
+  './theme-editor-workflow.css?v=6',
+  './theme-editor-workflow.js?v=3',
   './dashboard-premium-alpine.js?v=36',
   './app-navigation-history.js?v=1',
   './android-gallery-photos.js?v=8',

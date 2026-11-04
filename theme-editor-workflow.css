@@ -293,7 +293,7 @@
 }
 
 #theme-editor-savebar button {
-  min-height: 39px;
+  min-height: 38px;
   margin: 0;
   border-radius: var(--app-radius, 14px);
   background: var(--accent-gradient, var(--theme-palette-accent-gradient));
@@ -463,3 +463,23 @@ body[data-app-density="comfortable"] #theme-view .theme-editor-settings-grid {
   max-height: none !important;
   overflow: visible !important;
 }
+
+#theme-view > .theme-editor-inner > details.theme-editor-section-card:not([open]) { margin:0 0 12px !important; }
+#theme-view > .theme-editor-inner > details.theme-editor-section-card:last-child { margin-bottom:0 !important; }
+#theme-view .theme-editor-section-card > summary { justify-content:center !important; text-align:center !important; }
+#theme-view .dashboard-editor-item,
+#theme-view .dashboard-editor-move-btn { border-radius:var(--app-radius,14px) !important; }
+#theme-view .background-image-presets-accordion,
+#theme-view .background-image-settings-accordion { margin:0 0 10px; }
+#theme-view .background-image-settings-accordion > .theme-editor-subgroup-body { padding:0 9px 10px; }
+#theme-view .background-image-settings-accordion .background-image-upload-panel { margin:0; padding:0; border:0; }
+#theme-view .theme-editor-widget-grid { display:flex; flex-direction:column; gap:6px; padding:0; }
+#theme-view .theme-editor-widget-choice { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:8px; min-width:0; padding:6px 8px; border:1px solid var(--app-surface-border,rgba(225,232,242,.14)); border-radius:var(--app-radius,14px); background:var(--app-surface-subtle,rgba(13,21,31,.48)); }
+#theme-view .theme-editor-widget-choice > label { display:flex; align-items:center; gap:8px; min-height:30px; color:var(--app-text-primary,#f3f7fb); font-size:11px; font-weight:700; }
+#theme-view .theme-editor-widget-choice input { width:16px; height:16px; margin:0; accent-color:var(--theme-palette-accent,#ad7d12); }
+#theme-view .theme-editor-widget-move { display:flex; align-items:center; gap:4px; }
+#theme-view .theme-editor-widget-move button { display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; min-height:30px; padding:0; border:1px solid var(--app-surface-border,rgba(225,232,242,.18)); border-radius:var(--app-radius,14px); background:var(--app-surface-strong,rgba(25,30,39,.82)); color:var(--app-text-primary,#f3f7fb); font-size:15px; font-weight:800; }
+#theme-view .theme-editor-widget-move button:disabled { opacity:.25; }
+#theme-view .theme-editor-widget-count { margin:-4px 0 2px; color:var(--theme-palette-accent,#ad7d12); font-size:10px; font-weight:800; text-align:right; }
+#theme-view .background-image-selected-label { margin:0 0 10px; }
+#theme-editor-savebar button { min-height:38px !important; }

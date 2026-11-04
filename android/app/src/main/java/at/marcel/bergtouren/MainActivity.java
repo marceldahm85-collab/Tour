@@ -40,6 +40,7 @@ import androidx.webkit.WebMessageCompat;
 import androidx.webkit.WebViewCompat;
 import androidx.webkit.WebViewFeature;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -460,12 +461,25 @@ public final class MainActivity extends Activity {
                                 boolean showPeaks = request.optBoolean("showPeaks", true);
                                 boolean showSteps = request.optBoolean("showSteps", true);
                                 boolean showTime = request.optBoolean("showTime", true);
-                                boolean hasMetric = showTours || showDistance || showAscent || showPeaks || showSteps || showTime;
-                                if (title.length() <= 20 && hasMetric
+                                boolean showSpeed = request.optBoolean("showSpeed", false);
+                                boolean showGradient = request.optBoolean("showGradient", false);
+                                boolean showAscentRate = request.optBoolean("showAscentRate", false);
+                                int selectedCount = (showTours ? 1 : 0) + (showDistance ? 1 : 0)
+                                        + (showAscent ? 1 : 0) + (showPeaks ? 1 : 0)
+                                        + (showSteps ? 1 : 0) + (showTime ? 1 : 0)
+                                        + (showSpeed ? 1 : 0) + (showGradient ? 1 : 0)
+                                        + (showAscentRate ? 1 : 0);
+                                JSONArray orderJson = request.optJSONArray("metricOrder");
+                                String[] metricOrder = new String[orderJson == null ? 0 : orderJson.length()];
+                                if (orderJson != null) {
+                                    for (int i = 0; i < orderJson.length(); i++) metricOrder[i] = orderJson.optString(i, "");
+                                }
+                                if (title.length() <= 20 && selectedCount >= 1 && selectedCount <= 6
                                         && ("alpine".equals(background) || "dark".equals(background))) {
                                     YearStatsWidgetProvider.updateConfiguration(
-                                            MainActivity.this, title, showTours, showDistance,
-                                            showAscent, showPeaks, showSteps, showTime, background);
+                                            MainActivity.this, title, showTours, showDistance, showAscent,
+                                            showPeaks, showSteps, showTime, showSpeed, showGradient,
+                                            showAscentRate, metricOrder, background);
                                 } else {
                                     Log.w(TAG, "Ungültige Widget-Konfiguration verworfen.");
                                 }
@@ -477,6 +491,9 @@ public final class MainActivity extends Activity {
                                 long peaks = request.optLong("peaks", -1L);
                                 long steps = request.optLong("steps", -1L);
                                 long walkingMinutes = request.optLong("walkingMinutes", -1L);
+                                double avgSpeed = request.optDouble("avgSpeed", 0d);
+                                double avgGradient = request.optDouble("avgGradient", 0d);
+                                double avgAscentRate = request.optDouble("avgAscentRate", 0d);
                                 String accent = request.optString("accent", "#ad7d12");
 
                                 if (year >= 2000 && year <= 9999
@@ -484,10 +501,14 @@ public final class MainActivity extends Activity {
                                         && Double.isFinite(distance) && distance >= 0
                                         && Double.isFinite(ascent) && ascent >= 0
                                         && peaks >= 0 && steps >= 0 && walkingMinutes >= 0
+                                        && Double.isFinite(avgSpeed) && avgSpeed >= 0
+                                        && Double.isFinite(avgGradient) && avgGradient >= 0
+                                        && Double.isFinite(avgAscentRate) && avgAscentRate >= 0
                                         && accent.matches("#[0-9a-fA-F]{6}")) {
                                     YearStatsWidgetProvider.updateStats(
                                             MainActivity.this, year, tours, distance, ascent,
-                                            peaks, steps, walkingMinutes, accent);
+                                            peaks, steps, walkingMinutes, avgSpeed, avgGradient,
+                                            avgAscentRate, accent);
                                 } else {
                                     Log.w(TAG, "Ungültige Jahresstatistik für das Widget verworfen.");
                                 }

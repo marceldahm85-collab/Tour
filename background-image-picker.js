@@ -5,7 +5,6 @@
 
     const grid = document.getElementById('background-image-presets');
     const status = document.getElementById('background-image-selected-label');
-    const credits = document.getElementById('background-image-credits-list');
     const fileInput = document.getElementById('background-image-file-input');
     const chooseButton = document.getElementById('background-image-choose-file');
     const uploadStatus = document.getElementById('background-image-upload-status');
@@ -127,11 +126,7 @@
         title.className = 'background-preset-title';
         title.textContent = preset.name;
 
-        const description = document.createElement('span');
-        description.className = 'background-preset-description';
-        description.textContent = preset.description || '';
-
-        textWrap.append(title, description);
+        textWrap.append(title);
         button.append(imageWrap, textWrap);
 
         button.addEventListener('click', () => {
@@ -155,33 +150,6 @@
         });
 
         return button;
-    }
-
-    function renderCredits(catalog) {
-        if (!credits) return;
-        credits.replaceChildren();
-
-        catalog.filter(preset => preset.sourceUrl && preset.credit).forEach(preset => {
-            const item = document.createElement('li');
-            const source = document.createElement('a');
-            source.href = preset.sourceUrl;
-            source.target = '_blank';
-            source.rel = 'noopener noreferrer';
-            source.textContent = preset.name + ' – ' + preset.credit;
-            item.appendChild(source);
-
-            if (preset.licenseUrl && preset.licenseLabel) {
-                const license = document.createElement('a');
-                license.href = preset.licenseUrl;
-                license.target = '_blank';
-                license.rel = 'noopener noreferrer';
-                license.textContent = 'Lizenz';
-                license.setAttribute('aria-label', preset.licenseLabel + ' Lizenz für ' + preset.name);
-                item.append(' · ', license);
-            }
-
-            credits.appendChild(item);
-        });
     }
 
     function render() {

@@ -124,8 +124,8 @@
 <link rel="stylesheet" href="./fonts.css?v=1">
 <link rel="stylesheet" href="./styles.css?v=18">
 <link rel="stylesheet" href="./styles-overrides.css?v=95">
-<link rel="stylesheet" href="./background-image-picker.css?v=2">
-<link rel="stylesheet" href="./theme-editor-workflow.css?v=5">
+<link rel="stylesheet" href="./background-image-picker.css?v=3">
+<link rel="stylesheet" href="./theme-editor-workflow.css?v=6">
 <link rel="stylesheet" href="./android-gallery-photos.css?v=5">
 <link rel="stylesheet" href="./dashboard-premium-alpine.css?v=23">
 <link rel="stylesheet" href="./stats-premium-alpine.css?v=16">
@@ -2356,22 +2356,19 @@
 <div id="theme-view" class="view">
     <div class="theme-editor-inner">
         <details class="theme-editor-panel theme-editor-card theme-editor-section-card" id="theme-editor-settings-card" data-theme-editor-accordion="settings" open>
-            <summary class="theme-editor-panel-title">🎨 Farben, Oberfläche & Bedienung</summary>
-            <div class="theme-editor-top">
-                <div id="theme-editor-hint">Änderungen werden sofort angezeigt. Mit „Speichern“ übernimmst du sie dauerhaft.</div>
-            </div>
+            <summary class="theme-editor-panel-title">Farben, Oberfläche & Bedienung</summary>
 
             <div class="theme-editor-accordion-stack">
 <details class="theme-editor-subgroup" open><summary>Farben & Farbverlauf</summary><div class="theme-editor-subgroup-body"><div class="theme-editor-settings-grid"><div class="theme-editor-option">
                     <div class="theme-editor-option-heading">
                         <label for="te-unified-accent">Akzentfarbe 1</label>
-                        <small>Startfarbe für Flächen und Navigation.</small>
+                        
                     </div>
                     <input type="color" id="te-unified-accent" value="#ad7d12" aria-label="Erste app-weite Akzentfarbe">
                 </div><div class="theme-editor-option">
                     <div class="theme-editor-option-heading">
                         <label for="te-unified-accent2">Akzentfarbe 2</label>
-                        <small>Endfarbe des Verlaufs; standardmäßig Schwarz.</small>
+                        
                     </div>
                     <input type="color" id="te-unified-accent2" value="#000000" aria-label="Zweite app-weite Akzentfarbe">
                 </div><div class="theme-editor-option">
@@ -2391,7 +2388,7 @@
                         <span id="te-unified-transition-value">55 %</span>
                     </div>
                     <input type="range" id="te-unified-transition" min="10" max="90" step="1" value="55">
-                </div><div class="theme-editor-gradient-preview" id="theme-editor-gradient-preview"><span>Farbverlauf-Vorschau</span></div><div class="theme-editor-option theme-editor-option-wide"><div class="theme-editor-option-heading"><label for="te-unified-glass-opacity">Glas-Deckkraft</label><span id="te-unified-glass-opacity-value">68 %</span></div><input type="range" id="te-unified-glass-opacity" min="35" max="78" step="1" value="68"><small>Bestimmt, wie stark die dunklen Flächen das Alpenmotiv überdecken.</small></div></div></div></details>
+                </div><div class="theme-editor-gradient-preview" id="theme-editor-gradient-preview"><span>Farbverlauf-Vorschau</span></div><div class="theme-editor-option theme-editor-option-wide"><div class="theme-editor-option-heading"><label for="te-unified-glass-opacity">Glas-Deckkraft</label><span id="te-unified-glass-opacity-value">68 %</span></div><input type="range" id="te-unified-glass-opacity" min="35" max="78" step="1" value="68"></div></div></div></details>
 <details class="theme-editor-subgroup"><summary>Oberfläche & Schrift</summary><div class="theme-editor-subgroup-body"><div class="theme-editor-settings-grid"><div class="theme-editor-option">
                     <div class="theme-editor-option-heading">
                         <label for="te-unified-radius">Eckenradius</label>
@@ -2417,13 +2414,13 @@
                         <span id="te-font-size-value">100 %</span>
                     </div>
                     <input type="range" id="te-font-size" min="80" max="130" step="1" value="100">
-                </div><div class="theme-editor-option theme-editor-option-wide"><div class="theme-editor-option-heading"><label for="te-unified-density">Oberflächendichte</label></div><select id="te-unified-density"><option value="compact">Kompakt</option><option value="standard" selected>Standard</option><option value="comfortable">Großzügig</option></select><small>Passt Innenabstände und Abstände zwischen Bedienelementen an.</small></div></div></div></details>
+                </div><div class="theme-editor-option theme-editor-option-wide"><div class="theme-editor-option-heading"><label for="te-unified-density">Oberflächendichte</label></div><select id="te-unified-density"><option value="compact">Kompakt</option><option value="standard" selected>Standard</option><option value="comfortable">Großzügig</option></select></div></div></div></details>
 <details class="theme-editor-subgroup"><summary>Bedienung</summary><div class="theme-editor-subgroup-body"><div class="theme-editor-settings-grid"><div class="theme-editor-option">
                     <label class="theme-editor-haptics-toggle" for="haptic-feedback-toggle">
                         <input type="checkbox" id="haptic-feedback-toggle" checked>
                         <span>
                             <strong>Haptisches Feedback</strong>
-                            <small>Kurze Vibration bei bewussten Aktionen.</small>
+                            
                         </span>
                     </label>
                 </div></div></div></details></div>
@@ -2431,25 +2428,17 @@
         </details>
 
         <details class="theme-editor-panel theme-editor-card theme-editor-section-card background-image-editor-card" id="background-image-editor-card" data-theme-editor-accordion="background">
-            <summary class="theme-editor-panel-title">🏔️ Hintergrundbild</summary>
-            <div class="background-image-editor-intro">
-                <p>Wähle ein fest integriertes Alpenmotiv als Hintergrund für deine App. Das gewählte Bild wird sofort übernommen und dauerhaft gespeichert.</p>
-                <div class="background-image-selected-label" id="background-image-selected-label" aria-live="polite">Aktiv: Alpenpanorama</div>
-            </div>
+            <summary class="theme-editor-panel-title">Hintergrundbild</summary>
+            <div class="background-image-selected-label" id="background-image-selected-label" aria-live="polite">Aktiv: Alpenpanorama</div>
 
-            <div
-                class="background-image-presets"
-                id="background-image-presets"
-                role="group"
-                aria-label="Integrierte Alpen-Hintergrundbilder">
-            </div>
+            <details class="theme-editor-subgroup background-image-presets-accordion"><summary>Voreingestellte Alpenmotive</summary><div class="theme-editor-subgroup-body"><div class="background-image-presets" id="background-image-presets" role="group" aria-label="Integrierte Alpen-Hintergrundbilder"></div></div></details>
 
-            <div class="background-image-upload-panel">
+            <details class="theme-editor-subgroup background-image-settings-accordion" open><summary>Bildeinstellungen</summary><div class="theme-editor-subgroup-body"><div class="background-image-upload-panel">
                 <div class="background-image-subheading">
                     <span class="background-image-subheading-icon" aria-hidden="true">▧</span>
                     <div>
                         <strong>Eigenes Foto verwenden</strong>
-                        <small>Wähle ein Bild direkt aus deiner Smartphone-Galerie oder vom Computer.</small>
+                        
                     </div>
                 </div>
 
@@ -2463,7 +2452,6 @@
                     <span aria-hidden="true">＋</span>
                     <span>Bild aus Galerie auswählen</span>
                 </button>
-                <p class="background-image-upload-hint">Das Foto wird automatisch optimiert (max. 1920 Pixel) und nur auf diesem Gerät gespeichert. Originaldatei und Galerie bleiben unverändert.</p>
                 <p class="background-image-upload-status" id="background-image-upload-status" role="status" aria-live="polite" hidden></p>
 
                 <div class="background-image-custom-panel" id="background-image-custom-panel" hidden>
@@ -2483,7 +2471,6 @@
                         <span class="background-image-subheading-icon" aria-hidden="true">⌗</span>
                         <div>
                             <strong>Bildposition anpassen</strong>
-                            <small>Stelle den Bildausschnitt für die verschiedenen Bildschirmformate ein.</small>
                         </div>
                     </div>
 
@@ -2517,25 +2504,17 @@
                         <input type="range" id="background-image-position-y" min="0" max="100" step="1" value="50">
                     </div>
 
-                    <div class="background-image-position-footer">
-                        <span>Die vertikale Position gilt für alle Formate.</span>
-                        <button type="button" class="background-image-secondary-button" id="background-image-center-position">Zentrieren</button>
-                    </div>
+                    <div class="background-image-position-footer"><button type="button" class="background-image-secondary-button" id="background-image-center-position">Zentrieren</button></div>
                 </div>
-            </div>
-
-            <details class="background-image-credits">
-                <summary>Bildnachweise</summary>
-                <ul id="background-image-credits-list"></ul>
-            </details>
+            </div></div></details>
         </details>
 
         <details class="theme-editor-panel dashboard-editor-section theme-editor-section-card" data-theme-editor-accordion="dashboard">
-            <summary class="theme-editor-panel-title">📊 Dashboard-Aufbau</summary>
+            <summary class="theme-editor-panel-title">Dashboard-Aufbau</summary>
             <div class="dashboard-editor-inline-body" id="dashboard-editor-body"></div>
         </details>
-<details class="theme-editor-panel dashboard-editor-section theme-editor-extra-section theme-editor-section-card" id="theme-editor-widget-section" data-theme-editor-accordion="widget"><summary class="theme-editor-panel-title">📱 Android-App-Widget</summary><div class="theme-editor-extra-body"><p class="theme-editor-description">Lege fest, welche Kennzahlen dein Bergjahr-Widget auf dem Android-Startbildschirm zeigt.</p><label for="te-widget-title">Widget-Titel</label><input type="text" id="te-widget-title" maxlength="20" value="BERGJAHR" placeholder="z. B. MEIN BERGJAHR"><div class="theme-editor-widget-grid"><label><input type="checkbox" data-widget-metric="tours" checked><span>Touren</span></label><label><input type="checkbox" data-widget-metric="distance" checked><span>Strecke</span></label><label><input type="checkbox" data-widget-metric="ascent" checked><span>Aufstieg</span></label><label><input type="checkbox" data-widget-metric="peaks" checked><span>Gipfel</span></label><label><input type="checkbox" data-widget-metric="steps" checked><span>Schritte</span></label><label><input type="checkbox" data-widget-metric="time" checked><span>Gehzeit</span></label></div><label for="te-widget-background">Widget-Hintergrund</label><select id="te-widget-background"><option value="alpine">Alpenmotiv</option><option value="dark">Dunkel / ohne Foto</option></select><small class="theme-editor-description">Die Konfiguration wird beim zentralen Speichern an die native Android-Komponente übertragen.</small></div></details>
-<details class="theme-editor-panel dashboard-editor-section theme-editor-extra-section theme-editor-section-card" id="theme-editor-presets-section" data-theme-editor-accordion="presets"><summary class="theme-editor-panel-title">◆ Design-Presets</summary><div class="theme-editor-extra-body"><p class="theme-editor-description">Speichere eine vollständige Kombination aus Farben, Schrift, Hintergrund, Dashboard und Widget. Eigene Bilder werden nicht dupliziert; Presets verweisen auf das lokal gespeicherte Motiv.</p><label for="te-preset-select">Gespeichertes Preset</label><select id="te-preset-select"><option value="">Kein Preset ausgewählt</option></select><label for="te-preset-name">Name des Presets</label><input type="text" id="te-preset-name" maxlength="32" placeholder="z. B. Gold Alpine"><div class="theme-editor-preset-actions"><button type="button" class="save-btn" id="te-preset-save">Preset speichern</button><button type="button" class="save-btn" id="te-preset-load">Preset laden</button><button type="button" class="save-btn theme-editor-preset-delete" id="te-preset-delete">Preset löschen</button></div><div id="te-preset-status" class="theme-editor-description" aria-live="polite"></div></div></details>
+<details class="theme-editor-panel dashboard-editor-section theme-editor-extra-section theme-editor-section-card" id="theme-editor-widget-section" data-theme-editor-accordion="widget"><summary class="theme-editor-panel-title">Android-App-Widget</summary><div class="theme-editor-extra-body"><label for="te-widget-title">Widget-Titel</label><input type="text" id="te-widget-title" maxlength="20" value="BERGJAHR" placeholder="BERGJAHR"><label>Kennzahlen und Position</label><div class="theme-editor-widget-grid" id="te-widget-metrics"><div class="theme-editor-widget-choice" data-widget-choice="tours"><label><input type="checkbox" data-widget-metric="tours" checked><span>Touren</span></label><div class="theme-editor-widget-move"><button type="button" data-widget-move="-1" aria-label="Touren nach oben">↑</button><button type="button" data-widget-move="1" aria-label="Touren nach unten">↓</button></div></div><div class="theme-editor-widget-choice" data-widget-choice="distance"><label><input type="checkbox" data-widget-metric="distance" checked><span>Strecke</span></label><div class="theme-editor-widget-move"><button type="button" data-widget-move="-1" aria-label="Strecke nach oben">↑</button><button type="button" data-widget-move="1" aria-label="Strecke nach unten">↓</button></div></div><div class="theme-editor-widget-choice" data-widget-choice="ascent"><label><input type="checkbox" data-widget-metric="ascent" checked><span>Aufstieg</span></label><div class="theme-editor-widget-move"><button type="button" data-widget-move="-1" aria-label="Aufstieg nach oben">↑</button><button type="button" data-widget-move="1" aria-label="Aufstieg nach unten">↓</button></div></div><div class="theme-editor-widget-choice" data-widget-choice="peaks"><label><input type="checkbox" data-widget-metric="peaks" checked><span>Gipfel</span></label><div class="theme-editor-widget-move"><button type="button" data-widget-move="-1" aria-label="Gipfel nach oben">↑</button><button type="button" data-widget-move="1" aria-label="Gipfel nach unten">↓</button></div></div><div class="theme-editor-widget-choice" data-widget-choice="steps"><label><input type="checkbox" data-widget-metric="steps" checked><span>Schritte</span></label><div class="theme-editor-widget-move"><button type="button" data-widget-move="-1" aria-label="Schritte nach oben">↑</button><button type="button" data-widget-move="1" aria-label="Schritte nach unten">↓</button></div></div><div class="theme-editor-widget-choice" data-widget-choice="time"><label><input type="checkbox" data-widget-metric="time" checked><span>Gehzeit</span></label><div class="theme-editor-widget-move"><button type="button" data-widget-move="-1" aria-label="Gehzeit nach oben">↑</button><button type="button" data-widget-move="1" aria-label="Gehzeit nach unten">↓</button></div></div><div class="theme-editor-widget-choice" data-widget-choice="speed"><label><input type="checkbox" data-widget-metric="speed"><span>Ø Speed</span></label><div class="theme-editor-widget-move"><button type="button" data-widget-move="-1" aria-label="Ø Speed nach oben">↑</button><button type="button" data-widget-move="1" aria-label="Ø Speed nach unten">↓</button></div></div><div class="theme-editor-widget-choice" data-widget-choice="gradient"><label><input type="checkbox" data-widget-metric="gradient"><span>Ø Steigung</span></label><div class="theme-editor-widget-move"><button type="button" data-widget-move="-1" aria-label="Ø Steigung nach oben">↑</button><button type="button" data-widget-move="1" aria-label="Ø Steigung nach unten">↓</button></div></div><div class="theme-editor-widget-choice" data-widget-choice="ascentRate"><label><input type="checkbox" data-widget-metric="ascentRate"><span>Ø Anstieg</span></label><div class="theme-editor-widget-move"><button type="button" data-widget-move="-1" aria-label="Ø Anstieg nach oben">↑</button><button type="button" data-widget-move="1" aria-label="Ø Anstieg nach unten">↓</button></div></div></div><div class="theme-editor-widget-count" id="te-widget-count" aria-live="polite">6/6</div><label for="te-widget-background">Widget-Hintergrund</label><select id="te-widget-background"><option value="alpine">Alpenmotiv</option><option value="dark">Dunkel / ohne Foto</option></select></div></details>
+<details class="theme-editor-panel dashboard-editor-section theme-editor-extra-section theme-editor-section-card" id="theme-editor-presets-section" data-theme-editor-accordion="presets"><summary class="theme-editor-panel-title">Design-Presets</summary><div class="theme-editor-extra-body"><label for="te-preset-select">Gespeichertes Preset</label><select id="te-preset-select"><option value="">Kein Preset ausgewählt</option></select><label for="te-preset-name">Name des Presets</label><input type="text" id="te-preset-name" maxlength="32" placeholder="Preset-Name"><div class="theme-editor-preset-actions"><button type="button" class="save-btn" id="te-preset-save">Preset speichern</button><button type="button" class="save-btn" id="te-preset-load">Preset laden</button><button type="button" class="save-btn theme-editor-preset-delete" id="te-preset-delete">Preset löschen</button></div><div id="te-preset-status" aria-live="polite"></div></div></details>
     </div>
 
 <div class="theme-editor-savebar theme-editor-save-nav" id="theme-editor-savebar" hidden><div class="theme-editor-savebar-status" id="theme-editor-savebar-status">Alle Änderungen gespeichert</div><button type="button" class="save-btn" id="theme-editor-save" disabled>Änderungen speichern</button></div>
@@ -2590,16 +2569,16 @@
 </div>
 
 <script src="./android-backup-bridge.js?v=5" defer></script>
-<script src="./app-main-20261019.js?v=85" defer></script>
+<script src="./app-main-20261019.js?v=86" defer></script>
 <script src="./more-menu-navigation-fix.js?v=1" defer></script>
 <script src="./osttirol-slide-background.js?v=1" defer></script>
 <script src="./pdf-magazine.js?v=3" defer></script>
 <script src="./stats-premium-alpine.js?v=10" defer></script>
 <script src="./theme-editor-unified.js?v=27" defer></script>
 <script src="./background-image-manager.js?v=9" defer></script>
-<script src="./background-image-picker.js?v=6" defer></script>
+<script src="./background-image-picker.js?v=7" defer></script>
 <script src="./dashboard-premium-alpine.js?v=36" defer></script>
-<script src="./theme-editor-workflow.js?v=2" defer></script>
+<script src="./theme-editor-workflow.js?v=3" defer></script>
 <script src="./app-navigation-history.js?v=1" defer></script>
 <script src="./android-gallery-photos.js?v=8" defer></script>
 <script src="./premium-alpine-icons.js?v=2" defer></script>
