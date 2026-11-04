@@ -19,6 +19,9 @@ import android.os.Build;
 import android.util.SizeF;
 import android.view.View;
 import android.widget.RemoteViews;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -91,6 +94,67 @@ public final class YearStatsWidgetProvider extends AppWidgetProvider {
         if(!persisted)return false;
         updateAll(context.getApplicationContext());
         return true;
+    }
+
+    public static JSONObject exportConfiguration(Context context) {
+        if (context == null) throw new IllegalArgumentException("Context darf nicht null sein.");
+        SharedPreferences prefs = context.getApplicationContext()
+                .getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        JSONObject configuration = new JSONObject();
+        JSONArray metricOrder = new JSONArray();
+        for (String metric : getStoredOrder(prefs)) metricOrder.put(metric);
+        try {
+            configuration.put("title", prefs.getString("widget_title", DEFAULT_WIDGET_TITLE));
+            configuration.put("background", prefs.getString("widget_background", "alpine"));
+            configuration.put("showTours", prefs.getBoolean("show_tours", true));
+            configuration.put("showDistance", prefs.getBoolean("show_distance", true));
+            configuration.put("showAscent", prefs.getBoolean("show_ascent", true));
+            configuration.put("showPeaks", prefs.getBoolean("show_peaks", true));
+            configuration.put("showSteps", prefs.getBoolean("show_steps", true));
+            configuration.put("showTime", prefs.getBoolean("show_time", true));
+            configuration.put("showSpeed", prefs.getBoolean("show_speed", false));
+            configuration.put("showGradient", prefs.getBoolean("show_gradient", false));
+            configuration.put("showAscentRate", prefs.getBoolean("show_ascentRate", false));
+            configuration.put("metricOrder", metricOrder);
+        } catch (JSONException error) {
+            throw new IllegalStateException("Widget-Konfiguration konnte nicht exportiert werden.", error);
+        }
+        return configuration;
+    }
+
+    public static boolean restoreConfiguration(Context context, JSONObject configuration) {
+        if (context == null || configuration == null) return false;
+        String title = configuration.optString("title", DEFAULT_WIDGET_TITLE).trim();
+        String background = configuration.optString("background", "alpine");
+        boolean showTours = configuration.optBoolean("showTours", true);
+        boolean showDistance = configuration.optBoolean("showDistance", true);
+        boolean showAscent = configuration.optBoolean("showAscent", true);
+        boolean showPeaks = configuration.optBoolean("showPeaks", true);
+        boolean showSteps = configuration.optBoolean("showSteps", true);
+        boolean showTime = configuration.optBoolean("showTime", true);
+        boolean showSpeed = configuration.optBoolean("showSpeed", false);
+        boolean showGradient = configuration.optBoolean("showGradient", false);
+        boolean showAscentRate = configuration.optBoolean("showAscentRate", false);
+        int selectedCount = (showTours ? 1 : 0) + (showDistance ? 1 : 0)
+                + (showAscent ? 1 : 0) + (showPeaks ? 1 : 0)
+                + (showSteps ? 1 : 0) + (showTime ? 1 : 0)
+                + (showSpeed ? 1 : 0) + (showGradient ? 1 : 0)
+                + (showAscentRate ? 1 : 0);
+        if (title.isEmpty() || title.length() > 20 || selectedCount < 1 || selectedCount > 6
+                || !("alpine".equals(background) || "dark".equals(background))) {
+            return false;
+        }
+
+        JSONArray orderJson = configuration.optJSONArray("metricOrder");
+        String[] metricOrder = new String[orderJson == null ? 0 : orderJson.length()];
+        if (orderJson != null) {
+            for (int i = 0; i < orderJson.length(); i++) {
+                metricOrder[i] = orderJson.optString(i, "");
+            }
+        }
+        return updateConfiguration(context, title, showTours, showDistance, showAscent,
+                showPeaks, showSteps, showTime, showSpeed, showGradient, showAscentRate,
+                metricOrder, background);
     }
 
     private static List<String> normalizeOrder(String[] requested,boolean[] selected) {
