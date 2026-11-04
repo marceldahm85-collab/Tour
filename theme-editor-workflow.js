@@ -24,7 +24,9 @@ function sendWidget(v){
  return nativeRequest('widget.yearStats.settings',payload,12000).then(message=>{
   if(!message||message.type!=='widget.yearStats.settings.result')throw new Error('Android hat eine unerwartete Antwort auf die Widget-Konfiguration gesendet.');
   if(message.ok!==true)throw new Error(message.error||'Android hat die Widget-Einstellungen nicht übernommen.');
-  return {status:'synced',widgetCount:Number(message.widgetCount)||0};
+  const widgetCount=Number(message.widgetCount)||0;
+  if(widgetCount<1)throw new Error('Android hat die Einstellungen gespeichert, findet aber kein platziertes Bergjahr-Widget dieser App.');
+  return {status:'synced',widgetCount};
  });
 }
 function allPresets(){const p=get(PK);return p&&typeof p==='object'&&!Array.isArray(p)?p:{};}
