@@ -1135,13 +1135,7 @@
 }
 
 
-/* Auf mobilen Breiten dieselbe kompakte Titelgröße wie in Statistik und Entwicklung. */
-@media (max-width: 1024px) {
-    #theme-view .theme-editor-section-card > .stats-analysis-title,
-    #theme-view .theme-editor-subgroup > .stats-analysis-title {
-        font-size: 11px;
-    }
-}
+
 
 
 /* =========================================================
