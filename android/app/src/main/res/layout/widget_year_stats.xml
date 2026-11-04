@@ -76,43 +76,26 @@
                     android:id="@+id/widget_year_stats_compact_tours_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_compact_tours_icon"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
                         android:contentDescription="@null"
                         android:src="@drawable/widget_ic_tours" />
-                    <LinearLayout
-                        android:layout_width="wrap_content"
+                    <TextView
+                        android:id="@+id/widget_year_stats_compact_tours_value"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:layout_marginStart="5dp"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/widget_year_stats_compact_tours_value"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans"
-                            android:includeFontPadding="false"
-                            android:singleLine="true"
-                            android:ellipsize="end"
-                            android:text="0"
-                            android:textColor="#FFFFFFFF"
-                            android:textSize="16sp"
-                            android:gravity="start"
-                            android:textStyle="bold" />
-                        <TextView
-                            android:id="@+id/widget_year_stats_compact_tours_label"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans"
-                            android:includeFontPadding="false"
-                            android:letterSpacing="0.04"
-                            android:singleLine="true"
-                            android:text="TOUREN"
-                            android:textColor="#D5DEE5"
-                            android:textSize="9sp"
-                            android:gravity="start"
-                            android:textStyle="bold" />
-                    </LinearLayout>
+                        android:fontFamily="sans"
+                        android:includeFontPadding="false"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        android:text="0&#10;TOUREN"
+                        android:textColor="#FFFFFFFF"
+                        android:textSize="17sp"
+                        android:lineSpacingMultiplier="0.9"
+                        android:gravity="center_vertical|start"
+                        android:textStyle="bold" />
                 </LinearLayout>
 
                 <ImageView
@@ -131,43 +114,26 @@
                     android:id="@+id/widget_year_stats_compact_distance_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_compact_distance_icon"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
                         android:contentDescription="@null"
                         android:src="@drawable/widget_ic_distance" />
-                    <LinearLayout
-                        android:layout_width="wrap_content"
+                    <TextView
+                        android:id="@+id/widget_year_stats_compact_distance_value"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:layout_marginStart="5dp"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/widget_year_stats_compact_distance_value"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans"
-                            android:includeFontPadding="false"
-                            android:singleLine="true"
-                            android:ellipsize="end"
-                            android:text="0,0"
-                            android:textColor="#FFFFFFFF"
-                            android:textSize="16sp"
-                            android:gravity="start"
-                            android:textStyle="bold" />
-                        <TextView
-                            android:id="@+id/widget_year_stats_compact_distance_label"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans"
-                            android:includeFontPadding="false"
-                            android:letterSpacing="0.04"
-                            android:singleLine="true"
-                            android:text="KM"
-                            android:textColor="#D5DEE5"
-                            android:textSize="9sp"
-                            android:gravity="start"
-                            android:textStyle="bold" />
-                    </LinearLayout>
+                        android:fontFamily="sans"
+                        android:includeFontPadding="false"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        android:text="0&#10;KM"
+                        android:textColor="#FFFFFFFF"
+                        android:textSize="17sp"
+                        android:lineSpacingMultiplier="0.9"
+                        android:gravity="center_vertical|start"
+                        android:textStyle="bold" />
                 </LinearLayout>
 
                 <ImageView
@@ -186,43 +152,26 @@
                     android:id="@+id/widget_year_stats_compact_ascent_group">
                     <ImageView
                         android:id="@+id/widget_year_stats_compact_ascent_icon"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
                         android:contentDescription="@null"
                         android:src="@drawable/widget_ic_ascent" />
-                    <LinearLayout
-                        android:layout_width="wrap_content"
+                    <TextView
+                        android:id="@+id/widget_year_stats_compact_ascent_value"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:layout_marginStart="5dp"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/widget_year_stats_compact_ascent_value"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans"
-                            android:includeFontPadding="false"
-                            android:singleLine="true"
-                            android:ellipsize="end"
-                            android:text="0"
-                            android:textColor="#FFFFFFFF"
-                            android:textSize="16sp"
-                            android:gravity="start"
-                            android:textStyle="bold" />
-                        <TextView
-                            android:id="@+id/widget_year_stats_compact_ascent_label"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans"
-                            android:includeFontPadding="false"
-                            android:letterSpacing="0.04"
-                            android:singleLine="true"
-                            android:text="HM"
-                            android:textColor="#D5DEE5"
-                            android:textSize="9sp"
-                            android:gravity="start"
-                            android:textStyle="bold" />
-                    </LinearLayout>
+                        android:fontFamily="sans"
+                        android:includeFontPadding="false"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        android:text="0&#10;HM"
+                        android:textColor="#FFFFFFFF"
+                        android:textSize="17sp"
+                        android:lineSpacingMultiplier="0.9"
+                        android:gravity="center_vertical|start"
+                        android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
