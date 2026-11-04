@@ -3,7 +3,7 @@ const PK='themeEditorPresets_v1',WK='nativeWidgetSettings_v1';
 const METRICS=["tours","distance","ascent","peaks","steps","time","speed","gradient","ascentRate"],FLAGS={"tours":"showTours","distance":"showDistance","ascent":"showAscent","peaks":"showPeaks","steps":"showSteps","time":"showTime","speed":"showSpeed","gradient":"showGradient","ascentRate":"showAscentRate"};
 const DEF={title:'BERGJAHR',showTours:true,showDistance:true,showAscent:true,showPeaks:true,showSteps:true,showTime:true,showSpeed:false,showGradient:false,showAscentRate:false,metricOrder:[...METRICS],background:'alpine'};
 let active=false,dirty=false,saving=false,widget={...DEF},bound=false;
-const get=k=>{try{return typeof appStorage!=='undefined'&&appStorage?appStorage.get(k):null;}catch(_){return null;}};
+const isNativeAndroidShell=()=>document.documentElement.classList.contains('android-native-shell')||(/Android/i.test(navigator.userAgent||'')&&(navigator.userAgent||'').includes('; wv)'));const get=k=>{try{return typeof appStorage!=='undefined'&&appStorage?appStorage.get(k):null;}catch(_){return null;}};
 const set=(k,v)=>{try{if(typeof appStorage!=='undefined'&&appStorage?.set)appStorage.set(k,v);}catch(_){}try{localStorage.setItem(k,JSON.stringify(v));}catch(_){}};
 const list=()=>document.getElementById('te-widget-metrics'),choices=()=>Array.from(list()?.querySelectorAll('[data-widget-choice]')||[]),checked=()=>choices().filter(r=>r.querySelector('[data-widget-metric]')?.checked);
 function updateWidgetMetricUi(){const on=checked(),counter=document.getElementById('te-widget-count');if(counter)counter.textContent=on.length+'/6';choices().forEach(r=>{const box=r.querySelector('[data-widget-metric]'),at=on.indexOf(r);r.querySelectorAll('[data-widget-move]').forEach(btn=>{const d=Number(btn.dataset.widgetMove);btn.disabled=at<0||(d<0?at===0:at===on.length-1);});if(box)box.disabled=!box.checked&&on.length>=6;});}
@@ -14,7 +14,7 @@ function fillWidget(v){widget={...DEF,...(v&&typeof v==='object'?v:{})};const t=
 let widgetRequestCounter=0;
 function sendWidget(v){
  const bridge=window.TourNative;
- if(!bridge?.postMessage)return Promise.resolve(null);
+ if(!bridge?.postMessage){if(isNativeAndroidShell())return Promise.reject(new Error('Die sichere Android-Verbindung zum Startbildschirm-Widget ist nicht verfügbar.'));return Promise.resolve({status:'not-native'});}
  if(typeof bridge.addEventListener!=='function')return Promise.reject(new Error('Die Android-Widget-Verbindung ist nicht verfügbar.'));
  const c={...DEF,...v},requestId='widget-settings-'+Date.now()+'-'+(++widgetRequestCounter);
  const payload={type:'widget.yearStats.settings',requestId,title:String(c.title||'BERGJAHR').slice(0,20),background:c.background==='dark'?'dark':'alpine',metricOrder:(c.metricOrder||DEF.metricOrder).filter(id=>METRICS.includes(id))};
@@ -31,7 +31,7 @@ function sendWidget(v){
    let message;
    try{message=typeof event.data==='string'?JSON.parse(event.data):event.data;}catch(_){return;}
    if(!message||message.requestId!==requestId||message.type!=='widget.yearStats.settings.result')return;
-   if(message.ok===true)finish(null,true);
+   if(message.ok===true)finish(null,{status:'synced'});
    else finish(new Error(message.error||'Android hat die Widget-Einstellungen nicht übernommen.'));
   };
   const timer=window.setTimeout(()=>finish(new Error('Android hat die Widget-Einstellungen nicht bestätigt. Bitte erneut speichern.')),12000);
@@ -50,42 +50,38 @@ function paint(){const s=document.getElementById('theme-editor-savebar-status'),
 function setSavebarVisible(v){const el=document.getElementById('theme-editor-savebar');if(el)el.hidden=!v;}
 function mark(){if(active&&!saving){dirty=true;paint();}}
 function handleMetricChange(box){if(!box)return;const on=checked();if(box.checked&&on.length>6){box.checked=false;window.showToast?.('Es können höchstens sechs Kennzahlen ausgewählt werden.');}if(!box.checked&&checked().length===0){box.checked=true;window.showToast?.('Mindestens eine Kennzahl muss ausgewählt bleiben.');}sortChoices();widget=readWidget();}
-async function begin(){if(active)return;active=true;setSavebarVisible(true);dirty=false;try{await window.beginAppBackgroundEditorDraft?.();}catch(e){console.warn('[Editor] Bildentwurf:',e);}window.__beginDashboardEditorDraft?.();fillWidget(get(WK));renderPresets();preview();paint();if(bound)return;bound=true;const root=document.getElementById('theme-view');root?.addEventListener('input',e=>{if(e.target.closest('.theme-editor-card,#theme-editor-widget-section,#dashboard-editor-body')){if(e.target.matches('[data-widget-metric]'))handleMetricChange(e.target);mark();preview();if(e.target.matches('[data-widget-metric],#te-widget-title,#te-widget-background'))widget=readWidget();}});root?.addEventListener('change',e=>{if(e.target.closest('.theme-editor-card,#theme-editor-widget-section,#dashboard-editor-body')){if(e.target.matches('[data-widget-metric]'))handleMetricChange(e.target);mark();preview();if(e.target.matches('[data-widget-metric],#te-widget-title,#te-widget-background'))widget=readWidget();}});root?.addEventListener('click',e=>{const move=e.target.closest('[data-widget-move]');if(move){moveMetric(move);return;}if(e.target.closest('#background-image-presets,#background-image-choose-file,#background-image-remove-custom,#background-image-activate-custom,#background-image-center-position,[data-background-profile],[data-editor-move]')){mark();preview();}});document.getElementById('te-preset-save')?.addEventListener('click',async()=>{const n=(document.getElementById('te-preset-name')?.value||'').trim().slice(0,32),s=document.getElementById('te-preset-status');if(!n){if(s)s.textContent='Bitte zuerst einen Preset-Namen eingeben.';return;}try{await window.persistAppBackgroundDraftAsset?.();const p=allPresets();p[n]=snapshot();set(PK,p);renderPresets(n);if(s)s.textContent='Preset „'+n+'“ gespeichert.';}catch(e){console.error('[Editor] Preset-Bild konnte nicht gespeichert werden:',e);if(s)s.textContent='Preset konnte nicht gespeichert werden. Bitte erneut versuchen.';}});document.getElementById('te-preset-load')?.addEventListener('click',async()=>{const n=document.getElementById('te-preset-select')?.value;if(n)await loadPreset(n);});document.getElementById('te-preset-delete')?.addEventListener('click',()=>{const n=document.getElementById('te-preset-select')?.value;if(!n)return;const p=allPresets();delete p[n];set(PK,p);renderPresets();const s=document.getElementById('te-preset-status');if(s)s.textContent='Preset „'+n+'“ gelöscht.';});}
+async function begin(syncWidget=true){if(active)return;active=true;setSavebarVisible(true);dirty=false;try{await window.beginAppBackgroundEditorDraft?.();}catch(e){console.warn('[Editor] Bildentwurf:',e);}window.__beginDashboardEditorDraft?.();fillWidget(get(WK));renderPresets();preview();paint();if(syncWidget&&isNativeAndroidShell())sendWidget(widget).catch(error=>console.warn('[Editor] Gespeicherte Widget-Einstellungen konnten beim Öffnen nicht synchronisiert werden:',error));if(bound)return;bound=true;const root=document.getElementById('theme-view');root?.addEventListener('input',e=>{if(e.target.closest('.theme-editor-card,#theme-editor-widget-section,#dashboard-editor-body')){if(e.target.matches('[data-widget-metric]'))handleMetricChange(e.target);mark();preview();if(e.target.matches('[data-widget-metric],#te-widget-title,#te-widget-background'))widget=readWidget();}});root?.addEventListener('change',e=>{if(e.target.closest('.theme-editor-card,#theme-editor-widget-section,#dashboard-editor-body')){if(e.target.matches('[data-widget-metric]'))handleMetricChange(e.target);mark();preview();if(e.target.matches('[data-widget-metric],#te-widget-title,#te-widget-background'))widget=readWidget();}});root?.addEventListener('click',e=>{const move=e.target.closest('[data-widget-move]');if(move){moveMetric(move);return;}if(e.target.closest('#background-image-presets,#background-image-choose-file,#background-image-remove-custom,#background-image-activate-custom,#background-image-center-position,[data-background-profile],[data-editor-move]')){mark();preview();}});document.getElementById('te-preset-save')?.addEventListener('click',async()=>{const n=(document.getElementById('te-preset-name')?.value||'').trim().slice(0,32),s=document.getElementById('te-preset-status');if(!n){if(s)s.textContent='Bitte zuerst einen Preset-Namen eingeben.';return;}try{await window.persistAppBackgroundDraftAsset?.();const p=allPresets();p[n]=snapshot();set(PK,p);renderPresets(n);if(s)s.textContent='Preset „'+n+'“ gespeichert.';}catch(e){console.error('[Editor] Preset-Bild konnte nicht gespeichert werden:',e);if(s)s.textContent='Preset konnte nicht gespeichert werden. Bitte erneut versuchen.';}});document.getElementById('te-preset-load')?.addEventListener('click',async()=>{const n=document.getElementById('te-preset-select')?.value;if(n)await loadPreset(n);});document.getElementById('te-preset-delete')?.addEventListener('click',()=>{const n=document.getElementById('te-preset-select')?.value;if(!n)return;const p=allPresets();delete p[n];set(PK,p);renderPresets();const s=document.getElementById('te-preset-status');if(s)s.textContent='Preset „'+n+'“ gelöscht.';});}
 async function commit(){
-  if(saving)return {saved:false};
-  saving=true;paint();
-  let savedWidget;
-  try{
-    widget=readWidget();
-    // App-Einstellungen und Editor-Entwürfe sind der eigentliche Speichervorgang.
-    // Die native Startbildschirm-Kachel wird davon unabhängig aktualisiert.
-    await window.commitAppBackgroundEditorDraft?.();
-    window.persistThemeEditorUnifiedSettings?.();
-    window.__commitDashboardEditorDraft?.();
-    savedWidget={...widget,metricOrder:[...(widget.metricOrder||[])]};
-    set(WK,savedWidget);
-    dirty=false;
-    active=false;
-  }catch(error){
-    saving=false;paint();
-    throw error;
-  }
-  saving=false;paint();
-  await begin();
-
-  // Ein Fehler bei der optionalen Android-Widget-Synchronisierung darf bereits
-  // dauerhaft gespeicherte Editor-Einstellungen nicht als fehlgeschlagen markieren.
-  try{
-    Promise.resolve(sendWidget(savedWidget)).catch(error=>{
-      console.warn('[Editor] Einstellungen gespeichert; Android-Widget konnte nicht aktualisiert werden:',error);
-      try{
-        window.showToast?.('Editor-Einstellungen gespeichert. Das Android-Widget konnte nicht aktualisiert werden.',{type:'warning',duration:3500});
-      }catch(_){}
-    });
-  }catch(error){
-    console.warn('[Editor] Native Widget-Synchronisierung nicht verfügbar:',error);
-  }
-  return {saved:true};
-}
+   if(saving)return {saved:false};
+   saving=true;paint();
+   let savedWidget;
+   try{
+     widget=readWidget();
+     await window.commitAppBackgroundEditorDraft?.();
+     window.persistThemeEditorUnifiedSettings?.();
+     window.__commitDashboardEditorDraft?.();
+     savedWidget={...widget,metricOrder:[...(widget.metricOrder||[])]};
+     set(WK,savedWidget);
+     dirty=false;
+     active=false;
+   }catch(error){
+     saving=false;paint();
+     throw error;
+   }
+   saving=false;paint();
+   let widgetSync={status:'not-native'};
+   try{
+     widgetSync=await sendWidget(savedWidget);
+   }catch(error){
+     widgetSync={status:'failed',message:error?.message||'Keine Bestätigung von Android erhalten.'};
+     console.warn('[Editor] Editor-Einstellungen gespeichert; Android-Widget konnte nicht aktualisiert werden:',error);
+   }
+   await begin(false);
+   if(widgetSync.status==='failed'){
+     const status=document.getElementById('theme-editor-savebar-status');
+     if(status)status.textContent='Editor gespeichert · Widget nicht aktualisiert';
+   }
+   return {saved:true,widgetSync};
+ }
 async function discard(){if(!active||saving)return;setSavebarVisible(false);await window.discardAppBackgroundEditorDraft?.();window.setThemeEditorUnifiedSettings?.(get('themeEditorUnifiedSettings_v1')||{});window.__discardDashboardEditorDraft?.();fillWidget(get(WK));dirty=false;active=false;paint();}
 window.__commitPremiumEditorSettings=commit;const init=window.initThemeEditor;if(typeof init==='function'&&!init.__premiumWorkflowWrapped){const wrap=function(){const r=init.apply(this,arguments);begin().catch(console.warn);return r;};wrap.__premiumWorkflowWrapped=true;window.initThemeEditor=wrap;}const nav=window.goToView;if(typeof nav==='function'&&!nav.__premiumWorkflowWrapped){const wrap=function(v){const was=document.getElementById('theme-view')?.classList.contains('visible')||document.getElementById('theme-view')?.classList.contains('active');if(was&&v!=='theme'&&v!=='theme-view')discard();return nav.apply(this,arguments);};wrap.__premiumWorkflowWrapped=true;window.goToView=wrap;}document.addEventListener('DOMContentLoaded',paint,{once:true});})();
