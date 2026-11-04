@@ -15,12 +15,16 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.os.Bundle;
+import android.os.Build;
+import android.util.SizeF;
 import android.view.View;
 import android.widget.RemoteViews;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -28,7 +32,9 @@ import java.util.Set;
 public final class YearStatsWidgetProvider extends AppWidgetProvider {
     private static final String PREFS = "year_stats_widget";
     private static final String DEFAULT_ACCENT = "#ad7d12";
-    private static final int EXPANDED_HEIGHT_DP = 100;
+    private static final int EXPANDED_HEIGHT_DP = 160;
+    private static final float COMPACT_LAYOUT_MIN_WIDTH_DP = 250f;
+    private static final float COMPACT_LAYOUT_MIN_HEIGHT_DP = 64f;
     private static final String DEFAULT_WIDGET_TITLE = "BERGJAHR";
     private static final String[] METRICS = {"tours","distance","ascent","peaks","steps","time","speed","gradient","ascentRate"};
     private static final String[] DEFAULT_ORDER = {"tours","distance","ascent","peaks","steps","time","speed","gradient","ascentRate"};
@@ -116,36 +122,116 @@ public final class YearStatsWidgetProvider extends AppWidgetProvider {
 
     private static void updateWidgets(Context context,AppWidgetManager manager,int[] ids) {
         if(context==null||manager==null||ids==null||ids.length==0)return;
-        SharedPreferences prefs=context.getSharedPreferences(PREFS,Context.MODE_PRIVATE);int year=Calendar.getInstance().get(Calendar.YEAR);boolean sameYear=prefs.getInt("year",year)==year;
-        int tours=sameYear?prefs.getInt("tours",0):0;double distance=sameYear?prefs.getFloat("distance",0f):0d;double ascent=sameYear?prefs.getFloat("ascent",0f):0d;
-        long peaks=sameYear?prefs.getLong("peaks",0L):0L,steps=sameYear?prefs.getLong("steps",0L):0L,walkingMinutes=sameYear?prefs.getLong("walking_minutes",0L):0L;
-        double avgSpeed=sameYear?prefs.getFloat("average_speed",0f):0d,avgGradient=sameYear?prefs.getFloat("average_gradient",0f):0d,avgAscentRate=sameYear?prefs.getFloat("average_ascent_rate",0f):0d;
-        int accent=parseAccent(prefs.getString("accent",DEFAULT_ACCENT));String widgetTitle=prefs.getString("widget_title",DEFAULT_WIDGET_TITLE);
-        boolean alpineBackground=!"dark".equals(prefs.getString("widget_background","alpine"));List<String> order=getStoredOrder(prefs);
-        NumberFormat integer=NumberFormat.getIntegerInstance(Locale.GERMANY),decimal=NumberFormat.getNumberInstance(Locale.GERMANY);decimal.setMinimumFractionDigits(1);decimal.setMaximumFractionDigits(1);
+
+        SharedPreferences prefs=context.getSharedPreferences(PREFS,Context.MODE_PRIVATE);
+        int year=Calendar.getInstance().get(Calendar.YEAR);
+        boolean sameYear=prefs.getInt("year",year)==year;
+        int tours=sameYear?prefs.getInt("tours",0):0;
+        double distance=sameYear?prefs.getFloat("distance",0f):0d;
+        double ascent=sameYear?prefs.getFloat("ascent",0f):0d;
+        long peaks=sameYear?prefs.getLong("peaks",0L):0L;
+        long steps=sameYear?prefs.getLong("steps",0L):0L;
+        long walkingMinutes=sameYear?prefs.getLong("walking_minutes",0L):0L;
+        double avgSpeed=sameYear?prefs.getFloat("average_speed",0f):0d;
+        double avgGradient=sameYear?prefs.getFloat("average_gradient",0f):0d;
+        double avgAscentRate=sameYear?prefs.getFloat("average_ascent_rate",0f):0d;
+        int accent=parseAccent(prefs.getString("accent",DEFAULT_ACCENT));
+        String widgetTitle=prefs.getString("widget_title",DEFAULT_WIDGET_TITLE);
+        boolean alpineBackground=!"dark".equals(prefs.getString("widget_background","alpine"));
+        List<String> order=getStoredOrder(prefs);
+        NumberFormat integer=NumberFormat.getIntegerInstance(Locale.GERMANY);
+        NumberFormat decimal=NumberFormat.getNumberInstance(Locale.GERMANY);
+        decimal.setMinimumFractionDigits(1);
+        decimal.setMaximumFractionDigits(1);
         String duration=formatDuration(walkingMinutes);
+
         for(int id:ids){
-            Bundle options=manager.getAppWidgetOptions(id);int minHeight=options!=null?options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,0):0;boolean expanded=minHeight>=EXPANDED_HEIGHT_DP;
-            RemoteViews views=new RemoteViews(context.getPackageName(),R.layout.widget_year_stats);
-            views.setViewVisibility(R.id.widget_year_stats_compact,expanded?View.GONE:View.VISIBLE);views.setViewVisibility(R.id.widget_year_stats_expanded,expanded?View.VISIBLE:View.GONE);
-            String heading=widgetTitle.toUpperCase(Locale.GERMANY)+" "+year;views.setTextViewText(R.id.widget_year_stats_compact_heading,heading);views.setTextViewText(R.id.widget_year_stats_heading,heading);views.setTextColor(R.id.widget_year_stats_compact_heading,accent);views.setTextColor(R.id.widget_year_stats_heading,accent);views.setInt(R.id.widget_year_stats_heading_icon,"setColorFilter",accent);
-            views.setInt(R.id.widget_year_stats_accent_line,"setBackgroundColor",accent);views.setViewVisibility(R.id.widget_year_stats_background_image,alpineBackground?View.VISIBLE:View.GONE);
-            views.setViewVisibility(R.id.widget_year_stats_scrim_image,alpineBackground?View.VISIBLE:View.GONE);views.setInt(R.id.widget_year_stats_root,"setBackgroundColor",Color.rgb(7,12,18));
-            if(expanded){
-                int topCount=Math.min(3,order.size()),bottomCount=Math.max(0,order.size()-3);
-                views.setViewVisibility(R.id.widget_year_stats_expanded_second_row,bottomCount>0?View.VISIBLE:View.GONE);
-                views.setViewVisibility(R.id.widget_year_stats_expanded_row_divider,bottomCount>0?View.VISIBLE:View.GONE);
-                for(int i=0;i<EXPANDED_GROUPS.length;i++){boolean visible=i<order.size();views.setViewVisibility(EXPANDED_GROUPS[i],visible?View.VISIBLE:View.GONE);if(visible)applyMetric(views,order.get(i),EXPANDED_ICONS[i],EXPANDED_VALUES[i],EXPANDED_LABELS[i],accent,integer,decimal,distance,ascent,tours,peaks,steps,duration,avgSpeed,avgGradient,avgAscentRate);}
-                views.setViewVisibility(EXPANDED_DIVIDERS[0],topCount>1?View.VISIBLE:View.GONE);views.setViewVisibility(EXPANDED_DIVIDERS[1],topCount>2?View.VISIBLE:View.GONE);
-                views.setViewVisibility(EXPANDED_DIVIDERS[2],bottomCount>1?View.VISIBLE:View.GONE);views.setViewVisibility(EXPANDED_DIVIDERS[3],bottomCount>2?View.VISIBLE:View.GONE);
+            if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.S){
+                // Android 12+ wählt anhand der tatsächlichen Widget-Fläche.
+                // Die Größenbereiche vermeiden die fehleranfällige Schätzung über
+                // OPTION_APPWIDGET_MIN_HEIGHT (z. B. 1 Rasterzelle ≈ 102 dp).
+                Map<SizeF,RemoteViews> responsiveViews=new HashMap<>();
+                responsiveViews.put(
+                        new SizeF(COMPACT_LAYOUT_MIN_WIDTH_DP,COMPACT_LAYOUT_MIN_HEIGHT_DP),
+                        createWidgetViews(context,year,tours,distance,ascent,peaks,steps,duration,
+                                avgSpeed,avgGradient,avgAscentRate,accent,widgetTitle,
+                                alpineBackground,order,integer,decimal,false)
+                );
+                responsiveViews.put(
+                        new SizeF(COMPACT_LAYOUT_MIN_WIDTH_DP,EXPANDED_HEIGHT_DP),
+                        createWidgetViews(context,year,tours,distance,ascent,peaks,steps,duration,
+                                avgSpeed,avgGradient,avgAscentRate,accent,widgetTitle,
+                                alpineBackground,order,integer,decimal,true)
+                );
+                manager.updateAppWidget(id,new RemoteViews(responsiveViews));
             }else{
-                int count=Math.min(3,order.size());for(int i=0;i<COMPACT_GROUPS.length;i++){boolean visible=i<count;views.setViewVisibility(COMPACT_GROUPS[i],visible?View.VISIBLE:View.GONE);if(visible)applyCompactMetric(views,order.get(i),COMPACT_ICONS[i],COMPACT_VALUES[i],accent,integer,decimal,distance,ascent,tours,peaks,steps,duration,avgSpeed,avgGradient,avgAscentRate);}
-                views.setViewVisibility(COMPACT_DIVIDERS[0],count>1?View.VISIBLE:View.GONE);views.setViewVisibility(COMPACT_DIVIDERS[1],count>2?View.VISIBLE:View.GONE);
+                Bundle options=manager.getAppWidgetOptions(id);
+                int minHeight=options!=null
+                        ?options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,0):0;
+                boolean expanded=minHeight>=EXPANDED_HEIGHT_DP;
+                manager.updateAppWidget(id,createWidgetViews(context,year,tours,distance,ascent,
+                        peaks,steps,duration,avgSpeed,avgGradient,avgAscentRate,accent,
+                        widgetTitle,alpineBackground,order,integer,decimal,expanded));
             }
-            Intent open=new Intent(context,MainActivity.class);open.setAction(MainActivity.ACTION_OPEN_DASHBOARD);open.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            PendingIntent pending=PendingIntent.getActivity(context,0,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
-            views.setOnClickPendingIntent(R.id.widget_year_stats_root,pending);manager.updateAppWidget(id,views);
         }
+    }
+
+    private static RemoteViews createWidgetViews(
+            Context context,int year,int tours,double distance,double ascent,long peaks,long steps,
+            String duration,double avgSpeed,double avgGradient,double avgAscentRate,int accent,
+            String widgetTitle,boolean alpineBackground,List<String> order,
+            NumberFormat integer,NumberFormat decimal,boolean expanded) {
+        RemoteViews views=new RemoteViews(context.getPackageName(),R.layout.widget_year_stats);
+        views.setViewVisibility(R.id.widget_year_stats_compact,expanded?View.GONE:View.VISIBLE);
+        views.setViewVisibility(R.id.widget_year_stats_expanded,expanded?View.VISIBLE:View.GONE);
+
+        String heading=widgetTitle.toUpperCase(Locale.GERMANY)+" "+year;
+        views.setTextViewText(R.id.widget_year_stats_compact_heading,heading);
+        views.setTextViewText(R.id.widget_year_stats_heading,heading);
+        views.setTextColor(R.id.widget_year_stats_compact_heading,accent);
+        views.setTextColor(R.id.widget_year_stats_heading,accent);
+        views.setInt(R.id.widget_year_stats_heading_icon,"setColorFilter",accent);
+        views.setInt(R.id.widget_year_stats_accent_line,"setBackgroundColor",accent);
+        views.setViewVisibility(R.id.widget_year_stats_background_image,alpineBackground?View.VISIBLE:View.GONE);
+        views.setViewVisibility(R.id.widget_year_stats_scrim_image,alpineBackground?View.VISIBLE:View.GONE);
+        views.setInt(R.id.widget_year_stats_root,"setBackgroundColor",Color.rgb(7,12,18));
+
+        if(expanded){
+            int topCount=Math.min(3,order.size());
+            int bottomCount=Math.max(0,order.size()-3);
+            views.setViewVisibility(R.id.widget_year_stats_expanded_second_row,bottomCount>0?View.VISIBLE:View.GONE);
+            views.setViewVisibility(R.id.widget_year_stats_expanded_row_divider,bottomCount>0?View.VISIBLE:View.GONE);
+            for(int i=0;i<EXPANDED_GROUPS.length;i++){
+                boolean visible=i<order.size();
+                views.setViewVisibility(EXPANDED_GROUPS[i],visible?View.VISIBLE:View.GONE);
+                if(visible)applyMetric(views,order.get(i),EXPANDED_ICONS[i],EXPANDED_VALUES[i],
+                        EXPANDED_LABELS[i],accent,integer,decimal,distance,ascent,tours,peaks,
+                        steps,duration,avgSpeed,avgGradient,avgAscentRate);
+            }
+            views.setViewVisibility(EXPANDED_DIVIDERS[0],topCount>1?View.VISIBLE:View.GONE);
+            views.setViewVisibility(EXPANDED_DIVIDERS[1],topCount>2?View.VISIBLE:View.GONE);
+            views.setViewVisibility(EXPANDED_DIVIDERS[2],bottomCount>1?View.VISIBLE:View.GONE);
+            views.setViewVisibility(EXPANDED_DIVIDERS[3],bottomCount>2?View.VISIBLE:View.GONE);
+        }else{
+            int count=Math.min(3,order.size());
+            for(int i=0;i<COMPACT_GROUPS.length;i++){
+                boolean visible=i<count;
+                views.setViewVisibility(COMPACT_GROUPS[i],visible?View.VISIBLE:View.GONE);
+                if(visible)applyCompactMetric(views,order.get(i),COMPACT_ICONS[i],
+                        COMPACT_VALUES[i],accent,integer,decimal,distance,ascent,tours,peaks,
+                        steps,duration,avgSpeed,avgGradient,avgAscentRate);
+            }
+            views.setViewVisibility(COMPACT_DIVIDERS[0],count>1?View.VISIBLE:View.GONE);
+            views.setViewVisibility(COMPACT_DIVIDERS[1],count>2?View.VISIBLE:View.GONE);
+        }
+
+        Intent open=new Intent(context,MainActivity.class);
+        open.setAction(MainActivity.ACTION_OPEN_DASHBOARD);
+        open.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pending=PendingIntent.getActivity(context,0,open,
+                PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+        views.setOnClickPendingIntent(R.id.widget_year_stats_root,pending);
+        return views;
     }
 
     private static void applyCompactMetric(RemoteViews views,String id,int iconId,int valueId,int accent,NumberFormat integer,NumberFormat decimal,double distance,double ascent,int tours,long peaks,long steps,String duration,double avgSpeed,double avgGradient,double avgAscentRate) {
