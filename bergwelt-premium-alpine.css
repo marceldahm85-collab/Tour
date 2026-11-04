@@ -2039,3 +2039,128 @@ body.wrapped-mobile-fullscreen-active .accordion-header {
         margin: 6px auto 14px !important;
     }
 }
+
+
+/* BERGWELT HEADER — exakt an die Überschriften der Statistik angeglichen.
+   Schmale Titelzeile, Akzent-Line-Art links und feine Unterstreichung statt
+   eigenständiger Hero-/Eyebrow-Optik. Inhaltsbilder und Kennzahlen bleiben unberührt. */
+#wrapped-view.bergwelt-ready .bergwelt-intro {
+    display: block !important;
+    margin: 4px 0 16px !important;
+    padding: 0 !important;
+}
+#wrapped-view.bergwelt-ready .bergwelt-intro > .bergwelt-eyebrow {
+    display: none !important;
+}
+#wrapped-view.bergwelt-ready .bergwelt-intro > .bergwelt-heading {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    margin: 0 0 11px !important;
+    padding: 0 0 8px !important;
+    border-bottom: 1px solid var(--bw-border) !important;
+    color: var(--bw-text) !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.25 !important;
+}
+#wrapped-view.bergwelt-ready .bergwelt-intro > .bergwelt-heading::before,
+#wrapped-view.bergwelt-ready .bergwelt-tourbook-hero-content > h2::before {
+    content: "" !important;
+    display: inline-block !important;
+    flex: 0 0 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    background: var(--bw-accent) !important;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m2 20 6-10 4 5 3-4 7 9H2Z' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='m6 13 2-3 3 4' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat !important;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m2 20 6-10 4 5 3-4 7 9H2Z' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='m6 13 2-3 3 4' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat !important;
+    filter: drop-shadow(0 1px 3px color-mix(in srgb, var(--bw-accent) 22%, transparent));
+}
+#wrapped-view.bergwelt-ready .bergwelt-intro > .bergwelt-copy {
+    margin: 0 !important;
+    color: var(--bw-muted) !important;
+    font-size: .8rem !important;
+    line-height: 1.45 !important;
+}
+
+/* Tourbuch verwendete bisher einen großen Fotobanner als Seitentitel.
+   Der Titel folgt jetzt derselben Statistik-Kopfzeile; die PDF-Inhalte bleiben. */
+#wrapped-view.bergwelt-ready .bergwelt-tourbook-hero {
+    display: block !important;
+    min-height: 0 !important;
+    margin: 4px 0 16px !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+}
+#wrapped-view.bergwelt-ready .bergwelt-tourbook-hero-content {
+    max-width: none !important;
+}
+#wrapped-view.bergwelt-ready .bergwelt-tourbook-hero-content > p {
+    display: none !important;
+}
+#wrapped-view.bergwelt-ready .bergwelt-tourbook-hero-content > h2 {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 0 11px !important;
+    padding: 0 0 8px !important;
+    border-bottom: 1px solid var(--bw-border) !important;
+    color: var(--bw-text) !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.25 !important;
+}
+#wrapped-view.bergwelt-ready .bergwelt-tourbook-hero-content > span {
+    display: block !important;
+    color: var(--bw-muted) !important;
+    font-size: .8rem !important;
+    line-height: 1.45 !important;
+}
+
+/* Achievements erhielt bisher gar keine eigene Titelzeile. Auch hier dieselbe
+   Statistik-Hierarchie oberhalb der Jahresauswahl. */
+#wrapped-view.bergwelt-ready.bergwelt-active-achievements #achievements-view .achievements-inner {
+    position: relative !important;
+}
+#wrapped-view.bergwelt-ready.bergwelt-active-achievements #achievements-view .achievements-inner::before {
+    content: "Achievements";
+    display: flex;
+    align-items: center;
+    min-height: 18px;
+    margin: 4px 0 11px;
+    padding: 0 0 8px 26px;
+    border-bottom: 1px solid var(--bw-border);
+    color: var(--bw-text);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 1.25;
+}
+#wrapped-view.bergwelt-ready.bergwelt-active-achievements #achievements-view .achievements-inner::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 0;
+    width: 18px;
+    height: 18px;
+    background: var(--bw-accent);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m2 20 6-10 4 5 3-4 7 9H2Z' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='m6 13 2-3 3 4' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m2 20 6-10 4 5 3-4 7 9H2Z' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='m6 13 2-3 3 4' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+@media (max-width: 380px) {
+    #wrapped-view.bergwelt-ready .bergwelt-intro > .bergwelt-heading,
+    #wrapped-view.bergwelt-ready .bergwelt-tourbook-hero-content > h2,
+    #wrapped-view.bergwelt-ready.bergwelt-active-achievements #achievements-view .achievements-inner::before {
+        gap: 6px;
+        font-size: 12px !important;
+        padding-bottom: 7px;
+        margin-bottom: 9px;
+    }
+}
