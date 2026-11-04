@@ -169,10 +169,17 @@
         if (control) {
             add('min-height', computed.minHeight, 24, 90);
             add('height', computed.height, 26, 90);
+            add('max-height', computed.maxHeight, 26, 90);
         } else if (listRow) {
             add('min-height', computed.minHeight, 28, 110);
-        } else if (surface && /(?:^|[\s_-])(tab|nav-item|list-item)(?:$|[\s_-])/i.test(signature)) {
+            add('max-height', computed.maxHeight, 28, 110);
+        } else if (surface && (
+            tag === 'nav' ||
+            /(?:^|[ \t_-])(tab|tabs|nav-item|list-item|toolbar)(?:$|[ \t_-])/i.test(signature)
+        )) {
             add('min-height', computed.minHeight, 28, 90);
+            add('height', computed.height, 28, 90);
+            add('max-height', computed.maxHeight, 28, 90);
         }
 
         return properties;
