@@ -334,7 +334,7 @@
         '#chart-view .stats-year-filter-wrap > select', '#tour-map',
         '#wrapped-view .bergwelt-side-nav', '#wrapped-view .bergwelt-tab',
         '#theme-view .theme-editor-card', '#theme-view .theme-editor-option',
-        '#theme-view .theme-editor-panel', '#theme-view details > summary',
+        '#theme-view .theme-editor-panel', '#theme-view details > summary:not(.stats-analysis-title)',
         '.modal-card', '.modal-content', '.mob-sel-sheet', '.mob-sel-hdr', '.mob-sel-opt',
         '.top-main-nav', '.top-main-nav button', '.more-menu-item',
         '.accordion-header', '.tour-form input[type="text"]',
@@ -430,7 +430,7 @@
             ' !important; }\n';
         css += selectors(RADIUS_SURFACES) + ' { border-radius: ' + radius + ' !important; }\n';
         css += globalSelectors(GLOBAL_RADIUS_SURFACES) + ' { border-radius: ' + radius + ' !important; }\n';
-        css += 'body.gold :is(#dashboard-view, #app-view, #chart-view, #map-view, #tour-view, #backup-view, #wrapped-view, #achievements-view, #theme-view, #filter-view) :is([class*="-card"], [class*="-tile"]:not(.leaflet-tile), [class*="-panel"], [class*="-section"], [class*="-btn"], [class*="-button"], [class*="-nav"], [class*="-list"] > li, button, input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]), select, textarea, details > summary):not(.leaflet-container):not(.leaflet-container *) { border-radius: ' + radius + ' !important; }\n';
+        css += 'body.gold :is(#dashboard-view, #app-view, #chart-view, #map-view, #tour-view, #backup-view, #wrapped-view, #achievements-view, #theme-view, #filter-view) :is([class*="-card"], [class*="-tile"]:not(.leaflet-tile), [class*="-panel"], [class*="-section"], [class*="-btn"], [class*="-button"], [class*="-nav"], [class*="-list"] > li, button, input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]), select, textarea, details > summary:not(.stats-analysis-title)):not(.leaflet-container):not(.leaflet-container *) { border-radius: ' + radius + ' !important; }\n';
         css += 'body.gold .top-main-nav { background: ' + navGradient +
             ' !important; background-image: ' + navGradient +
             ' !important; border-color: color-mix(in srgb, ' + settings.accent +
