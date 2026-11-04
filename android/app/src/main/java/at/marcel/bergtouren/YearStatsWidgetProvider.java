@@ -151,7 +151,7 @@ public final class YearStatsWidgetProvider extends AppWidgetProvider {
     private static void applyCompactMetric(RemoteViews views,String id,int iconId,int valueId,int accent,NumberFormat integer,NumberFormat decimal,double distance,double ascent,int tours,long peaks,long steps,String duration,double avgSpeed,double avgGradient,double avgAscentRate) {
         MetricValue m=metricValue(id,integer,decimal,distance,ascent,tours,peaks,steps,duration,avgSpeed,avgGradient,avgAscentRate);
         int split=m.value.length();
-        SpannableString display=new SpannableString(m.value+"\\n"+m.label);
+        SpannableString display=new SpannableString(m.value+"\n"+m.label);
         display.setSpan(new RelativeSizeSpan(0.62f),split+1,display.length(),Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         display.setSpan(new ForegroundColorSpan(Color.rgb(213,222,229)),split+1,display.length(),Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         display.setSpan(new StyleSpan(Typeface.BOLD),split+1,display.length(),Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
