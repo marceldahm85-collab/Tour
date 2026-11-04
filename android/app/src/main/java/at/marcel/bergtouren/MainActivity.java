@@ -417,6 +417,7 @@ public final class MainActivity extends Activity {
                                 features.put("widget.yearStats.v1");
                                 features.put("widget.yearStats.v2");
                                 features.put("widget.yearStats.config.v1");
+                                features.put("widget.yearStats.backup.v1");
                                 features.put("backup.export.v1");
                                 features.put("pdf.export.v1");
                                 features.put("backup.file.link.v1");
@@ -507,6 +508,35 @@ public final class MainActivity extends Activity {
                                 replyToBridge(replyProxy, response);
                                 Log.i(TAG, "Widget-Konfiguration: saved=" + saved + ", widgetCount=" + widgetCount
                                         + ", requestId=" + requestId);
+                            } else if ("widget.yearStats.backup.get".equals(type)) {
+                                JSONObject response = createGalleryResponse("widget.yearStats.backup.result", requestId);
+                                try {
+                                    response.put("ok", true);
+                                    response.put("configuration", YearStatsWidgetProvider.exportConfiguration(MainActivity.this));
+                                    response.put("widgetCount", YearStatsWidgetProvider.getInstalledWidgetCount(MainActivity.this));
+                                } catch (RuntimeException backupError) {
+                                    Log.e(TAG, "Widget-Konfiguration konnte nicht exportiert werden.", backupError);
+                                    response.put("ok", false);
+                                    response.put("error", "Die Android-Widget-Konfiguration konnte nicht ausgelesen werden.");
+                                }
+                                replyToBridge(replyProxy, response);
+                            } else if ("widget.yearStats.backup.restore".equals(type)) {
+                                JSONObject response = createGalleryResponse("widget.yearStats.backup.result", requestId);
+                                boolean restored = false;
+                                try {
+                                    restored = YearStatsWidgetProvider.restoreConfiguration(
+                                            MainActivity.this, request.optJSONObject("configuration"));
+                                    response.put("ok", restored);
+                                    response.put("widgetCount", YearStatsWidgetProvider.getInstalledWidgetCount(MainActivity.this));
+                                    if (!restored) {
+                                        response.put("error", "Die Widget-Konfiguration in der Sicherungsdatei ist ungültig.");
+                                    }
+                                } catch (RuntimeException backupError) {
+                                    Log.e(TAG, "Widget-Konfiguration konnte nicht wiederhergestellt werden.", backupError);
+                                    response.put("ok", false);
+                                    response.put("error", "Die Android-Widget-Konfiguration konnte nicht wiederhergestellt werden.");
+                                }
+                                replyToBridge(replyProxy, response);
                             } else if ("widget.yearStats.update".equals(type)) {
                                 int year = request.optInt("year", -1);
                                 int tours = request.optInt("tours", -1);
