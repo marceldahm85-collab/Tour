@@ -453,48 +453,60 @@ public final class MainActivity extends Activity {
                             } else if ("backup.file.read".equals(type)) {
                                 readBackupFile(request, replyProxy, requestId);
                             } else if ("widget.yearStats.settings".equals(type)) {
-                                String title = request.optString("title", "BERGJAHR");
-                                String background = request.optString("background", "alpine");
-                                boolean showTours = request.optBoolean("showTours", true);
-                                boolean showDistance = request.optBoolean("showDistance", true);
-                                boolean showAscent = request.optBoolean("showAscent", true);
-                                boolean showPeaks = request.optBoolean("showPeaks", true);
-                                boolean showSteps = request.optBoolean("showSteps", true);
-                                boolean showTime = request.optBoolean("showTime", true);
-                                boolean showSpeed = request.optBoolean("showSpeed", false);
-                                boolean showGradient = request.optBoolean("showGradient", false);
-                                boolean showAscentRate = request.optBoolean("showAscentRate", false);
-                                int selectedCount = (showTours ? 1 : 0) + (showDistance ? 1 : 0)
-                                        + (showAscent ? 1 : 0) + (showPeaks ? 1 : 0)
-                                        + (showSteps ? 1 : 0) + (showTime ? 1 : 0)
-                                        + (showSpeed ? 1 : 0) + (showGradient ? 1 : 0)
-                                        + (showAscentRate ? 1 : 0);
-                                JSONArray orderJson = request.optJSONArray("metricOrder");
-                                String[] metricOrder = new String[orderJson == null ? 0 : orderJson.length()];
-                                if (orderJson != null) {
-                                    for (int i = 0; i < orderJson.length(); i++) {
-                                        metricOrder[i] = orderJson.optString(i, "");
+                                boolean saved = false;
+                                int widgetCount = 0;
+                                String saveError = null;
+                                try {
+                                    String title = request.optString("title", "BERGJAHR");
+                                    String background = request.optString("background", "alpine");
+                                    boolean showTours = request.optBoolean("showTours", true);
+                                    boolean showDistance = request.optBoolean("showDistance", true);
+                                    boolean showAscent = request.optBoolean("showAscent", true);
+                                    boolean showPeaks = request.optBoolean("showPeaks", true);
+                                    boolean showSteps = request.optBoolean("showSteps", true);
+                                    boolean showTime = request.optBoolean("showTime", true);
+                                    boolean showSpeed = request.optBoolean("showSpeed", false);
+                                    boolean showGradient = request.optBoolean("showGradient", false);
+                                    boolean showAscentRate = request.optBoolean("showAscentRate", false);
+                                    int selectedCount = (showTours ? 1 : 0) + (showDistance ? 1 : 0)
+                                            + (showAscent ? 1 : 0) + (showPeaks ? 1 : 0)
+                                            + (showSteps ? 1 : 0) + (showTime ? 1 : 0)
+                                            + (showSpeed ? 1 : 0) + (showGradient ? 1 : 0)
+                                            + (showAscentRate ? 1 : 0);
+                                    JSONArray orderJson = request.optJSONArray("metricOrder");
+                                    String[] metricOrder = new String[orderJson == null ? 0 : orderJson.length()];
+                                    if (orderJson != null) {
+                                        for (int i = 0; i < orderJson.length(); i++) {
+                                            metricOrder[i] = orderJson.optString(i, "");
+                                        }
                                     }
+                                    boolean valid = title.length() <= 20 && selectedCount >= 1 && selectedCount <= 6
+                                            && ("alpine".equals(background) || "dark".equals(background));
+                                    if (valid) {
+                                        saved = YearStatsWidgetProvider.updateConfiguration(
+                                                MainActivity.this, title, showTours, showDistance, showAscent,
+                                                showPeaks, showSteps, showTime, showSpeed, showGradient,
+                                                showAscentRate, metricOrder, background);
+                                    } else {
+                                        saveError = "Die Widget-Auswahl ist ungültig. Wähle eine bis sechs Kennzahlen.";
+                                    }
+                                    widgetCount = YearStatsWidgetProvider.getInstalledWidgetCount(MainActivity.this);
+                                    if (valid && !saved) {
+                                        saveError = "Android konnte die Widget-Einstellungen nicht dauerhaft speichern.";
+                                    }
+                                } catch (RuntimeException widgetError) {
+                                    Log.e(TAG, "Widget-Konfiguration oder Widget-Aktualisierung fehlgeschlagen.", widgetError);
+                                    saveError = "Android konnte die Widget-Konfiguration nicht anwenden: "
+                                            + widgetError.getClass().getSimpleName();
                                 }
-                                boolean valid = title.length() <= 20 && selectedCount >= 1 && selectedCount <= 6
-                                        && ("alpine".equals(background) || "dark".equals(background));
-                                boolean saved = valid && YearStatsWidgetProvider.updateConfiguration(
-                                        MainActivity.this, title, showTours, showDistance, showAscent,
-                                        showPeaks, showSteps, showTime, showSpeed, showGradient,
-                                        showAscentRate, metricOrder, background);
+
                                 JSONObject response = createGalleryResponse("widget.yearStats.settings.result", requestId);
                                 response.put("ok", saved);
-                                if (!saved) {
-                                    response.put("error", valid
-                                            ? "Android konnte die Widget-Einstellungen nicht dauerhaft speichern."
-                                            : "Die Widget-Auswahl ist ungültig. Wähle eine bis sechs Kennzahlen.");
-                                }
+                                response.put("widgetCount", widgetCount);
+                                if (saveError != null) response.put("error", saveError);
                                 replyToBridge(replyProxy, response);
-                                if (saved) {
-                                    Log.i(TAG, "Widget-Konfiguration dauerhaft gespeichert und Widget-Aktualisierung ausgelöst.");
-                                } else {
-                                    Log.w(TAG, "Widget-Konfiguration wurde nicht gespeichert.");
-                                }
+                                Log.i(TAG, "Widget-Konfiguration: saved=" + saved + ", widgetCount=" + widgetCount
+                                        + ", requestId=" + requestId);
                             } else if ("widget.yearStats.update".equals(type)) {
                                 int year = request.optInt("year", -1);
                                 int tours = request.optInt("tours", -1);
