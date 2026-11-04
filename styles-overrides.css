@@ -5367,7 +5367,7 @@ body.summit .achievement-category-tile.empty {
 
 
 /* Theme Editor – aufklappbare Gruppen und Grüntheme-Oberflächen */
-#theme-view details[data-theme-editor-accordion] > summary {
+#theme-view details[data-theme-editor-accordion] > summary:not(.stats-analysis-title) {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -5377,11 +5377,11 @@ body.summit .achievement-category-tile.empty {
     -webkit-tap-highlight-color: transparent;
 }
 
-#theme-view details[data-theme-editor-accordion] > summary::-webkit-details-marker {
+#theme-view details[data-theme-editor-accordion] > summary:not(.stats-analysis-title)::-webkit-details-marker {
     display: none;
 }
 
-#theme-view details[data-theme-editor-accordion] > summary::after {
+#theme-view details[data-theme-editor-accordion] > summary:not(.stats-analysis-title):not(.stats-analysis-title)::after {
     content: "⌄";
     display: inline-flex;
     flex: 0 0 24px;
@@ -5398,7 +5398,7 @@ body.summit .achievement-category-tile.empty {
     transition: transform 0.18s ease, background 0.18s ease;
 }
 
-#theme-view details[data-theme-editor-accordion][open] > summary::after {
+#theme-view details[data-theme-editor-accordion][open] > summary:not(.stats-analysis-title):not(.stats-analysis-title)::after {
     transform: rotate(0deg);
     background: var(--accent-soft);
 }
@@ -5409,11 +5409,11 @@ body.summit .achievement-category-tile.empty {
     border-bottom: 1px solid var(--ui-card-border);
 }
 
-#theme-view details.theme-editor-panel > summary {
+#theme-view details.theme-editor-panel > summary:not(.stats-analysis-title) {
     margin: 0;
 }
 
-#theme-view details.theme-editor-panel[open] > summary {
+#theme-view details.theme-editor-panel[open] > summary:not(.stats-analysis-title) {
     margin-bottom: 10px;
 }
 
@@ -5437,7 +5437,7 @@ body.green #theme-view .theme-editor-panel {
 }
 
 body.green #theme-view details.theme-editor-col > summary,
-body.green #theme-view details.theme-editor-panel > summary {
+body.green #theme-view details.theme-editor-panel > summary:not(.stats-analysis-title):not(.stats-analysis-title) {
     color: #e6f8ed;
 }
 
@@ -5471,16 +5471,16 @@ body.green #theme-view #theme-editor-tabs button.active {
         font-size: 12px;
     }
 
-    #theme-view details.theme-editor-panel > summary {
+    #theme-view details.theme-editor-panel > summary:not(.stats-analysis-title) {
         min-height: 36px;
         font-size: 12px;
     }
 
-    #theme-view details.theme-editor-panel[open] > summary {
+    #theme-view details.theme-editor-panel[open] > summary:not(.stats-analysis-title) {
         margin-bottom: 10px;
     }
 
-    #theme-view details[data-theme-editor-accordion] > summary::after {
+    #theme-view details[data-theme-editor-accordion] > summary:not(.stats-analysis-title):not(.stats-analysis-title)::after {
         flex-basis: 26px;
         width: 26px;
         height: 26px;
@@ -5489,7 +5489,7 @@ body.green #theme-view #theme-editor-tabs button.active {
 
 
 /* Theme Editor – deutlichere Touch-Bereiche und sattere Grüntheme-Flächen */
-#theme-view details[data-theme-editor-accordion] > summary {
+#theme-view details[data-theme-editor-accordion] > summary:not(.stats-analysis-title) {
     position: relative;
     min-height: 44px;
     padding: 8px 10px;
@@ -5509,21 +5509,21 @@ body.green #theme-view #theme-editor-tabs button.active {
     border-bottom: 1px solid var(--ui-card-border, rgba(127,127,127,0.24));
 }
 
-#theme-view details.theme-editor-panel > summary,
+#theme-view details.theme-editor-panel > summary:not(.stats-analysis-title),
 #theme-view details.theme-editor-contrast-section > summary {
     margin: 0;
 }
 
-#theme-view details[data-theme-editor-accordion] > summary:active {
+#theme-view details[data-theme-editor-accordion] > summary:not(.stats-analysis-title):active {
     filter: brightness(0.94);
 }
 
-#theme-view details[data-theme-editor-accordion] > summary:focus-visible {
+#theme-view details[data-theme-editor-accordion] > summary:not(.stats-analysis-title):focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
 
-#theme-view details[data-theme-editor-accordion][open] > summary {
+#theme-view details[data-theme-editor-accordion][open] > summary:not(.stats-analysis-title) {
     background: var(--accent-soft);
 }
 
@@ -5556,7 +5556,7 @@ body.green #theme-view .theme-editor-panel > summary {
     border-color: rgba(82,183,136,0.34);
 }
 
-body.green #theme-view details[data-theme-editor-accordion][open] > summary {
+body.green #theme-view details[data-theme-editor-accordion][open] > summary:not(.stats-analysis-title):not(.stats-analysis-title) {
     background: linear-gradient(90deg, rgba(82,183,136,0.30), rgba(35,111,70,0.30));
     border-color: rgba(130,225,164,0.55);
 }
@@ -5567,20 +5567,20 @@ body.green #theme-view .theme-editor-contrast-row {
 }
 
 @media (max-width: 768px) and (orientation: portrait) and (pointer: coarse) {
-    #theme-view details[data-theme-editor-accordion] > summary {
+    #theme-view details[data-theme-editor-accordion] > summary:not(.stats-analysis-title) {
         min-height: 48px;
         padding: 10px 11px;
         font-size: 12.5px;
     }
 
-    #theme-view details[data-theme-editor-accordion] > summary::after {
+    #theme-view details[data-theme-editor-accordion] > summary:not(.stats-analysis-title):not(.stats-analysis-title)::after {
         flex-basis: 28px;
         width: 28px;
         height: 28px;
     }
 
     #theme-view details.theme-editor-col[open] > summary,
-    #theme-view details.theme-editor-panel[open] > summary,
+    #theme-view details.theme-editor-panel[open] > summary:not(.stats-analysis-title),
     #theme-view details.theme-editor-contrast-section[open] > summary {
         margin-bottom: 10px;
     }
@@ -5608,7 +5608,7 @@ body.green #theme-view .theme-editor-contrast-row {
         overflow: hidden;
     }
 
-    #theme-view details[data-theme-editor-accordion]:not([open]) > summary {
+    #theme-view details[data-theme-editor-accordion]:not([open]) > summary:not(.stats-analysis-title) {
         display: flex;
         align-items: center;
         width: 100%;
@@ -5732,7 +5732,7 @@ body.green #theme-view .theme-editor-contrast-row {
         overflow: hidden;
     }
 
-    #theme-view details[data-theme-editor-accordion]:not([open]) > summary {
+    #theme-view details[data-theme-editor-accordion]:not([open]) > summary:not(.stats-analysis-title) {
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -5758,7 +5758,7 @@ body.green #theme-view .theme-editor-contrast-row {
         box-sizing: border-box !important;
     }
 
-    #theme-view details[data-theme-editor-accordion]:not([open]) > summary {
+    #theme-view details[data-theme-editor-accordion]:not([open]) > summary:not(.stats-analysis-title) {
         display: flex !important;
         align-items: center !important;
         justify-content: space-between !important;
@@ -8494,7 +8494,7 @@ body.summit .top-main-nav [aria-current="page"] {
     color: var(--app-text-primary, #f3f7fb);
     overflow: hidden;
 }
-#theme-view .dashboard-editor-section > summary {
+#theme-view .dashboard-editor-section > summary:not(.stats-analysis-title) {
     padding: 13px 14px;
     cursor: pointer;
 }
