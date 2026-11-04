@@ -97,7 +97,8 @@
 /* Überschriften: individuelle alpine Line-Art statt eines identischen Bergsymbols. */
 #chart-view .stats-analysis-title,
 #chart-view .chart-title,
-#theme-view .theme-editor-section-card > .stats-analysis-title {
+#theme-view .theme-editor-section-card > .stats-analysis-title,
+#theme-view .theme-editor-subgroup > .stats-analysis-title {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -351,7 +352,8 @@
 @media (max-width: 380px) {
     #chart-view .stats-analysis-title,
     #chart-view .chart-title,
-    #theme-view .theme-editor-section-card > .stats-analysis-title {
+    #theme-view .theme-editor-section-card > .stats-analysis-title,
+    #theme-view .theme-editor-subgroup > .stats-analysis-title {
         gap: 6px;
         padding-bottom: 7px;
         margin-bottom: 9px;
@@ -1135,7 +1137,107 @@
 
 /* Auf mobilen Breiten dieselbe kompakte Titelgröße wie in Statistik und Entwicklung. */
 @media (max-width: 1024px) {
-    #theme-view .theme-editor-section-card > .stats-analysis-title {
+    #theme-view .theme-editor-section-card > .stats-analysis-title,
+    #theme-view .theme-editor-subgroup > .stats-analysis-title {
         font-size: 11px;
+    }
+}
+
+
+/* =========================================================
+   EDITOR — exakt dieselbe Statistik-Header-Komponente
+   Gilt für Hauptbereiche und Untergruppen. Der Header bleibt
+   im offenen und geschlossenen Zustand geometrisch identisch.
+   Nur das Chevron zeigt den jeweiligen Zustand an.
+   ========================================================= */
+#theme-view .theme-editor-section-card > summary.stats-analysis-title,
+#theme-view .theme-editor-subgroup > summary.stats-analysis-title {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 0 11px !important;
+    padding: 0 26px 8px 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--premium-border, rgba(255,255,255,.12)) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--app-text-primary, var(--text-main, inherit)) !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.25 !important;
+    text-align: left !important;
+    list-style: none !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+#theme-view .theme-editor-section-card > summary.stats-analysis-title::-webkit-details-marker,
+#theme-view .theme-editor-subgroup > summary.stats-analysis-title::-webkit-details-marker {
+    display: none !important;
+}
+#theme-view .theme-editor-section-card > summary.stats-analysis-title::after,
+#theme-view .theme-editor-subgroup > summary.stats-analysis-title::after {
+    content: "" !important;
+    position: absolute !important;
+    display: block !important;
+    right: 5px !important;
+    top: calc(50% - 5px) !important;
+    flex: 0 0 8px !important;
+    width: 8px !important;
+    height: 8px !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-right: 1.8px solid var(--theme-palette-accent, var(--accent, #D5A64C)) !important;
+    border-bottom: 1.8px solid var(--theme-palette-accent, var(--accent, #D5A64C)) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--theme-palette-accent, var(--accent, #D5A64C)) !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    transform: rotate(45deg) !important;
+    transform-origin: center !important;
+    transition: transform 160ms ease, top 160ms ease !important;
+    opacity: .95 !important;
+}
+#theme-view .theme-editor-section-card[open] > summary.stats-analysis-title::after,
+#theme-view .theme-editor-subgroup[open] > summary.stats-analysis-title::after {
+    top: calc(50% - 2px) !important;
+    transform: rotate(225deg) !important;
+}
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    #theme-view .theme-editor-section-card > summary.stats-analysis-title,
+    #theme-view .theme-editor-subgroup > summary.stats-analysis-title {
+        margin-bottom: 6px !important;
+        font-size: 11px !important;
+    }
+}
+@media (max-width: 380px) {
+    #theme-view .theme-editor-section-card > summary.stats-analysis-title,
+    #theme-view .theme-editor-subgroup > summary.stats-analysis-title {
+        gap: 6px !important;
+        padding-bottom: 7px !important;
+        margin-bottom: 9px !important;
+    }
+    #theme-view .theme-editor-section-card > summary.stats-analysis-title .stats-premium-title-icon,
+    #theme-view .theme-editor-subgroup > summary.stats-analysis-title .stats-premium-title-icon {
+        flex-basis: 16px !important;
+        width: 16px !important;
+        height: 16px !important;
+    }
+    #theme-view .theme-editor-section-card > summary.stats-analysis-title .stats-premium-title-label,
+    #theme-view .theme-editor-subgroup > summary.stats-analysis-title .stats-premium-title-label {
+        gap: 6px !important;
     }
 }
