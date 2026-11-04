@@ -39,10 +39,11 @@ public final class YearStatsWidgetProvider extends AppWidgetProvider {
     private static final String[] METRICS = {"tours","distance","ascent","peaks","steps","time","speed","gradient","ascentRate"};
     private static final String[] DEFAULT_ORDER = {"tours","distance","ascent","peaks","steps","time","speed","gradient","ascentRate"};
 
-    private static final int[] COMPACT_GROUPS = {R.id.widget_year_stats_compact_tours_group,R.id.widget_year_stats_compact_distance_group,R.id.widget_year_stats_compact_ascent_group};
-    private static final int[] COMPACT_ICONS = {R.id.widget_year_stats_compact_tours_icon,R.id.widget_year_stats_compact_distance_icon,R.id.widget_year_stats_compact_ascent_icon};
-    private static final int[] COMPACT_VALUES = {R.id.widget_year_stats_compact_tours_value,R.id.widget_year_stats_compact_distance_value,R.id.widget_year_stats_compact_ascent_value};
-    private static final int[] COMPACT_DIVIDERS = {R.id.widget_year_stats_compact_divider_1,R.id.widget_year_stats_compact_divider_2};
+    private static final int[] COMPACT_GROUPS = {R.id.widget_year_stats_compact_tours_group,R.id.widget_year_stats_compact_distance_group,R.id.widget_year_stats_compact_ascent_group,R.id.widget_year_stats_compact_peaks_group,R.id.widget_year_stats_compact_steps_group,R.id.widget_year_stats_compact_time_group};
+    private static final int[] COMPACT_ICONS = {R.id.widget_year_stats_compact_tours_icon,R.id.widget_year_stats_compact_distance_icon,R.id.widget_year_stats_compact_ascent_icon,R.id.widget_year_stats_compact_peaks_icon,R.id.widget_year_stats_compact_steps_icon,R.id.widget_year_stats_compact_time_icon};
+    private static final int[] COMPACT_VALUES = {R.id.widget_year_stats_compact_tours_value,R.id.widget_year_stats_compact_distance_value,R.id.widget_year_stats_compact_ascent_value,R.id.widget_year_stats_compact_peaks_value,R.id.widget_year_stats_compact_steps_value,R.id.widget_year_stats_compact_time_value};
+    private static final int[] COMPACT_DIVIDERS = {R.id.widget_year_stats_compact_divider_1,R.id.widget_year_stats_compact_divider_2,R.id.widget_year_stats_compact_divider_3,R.id.widget_year_stats_compact_divider_4};
+    private static final int COMPACT_ROW_DIVIDER = R.id.widget_year_stats_compact_row_divider;
     private static final int[] EXPANDED_GROUPS = {R.id.widget_year_stats_tours_group,R.id.widget_year_stats_distance_group,R.id.widget_year_stats_ascent_group,R.id.widget_year_stats_peaks_group,R.id.widget_year_stats_steps_group,R.id.widget_year_stats_time_group};
     private static final int[] EXPANDED_ICONS = {R.id.widget_year_stats_tours_icon,R.id.widget_year_stats_distance_icon,R.id.widget_year_stats_ascent_icon,R.id.widget_year_stats_peaks_icon,R.id.widget_year_stats_steps_icon,R.id.widget_year_stats_time_icon};
     private static final int[] EXPANDED_VALUES = {R.id.widget_year_stats_tours_value,R.id.widget_year_stats_distance_value,R.id.widget_year_stats_ascent_value,R.id.widget_year_stats_peaks_value,R.id.widget_year_stats_steps_value,R.id.widget_year_stats_time_value};
@@ -213,7 +214,9 @@ public final class YearStatsWidgetProvider extends AppWidgetProvider {
             views.setViewVisibility(EXPANDED_DIVIDERS[2],bottomCount>1?View.VISIBLE:View.GONE);
             views.setViewVisibility(EXPANDED_DIVIDERS[3],bottomCount>2?View.VISIBLE:View.GONE);
         }else{
-            int count=Math.min(3,order.size());
+            int count=Math.min(COMPACT_GROUPS.length,order.size());
+            int topCount=Math.min(3,count);
+            int bottomCount=Math.max(0,count-3);
             for(int i=0;i<COMPACT_GROUPS.length;i++){
                 boolean visible=i<count;
                 views.setViewVisibility(COMPACT_GROUPS[i],visible?View.VISIBLE:View.GONE);
@@ -221,8 +224,11 @@ public final class YearStatsWidgetProvider extends AppWidgetProvider {
                         COMPACT_VALUES[i],accent,integer,decimal,distance,ascent,tours,peaks,
                         steps,duration,avgSpeed,avgGradient,avgAscentRate);
             }
-            views.setViewVisibility(COMPACT_DIVIDERS[0],count>1?View.VISIBLE:View.GONE);
-            views.setViewVisibility(COMPACT_DIVIDERS[1],count>2?View.VISIBLE:View.GONE);
+            views.setViewVisibility(COMPACT_DIVIDERS[0],topCount>1?View.VISIBLE:View.GONE);
+            views.setViewVisibility(COMPACT_DIVIDERS[1],topCount>2?View.VISIBLE:View.GONE);
+            views.setViewVisibility(COMPACT_DIVIDERS[2],bottomCount>1?View.VISIBLE:View.GONE);
+            views.setViewVisibility(COMPACT_DIVIDERS[3],bottomCount>2?View.VISIBLE:View.GONE);
+            views.setViewVisibility(COMPACT_ROW_DIVIDER,bottomCount>0?View.VISIBLE:View.GONE);
         }
 
         Intent open=new Intent(context,MainActivity.class);
