@@ -109,7 +109,7 @@
                             android:singleLine="true"
                             android:text="TOUREN"
                             android:textColor="#D5DEE5"
-                            android:textSize="8sp"
+                            android:textSize="9sp"
                             android:gravity="start"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -164,7 +164,7 @@
                             android:singleLine="true"
                             android:text="KM"
                             android:textColor="#D5DEE5"
-                            android:textSize="8sp"
+                            android:textSize="9sp"
                             android:gravity="start"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -219,7 +219,7 @@
                             android:singleLine="true"
                             android:text="HM"
                             android:textColor="#D5DEE5"
-                            android:textSize="8sp"
+                            android:textSize="9sp"
                             android:gravity="start"
                             android:textStyle="bold" />
                     </LinearLayout>
