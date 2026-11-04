@@ -15,6 +15,7 @@ on:
       - "android-gallery-photos.css"
       - "background-image-manager.js"
       - "theme-editor-unified.js"
+      - "theme-editor-workflow.js"
       - "index.html"
       - "styles-overrides.css"
       - "sw.js"
@@ -128,6 +129,7 @@ jobs:
           node --check android-gallery-photos.js
           node --check background-image-manager.js
           node --check theme-editor-unified.js
+          node --check theme-editor-workflow.js
 
       - name: Assemble debug APK
         run: ./android/gradlew --no-daemon --stacktrace -p android :app:assembleDebug
