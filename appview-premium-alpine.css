@@ -713,3 +713,21 @@ html body #tour-detail-modal #td-body .td-accordion-header:focus-visible {
         transition: none;
     }
 }
+
+/* Einzeltour-Modal: auch die äußere Kartenkontur folgt dem Editor-Radius.
+   Innenliegende Tour- und Galerieflächen verwenden bereits denselben Token. */
+html body #tour-detail-modal > .modal-card {
+    border-radius: var(--editor-radius, var(--premium-radius-card, 16px)) !important;
+}
+
+@media (max-width: 768px), (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    /* Das Modal bleibt als Bottom-Sheet unten bündig; nur die oberen Ecken
+       übernehmen den frei einstellbaren Editor-Radius. */
+    html body #tour-detail-modal > .modal-card {
+        border-radius:
+            var(--editor-radius, 22px)
+            var(--editor-radius, 22px)
+            0
+            0 !important;
+    }
+}
