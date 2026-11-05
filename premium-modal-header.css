@@ -1,0 +1,277 @@
+/* Premium Alpine — einheitlicher Modal-Header.
+   Referenz: Tourdetail-Modal. Das Meilenstein-Modal bleibt beim Titelbereich
+   vollständig eigenständig; dort wird ausschließlich der Schließen-Button normiert. */
+
+:is(
+    #tour-detail-modal,
+    #achievement-category-modal,
+    #compare-modal,
+    #month-stats-modal,
+    #stats-chart-modal,
+    #tour-list-modal,
+    #dash-stat-modal
+) > .modal-card > .modal-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    min-height: 42px;
+    padding: 0 0 12px !important;
+    margin: 0 0 12px !important;
+    position: relative !important;
+    border: 0 !important;
+    background: transparent !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+}
+
+:is(
+    #tour-detail-modal,
+    #achievement-category-modal,
+    #compare-modal,
+    #month-stats-modal,
+    #stats-chart-modal,
+    #tour-list-modal,
+    #dash-stat-modal
+) > .modal-card > .modal-header::after {
+    content: "" !important;
+    position: absolute !important;
+    left: 4% !important;
+    right: 4% !important;
+    bottom: 0 !important;
+    width: auto !important;
+    height: 1px !important;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 44%, rgba(255,255,255,.34)) 50%,
+        transparent 100%
+    ) !important;
+    pointer-events: none;
+}
+
+:is(
+    #tour-detail-modal,
+    #achievement-category-modal,
+    #compare-modal,
+    #month-stats-modal,
+    #stats-chart-modal,
+    #tour-list-modal,
+    #dash-stat-modal
+) > .modal-card > .modal-header > .modal-title {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: var(--app-text-primary, var(--text-main, #f3f7fb)) !important;
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    line-height: 1.22 !important;
+    overflow-wrap: anywhere;
+}
+
+:is(
+    #tour-detail-modal,
+    #achievement-category-modal,
+    #compare-modal,
+    #month-stats-modal,
+    #stats-chart-modal,
+    #tour-list-modal,
+    #dash-stat-modal
+) > .modal-card > .modal-header > .modal-title > :is(
+    .premium-modal-header-icon,
+    .premium-dashboard-header-icon,
+    .stats-premium-content-icon,
+    .premium-alpine-inline-icon,
+    .stats-premium-title-icon
+) {
+    flex: 0 0 1.08em !important;
+    width: 1.08em !important;
+    height: 1.08em !important;
+    min-width: 1.08em !important;
+    min-height: 1.08em !important;
+    margin: 0 !important;
+}
+
+:is(
+    #tour-detail-modal,
+    #achievement-category-modal,
+    #compare-modal,
+    #month-stats-modal,
+    #stats-chart-modal,
+    #tour-list-modal,
+    #dash-stat-modal
+) > .modal-card > .modal-header > .modal-header-actions {
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    margin: 0 !important;
+}
+
+/* Einheitliche 42-px-Bedienflächen für Zurück und Schließen.
+   Der Editor-Radius wird auch bei Inline-Styles und alten Theme-Regeln durchgesetzt. */
+:is(
+    #td-close,
+    #achievement-category-close,
+    #compare-modal-close,
+    #ms-close,
+    #stats-chart-modal-close,
+    #tl-close,
+    #ds-close,
+    #milestone-modal-close,
+    #td-back,
+    #tl-back,
+    #ds-header-back
+) {
+    display: inline-flex !important;
+    flex: 0 0 42px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid color-mix(
+        in srgb,
+        var(--theme-palette-accent, var(--accent, #ad7d12)) 42%,
+        rgba(255,255,255,.28)
+    ) !important;
+    border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
+    background: linear-gradient(
+        145deg,
+        color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 17%, var(--app-surface-strong, rgba(25,30,39,.92))),
+        color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 8%, var(--app-surface-card, rgba(17,26,37,.88)))
+    ) !important;
+    color: var(--app-text-primary, var(--theme-palette-text, #f3f7fb)) !important;
+    box-shadow:
+        0 3px 10px rgba(0,0,0,.18),
+        inset 0 1px 0 rgba(255,255,255,.10) !important;
+    font-size: 18px !important;
+    font-weight: 750 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transform: none;
+}
+
+/* Zurück-Pfeile dürfen etwas größer sein, bleiben aber exakt gleich groß. */
+:is(#td-back, #tl-back, #ds-header-back) {
+    font-size: 22px !important;
+}
+
+/* Das MS-Modal wird absichtlich nur über diesen Button adressiert.
+   Titel, Abzeichen, Header-Aufbau und Trennlinie bleiben unangetastet. */
+#milestone-modal-close {
+    flex: 0 0 42px !important;
+}
+
+:is(
+    #td-close,
+    #achievement-category-close,
+    #compare-modal-close,
+    #ms-close,
+    #stats-chart-modal-close,
+    #tl-close,
+    #ds-close,
+    #milestone-modal-close,
+    #td-back,
+    #tl-back,
+    #ds-header-back
+):active {
+    transform: scale(.96) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    :is(
+        #td-close,
+        #achievement-category-close,
+        #compare-modal-close,
+        #ms-close,
+        #stats-chart-modal-close,
+        #tl-close,
+        #ds-close,
+        #milestone-modal-close,
+        #td-back,
+        #tl-back,
+        #ds-header-back
+    ):hover {
+        border-color: color-mix(
+            in srgb,
+            var(--theme-palette-accent, var(--accent, #ad7d12)) 66%,
+            rgba(255,255,255,.36)
+        ) !important;
+        filter: brightness(1.08);
+    }
+}
+
+:is(
+    #td-close,
+    #achievement-category-close,
+    #compare-modal-close,
+    #ms-close,
+    #stats-chart-modal-close,
+    #tl-close,
+    #ds-close,
+    #milestone-modal-close,
+    #td-back,
+    #tl-back,
+    #ds-header-back
+):focus-visible {
+    outline: 2px solid var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+    outline-offset: 2px;
+}
+
+@media (max-width: 380px) {
+    :is(
+        #tour-detail-modal,
+        #achievement-category-modal,
+        #compare-modal,
+        #month-stats-modal,
+        #stats-chart-modal,
+        #tour-list-modal,
+        #dash-stat-modal
+    ) > .modal-card > .modal-header {
+        gap: 8px !important;
+    }
+
+    :is(
+        #tour-detail-modal,
+        #achievement-category-modal,
+        #compare-modal,
+        #month-stats-modal,
+        #stats-chart-modal,
+        #tour-list-modal,
+        #dash-stat-modal
+    ) > .modal-card > .modal-header > .modal-title {
+        font-size: 17px !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :is(
+        #td-close,
+        #achievement-category-close,
+        #compare-modal-close,
+        #ms-close,
+        #stats-chart-modal-close,
+        #tl-close,
+        #ds-close,
+        #milestone-modal-close,
+        #td-back,
+        #tl-back,
+        #ds-header-back
+    ) {
+        transition: none !important;
+    }
+}
