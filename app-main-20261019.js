@@ -15065,7 +15065,71 @@ function closeAllOpenBoxes() {
     });
 }
 
+function ensureBergweltModuleLoaded() {
+    window.__bergweltGetTours = () => appStorage.get('touren') || [];
+    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261102-bergwelt-experience-controls') {
+        window.__bergweltRender?.();
+        return;
+    }
+    if (window.__BERGWELT_BADGE_LOADING__) return;
+    window.__BERGWELT_BADGE_LOADING__ = true;
+    window.__BERGWELT_LOADING__ = true;
+    if (!document.querySelector('link[data-bergwelt-badge-styles="20261022-year-ascent-donut"]')) {
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = './bergwelt-badges-20261019.css?v=1';
+        styleLink.dataset.bergweltBadgeStyles = '20261022-year-ascent-donut';
+        document.head.appendChild(styleLink);
+    }
+    if (!document.querySelector('link[data-bergwelt-premium-styles="20261102-premium-alpine-bottom-aligned"]')) {
+        const premiumStyleLink = document.createElement('link');
+        premiumStyleLink.rel = 'stylesheet';
+        premiumStyleLink.href = './bergwelt-premium-alpine.css?v=8';
+        premiumStyleLink.dataset.bergweltPremiumStyles = '20261102-premium-alpine-bottom-aligned';
+        document.head.appendChild(premiumStyleLink);
+    }
+    const script = document.createElement('script');
+    script.src = './bergwelt-badges-20261019.js?v=5';
+    script.onload = () => {
+        window.__BERGWELT_BADGE_LOADING__ = false;
+        window.__BERGWELT_LOADING__ = false;
+        window.__bergweltRender?.();
+    };
+    script.onerror = () => {
+        window.__BERGWELT_BADGE_LOADING__ = false;
+        window.__BERGWELT_LOADING__ = false;
+        showToast?.('Die Bergwelt konnte nicht geladen werden.', { type: 'error', duration: 3000 });
+    };
+    document.body.appendChild(script);
+}
+window.__bergweltEnsureLoaded = ensureBergweltModuleLoaded;
+
+document.addEventListener('click', event => {
+    const target = event.target instanceof Element ? event.target : null;
+    const trigger = target?.closest('#wrapped-toggle');
+    if (!trigger) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const years = getWrappedAvailableYears();
+    if (!years.length) {
+        showToast?.('Für die Bergwelt sind noch keine Tourdaten vorhanden.', { type: 'info' });
+        return;
+    }
+    closeMoreMenu?.();
+    ensureBergweltModuleLoaded();
+    openWrappedView(Number(years[0]));
+});
+
+let viewBlurCleanupTimer = null;
+
 function goToView(targetView, animate = true) {
+    if (viewBlurCleanupTimer !== null) {
+        clearTimeout(viewBlurCleanupTimer);
+        viewBlurCleanupTimer = null;
+    }
+    document.querySelectorAll('.view.view-blur-in, .view.view-blur-out').forEach(view => {
+        view.classList.remove('view-blur-in', 'view-blur-out');
+    });
     if (targetView === 'achievements') {
         window.__bergweltRequestedTab = 'achievements';
         targetView = 'wrapped';
@@ -15083,7 +15147,7 @@ function goToView(targetView, animate = true) {
     // Beim direkten Menüaufruf wird derselbe Loader verwendet; das Modul bleibt
     // weiterhin lazy und wird nicht beim Appstart geladen.
     if (targetView === 'wrapped') {
-        window.__bergweltEnsureLoaded?.();
+        ensureBergweltModuleLoaded();
     }
 
     const previousView = currentView;
@@ -15192,6 +15256,9 @@ if (previousView === 'wrapped' && targetView !== 'wrapped') {
     clearWrappedAutoAdvance();
     exitWrappedFullscreenIfActive();
 }
+if (targetView === 'wrapped') {
+    scheduleWrappedCanvasLayoutRefresh(animate ? 420 : 80);
+}
 
     if (isViewChange && animate) {
         // Neue View startet leicht geblurrt und blendet dann scharf ein
@@ -15206,9 +15273,12 @@ if (previousView === 'wrapped' && targetView !== 'wrapped') {
         }
 
         // Alte View nach Abschluss der Slide-Transition wieder scharf zurücksetzen
-        setTimeout(() => {
-            if (oldViewEl) oldViewEl.classList.remove('view-blur-out');
-        }, 380);
+        viewBlurCleanupTimer = setTimeout(() => {
+            document.querySelectorAll('.view.view-blur-in, .view.view-blur-out').forEach(view => {
+                view.classList.remove('view-blur-in', 'view-blur-out');
+            });
+            viewBlurCleanupTimer = null;
+        }, 420);
     }
 }
 
@@ -36035,7 +36105,6 @@ async function openWrappedView(year) {
 
     goToView('wrapped');
     renderWrappedSlide(0);
-    scheduleWrappedCanvasLayoutRefresh(true);
     updateWrappedPauseButtonLabel();
 
     await attachWrappedPhotos(wrappedSlides, year);
@@ -36351,56 +36420,7 @@ const endHold = () => {
     document.getElementById('wrapped-year-next-btn')?.addEventListener('click', () => shiftWrappedYear('next'));
 
     // Die Präsentation besitzt keinen Teilen-Button mehr im Header.
-    // Bergwelt bleibt ein optionales Modul und wird erst beim Öffnen geladen.
-    function loadBergweltModule() {
-        window.__bergweltGetTours = () => appStorage.get('touren') || [];
-        if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261102-bergwelt-experience-controls') {
-            window.__bergweltRender?.();
-            return;
-        }
-        if (window.__BERGWELT_BADGE_LOADING__) return;
-        window.__BERGWELT_BADGE_LOADING__ = true;
-        window.__BERGWELT_LOADING__ = true;
-        if (!document.querySelector('link[data-bergwelt-badge-styles="20261022-year-ascent-donut"]')) {
-            const styleLink = document.createElement('link');
-            styleLink.rel = 'stylesheet';
-            styleLink.href = './bergwelt-badges-20261019.css?v=1';
-            styleLink.dataset.bergweltBadgeStyles = '20261022-year-ascent-donut';
-            document.head.appendChild(styleLink);
-        }
-        if (!document.querySelector('link[data-bergwelt-premium-styles="20261102-premium-alpine-bottom-aligned"]')) {
-            const premiumStyleLink = document.createElement('link');
-            premiumStyleLink.rel = 'stylesheet';
-            premiumStyleLink.href = './bergwelt-premium-alpine.css?v=8';
-            premiumStyleLink.dataset.bergweltPremiumStyles = '20261102-premium-alpine-bottom-aligned';
-            document.head.appendChild(premiumStyleLink);
-        }
-        const script = document.createElement('script');
-        script.src = './bergwelt-badges-20261019.js?v=5';
-        script.onload = () => {
-            window.__BERGWELT_BADGE_LOADING__ = false;
-            window.__BERGWELT_LOADING__ = false;
-            window.__bergweltRender?.();
-        };
-        script.onerror = () => {
-            window.__BERGWELT_BADGE_LOADING__ = false;
-            window.__BERGWELT_LOADING__ = false;
-            showToast?.('Die Bergwelt konnte nicht geladen werden.', { type: 'error', duration: 3000 });
-        };
-        document.body.appendChild(script);
-    }
-
-    // Von der zentralen View-Navigation (einschließlich Swipe) nutzbarer Loader.
-    window.__bergweltEnsureLoaded = loadBergweltModule;
-
-    document.getElementById('wrapped-toggle').addEventListener('click', () => {
-        const years = getWrappedAvailableYears();
-        if (!years.length) return;
-        closeMoreMenu?.();
-        openWrappedView(years[0]);
-        loadBergweltModule();
-    });
-
+    document.getElementById('wrapped-fullscreen-btn')?.addEventListener('click', toggleWrappedFullscreen);
     document.getElementById('wrapped-fullscreen-btn')?.addEventListener('click', toggleWrappedFullscreen);
 }
 
@@ -37473,48 +37493,22 @@ function renderWrappedSlide(index, transition = null) {
         );
     }
 }
-let wrappedCanvasResizeFrame = 0;
-let wrappedCanvasLastStageSize = { width: 0, height: 0 };
-function scheduleWrappedCanvasLayoutRefresh(force = false) {
-    const view = document.getElementById('wrapped-view');
-    if (!view?.classList.contains('visible') || !wrappedSlides.length) return;
-    if (wrappedCanvasResizeFrame) cancelAnimationFrame(wrappedCanvasResizeFrame);
-    wrappedCanvasResizeFrame = requestAnimationFrame(() => {
-        wrappedCanvasResizeFrame = requestAnimationFrame(() => {
-            wrappedCanvasResizeFrame = 0;
-            const stage = document.getElementById('wrapped-stage');
-            const rect = stage?.getBoundingClientRect();
-            if (!rect || rect.width <= 0 || rect.height <= 0) return;
-            const changed = Math.abs(rect.width - wrappedCanvasLastStageSize.width) > 1 ||
-                Math.abs(rect.height - wrappedCanvasLastStageSize.height) > 1;
-            if (!force && !changed) return;
-            wrappedCanvasLastStageSize = { width: rect.width, height: rect.height };
+let wrappedCanvasLayoutTimer = null;
+function scheduleWrappedCanvasLayoutRefresh(delay = 420) {
+    if (wrappedCanvasLayoutTimer !== null) clearTimeout(wrappedCanvasLayoutTimer);
+    wrappedCanvasLayoutTimer = setTimeout(() => {
+        wrappedCanvasLayoutTimer = null;
+        if (currentView !== 'wrapped' || !wrappedSlides.length) return;
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            if (currentView !== 'wrapped' || !wrappedSlides.length) return;
             if (wrappedTransitionState) finishWrappedTransition(true, true);
             renderWrappedSlide(wrappedSlideIndex);
-        });
-    });
+        }));
+    }, Math.max(0, Number(delay) || 0));
 }
-window.addEventListener('resize', () => scheduleWrappedCanvasLayoutRefresh(false), { passive: true });
-
-if (typeof ResizeObserver !== 'undefined') {
-    const wrappedStageObserver = new ResizeObserver(entries => {
-        const entry = entries[entries.length - 1];
-        const rect = entry?.contentRect;
-        if (!rect) return;
-        const changed = Math.abs(rect.width - wrappedCanvasLastStageSize.width) > 1 ||
-            Math.abs(rect.height - wrappedCanvasLastStageSize.height) > 1;
-        if (changed) scheduleWrappedCanvasLayoutRefresh(false);
-    });
-    const observeWrappedStage = () => {
-        const stage = document.getElementById('wrapped-stage');
-        if (stage) wrappedStageObserver.observe(stage);
-    };
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', observeWrappedStage, { once: true });
-    } else {
-        observeWrappedStage();
-    }
-}
+window.addEventListener('resize', () => {
+    if (currentView === 'wrapped') scheduleWrappedCanvasLayoutRefresh(100);
+}, { passive: true });
 
 function renderWrappedIntroSlide(ctx, w, h, colors, data, showAlpineArtwork = true) {
     // Der alpine Hintergrund bzw. das jeweilige Tourfoto bleibt erhalten.
