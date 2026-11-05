@@ -42,10 +42,10 @@
 
             if (direction === 'radial') {
                 gradient = document.createElementNS(SVG_NS, 'radialGradient');
-                gradient.setAttribute('cx', '72%');
-                gradient.setAttribute('cy', '82%');
-                gradient.setAttribute('fx', '72%');
-                gradient.setAttribute('fy', '82%');
+                gradient.setAttribute('cx', '28%');
+                gradient.setAttribute('cy', '18%');
+                gradient.setAttribute('fx', '28%');
+                gradient.setAttribute('fy', '18%');
                 gradient.setAttribute('r', '88%');
 
                 const stopA = document.createElementNS(SVG_NS, 'stop');
@@ -64,9 +64,9 @@
                 const dx = Math.sin(radians);
                 const dy = -Math.cos(radians);
                 const x1 = 50 + dx * 50;
-                const y1 = 50 - dy * 50;
+                const y1 = 50 + dy * 50;
                 const x2 = 50 - dx * 50;
-                const y2 = 50 + dy * 50;
+                const y2 = 50 - dy * 50;
 
                 gradient = document.createElementNS(SVG_NS, 'linearGradient');
                 gradient.setAttribute('x1', x1 + '%');
