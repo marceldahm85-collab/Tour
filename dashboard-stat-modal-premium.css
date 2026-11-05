@@ -162,6 +162,7 @@
         --theme-palette-accent-gradient,
         var(--accent-gradient, linear-gradient(180deg, var(--accent, #ad7d12), #000))
     ) !important;
+    background-color: transparent !important;
     border-color: color-mix(
         in srgb,
         var(--theme-palette-accent, var(--accent, #ad7d12)) 34%,
