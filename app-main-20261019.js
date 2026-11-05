@@ -15065,71 +15065,7 @@ function closeAllOpenBoxes() {
     });
 }
 
-function ensureBergweltModuleLoaded() {
-    window.__bergweltGetTours = () => appStorage.get('touren') || [];
-    if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261102-bergwelt-experience-controls') {
-        window.__bergweltRender?.();
-        return;
-    }
-    if (window.__BERGWELT_BADGE_LOADING__) return;
-    window.__BERGWELT_BADGE_LOADING__ = true;
-    window.__BERGWELT_LOADING__ = true;
-    if (!document.querySelector('link[data-bergwelt-badge-styles="20261022-year-ascent-donut"]')) {
-        const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet';
-        styleLink.href = './bergwelt-badges-20261019.css?v=1';
-        styleLink.dataset.bergweltBadgeStyles = '20261022-year-ascent-donut';
-        document.head.appendChild(styleLink);
-    }
-    if (!document.querySelector('link[data-bergwelt-premium-styles="20261102-premium-alpine-bottom-aligned"]')) {
-        const premiumStyleLink = document.createElement('link');
-        premiumStyleLink.rel = 'stylesheet';
-        premiumStyleLink.href = './bergwelt-premium-alpine.css?v=8';
-        premiumStyleLink.dataset.bergweltPremiumStyles = '20261102-premium-alpine-bottom-aligned';
-        document.head.appendChild(premiumStyleLink);
-    }
-    const script = document.createElement('script');
-    script.src = './bergwelt-badges-20261019.js?v=5';
-    script.onload = () => {
-        window.__BERGWELT_BADGE_LOADING__ = false;
-        window.__BERGWELT_LOADING__ = false;
-        window.__bergweltRender?.();
-    };
-    script.onerror = () => {
-        window.__BERGWELT_BADGE_LOADING__ = false;
-        window.__BERGWELT_LOADING__ = false;
-        showToast?.('Die Bergwelt konnte nicht geladen werden.', { type: 'error', duration: 3000 });
-    };
-    document.body.appendChild(script);
-}
-window.__bergweltEnsureLoaded = ensureBergweltModuleLoaded;
-
-document.addEventListener('click', event => {
-    const target = event.target instanceof Element ? event.target : null;
-    const trigger = target?.closest('#wrapped-toggle');
-    if (!trigger) return;
-    event.preventDefault();
-    event.stopPropagation();
-    const years = getWrappedAvailableYears();
-    if (!years.length) {
-        showToast?.('Für die Bergwelt sind noch keine Tourdaten vorhanden.', { type: 'info' });
-        return;
-    }
-    closeMoreMenu?.();
-    ensureBergweltModuleLoaded();
-    openWrappedView(Number(years[0]));
-});
-
-let viewBlurCleanupTimer = null;
-
 function goToView(targetView, animate = true) {
-    if (viewBlurCleanupTimer !== null) {
-        clearTimeout(viewBlurCleanupTimer);
-        viewBlurCleanupTimer = null;
-    }
-    document.querySelectorAll('.view.view-blur-in, .view.view-blur-out').forEach(view => {
-        view.classList.remove('view-blur-in', 'view-blur-out');
-    });
     if (targetView === 'achievements') {
         window.__bergweltRequestedTab = 'achievements';
         targetView = 'wrapped';
@@ -15147,7 +15083,7 @@ function goToView(targetView, animate = true) {
     // Beim direkten Menüaufruf wird derselbe Loader verwendet; das Modul bleibt
     // weiterhin lazy und wird nicht beim Appstart geladen.
     if (targetView === 'wrapped') {
-        ensureBergweltModuleLoaded();
+        window.__bergweltEnsureLoaded?.();
     }
 
     const previousView = currentView;
@@ -15256,9 +15192,6 @@ if (previousView === 'wrapped' && targetView !== 'wrapped') {
     clearWrappedAutoAdvance();
     exitWrappedFullscreenIfActive();
 }
-if (targetView === 'wrapped') {
-    scheduleWrappedCanvasLayoutRefresh(animate ? 420 : 80);
-}
 
     if (isViewChange && animate) {
         // Neue View startet leicht geblurrt und blendet dann scharf ein
@@ -15273,12 +15206,9 @@ if (targetView === 'wrapped') {
         }
 
         // Alte View nach Abschluss der Slide-Transition wieder scharf zurücksetzen
-        viewBlurCleanupTimer = setTimeout(() => {
-            document.querySelectorAll('.view.view-blur-in, .view.view-blur-out').forEach(view => {
-                view.classList.remove('view-blur-in', 'view-blur-out');
-            });
-            viewBlurCleanupTimer = null;
-        }, 420);
+        setTimeout(() => {
+            if (oldViewEl) oldViewEl.classList.remove('view-blur-out');
+        }, 380);
     }
 }
 
@@ -24873,6 +24803,46 @@ function getWrappedHighlights(entries) {
         longestTime ? { label: 'Längste Gehzeit', symbol: 'time', value: formatMinutesToHHMM(longestTime.value) + ' h', entry: longestTime.entry } : null,
         mostSteps ? { label: 'Meiste Schritte', symbol: 'steps', value: Math.round(mostSteps.value).toLocaleString('de-DE') + ' Schritte', entry: mostSteps.entry } : null
     ].filter(Boolean);
+}
+
+function getWrappedTotals(entries) {
+    let distance = 0;
+    let ascent = 0;
+    let minutes = 0;
+    let peaks = 0;
+    let steps = 0;
+
+    entries.forEach(entry => {
+        distance += parseFloat(String(entry.strecke || '').replace(',', '.')) || 0;
+        ascent += parseFloat(String(entry.aufstieg || '').replace(',', '.')) || 0;
+        peaks += parseInt(entry.gipfel) || 0;
+        steps += Number(calculateEntrySteps(entry)) || 0;
+
+        if (entry.zeit && String(entry.zeit).includes(':')) {
+            const [h, m] = String(entry.zeit).split(':').map(Number);
+            if (Number.isFinite(h) && Number.isFinite(m)) {
+                minutes += h * 60 + m;
+            }
+        }
+    });
+
+    return { tourCount: countDistinctTours(entries), distance, ascent, minutes, peaks, steps };
+}
+
+function getWrappedSeasonTitle(totals) {
+    const tourCount = Number(totals?.tourCount) || 0;
+    const ascent = Number(totals?.ascent) || 0;
+    const distance = Number(totals?.distance) || 0;
+
+    // Titel nur aus tatsächlich gespeicherten Jahreswerten ableiten.
+    if (tourCount === 0) return 'Ein neues Kapitel beginnt';
+    if (ascent >= 20000) return 'Höhenmeter ohne Ende';
+    if (distance >= 1000) return 'Weite Wege, große Momente';
+    if (ascent >= 10000) return 'Hoch hinaus';
+    if (tourCount >= 50) return 'Ein Jahr voller Bergmomente';
+    if (distance >= 300) return 'Auf langen Wegen';
+    if (tourCount >= 20) return 'Draußen zuhause';
+    return 'Dein Jahr in den Bergen';
 }
 
 function buildWrappedSlideData(year) {
@@ -36113,6 +36083,7 @@ async function openWrappedView(year) {
     } else {
         renderWrappedSlide(wrappedSlideIndex);
     }
+    scheduleWrappedCanvasInitialFit(520);
 }
 
 function populateWrappedYearSelect() {
@@ -36417,11 +36388,64 @@ const endHold = () => {
     }
 
     document.getElementById('wrapped-year-prev-btn')?.addEventListener('click', () => shiftWrappedYear('prev'));
-    document.getElementById('wrapped-year-next-btn')?.addEventListener('click', () => shiftWrappedYear('next'));
+    document.getElementById('wrapped-year-next-btn')?.addEventListener('click', () => shiftWrappedYear('next'));// Bergwelt bleibt ein optionales Modul und wird erst beim Öffnen geladen.
+    function loadBergweltModule() {
+        window.__bergweltGetTours = () => appStorage.get('touren') || [];
+        if (window.__BERGWELT_BADGE_MODULE_VERSION__ === '20261102-bergwelt-experience-controls') {
+            window.__bergweltRender?.();
+            return;
+        }
+        if (window.__BERGWELT_BADGE_LOADING__) return;
+        window.__BERGWELT_BADGE_LOADING__ = true;
+        window.__BERGWELT_LOADING__ = true;
+        if (!document.querySelector('link[data-bergwelt-badge-styles="20261022-year-ascent-donut"]')) {
+            const styleLink = document.createElement('link');
+            styleLink.rel = 'stylesheet';
+            styleLink.href = './bergwelt-badges-20261019.css?v=1';
+            styleLink.dataset.bergweltBadgeStyles = '20261022-year-ascent-donut';
+            document.head.appendChild(styleLink);
+        }
+        if (!document.querySelector('link[data-bergwelt-premium-styles="20261102-premium-alpine-bottom-aligned"]')) {
+            const premiumStyleLink = document.createElement('link');
+            premiumStyleLink.rel = 'stylesheet';
+            premiumStyleLink.href = './bergwelt-premium-alpine.css?v=8';
+            premiumStyleLink.dataset.bergweltPremiumStyles = '20261102-premium-alpine-bottom-aligned';
+            document.head.appendChild(premiumStyleLink);
+        }
+        const script = document.createElement('script');
+        script.src = './bergwelt-badges-20261019.js?v=5';
+        script.onload = () => {
+            window.__BERGWELT_BADGE_LOADING__ = false;
+            window.__BERGWELT_LOADING__ = false;
+            window.__bergweltRender?.();
+        };
+        script.onerror = () => {
+            window.__BERGWELT_BADGE_LOADING__ = false;
+            window.__BERGWELT_LOADING__ = false;
+            showToast?.('Die Bergwelt konnte nicht geladen werden.', { type: 'error', duration: 3000 });
+        };
+        document.body.appendChild(script);
+    }
 
-    // Die Präsentation besitzt keinen Teilen-Button mehr im Header.
+    // Von der zentralen View-Navigation (einschließlich Swipe) nutzbarer Loader.
+    window.__bergweltEnsureLoaded = loadBergweltModule;
+
+    document.getElementById('wrapped-toggle').addEventListener('click', () => {
+        const years = getWrappedAvailableYears();
+        if (!years.length) return;
+        closeMoreMenu?.();
+        openWrappedView(years[0]);
+        loadBergweltModule();
+    });
+
     document.getElementById('wrapped-fullscreen-btn')?.addEventListener('click', toggleWrappedFullscreen);
-    document.getElementById('wrapped-fullscreen-btn')?.addEventListener('click', toggleWrappedFullscreen);
+    const wrappedView = document.getElementById('wrapped-view');
+    if (wrappedView && !wrappedView.dataset.wrappedCanvasFitListener) {
+        wrappedView.dataset.wrappedCanvasFitListener = 'true';
+        wrappedView.addEventListener('transitionend', event => {
+            if (event.target === wrappedView && event.propertyName === 'transform') scheduleWrappedCanvasInitialFit(80);
+        });
+    }
 }
 
 function getWrappedThemeColors() {
@@ -36753,44 +36777,44 @@ function drawWrappedOsttirolMotionFrame(state, progress) {
     const canvas = document.getElementById('wrapped-canvas');
     const slide = wrappedSlides[state?.slideIndex];
     if (!canvas || !slide || slide.key !== 'osttirolLoop') return;
-
     const verticalScale = canvas.height / WRAPPED_CANVAS_BASE_HEIGHT;
     const logicalWidth = canvas.width / verticalScale;
-    const layout = getWrappedOsttirolMapLayout(logicalWidth, WRAPPED_CANVAS_BASE_HEIGHT);
-    const points = layout.points;
+    const points = getWrappedOsttirolMapLayout(logicalWidth, WRAPPED_CANVAS_BASE_HEIGHT).points;
+    if (!Array.isArray(points) || points.length < 2) return;
     const segments = points.length - 1;
-    const position = Math.max(0, Math.min(1, progress)) * segments;
+    const position = Math.max(0, Math.min(1, Number(progress) || 0)) * segments;
     const index = Math.min(segments - 1, Math.floor(position));
     const local = position - index;
-    const from = points[index];
-    const to = points[index + 1];
+    const from = points[index], to = points[index + 1];
     const x = from.x + (to.x - from.x) * local;
     const y = from.y + (to.y - from.y) * local;
-
     const ctx = canvas.getContext('2d');
     ctx.save();
     ctx.setTransform(verticalScale, 0, 0, verticalScale, 0, 0);
     ctx.globalAlpha = 1;
-
-    // Die animierte Leuchtspur wird entlang aller bereits erreichten Punkte gezeichnet.
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    for (let pointIndex = 1; pointIndex <= index; pointIndex++) {
-        ctx.lineTo(points[pointIndex].x, points[pointIndex].y);
-    }
-    ctx.lineTo(x, y);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.setLineDash([]);
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.strokeStyle = 'rgba(255,206,112,0.42)';
-    ctx.lineWidth = 12;
+    ctx.miterLimit = 2;
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i <= index; i++) ctx.lineTo(points[i].x, points[i].y);
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = 'rgba(255,196,91,0.48)';
+    ctx.lineWidth = 18;
     ctx.shadowColor = '#ffe4a1';
-    ctx.shadowBlur = 17;
+    ctx.shadowBlur = 23;
     ctx.stroke();
-    ctx.shadowBlur = 0;
     ctx.strokeStyle = 'rgba(255,239,194,0.98)';
-    ctx.lineWidth = 4.5;
+    ctx.lineWidth = 6.5;
+    ctx.shadowColor = 'rgba(255,238,192,0.72)';
+    ctx.shadowBlur = 5;
     ctx.stroke();
-
+    ctx.strokeStyle = 'rgba(255,255,245,0.94)';
+    ctx.lineWidth = 2.3;
+    ctx.shadowBlur = 0;
+    ctx.stroke();
     const halo = ctx.createRadialGradient(x, y, 1, x, y, 16);
     halo.addColorStop(0, 'rgba(255,250,220,0.78)');
     halo.addColorStop(0.28, 'rgba(255,217,130,0.42)');
@@ -37493,22 +37517,36 @@ function renderWrappedSlide(index, transition = null) {
         );
     }
 }
-let wrappedCanvasLayoutTimer = null;
-function scheduleWrappedCanvasLayoutRefresh(delay = 420) {
-    if (wrappedCanvasLayoutTimer !== null) clearTimeout(wrappedCanvasLayoutTimer);
-    wrappedCanvasLayoutTimer = setTimeout(() => {
-        wrappedCanvasLayoutTimer = null;
-        if (currentView !== 'wrapped' || !wrappedSlides.length) return;
+let wrappedCanvasResizeFrame = 0;
+window.addEventListener('resize', () => {
+    const view = document.getElementById('wrapped-view');
+    if (!view?.classList.contains('visible') || !wrappedSlides.length) return;
+    if (wrappedCanvasResizeFrame) cancelAnimationFrame(wrappedCanvasResizeFrame);
+    wrappedCanvasResizeFrame = requestAnimationFrame(() => {
+        wrappedCanvasResizeFrame = 0;
+        if (wrappedTransitionState) finishWrappedTransition(true, true);
+        renderWrappedSlide(wrappedSlideIndex);
+    });
+}, { passive: true });
+
+
+let wrappedCanvasInitialFitTimer = null;
+function scheduleWrappedCanvasInitialFit(delay = 460) {
+    if (wrappedCanvasInitialFitTimer !== null) clearTimeout(wrappedCanvasInitialFitTimer);
+    wrappedCanvasInitialFitTimer = setTimeout(() => {
+        wrappedCanvasInitialFitTimer = null;
         requestAnimationFrame(() => requestAnimationFrame(() => {
-            if (currentView !== 'wrapped' || !wrappedSlides.length) return;
-            if (wrappedTransitionState) finishWrappedTransition(true, true);
+            const view = document.getElementById('wrapped-view');
+            const stage = document.getElementById('wrapped-stage');
+            const canvas = document.getElementById('wrapped-canvas');
+            if (currentView !== 'wrapped' || !wrappedSlides.length || view?.classList.contains('bergwelt-mode') || !stage || !canvas) return;
+            const rect = stage.getBoundingClientRect();
+            if (rect.width <= 0 || rect.height <= 0) return;
+            if (wrappedTransitionState) finishWrappedTransition(true, false);
             renderWrappedSlide(wrappedSlideIndex);
         }));
     }, Math.max(0, Number(delay) || 0));
 }
-window.addEventListener('resize', () => {
-    if (currentView === 'wrapped') scheduleWrappedCanvasLayoutRefresh(100);
-}, { passive: true });
 
 function renderWrappedIntroSlide(ctx, w, h, colors, data, showAlpineArtwork = true) {
     // Der alpine Hintergrund bzw. das jeweilige Tourfoto bleibt erhalten.
@@ -37684,7 +37722,6 @@ function renderWrappedAscentSlide(ctx, w, h, colors, data) {
     wrapWrappedText(ctx, 'Meter für Meter dem Himmel entgegen – und mit jedem Aufstieg ein Stück näher an neuen Perspektiven und unvergesslichen Ausblicken.', w / 2, 1535, w * 0.78, 46);
 }
 
-
 function drawWrappedPremiumIcon(ctx, key, centerX, centerY, size, color, ordinal = null) {
     const scale = size / 24;
     ctx.save();
@@ -37696,7 +37733,47 @@ function drawWrappedPremiumIcon(ctx, key, centerX, centerY, size, color, ordinal
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    if (key === 'time') {
+    if (key === 'route') {
+        ctx.beginPath();
+        ctx.moveTo(3, 17);
+        ctx.bezierCurveTo(6, 17, 6, 7, 11, 7);
+        ctx.bezierCurveTo(15, 7, 14, 17, 20, 17);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(3, 17, 1.5, 0, Math.PI * 2);
+        ctx.arc(20, 17, 1.5, 0, Math.PI * 2);
+        ctx.stroke();
+    } else if (key === 'ascent') {
+        ctx.beginPath();
+        ctx.moveTo(3, 19);
+        ctx.lineTo(8, 14);
+        ctx.lineTo(11, 16);
+        ctx.lineTo(18, 7);
+        ctx.moveTo(12.5, 7);
+        ctx.lineTo(18, 7);
+        ctx.lineTo(18, 12.5);
+        ctx.stroke();
+    } else if (key === 'steepness') {
+        ctx.beginPath();
+        ctx.moveTo(3, 20);
+        ctx.lineTo(3, 4);
+        ctx.moveTo(3, 20);
+        ctx.lineTo(21, 20);
+        ctx.moveTo(5, 18);
+        ctx.lineTo(18.5, 5);
+        ctx.stroke();
+    } else if (key === 'steps') {
+        ctx.beginPath();
+        ctx.ellipse(7.2, 8, 2.4, 4.2, -0.28, 0, Math.PI * 2);
+        ctx.ellipse(16.5, 16, 2.4, 4.2, 0.28, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(4.7, 3, 1, 0, Math.PI * 2);
+        ctx.arc(9, 12, 1, 0, Math.PI * 2);
+        ctx.arc(14, 11, 1, 0, Math.PI * 2);
+        ctx.arc(18.5, 20, 1, 0, Math.PI * 2);
+        ctx.stroke();
+    } else if (key === 'time') {
         ctx.beginPath(); ctx.arc(12, 12, 8.5, 0, Math.PI * 2); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(12, 7); ctx.lineTo(12, 12); ctx.lineTo(15.5, 14);
         ctx.moveTo(9, 2.5); ctx.lineTo(15, 2.5); ctx.moveTo(12, 2.5); ctx.lineTo(12, 3.5); ctx.stroke();
@@ -37758,10 +37835,11 @@ function renderWrappedTimeSlide(ctx, w, h, colors, data) {
 function renderWrappedActiveMonthSlide(ctx, w, h, colors, data) {
     const monthNames = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
     drawWrappedCenteredTitle(ctx, 'Dein aktivster Monat', 245, 70, colors.text, w);
-    setWrappedFont(ctx, 94, 'bold'); ctx.fillStyle = colors.accent; ctx.textAlign = 'center';
+    setWrappedFont(ctx, 94, 'bold');
+    ctx.fillStyle = colors.accent;
+    ctx.textAlign = 'center';
     ctx.fillText(monthNames[data.activeMonthIndex], w / 2, 455);
-
-    const chartX = 100, chartY = 775, chartW = w - 200, chartH = 390, barGap = 12;
+    const chartX = 100, chartY = 895, chartW = w - 200, chartH = 360, barGap = 12;
     const barW = (chartW - barGap * 11) / 12;
     const maxVal = Math.max(...data.monthlyTours, 1);
     data.monthlyTours.forEach((count, i) => {
@@ -37770,12 +37848,18 @@ function renderWrappedActiveMonthSlide(ctx, w, h, colors, data) {
         const y = chartY + chartH - barH;
         ctx.fillStyle = i === data.activeMonthIndex ? colors.accent : 'rgba(255,255,255,0.4)';
         ctx.fillRect(x, y, barW, barH);
-        ctx.fillStyle = colors.text; setWrappedFont(ctx, 24); ctx.textAlign = 'center';
+        ctx.fillStyle = colors.text;
+        setWrappedFont(ctx, 24);
+        ctx.textAlign = 'center';
         ctx.fillText(monthNames[i], x + barW / 2, chartY + chartH + 40);
     });
-    setWrappedFont(ctx, 42); ctx.fillStyle = colors.text; ctx.textAlign = 'center';
-    ctx.fillText(`${data.monthlyTours[data.activeMonthIndex]} Touren`, w / 2, chartY - 30);
-    setWrappedFont(ctx, 32, 'normal'); ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    setWrappedFont(ctx, 42);
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    ctx.fillText(String(data.monthlyTours[data.activeMonthIndex]) + ' Touren', w / 2, chartY - 28);
+    setWrappedFont(ctx, 32, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.textAlign = 'center';
     wrapWrappedText(ctx, 'In diesem Monat zog es dich besonders oft hinaus – jeder Ausflug brachte neue Wege, Eindrücke und Gipfelmomente.', w / 2, 1530, w * 0.78, 46);
 }
 
@@ -37796,42 +37880,28 @@ function renderWrappedPeakCountSlide(ctx, w, h, colors, data) {
     wrapWrappedText(ctx, 'Jeder Gipfel ein eigenes Ziel. Jeder Aufstieg ein neuer Blick auf die Berge.', w / 2, 1550, w * 0.78, 46);
 }
 
-
-function renderWrappedTourPhotoSlide(ctx, w, h, colors, data, photoImages = [], loadFailed = false) {
-    // Jede Fotofolie zeigt nur den Tourtitel und bis zu vier Fotos derselben Tour.
+function renderWrappedTourPhotoSlide(ctx, w, h, colors, data, photoImages = []) {
     const title = data.entry?.tourname || data.entry?.region || 'Tourfoto';
     drawWrappedCenteredTitle(ctx, title, 170, 58, colors.text, w);
-
     const images = (Array.isArray(photoImages) ? photoImages : [])
         .map(item => item?.image || item)
         .filter(image => image && image.complete !== false && image.width > 0 && image.height > 0)
         .slice(0, 4);
-
-    const marginX = 64;
-    const top = 285;
-    const bottom = h - 125;
-    const gap = 22;
-    const availableW = w - marginX * 2;
-    const availableH = bottom - top;
+    if (!images.length) return;
+    const margin = 64, top = 285, bottom = h - 125, gap = 22;
+    const availableW = Math.max(1, w - margin * 2);
+    const availableH = Math.max(1, bottom - top);
     const columns = images.length === 1 ? 1 : 2;
-    const rows = Math.max(1, Math.ceil(images.length / columns));
+    const rows = Math.ceil(images.length / columns);
     const cellW = (availableW - gap * (columns - 1)) / columns;
     const cellH = (availableH - gap * (rows - 1)) / rows;
-
     images.forEach((image, index) => {
         const row = Math.floor(index / columns);
         const rowCount = Math.min(columns, images.length - row * columns);
         const col = index % columns;
-        const rowOffset = rowCount === 1 ? (availableW - cellW) / 2 : col * (cellW + gap);
-        drawWrappedContainedImage(ctx, image, marginX + rowOffset, top + row * (cellH + gap), cellW, cellH, 26);
+        const offsetX = rowCount === 1 ? (availableW - cellW) / 2 : col * (cellW + gap);
+        drawWrappedContainedImage(ctx, image, margin + offsetX, top + row * (cellH + gap), cellW, cellH, 26);
     });
-
-    if (!images.length) {
-        setWrappedFont(ctx, 34, 'bold');
-        ctx.fillStyle = colors.text;
-        ctx.textAlign = 'center';
-        ctx.fillText(loadFailed ? 'Foto nicht verfügbar' : 'Fotos werden geladen …', w / 2, h * 0.56);
-    }
 }
 
 function renderWrappedHighestPeakSlide(ctx, w, h, colors, data) {
@@ -38111,67 +38181,54 @@ function renderWrappedHighlightsSlide(ctx, w, h, colors, data) {
 }
 
 function renderWrappedTop3Slide(ctx, w, h, colors, data) {
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0, 0, w, h); ctx.clip();
     drawWrappedCenteredTitle(ctx, 'Top 3 der Saison', 190, 58, colors.text, w);
-    ctx.textAlign = 'left';
-
     const medals = [1, 2, 3];
-    const cardX = Math.max(42, Math.min(70, w * 0.065));
-    const cardW = w - cardX * 2;
-    const cardH = 435;
-    const gap = 38;
-    const startY = 315;
-
+    const cardX = Math.max(34, Math.min(60, w * 0.06));
+    const cardW = Math.max(1, w - cardX * 2);
+    const cardH = 420, gap = 25, startY = 300;
     (data.top3 || []).slice(0, 3).forEach((item, i) => {
         const y = startY + i * (cardH + gap);
-        const cardGradient = ctx.createLinearGradient(cardX, y, cardX + cardW, y + cardH);
-        cardGradient.addColorStop(0, 'rgba(16,46,55,0.55)');
-        cardGradient.addColorStop(1, 'rgba(7,25,34,0.72)');
-        ctx.fillStyle = cardGradient;
-        ctx.beginPath(); ctx.roundRect(cardX, y, cardW, cardH, 34); ctx.fill();
+        const gradient = ctx.createLinearGradient(cardX, y, cardX + cardW, y + cardH);
+        gradient.addColorStop(0, 'rgba(16,46,55,0.58)');
+        gradient.addColorStop(1, 'rgba(7,25,34,0.76)');
+        ctx.fillStyle = gradient;
+        ctx.beginPath(); ctx.roundRect(cardX, y, cardW, cardH, 30); ctx.fill();
+        ctx.save(); ctx.strokeStyle = colors.accent; ctx.globalAlpha = 0.42; ctx.lineWidth = 2.5; ctx.stroke(); ctx.restore();
         ctx.save();
-        ctx.globalAlpha = 0.42; ctx.strokeStyle = colors.accent; ctx.lineWidth = 3; ctx.stroke();
-        ctx.restore();
-
-        drawWrappedPremiumIcon(ctx, 'medal', cardX + 56, y + 62, 48, colors.accent, medals[i]);
+        ctx.beginPath(); ctx.roundRect(cardX + 18, y + 18, cardW - 36, cardH - 36, 20); ctx.clip();
+        drawWrappedPremiumIcon(ctx, 'medal', cardX + 58, y + 62, 48, colors.accent, medals[i]);
         ctx.textAlign = 'left';
-        setWrappedFont(ctx, 31, 'bold');
-        ctx.fillStyle = colors.text;
-        wrapWrappedText(ctx, item.entry?.tourname || item.entry?.region || 'Tour', cardX + 112, y + 62, cardW - 150, 38);
-
-        ctx.textAlign = 'left';
-        setWrappedFont(ctx, 21, 'normal');
-        ctx.fillStyle = 'rgba(255,255,255,0.78)';
+        setWrappedFont(ctx, 31, 'bold'); ctx.fillStyle = colors.text;
+        const titleEnd = wrapWrappedText(ctx, item.entry?.tourname || item.entry?.region || 'Tour', cardX + 108, y + 66, cardW - 150, 37);
+        setWrappedFont(ctx, 20, 'normal'); ctx.fillStyle = 'rgba(255,255,255,0.78)';
         const meta = [item.entry?.date || '', item.entry?.region || ''].filter(Boolean).join(' · ');
-        wrapWrappedText(ctx, meta, cardX + 32, y + 145, cardW - 64, 28);
-
+        let lineY = Math.max(y + 145, titleEnd + 20);
+        if (meta) lineY = wrapWrappedText(ctx, meta, cardX + 32, lineY, cardW - 64, 27) + 28;
         const m = item.metrics || {};
-        setWrappedFont(ctx, 23, 'bold');
-        ctx.fillStyle = colors.text;
-        ctx.fillText(`${Number(m.distance || 0).toFixed(1).replace('.', ',')} km · ${Math.round(m.ascent || 0).toLocaleString('de-DE')} hm`, cardX + 32, y + 198);
-        ctx.fillText(`${formatWrappedMinutes(m.minutes)} · ${m.peaks || 0} Gipfel`, cardX + 32, y + 238);
-
-        if (m.steps > 0) {
-            setWrappedFont(ctx, 21, 'normal');
-            ctx.fillStyle = 'rgba(255,255,255,0.78)';
-            ctx.fillText(`${Math.round(m.steps).toLocaleString('de-DE')} Schritte`, cardX + 32, y + 275);
+        setWrappedFont(ctx, 23, 'bold'); ctx.fillStyle = colors.text;
+        lineY = wrapWrappedText(ctx, Number(m.distance || 0).toFixed(1).replace('.', ',') + ' km · ' + Math.round(m.ascent || 0).toLocaleString('de-DE') + ' hm', cardX + 32, lineY, cardW - 64, 29) + 30;
+        lineY = wrapWrappedText(ctx, formatWrappedMinutes(m.minutes) + ' · ' + (m.peaks || 0) + ' Gipfel', cardX + 32, lineY, cardW - 64, 29) + 28;
+        if (m.steps > 0 && lineY < y + cardH - 58) {
+            setWrappedFont(ctx, 20, 'normal'); ctx.fillStyle = 'rgba(255,255,255,0.78)';
+            lineY = wrapWrappedText(ctx, Math.round(m.steps).toLocaleString('de-DE') + ' Schritte', cardX + 32, lineY, cardW - 64, 26) + 24;
         }
-        if (m.score !== null && m.score !== undefined) {
-            setWrappedFont(ctx, 26, 'bold');
-            ctx.fillStyle = colors.accent;
-            ctx.fillText(`Leistungsindex ${Math.round(m.score)} / 100`, cardX + 32, y + 315);
+        if (m.score !== null && m.score !== undefined && lineY < y + cardH - 58) {
+            setWrappedFont(ctx, 23, 'bold'); ctx.fillStyle = colors.accent;
+            lineY = wrapWrappedText(ctx, 'Leistungsindex ' + Math.round(m.score) + ' / 100', cardX + 32, lineY, cardW - 64, 27) + 22;
         }
-        const topReasons = (item.info?.highlights || []).slice(0, 4);
-        if (topReasons.length) {
-            setWrappedFont(ctx, 17, 'normal');
-            ctx.fillStyle = colors.text;
-            wrapWrappedText(ctx, 'Top 3: ' + topReasons.map(x => x.name).join(' · '), cardX + 32, y + 370, cardW - 64, 25);
+        const reasons = (item.info?.highlights || []).slice(0, 3);
+        if (reasons.length && lineY < y + cardH - 38) {
+            setWrappedFont(ctx, 16, 'normal'); ctx.fillStyle = 'rgba(255,255,255,0.82)';
+            wrapWrappedText(ctx, 'Top 3: ' + reasons.map(reason => reason.name).join(' · '), cardX + 32, lineY, cardW - 64, 22);
         }
+        ctx.restore();
     });
-
-    setWrappedFont(ctx, 30, 'normal');
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    ctx.textAlign = 'center';
+    setWrappedFont(ctx, 29, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.textAlign = 'center';
     wrapWrappedText(ctx, 'Manche Tage bleiben besonders lebendig. Wegen der Landschaft, der gemeinsamen Augenblicke oder einfach wegen des Gefühls, genau am richtigen Ort zu sein.', w / 2, 1740, w * 0.82, 40);
+    ctx.restore();
 }
 
 function renderWrappedOutroSlide(ctx, w, h, colors, data) {
