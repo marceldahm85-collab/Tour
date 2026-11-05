@@ -63,10 +63,10 @@
                 const radians = degrees * Math.PI / 180;
                 const dx = Math.sin(radians);
                 const dy = -Math.cos(radians);
-                const x1 = 50 + dx * 50;
-                const y1 = 50 + dy * 50;
-                const x2 = 50 - dx * 50;
-                const y2 = 50 - dy * 50;
+                const x1 = 50 - dx * 50;
+                const y1 = 50 - dy * 50;
+                const x2 = 50 + dx * 50;
+                const y2 = 50 + dy * 50;
 
                 gradient = document.createElementNS(SVG_NS, 'linearGradient');
                 gradient.setAttribute('x1', x1 + '%');
@@ -105,10 +105,14 @@
                 return;
             }
 
-            const source = title.querySelector('.stats-premium-content-icon svg');
+            const iconHolder = title.querySelector('.stats-premium-content-icon');
+            const source = iconHolder?.querySelector('svg');
             if (!source) return;
 
+            const iconKey = iconHolder.dataset.iconKey || 'distance';
             let hero = modalCard.querySelector('.dashboard-stat-hero-icon');
+            if (hero?.dataset.iconKey === iconKey && hero.firstElementChild) return;
+
             if (!hero) {
                 hero = document.createElement('div');
                 hero.className = 'dashboard-stat-hero-icon';
@@ -120,6 +124,7 @@
             svg.setAttribute('aria-hidden', 'true');
             svg.setAttribute('focusable', 'false');
             makeSvgGradient(svg);
+            hero.dataset.iconKey = iconKey;
             hero.replaceChildren(svg);
         }
 
@@ -194,19 +199,10 @@
             subtree: true
         });
 
-        const bodyObserver = new MutationObserver(() => {
-            enhanceDistanceOverview();
-            ensureHeroIcon();
-        });
+        // Nur die Datenstruktur beobachten. Das Dekorations-SVG wird beim
+        // Titel-/Modalwechsel einmalig erzeugt und nicht bei jeder DOM-Änderung ersetzt.
+        const bodyObserver = new MutationObserver(enhanceDistanceOverview);
         bodyObserver.observe(body, { childList: true });
-
-        const paletteObserver = new MutationObserver(() => {
-            if (modal.dataset.dashboardStatType === 'strecke') ensureHeroIcon();
-        });
-        if (document.body) paletteObserver.observe(document.body, {
-            attributes: true,
-            attributeFilter: ['style']
-        });
 
         const modalStateObserver = new MutationObserver(() => {
             if (!modal.classList.contains('hidden')) syncModalType();
