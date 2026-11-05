@@ -156,13 +156,14 @@
     }
 
     function applyMilestoneModalBackdrop(modal, type) {
+        const card = modal.querySelector('.modal-card');
         const body = modal.querySelector('#milestone-modal-body');
         const image = BACKDROP_ASSETS[type];
-        if (!body || !image) return;
+        if (!card || !body || !image) return;
 
         body.dataset.milestoneModalType = type;
-        body.style.setProperty('--milestone-modal-image', 'url("' + image + '")');
-        body.style.setProperty(
+        card.style.setProperty('--milestone-modal-image', 'url("' + image + '")');
+        card.style.setProperty(
             '--milestone-modal-image-position',
             MODAL_BACKDROP_POSITIONS[type] || 'center'
         );
