@@ -13,7 +13,7 @@
         modal.dataset.premiumDistanceModalInit = 'true';
 
         const SVG_NS = 'http://www.w3.org/2000/svg';
-        const HERO_GRADIENT_ID = 'dashboard-stat-distance-reverse-gradient';
+        const HERO_GRADIENT_ID = 'dashboard-stat-distance-gradient';
 
         function getEditorSettings() {
             try {
@@ -28,6 +28,59 @@
         function clamp(value, min, max, fallback) {
             const number = Number(value);
             return Number.isFinite(number) ? Math.min(max, Math.max(min, number)) : fallback;
+        }
+
+        function buildReversedModalBackground() {
+            const settings = getEditorSettings();
+            const computedAccent = getComputedStyle(document.body)
+                .getPropertyValue('--theme-palette-accent').trim();
+            const accent = /^#[0-9a-f]{6}$/i.test(settings.accent || '')
+                ? settings.accent : (/^#[0-9a-f]{6}$/i.test(computedAccent) ? computedAccent : '#ad7d12');
+            const accent2 = /^#[0-9a-f]{6}$/i.test(settings.accent2 || '')
+                ? settings.accent2 : '#000000';
+            const transition = clamp(settings.transition, 10, 90, 55);
+            const direction = settings.gradientDirection || '180deg';
+
+            // Linear: Farbfolge tauschen und Übergangspunkt spiegeln.
+            // Das entspricht exakt einer 180°-Drehung des Editor-Verlaufs.
+            if (direction === 'radial') {
+                // Radial: den Mittelpunkt um 180° versetzen; Farbrichtung bleibt normal.
+                return 'radial-gradient(circle at 72% 82%, ' +
+                    accent + ' 0%, ' + accent + ' ' + transition + '%, ' + accent2 + ' 100%)';
+            }
+
+            const reversedTransition = 100 - transition;
+            return 'linear-gradient(' + direction + ', ' +
+                accent2 + ' 0%, ' + accent2 + ' ' + reversedTransition + '%, ' +
+                accent + ' 100%)';
+        }
+
+        function ensureDistanceHeaderIcon() {
+            let holder = title.querySelector(':scope > .stats-premium-content-icon');
+            if (holder) return holder;
+
+            // Falls die zentrale Titel-Icon-Aufbereitung noch nicht gelaufen ist,
+            // übernimmt ein bereits vorhandenes Premium-Symbol oder wird ergänzt.
+            holder = title.querySelector(':scope > .premium-alpine-inline-icon');
+            if (holder) {
+                holder.classList.add('stats-premium-content-icon');
+                holder.dataset.iconKey = holder.dataset.iconKey || 'distance';
+                return holder;
+            }
+
+            const label = String(title.textContent || '').replace(/^\\s*[\\p{Extended_Pictographic}\\p{Emoji_Presentation}\\p{Emoji_Modifier}\\uFE0E\\uFE0F\\u200D\\u20E3]+\\s*/u, '').trim();
+            if (!/\\bstrecke\\b/i.test(label)) return null;
+
+            holder = document.createElement('span');
+            holder.className = 'stats-premium-content-icon';
+            holder.dataset.iconKey = 'distance';
+            holder.setAttribute('aria-hidden', 'true');
+            holder.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+                '<path d="m4 17 13-13 4 4L8 21l-4-4Z"/>' +
+                '<path d="m14 7 2 2M11.5 9.5l1.5 1.5M9 12l2 2M6.5 14.5 8 16M16.5 4.5 19 7"/>' +
+                '</svg>';
+            title.insertBefore(holder, title.firstChild);
+            return holder;
         }
 
         function makeSvgGradient(svg) {
@@ -50,13 +103,13 @@
 
                 const stopA = document.createElementNS(SVG_NS, 'stop');
                 stopA.setAttribute('offset', '0%');
-                stopA.setAttribute('stop-color', accent2);
+                stopA.setAttribute('stop-color', accent);
                 const stopB = document.createElementNS(SVG_NS, 'stop');
-                stopB.setAttribute('offset', (100 - transition) + '%');
-                stopB.setAttribute('stop-color', accent2);
+                stopB.setAttribute('offset', transition + '%');
+                stopB.setAttribute('stop-color', accent);
                 const stopC = document.createElementNS(SVG_NS, 'stop');
                 stopC.setAttribute('offset', '100%');
-                stopC.setAttribute('stop-color', accent);
+                stopC.setAttribute('stop-color', accent2);
                 gradient.append(stopA, stopB, stopC);
             } else {
                 const degrees = Number.parseFloat(direction) || 180;
@@ -105,7 +158,7 @@
                 return;
             }
 
-            const iconHolder = title.querySelector('.stats-premium-content-icon');
+            const iconHolder = ensureDistanceHeaderIcon();
             const source = iconHolder?.querySelector('svg');
             if (!source) return;
 
@@ -132,8 +185,14 @@
             const label = String(title.textContent || '').trim().toLocaleLowerCase('de');
             if (label.includes('strecke')) {
                 modal.dataset.dashboardStatType = 'strecke';
+                modalCard.style.setProperty(
+                    '--dashboard-stat-background-gradient',
+                    buildReversedModalBackground()
+                );
+                ensureDistanceHeaderIcon();
             } else {
                 delete modal.dataset.dashboardStatType;
+                modalCard.style.removeProperty('--dashboard-stat-background-gradient');
             }
             enhanceDistanceOverview();
             ensureHeroIcon();
