@@ -6,8 +6,7 @@
     #compare-modal,
     #month-stats-modal,
     #stats-chart-modal,
-    #tour-list-modal,
-)[data-premium-modal-surface="true"] > .modal-card {
+    #tour-list-modal)[data-premium-modal-surface="true"] > .modal-card {
     position: absolute;
     isolation: isolate;
     background: var(
@@ -34,8 +33,7 @@
     #compare-modal,
     #month-stats-modal,
     #stats-chart-modal,
-    #tour-list-modal,
-)[data-premium-modal-surface="true"] .premium-modal-hero-icon {
+    #tour-list-modal)[data-premium-modal-surface="true"] .premium-modal-hero-icon {
     position: absolute;
     z-index: 0;
     top: 50%;
@@ -56,8 +54,7 @@
     #compare-modal,
     #month-stats-modal,
     #stats-chart-modal,
-    #tour-list-modal,
-)[data-premium-modal-surface="true"] .premium-modal-hero-icon svg {
+    #tour-list-modal)[data-premium-modal-surface="true"] .premium-modal-hero-icon svg {
     display: block;
     width: 100%;
     height: 100%;
@@ -77,22 +74,19 @@
     #compare-modal,
     #month-stats-modal,
     #stats-chart-modal,
-    #tour-list-modal,
-)[data-premium-modal-surface="true"] > .modal-card > .modal-header,
+    #tour-list-modal)[data-premium-modal-surface="true"] > .modal-card > .modal-header,
 :is(
     #achievement-category-modal,
     #compare-modal,
     #month-stats-modal,
     #stats-chart-modal,
-    #tour-list-modal,
-)[data-premium-modal-surface="true"] > .modal-card > .modal-body,
+    #tour-list-modal)[data-premium-modal-surface="true"] > .modal-card > .modal-body,
 :is(
     #achievement-category-modal,
     #compare-modal,
     #month-stats-modal,
     #stats-chart-modal,
-    #tour-list-modal,
-)[data-premium-modal-surface="true"] > .modal-card > .modal-actions {
+    #tour-list-modal)[data-premium-modal-surface="true"] > .modal-card > .modal-actions {
     position: relative;
     z-index: 1;
 }
@@ -103,8 +97,7 @@
     #compare-modal,
     #month-stats-modal,
     #stats-chart-modal,
-    #tour-list-modal,
-)[data-premium-modal-surface="true"] .modal-title > .premium-modal-header-icon {
+    #tour-list-modal)[data-premium-modal-surface="true"] .modal-title > .premium-modal-header-icon {
     display: inline-flex !important;
     flex: 0 0 1.08em;
     width: 1.08em;
@@ -125,8 +118,7 @@
     #compare-modal,
     #month-stats-modal,
     #stats-chart-modal,
-    #tour-list-modal,
-)[data-premium-modal-surface="true"] .modal-title > .premium-modal-header-icon svg {
+    #tour-list-modal)[data-premium-modal-surface="true"] .modal-title > .premium-modal-header-icon svg {
     display: block !important;
     width: 100% !important;
     height: 100% !important;
@@ -145,8 +137,7 @@
     #compare-modal,
     #month-stats-modal,
     #stats-chart-modal,
-    #tour-list-modal,
-)[data-premium-modal-surface="true"] .modal-body :is(
+    #tour-list-modal)[data-premium-modal-surface="true"] .modal-body :is(
     .stats-list > li:not(.highlight-rank-gold):not(.highlight-rank-silver):not(.highlight-rank-bronze),
     .tour-list > li,
     .peak-tour-list > li,
@@ -184,8 +175,7 @@
         #compare-modal,
         #month-stats-modal,
         #stats-chart-modal,
-        #tour-list-modal,
-        )[data-premium-modal-surface="true"] .premium-modal-hero-icon {
+        #tour-list-modal)[data-premium-modal-surface="true"] .premium-modal-hero-icon {
         width: 148px;
         height: 148px;
     }
@@ -197,8 +187,7 @@
         #compare-modal,
         #month-stats-modal,
         #stats-chart-modal,
-        #tour-list-modal,
-        )[data-premium-modal-surface="true"] .premium-modal-hero-icon {
+        #tour-list-modal)[data-premium-modal-surface="true"] .premium-modal-hero-icon {
         filter: none;
     }
 }
