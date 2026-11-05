@@ -281,3 +281,31 @@
         transition: none !important;
     }
 }
+
+/* Modal-Zurückpfeile verwenden exakt dasselbe SVG wie die View-Arrowbuttons.
+   Die Flex-Zentrierung ersetzt das zuvor um 2% nach oben korrigierte Text-Pseudo-Element. */
+.modal .modal-header :is(#td-back, #tl-back, #ds-header-back) {
+    font-size: 0 !important;
+    line-height: 0 !important;
+}
+
+.modal .modal-header :is(#td-back, #tl-back, #ds-header-back) > .view-nav-arrow {
+    display: block !important;
+    flex: 0 0 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible;
+    color: currentColor;
+    pointer-events: none;
+    transform: none !important;
+}
+
+.modal .modal-header :is(#td-back, #tl-back, #ds-header-back) > .view-nav-arrow path {
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 2.35 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+}
