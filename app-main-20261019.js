@@ -7090,11 +7090,10 @@ function initTourDetailModal() {
 
 // ===== Gespeicherte Tour =====
 if (currentDetailType === 'saved') {
-    closeTourDetail();
-
+    // Erst das Formular vollständig vorbereiten. Der gespeicherte Datensatz
+    // bleibt während der gesamten Bearbeitung unverändert in IndexedDB.
     if (await fillSaveFormFromEntry(entryToEdit) === false) return;
-    removeSavedTourFromStorage(entryToEdit);
-    loadData();
+    closeTourDetail();
 
     if (typeof goToView === 'function') {
         goToView('app', true);
@@ -7118,12 +7117,10 @@ if (currentDetailType === 'saved') {
 
 // ===== Geplante Tour =====
 if (currentDetailType === 'planned') {
-    closeTourDetail();
-
+    // Die Planung bleibt gespeichert, bis die geänderte Version erfolgreich
+    // über den Planen-Button an derselben ID ersetzt wurde.
     fillPlanFormFromEntry(entryToEdit);
-    removePlannedTourFromStorage(entryToEdit);
-    loadPlannedTours();
-    updatePlannedPeaks();
+    closeTourDetail();
 
     if (typeof goToView === 'function') {
         goToView('tour', true);
@@ -7272,10 +7269,9 @@ function initOverviewTableDelegation() {
             const entryToEdit = JSON.parse(JSON.stringify(entry));
 
             if (await fillSaveFormFromEntry(entryToEdit) === false) return;
-            removeSavedTourFromStorage(entryToEdit);
 
-            tablePage = 1;
-            loadData();
+            // Kein Entfernen beim Einstieg in den Editiermodus:
+            // erst der Speichern-Button schreibt die Änderungen zurück.
 
             if (typeof goToView === 'function') {
                 goToView('app', true);
@@ -14730,6 +14726,24 @@ gipfelDetails: (gipfelDetails || []).map(g => ({
     }
 
     appStorage.set('touren', data);
+
+    // Beim Übernehmen einer Planung wird diese erst jetzt entfernt – also
+    // gemeinsam mit dem erfolgreichen Anlegen der gespeicherten Tour.
+    const transferPlanId = String(form.dataset.transferPlanId || '').trim();
+    if (transferPlanId) {
+        const plannedTours = appStorage.get('plannedTours') || [];
+        const plannedIndex = plannedTours.findIndex(
+            item => String(item?.id ?? '') === transferPlanId
+        );
+        if (plannedIndex >= 0) {
+            plannedTours.splice(plannedIndex, 1);
+            appStorage.set('plannedTours', plannedTours);
+            loadPlannedTours();
+            updatePlannedPeaks();
+        }
+        delete form.dataset.transferPlanId;
+    }
+
     delete form.dataset.editEntryId;
 
     tablePage = 1;
@@ -25345,8 +25359,9 @@ planGipfelCount.addEventListener('change', () => {
 // ---------- Speichern ----------
 planSaveBtn.addEventListener('click', () => {
 
-    // Bearbeitungsstatus vor dem späteren Löschen der ID-Kennung sichern.
-    const isEditingPlannedTour = Object.prototype.hasOwnProperty.call(planForm.dataset, 'editEntryId');
+    // Bestehende Planungen werden anhand ihrer persistenten ID aktualisiert.
+    const editEntryId = String(planForm.dataset.editEntryId || '').trim();
+    const isEditingPlannedTour = Boolean(editEntryId);
 
     // Gehzeit unmittelbar vor dem Speichern aus Strecke/Aufstieg aktualisieren.
     updatePlannedEstimatedWalkingTime();
@@ -25459,7 +25474,7 @@ const savedPlanZeit = isPlanBikeTour ? '' : zeit;
 
     // Eintrag erstellen
     const entry = {
-        id: String(planForm.dataset.editEntryId || '').trim() || createEntryId('plan'),
+        id: editEntryId || createEntryId('plan'),
         tourname,
         strecke: savedPlanStrecke,
 aufstieg: savedPlanAufstieg,
@@ -25482,9 +25497,27 @@ ferrataZeit: planFerrataZeit,
         tourDayCount: isMultiday && tourDayCountVal ? parseInt(tourDayCountVal) : null
     };
 
-    // ✅ Speicher 1:1 wie Save-Button – nur eigener Key
+    // Vorhandene Planung an Ort und Stelle aktualisieren. Die alte Version
+    // wurde beim Öffnen des Formulars bewusst nicht aus dem Storage entfernt.
     const plannedTours = appStorage.get('plannedTours') || [];
-    plannedTours.push(entry);
+    const editIndex = editEntryId
+        ? plannedTours.findIndex(item => String(item?.id ?? '') === editEntryId)
+        : -1;
+
+    if (editEntryId && editIndex < 0) {
+        showToast('Die zu bearbeitende Planung wurde nicht gefunden. Sie wurde nicht erneut angelegt.', {
+            type: 'error',
+            duration: 3500
+        });
+        return;
+    }
+
+    if (editIndex >= 0) {
+        plannedTours[editIndex] = { ...plannedTours[editIndex], ...entry };
+    } else {
+        plannedTours.push(entry);
+    }
+
     appStorage.set('plannedTours', plannedTours);
     delete planForm.dataset.editEntryId;
 
@@ -25714,8 +25747,15 @@ planGipfelDetails.appendChild(row);
 function transferPlannedTourToSavedForm(entry) {
     if (!entry) return;
 
-    // Übernahme aus Planung ist kein Edit eines gespeicherten Eintrags.
+    // Übernahme aus Planung ist ein neuer gespeicherter Tourdatensatz.
+    // Die Planung selbst bleibt erhalten, bis das Speichern erfolgreich war.
     delete form.dataset.editEntryId;
+    const transferPlanId = String(entry.id || '').trim();
+    if (transferPlanId) {
+        form.dataset.transferPlanId = transferPlanId;
+    } else {
+        delete form.dataset.transferPlanId;
+    }
 
     // Formular "Tour speichern" befüllen
     form.date.value = '';
@@ -25809,12 +25849,7 @@ updateActivityFieldsVisibility();
         gipfelDetailsContainer.style.display = 'none';
     }
 
-    // Ursprüngliche geplante Tour löschen
-    removePlannedTourFromStorage(entry);
-
-    // Geplante Touren neu laden
-    loadPlannedTours();
-    updatePlannedPeaks();
+    // Die ursprüngliche Planung bleibt bis zum erfolgreichen Speichern erhalten.
 
     // Modal schließen
     closeTourDetail();
@@ -25835,8 +25870,6 @@ updateActivityFieldsVisibility();
             block: 'start'
         });
     });
-
-autoSaveDataFileIfLinked();
 
 }
 
@@ -25925,11 +25958,9 @@ function initPlannedTableDelegation() {
 
             const entryToEdit = JSON.parse(JSON.stringify(entry));
 
+            // Die Planung bleibt in der Liste und im Storage erhalten.
+            // Der Speichern-Button aktualisiert später denselben Datensatz.
             fillPlanFormFromEntry(entryToEdit);
-            removePlannedTourFromStorage(entryToEdit);
-
-            loadPlannedTours();
-            updatePlannedPeaks();
 
             openBoxIfNeeded(planBox, () => {
                 planTourname.focus();
