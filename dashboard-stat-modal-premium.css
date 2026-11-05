@@ -1,244 +1,16 @@
-/* Premium Alpine — Dashboardkachel-Modal: Strecke.
-   Nur Darstellung und DOM-Gruppierung des vorhandenen Inhalts; keine Statistiklogik. */
+/* Premium Alpine — identische Präsentationsvorlage für alle Dashboard-Kachelmodale.
+   Statistikwerte und Zeilen bleiben unverändert; nur vorhandene Listenelemente werden gruppiert. */
 
-#dash-stat-modal[data-dashboard-stat-type="strecke"] #ds-body {
+#dash-stat-modal[data-dashboard-stat-type] #ds-body {
     display: flex;
     flex-direction: column;
     gap: 0;
     min-width: 0;
 }
 
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview {
+/* Übersicht: transparente Glasfläche wie im Strecken-Modal. */
+#dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-overview {
     min-width: 0;
-    padding: 9px;
-    border: 1px solid color-mix(
-        in srgb,
-        var(--accent, #D5A64C) 26%,
-        var(--app-surface-border, rgba(255,255,255,.12))
-    );
-    border-radius: 14px;
-    background: linear-gradient(
-        145deg,
-        color-mix(in srgb, var(--accent, #D5A64C) 9%, var(--app-surface-strong, #243139)),
-        var(--app-surface-card, #1b272e)
-    );
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.07),
-        0 5px 13px rgba(0,0,0,.14);
-}
-
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list {
-    gap: 6px;
-}
-
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list > li {
-    min-height: 42px;
-    padding: 8px 10px;
-    border: 1px solid color-mix(
-        in srgb,
-        var(--accent, #D5A64C) 15%,
-        var(--app-surface-border, rgba(255,255,255,.10))
-    );
-    border-radius: 10px;
-    background: color-mix(
-        in srgb,
-        var(--app-surface-strong, #243139) 78%,
-        transparent
-    );
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.045);
-}
-
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list > #ds-total-row {
-    min-height: 48px;
-    border-left: 3px solid var(--accent, #D5A64C);
-    background: linear-gradient(
-        100deg,
-        color-mix(in srgb, var(--accent, #D5A64C) 13%, var(--app-surface-strong, #243139)),
-        color-mix(in srgb, var(--app-surface-card, #1b272e) 92%, transparent)
-    );
-}
-
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list > #ds-total-row .stats-label {
-    font-weight: 750;
-}
-
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list > #ds-total-row .stats-value {
-    color: var(--accent, #D5A64C) !important;
-    font-size: 17px;
-    font-weight: 850;
-}
-
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list > li.stats-sub {
-    margin-left: 0;
-    padding-left: 12px;
-    border-color: color-mix(
-        in srgb,
-        var(--app-surface-border, rgba(255,255,255,.10)) 82%,
-        transparent
-    );
-    background: color-mix(
-        in srgb,
-        var(--app-surface-card, #1b272e) 88%,
-        transparent
-    );
-}
-
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-months {
-    min-width: 0;
-    margin-top: 13px;
-}
-
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-month-heading {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    margin: 0 2px 7px;
-    color: color-mix(
-        in srgb,
-        var(--accent, #D5A64C) 84%,
-        var(--app-text-primary, #fff)
-    );
-    font-size: 10px;
-    font-weight: 850;
-    letter-spacing: .13em;
-    line-height: 1.25;
-}
-
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-month-heading::after {
-    content: "";
-    flex: 1 1 auto;
-    height: 1px;
-    background: linear-gradient(
-        90deg,
-        color-mix(in srgb, var(--accent, #D5A64C) 43%, transparent),
-        transparent
-    );
-}
-
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-month-list {
-    gap: 5px;
-}
-
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-month-list > li,
-#dash-stat-modal[data-dashboard-stat-type="strecke"] #ds-body > .stats-list > li {
-    min-height: 39px;
-    padding: 7px 10px;
-    border: 1px solid var(--app-surface-border, rgba(255,255,255,.10));
-    border-left: 2px solid color-mix(
-        in srgb,
-        var(--accent, #D5A64C) 35%,
-        var(--app-surface-border, rgba(255,255,255,.10))
-    );
-    border-radius: 10px;
-    background: linear-gradient(
-        180deg,
-        var(--app-surface-card, rgba(255,255,255,.055)),
-        var(--app-surface-subtle, rgba(255,255,255,.025))
-    );
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
-}
-
-#dash-stat-modal[data-dashboard-stat-type="strecke"] #ds-body > .stats-list > li.stats-sub {
-    margin-left: 0;
-}
-
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-month-list > li[data-month-idx]:active {
-    border-color: color-mix(
-        in srgb,
-        var(--accent, #D5A64C) 58%,
-        rgba(255,255,255,.26)
-    );
-}
-
-/* Der Editor-Verlauf prägt die vollständige Modalfläche. Das große Zweitsymbol
-   liegt als transparente Kontur hinter Übersicht und Monatseinträgen. */
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .modal-card {
-    isolation: isolate;
-    background: var(
-        --dashboard-stat-background-gradient,
-        var(--theme-palette-accent-gradient, var(--accent-gradient, linear-gradient(180deg, var(--accent, #ad7d12), #000)))
-    ) !important;
-    background-image: var(
-        --dashboard-stat-background-gradient,
-        var(--theme-palette-accent-gradient, var(--accent-gradient, linear-gradient(180deg, var(--accent, #ad7d12), #000)))
-    ) !important;
-    background-color: transparent !important;
-    border-color: color-mix(
-        in srgb,
-        var(--theme-palette-accent, var(--accent, #ad7d12)) 34%,
-        rgba(255,255,255,.28)
-    ) !important;
-    border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
-}
-
-
-/* Das kleine Header-Symbol bleibt unabhängig von der dekorativen Hintergrundebene sichtbar. */
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .modal-header,
-#dash-stat-modal[data-dashboard-stat-type="strecke"] #ds-title {
-    position: relative;
-    z-index: 2;
-}
-
-#dash-stat-modal[data-dashboard-stat-type="strecke"] #ds-title > .stats-premium-content-icon {
-    display: inline-flex !important;
-    flex: 0 0 18px !important;
-    width: 18px !important;
-    height: 18px !important;
-    min-width: 18px;
-    min-height: 18px;
-    opacity: 1 !important;
-    visibility: visible !important;
-    color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
-}
-
-#dash-stat-modal[data-dashboard-stat-type="strecke"] #ds-title > .stats-premium-content-icon svg {
-    display: block !important;
-    width: 100% !important;
-    height: 100% !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    stroke: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
-    stroke-width: 1.7 !important;
-}
-
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-hero-icon {
-    position: absolute;
-    z-index: 0;
-    top: 50%;
-    left: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: clamp(154px, 47vw, 204px);
-    height: clamp(154px, 47vw, 204px);
-    transform: translate(-50%, -50%);
-    opacity: .78;
-    pointer-events: none;
-    filter: drop-shadow(0 3px 12px rgba(0,0,0,.18));
-}
-
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-hero-icon svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    max-height: none;
-    overflow: visible;
-    fill: none !important;
-    stroke: url(#dashboard-stat-distance-gradient) !important;
-    stroke-width: 1.15;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    vector-effect: non-scaling-stroke;
-}
-
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .modal-header,
-#dash-stat-modal[data-dashboard-stat-type="strecke"] #ds-body {
-    position: relative;
-    z-index: 1;
-}
-
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview {
     padding: 9px;
     border: 1px solid color-mix(
         in srgb,
@@ -258,35 +30,99 @@
         0 5px 13px rgba(0,0,0,.13);
 }
 
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list > li {
+#dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-overview-list {
+    gap: 6px;
+}
+
+#dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-overview-list > li {
+    min-height: 42px;
+    padding: 8px 10px;
+    border: 1px solid rgba(255,255,255,.20);
     border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
-    border-color: rgba(255,255,255,.20);
     background: rgba(7,16,26,.25);
     box-shadow: inset 0 1px 0 rgba(255,255,255,.09);
 }
 
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list > #ds-total-row {
+/* Rangfarben der Gipfelstufen bleiben bewusst erhalten. */
+#dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-overview-list > li.peak-tier-1,
+#dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-overview-list > li.peak-tier-2,
+#dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-overview-list > li.peak-tier-3 {
+    border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
+}
+
+#dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-overview-list > #ds-total-row {
+    min-height: 48px;
+    border-left: 3px solid var(--theme-palette-accent, var(--accent, #D5A64C));
     background: linear-gradient(
         100deg,
-        color-mix(in srgb, var(--accent, #D5A64C) 17%, rgba(255,255,255,.10)),
+        color-mix(in srgb, var(--theme-palette-accent, var(--accent, #D5A64C)) 17%, rgba(255,255,255,.10)),
         rgba(7,16,26,.19)
     );
 }
 
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list > li.stats-sub {
+#dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-overview-list > #ds-total-row .stats-label {
+    font-weight: 750;
+}
+
+#dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-overview-list > #ds-total-row .stats-value {
+    color: var(--theme-palette-accent, var(--accent, #D5A64C)) !important;
+    font-size: 17px;
+    font-weight: 850;
+}
+
+#dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-overview-list > li.stats-sub {
+    margin-left: 0;
+    padding-left: 12px;
+    border-color: rgba(255,255,255,.19);
     border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
     background: rgba(7,16,26,.19);
 }
 
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-month-list > li,
-#dash-stat-modal[data-dashboard-stat-type="strecke"] #ds-body > .stats-list > li {
-    border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
-    border-color: rgba(255,255,255,.19);
-    border-left-color: color-mix(
+/* Monatsbereich und Monatszeilen folgen exakt derselben Vorlage. */
+#dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-months {
+    min-width: 0;
+    margin-top: 13px;
+}
+
+#dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-month-heading {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 2px 7px;
+    color: var(--theme-palette-accent-text, #fff);
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: .13em;
+    line-height: 1.25;
+    text-shadow: 0 1px 5px rgba(0,0,0,.24);
+}
+
+#dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-month-heading::after {
+    content: "";
+    flex: 1 1 auto;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--theme-palette-accent, var(--accent, #D5A64C)) 43%, transparent),
+        transparent
+    );
+}
+
+#dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-month-list {
+    gap: 5px;
+}
+
+#dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-month-list > li,
+#dash-stat-modal[data-dashboard-stat-type] #ds-body > .stats-list > li {
+    min-height: 39px;
+    padding: 7px 10px;
+    border: 1px solid rgba(255,255,255,.19);
+    border-left: 2px solid color-mix(
         in srgb,
-        var(--accent, #D5A64C) 52%,
+        var(--theme-palette-accent, var(--accent, #D5A64C)) 52%,
         rgba(255,255,255,.22)
     );
+    border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
     background: linear-gradient(
         145deg,
         rgba(255,255,255,.12),
@@ -297,35 +133,135 @@
     box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
 }
 
-#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-month-heading {
-    color: var(--theme-palette-accent-text, #fff);
-    text-shadow: 0 1px 5px rgba(0,0,0,.24);
+#dash-stat-modal[data-dashboard-stat-type] #ds-body > .stats-list > li.stats-sub {
+    margin-left: 0;
+}
+
+#dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-month-list > li[data-month-idx]:active {
+    border-color: color-mix(
+        in srgb,
+        var(--theme-palette-accent, var(--accent, #D5A64C)) 58%,
+        rgba(255,255,255,.26)
+    );
+}
+
+/* Hintergrund mit 180°-Drehung; das große Symbol darüber verwendet den normalen Editor-Verlauf. */
+#dash-stat-modal[data-dashboard-stat-type] .modal-card {
+    isolation: isolate;
+    background: var(
+        --dashboard-stat-background-gradient,
+        var(--theme-palette-accent-gradient, var(--accent-gradient, linear-gradient(180deg, var(--accent, #ad7d12), #000)))
+    ) !important;
+    background-image: var(
+        --dashboard-stat-background-gradient,
+        var(--theme-palette-accent-gradient, var(--accent-gradient, linear-gradient(180deg, var(--accent, #ad7d12), #000)))
+    ) !important;
+    background-color: transparent !important;
+    border-color: color-mix(
+        in srgb,
+        var(--theme-palette-accent, var(--accent, #ad7d12)) 34%,
+        rgba(255,255,255,.28)
+    ) !important;
+    border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
+}
+
+/* Kleines Header-Symbol bleibt an seiner gewohnten Position sichtbar. */
+#dash-stat-modal[data-dashboard-stat-type] .modal-header,
+#dash-stat-modal[data-dashboard-stat-type] #ds-title {
+    position: relative;
+    z-index: 2;
+}
+
+#dash-stat-modal[data-dashboard-stat-type] #ds-title > .stats-premium-content-icon,
+#dash-stat-modal[data-dashboard-stat-type] #ds-title > .premium-alpine-inline-icon,
+#dash-stat-modal[data-dashboard-stat-type] #ds-title > .premium-dashboard-header-icon {
+    display: inline-flex !important;
+    flex: 0 0 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px;
+    min-height: 18px;
+    margin-right: 0;
+    opacity: 1 !important;
+    visibility: visible !important;
+    color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+}
+
+#dash-stat-modal[data-dashboard-stat-type] #ds-title > .stats-premium-content-icon svg,
+#dash-stat-modal[data-dashboard-stat-type] #ds-title > .premium-alpine-inline-icon svg,
+#dash-stat-modal[data-dashboard-stat-type] #ds-title > .premium-dashboard-header-icon svg {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    stroke: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+    stroke-width: 1.7 !important;
+}
+
+/* Großes Zweitsymbol: exakt die Größe, Position und Deckkraft der Streckenvorlage. */
+#dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-hero-icon {
+    position: absolute;
+    z-index: 0;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(154px, 47vw, 204px);
+    height: clamp(154px, 47vw, 204px);
+    transform: translate(-50%, -50%);
+    opacity: .78;
+    pointer-events: none;
+    filter: drop-shadow(0 3px 12px rgba(0,0,0,.18));
+}
+
+#dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-hero-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    overflow: visible;
+    fill: none !important;
+    stroke-width: 1.15;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+}
+
+#dash-stat-modal[data-dashboard-stat-type] .modal-header {
+    position: relative;
+    z-index: 2;
+}
+
+#dash-stat-modal[data-dashboard-stat-type] #ds-body {
+    position: relative;
+    z-index: 1;
 }
 
 @media (max-width: 380px) {
-    #dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-hero-icon {
+    #dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-hero-icon {
         width: 148px;
         height: 148px;
     }
-}
 
-@media (max-width: 380px) {
-    #dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview {
+    #dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-overview {
         padding: 7px;
     }
 
-    #dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list > li,
-    #dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-month-list > li {
+    #dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-overview-list > li,
+    #dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-month-list > li {
         padding: 7px 8px;
     }
 
-    #dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list > #ds-total-row .stats-value {
+    #dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-overview-list > #ds-total-row .stats-value {
         font-size: 16px;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    #dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-month-list > li {
+    #dash-stat-modal[data-dashboard-stat-type] .dashboard-stat-month-list > li {
         transition: none !important;
     }
 }
