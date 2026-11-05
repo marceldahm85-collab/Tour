@@ -402,9 +402,12 @@
 
         const GLOBAL_BIG_SURFACES = [
             '.modal-card:not(.highlight-modal-gold):not(.highlight-modal-silver):not(.highlight-modal-bronze)',
-            '.mob-sel-sheet',
-            '#more-menu'
+            '.mob-sel-sheet'
         ];
+        // Das Mehr-Menü behält seine eigene, nahezu deckende Oberfläche.
+        // Die globale Glas-Deckkraft soll nur Inhaltsflächen beeinflussen.
+        // Andernfalls wird der bewusst dunkle 96%-Hintergrund des Menüs
+        // durch die deutlich transparentere Standard-Glasfläche ersetzt.
         const GLOBAL_SOFT_SURFACES = [
             '.mob-sel-hdr',
             '.mob-sel-opt:not(.selected)'
