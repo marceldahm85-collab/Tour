@@ -444,26 +444,43 @@
 
 /* Dashboard-Meilenstein-Modal: Abzeichen im Titel und passendes Alpenmotiv über der gesamten Modalfläche.
    Die globale Modalpositionierung und das Scrollverhalten aus styles.css bleiben unberührt. */
+/* Die Bildschicht ist ein eigenes Pseudo-Element. So kann die globale
+   Theme-Editor-Regel mit ihrem background-Gradient das Motiv nicht überdecken. */
 #milestone-modal .modal-card {
-    background-color: rgba(2, 9, 12, .78) !important;
+    isolation: isolate;
+}
+#milestone-modal .modal-card::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    border-radius: inherit;
+    background-color: rgba(2, 9, 12, .78);
     background-image:
         linear-gradient(90deg,
             rgba(2, 9, 12, .72) 0%,
             rgba(2, 9, 12, .52) 42%,
             rgba(2, 9, 12, .30) 100%),
         linear-gradient(0deg, rgba(2, 8, 10, .24), rgba(2, 8, 10, .04)),
-        var(--milestone-modal-image, none) !important;
-    background-repeat: no-repeat !important;
-    background-size: 100% 100%, 100% 100%, cover !important;
+        var(--milestone-modal-image, none);
+    background-repeat: no-repeat;
+    background-size: 100% 100%, 100% 100%, cover;
     background-position:
         0 0,
         0 0,
-        var(--milestone-modal-image-position, center) !important;
-    background-origin: border-box !important;
-    background-clip: border-box !important;
+        var(--milestone-modal-image-position, center);
+    background-origin: border-box;
+    background-clip: border-box;
+    pointer-events: none;
+}
+#milestone-modal .modal-card > .modal-header,
+#milestone-modal .modal-card > .modal-body {
+    position: relative;
+    z-index: 1;
 }
 #milestone-modal .modal-card > .modal-header {
     position: relative !important;
+    z-index: 1 !important;
     display: block !important;
     box-sizing: border-box !important;
     height: 108px !important;
