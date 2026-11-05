@@ -13,7 +13,6 @@
         { modalId: 'month-stats-modal', titleId: 'ms-title', bodyId: 'ms-body', fallbackIcon: 'calendar' },
         { modalId: 'stats-chart-modal', titleId: 'stats-chart-modal-title', bodyId: 'stats-chart-modal-body', fallbackIcon: 'chart' },
         { modalId: 'tour-list-modal', titleId: 'tl-title', bodyId: 'tl-body', fallbackIcon: 'tour' },
-        { modalId: 'dash-stat-modal', titleId: 'ds-title', bodyId: 'ds-body', fallbackIcon: 'peaks', skipDashboardDistance: true }
     ];
 
     function clamp(value, min, max, fallback) {
@@ -181,14 +180,6 @@
         const card = modal?.querySelector(':scope > .modal-card');
         const title = document.getElementById(config.titleId);
         if (!modal || !card || !title) return;
-
-        // Das Strecken-Modal besitzt bereits seine eigene, abgestimmte Umsetzung.
-        if (config.skipDashboardDistance && modal.dataset.dashboardStatType === 'strecke') {
-            modal.removeAttribute('data-premium-modal-surface');
-            card.style.removeProperty('--premium-modal-background-gradient');
-            card.querySelector('.premium-modal-hero-icon')?.remove();
-            return;
-        }
 
         const settings = getSettings();
         card.style.setProperty('--premium-modal-background-gradient', buildReversedBackground(settings));
