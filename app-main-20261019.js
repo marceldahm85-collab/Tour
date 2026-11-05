@@ -5522,6 +5522,8 @@ async function fillSaveFormFromEntry(entry) {
         return false;
     }
 
+    // Ein gespeicherter Tourdatensatz ist kein offener Plantransfer.
+    delete form.dataset.transferPlanId;
     form.dataset.editEntryId = String(entry?.id || '');
 
     form.date.value = entry.date || '';
