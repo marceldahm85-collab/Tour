@@ -476,7 +476,9 @@ html body #app-view #tour-form .save-form-card > * {
    ========================================================= */
 
 html body #tour-detail-modal .modal-card {
-    position: relative !important;
+    /* Absolute Positionierung bewahrt Desktop-Zentrierung und Mobile-Bottom-Sheet.
+       Die Karte bleibt zugleich der Bezugspunkt für die Kontur-Pseudoelemente. */
+    position: absolute !important;
     isolation: isolate !important;
 }
 
