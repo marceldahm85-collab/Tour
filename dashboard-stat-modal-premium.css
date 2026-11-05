@@ -1,0 +1,172 @@
+/* Premium Alpine — Dashboardkachel-Modal: Strecke.
+   Nur Darstellung und DOM-Gruppierung des vorhandenen Inhalts; keine Statistiklogik. */
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] #ds-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    min-width: 0;
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview {
+    min-width: 0;
+    padding: 9px;
+    border: 1px solid color-mix(
+        in srgb,
+        var(--accent, #D5A64C) 26%,
+        var(--app-surface-border, rgba(255,255,255,.12))
+    );
+    border-radius: 14px;
+    background: linear-gradient(
+        145deg,
+        color-mix(in srgb, var(--accent, #D5A64C) 9%, var(--app-surface-strong, #243139)),
+        var(--app-surface-card, #1b272e)
+    );
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.07),
+        0 5px 13px rgba(0,0,0,.14);
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list {
+    gap: 6px;
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list > li {
+    min-height: 42px;
+    padding: 8px 10px;
+    border: 1px solid color-mix(
+        in srgb,
+        var(--accent, #D5A64C) 15%,
+        var(--app-surface-border, rgba(255,255,255,.10))
+    );
+    border-radius: 10px;
+    background: color-mix(
+        in srgb,
+        var(--app-surface-strong, #243139) 78%,
+        transparent
+    );
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.045);
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list > #ds-total-row {
+    min-height: 48px;
+    border-left: 3px solid var(--accent, #D5A64C);
+    background: linear-gradient(
+        100deg,
+        color-mix(in srgb, var(--accent, #D5A64C) 13%, var(--app-surface-strong, #243139)),
+        color-mix(in srgb, var(--app-surface-card, #1b272e) 92%, transparent)
+    );
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list > #ds-total-row .stats-label {
+    font-weight: 750;
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list > #ds-total-row .stats-value {
+    color: var(--accent, #D5A64C) !important;
+    font-size: 17px;
+    font-weight: 850;
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list > li.stats-sub {
+    margin-left: 0;
+    padding-left: 12px;
+    border-color: color-mix(
+        in srgb,
+        var(--app-surface-border, rgba(255,255,255,.10)) 82%,
+        transparent
+    );
+    background: color-mix(
+        in srgb,
+        var(--app-surface-card, #1b272e) 88%,
+        transparent
+    );
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-months {
+    min-width: 0;
+    margin-top: 13px;
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-month-heading {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 2px 7px;
+    color: color-mix(
+        in srgb,
+        var(--accent, #D5A64C) 84%,
+        var(--app-text-primary, #fff)
+    );
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: .13em;
+    line-height: 1.25;
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-month-heading::after {
+    content: "";
+    flex: 1 1 auto;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--accent, #D5A64C) 43%, transparent),
+        transparent
+    );
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-month-list {
+    gap: 5px;
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-month-list > li,
+#dash-stat-modal[data-dashboard-stat-type="strecke"] #ds-body > .stats-list > li {
+    min-height: 39px;
+    padding: 7px 10px;
+    border: 1px solid var(--app-surface-border, rgba(255,255,255,.10));
+    border-left: 2px solid color-mix(
+        in srgb,
+        var(--accent, #D5A64C) 35%,
+        var(--app-surface-border, rgba(255,255,255,.10))
+    );
+    border-radius: 10px;
+    background: linear-gradient(
+        180deg,
+        var(--app-surface-card, rgba(255,255,255,.055)),
+        var(--app-surface-subtle, rgba(255,255,255,.025))
+    );
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] #ds-body > .stats-list > li.stats-sub {
+    margin-left: 0;
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-month-list > li[data-month-idx]:active {
+    border-color: color-mix(
+        in srgb,
+        var(--accent, #D5A64C) 58%,
+        var(--app-surface-border, rgba(255,255,255,.10))
+    );
+}
+
+@media (max-width: 380px) {
+    #dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview {
+        padding: 7px;
+    }
+
+    #dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list > li,
+    #dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-month-list > li {
+        padding: 7px 8px;
+    }
+
+    #dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list > #ds-total-row .stats-value {
+        font-size: 16px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-month-list > li {
+        transition: none !important;
+    }
+}
