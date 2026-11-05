@@ -442,8 +442,26 @@
     }
 }
 
-/* Dashboard-Meilenstein-Modal: Abzeichen im Titel und passendes Alpenmotiv hinter den Einträgen.
-   Die globale Modalpositionierung aus styles.css bleibt unberührt. */
+/* Dashboard-Meilenstein-Modal: Abzeichen im Titel und passendes Alpenmotiv über der gesamten Modalfläche.
+   Die globale Modalpositionierung und das Scrollverhalten aus styles.css bleiben unberührt. */
+#milestone-modal .modal-card {
+    background-color: rgba(2, 9, 12, .78) !important;
+    background-image:
+        linear-gradient(90deg,
+            rgba(2, 9, 12, .72) 0%,
+            rgba(2, 9, 12, .52) 42%,
+            rgba(2, 9, 12, .30) 100%),
+        linear-gradient(0deg, rgba(2, 8, 10, .24), rgba(2, 8, 10, .04)),
+        var(--milestone-modal-image, none) !important;
+    background-repeat: no-repeat !important;
+    background-size: 100% 100%, 100% 100%, cover !important;
+    background-position:
+        0 0,
+        0 0,
+        var(--milestone-modal-image-position, center) !important;
+    background-origin: border-box !important;
+    background-clip: border-box !important;
+}
 #milestone-modal .modal-card > .modal-header {
     position: relative !important;
     display: block !important;
@@ -533,27 +551,4 @@
     border-radius: 13px;
 }
 
-/* Das Bild liegt als eigene Ebene hinter der Liste. Die Eintragsflächen und
-   deren Klickbereiche bleiben darüber unverändert erhalten. */
-#milestone-modal #milestone-modal-body::before {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    inset: 0;
-    border-radius: inherit;
-    background-color: rgba(2, 9, 12, .78);
-    background-image:
-        linear-gradient(90deg,
-            rgba(2, 9, 12, .72) 0%,
-            rgba(2, 9, 12, .52) 42%,
-            rgba(2, 9, 12, .30) 100%),
-        linear-gradient(0deg, rgba(2, 8, 10, .24), rgba(2, 8, 10, .04)),
-        var(--milestone-modal-image, none);
-    background-repeat: no-repeat;
-    background-size: 100% 100%, 100% 100%, cover;
-    background-position:
-        0 0,
-        0 0,
-        var(--milestone-modal-image-position, center);
-    pointer-events: none;
-}
+
