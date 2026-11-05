@@ -578,3 +578,136 @@ html body #tour-detail-modal .modal-card > * {
         opacity: .27;
     }
 }
+
+
+/* =========================================================
+   PREMIUM ALPINE — Einzeltour-Modal: Statistik-Accordions
+   Nur die Abschnitte unterhalb von Gipfel werden umgebaut.
+   ========================================================= */
+
+html body #tour-detail-modal #td-body .td-accordion-section {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 11px 0 0;
+    padding: 11px;
+    color: var(--app-text-primary, var(--theme-palette-text, #f3f7fb));
+    border: 1px solid var(--premium-border, rgba(255,255,255,.13));
+    border-radius: var(--editor-radius, var(--premium-radius-card, 16px));
+    background:
+        radial-gradient(ellipse at 98% 0%,
+            color-mix(in srgb, var(--theme-palette-accent, var(--accent, #D5A64C)) 7%, transparent),
+            transparent 42%),
+        linear-gradient(150deg,
+            var(--app-surface-strong, rgba(255,255,255,.055)),
+            var(--app-surface-card, rgba(10,16,23,.8)));
+    box-shadow: var(--premium-shadow-card, 0 8px 22px rgba(0,0,0,.18)),
+                inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+html body #tour-detail-modal #td-body .td-accordion-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    gap: 8px;
+    margin: 0 0 11px;
+    padding: 0 27px 8px 0;
+    color: var(--app-text-primary, var(--theme-palette-text, #f3f7fb));
+    border: 0;
+    border-bottom: 1px solid var(--premium-border, rgba(255,255,255,.12));
+    line-height: 1.25;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    text-align: left;
+}
+
+html body #tour-detail-modal #td-body .td-accordion-label {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    gap: 7px;
+    color: var(--app-text-primary, var(--theme-palette-text, #f3f7fb));
+    font-size: 14px;
+    font-weight: 750;
+    letter-spacing: -.01em;
+}
+
+html body #tour-detail-modal #td-body .td-accordion-icon {
+    display: inline-flex;
+    flex: 0 0 18px;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    color: var(--theme-palette-accent, var(--accent, #D5A64C));
+    opacity: .98;
+    filter: drop-shadow(0 1px 3px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #D5A64C)) 22%, transparent));
+}
+
+html body #tour-detail-modal #td-body .td-accordion-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.55;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    overflow: visible;
+}
+
+html body #tour-detail-modal #td-body .td-accordion-header::after {
+    content: "";
+    position: absolute;
+    right: 5px;
+    top: calc(50% - 5px);
+    width: 8px;
+    height: 8px;
+    border-right: 1.8px solid var(--theme-palette-accent, var(--accent, #D5A64C));
+    border-bottom: 1.8px solid var(--theme-palette-accent, var(--accent, #D5A64C));
+    transform: rotate(45deg);
+    transform-origin: center;
+    transition: transform 160ms ease, top 160ms ease;
+    opacity: .95;
+}
+
+html body #tour-detail-modal #td-body .td-accordion-section:not(.is-collapsed) > .td-accordion-header::after {
+    top: calc(50% - 2px);
+    transform: rotate(225deg);
+}
+
+html body #tour-detail-modal #td-body .td-accordion-section.is-collapsed > .td-accordion-header {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom-color: transparent;
+}
+
+html body #tour-detail-modal #td-body .td-accordion-section.is-collapsed > .td-accordion-content {
+    display: none !important;
+}
+
+html body #tour-detail-modal #td-body .tour-profile-detail-card {
+    margin: 0 !important;
+}
+
+html body #tour-detail-modal #td-body .td-accordion-header:focus-visible {
+    outline: 2px solid var(--theme-palette-accent, var(--accent, #D5A64C));
+    outline-offset: 3px;
+    border-radius: 5px;
+}
+
+@media (max-width: 520px) {
+    html body #tour-detail-modal #td-body .td-accordion-section {
+        margin-top: 9px;
+        padding: 10px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body #tour-detail-modal #td-body .td-accordion-header::after {
+        transition: none;
+    }
+}
