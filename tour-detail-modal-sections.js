@@ -84,15 +84,15 @@
     }
 
     function ensureSection(body, key, title, iconKind, item) {
-        if (!item) return null;
-
         let section = findSection(body, key);
+        if (!section && !item) return null;
+
         if (!section) {
             section = createSection(body, key, title, iconKind, item);
         }
 
         const content = getContent(section);
-        if (content && item.parentElement !== content) {
+        if (item && content && item.parentElement !== content) {
             content.appendChild(item);
         }
         return section;
@@ -162,11 +162,16 @@
         let mediaSection = findSection(body, 'media');
         if (!mediaSection && (image || gallery)) {
             const profileSection = findSection(body, 'profile');
+            const existingPerformanceSection = findSection(body, 'performance');
             const detailsGrid = Array.from(body.children).find(node =>
                 node.classList.contains('modal-detail-grid')
             ) || null;
             const peaksSection = detailsGrid ? detailsGrid.nextElementSibling : null;
-            const anchor = performanceSection || profileSection || peaksSection || detailsGrid;
+            const anchor = performanceSection ||
+                existingPerformanceSection ||
+                profileSection ||
+                peaksSection ||
+                detailsGrid;
             mediaSection = createSection(
                 body,
                 'media',
