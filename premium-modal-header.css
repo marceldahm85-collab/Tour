@@ -165,6 +165,12 @@
     transform: none;
 }
 
+/* Die vorhandene Navigation steuert die Sichtbarkeit der Zurück-Buttons.
+   Diese Regel ist spezifischer als die feste Button-Darstellung und erhält hidden. */
+.modal .modal-header :is(#td-back, #tl-back, #ds-header-back)[hidden] {
+    display: none !important;
+}
+
 /* Zurück-Pfeile dürfen etwas größer sein, bleiben aber exakt gleich groß. */
 .modal .modal-header :is(#td-back, #tl-back, #ds-header-back) {
     font-size: 22px !important;
