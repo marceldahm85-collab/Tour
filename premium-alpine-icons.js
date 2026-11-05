@@ -98,6 +98,7 @@
         '.premium-alpine-inline-icon--rank-gold{color:#d8ad51}',
         '.premium-alpine-inline-icon--rank-silver{color:#c3ccd3}',
         '.premium-alpine-inline-icon--rank-bronze{color:#bd865c}',
+        '.highlight-category-icon-btn{color:inherit}',
         'button>.premium-alpine-inline-icon,.bergwelt-tab>.premium-alpine-inline-icon,.nav-item>.premium-alpine-inline-icon{margin-right:.24em}'
     ].join('');
 
@@ -120,8 +121,9 @@
         if (!parent) return true;
         if (!parent.closest(PRESERVE_SELECTOR)) return false;
         // In Tournamen bleiben Emojis als Bestandteil des frei eingegebenen Namens erhalten.
-        // Separat erzeugte Status-/Rang-Badges innerhalb derselben Zeile werden dennoch ersetzt.
-        if (parent.closest('.big-tour-flag,.highlight-title-flag,.gradient-flag,.tour-group-badge')) return false;
+        // UI-Badges im geschützten Detailtitel verwenden weiterhin die zentrale Alpine-Symbolzuordnung.
+        // Der eigentliche Tourname (#td-title) bleibt davon unberührt und behält freie Namens-Emojis.
+        if (parent.closest('.big-tour-flag,.highlight-title-flag,.highlight-category-icon-btn,.gradient-flag,.tour-group-badge')) return false;
         return true;
     }
 
@@ -133,7 +135,7 @@
         pattern.lastIndex = 0;
 
         const parent = node.parentElement;
-        const forceIcon = Boolean(parent?.closest('.big-tour-flag,.highlight-title-flag,.gradient-flag'));
+        const forceIcon = Boolean(parent?.closest('.big-tour-flag,.highlight-title-flag,.highlight-category-icon-btn,.gradient-flag'));
         const fragment = document.createDocumentFragment();
         let cursor = 0;
         let match;
