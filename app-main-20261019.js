@@ -24674,9 +24674,6 @@ function createWrappedPhotoAllocator(photoEntries) {
     };
 }
 async function attachWrappedPhotos(slides, year) {
-    // Tourfotos gehören ausschließlich in den Fotoabschnitt nach allen Statistikfolien.
-    // Statistik-, Highlight-, Leistungs- und Top-3-Folien erhalten nur ihre eigenen
-    // thematischen Hintergrundmotive aus WRAPPED_BACKGROUND_IMAGE_SOURCES.
     const yearEntries = (getWrappedDataForYear(year) || []).map(entry => ({ ...entry }));
     const photosById = new Map(
         yearEntries
@@ -24686,40 +24683,24 @@ async function attachWrappedPhotos(slides, year) {
 
     const findPhotoEntry = entry => {
         if (!entry) return null;
-        if (entry.id && photosById.has(String(entry.id))) {
-            return photosById.get(String(entry.id));
-        }
-        return entry.hasImage || (typeof entry.imageData === 'string' && entry.imageData)
-            ? entry
-            : null;
+        if (entry.id && photosById.has(String(entry.id))) return photosById.get(String(entry.id));
+        return entry.hasImage || (typeof entry.imageData === 'string' && entry.imageData) ? entry : null;
     };
 
     slides.forEach(slide => {
-        // Sicherheitsbereinigung: keine Tourbildreferenz darf auf Statistikfolien
-        // oder in Top-3-Karten zurückbleiben.
-        slide.photoImg = null;
-        delete slide.photoEntry;
-
-        if (slide.key === 'top3') {
-            (slide.data?.top3 || []).forEach(item => {
-                if (item) delete item.photoImg;
-            });
-        }
-
+        slide.photoImages = null;
+        slide.photoLoadPromise = null;
+        slide.photoCacheKeys = [];
         if (slide.key !== 'tourPhoto') return;
 
-        if (slide.data?.source === 'cover') {
-            const photoEntry = findPhotoEntry(slide.data?.entry);
-            slide.photoEntry = photoEntry ? { ...photoEntry } : null;
-            slide.photoLoadFailed = !slide.photoEntry;
-        } else {
-            // Galerieaufnahmen werden erst beim Erreichen ihrer eigenen Folie geladen.
-            slide.photoLoadFailed = false;
-        }
+        const needsCover = (slide.data?.photos || []).some(photo => photo?.source === 'cover');
+        const photoEntry = needsCover ? findPhotoEntry(slide.data?.entry) : null;
+        slide.photoEntry = photoEntry ? { ...photoEntry } : null;
+        slide.photoLoadFailed = false;
     });
-
     return slides;
 }
+
 function getWrappedTop3(entries) {
     // Globalen Stats-Cache sichern, bevor wir ihn für Wrapped-Zwecke
     // vorübergehend mit den jahresgefilterten Daten überschreiben.
@@ -24815,12 +24796,12 @@ function getWrappedHighlights(entries) {
     });
 
     return [
-        longest ? { label: 'Längste Tour', icon: '📏', value: formatDecimalAT(longest.value) + ' km', entry: longest.entry } : null,
-        biggestAscent ? { label: 'Größter Aufstieg', icon: '⛰️', value: Math.round(biggestAscent.value).toLocaleString('de-DE') + ' hm', entry: biggestAscent.entry } : null,
-        fastestAscent ? { label: 'Schnellster Anstieg', icon: '⬆️', value: Math.round(fastestAscent.value).toLocaleString('de-DE') + ' hm/h', entry: fastestAscent.entry } : null,
-        steepest ? { label: 'Steilste Tour', icon: '📐', value: Math.round(steepest.value).toLocaleString('de-DE') + ' hm/km', entry: steepest.entry } : null,
-        longestTime ? { label: 'Längste Gehzeit', icon: '⏱️', value: formatMinutesToHHMM(longestTime.value) + ' h', entry: longestTime.entry } : null,
-        mostSteps ? { label: 'Meiste Schritte', icon: '👣', value: Math.round(mostSteps.value).toLocaleString('de-DE') + ' Schritte', entry: mostSteps.entry } : null
+        longest ? { label: 'Längste Tour', symbol: 'route', value: formatDecimalAT(longest.value) + ' km', entry: longest.entry } : null,
+        biggestAscent ? { label: 'Größter Aufstieg', symbol: 'peaks', value: Math.round(biggestAscent.value).toLocaleString('de-DE') + ' hm', entry: biggestAscent.entry } : null,
+        fastestAscent ? { label: 'Schnellster Anstieg', symbol: 'ascent', value: Math.round(fastestAscent.value).toLocaleString('de-DE') + ' hm/h', entry: fastestAscent.entry } : null,
+        steepest ? { label: 'Steilste Tour', symbol: 'steepness', value: Math.round(steepest.value).toLocaleString('de-DE') + ' hm/km', entry: steepest.entry } : null,
+        longestTime ? { label: 'Längste Gehzeit', symbol: 'time', value: formatMinutesToHHMM(longestTime.value) + ' h', entry: longestTime.entry } : null,
+        mostSteps ? { label: 'Meiste Schritte', symbol: 'steps', value: Math.round(mostSteps.value).toLocaleString('de-DE') + ' Schritte', entry: mostSteps.entry } : null
     ].filter(Boolean);
 }
 
@@ -24876,6 +24857,7 @@ function buildWrappedSlideData(year) {
     const topCompanion = getWrappedTopCompanion(entries);
     const activeMonthIndex = monthlyTours.indexOf(Math.max(...monthlyTours));
 
+    // Fotos derselben Tour bleiben zusammen; pro Folie maximal vier Fotos.
     const photoSlides = [];
     const orderedPhotoEntries = entries.slice().sort((a, b) => {
         const dateA = parseStatsCalendarDate(a?.date);
@@ -24886,6 +24868,7 @@ function buildWrappedSlideData(year) {
     const seenGalleryUris = new Set();
 
     orderedPhotoEntries.forEach(entry => {
+        const photos = [];
         const hasCover = Boolean(entry?.hasImage || (typeof entry?.imageData === 'string' && entry.imageData));
         if (hasCover) {
             const coverKey = typeof entry.imageData === 'string' && entry.imageData
@@ -24893,41 +24876,39 @@ function buildWrappedSlideData(year) {
                 : 'cover:' + String(entry.id || [entry.date, entry.tourname, entry.region].join('|'));
             if (!seenCoverImages.has(coverKey)) {
                 seenCoverImages.add(coverKey);
-                photoSlides.push({
-                    key: 'tourPhoto',
-                    type: 'photo',
-                    duration: WRAPPED_SLIDE_DURATIONS.photo,
-                    data: { entry, source: 'cover' }
-                });
+                photos.push({ source: 'cover' });
             }
         }
 
-        if (typeof window.__tourGalleryLoadPhotoThumbnail !== 'function') return;
-        const galleryPhotos = (Array.isArray(entry?.galleryPhotos) ? entry.galleryPhotos : [])
-            .filter(media => media && typeof media.uri === 'string' &&
-                media.uri.includes('/images/media/') && media.mediaType !== 'video')
-            .slice()
-            .sort((a, b) => {
-                const timeA = Number(a.dateTaken) || Number(a.dateAdded) || 0;
-                const timeB = Number(b.dateTaken) || Number(b.dateAdded) || 0;
-                return timeA - timeB;
-            });
+        if (typeof window.__tourGalleryLoadPhotoThumbnail === 'function') {
+            const galleryPhotos = (Array.isArray(entry?.galleryPhotos) ? entry.galleryPhotos : [])
+                .filter(media => media && typeof media.uri === 'string' &&
+                    media.uri.includes('/images/media/') && media.mediaType !== 'video')
+                .slice()
+                .sort((a, b) => {
+                    const timeA = Number(a.dateTaken) || Number(a.dateAdded) || 0;
+                    const timeB = Number(b.dateTaken) || Number(b.dateAdded) || 0;
+                    return timeA - timeB;
+                });
 
-        galleryPhotos.forEach(media => {
-            if (seenGalleryUris.has(media.uri)) return;
-            seenGalleryUris.add(media.uri);
+            galleryPhotos.forEach(media => {
+                if (seenGalleryUris.has(media.uri)) return;
+                seenGalleryUris.add(media.uri);
+                photos.push({ source: 'gallery', media });
+            });
+        }
+
+        for (let offset = 0; offset < photos.length; offset += 4) {
             photoSlides.push({
                 key: 'tourPhoto',
                 type: 'photo',
                 duration: WRAPPED_SLIDE_DURATIONS.photo,
-                data: { entry, source: 'gallery', media }
+                data: {
+                    entry,
+                    photos: photos.slice(offset, offset + 4)
+                }
             });
-        });
-    });
-
-    photoSlides.forEach((slide, index) => {
-        slide.data.photoIndex = index + 1;
-        slide.data.photoCount = photoSlides.length;
+        }
     });
 
     const highlightPageCount = Math.ceil(highlights.length / 2);
@@ -24975,6 +24956,7 @@ function buildWrappedSlideData(year) {
 
     return slides;
 }
+
 function checkWrappedJanuaryReminder() {
     const now = new Date();
     const isJanuaryWindow = now.getMonth() === 0 && now.getDate() <= 7;
@@ -35982,18 +35964,13 @@ function renderWrappedSlideToCanvas(slide, width, height) {
     const ctx = canvas.getContext('2d');
     const previousVerticalScale = wrappedCanvasVerticalScale;
     wrappedCanvasVerticalScale = height / WRAPPED_CANVAS_BASE_HEIGHT;
-    ctx.setTransform(
-        wrappedCanvasVerticalScale, 0,
-        0, wrappedCanvasVerticalScale,
-        0, 0
-    );
+    ctx.setTransform(wrappedCanvasVerticalScale, 0, 0, wrappedCanvasVerticalScale, 0, 0);
     const logicalHeight = WRAPPED_CANVAS_BASE_HEIGHT;
     const logicalWidth = width / wrappedCanvasVerticalScale;
-
-    const colors = drawWrappedBackground(ctx, logicalWidth, logicalHeight, slide.photoImg || null, slide.key, slide.data);
+    const colors = drawWrappedBackground(ctx, logicalWidth, logicalHeight, null, slide.key, slide.data);
 
     switch (slide.key) {
-        case 'intro': renderWrappedIntroSlide(ctx, logicalWidth, logicalHeight, colors, slide.data, !slide.photoImg); break;
+        case 'intro': renderWrappedIntroSlide(ctx, logicalWidth, logicalHeight, colors, slide.data, true); break;
         case 'distance': renderWrappedDistanceSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
         case 'osttirolLoop': renderWrappedOsttirolSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
         case 'ascent': renderWrappedAscentSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
@@ -36004,12 +35981,11 @@ function renderWrappedSlideToCanvas(slide, width, height) {
         case 'highestPeak': renderWrappedHighestPeakSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
         case 'topRegion': renderWrappedTopRegionSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
         case 'highlights': renderWrappedHighlightsSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
-        case 'tourPhoto': renderWrappedTourPhotoSlide(ctx, logicalWidth, logicalHeight, colors, slide.data, slide.photoImg || null, Boolean(slide.photoLoadFailed)); break;
+        case 'tourPhoto': renderWrappedTourPhotoSlide(ctx, logicalWidth, logicalHeight, colors, slide.data, slide.photoImages || [], Boolean(slide.photoLoadFailed)); break;
         case 'top3': renderWrappedTop3Slide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
         case 'topCompanion': renderWrappedTopCompanionSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
         case 'outro': renderWrappedOutroSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
     }
-
     wrappedCanvasVerticalScale = previousVerticalScale;
     return canvas;
 }
@@ -36107,6 +36083,7 @@ async function openWrappedView(year) {
     } else {
         renderWrappedSlide(wrappedSlideIndex);
     }
+    scheduleWrappedCanvasInitialFit(520);
 }
 
 function populateWrappedYearSelect() {
@@ -36462,9 +36439,14 @@ const endHold = () => {
     });
 
     document.getElementById('wrapped-fullscreen-btn')?.addEventListener('click', toggleWrappedFullscreen);
+    const wrappedView = document.getElementById('wrapped-view');
+    if (wrappedView && !wrappedView.dataset.wrappedCanvasFitListener) {
+        wrappedView.dataset.wrappedCanvasFitListener = 'true';
+        wrappedView.addEventListener('transitionend', event => {
+            if (event.target === wrappedView && event.propertyName === 'transform') scheduleWrappedCanvasInitialFit(80);
+        });
+    }
 }
-
-
 
 function getWrappedThemeColors() {
     const legacyThemeKey = themeEditorGetActiveTheme();
@@ -36480,45 +36462,53 @@ function getWrappedThemeColors() {
 
 function releaseWrappedGalleryPhoto(slide) {
     if (!slide || slide.key !== 'tourPhoto') return;
-    if (slide.photoCacheKey) wrappedPhotoCache.delete(slide.photoCacheKey);
-    slide.photoCacheKey = null;
-    slide.photoImg = null;
+    (Array.isArray(slide.photoCacheKeys) ? slide.photoCacheKeys : []).forEach(key => {
+        if (key) wrappedPhotoCache.delete(key);
+    });
+    slide.photoCacheKeys = [];
+    slide.photoImages = null;
     slide.photoLoadPromise = null;
 }
 
 async function ensureWrappedGalleryPhotoLoaded(slide) {
-    if (!slide || slide.key !== 'tourPhoto') return slide?.photoImg || null;
-    if (slide.photoImg) return slide.photoImg;
+    if (!slide || slide.key !== 'tourPhoto') return slide?.photoImages || [];
+    if (Array.isArray(slide.photoImages)) return slide.photoImages;
     if (slide.photoLoadPromise) return slide.photoLoadPromise;
 
     slide.photoLoadPromise = (async () => {
         try {
-            let dataUrl = null;
-            if (slide.data?.source === 'gallery') {
-                const loadThumbnail = window.__tourGalleryLoadPhotoThumbnail;
-                if (typeof loadThumbnail !== 'function') {
-                    slide.photoLoadFailed = true;
-                    return null;
+            const sources = Array.isArray(slide.data?.photos) ? slide.data.photos.slice(0, 4) : [];
+            const loaded = await Promise.all(sources.map(async photo => {
+                try {
+                    let dataUrl = null;
+                    if (photo?.source === 'gallery') {
+                        const loadThumbnail = window.__tourGalleryLoadPhotoThumbnail;
+                        if (typeof loadThumbnail !== 'function') return { image: null, cacheKey: null };
+                        dataUrl = await loadThumbnail(photo.media);
+                    } else if (photo?.source === 'cover') {
+                        const entry = slide.photoEntry ? { ...slide.photoEntry } : { ...(slide.data?.entry || {}) };
+                        if (Object.keys(entry).length) {
+                            await loadTourImageData(entry);
+                            dataUrl = entry.imageData || null;
+                        }
+                    }
+                    const image = dataUrl ? await loadWrappedImage(dataUrl) : null;
+                    return { image, cacheKey: dataUrl || null };
+                } catch (error) {
+                    console.warn('[Jahresrückblick] Ein Tourfoto konnte nicht geladen werden.', error);
+                    return { image: null, cacheKey: null };
                 }
-                dataUrl = await loadThumbnail(slide.data.media);
-            } else if (slide.data?.source === 'cover') {
-                const entry = slide.photoEntry ? { ...slide.photoEntry } : null;
-                if (entry) {
-                    await loadTourImageData(entry);
-                    dataUrl = entry.imageData || null;
-                }
-            }
-
-            const image = dataUrl ? await loadWrappedImage(dataUrl) : null;
-            slide.photoCacheKey = dataUrl || null;
-            slide.photoImg = image;
-            slide.photoLoadFailed = !image;
-            if (slide.photoEntry && slide.photoEntry.imageData) delete slide.photoEntry.imageData;
-            return image;
+            }));
+            slide.photoImages = loaded;
+            slide.photoCacheKeys = loaded.map(photo => photo.cacheKey).filter(Boolean);
+            slide.photoLoadFailed = !loaded.some(photo => photo.image);
+            if (slide.photoEntry?.imageData) delete slide.photoEntry.imageData;
+            return slide.photoImages;
         } catch (error) {
-            console.warn('[Jahresrückblick] Tourfoto konnte nicht geladen werden.', error);
+            console.warn('[Jahresrückblick] Tourfotos konnten nicht geladen werden.', error);
+            slide.photoImages = [];
             slide.photoLoadFailed = true;
-            return null;
+            return slide.photoImages;
         }
     })();
     return slide.photoLoadPromise;
@@ -36787,47 +36777,54 @@ function drawWrappedOsttirolMotionFrame(state, progress) {
     const canvas = document.getElementById('wrapped-canvas');
     const slide = wrappedSlides[state?.slideIndex];
     if (!canvas || !slide || slide.key !== 'osttirolLoop') return;
-
     const verticalScale = canvas.height / WRAPPED_CANVAS_BASE_HEIGHT;
     const logicalWidth = canvas.width / verticalScale;
-    const layout = getWrappedOsttirolMapLayout(logicalWidth, WRAPPED_CANVAS_BASE_HEIGHT);
-    const points = layout.points;
+    const points = getWrappedOsttirolMapLayout(logicalWidth, WRAPPED_CANVAS_BASE_HEIGHT).points;
+    if (!Array.isArray(points) || points.length < 2) return;
     const segments = points.length - 1;
-    const position = Math.max(0, Math.min(1, progress)) * segments;
+    const position = Math.max(0, Math.min(1, Number(progress) || 0)) * segments;
     const index = Math.min(segments - 1, Math.floor(position));
     const local = position - index;
-    const from = points[index];
-    const to = points[index + 1];
+    const from = points[index], to = points[index + 1];
     const x = from.x + (to.x - from.x) * local;
     const y = from.y + (to.y - from.y) * local;
-
     const ctx = canvas.getContext('2d');
     ctx.save();
     ctx.setTransform(verticalScale, 0, 0, verticalScale, 0, 0);
-
     ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.setLineDash([]);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.miterLimit = 2;
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i <= index; i++) ctx.lineTo(points[i].x, points[i].y);
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = 'rgba(255,196,91,0.48)';
+    ctx.lineWidth = 18;
+    ctx.shadowColor = '#ffe4a1';
+    ctx.shadowBlur = 23;
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,239,194,0.98)';
+    ctx.lineWidth = 6.5;
+    ctx.shadowColor = 'rgba(255,238,192,0.72)';
+    ctx.shadowBlur = 5;
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,245,0.94)';
+    ctx.lineWidth = 2.3;
+    ctx.shadowBlur = 0;
+    ctx.stroke();
     const halo = ctx.createRadialGradient(x, y, 1, x, y, 16);
     halo.addColorStop(0, 'rgba(255,250,220,0.78)');
     halo.addColorStop(0.28, 'rgba(255,217,130,0.42)');
     halo.addColorStop(1, 'rgba(255,193,75,0)');
     ctx.fillStyle = halo;
-    ctx.beginPath();
-    ctx.arc(x, y, 16, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.shadowColor = '#ffe4a1';
-    ctx.shadowBlur = 9;
-    ctx.fillStyle = '#fff8df';
-    ctx.beginPath();
-    ctx.arc(x, y, 3.2, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = 'rgba(255,248,225,0.92)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.arc(x, y, 5.2, 0, Math.PI * 2);
-    ctx.stroke();
+    ctx.beginPath(); ctx.arc(x, y, 16, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowColor = '#ffe4a1'; ctx.shadowBlur = 9; ctx.fillStyle = '#fff8df';
+    ctx.beginPath(); ctx.arc(x, y, 3.2, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0; ctx.strokeStyle = 'rgba(255,248,225,0.92)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(x, y, 5.2, 0, Math.PI * 2); ctx.stroke();
     ctx.restore();
 }
 
@@ -37426,17 +37423,14 @@ function drawWrappedSlideIntoCanvas(index, targetCanvas) {
     }
     wrappedLastRenderedSlideIndex = index;
 
-    if (slide.key === 'tourPhoto' && !slide.photoImg && !slide.photoLoadFailed && !slide.photoRefreshAttached) {
+    if (slide.key === 'tourPhoto' && !Array.isArray(slide.photoImages) && !slide.photoLoadFailed && !slide.photoRefreshAttached) {
         slide.photoRefreshAttached = true;
-        ensureWrappedGalleryPhotoLoaded(slide).then(image => {
+        ensureWrappedGalleryPhotoLoaded(slide).then(images => {
             slide.photoRefreshAttached = false;
             if (wrappedSlides[index] !== slide) return;
             if (wrappedSlideIndex === index) {
                 renderWrappedSlide(index);
-                if (image && !wrappedPaused && !wrappedTransitionState && wrappedAutoAdvanceTimer !== null) {
-                    startWrappedPhotoMotionForCurrentSlide(getWrappedCurrentSlideRemaining());
-                }
-            } else if (image) {
+            } else if (Array.isArray(images) && images.length) {
                 releaseWrappedGalleryPhoto(slide);
             }
         });
@@ -37446,16 +37440,11 @@ function drawWrappedSlideIntoCanvas(index, targetCanvas) {
     wrappedCanvasVerticalScale = pixelHeight / WRAPPED_CANVAS_BASE_HEIGHT;
     const w = logicalWidth / wrappedCanvasVerticalScale;
     const h = WRAPPED_CANVAS_BASE_HEIGHT;
-    ctx.setTransform(
-        wrappedCanvasVerticalScale, 0,
-        0, wrappedCanvasVerticalScale,
-        0, 0
-    );
-
-    const colors = drawWrappedBackground(ctx, w, h, slide.photoImg || null, slide.key, slide.data);
+    ctx.setTransform(wrappedCanvasVerticalScale, 0, 0, wrappedCanvasVerticalScale, 0, 0);
+    const colors = drawWrappedBackground(ctx, w, h, null, slide.key, slide.data);
 
     switch (slide.key) {
-        case 'intro': renderWrappedIntroSlide(ctx, w, h, colors, slide.data, !slide.photoImg); break;
+        case 'intro': renderWrappedIntroSlide(ctx, w, h, colors, slide.data, true); break;
         case 'distance': renderWrappedDistanceSlide(ctx, w, h, colors, slide.data); break;
         case 'osttirolLoop': renderWrappedOsttirolSlide(ctx, w, h, colors, slide.data); break;
         case 'ascent': renderWrappedAscentSlide(ctx, w, h, colors, slide.data); break;
@@ -37466,12 +37455,11 @@ function drawWrappedSlideIntoCanvas(index, targetCanvas) {
         case 'highestPeak': renderWrappedHighestPeakSlide(ctx, w, h, colors, slide.data); break;
         case 'topRegion': renderWrappedTopRegionSlide(ctx, w, h, colors, slide.data); break;
         case 'highlights': renderWrappedHighlightsSlide(ctx, w, h, colors, slide.data); break;
-        case 'tourPhoto': renderWrappedTourPhotoSlide(ctx, w, h, colors, slide.data, slide.photoImg || null, Boolean(slide.photoLoadFailed)); break;
+        case 'tourPhoto': renderWrappedTourPhotoSlide(ctx, w, h, colors, slide.data, slide.photoImages || [], Boolean(slide.photoLoadFailed)); break;
         case 'top3': renderWrappedTop3Slide(ctx, w, h, colors, slide.data); break;
         case 'topCompanion': renderWrappedTopCompanionSlide(ctx, w, h, colors, slide.data); break;
         case 'outro': renderWrappedOutroSlide(ctx, w, h, colors, slide.data); break;
     }
-
     return true;
 }
 
@@ -37541,6 +37529,25 @@ window.addEventListener('resize', () => {
     });
 }, { passive: true });
 
+
+let wrappedCanvasInitialFitTimer = null;
+function scheduleWrappedCanvasInitialFit(delay = 460) {
+    if (wrappedCanvasInitialFitTimer !== null) clearTimeout(wrappedCanvasInitialFitTimer);
+    wrappedCanvasInitialFitTimer = setTimeout(() => {
+        wrappedCanvasInitialFitTimer = null;
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            const view = document.getElementById('wrapped-view');
+            const stage = document.getElementById('wrapped-stage');
+            const canvas = document.getElementById('wrapped-canvas');
+            if (currentView !== 'wrapped' || !wrappedSlides.length || view?.classList.contains('bergwelt-mode') || !stage || !canvas) return;
+            const rect = stage.getBoundingClientRect();
+            if (rect.width <= 0 || rect.height <= 0) return;
+            if (wrappedTransitionState) finishWrappedTransition(true, false);
+            renderWrappedSlide(wrappedSlideIndex);
+        }));
+    }, Math.max(0, Number(delay) || 0));
+}
+
 function renderWrappedIntroSlide(ctx, w, h, colors, data, showAlpineArtwork = true) {
     // Der alpine Hintergrund bzw. das jeweilige Tourfoto bleibt erhalten.
     drawWrappedCenteredTitle(ctx, 'DEIN ALPINES JAHR', 320, 76, colors.accent, w);
@@ -37572,24 +37579,15 @@ function renderWrappedIntroSlide(ctx, w, h, colors, data, showAlpineArtwork = tr
     );
 }
 function renderWrappedDistanceSlide(ctx, w, h, colors, data) {
-    drawWrappedCenteredTitle(ctx, 'Deine Strecke', 350, 70, colors.text, w);
-    drawWrappedBigNumber(ctx, data.distance.toFixed(1), 'km', 800, colors.text, w);
+    drawWrappedCenteredTitle(ctx, 'Deine Strecke', 245, 70, colors.text, w);
+    drawWrappedBigNumber(ctx, data.distance.toFixed(1), 'km', 650, colors.text, w);
     setWrappedFont(ctx, 38);
-    ctx.fillStyle = colors.accent;
-    ctx.textAlign = 'center';
-    wrapWrappedText(ctx, getWrappedDistanceComparison(data.distance), w / 2, 1000, w - 160, 50);
-
-    setWrappedFont(ctx, 32, 'normal');
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    wrapWrappedText(
-        ctx,
-        'Jeder Kilometer war ein Teil deines Weges – durch Täler, über Höhen und immer ein Stück weiter.',
-        w / 2,
-        1150,
-        w * 0.78,
-        46
-    );
+    ctx.fillStyle = colors.accent; ctx.textAlign = 'center';
+    wrapWrappedText(ctx, getWrappedDistanceComparison(data.distance), w / 2, 850, w - 160, 50);
+    setWrappedFont(ctx, 32, 'normal'); ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    wrapWrappedText(ctx, 'Jeder Kilometer war ein Teil deines Weges – durch Täler, über Höhen und immer ein Stück weiter.', w / 2, 1550, w * 0.78, 46);
 }
+
 
 // Bezirksgrenze Lienz (Osttirol), aus der vereinfachten Bezirksgeometrie
 // GeoJSON-TopoJSON-Austria, 2021/simplified-99.9/bezirke_999_geo.json
@@ -37715,26 +37713,15 @@ function renderWrappedOsttirolSlide(ctx, w, h, colors, data) {
 }
 
 function renderWrappedAscentSlide(ctx, w, h, colors, data) {
-    drawWrappedCenteredTitle(ctx, 'Deine Höhenmeter', 350, 70, colors.text, w);
-    drawWrappedBigNumber(ctx, Math.round(data.ascent).toLocaleString('de-DE'), 'Hm', 800, colors.text, w);
-
-    setWrappedFont(ctx, 38, 'normal');
-    ctx.fillStyle = colors.accent;
-    ctx.textAlign = 'center';
-    wrapWrappedText(ctx, getWrappedElevationComparison(data.ascent), w / 2, 1000, w - 160, 50);
-    wrapWrappedText(ctx, getWrappedEverestComparison(data.ascent), w / 2, 1070, w - 160, 50);
-
-    setWrappedFont(ctx, 32, 'normal');
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    wrapWrappedText(
-        ctx,
-        'Meter für Meter dem Himmel entgegen – und mit jedem Aufstieg ein Stück näher an neuen Perspektiven und unvergesslichen Ausblicken.',
-        w / 2,
-        1220,
-        w * 0.78,
-        46
-    );
+    drawWrappedCenteredTitle(ctx, 'Deine Höhenmeter', 245, 70, colors.text, w);
+    drawWrappedBigNumber(ctx, Math.round(data.ascent).toLocaleString('de-DE'), 'Hm', 650, colors.text, w);
+    setWrappedFont(ctx, 38, 'normal'); ctx.fillStyle = colors.accent; ctx.textAlign = 'center';
+    wrapWrappedText(ctx, getWrappedElevationComparison(data.ascent), w / 2, 850, w - 160, 50);
+    wrapWrappedText(ctx, getWrappedEverestComparison(data.ascent), w / 2, 930, w - 160, 50);
+    setWrappedFont(ctx, 32, 'normal'); ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    wrapWrappedText(ctx, 'Meter für Meter dem Himmel entgegen – und mit jedem Aufstieg ein Stück näher an neuen Perspektiven und unvergesslichen Ausblicken.', w / 2, 1535, w * 0.78, 46);
 }
+
 function drawWrappedPremiumIcon(ctx, key, centerX, centerY, size, color, ordinal = null) {
     const scale = size / 24;
     ctx.save();
@@ -37746,313 +37733,208 @@ function drawWrappedPremiumIcon(ctx, key, centerX, centerY, size, color, ordinal
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    if (key === 'time') {
+    if (key === 'route') {
         ctx.beginPath();
-        ctx.arc(12, 12, 8.5, 0, Math.PI * 2);
+        ctx.moveTo(3, 17);
+        ctx.bezierCurveTo(6, 17, 6, 7, 11, 7);
+        ctx.bezierCurveTo(15, 7, 14, 17, 20, 17);
         ctx.stroke();
         ctx.beginPath();
-        ctx.moveTo(12, 7);
-        ctx.lineTo(12, 12);
-        ctx.lineTo(15.5, 14);
-        ctx.moveTo(9, 2.5);
-        ctx.lineTo(15, 2.5);
-        ctx.moveTo(12, 2.5);
-        ctx.lineTo(12, 3.5);
+        ctx.arc(3, 17, 1.5, 0, Math.PI * 2);
+        ctx.arc(20, 17, 1.5, 0, Math.PI * 2);
+        ctx.stroke();
+    } else if (key === 'ascent') {
+        ctx.beginPath();
+        ctx.moveTo(3, 19);
+        ctx.lineTo(8, 14);
+        ctx.lineTo(11, 16);
+        ctx.lineTo(18, 7);
+        ctx.moveTo(12.5, 7);
+        ctx.lineTo(18, 7);
+        ctx.lineTo(18, 12.5);
+        ctx.stroke();
+    } else if (key === 'steepness') {
+        ctx.beginPath();
+        ctx.moveTo(3, 20);
+        ctx.lineTo(3, 4);
+        ctx.moveTo(3, 20);
+        ctx.lineTo(21, 20);
+        ctx.moveTo(5, 18);
+        ctx.lineTo(18.5, 5);
+        ctx.stroke();
+    } else if (key === 'steps') {
+        ctx.beginPath();
+        ctx.ellipse(7.2, 8, 2.4, 4.2, -0.28, 0, Math.PI * 2);
+        ctx.ellipse(16.5, 16, 2.4, 4.2, 0.28, 0, Math.PI * 2);
         ctx.stroke();
         ctx.beginPath();
-        ctx.arc(12, 12, 0.8, 0, Math.PI * 2);
+        ctx.arc(4.7, 3, 1, 0, Math.PI * 2);
+        ctx.arc(9, 12, 1, 0, Math.PI * 2);
+        ctx.arc(14, 11, 1, 0, Math.PI * 2);
+        ctx.arc(18.5, 20, 1, 0, Math.PI * 2);
         ctx.stroke();
+    } else if (key === 'time') {
+        ctx.beginPath(); ctx.arc(12, 12, 8.5, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(12, 7); ctx.lineTo(12, 12); ctx.lineTo(15.5, 14);
+        ctx.moveTo(9, 2.5); ctx.lineTo(15, 2.5); ctx.moveTo(12, 2.5); ctx.lineTo(12, 3.5); ctx.stroke();
     } else if (key === 'location') {
         ctx.beginPath();
-        ctx.moveTo(12, 21);
-        ctx.bezierCurveTo(10.2, 18.5, 5, 13.5, 5, 9);
-        ctx.bezierCurveTo(5, 5.1, 8.1, 2, 12, 2);
-        ctx.bezierCurveTo(15.9, 2, 19, 5.1, 19, 9);
-        ctx.bezierCurveTo(19, 13.5, 13.8, 18.5, 12, 21);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(7.7, 12.8);
-        ctx.lineTo(10.2, 9.1);
-        ctx.lineTo(12, 11.4);
-        ctx.lineTo(14.1, 8.4);
-        ctx.lineTo(16.4, 12.8);
-        ctx.closePath();
-        ctx.stroke();
+        ctx.moveTo(12, 21); ctx.bezierCurveTo(10.2, 18.5, 5, 13.5, 5, 9);
+        ctx.bezierCurveTo(5, 5.1, 8.1, 2, 12, 2); ctx.bezierCurveTo(15.9, 2, 19, 5.1, 19, 9);
+        ctx.bezierCurveTo(19, 13.5, 13.8, 18.5, 12, 21); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(7.7, 12.8); ctx.lineTo(10.2, 9.1); ctx.lineTo(12, 11.4);
+        ctx.lineTo(14.1, 8.4); ctx.lineTo(16.4, 12.8); ctx.closePath(); ctx.stroke();
     } else if (key === 'companion') {
-        ctx.beginPath();
-        ctx.arc(8, 7, 2.6, 0, Math.PI * 2);
-        ctx.arc(16, 7, 2.6, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(2.5, 20);
-        ctx.bezierCurveTo(2.9, 15.9, 4.7, 13.5, 8, 13.5);
-        ctx.bezierCurveTo(10.2, 13.5, 11.5, 14.6, 12, 16);
-        ctx.moveTo(12, 16);
+        ctx.beginPath(); ctx.arc(8, 7, 2.6, 0, Math.PI * 2); ctx.arc(16, 7, 2.6, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(2.5, 20); ctx.bezierCurveTo(2.9, 15.9, 4.7, 13.5, 8, 13.5);
+        ctx.bezierCurveTo(10.2, 13.5, 11.5, 14.6, 12, 16); ctx.moveTo(12, 16);
         ctx.bezierCurveTo(12.5, 14.6, 13.8, 13.5, 16, 13.5);
-        ctx.bezierCurveTo(19.3, 13.5, 21.1, 15.9, 21.5, 20);
-        ctx.moveTo(10.1, 11.7);
-        ctx.lineTo(12, 13.2);
-        ctx.lineTo(13.9, 11.7);
-        ctx.stroke();
+        ctx.bezierCurveTo(19.3, 13.5, 21.1, 15.9, 21.5, 20); ctx.stroke();
     } else if (key === 'medal') {
-        ctx.beginPath();
-        ctx.moveTo(8.2, 12.5);
-        ctx.lineTo(7, 22);
-        ctx.lineTo(12, 19.1);
-        ctx.lineTo(17, 22);
-        ctx.lineTo(15.8, 12.5);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(12, 8.5, 5.3, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(12, 8.5, 3.4, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.fillStyle = color;
-        ctx.font = 'bold 7px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
+        ctx.beginPath(); ctx.moveTo(8.2, 12.5); ctx.lineTo(7, 22); ctx.lineTo(12, 19.1);
+        ctx.lineTo(17, 22); ctx.lineTo(15.8, 12.5); ctx.stroke();
+        ctx.beginPath(); ctx.arc(12, 8.5, 5.3, 0, Math.PI * 2); ctx.arc(12, 8.5, 3.4, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = color; ctx.font = 'bold 7px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText(String(ordinal || 1), 12, 8.6);
     } else if (key === 'peaks') {
-        ctx.beginPath();
-        ctx.moveTo(2.2, 20);
-        ctx.lineTo(8.2, 9.5);
-        ctx.lineTo(11.2, 14);
-        ctx.lineTo(15.5, 5);
-        ctx.lineTo(21.8, 20);
-        ctx.closePath();
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(13.6, 9);
-        ctx.lineTo(15.5, 5);
-        ctx.lineTo(18.3, 9.7);
-        ctx.lineTo(16.3, 9);
-        ctx.lineTo(15.3, 10);
-        ctx.lineTo(14.6, 9);
-        ctx.moveTo(5.8, 17);
-        ctx.lineTo(8.2, 13);
-        ctx.lineTo(10.4, 16);
-        ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(2.2, 20); ctx.lineTo(8.2, 9.5); ctx.lineTo(11.2, 14);
+        ctx.lineTo(15.5, 5); ctx.lineTo(21.8, 20); ctx.closePath(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(13.6, 9); ctx.lineTo(15.5, 5); ctx.lineTo(18.3, 9.7);
+        ctx.lineTo(16.3, 9); ctx.lineTo(15.3, 10); ctx.lineTo(14.6, 9);
+        ctx.moveTo(5.8, 17); ctx.lineTo(8.2, 13); ctx.lineTo(10.4, 16); ctx.stroke();
+    } else if (key === 'route') {
+        ctx.beginPath(); ctx.arc(4.5, 19, 2, 0, Math.PI * 2); ctx.arc(19.5, 5, 2, 0, Math.PI * 2);
+        ctx.moveTo(6.5, 19); ctx.lineTo(10, 19); ctx.bezierCurveTo(14, 19, 9, 9, 14, 9); ctx.lineTo(17.5, 9); ctx.stroke();
+    } else if (key === 'ascent') {
+        ctx.beginPath(); ctx.moveTo(3, 20); ctx.lineTo(11, 8); ctx.lineTo(15, 13); ctx.lineTo(21, 4);
+        ctx.moveTo(15.5, 4); ctx.lineTo(21, 4); ctx.lineTo(21, 9.5); ctx.stroke();
+    } else if (key === 'steepness') {
+        ctx.beginPath(); ctx.moveTo(4, 20); ctx.lineTo(19, 5); ctx.moveTo(13, 5); ctx.lineTo(19, 5);
+        ctx.lineTo(19, 11); ctx.moveTo(4, 20); ctx.lineTo(12, 20); ctx.stroke();
+    } else if (key === 'steps') {
+        ctx.beginPath(); ctx.ellipse(7.5, 8, 2.5, 4, -0.35, 0, Math.PI * 2);
+        ctx.ellipse(16.5, 16, 2.5, 4, -0.35, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(5.5, 3.5, 1, 0, Math.PI * 2); ctx.arc(14.5, 11.5, 1, 0, Math.PI * 2); ctx.stroke();
     }
-
     ctx.restore();
 }
 
 function renderWrappedTimeSlide(ctx, w, h, colors, data) {
     const hours = Math.floor(data.minutes / 60);
     const days = (data.minutes / (60 * 24)).toFixed(2).replace('.', ',');
-    drawWrappedCenteredTitle(ctx, 'Zeit unterwegs', 350, 70, colors.text, w);
-    drawWrappedBigNumber(ctx, hours.toLocaleString('de-DE'), 'Stunden', 800, colors.text, w);
-    setWrappedFont(ctx, 38);
-    ctx.fillStyle = colors.accent;
-    ctx.textAlign = 'center';
+    drawWrappedCenteredTitle(ctx, 'Zeit unterwegs', 245, 70, colors.text, w);
+    drawWrappedBigNumber(ctx, hours.toLocaleString('de-DE'), 'Stunden', 650, colors.text, w);
+    setWrappedFont(ctx, 38); ctx.fillStyle = colors.accent; ctx.textAlign = 'center';
     const timeLabel = `Das sind ${days} Tage am Berg!`;
-    ctx.fillText(timeLabel, w / 2, 1000);
-    drawWrappedPremiumIcon(
-        ctx, 'time',
-        w / 2 + ctx.measureText(timeLabel).width / 2 + 25,
-        987, 34, colors.accent
-    );
-
-    setWrappedFont(ctx, 32, 'normal');
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    wrapWrappedText(
-        ctx,
-        'Stunden fernab vom Alltag, mitten in der Natur. Zeit zum Durchatmen, Weitergehen und Genießen.',
-        w / 2,
-        1150,
-        w * 0.78,
-        46
-    );
+    ctx.fillText(timeLabel, w / 2, 850);
+    drawWrappedPremiumIcon(ctx, 'time', w / 2 + ctx.measureText(timeLabel).width / 2 + 25, 837, 34, colors.accent);
+    setWrappedFont(ctx, 32, 'normal'); ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    wrapWrappedText(ctx, 'Stunden fernab vom Alltag, mitten in der Natur. Zeit zum Durchatmen, Weitergehen und Genießen.', w / 2, 1550, w * 0.78, 46);
 }
+
 function renderWrappedActiveMonthSlide(ctx, w, h, colors, data) {
     const monthNames = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
-    drawWrappedCenteredTitle(ctx, 'Dein aktivster Monat', 300, 70, colors.text, w);
-
-    setWrappedFont(ctx, 100, 'bold');
+    drawWrappedCenteredTitle(ctx, 'Dein aktivster Monat', 245, 70, colors.text, w);
+    setWrappedFont(ctx, 94, 'bold');
     ctx.fillStyle = colors.accent;
     ctx.textAlign = 'center';
-    ctx.fillText(monthNames[data.activeMonthIndex], w / 2, 500);
-
-    const chartX = 100, chartY = 650, chartW = w - 200, chartH = 500, barGap = 12;
+    ctx.fillText(monthNames[data.activeMonthIndex], w / 2, 455);
+    const chartX = 100, chartY = 895, chartW = w - 200, chartH = 360, barGap = 12;
     const barW = (chartW - barGap * 11) / 12;
     const maxVal = Math.max(...data.monthlyTours, 1);
-
     data.monthlyTours.forEach((count, i) => {
         const barH = (count / maxVal) * chartH;
         const x = chartX + i * (barW + barGap);
         const y = chartY + chartH - barH;
         ctx.fillStyle = i === data.activeMonthIndex ? colors.accent : 'rgba(255,255,255,0.4)';
         ctx.fillRect(x, y, barW, barH);
-
         ctx.fillStyle = colors.text;
         setWrappedFont(ctx, 24);
         ctx.textAlign = 'center';
         ctx.fillText(monthNames[i], x + barW / 2, chartY + chartH + 40);
     });
-
     setWrappedFont(ctx, 42);
     ctx.fillStyle = colors.text;
-    ctx.fillText(`${data.monthlyTours[data.activeMonthIndex]} Touren`, w / 2, chartY - 30);
-
+    ctx.textAlign = 'center';
+    ctx.fillText(String(data.monthlyTours[data.activeMonthIndex]) + ' Touren', w / 2, chartY - 28);
     setWrappedFont(ctx, 32, 'normal');
     ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    wrapWrappedText(
-        ctx,
-        'In diesem Monat zog es dich besonders oft hinaus – jeder Ausflug brachte neue Wege, Eindrücke und Gipfelmomente.',
-        w / 2,
-        1360,
-        w * 0.78,
-        46
-    );
+    ctx.textAlign = 'center';
+    wrapWrappedText(ctx, 'In diesem Monat zog es dich besonders oft hinaus – jeder Ausflug brachte neue Wege, Eindrücke und Gipfelmomente.', w / 2, 1530, w * 0.78, 46);
 }
+
 function renderWrappedBestTourSlide(ctx, w, h, colors, data) {
-    drawWrappedCenteredTitle(ctx, 'Deine leistungsbeste Tour', 300, 70, colors.text, w);
-    setWrappedFont(ctx, 54, 'bold');
-    ctx.fillStyle = colors.accent;
-    ctx.textAlign = 'center';
-    wrapWrappedText(ctx, data.entry.tourname || data.entry.region || 'Unbenannte Tour', w / 2, 500, w - 160, 65);
-
-    setWrappedFont(ctx, 36);
-    ctx.fillStyle = colors.text;
-    ctx.fillText(data.entry.date || '', w / 2, 650);
-
-    drawWrappedBigNumber(ctx, data.score.toFixed(0), 'Leistungsindex', 1000, colors.text, w);
-
-    setWrappedFont(ctx, 32, 'normal');
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    wrapWrappedText(
-        ctx,
-        'Nicht jede besondere Tour lässt sich in Zahlen fassen. Manchmal sind es die Weite der Berge, der Blick vom Gipfel und das Gefühl dieses einen Tages, die in Erinnerung bleiben.',
-        w / 2,
-        1240,
-        w * 0.78,
-        46
-    );
+    drawWrappedCenteredTitle(ctx, 'Deine leistungsbeste Tour', 245, 70, colors.text, w);
+    setWrappedFont(ctx, 54, 'bold'); ctx.fillStyle = colors.accent; ctx.textAlign = 'center';
+    wrapWrappedText(ctx, data.entry.tourname || data.entry.region || 'Unbenannte Tour', w / 2, 425, w - 160, 65);
+    setWrappedFont(ctx, 36); ctx.fillStyle = colors.text; ctx.fillText(data.entry.date || '', w / 2, 555);
+    drawWrappedBigNumber(ctx, data.score.toFixed(0), 'Leistungsindex', 880, colors.text, w);
+    setWrappedFont(ctx, 32, 'normal'); ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    wrapWrappedText(ctx, 'Nicht jede besondere Tour lässt sich in Zahlen fassen. Manchmal sind es die Weite der Berge, der Blick vom Gipfel und das Gefühl dieses einen Tages, die in Erinnerung bleiben.', w / 2, 1530, w * 0.78, 46);
 }
+
 function renderWrappedPeakCountSlide(ctx, w, h, colors, data) {
-    drawWrappedCenteredTitle(ctx, 'Deine Gipfel', 350, 70, colors.text, w);
-    drawWrappedBigNumber(ctx, Math.round(Number(data.peaks) || 0).toLocaleString('de-DE'), 'Gipfel', h * 0.58, colors.text, w);
-
-    setWrappedFont(ctx, 32, 'normal');
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    ctx.textAlign = 'center';
-    wrapWrappedText(
-        ctx,
-        'Jeder Gipfel ein eigenes Ziel. Jeder Aufstieg ein neuer Blick auf die Berge.',
-        w / 2,
-        1350,
-        w * 0.78,
-        46
-    );
+    drawWrappedCenteredTitle(ctx, 'Deine Gipfel', 245, 70, colors.text, w);
+    drawWrappedBigNumber(ctx, Math.round(Number(data.peaks) || 0).toLocaleString('de-DE'), 'Gipfel', 760, colors.text, w);
+    setWrappedFont(ctx, 32, 'normal'); ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.textAlign = 'center';
+    wrapWrappedText(ctx, 'Jeder Gipfel ein eigenes Ziel. Jeder Aufstieg ein neuer Blick auf die Berge.', w / 2, 1550, w * 0.78, 46);
 }
 
-function renderWrappedTourPhotoSlide(ctx, w, h, colors, data, photoImg, loadFailed = false) {
-    // Das Tourfoto ist bereits das vollflächige, scharfe Hintergrundbild.
-    // Hier werden nur Titel und Metadaten darübergelegt – ohne zweite Bildkopie.
+function renderWrappedTourPhotoSlide(ctx, w, h, colors, data, photoImages = []) {
     const title = data.entry?.tourname || data.entry?.region || 'Tourfoto';
-    drawWrappedCenteredTitle(ctx, title, 185, 58, colors.text, w);
-
-    if (!photoImg) {
-        setWrappedFont(ctx, 36, 'bold');
-        ctx.fillStyle = colors.text;
-        ctx.textAlign = 'center';
-        ctx.fillText(loadFailed ? 'Foto nicht verfügbar' : 'Foto wird geladen …', w / 2, h * 0.56);
-    }
-
-    const meta = [data.entry?.date || '', data.entry?.region || ''].filter(Boolean).join(' · ');
-    if (meta) {
-        setWrappedFont(ctx, 29, 'normal');
-        ctx.fillStyle = 'rgba(255,255,255,0.94)';
-        ctx.textAlign = 'center';
-        wrapWrappedText(ctx, meta, w / 2, h - 235, w - 140, 38);
-    }
-    if (data.photoCount > 1) {
-        setWrappedFont(ctx, 22, 'normal');
-        ctx.fillStyle = 'rgba(255,255,255,0.82)';
-        ctx.textAlign = 'center';
-        ctx.fillText((data.photoIndex || 1) + ' / ' + data.photoCount, w / 2, h - 145);
-    }
+    drawWrappedCenteredTitle(ctx, title, 170, 58, colors.text, w);
+    const images = (Array.isArray(photoImages) ? photoImages : [])
+        .map(item => item?.image || item)
+        .filter(image => image && image.complete !== false && image.width > 0 && image.height > 0)
+        .slice(0, 4);
+    if (!images.length) return;
+    const margin = 64, top = 285, bottom = h - 125, gap = 22;
+    const availableW = Math.max(1, w - margin * 2);
+    const availableH = Math.max(1, bottom - top);
+    const columns = images.length === 1 ? 1 : 2;
+    const rows = Math.ceil(images.length / columns);
+    const cellW = (availableW - gap * (columns - 1)) / columns;
+    const cellH = (availableH - gap * (rows - 1)) / rows;
+    images.forEach((image, index) => {
+        const row = Math.floor(index / columns);
+        const rowCount = Math.min(columns, images.length - row * columns);
+        const col = index % columns;
+        const offsetX = rowCount === 1 ? (availableW - cellW) / 2 : col * (cellW + gap);
+        drawWrappedContainedImage(ctx, image, margin + offsetX, top + row * (cellH + gap), cellW, cellH, 26);
+    });
 }
 
 function renderWrappedHighestPeakSlide(ctx, w, h, colors, data) {
-    drawWrappedCenteredTitle(ctx, 'Dein höchster Gipfel', 350, 70, colors.text, w);
-    setWrappedFont(ctx, 64, 'bold');
-    ctx.fillStyle = colors.accent;
-    ctx.textAlign = 'center';
-    wrapWrappedText(ctx, data.peak.name, w / 2, 650, w - 160, 75);
-
-    drawWrappedBigNumber(ctx, data.peak.height.toLocaleString('de-DE'), 'Meter', 1000, colors.text, w);
-
-    setWrappedFont(ctx, 32, 'normal');
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    wrapWrappedText(
-        ctx,
-        'Jeder Gipfel hat seine eigene Geschichte. Dieser markiert den höchsten Punkt deines Bergjahres – erreicht mit Ausdauer und Entschlossenheit. Hier oben werden Anstrengung und die Schönheit der Berge zu einem besonderen Moment und einem Ausblick, der in Erinnerung bleibt.',
-        w / 2,
-        1240,
-        w * 0.78,
-        46
-    );
+    drawWrappedCenteredTitle(ctx, 'Dein höchster Gipfel', 245, 70, colors.text, w);
+    setWrappedFont(ctx, 64, 'bold'); ctx.fillStyle = colors.accent; ctx.textAlign = 'center';
+    wrapWrappedText(ctx, data.peak.name, w / 2, 520, w - 160, 75);
+    drawWrappedBigNumber(ctx, data.peak.height.toLocaleString('de-DE'), 'Meter', 900, colors.text, w);
+    setWrappedFont(ctx, 32, 'normal'); ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    wrapWrappedText(ctx, 'Jeder Gipfel hat seine eigene Geschichte. Dieser markiert den höchsten Punkt deines Bergjahres – erreicht mit Ausdauer und Entschlossenheit. Hier oben werden Anstrengung und die Schönheit der Berge zu einem besonderen Moment und einem Ausblick, der in Erinnerung bleibt.', w / 2, 1480, w * 0.78, 46);
 }
+
 function renderWrappedTopRegionSlide(ctx, w, h, colors, data) {
-    drawWrappedCenteredTitle(ctx, 'Deine Lieblingsregion', 400, 70, colors.text, w);
-    setWrappedFont(ctx, 72, 'bold');
-    ctx.fillStyle = colors.accent;
-    ctx.textAlign = 'center';
-    wrapWrappedText(ctx, data.region.label, w / 2, 700, w - 160, 85);
-
-    setWrappedFont(ctx, 42);
-    ctx.fillStyle = colors.text;
+    drawWrappedCenteredTitle(ctx, 'Deine Lieblingsregion', 245, 70, colors.text, w);
+    setWrappedFont(ctx, 72, 'bold'); ctx.fillStyle = colors.accent; ctx.textAlign = 'center';
+    wrapWrappedText(ctx, data.region.label, w / 2, 600, w - 160, 85);
+    setWrappedFont(ctx, 42); ctx.fillStyle = colors.text;
     const regionLabel = `${data.region.count} Touren hier!`;
-    ctx.fillText(regionLabel, w / 2, 900);
-    drawWrappedPremiumIcon(
-        ctx, 'location',
-        w / 2 + ctx.measureText(regionLabel).width / 2 + 24,
-        887, 38, colors.accent
-    );
-
-    setWrappedFont(ctx, 32, 'normal');
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    wrapWrappedText(
-        ctx,
-        'Zwischen bekannten Pfaden und neuen Gipfelzielen: Hier hat es dich in diesem Jahr besonders oft hingezogen.',
-        w / 2,
-        1080,
-        w * 0.78,
-        46
-    );
+    ctx.fillText(regionLabel, w / 2, 825);
+    drawWrappedPremiumIcon(ctx, 'location', w / 2 + ctx.measureText(regionLabel).width / 2 + 26, 812, 36, colors.accent);
+    setWrappedFont(ctx, 32, 'normal'); ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    wrapWrappedText(ctx, 'Zwischen bekannten Pfaden und neuen Gipfelzielen: Hier hat es dich in diesem Jahr besonders oft hingezogen.', w / 2, 1530, w * 0.78, 46);
 }
+
 function renderWrappedTopCompanionSlide(ctx, w, h, colors, data) {
-    drawWrappedCenteredTitle(ctx, 'Dein Wanderbuddy des Jahres', 400, 64, colors.text, w);
-
-    setWrappedFont(ctx, 72, 'bold');
-    ctx.fillStyle = colors.accent;
-    ctx.textAlign = 'center';
-    wrapWrappedText(ctx, data.companion.name, w / 2, 700, w - 160, 85);
-
-    setWrappedFont(ctx, 42);
-    ctx.fillStyle = colors.text;
-    const companionLabel =
-        `${data.companion.count} ${data.companion.count === 1 ? 'gemeinsame Tour' : 'gemeinsame Touren'}`;
-    ctx.fillText(companionLabel, w / 2, 900);
-    drawWrappedPremiumIcon(
-        ctx, 'companion',
-        w / 2 + ctx.measureText(companionLabel).width / 2 + 26,
-        887, 42, colors.accent
-    );
-
-    setWrappedFont(ctx, 32, 'normal');
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    ctx.textAlign = 'center';
-    wrapWrappedText(
-        ctx,
-        'Die schönsten Gipfelmomente sind oft die, die man nicht allein erlebt. Gemeinsame Wege, gegenseitige Motivation und unvergessliche Augenblicke machen aus einzelnen Touren gemeinsame Geschichten. Denn manche Erinnerungen entstehen erst, wenn man sie miteinander teilt.',
-        w / 2,
-        1120,
-        w * 0.82,
-        48
-    );
+    drawWrappedCenteredTitle(ctx, 'Dein Wanderbuddy des Jahres', 245, 64, colors.text, w);
+    setWrappedFont(ctx, 72, 'bold'); ctx.fillStyle = colors.accent; ctx.textAlign = 'center';
+    wrapWrappedText(ctx, data.companion.name, w / 2, 570, w - 160, 85);
+    setWrappedFont(ctx, 42); ctx.fillStyle = colors.text;
+    const companionLabel = `${data.companion.count} ${data.companion.count === 1 ? 'gemeinsame Tour' : 'gemeinsame Touren'}`;
+    ctx.fillText(companionLabel, w / 2, 800);
+    drawWrappedPremiumIcon(ctx, 'companion', w / 2 + ctx.measureText(companionLabel).width / 2 + 26, 787, 42, colors.accent);
+    setWrappedFont(ctx, 32, 'normal'); ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.textAlign = 'center';
+    wrapWrappedText(ctx, 'Die schönsten Gipfelmomente sind oft die, die man nicht allein erlebt. Gemeinsame Wege, gegenseitige Motivation und unvergessliche Augenblicke machen aus einzelnen Touren gemeinsame Geschichten. Denn manche Erinnerungen entstehen erst, wenn man sie miteinander teilt.', w / 2, 1480, w * 0.82, 48);
 }
 
 function formatWrappedCompareValue(kind, value) {
@@ -38266,14 +38148,10 @@ function renderWrappedHighlightsSlide(ctx, w, h, colors, data) {
         const x = cardX;
         const y = startY + i * (cardH + gapY);
         ctx.fillStyle = 'rgba(0,0,0,0.20)';
-        ctx.beginPath();
-        ctx.roundRect(x, y, cardW, cardH, 34);
-        ctx.fill();
+        ctx.beginPath(); ctx.roundRect(x, y, cardW, cardH, 34); ctx.fill();
 
-        setWrappedFont(ctx, 66, 'bold');
-        ctx.fillStyle = colors.accent;
         ctx.textAlign = 'left';
-        ctx.fillText(item.icon, x + 42, y + 105);
+        drawWrappedPremiumIcon(ctx, item.symbol || 'peaks', x + 72, y + 88, 56, colors.accent);
 
         setWrappedFont(ctx, 34, 'bold');
         ctx.fillStyle = colors.text;
@@ -38289,125 +38167,68 @@ function renderWrappedHighlightsSlide(ctx, w, h, colors, data) {
     });
 
     if (data.page === 1) {
-        setWrappedFont(ctx, 32, 'normal');
-        ctx.fillStyle = 'rgba(255,255,255,0.92)';
-        ctx.textAlign = 'center';
-        wrapWrappedText(
-            ctx,
-            'Weite Wege, beeindruckende Bergkulissen und das Gefühl, ganz bei sich zu sein. Es sind die Augenblicke zwischen Gipfeln, Tälern und weitem Himmel, die für immer bleiben.',
-            w / 2,
-            1635,
-            w * 0.78,
-            46
-        );
+        setWrappedFont(ctx, 32, 'normal'); ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.textAlign = 'center';
+        wrapWrappedText(ctx, 'Weite Wege, beeindruckende Bergkulissen und das Gefühl, ganz bei sich zu sein. Es sind die Augenblicke zwischen Gipfeln, Tälern und weitem Himmel, die für immer bleiben.', w / 2, 1635, w * 0.78, 46);
     }
-
     if (data.page === 2) {
-        setWrappedFont(ctx, 32, 'normal');
-        ctx.fillStyle = 'rgba(255,255,255,0.92)';
-        ctx.textAlign = 'center';
-        wrapWrappedText(
-            ctx,
-            'Auf schmalen Steigen windet sich der Weg zwischen schroffen Felsen bergauf, bis sich die Landschaft weit vor dir öffnet. Oben bleibt mehr als ein Ausblick – ein Gefühl, das lange nachklingt.',
-            w / 2,
-            1635,
-            w * 0.78,
-            46
-        );
+        setWrappedFont(ctx, 32, 'normal'); ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.textAlign = 'center';
+        wrapWrappedText(ctx, 'Auf schmalen Steigen windet sich der Weg zwischen schroffen Felsen bergauf, bis sich die Landschaft weit vor dir öffnet. Oben bleibt mehr als ein Ausblick – ein Gefühl, das lange nachklingt.', w / 2, 1635, w * 0.78, 46);
     }
-
     if (data.page === 3) {
-        setWrappedFont(ctx, 32, 'normal');
-        ctx.fillStyle = 'rgba(255,255,255,0.92)';
-        ctx.textAlign = 'center';
-        wrapWrappedText(
-            ctx,
-            'Manchmal vergeht die Zeit Schritt für Schritt, während der Alltag weit zurückbleibt. Zwischen Waldpfaden, Fels und Gipfelblicken entstehen stille Stunden, die sich besonders tief ins Gedächtnis schreiben.',
-            w / 2,
-            1635,
-            w * 0.78,
-            46
-        );
+        setWrappedFont(ctx, 32, 'normal'); ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.textAlign = 'center';
+        wrapWrappedText(ctx, 'Manchmal vergeht die Zeit Schritt für Schritt, während der Alltag weit zurückbleibt. Zwischen Waldpfaden, Fels und Gipfelblicken entstehen stille Stunden, die sich besonders tief ins Gedächtnis schreiben.', w / 2, 1635, w * 0.78, 46);
     }
-
 }
+
 function renderWrappedTop3Slide(ctx, w, h, colors, data) {
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0, 0, w, h); ctx.clip();
     drawWrappedCenteredTitle(ctx, 'Top 3 der Saison', 190, 58, colors.text, w);
-
     const medals = [1, 2, 3];
-    const cardX = 70;
-    const cardW = w - 140;
-    const cardH = 435;
-    const gap = 38;
-    const startY = 315;
-
+    const cardX = Math.max(34, Math.min(60, w * 0.06));
+    const cardW = Math.max(1, w - cardX * 2);
+    const cardH = 420, gap = 25, startY = 300;
     (data.top3 || []).slice(0, 3).forEach((item, i) => {
         const y = startY + i * (cardH + gap);
-
-        const cardGradient = ctx.createLinearGradient(cardX, y, cardX + cardW, y + cardH);
-        cardGradient.addColorStop(0, 'rgba(16,46,55,0.55)');
-        cardGradient.addColorStop(1, 'rgba(7,25,34,0.72)');
-        ctx.fillStyle = cardGradient;
-        ctx.beginPath();
-        ctx.roundRect(cardX, y, cardW, cardH, 34);
-        ctx.fill();
+        const gradient = ctx.createLinearGradient(cardX, y, cardX + cardW, y + cardH);
+        gradient.addColorStop(0, 'rgba(16,46,55,0.58)');
+        gradient.addColorStop(1, 'rgba(7,25,34,0.76)');
+        ctx.fillStyle = gradient;
+        ctx.beginPath(); ctx.roundRect(cardX, y, cardW, cardH, 30); ctx.fill();
+        ctx.save(); ctx.strokeStyle = colors.accent; ctx.globalAlpha = 0.42; ctx.lineWidth = 2.5; ctx.stroke(); ctx.restore();
         ctx.save();
-        ctx.globalAlpha = 0.42;
-        ctx.strokeStyle = colors.accent;
-        ctx.lineWidth = 3;
-        ctx.stroke();
-        ctx.restore();
-
-        drawWrappedPremiumIcon(
-            ctx, 'medal', cardX + 56, y + 62, 48, colors.accent, medals[i]
-        );
-
-        setWrappedFont(ctx, 31, 'bold');
-        ctx.fillStyle = colors.text;
-        wrapWrappedText(ctx, item.entry?.tourname || item.entry?.region || 'Tour', cardX + 112, y + 62, cardW - 140, 38);
-
-        setWrappedFont(ctx, 21, 'normal');
-        ctx.fillStyle = 'rgba(255,255,255,0.78)';
+        ctx.beginPath(); ctx.roundRect(cardX + 18, y + 18, cardW - 36, cardH - 36, 20); ctx.clip();
+        drawWrappedPremiumIcon(ctx, 'medal', cardX + 58, y + 62, 48, colors.accent, medals[i]);
+        ctx.textAlign = 'left';
+        setWrappedFont(ctx, 31, 'bold'); ctx.fillStyle = colors.text;
+        const titleEnd = wrapWrappedText(ctx, item.entry?.tourname || item.entry?.region || 'Tour', cardX + 108, y + 66, cardW - 150, 37);
+        setWrappedFont(ctx, 20, 'normal'); ctx.fillStyle = 'rgba(255,255,255,0.78)';
         const meta = [item.entry?.date || '', item.entry?.region || ''].filter(Boolean).join(' · ');
-        wrapWrappedText(ctx, meta, cardX + 32, y + 145, cardW - 140, 28);
-
+        let lineY = Math.max(y + 145, titleEnd + 20);
+        if (meta) lineY = wrapWrappedText(ctx, meta, cardX + 32, lineY, cardW - 64, 27) + 28;
         const m = item.metrics || {};
-        setWrappedFont(ctx, 23, 'bold');
-        ctx.fillStyle = colors.text;
-        ctx.fillText(`${Number(m.distance || 0).toFixed(1).replace('.', ',')} km · ${Math.round(m.ascent || 0).toLocaleString('de-DE')} hm`, cardX + 32, y + 198);
-        ctx.fillText(`${formatWrappedMinutes(m.minutes)} · ${m.peaks || 0} Gipfel`, cardX + 32, y + 238);
-
-        if (m.steps > 0) {
-            setWrappedFont(ctx, 21, 'normal');
-            ctx.fillStyle = 'rgba(255,255,255,0.78)';
-            ctx.fillText(`${Math.round(m.steps).toLocaleString('de-DE')} Schritte`, cardX + 32, y + 275);
+        setWrappedFont(ctx, 23, 'bold'); ctx.fillStyle = colors.text;
+        lineY = wrapWrappedText(ctx, Number(m.distance || 0).toFixed(1).replace('.', ',') + ' km · ' + Math.round(m.ascent || 0).toLocaleString('de-DE') + ' hm', cardX + 32, lineY, cardW - 64, 29) + 30;
+        lineY = wrapWrappedText(ctx, formatWrappedMinutes(m.minutes) + ' · ' + (m.peaks || 0) + ' Gipfel', cardX + 32, lineY, cardW - 64, 29) + 28;
+        if (m.steps > 0 && lineY < y + cardH - 58) {
+            setWrappedFont(ctx, 20, 'normal'); ctx.fillStyle = 'rgba(255,255,255,0.78)';
+            lineY = wrapWrappedText(ctx, Math.round(m.steps).toLocaleString('de-DE') + ' Schritte', cardX + 32, lineY, cardW - 64, 26) + 24;
         }
-
-        if (m.score !== null && m.score !== undefined) {
-            setWrappedFont(ctx, 26, 'bold');
-            ctx.fillStyle = colors.accent;
-            ctx.fillText(`Leistungsindex ${Math.round(m.score)} / 100`, cardX + 32, y + 315);
+        if (m.score !== null && m.score !== undefined && lineY < y + cardH - 58) {
+            setWrappedFont(ctx, 23, 'bold'); ctx.fillStyle = colors.accent;
+            lineY = wrapWrappedText(ctx, 'Leistungsindex ' + Math.round(m.score) + ' / 100', cardX + 32, lineY, cardW - 64, 27) + 22;
         }
-
-        const topReasons = (item.info?.highlights || []).slice(0, 4);
-        if (topReasons.length) {
-            setWrappedFont(ctx, 17, 'normal');
-            ctx.fillStyle = colors.text;
-            wrapWrappedText(ctx, 'Top 3: ' + topReasons.map(x => x.name).join(' · '), cardX + 32, y + 370, cardW - 140, 25);
+        const reasons = (item.info?.highlights || []).slice(0, 3);
+        if (reasons.length && lineY < y + cardH - 38) {
+            setWrappedFont(ctx, 16, 'normal'); ctx.fillStyle = 'rgba(255,255,255,0.82)';
+            wrapWrappedText(ctx, 'Top 3: ' + reasons.map(reason => reason.name).join(' · '), cardX + 32, lineY, cardW - 64, 22);
         }
+        ctx.restore();
     });
-
-    setWrappedFont(ctx, 30, 'normal');
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    ctx.textAlign = 'center';
-    wrapWrappedText(
-        ctx,
-        'Manche Tage bleiben besonders lebendig. Wegen der Landschaft, der gemeinsamen Augenblicke oder einfach wegen des Gefühls, genau am richtigen Ort zu sein.',
-        w / 2,
-        1740,
-        w * 0.82,
-        40
-    );
+    setWrappedFont(ctx, 29, 'normal');
+    ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.textAlign = 'center';
+    wrapWrappedText(ctx, 'Manche Tage bleiben besonders lebendig. Wegen der Landschaft, der gemeinsamen Augenblicke oder einfach wegen des Gefühls, genau am richtigen Ort zu sein.', w / 2, 1740, w * 0.82, 40);
+    ctx.restore();
 }
 
 function renderWrappedOutroSlide(ctx, w, h, colors, data) {
