@@ -20147,44 +20147,6 @@ textarea:focus {
     }
 }
 
-/* =========================================================
-   Zurück-Pfeil in Modal-Headern: exakte Zentrierung
-   Der Original-Text (reiner Textknoten "←") wird unsichtbar
-   gemacht, ein Pseudo-Element übernimmt die Darstellung.
-   ========================================================= */
-
-.tour-detail-back-btn,
-#ds-header-back {
-    font-size: 0 !important;
-    line-height: 0 !important;
-    position: relative;
-}
-
-.tour-detail-back-btn::before,
-#ds-header-back::before {
-    content: "←";
-
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -52%);
-
-    font-size: 20px;
-    font-weight: 900;
-    line-height: 1;
-
-    color: inherit;
-    pointer-events: none;
-}
-
-@media (max-width: 768px), (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
-    .tour-detail-back-btn::before,
-    #ds-header-back::before {
-        font-size: 22px;
-        transform: translate(-50%, -52%);
-    }
-}
-
 .wrapped-reminder-banner {
     position: fixed;
     top: 0;
