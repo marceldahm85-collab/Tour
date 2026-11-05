@@ -115,7 +115,7 @@
 
 /* Einheitliche 42-px-Bedienflächen für Zurück und Schließen.
    Der Editor-Radius wird auch bei Inline-Styles und alten Theme-Regeln durchgesetzt. */
-:is(
+.modal .modal-header :is(
     #td-close,
     #achievement-category-close,
     #compare-modal-close,
@@ -172,11 +172,11 @@
 
 /* Das MS-Modal wird absichtlich nur über diesen Button adressiert.
    Titel, Abzeichen, Header-Aufbau und Trennlinie bleiben unangetastet. */
-#milestone-modal-close {
+.modal .modal-header #milestone-modal-close {
     flex: 0 0 42px !important;
 }
 
-:is(
+.modal .modal-header .modal .modal-header :is(
     #td-close,
     #achievement-category-close,
     #compare-modal-close,
@@ -193,7 +193,7 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-    :is(
+    .modal .modal-header :is(
         #td-close,
         #achievement-category-close,
         #compare-modal-close,
@@ -215,7 +215,7 @@
     }
 }
 
-:is(
+.modal .modal-header .modal .modal-header :is(
     #td-close,
     #achievement-category-close,
     #compare-modal-close,
