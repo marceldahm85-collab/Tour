@@ -1,0 +1,216 @@
+/* Premium Alpine — gemeinsamer Hintergrund- und Symbolaufbau regulärer Informationsmodale.
+   Tourdetail und Meilenstein behalten bewusst ihre eigenen Bildhintergründe. */
+
+:is(
+    #achievement-category-modal,
+    #compare-modal,
+    #month-stats-modal,
+    #stats-chart-modal,
+    #tour-list-modal,
+    #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
+)[data-premium-modal-surface="true"] > .modal-card {
+    position: absolute;
+    isolation: isolate;
+    background: var(
+        --premium-modal-background-gradient,
+        var(--theme-palette-accent-gradient, var(--accent-gradient, linear-gradient(180deg, var(--accent, #ad7d12), #000)))
+    ) !important;
+    background-image: var(
+        --premium-modal-background-gradient,
+        var(--theme-palette-accent-gradient, var(--accent-gradient, linear-gradient(180deg, var(--accent, #ad7d12), #000)))
+    ) !important;
+    background-color: transparent !important;
+    border: 1px solid color-mix(
+        in srgb,
+        var(--theme-palette-accent, var(--accent, #ad7d12)) 34%,
+        rgba(255,255,255,.28)
+    ) !important;
+    border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
+    color: var(--app-text-primary, #f3f7fb) !important;
+}
+
+/* Das große Zweitsymbol bleibt mittig hinter sämtlichen Modal-Inhalten. */
+:is(
+    #achievement-category-modal,
+    #compare-modal,
+    #month-stats-modal,
+    #stats-chart-modal,
+    #tour-list-modal,
+    #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
+)[data-premium-modal-surface="true"] .premium-modal-hero-icon {
+    position: absolute;
+    z-index: 0;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(154px, 47vw, 204px);
+    height: clamp(154px, 47vw, 204px);
+    transform: translate(-50%, -50%);
+    opacity: .78;
+    pointer-events: none;
+    filter: drop-shadow(0 3px 12px rgba(0,0,0,.18));
+}
+
+:is(
+    #achievement-category-modal,
+    #compare-modal,
+    #month-stats-modal,
+    #stats-chart-modal,
+    #tour-list-modal,
+    #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
+)[data-premium-modal-surface="true"] .premium-modal-hero-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    overflow: visible;
+    fill: none !important;
+    stroke: url(#premium-modal-symbol-gradient) !important;
+    stroke-width: 1.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+}
+
+/* Header und Inhalt liegen oberhalb des dekorativen Symbols; die Anordnung selbst bleibt bestehen. */
+:is(
+    #achievement-category-modal,
+    #compare-modal,
+    #month-stats-modal,
+    #stats-chart-modal,
+    #tour-list-modal,
+    #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
+)[data-premium-modal-surface="true"] > .modal-card > .modal-header,
+:is(
+    #achievement-category-modal,
+    #compare-modal,
+    #month-stats-modal,
+    #stats-chart-modal,
+    #tour-list-modal,
+    #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
+)[data-premium-modal-surface="true"] > .modal-card > .modal-body,
+:is(
+    #achievement-category-modal,
+    #compare-modal,
+    #month-stats-modal,
+    #stats-chart-modal,
+    #tour-list-modal,
+    #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
+)[data-premium-modal-surface="true"] > .modal-card > .modal-actions {
+    position: relative;
+    z-index: 1;
+}
+
+/* Die vorhandenen Titelsymbole bleiben im Header sichtbar und behalten die bisherige Größe. */
+:is(
+    #achievement-category-modal,
+    #compare-modal,
+    #month-stats-modal,
+    #stats-chart-modal,
+    #tour-list-modal,
+    #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
+)[data-premium-modal-surface="true"] .modal-title > .premium-modal-header-icon {
+    display: inline-flex !important;
+    flex: 0 0 1.08em;
+    width: 1.08em;
+    height: 1.08em;
+    min-width: 1.08em;
+    min-height: 1.08em;
+    align-items: center;
+    justify-content: center;
+    margin: 0 .16em 0 0;
+    color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    vertical-align: -.18em;
+}
+
+:is(
+    #achievement-category-modal,
+    #compare-modal,
+    #month-stats-modal,
+    #stats-chart-modal,
+    #tour-list-modal,
+    #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
+)[data-premium-modal-surface="true"] .modal-title > .premium-modal-header-icon svg {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 1.65;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    overflow: visible;
+}
+
+/* Statistik- und Vergleichseinträge erhalten dieselbe leichte Glaswirkung.
+   Semantische Medaillenfarben und Achievement-Rangverläufe werden ausgenommen. */
+:is(
+    #achievement-category-modal,
+    #compare-modal,
+    #month-stats-modal,
+    #stats-chart-modal,
+    #tour-list-modal,
+    #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
+)[data-premium-modal-surface="true"] .modal-body :is(
+    .stats-list > li:not(.highlight-rank-gold):not(.highlight-rank-silver):not(.highlight-rank-bronze),
+    .tour-list > li,
+    .peak-tour-list > li,
+    .compare-row,
+    .compare-period-card,
+    .compare-list-card,
+    .compare-chip
+) {
+    border: 1px solid rgba(255,255,255,.19);
+    border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
+    background: linear-gradient(
+        145deg,
+        rgba(255,255,255,.12),
+        rgba(7,16,26,.23)
+    ) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(122%);
+    backdrop-filter: blur(10px) saturate(122%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
+}
+
+/* Achievement-Stufen behalten ihre semantischen Farblinien; nur der Radius folgt dem Editor. */
+#achievement-category-modal[data-premium-modal-surface="true"] .achievement-modal-inline-rows {
+    border-color: rgba(255,255,255,.22);
+    border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
+    background: rgba(7,16,26,.16);
+}
+
+#achievement-category-modal[data-premium-modal-surface="true"] .achievement-inline-row {
+    border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
+}
+
+@media (max-width: 380px) {
+    :is(
+        #achievement-category-modal,
+        #compare-modal,
+        #month-stats-modal,
+        #stats-chart-modal,
+        #tour-list-modal,
+        #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
+    )[data-premium-modal-surface="true"] .premium-modal-hero-icon {
+        width: 148px;
+        height: 148px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :is(
+        #achievement-category-modal,
+        #compare-modal,
+        #month-stats-modal,
+        #stats-chart-modal,
+        #tour-list-modal,
+        #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
+    )[data-premium-modal-surface="true"] .premium-modal-hero-icon {
+        filter: none;
+    }
+}
