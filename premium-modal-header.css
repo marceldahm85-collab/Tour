@@ -166,7 +166,7 @@
 }
 
 /* Zurück-Pfeile dürfen etwas größer sein, bleiben aber exakt gleich groß. */
-:is(#td-back, #tl-back, #ds-header-back) {
+.modal .modal-header :is(#td-back, #tl-back, #ds-header-back) {
     font-size: 22px !important;
 }
 
@@ -176,7 +176,7 @@
     flex: 0 0 42px !important;
 }
 
-.modal .modal-header .modal .modal-header :is(
+.modal .modal-header :is(
     #td-close,
     #achievement-category-close,
     #compare-modal-close,
@@ -215,7 +215,7 @@
     }
 }
 
-.modal .modal-header .modal .modal-header :is(
+.modal .modal-header :is(
     #td-close,
     #achievement-category-close,
     #compare-modal-close,
@@ -259,7 +259,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    :is(
+    .modal .modal-header :is(
         #td-close,
         #achievement-category-close,
         #compare-modal-close,
