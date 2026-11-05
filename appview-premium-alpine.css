@@ -467,3 +467,114 @@ html body #app-view #tour-form .save-form-card > * {
         opacity: .44;
     }
 }
+
+
+/* =========================================================
+   PREMIUM ALPINE — Einzeltour-Detailmodal: Lienzer-Dolomiten-Relief
+   Nutzt exakt dieselben beiden SVG-Konturebenen wie "Tour speichern".
+   Ausschließlich #tour-detail-modal; andere Modale bleiben unberührt.
+   ========================================================= */
+
+html body #tour-detail-modal .modal-card {
+    position: relative !important;
+    isolation: isolate !important;
+}
+
+/* Zwei eigenständige, nicht interaktive Konturebenen über der Modaloberfläche. */
+html body #tour-detail-modal .modal-card::before,
+html body #tour-detail-modal .modal-card::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background-repeat: no-repeat;
+    background-position: center center;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center center;
+    mask-position: center center;
+    -webkit-mask-size: cover;
+    mask-size: cover;
+}
+
+/* Normale Tour: dezente Relief-Linien plus Editor-Akzent. */
+html body #tour-detail-modal .modal-card:not(.highlight-modal-bronze):not(.highlight-modal-silver):not(.highlight-modal-gold)::before {
+    background-color: color-mix(
+        in srgb,
+        #a9bdb1 78%,
+        var(--theme-palette-accent, var(--accent, #ad7d12)) 22%
+    );
+    opacity: .27;
+    -webkit-mask-image: url("./assets/topography/lienzer-dolomiten-contours-fine.svg");
+    mask-image: url("./assets/topography/lienzer-dolomiten-contours-fine.svg");
+}
+html body #tour-detail-modal .modal-card:not(.highlight-modal-bronze):not(.highlight-modal-silver):not(.highlight-modal-gold)::after {
+    background-color: var(--theme-palette-accent, var(--accent, #ad7d12));
+    opacity: .30;
+    -webkit-mask-image: url("./assets/topography/lienzer-dolomiten-contours-index.svg");
+    mask-image: url("./assets/topography/lienzer-dolomiten-contours-index.svg");
+}
+
+/* Metallische Touren: gleiches Relief, aber in der jeweiligen Metallfamilie.
+   Die vorhandenen Bronze-/Silber-/Gold-Grundflächen und Pulseffekte bleiben bestehen. */
+html body #tour-detail-modal .modal-card.highlight-modal-bronze::before,
+html body #tour-detail-modal .modal-card.highlight-modal-bronze::after {
+    background-color: color-mix(in srgb, #f6c18f 32%, var(--metal-bronze-border, #a95724));
+}
+html body #tour-detail-modal .modal-card.highlight-modal-bronze::before {
+    opacity: .34;
+    -webkit-mask-image: url("./assets/topography/lienzer-dolomiten-contours-fine.svg");
+    mask-image: url("./assets/topography/lienzer-dolomiten-contours-fine.svg");
+}
+html body #tour-detail-modal .modal-card.highlight-modal-bronze::after {
+    opacity: .42;
+    -webkit-mask-image: url("./assets/topography/lienzer-dolomiten-contours-index.svg");
+    mask-image: url("./assets/topography/lienzer-dolomiten-contours-index.svg");
+}
+
+html body #tour-detail-modal .modal-card.highlight-modal-silver::before,
+html body #tour-detail-modal .modal-card.highlight-modal-silver::after {
+    background-color: color-mix(in srgb, #ffffff 42%, var(--metal-silver-border, #7895aa));
+}
+html body #tour-detail-modal .modal-card.highlight-modal-silver::before {
+    opacity: .34;
+    -webkit-mask-image: url("./assets/topography/lienzer-dolomiten-contours-fine.svg");
+    mask-image: url("./assets/topography/lienzer-dolomiten-contours-fine.svg");
+}
+html body #tour-detail-modal .modal-card.highlight-modal-silver::after {
+    opacity: .42;
+    -webkit-mask-image: url("./assets/topography/lienzer-dolomiten-contours-index.svg");
+    mask-image: url("./assets/topography/lienzer-dolomiten-contours-index.svg");
+}
+
+html body #tour-detail-modal .modal-card.highlight-modal-gold::before,
+html body #tour-detail-modal .modal-card.highlight-modal-gold::after {
+    background-color: color-mix(in srgb, #fff0a8 34%, var(--metal-gold-border, #c79200));
+}
+html body #tour-detail-modal .modal-card.highlight-modal-gold::before {
+    opacity: .34;
+    -webkit-mask-image: url("./assets/topography/lienzer-dolomiten-contours-fine.svg");
+    mask-image: url("./assets/topography/lienzer-dolomiten-contours-fine.svg");
+}
+html body #tour-detail-modal .modal-card.highlight-modal-gold::after {
+    opacity: .42;
+    -webkit-mask-image: url("./assets/topography/lienzer-dolomiten-contours-index.svg");
+    mask-image: url("./assets/topography/lienzer-dolomiten-contours-index.svg");
+}
+
+/* Modalstruktur und sämtliche vorhandenen Inhalte bleiben oberhalb der Konturen. */
+html body #tour-detail-modal .modal-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+@media (max-width: 520px) {
+    html body #tour-detail-modal .modal-card:not(.highlight-modal-bronze):not(.highlight-modal-silver):not(.highlight-modal-gold)::before {
+        opacity: .24;
+    }
+    html body #tour-detail-modal .modal-card:not(.highlight-modal-bronze):not(.highlight-modal-silver):not(.highlight-modal-gold)::after {
+        opacity: .27;
+    }
+}
