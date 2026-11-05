@@ -1,0 +1,197 @@
+/* Premium Alpine — gemeinsame Designsprache für alle Vergleichsansichten.
+   Auswahlfelder, Tabellenraster, Kennzahlen und Vergleichslogik bleiben unverändert. */
+
+:root {
+    --comparison-editor-radius: var(--editor-radius, var(--app-radius, 14px));
+    --comparison-editor-accent: var(--theme-palette-accent, var(--accent, #ad7d12));
+}
+
+/* Drei Vergleichsbereiche in Suche & Vergleiche: ruhige, einheitliche Außenfläche. */
+#filter-view .filter-section-panel[data-filter-panel="period"],
+#filter-view .filter-section-panel[data-filter-panel="years"],
+#filter-view .filter-section-panel[data-filter-panel="tourCompare"] {
+    border-radius: var(--comparison-editor-radius) !important;
+}
+
+/* Zeitraum-Modus und seine Auswahlbuttons. */
+#filter-view .compare-mode-toggle {
+    border: 1px solid color-mix(
+        in srgb,
+        var(--comparison-editor-accent) 27%,
+        rgba(255,255,255,.18)
+    ) !important;
+    border-radius: var(--comparison-editor-radius) !important;
+    background: linear-gradient(
+        145deg,
+        rgba(255,255,255,.10),
+        rgba(7,16,26,.20)
+    ) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.07);
+    -webkit-backdrop-filter: blur(9px) saturate(120%);
+    backdrop-filter: blur(9px) saturate(120%);
+}
+
+#filter-view .compare-mode-btn {
+    border: 1px solid transparent !important;
+    border-radius: var(--comparison-editor-radius) !important;
+    color: var(--app-text-primary, var(--text-main, #f3f7fb));
+}
+
+#filter-view .compare-mode-btn.active {
+    border-color: color-mix(
+        in srgb,
+        var(--comparison-editor-accent) 55%,
+        rgba(255,255,255,.20)
+    ) !important;
+    background: var(
+        --theme-palette-accent-gradient,
+        var(--accent-gradient, linear-gradient(145deg, var(--comparison-editor-accent), #111820))
+    ) !important;
+    color: var(--theme-palette-accent-text, var(--accent-text-color, #fff)) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.15),
+        0 2px 8px rgba(0,0,0,.16);
+}
+
+/* Gemeinsame Glasflächen für Zeitraum-Ergebnis und Tourvergleich. */
+#filter-view .compare-inline-result,
+#filter-view .tour-compare-result {
+    border: 1px solid color-mix(
+        in srgb,
+        var(--comparison-editor-accent) 28%,
+        rgba(255,255,255,.20)
+    ) !important;
+    border-radius: var(--comparison-editor-radius) !important;
+    background: linear-gradient(
+        145deg,
+        rgba(255,255,255,.12),
+        rgba(7,16,26,.24)
+    ) !important;
+    color: var(--app-text-primary, var(--text-main, #f3f7fb)) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.10),
+        0 5px 14px rgba(0,0,0,.12);
+    -webkit-backdrop-filter: blur(11px) saturate(124%);
+    backdrop-filter: blur(11px) saturate(124%);
+}
+
+/* Detailkarten und Ergebniszeilen der Zeitraumvergleiche. */
+#compare-modal .compare-period-card,
+#compare-modal .compare-list-card,
+#compare-modal .compare-chip,
+#compare-modal .compare-row,
+#filter-view .compare-period-card,
+#filter-view .compare-list-card,
+#filter-view .compare-chip,
+#filter-view .compare-row {
+    border: 1px solid rgba(255,255,255,.17) !important;
+    border-radius: var(--comparison-editor-radius) !important;
+    background: linear-gradient(
+        145deg,
+        rgba(255,255,255,.11),
+        rgba(7,16,26,.22)
+    ) !important;
+    color: var(--app-text-primary, var(--text-main, #f3f7fb));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.07);
+}
+
+#compare-modal .compare-row.compare-head,
+#filter-view .compare-row.compare-head {
+    border-color: color-mix(
+        in srgb,
+        var(--comparison-editor-accent) 44%,
+        rgba(255,255,255,.20)
+    ) !important;
+    background: linear-gradient(
+        120deg,
+        color-mix(in srgb, var(--comparison-editor-accent) 23%, rgba(255,255,255,.12)),
+        rgba(7,16,26,.22)
+    ) !important;
+    font-weight: 850;
+}
+
+#compare-modal .compare-period-title,
+#compare-modal .compare-list-title,
+#filter-view .compare-period-title,
+#filter-view .compare-list-title {
+    color: var(--comparison-editor-accent);
+}
+
+/* Die Tour-A-/Tour-B-Auswahl und die Ergebnisliste erhalten dieselbe Glasoptik. */
+#filter-view .tour-compare-pick-card,
+#filter-view .tour-compare-row {
+    border: 1px solid rgba(255,255,255,.17) !important;
+    border-radius: var(--comparison-editor-radius) !important;
+    background: linear-gradient(
+        145deg,
+        rgba(255,255,255,.11),
+        rgba(7,16,26,.22)
+    ) !important;
+    color: var(--app-text-primary, var(--text-main, #f3f7fb));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.07);
+}
+
+#filter-view .tour-compare-pick-title {
+    padding-bottom: 6px;
+    border-bottom: 1px solid color-mix(
+        in srgb,
+        var(--comparison-editor-accent) 35%,
+        transparent
+    );
+    color: var(--comparison-editor-accent);
+}
+
+#filter-view .tour-compare-row.tour-compare-head {
+    border-color: color-mix(
+        in srgb,
+        var(--comparison-editor-accent) 44%,
+        rgba(255,255,255,.20)
+    ) !important;
+    background: linear-gradient(
+        120deg,
+        color-mix(in srgb, var(--comparison-editor-accent) 23%, rgba(255,255,255,.12)),
+        rgba(7,16,26,.22)
+    ) !important;
+}
+
+/* Jahresvergleich: die Zeichenfläche wird als Teil derselben Oberfläche gefasst. */
+#year-compare-inline #year-compare-canvas {
+    border: 1px solid color-mix(
+        in srgb,
+        var(--comparison-editor-accent) 38%,
+        rgba(255,255,255,.20)
+    ) !important;
+    border-radius: var(--comparison-editor-radius) !important;
+    background:
+        radial-gradient(
+            ellipse at 12% 0%,
+            color-mix(in srgb, var(--comparison-editor-accent) 18%, transparent),
+            transparent 58%
+        ),
+        linear-gradient(
+            145deg,
+            var(--app-surface-strong, rgba(25,30,39,.94)),
+            var(--app-surface-card, rgba(10,16,23,.94))
+        ) !important;
+}
+
+/* Schmale Displays behalten die vorhandenen Spalten und kompakten Abstände. */
+@media (max-width: 380px) {
+    #filter-view .compare-mode-toggle,
+    #filter-view .compare-inline-result,
+    #filter-view .tour-compare-result,
+    #filter-view .tour-compare-pick-card,
+    #filter-view .tour-compare-row,
+    #compare-modal .compare-period-card,
+    #compare-modal .compare-list-card,
+    #compare-modal .compare-chip,
+    #compare-modal .compare-row {
+        border-radius: var(--comparison-editor-radius) !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #filter-view .compare-mode-btn {
+        transition: none !important;
+    }
+}
