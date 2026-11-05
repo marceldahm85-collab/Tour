@@ -1,24 +1,39 @@
-/* Premium Alpine — behutsame Strukturierung des Dashboardkachel-Modals Strecke.
-   Bestehende Werte, Zeilen, Listener und Drilldowns werden unverändert übernommen. */
+/* Premium Alpine — einheitliche Vorlage für sämtliche Dashboard-Kachelmodale.
+   Die vorhandenen Statistikzeilen und ihre Klick-Listener werden nur gruppiert, nie neu erzeugt. */
 (function () {
     'use strict';
 
     function init() {
         const modal = document.getElementById('dash-stat-modal');
+        const card = modal?.querySelector(':scope > .modal-card');
         const title = document.getElementById('ds-title');
         const body = document.getElementById('ds-body');
-        const modalCard = modal?.querySelector('.modal-card');
-        if (!modal || !title || !body || !modalCard || modal.dataset.premiumDistanceModalInit === 'true') return;
+        if (!modal || !card || !title || !body ||
+            modal.dataset.dashboardModalPremiumInit === 'true') return;
 
-        modal.dataset.premiumDistanceModalInit = 'true';
+        modal.dataset.dashboardModalPremiumInit = 'true';
 
         const SVG_NS = 'http://www.w3.org/2000/svg';
-        const HERO_GRADIENT_ID = 'dashboard-stat-distance-gradient';
+        const HERO_GRADIENT_ID = 'dashboard-stat-modal-symbol-gradient';
+        let activeType = null;
+
+        const TYPE_RULES = [
+            { type: 'strecke', pattern: /strecke|distanz|umfang/i, icon: 'distance' },
+            { type: 'steps', pattern: /schritte/i, icon: 'steps' },
+            { type: 'gipfel', pattern: /gipfel/i, icon: 'peaks' },
+            { type: 'bigTours', pattern: /big\s*tours/i, icon: 'bigTour' },
+            { type: 'touren', pattern: /alle\s*touren|touren/i, icon: 'hiking' },
+            { type: 'aufstieg', pattern: /aufstieg|höhenmeter/i, icon: 'peaks' },
+            { type: 'gehzeit', pattern: /gehzeit/i, icon: 'time' },
+            { type: 'speed', pattern: /geschwindigkeit|speed/i, icon: 'speed' },
+            { type: 'steigung', pattern: /steigung|steilheit/i, icon: 'grade' },
+            { type: 'anstieg', pattern: /anstieg/i, icon: 'ascent' }
+        ];
 
         function getEditorSettings() {
             try {
                 return typeof window.getThemeEditorUnifiedSettings === 'function'
-                    ? window.getThemeEditorUnifiedSettings()
+                    ? window.getThemeEditorUnifiedSettings() || {}
                     : {};
             } catch (_) {
                 return {};
@@ -27,117 +42,120 @@
 
         function clamp(value, min, max, fallback) {
             const number = Number(value);
-            return Number.isFinite(number) ? Math.min(max, Math.max(min, number)) : fallback;
+            return Number.isFinite(number)
+                ? Math.min(max, Math.max(min, number))
+                : fallback;
         }
 
-        function buildReversedModalBackground() {
+        function getPalette() {
             const settings = getEditorSettings();
             const computedAccent = getComputedStyle(document.body)
                 .getPropertyValue('--theme-palette-accent').trim();
-            const accent = /^#[0-9a-f]{6}$/i.test(settings.accent || '')
-                ? settings.accent : (/^#[0-9a-f]{6}$/i.test(computedAccent) ? computedAccent : '#ad7d12');
-            const accent2 = /^#[0-9a-f]{6}$/i.test(settings.accent2 || '')
-                ? settings.accent2 : '#000000';
-            const transition = clamp(settings.transition, 10, 90, 55);
-            const direction = settings.gradientDirection || '180deg';
-
-            // Linear: Farbfolge tauschen und Übergangspunkt spiegeln.
-            // Das entspricht exakt einer 180°-Drehung des Editor-Verlaufs.
-            if (direction === 'radial') {
-                // Radial: den Mittelpunkt um 180° versetzen; Farbrichtung bleibt normal.
-                return 'radial-gradient(circle at 72% 82%, ' +
-                    accent + ' 0%, ' + accent + ' ' + transition + '%, ' + accent2 + ' 100%)';
-            }
-
-            const reversedTransition = 100 - transition;
-            return 'linear-gradient(' + direction + ', ' +
-                accent2 + ' 0%, ' + accent2 + ' ' + reversedTransition + '%, ' +
-                accent + ' 100%)';
+            return {
+                accent: /^#[0-9a-f]{6}$/i.test(settings.accent || '')
+                    ? settings.accent
+                    : (/^#[0-9a-f]{6}$/i.test(computedAccent) ? computedAccent : '#ad7d12'),
+                accent2: /^#[0-9a-f]{6}$/i.test(settings.accent2 || '')
+                    ? settings.accent2 : '#000000',
+                direction: ['180deg', '90deg', '135deg', '45deg', 'radial'].includes(settings.gradientDirection)
+                    ? settings.gradientDirection : '180deg',
+                transition: clamp(settings.transition, 10, 90, 55)
+            };
         }
 
-        function ensureDistanceHeaderIcon() {
-            let holder = title.querySelector(':scope > .stats-premium-content-icon');
-            if (holder) return holder;
+        function buildReversedModalBackground(palette) {
+            if (palette.direction === 'radial') {
+                return 'radial-gradient(circle at 72% 82%, ' +
+                    palette.accent + ' 0%, ' + palette.accent + ' ' +
+                    palette.transition + '%, ' + palette.accent2 + ' 100%)';
+            }
 
-            // Falls die zentrale Titel-Icon-Aufbereitung noch nicht gelaufen ist,
-            // übernimmt ein bereits vorhandenes Premium-Symbol oder wird ergänzt.
-            holder = title.querySelector(':scope > .premium-alpine-inline-icon');
+            const reversedTransition = 100 - palette.transition;
+            return 'linear-gradient(' + palette.direction + ', ' +
+                palette.accent2 + ' 0%, ' + palette.accent2 + ' ' +
+                reversedTransition + '%, ' + palette.accent + ' 100%)';
+        }
+
+        function resolveType() {
+            const label = String(title.textContent || '').trim();
+            const matched = TYPE_RULES.find(rule => rule.pattern.test(label));
+            if (matched) activeType = matched.type;
+            return activeType;
+        }
+
+        function createHeaderIcon(iconKey) {
+            const markup = window.PremiumAlpineIcons?.html?.(iconKey);
+            if (markup) {
+                const holder = document.createElement('span');
+                holder.innerHTML = markup;
+                return holder.firstElementChild;
+            }
+            return null;
+        }
+
+        function getHeaderIcon(type) {
+            let holder = title.querySelector(
+                ':scope > .stats-premium-content-icon, ' +
+                ':scope > .premium-alpine-inline-icon, ' +
+                ':scope > .stats-premium-title-icon'
+            );
+
             if (holder) {
-                holder.classList.add('stats-premium-content-icon');
-                holder.dataset.iconKey = holder.dataset.iconKey || 'distance';
+                holder.dataset.iconKey = holder.dataset.iconKey ||
+                    holder.dataset.premiumAlpineIcon ||
+                    TYPE_RULES.find(rule => rule.type === type)?.icon ||
+                    'peaks';
+                holder.classList.add('premium-dashboard-header-icon');
                 return holder;
             }
 
-            const label = String(title.textContent || '').replace(/^\\s*[\\p{Extended_Pictographic}\\p{Emoji_Presentation}\\p{Emoji_Modifier}\\uFE0E\\uFE0F\\u200D\\u20E3]+\\s*/u, '').trim();
-            if (!/\\bstrecke\\b/i.test(label)) return null;
+            const raw = String(title.textContent || '').trim();
+            const tokenMatch = raw.match(/^\s*[\p{Extended_Pictographic}\p{Emoji_Presentation}\p{Emoji_Modifier}\uFE0E\uFE0F\u200D\u20E3]+\s*/u);
+            if (tokenMatch) title.textContent = raw.slice(tokenMatch[0].length).trim();
 
-            holder = document.createElement('span');
-            holder.className = 'stats-premium-content-icon';
-            holder.dataset.iconKey = 'distance';
-            holder.setAttribute('aria-hidden', 'true');
-            holder.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
-                '<path d="m4 17 13-13 4 4L8 21l-4-4Z"/>' +
-                '<path d="m14 7 2 2M11.5 9.5l1.5 1.5M9 12l2 2M6.5 14.5 8 16M16.5 4.5 19 7"/>' +
-                '</svg>';
+            const key = TYPE_RULES.find(rule => rule.type === type)?.icon || 'peaks';
+            holder = createHeaderIcon(key);
+            if (!holder) return null;
+
+            holder.dataset.iconKey = key;
+            holder.classList.add('premium-dashboard-header-icon');
             title.insertBefore(holder, title.firstChild);
             return holder;
         }
 
-        function makeSvgGradient(svg) {
-            const settings = getEditorSettings();
-            const accent = /^#[0-9a-f]{6}$/i.test(settings.accent || '')
-                ? settings.accent : getComputedStyle(document.body).getPropertyValue('--theme-palette-accent').trim() || '#ad7d12';
-            const accent2 = /^#[0-9a-f]{6}$/i.test(settings.accent2 || '')
-                ? settings.accent2 : '#000000';
-            const transition = clamp(settings.transition, 10, 90, 55);
-            const direction = settings.gradientDirection || '180deg';
+        function applyNormalSymbolGradient(svg, palette) {
             let gradient;
 
-            if (direction === 'radial') {
+            if (palette.direction === 'radial') {
                 gradient = document.createElementNS(SVG_NS, 'radialGradient');
                 gradient.setAttribute('cx', '28%');
                 gradient.setAttribute('cy', '18%');
                 gradient.setAttribute('fx', '28%');
                 gradient.setAttribute('fy', '18%');
                 gradient.setAttribute('r', '88%');
-
-                const stopA = document.createElementNS(SVG_NS, 'stop');
-                stopA.setAttribute('offset', '0%');
-                stopA.setAttribute('stop-color', accent);
-                const stopB = document.createElementNS(SVG_NS, 'stop');
-                stopB.setAttribute('offset', transition + '%');
-                stopB.setAttribute('stop-color', accent);
-                const stopC = document.createElementNS(SVG_NS, 'stop');
-                stopC.setAttribute('offset', '100%');
-                stopC.setAttribute('stop-color', accent2);
-                gradient.append(stopA, stopB, stopC);
             } else {
-                const degrees = Number.parseFloat(direction) || 180;
+                const degrees = Number.parseFloat(palette.direction) || 180;
                 const radians = degrees * Math.PI / 180;
                 const dx = Math.sin(radians);
                 const dy = -Math.cos(radians);
-                const x1 = 50 - dx * 50;
-                const y1 = 50 - dy * 50;
-                const x2 = 50 + dx * 50;
-                const y2 = 50 + dy * 50;
 
                 gradient = document.createElementNS(SVG_NS, 'linearGradient');
-                gradient.setAttribute('x1', x1 + '%');
-                gradient.setAttribute('y1', y1 + '%');
-                gradient.setAttribute('x2', x2 + '%');
-                gradient.setAttribute('y2', y2 + '%');
-
-                const stopA = document.createElementNS(SVG_NS, 'stop');
-                stopA.setAttribute('offset', '0%');
-                stopA.setAttribute('stop-color', accent);
-                const stopB = document.createElementNS(SVG_NS, 'stop');
-                stopB.setAttribute('offset', transition + '%');
-                stopB.setAttribute('stop-color', accent);
-                const stopC = document.createElementNS(SVG_NS, 'stop');
-                stopC.setAttribute('offset', '100%');
-                stopC.setAttribute('stop-color', accent2);
-                gradient.append(stopA, stopB, stopC);
+                gradient.setAttribute('x1', (50 - dx * 50) + '%');
+                gradient.setAttribute('y1', (50 - dy * 50) + '%');
+                gradient.setAttribute('x2', (50 + dx * 50) + '%');
+                gradient.setAttribute('y2', (50 + dy * 50) + '%');
             }
+
+            [
+                { offset: '0%', color: palette.accent },
+                { offset: palette.transition + '%', color: palette.accent },
+                { offset: '100%', color: palette.accent2 }
+            ].forEach(item => {
+                const stop = document.createElementNS(SVG_NS, 'stop');
+                stop.setAttribute('offset', item.offset);
+                stop.setAttribute('stop-color', item.color);
+                gradient.appendChild(stop);
+            });
 
             gradient.setAttribute('id', HERO_GRADIENT_ID);
             const defs = document.createElementNS(SVG_NS, 'defs');
@@ -146,91 +164,74 @@
             svg.setAttribute('fill', 'none');
             svg.setAttribute('stroke', 'url(#' + HERO_GRADIENT_ID + ')');
             svg.setAttribute('stroke-width', '1.15');
+
             svg.querySelectorAll('.premium-alpine-accent-fill').forEach(element => {
                 element.classList.remove('premium-alpine-accent-fill');
                 element.setAttribute('fill', 'url(#' + HERO_GRADIENT_ID + ')');
+                element.setAttribute('stroke', 'none');
             });
         }
 
-        function ensureHeroIcon() {
-            if (modal.dataset.dashboardStatType !== 'strecke') {
-                modalCard.querySelector('.dashboard-stat-hero-icon')?.remove();
-                return;
-            }
-
-            const iconHolder = ensureDistanceHeaderIcon();
-            const source = iconHolder?.querySelector('svg');
+        function ensureHeroIcon(type, palette) {
+            const holder = getHeaderIcon(type);
+            const source = holder?.querySelector('svg');
             if (!source) return;
 
-            const iconKey = iconHolder.dataset.iconKey || 'distance';
-            let hero = modalCard.querySelector('.dashboard-stat-hero-icon');
-            if (hero?.dataset.iconKey === iconKey && hero.firstElementChild) return;
+            const iconKey = holder.dataset.iconKey || 'peaks';
+            const signature = [
+                iconKey, palette.accent, palette.accent2,
+                palette.direction, palette.transition
+            ].join('|');
+
+            let hero = card.querySelector(':scope > .dashboard-stat-hero-icon');
+            if (hero?.dataset.signature === signature && hero.firstElementChild) return;
 
             if (!hero) {
                 hero = document.createElement('div');
                 hero.className = 'dashboard-stat-hero-icon';
                 hero.setAttribute('aria-hidden', 'true');
-                modalCard.insertBefore(hero, modalCard.firstChild);
+                card.insertBefore(hero, card.firstChild);
             }
 
             const svg = source.cloneNode(true);
             svg.setAttribute('aria-hidden', 'true');
             svg.setAttribute('focusable', 'false');
-            makeSvgGradient(svg);
+            applyNormalSymbolGradient(svg, palette);
             hero.dataset.iconKey = iconKey;
+            hero.dataset.signature = signature;
             hero.replaceChildren(svg);
         }
 
-        function syncModalType() {
-            const label = String(title.textContent || '').trim().toLocaleLowerCase('de');
-            if (label.includes('strecke')) {
-                modal.dataset.dashboardStatType = 'strecke';
-                modalCard.style.setProperty(
-                    '--dashboard-stat-background-gradient',
-                    buildReversedModalBackground()
-                );
-                ensureDistanceHeaderIcon();
-            } else {
-                delete modal.dataset.dashboardStatType;
-                modalCard.style.removeProperty('--dashboard-stat-background-gradient');
-            }
-            enhanceDistanceOverview();
-            ensureHeroIcon();
-        }
-
-        function enhanceDistanceOverview() {
-            if (modal.dataset.dashboardStatType !== 'strecke') return;
-
-            // Drilldown-Ansichten besitzen einen eigenen Zurück-Button und bleiben Listenansichten.
-            if (body.querySelector('#ds-back')) return;
-
-            // Bereits gruppiert: MutationObserver nicht erneut auf denselben Inhalt anwenden.
+        function enhanceDashboardOverview() {
+            if (!activeType || body.querySelector('#ds-back')) return;
             if (body.querySelector(':scope > .dashboard-stat-overview')) return;
 
-            const sourceList = Array.from(body.children).find(
-                element => element.matches?.('.stats-list')
+            const sourceLists = Array.from(body.children).filter(element =>
+                element.matches?.(':scope.stats-list, .stats-list')
             );
-            if (!sourceList) return;
+            if (!sourceLists.length) return;
 
-            const totalRow = sourceList.querySelector(':scope > #ds-total-row');
-            const averageRow = totalRow?.nextElementSibling;
-            if (!totalRow || !averageRow?.matches('li.stats-sub')) return;
-
-            const monthRows = Array.from(sourceList.children).filter(
-                element => element !== totalRow && element !== averageRow
+            const allRows = sourceLists.flatMap(list =>
+                Array.from(list.children).filter(element => element.matches('li'))
             );
-            if (monthRows.some(row => !row.matches('li[data-month-idx]'))) return;
+            if (!allRows.length) return;
 
-            const overview = document.createElement('section');
-            overview.className = 'dashboard-stat-overview';
-            overview.setAttribute('aria-label', 'Streckenübersicht');
+            const monthRows = allRows.filter(row => row.hasAttribute('data-month-idx'));
+            const overviewRows = allRows.filter(row => !row.hasAttribute('data-month-idx'));
 
-            const overviewList = document.createElement('ul');
-            overviewList.className = 'stats-list dashboard-stat-overview-list';
-            overviewList.append(totalRow, averageRow);
-            overview.append(overviewList);
+            const sections = [];
 
-            const sections = [overview];
+            if (overviewRows.length) {
+                const overview = document.createElement('section');
+                overview.className = 'dashboard-stat-overview';
+                overview.setAttribute('aria-label', 'Übersicht');
+
+                const overviewList = document.createElement('ul');
+                overviewList.className = 'stats-list dashboard-stat-overview-list';
+                overviewRows.forEach(row => overviewList.appendChild(row));
+                overview.appendChild(overviewList);
+                sections.push(overview);
+            }
 
             if (monthRows.length) {
                 const months = document.createElement('section');
@@ -248,30 +249,50 @@
                 sections.push(months);
             }
 
+            if (!sections.length) return;
             body.replaceChildren(...sections);
         }
 
-        const titleObserver = new MutationObserver(syncModalType);
+        function syncModal() {
+            const type = resolveType();
+            if (!type) {
+                delete modal.dataset.dashboardStatType;
+                card.style.removeProperty('--dashboard-stat-background-gradient');
+                card.querySelector(':scope > .dashboard-stat-hero-icon')?.remove();
+                return;
+            }
+
+            modal.dataset.dashboardStatType = type;
+
+            const palette = getPalette();
+            card.style.setProperty(
+                '--dashboard-stat-background-gradient',
+                buildReversedModalBackground(palette)
+            );
+
+            ensureHeroIcon(type, palette);
+            enhanceDashboardOverview();
+        }
+
+        const titleObserver = new MutationObserver(syncModal);
         titleObserver.observe(title, {
             childList: true,
             characterData: true,
             subtree: true
         });
 
-        // Nur die Datenstruktur beobachten. Das Dekorations-SVG wird beim
-        // Titel-/Modalwechsel einmalig erzeugt und nicht bei jeder DOM-Änderung ersetzt.
-        const bodyObserver = new MutationObserver(enhanceDistanceOverview);
+        const bodyObserver = new MutationObserver(enhanceDashboardOverview);
         bodyObserver.observe(body, { childList: true });
 
-        const modalStateObserver = new MutationObserver(() => {
-            if (!modal.classList.contains('hidden')) syncModalType();
+        const modalObserver = new MutationObserver(() => {
+            if (!modal.classList.contains('hidden')) syncModal();
         });
-        modalStateObserver.observe(modal, {
+        modalObserver.observe(modal, {
             attributes: true,
             attributeFilter: ['class']
         });
 
-        syncModalType();
+        syncModal();
     }
 
     if (document.readyState === 'loading') {
