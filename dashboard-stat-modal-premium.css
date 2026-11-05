@@ -155,12 +155,12 @@
 #dash-stat-modal[data-dashboard-stat-type="strecke"] .modal-card {
     isolation: isolate;
     background: var(
-        --theme-palette-accent-gradient,
-        var(--accent-gradient, linear-gradient(180deg, var(--accent, #ad7d12), #000))
+        --dashboard-stat-background-gradient,
+        var(--theme-palette-accent-gradient, var(--accent-gradient, linear-gradient(180deg, var(--accent, #ad7d12), #000)))
     ) !important;
     background-image: var(
-        --theme-palette-accent-gradient,
-        var(--accent-gradient, linear-gradient(180deg, var(--accent, #ad7d12), #000))
+        --dashboard-stat-background-gradient,
+        var(--theme-palette-accent-gradient, var(--accent-gradient, linear-gradient(180deg, var(--accent, #ad7d12), #000)))
     ) !important;
     background-color: transparent !important;
     border-color: color-mix(
@@ -169,6 +169,36 @@
         rgba(255,255,255,.28)
     ) !important;
     border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
+}
+
+
+/* Das kleine Header-Symbol bleibt unabhängig von der dekorativen Hintergrundebene sichtbar. */
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .modal-header,
+#dash-stat-modal[data-dashboard-stat-type="strecke"] #ds-title {
+    position: relative;
+    z-index: 2;
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] #ds-title > .stats-premium-content-icon {
+    display: inline-flex !important;
+    flex: 0 0 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px;
+    min-height: 18px;
+    opacity: 1 !important;
+    visibility: visible !important;
+    color: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] #ds-title > .stats-premium-content-icon svg {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    stroke: var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+    stroke-width: 1.7 !important;
 }
 
 #dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-hero-icon {
@@ -195,7 +225,7 @@
     max-height: none;
     overflow: visible;
     fill: none !important;
-    stroke: url(#dashboard-stat-distance-reverse-gradient) !important;
+    stroke: url(#dashboard-stat-distance-gradient) !important;
     stroke-width: 1.15;
     stroke-linecap: round;
     stroke-linejoin: round;
