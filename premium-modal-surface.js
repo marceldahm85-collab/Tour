@@ -105,6 +105,8 @@
     }
 
     function ensureTitleIcon(config, title) {
+        if (!String(title.textContent || '').trim() && !title.querySelector('svg')) return null;
+
         let holder = Array.from(title.children).find(element =>
             element.matches('.stats-premium-content-icon, .premium-alpine-inline-icon, .stats-premium-title-icon')
         );
@@ -193,7 +195,7 @@
         modal.dataset.premiumModalSurface = 'true';
 
         const iconHolder = ensureTitleIcon(config, title);
-        const source = iconHolder.querySelector('svg');
+        const source = iconHolder?.querySelector('svg');
         if (!source) return;
 
         const key = iconHolder.dataset.iconKey ||
