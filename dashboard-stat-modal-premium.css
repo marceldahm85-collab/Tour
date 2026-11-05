@@ -146,8 +146,136 @@
     border-color: color-mix(
         in srgb,
         var(--accent, #D5A64C) 58%,
-        var(--app-surface-border, rgba(255,255,255,.10))
+        rgba(255,255,255,.26)
     );
+}
+
+/* Der Editor-Verlauf prägt die vollständige Modalfläche. Das große Zweitsymbol
+   liegt als transparente Kontur hinter Übersicht und Monatseinträgen. */
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .modal-card {
+    isolation: isolate;
+    background: var(
+        --theme-palette-accent-gradient,
+        var(--accent-gradient, linear-gradient(180deg, var(--accent, #ad7d12), #000))
+    ) !important;
+    background-image: var(
+        --theme-palette-accent-gradient,
+        var(--accent-gradient, linear-gradient(180deg, var(--accent, #ad7d12), #000))
+    ) !important;
+    border-color: color-mix(
+        in srgb,
+        var(--theme-palette-accent, var(--accent, #ad7d12)) 34%,
+        rgba(255,255,255,.28)
+    ) !important;
+    border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-hero-icon {
+    position: absolute;
+    z-index: 0;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(154px, 47vw, 204px);
+    height: clamp(154px, 47vw, 204px);
+    transform: translate(-50%, -50%);
+    opacity: .78;
+    pointer-events: none;
+    filter: drop-shadow(0 3px 12px rgba(0,0,0,.18));
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-hero-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    overflow: visible;
+    fill: none !important;
+    stroke: url(#dashboard-stat-distance-reverse-gradient) !important;
+    stroke-width: 1.15;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .modal-header,
+#dash-stat-modal[data-dashboard-stat-type="strecke"] #ds-body {
+    position: relative;
+    z-index: 1;
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview {
+    padding: 9px;
+    border: 1px solid color-mix(
+        in srgb,
+        var(--theme-palette-accent, var(--accent, #D5A64C)) 34%,
+        rgba(255,255,255,.27)
+    );
+    border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
+    background: linear-gradient(
+        145deg,
+        rgba(255,255,255,.14),
+        rgba(8,17,26,.24)
+    );
+    -webkit-backdrop-filter: blur(13px) saturate(128%);
+    backdrop-filter: blur(13px) saturate(128%);
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.16),
+        0 5px 13px rgba(0,0,0,.13);
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list > li {
+    border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
+    border-color: rgba(255,255,255,.20);
+    background: rgba(7,16,26,.25);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.09);
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list > #ds-total-row {
+    background: linear-gradient(
+        100deg,
+        color-mix(in srgb, var(--accent, #D5A64C) 17%, rgba(255,255,255,.10)),
+        rgba(7,16,26,.19)
+    );
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-overview-list > li.stats-sub {
+    border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
+    background: rgba(7,16,26,.19);
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-month-list > li,
+#dash-stat-modal[data-dashboard-stat-type="strecke"] #ds-body > .stats-list > li {
+    border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
+    border-color: rgba(255,255,255,.19);
+    border-left-color: color-mix(
+        in srgb,
+        var(--accent, #D5A64C) 52%,
+        rgba(255,255,255,.22)
+    );
+    background: linear-gradient(
+        145deg,
+        rgba(255,255,255,.12),
+        rgba(7,16,26,.23)
+    );
+    -webkit-backdrop-filter: blur(10px) saturate(122%);
+    backdrop-filter: blur(10px) saturate(122%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
+}
+
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-month-heading {
+    color: var(--theme-palette-accent-text, #fff);
+    text-shadow: 0 1px 5px rgba(0,0,0,.24);
+}
+
+@media (max-width: 380px) {
+    #dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-stat-hero-icon {
+        width: 148px;
+        height: 148px;
+    }
 }
 
 @media (max-width: 380px) {
