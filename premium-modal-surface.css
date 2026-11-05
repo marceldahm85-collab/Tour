@@ -7,7 +7,6 @@
     #month-stats-modal,
     #stats-chart-modal,
     #tour-list-modal,
-    #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
 )[data-premium-modal-surface="true"] > .modal-card {
     position: absolute;
     isolation: isolate;
@@ -36,7 +35,6 @@
     #month-stats-modal,
     #stats-chart-modal,
     #tour-list-modal,
-    #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
 )[data-premium-modal-surface="true"] .premium-modal-hero-icon {
     position: absolute;
     z-index: 0;
@@ -59,7 +57,6 @@
     #month-stats-modal,
     #stats-chart-modal,
     #tour-list-modal,
-    #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
 )[data-premium-modal-surface="true"] .premium-modal-hero-icon svg {
     display: block;
     width: 100%;
@@ -81,7 +78,6 @@
     #month-stats-modal,
     #stats-chart-modal,
     #tour-list-modal,
-    #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
 )[data-premium-modal-surface="true"] > .modal-card > .modal-header,
 :is(
     #achievement-category-modal,
@@ -89,7 +85,6 @@
     #month-stats-modal,
     #stats-chart-modal,
     #tour-list-modal,
-    #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
 )[data-premium-modal-surface="true"] > .modal-card > .modal-body,
 :is(
     #achievement-category-modal,
@@ -97,7 +92,6 @@
     #month-stats-modal,
     #stats-chart-modal,
     #tour-list-modal,
-    #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
 )[data-premium-modal-surface="true"] > .modal-card > .modal-actions {
     position: relative;
     z-index: 1;
@@ -110,7 +104,6 @@
     #month-stats-modal,
     #stats-chart-modal,
     #tour-list-modal,
-    #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
 )[data-premium-modal-surface="true"] .modal-title > .premium-modal-header-icon {
     display: inline-flex !important;
     flex: 0 0 1.08em;
@@ -133,7 +126,6 @@
     #month-stats-modal,
     #stats-chart-modal,
     #tour-list-modal,
-    #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
 )[data-premium-modal-surface="true"] .modal-title > .premium-modal-header-icon svg {
     display: block !important;
     width: 100% !important;
@@ -154,7 +146,6 @@
     #month-stats-modal,
     #stats-chart-modal,
     #tour-list-modal,
-    #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
 )[data-premium-modal-surface="true"] .modal-body :is(
     .stats-list > li:not(.highlight-rank-gold):not(.highlight-rank-silver):not(.highlight-rank-bronze),
     .tour-list > li,
@@ -194,8 +185,7 @@
         #month-stats-modal,
         #stats-chart-modal,
         #tour-list-modal,
-        #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
-    )[data-premium-modal-surface="true"] .premium-modal-hero-icon {
+        )[data-premium-modal-surface="true"] .premium-modal-hero-icon {
         width: 148px;
         height: 148px;
     }
@@ -208,8 +198,7 @@
         #month-stats-modal,
         #stats-chart-modal,
         #tour-list-modal,
-        #dash-stat-modal:not([data-dashboard-stat-type="strecke"])
-    )[data-premium-modal-surface="true"] .premium-modal-hero-icon {
+        )[data-premium-modal-surface="true"] .premium-modal-hero-icon {
         filter: none;
     }
 }
