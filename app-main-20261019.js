@@ -24021,22 +24021,30 @@ async function attachWrappedPhotos(slides, year) {
     const findPhotoEntry = entry => {
         if (!entry) return null;
         if (entry.id && photosById.has(String(entry.id))) return photosById.get(String(entry.id));
-        return entry.hasImage || (typeof entry.imageData === 'string' && entry.imageData) ? entry : null;
+        return entry.hasImage || (typeof entry.imageData === 'string' && entry.imageData)
+            ? entry
+            : null;
     };
 
     slides.forEach(slide => {
         slide.photoImages = null;
+        slide.photoEntries = null;
         slide.photoLoadPromise = null;
         slide.photoCacheKeys = [];
-        if (slide.key !== 'tourPhoto') return;
-
-        const needsCover = (slide.data?.photos || []).some(photo => photo?.source === 'cover');
-        const photoEntry = needsCover ? findPhotoEntry(slide.data?.entry) : null;
-        slide.photoEntry = photoEntry ? { ...photoEntry } : null;
         slide.photoLoadFailed = false;
         slide.photoLoadToken = 0;
         slide.photoRefreshAttached = false;
+
+        if (slide.key !== 'tourPhoto') return;
+
+        const tours = Array.isArray(slide.data?.tours) ? slide.data.tours : [];
+        slide.photoEntries = tours.slice(0, 4).map(item => {
+            if (item?.photo?.source !== 'cover') return null;
+            const source = findPhotoEntry(item.photoEntry || item.entry);
+            return source ? { ...source } : null;
+        });
     });
+
     return slides;
 }
 
@@ -24196,59 +24204,100 @@ function buildWrappedSlideData(year) {
     const topCompanion = getWrappedTopCompanion(entries);
     const activeMonthIndex = monthlyTours.indexOf(Math.max(...monthlyTours));
 
-    // Fotos derselben Tour bleiben zusammen; pro Folie maximal vier Fotos.
-    const photoSlides = [];
-    const orderedPhotoEntries = entries.slice().sort((a, b) => {
-        const dateA = parseStatsCalendarDate(a?.date);
-        const dateB = parseStatsCalendarDate(b?.date);
-        return (dateA?.getTime?.() || 0) - (dateB?.getTime?.() || 0);
+    // Nach "Wanderbuddy" folgen Fotoseiten mit vier unterschiedlichen Touren.
+    // Mehrtagestouren werden anhand derselben Identität wie in der App gruppiert.
+    const orderedPhotoEntries = entries
+        .map((entry, originalIndex) => ({
+            entry,
+            originalIndex,
+            date: parseStatsCalendarDate(entry?.date)
+        }))
+        .filter(item => item.entry && item.date)
+        .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    const tourGroups = new Map();
+    orderedPhotoEntries.forEach(item => {
+        const identity = tourIdentity(item.entry, item.originalIndex);
+        if (!tourGroups.has(identity)) tourGroups.set(identity, []);
+        tourGroups.get(identity).push(item.entry);
     });
+
     const seenCoverImages = new Set();
     const seenGalleryUris = new Set();
+    const tourPhotoItems = [];
 
-    orderedPhotoEntries.forEach(entry => {
-        const photos = [];
-        const hasCover = Boolean(entry?.hasImage || (typeof entry?.imageData === 'string' && entry.imageData));
-        if (hasCover) {
+    for (const groupEntries of tourGroups.values()) {
+        let selectedPhoto = null;
+        let photoEntry = null;
+
+        for (const entry of groupEntries) {
+            const hasCover = Boolean(
+                entry?.hasImage ||
+                (typeof entry?.imageData === 'string' && entry.imageData)
+            );
+            if (!hasCover) continue;
+
             const coverKey = typeof entry.imageData === 'string' && entry.imageData
                 ? entry.imageData
                 : 'cover:' + String(entry.id || [entry.date, entry.tourname, entry.region].join('|'));
-            if (!seenCoverImages.has(coverKey)) {
-                seenCoverImages.add(coverKey);
-                photos.push({ source: 'cover' });
+
+            if (seenCoverImages.has(coverKey)) continue;
+            seenCoverImages.add(coverKey);
+            selectedPhoto = { source: 'cover' };
+            photoEntry = entry;
+            break;
+        }
+
+        if (!selectedPhoto) {
+            for (const entry of groupEntries) {
+                const galleryPhotos = (Array.isArray(entry?.galleryPhotos) ? entry.galleryPhotos : [])
+                    .filter(media =>
+                        media &&
+                        typeof media.uri === 'string' &&
+                        media.uri.includes('/images/media/') &&
+                        media.mediaType !== 'video'
+                    )
+                    .slice()
+                    .sort((a, b) => {
+                        const timeA = Number(a.dateTaken) || Number(a.dateAdded) || 0;
+                        const timeB = Number(b.dateTaken) || Number(b.dateAdded) || 0;
+                        return timeA - timeB;
+                    });
+
+                const representative = galleryPhotos.find(media => !seenGalleryUris.has(media.uri));
+                if (!representative) continue;
+
+                seenGalleryUris.add(representative.uri);
+                selectedPhoto = { source: 'gallery', media: representative };
+                photoEntry = entry;
+                break;
             }
         }
 
-        if (typeof window.__tourGalleryLoadPhotoThumbnail === 'function') {
-            const galleryPhotos = (Array.isArray(entry?.galleryPhotos) ? entry.galleryPhotos : [])
-                .filter(media => media && typeof media.uri === 'string' &&
-                    media.uri.includes('/images/media/') && media.mediaType !== 'video')
-                .slice()
-                .sort((a, b) => {
-                    const timeA = Number(a.dateTaken) || Number(a.dateAdded) || 0;
-                    const timeB = Number(b.dateTaken) || Number(b.dateAdded) || 0;
-                    return timeA - timeB;
-                });
-
-            galleryPhotos.forEach(media => {
-                if (seenGalleryUris.has(media.uri)) return;
-                seenGalleryUris.add(media.uri);
-                photos.push({ source: 'gallery', media });
+        if (selectedPhoto && photoEntry) {
+            tourPhotoItems.push({
+                entry: groupEntries[0],
+                photoEntry,
+                photo: selectedPhoto
             });
         }
+    }
 
-        for (let offset = 0; offset < photos.length; offset += 4) {
-            photoSlides.push({
-                key: 'tourPhoto',
-                type: 'photo',
-                duration: WRAPPED_SLIDE_DURATIONS.photo,
-                data: {
-                    entry,
-                    photos: photos.slice(offset, offset + 4)
-                }
-            });
-        }
-    });
+    const photoSlides = [];
+    const photoPageCount = Math.ceil(tourPhotoItems.length / 4);
+    for (let offset = 0; offset < tourPhotoItems.length; offset += 4) {
+        const pageIndex = Math.floor(offset / 4);
+        photoSlides.push({
+            key: 'tourPhoto',
+            type: 'photo',
+            duration: WRAPPED_SLIDE_DURATIONS.photo,
+            data: {
+                tours: tourPhotoItems.slice(offset, offset + 4),
+                photoIndex: pageIndex + 1,
+                photoCount: photoPageCount
+            }
+        });
+    }
 
     const highlightPageCount = Math.ceil(highlights.length / 2);
     const highlightSlides = Array.from({ length: highlightPageCount }, (_, index) => ({
@@ -35790,11 +35839,9 @@ function releaseWrappedGalleryPhoto(slide) {
 
     slide.photoLoadToken = (Number(slide.photoLoadToken) || 0) + 1;
     slide.photoRefreshAttached = false;
-
     (Array.isArray(slide.photoCacheKeys) ? slide.photoCacheKeys : []).forEach(key => {
         if (key) wrappedPhotoCache.delete(key);
     });
-
     slide.photoCacheKeys = [];
     slide.photoImages = null;
     slide.photoLoadPromise = null;
@@ -35806,62 +35853,73 @@ async function ensureWrappedGalleryPhotoLoaded(slide) {
     if (slide.photoLoadPromise) return slide.photoLoadPromise;
 
     const loadToken = Number(slide.photoLoadToken) || 0;
-    const sources = Array.isArray(slide.data?.photos)
-        ? slide.data.photos.slice(0, 4)
-        : [];
+    const tours = Array.isArray(slide.data?.tours) ? slide.data.tours.slice(0, 4) : [];
 
     slide.photoLoadPromise = (async () => {
-        let loaded = [];
+        const loaded = await Promise.all(tours.map(async (item, index) => {
+            try {
+                let dataUrl = null;
 
-        try {
-            loaded = await Promise.all(sources.map(async photo => {
-                try {
-                    let dataUrl = null;
-
-                    if (photo?.source === 'gallery') {
-                        const loadThumbnail = window.__tourGalleryLoadPhotoThumbnail;
-                        if (typeof loadThumbnail !== 'function') {
-                            return { image: null, cacheKey: null };
-                        }
-                        dataUrl = await loadThumbnail(photo.media);
-                    } else if (photo?.source === 'cover') {
-                        const entry = slide.photoEntry
-                            ? { ...slide.photoEntry }
-                            : { ...(slide.data?.entry || {}) };
-
-                        if (Object.keys(entry).length) {
-                            await loadTourImageData(entry);
-                            dataUrl = entry.imageData || null;
-                        }
+                if (item?.photo?.source === 'gallery') {
+                    const loadThumbnail = window.__tourGalleryLoadPhotoThumbnail;
+                    if (typeof loadThumbnail === 'function') {
+                        dataUrl = await loadThumbnail(item.photo.media);
                     }
-
-                    const image = dataUrl ? await loadWrappedImage(dataUrl) : null;
-                    return { image, cacheKey: dataUrl || null };
-                } catch (error) {
-                    console.warn('[Jahresrückblick] Ein Tourfoto konnte nicht geladen werden.', error);
-                    return { image: null, cacheKey: null };
+                } else if (item?.photo?.source === 'cover') {
+                    const entry = slide.photoEntries?.[index]
+                        ? { ...slide.photoEntries[index] }
+                        : { ...(item.photoEntry || item.entry || {}) };
+                    if (Object.keys(entry).length) {
+                        await loadTourImageData(entry);
+                        dataUrl = entry.imageData || null;
+                    }
                 }
-            }));
-        } catch (error) {
-            console.warn('[Jahresrückblick] Tourfotos konnten nicht geladen werden.', error);
-            loaded = sources.map(() => ({ image: null, cacheKey: null }));
-        }
+
+                const image = dataUrl ? await loadWrappedImage(dataUrl) : null;
+                return { image, cacheKey: dataUrl || null };
+            } catch (error) {
+                console.warn('[Jahresrückblick] Ein Tourbild konnte nicht geladen werden.', error);
+                return { image: null, cacheKey: null };
+            }
+        }));
 
         if ((Number(slide.photoLoadToken) || 0) === loadToken) {
             slide.photoImages = loaded;
             slide.photoCacheKeys = loaded.map(photo => photo.cacheKey).filter(Boolean);
-            slide.photoLoadFailed = !loaded.some(photo => photo.image);
-
-            if (slide.photoEntry?.imageData) {
-                delete slide.photoEntry.imageData;
+            slide.photoLoadFailed = loaded.some(photo => !photo.image);
+            if (Array.isArray(slide.photoEntries)) {
+                slide.photoEntries.forEach(entry => {
+                    if (entry?.imageData) delete entry.imageData;
+                });
             }
         }
-
         return loaded;
     })();
 
     return slide.photoLoadPromise;
 }
+
+const WRAPPED_BACKGROUND_IMAGE_SOURCES = Object.freeze({
+    distance: 'https://images.unsplash.com/photo-1632665099926-094c0d6b92bb?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    ascent: 'https://images.unsplash.com/photo-1516733745173-62e8f8651711?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    peaks: 'https://images.unsplash.com/photo-1789909145224-b12f9ac21ab9?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    time: 'https://images.unsplash.com/photo-1486068720048-47715511ce71?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    activeMonth: 'https://images.unsplash.com/photo-1636043982206-a2255072410e?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    highestPeak: 'https://images.unsplash.com/photo-1642520175002-90a1168a0d57?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    topRegion: 'https://images.unsplash.com/photo-1789414297236-295409dfeb37?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    'highlights-1': 'https://images.unsplash.com/photo-1699448095339-c07828dee7c4?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    'highlights-2': 'https://images.unsplash.com/photo-1762375212956-46c0a0964336?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    'highlights-3': 'https://images.unsplash.com/photo-1757330878011-418ff67dd845?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    bestTour: 'https://images.unsplash.com/photo-1628091864452-095d137137e0?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    top3: 'https://images.unsplash.com/photo-1666567693318-27238d192d6a?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    topCompanion: 'https://images.unsplash.com/photo-1792928442695-aaa9c0bf9cd5?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    intro: 'https://images.unsplash.com/photo-1666567693318-27238d192d6a?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
+    outro: 'https://images.unsplash.com/photo-1792928442695-aaa9c0bf9cd5?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560'
+});
+
+const wrappedBackgroundImageCache = new Map();
+
+
 function getWrappedBackgroundImageKey(slideKey, slideData) {
     if (slideKey === 'highlights') {
         const page = Math.max(1, Math.min(3, Number(slideData?.page) || 1));
@@ -36751,9 +36809,11 @@ function drawWrappedSlideIntoCanvas(index, targetCanvas) {
     }
     wrappedLastRenderedSlideIndex = index;
 
-    if (slide.key === 'tourPhoto' && !Array.isArray(slide.photoImages) && !slide.photoLoadFailed && !slide.photoRefreshAttached) {
+    if (slide.key === 'tourPhoto' && !Array.isArray(slide.photoImages) && !slide.photoRefreshAttached) {
+        const requestToken = Number(slide.photoLoadToken) || 0;
         slide.photoRefreshAttached = true;
         ensureWrappedGalleryPhotoLoaded(slide).then(images => {
+            if ((Number(slide.photoLoadToken) || 0) !== requestToken) return;
             slide.photoRefreshAttached = false;
             if (wrappedSlides[index] !== slide) return;
             if (wrappedSlideIndex === index) {
@@ -36761,6 +36821,12 @@ function drawWrappedSlideIntoCanvas(index, targetCanvas) {
             } else if (Array.isArray(images) && images.length) {
                 releaseWrappedGalleryPhoto(slide);
             }
+        }).catch(error => {
+            if ((Number(slide.photoLoadToken) || 0) !== requestToken) return;
+            slide.photoRefreshAttached = false;
+            slide.photoLoadFailed = true;
+            console.warn('[Jahresrückblick] Die Tourbilder dieser Folie konnten nicht geladen werden.', error);
+            if (wrappedSlides[index] === slide && wrappedSlideIndex === index) renderWrappedSlide(index);
         });
     }
 
@@ -37209,44 +37275,59 @@ function renderWrappedPeakCountSlide(ctx, w, h, colors, data) {
 }
 
 function renderWrappedTourPhotoSlide(ctx, w, h, colors, data, photoImages = [], loadFailed = false) {
-    const title = data.entry?.tourname || data.entry?.region || 'Tourfoto';
-    drawWrappedCenteredTitle(ctx, title, 170, 58, colors.text, w);
-    const images = (Array.isArray(photoImages) ? photoImages : [])
-        .map(item => item?.image || item)
-        .filter(image => image && image.complete !== false && image.width > 0 && image.height > 0)
-        .slice(0, 4);
-    if (!images.length) {
+    const tours = Array.isArray(data?.tours) ? data.tours.slice(0, 4) : [];
+    if (!tours.length) return;
+
+    const marginX = 52;
+    const top = 185;
+    const bottom = h - 105;
+    const gapX = 20;
+    const gapY = 22;
+    const columns = tours.length === 1 ? 1 : 2;
+    const rows = Math.ceil(tours.length / columns);
+    const availableW = Math.max(1, w - marginX * 2);
+    const availableH = Math.max(1, bottom - top);
+    const cardW = columns === 1 ? Math.min(availableW, w * 0.84) : (availableW - gapX) / 2;
+    const cardH = (availableH - gapY * (rows - 1)) / rows;
+
+    tours.forEach((item, index) => {
+        const row = Math.floor(index / columns);
+        const rowCount = Math.min(columns, tours.length - row * columns);
+        const col = index % columns;
+        const rowStartX = rowCount === 1 ? (w - cardW) / 2 : marginX;
+        const x = rowStartX + col * (cardW + gapX);
+        const y = top + row * (cardH + gapY);
+        const title = item?.entry?.tourname || item?.entry?.region || 'Tour';
+        const image = photoImages[index]?.image || null;
+
         ctx.save();
-        ctx.fillStyle = colors.text;
+        ctx.fillStyle = 'rgba(4,18,27,0.46)';
+        ctx.beginPath();
+        ctx.roundRect(x, y, cardW, cardH, 24);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        setWrappedFont(ctx, 32, 'bold');
-        wrapWrappedText(
-            ctx,
-            loadFailed
-                ? 'Für diese Tour konnten keine Fotos geladen werden.'
-                : 'Tourfotos werden geladen …',
-            w / 2,
-            h * 0.56,
-            w * 0.82,
-            44
-        );
+        ctx.fillStyle = colors.text;
+        setWrappedFont(ctx, 29, 'bold');
+        wrapWrappedText(ctx, title, x + cardW / 2, y + 42, Math.max(1, cardW - 34), 35);
+
+        const imageInset = 13;
+        const imageTop = y + 88;
+        const imageHeight = Math.max(1, cardH - 101);
+        drawWrappedContainedImage(ctx, image, x + imageInset, imageTop, Math.max(1, cardW - imageInset * 2), imageHeight, 18);
+
+        if (!image) {
+            ctx.fillStyle = 'rgba(4,18,27,0.78)';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            setWrappedFont(ctx, 22, 'bold');
+            ctx.fillText(loadFailed ? 'Bild nicht verfügbar' : 'Bild wird geladen …', x + cardW / 2, imageTop + imageHeight / 2);
+        }
         ctx.restore();
-        return;
-    }
-    const margin = 64, top = 285, bottom = h - 125, gap = 22;
-    const availableW = Math.max(1, w - margin * 2);
-    const availableH = Math.max(1, bottom - top);
-    const columns = images.length === 1 ? 1 : 2;
-    const rows = Math.ceil(images.length / columns);
-    const cellW = (availableW - gap * (columns - 1)) / columns;
-    const cellH = (availableH - gap * (rows - 1)) / rows;
-    images.forEach((image, index) => {
-        const row = Math.floor(index / columns);
-        const rowCount = Math.min(columns, images.length - row * columns);
-        const col = index % columns;
-        const offsetX = rowCount === 1 ? (availableW - cellW) / 2 : col * (cellW + gap);
-        drawWrappedContainedImage(ctx, image, margin + offsetX, top + row * (cellH + gap), cellW, cellH, 26);
     });
 }
 
