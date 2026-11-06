@@ -337,7 +337,6 @@
                 '<div class="bergwelt-tourbook-hero-content">' +
                     '<p>DEIN PERSÖNLICHES TOURBUCH</p>' +
                     '<h2 id="bergwelt-tourbook-heading">Deine Touren. Deine Geschichte.</h2>' +
-                    '<span>Stelle Zeitraum, Inhalte und Gestaltung zusammen und erstelle daraus dein persönliches Tourbuch als PDF.</span>' +
                 '</div>';
             if (tourbookCard && tourbookCard.parentNode === tourbookPanel) {
                 tourbookPanel.insertBefore(hero, tourbookCard);

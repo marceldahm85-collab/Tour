@@ -568,4 +568,24 @@
     border-radius: 13px;
 }
 
+/* Gerade Trennlinie unter den beiden Dashboard-Abschnittstiteln.
+   Das Pseudoelement bleibt unabhängig vom Editor-Eckenradius horizontal. */
+#dashboard-view #dash-recent-section .dash-section-title,
+#dashboard-view #dash-milestones-section .dash-section-title {
+    position: relative;
+    border-bottom: 0 !important;
+}
 
+#dashboard-view #dash-recent-section .dash-section-title::after,
+#dashboard-view #dash-milestones-section .dash-section-title::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    border: 0;
+    border-radius: 0 !important;
+    background: var(--premium-border, rgba(255,255,255,.14));
+    pointer-events: none;
+}
