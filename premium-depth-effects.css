@@ -1,0 +1,100 @@
+/* Premium Alpine — feinere Licht- und Schattenstaffelung.
+   Nur bestehende Oberflächen; keine Geometrie, Inhalte oder Interaktionen werden verändert.
+   Fotomotive, das Kartenbild und die eigentlichen Modal-/Tourbilder bleiben unangetastet. */
+
+:root {
+    --premium-depth-shadow:
+        0 12px 28px rgba(0,0,0,.24),
+        0 0 16px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 5%, transparent),
+        inset 0 1px 0 rgba(255,255,255,.065),
+        inset 0 -1px 0 rgba(0,0,0,.10);
+
+    --premium-depth-shadow-soft:
+        0 4px 12px rgba(0,0,0,.15),
+        inset 0 1px 0 rgba(255,255,255,.065),
+        inset 0 -1px 0 rgba(0,0,0,.075);
+}
+
+/* Dashboard: die beiden bestehenden Inhaltsbereiche bekommen mehr Abstand zur Fläche dahinter. */
+#dashboard-view .dash-section {
+    box-shadow:
+        var(--premium-shadow-card, var(--theme-palette-shadow, 0 10px 28px rgba(0,0,0,.28))),
+        0 0 16px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 4%, transparent),
+        inset 0 1px 0 rgba(255,255,255,.07) !important;
+}
+
+/* Stats: klare Hauptkartenebene, kleinere Kennzahlen eine Stufe darunter. */
+#chart-view .stats-analysis-section,
+#chart-view .stats-structure-section,
+#chart-view .stats-chart-block,
+#chart-view .chart-card {
+    box-shadow: var(--premium-depth-shadow) !important;
+}
+
+#chart-view .chart-stat-tile:not(.active),
+#chart-view .stats-structure-typical-card,
+#chart-view .stats-structure-type-card,
+#chart-view .stats-structure-burden-card,
+#chart-view .development-metric-card:not(.active),
+#chart-view .best-form-card,
+#chart-view .tour-profile-summary-card:not(.active),
+#chart-view .activity-summary-card:not(.active),
+#chart-view .peak-summary-card {
+    box-shadow: var(--premium-depth-shadow-soft) !important;
+}
+
+/* Tour planen: die Formularspalten stehen sichtbar vor dem Seitenhintergrund. */
+html body #tour-view #plan-form > .plan-form-column {
+    box-shadow: var(--premium-depth-shadow) !important;
+}
+
+/* Bestehende Listenzeilen erhalten nur einen kurzen, weichen Schatten. */
+html body #tour-view #planned-tours-list .tour-list > li,
+html body #tour-view #planned-peaks-container .peak-tour-list > li {
+    box-shadow: var(--premium-depth-shadow-soft) !important;
+}
+
+/* Tour speichern: derselbe Tiefeneindruck wie in Tour planen. */
+#app-view .save-form-card {
+    box-shadow: var(--premium-depth-shadow) !important;
+}
+
+/* Bergwelt: bestehende Glasflächen mit ruhiger Lichtkante und etwas mehr Körper. */
+#wrapped-view.bergwelt-ready .bergwelt-card,
+#wrapped-view.bergwelt-ready .bergwelt-level-badge,
+#wrapped-view.bergwelt-ready .bergwelt-height-milestone,
+#wrapped-view.bergwelt-ready .bergwelt-height-year-donut-section,
+#wrapped-view.bergwelt-ready .bergwelt-height-years-chart-section,
+#wrapped-view.bergwelt-ready .bergwelt-level-modal-metric,
+#wrapped-view.bergwelt-ready .bergwelt-level-modal-progress,
+#wrapped-view.bergwelt-ready .bergwelt-level-modal-rank-row,
+#wrapped-view.bergwelt-ready .bergwelt-story-rail {
+    box-shadow:
+        var(--theme-palette-shadow, 0 10px 28px rgba(0,0,0,.26)),
+        0 0 14px color-mix(in srgb, var(--bw-accent) 4%, transparent),
+        inset 0 1px 0 rgba(255,255,255,.075),
+        inset 0 -1px 0 rgba(0,0,0,.09) !important;
+}
+
+/* Die vorhandene Tourbuch-Fläche bekommt dieselbe ruhige Lichtkante. */
+#wrapped-view.bergwelt-ready #pdf-export-card {
+    box-shadow:
+        var(--theme-palette-shadow, 0 10px 28px rgba(0,0,0,.26)),
+        0 0 14px color-mix(in srgb, var(--bw-accent) 4%, transparent),
+        inset 0 1px 0 rgba(255,255,255,.075) !important;
+}
+
+/* Auf schmalen Mobilgeräten keine zusätzlichen, großflächigen Leuchteffekte. */
+@media (max-width: 600px) {
+    #dashboard-view .dash-section,
+    #chart-view .stats-analysis-section,
+    #chart-view .stats-structure-section,
+    #chart-view .stats-chart-block,
+    #chart-view .chart-card,
+    html body #tour-view #plan-form > .plan-form-column,
+    #app-view .save-form-card {
+        box-shadow:
+            0 8px 20px rgba(0,0,0,.22),
+            inset 0 1px 0 rgba(255,255,255,.065) !important;
+    }
+}
