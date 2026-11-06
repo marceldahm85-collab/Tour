@@ -1,0 +1,48 @@
+/* Premium Alpine — Glasveredelung bestehender Kartenflächen.
+   Ausschließlich Oberflächenwirkung: Inhalte, Maße, Navigation und Interaktionen bleiben unverändert.
+   Bildflächen (Dashboard-Meilensteine), Tourdetail-Hintergründe und die eigentliche Karte bleiben scharf. */
+
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    /* Dashboard-Kennzahlen: leichte Tiefenwirkung, ohne die Fotokacheln anzutasten. */
+    #dashboard-view .dash-stat-tile,
+
+    /* Große Inhaltskarten im Stats-Bereich. */
+    #chart-view .stats-analysis-section,
+    #chart-view .stats-structure-section,
+    #chart-view .stats-chart-block,
+
+    /* Panorama-Highlights: der Hintergrund bleibt erkennbar, der Textbereich gewinnt Ruhe. */
+    #stats-highlights-page #highlights-content .highlight-group,
+
+    /* Bestehende Formularflächen. */
+    #app-view .save-form-card {
+        -webkit-backdrop-filter: blur(8px) saturate(118%);
+        backdrop-filter: blur(8px) saturate(118%);
+    }
+
+    /* Karten-Popup über der OpenTopoMap: stärkerer, aber weiterhin transparenter Glas-Look. */
+    #map-view .leaflet-popup-content-wrapper {
+        -webkit-backdrop-filter: blur(12px) saturate(124%);
+        backdrop-filter: blur(12px) saturate(124%);
+    }
+}
+
+/* Auf schmalen Geräten den Blur bewusst etwas reduzieren, um GPU-Last zu begrenzen. */
+@media (max-width: 600px) {
+    @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+        #dashboard-view .dash-stat-tile,
+        #chart-view .stats-analysis-section,
+        #chart-view .stats-structure-section,
+        #chart-view .stats-chart-block,
+        #stats-highlights-page #highlights-content .highlight-group,
+        #app-view .save-form-card {
+            -webkit-backdrop-filter: blur(7px) saturate(116%);
+            backdrop-filter: blur(7px) saturate(116%);
+        }
+
+        #map-view .leaflet-popup-content-wrapper {
+            -webkit-backdrop-filter: blur(10px) saturate(120%);
+            backdrop-filter: blur(10px) saturate(120%);
+        }
+    }
+}
