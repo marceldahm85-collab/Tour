@@ -42,4 +42,5 @@ android {
 
 dependencies {
     implementation("androidx.webkit:webkit:1.18.0")
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }
