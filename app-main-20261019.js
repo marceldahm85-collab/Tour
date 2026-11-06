@@ -5477,9 +5477,9 @@ async function handleTourImageFile(file) {
     try {
         const rawDataUrl = await loadImageFromFile(file);
         const compressedDataUrl = await compressImageDataUrl(rawDataUrl, {
-            maxWidth: 1400,
-            maxHeight: 1400,
-            quality: 0.82,
+            maxWidth: 1800,
+            maxHeight: 1800,
+            quality: 0.86,
             mimeType: 'image/jpeg'
         });
 
@@ -6052,7 +6052,9 @@ const imageHtml = entry.imageData
                 src="${entry.imageData}"
                 alt="Tourbild zu ${escapeHtmlAttribute(entry.tourname || 'Tour')}"
                 class="tour-detail-image"
-                loading="lazy">
+                loading="eager"
+                decoding="async"
+                fetchpriority="high">
         </div>
       `
     : '';
@@ -23958,6 +23960,7 @@ function loadWrappedImage(dataUrl) {
     if (wrappedPhotoCache.has(dataUrl)) return Promise.resolve(wrappedPhotoCache.get(dataUrl));
     return new Promise(resolve => {
         const img = new Image();
+        img.decoding = 'async';
         img.onload = () => { wrappedPhotoCache.set(dataUrl, img); resolve(img); };
         img.onerror = () => resolve(null);
         img.src = dataUrl;
@@ -35861,9 +35864,13 @@ async function ensureWrappedGalleryPhotoLoaded(slide) {
                 let dataUrl = null;
 
                 if (item?.photo?.source === 'gallery') {
+                    const loadFullImage = window.__tourGalleryLoadPhotoFull;
                     const loadThumbnail = window.__tourGalleryLoadPhotoThumbnail;
-                    if (typeof loadThumbnail === 'function') {
-                        dataUrl = await loadThumbnail(item.photo.media);
+                    const loadPhoto = typeof loadFullImage === 'function'
+                        ? loadFullImage
+                        : loadThumbnail;
+                    if (typeof loadPhoto === 'function') {
+                        dataUrl = await loadPhoto(item.photo.media);
                     }
                 } else if (item?.photo?.source === 'cover') {
                     const entry = slide.photoEntries?.[index]
@@ -36054,6 +36061,8 @@ function drawWrappedCoverImage(ctx, img, w, h, keepSharp = false) {
         sy = (img.height - sh) / 2;
     }
 
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
     ctx.filter = keepSharp ? 'none' : 'blur(2px) brightness(0.9)';
     ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
     ctx.filter = 'none';
@@ -37553,9 +37562,39 @@ function drawWrappedContainedImage(ctx, img, x, y, width, height, radius) {
     ctx.fillRect(x, y, width, height);
 
     if (img) {
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        // Ein weichgezeichneter Vollflächen-Ausschnitt füllt freie Ränder,
+        // während das vollständige Originalfoto darüber scharf erhalten bleibt.
+        const imageRatio = img.width / img.height;
+        const frameRatio = width / height;
+        let sx = 0;
+        let sy = 0;
+        let sw = img.width;
+        let sh = img.height;
+
+        if (imageRatio > frameRatio) {
+            sw = img.height * frameRatio;
+            sx = (img.width - sw) / 2;
+        } else {
+            sh = img.width / frameRatio;
+            sy = (img.height - sh) / 2;
+        }
+
+        ctx.save();
+        ctx.filter = 'blur(17px) brightness(.72) saturate(1.05)';
+        ctx.drawImage(img, sx, sy, sw, sh, x, y, width, height);
+        ctx.restore();
+
+        ctx.fillStyle = 'rgba(0,0,0,.10)';
+        ctx.fillRect(x, y, width, height);
+
+        // Hauptbild bleibt vollständig sichtbar; es wird nicht beschnitten.
         const scale = Math.min(width / img.width, height / img.height);
         const dw = img.width * scale;
         const dh = img.height * scale;
+        ctx.filter = 'none';
         ctx.drawImage(img, x + (width - dw) / 2, y + (height - dh) / 2, dw, dh);
     }
 
