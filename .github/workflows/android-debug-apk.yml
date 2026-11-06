@@ -21,6 +21,8 @@ on:
       - "premium-top3-metal.css"
       - "premium-image-presentation.css"
       - "premium-image-presentation.js"
+      - "premium-experience.js"
+      - "premium-motion-feedback.css"
       - "sw.js"
       - ".github/workflows/android-debug-apk.yml"
   workflow_dispatch:
