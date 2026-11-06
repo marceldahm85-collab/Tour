@@ -2,7 +2,7 @@
    Nur bestehende Oberflächen; keine Geometrie, Inhalte oder Interaktionen werden verändert.
    Fotomotive, das Kartenbild und die eigentlichen Modal-/Tourbilder bleiben unangetastet. */
 
-:root {
+body {
     --premium-depth-shadow:
         0 12px 28px rgba(0,0,0,.24),
         0 0 16px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 5%, transparent),
