@@ -7,6 +7,16 @@
     const HAPTIC_KEY = 'hapticFeedbackEnabled_v1';
     const LEGACY_HAPTIC_KEY = 'bergTourenHaptics';
 
+    const MOTION_PROFILE = Object.freeze({
+        control: 150,
+        view: 360,
+        secondary: 280,
+        modalOpen: 320,
+        modalClose: 480,
+        achievement: 580,
+        splashExit: 260
+    });
+
     const PATTERNS = Object.freeze({
         selection: { native: 'selection', browser: 7 },
         navigation: { native: 'navigation', browser: 10 },
@@ -124,18 +134,35 @@
     window.hapticFeedback = hapticFeedback;
 
     const motionQuery = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    function applyMotionProfile() {
+        const root = document.documentElement;
+        root.style.setProperty('--premium-motion-control-duration', MOTION_PROFILE.control + 'ms');
+        root.style.setProperty('--premium-motion-view-duration', MOTION_PROFILE.view + 'ms');
+        root.style.setProperty('--premium-motion-secondary-duration', MOTION_PROFILE.secondary + 'ms');
+        root.style.setProperty('--premium-motion-modal-duration', MOTION_PROFILE.modalOpen + 'ms');
+        root.style.setProperty('--premium-motion-achievement-duration', MOTION_PROFILE.achievement + 'ms');
+        root.style.setProperty('--premium-motion-splash-exit-duration', MOTION_PROFILE.splashExit + 'ms');
+    }
     function updateMotionPreference() {
         document.documentElement.classList.toggle(
             'premium-reduced-motion',
             Boolean(motionQuery?.matches)
         );
+        applyMotionProfile();
     }
     updateMotionPreference();
     motionQuery?.addEventListener?.('change', updateMotionPreference);
 
+    window.PremiumMotionController = Object.freeze({
+        profile: MOTION_PROFILE,
+        refresh: updateMotionPreference,
+        get reducedMotion() { return Boolean(motionQuery?.matches); }
+    });
+
     window.PremiumExperience = Object.freeze({
         haptic: hapticFeedback,
         announceReady: announceAppReady,
+        motion: MOTION_PROFILE,
         get reducedMotion() { return Boolean(motionQuery?.matches); },
         patterns: Object.keys(PATTERNS)
     });
