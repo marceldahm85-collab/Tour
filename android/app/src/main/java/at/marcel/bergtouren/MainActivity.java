@@ -1,17 +1,24 @@
 package at.marcel.bergtouren;
 
 import android.Manifest;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Insets;
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.os.VibratorManager;
 import android.provider.OpenableColumns;
 import android.util.Base64;
 import android.util.Log;
@@ -20,6 +27,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowInsets;
+import android.view.animation.DecelerateInterpolator;
 import android.annotation.TargetApi;
 import android.webkit.CookieManager;
 import android.webkit.ValueCallback;
@@ -31,10 +39,12 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.core.splashscreen.SplashScreen;
 import androidx.webkit.JavaScriptReplyProxy;
 import androidx.webkit.WebMessageCompat;
 import androidx.webkit.WebViewCompat;
@@ -77,6 +87,9 @@ public final class MainActivity extends Activity {
     private FrameLayout root;
     private ProgressBar progressBar;
     private LinearLayout errorPanel;
+    private FrameLayout premiumSplashOverlay;
+    private ValueAnimator premiumSplashSheenAnimator;
+    private boolean premiumSplashHiding;
     private ValueCallback<Uri[]> pendingFileChooser;
     private boolean bridgeAvailable;
     private boolean webPageLoaded;
@@ -102,6 +115,7 @@ public final class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SplashScreen.installSplashScreen(this);
         super.onCreate(savedInstanceState);
 
         pendingOpenDashboard = isWidgetDashboardAction(
@@ -135,6 +149,188 @@ public final class MainActivity extends Activity {
         } else {
             window.setStatusBarColor(Color.rgb(11, 15, 20));
             window.setNavigationBarColor(Color.rgb(11, 15, 20));
+        }
+    }
+
+    private void createPremiumSplashOverlay() {
+        FrameLayout overlay = new FrameLayout(this);
+        overlay.setClickable(true);
+        overlay.setFocusable(true);
+        overlay.setBackgroundColor(Color.rgb(7, 12, 18));
+
+        ImageView panorama = new ImageView(this);
+        panorama.setImageResource(R.drawable.widget_alpine_background);
+        panorama.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        overlay.addView(panorama, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        ));
+
+        View shade = new View(this);
+        shade.setBackground(new GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                new int[] { 0x28070D14, 0x74070D14, 0xE8070D14 }
+        ));
+        overlay.addView(shade, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        ));
+
+        LinearLayout content = new LinearLayout(this);
+        content.setOrientation(LinearLayout.VERTICAL);
+        content.setGravity(Gravity.CENTER);
+        content.setPadding(dp(24), dp(24), dp(24), dp(24));
+
+        FrameLayout emblem = new FrameLayout(this);
+        emblem.setClipChildren(true);
+        emblem.setClipToPadding(true);
+        emblem.setBackground(new GradientDrawable(
+                GradientDrawable.Orientation.TL_BR,
+                new int[] { 0xFFF4D99C, 0xFF6D512A, 0xFFD7B46D, 0xFF302719 }
+        ));
+        GradientDrawable emblemBorder = new GradientDrawable();
+        emblemBorder.setShape(GradientDrawable.OVAL);
+        emblemBorder.setColor(Color.TRANSPARENT);
+        emblemBorder.setStroke(dp(2), 0xFFE9D3A0);
+        emblem.setForeground(emblemBorder);
+        emblem.setElevation(dp(16));
+        emblem.setClipToOutline(true);
+
+        ImageView emblemIcon = new ImageView(this);
+        emblemIcon.setImageResource(R.drawable.ic_launcher_pwa);
+        emblemIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        emblemIcon.setPadding(dp(20), dp(20), dp(20), dp(20));
+        emblem.addView(emblemIcon, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        ));
+
+        View sheen = new View(this);
+        sheen.setBackground(new GradientDrawable(
+                GradientDrawable.Orientation.LEFT_RIGHT,
+                new int[] { 0x00FFFFFF, 0xA6FFFFFF, 0x00FFFFFF }
+        ));
+        sheen.setRotation(22f);
+        FrameLayout.LayoutParams sheenParams = new FrameLayout.LayoutParams(
+                dp(38), dp(154), Gravity.CENTER
+        );
+        emblem.addView(sheen, sheenParams);
+
+        content.addView(emblem, new LinearLayout.LayoutParams(dp(116), dp(116)));
+
+        TextView title = new TextView(this);
+        title.setText("BERGTOUREN");
+        title.setTextColor(0xFFF5F1E8);
+        title.setTextSize(19);
+        title.setTypeface(Typeface.create("sans-serif", Typeface.BOLD));
+        title.setLetterSpacing(0.20f);
+        title.setGravity(Gravity.CENTER);
+        title.setIncludeFontPadding(false);
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        titleParams.topMargin = dp(24);
+        content.addView(title, titleParams);
+
+        TextView subtitle = new TextView(this);
+        subtitle.setText("TOUREN  ·  GIPFEL  ·  ERLEBNISSE");
+        subtitle.setTextColor(0xCDE8DCC5);
+        subtitle.setTextSize(10);
+        subtitle.setLetterSpacing(0.15f);
+        subtitle.setGravity(Gravity.CENTER);
+        subtitle.setIncludeFontPadding(false);
+        LinearLayout.LayoutParams subtitleParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        subtitleParams.topMargin = dp(9);
+        content.addView(subtitle, subtitleParams);
+
+        overlay.addView(content, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                Gravity.CENTER
+        ));
+
+        root.addView(overlay, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        ));
+        premiumSplashOverlay = overlay;
+
+        premiumSplashSheenAnimator = ValueAnimator.ofFloat(-dp(128), dp(128));
+        premiumSplashSheenAnimator.setStartDelay(170L);
+        premiumSplashSheenAnimator.setDuration(1180L);
+        premiumSplashSheenAnimator.setInterpolator(new DecelerateInterpolator());
+        premiumSplashSheenAnimator.addUpdateListener(animation ->
+                sheen.setTranslationX((Float) animation.getAnimatedValue())
+        );
+        premiumSplashSheenAnimator.start();
+    }
+
+    private void hidePremiumSplashOverlay() {
+        if (premiumSplashOverlay == null || premiumSplashHiding) return;
+        premiumSplashHiding = true;
+
+        if (premiumSplashSheenAnimator != null) {
+            premiumSplashSheenAnimator.cancel();
+            premiumSplashSheenAnimator = null;
+        }
+
+        FrameLayout overlay = premiumSplashOverlay;
+        overlay.animate()
+                .alpha(0f)
+                .setDuration(260L)
+                .setInterpolator(new DecelerateInterpolator())
+                .withEndAction(() -> {
+                    if (root != null) root.removeView(overlay);
+                    if (premiumSplashOverlay == overlay) premiumSplashOverlay = null;
+                })
+                .start();
+    }
+
+    private void triggerAdaptiveHaptic(String patternName) {
+        final long[] timings;
+        final int[] amplitudes;
+
+        switch (patternName) {
+            case "selection":
+                timings = new long[] { 0L, 7L };
+                amplitudes = new int[] { 0, 48 };
+                break;
+            case "navigation":
+                timings = new long[] { 0L, 10L };
+                amplitudes = new int[] { 0, 72 };
+                break;
+            case "tile":
+                timings = new long[] { 0L, 13L };
+                amplitudes = new int[] { 0, 98 };
+                break;
+            case "milestone":
+                timings = new long[] { 0L, 18L, 30L, 22L };
+                amplitudes = new int[] { 0, 92, 0, 136 };
+                break;
+            case "achievement":
+                timings = new long[] { 0L, 22L, 38L, 30L, 46L, 34L };
+                amplitudes = new int[] { 0, 105, 0, 150, 0, 182 };
+                break;
+            default:
+                return;
+        }
+
+        try {
+            Vibrator vibrator;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                VibratorManager manager = getSystemService(VibratorManager.class);
+                vibrator = manager != null ? manager.getDefaultVibrator() : null;
+            } else {
+                vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+            }
+            if (vibrator == null || !vibrator.hasVibrator()) return;
+            vibrator.vibrate(VibrationEffect.createWaveform(timings, amplitudes, -1));
+        } catch (RuntimeException error) {
+            Log.w(TAG, "Adaptives haptisches Feedback ist auf diesem Gerät nicht verfügbar.", error);
         }
     }
 
@@ -179,6 +375,8 @@ public final class MainActivity extends Activity {
                 Color.rgb(199, 166, 106)
         ));
         root.addView(progressBar, progressParams);
+
+        createPremiumSplashOverlay();
 
         errorPanel = createErrorPanel();
         errorPanel.setVisibility(View.GONE);
@@ -277,6 +475,9 @@ public final class MainActivity extends Activity {
                 progressBar.setVisibility(View.GONE);
                 sendBridgeHandshake();
                 deliverPendingDashboardWidgetNavigation();
+                // Fallback, falls die PWA keinen eigenen Ready-Impuls senden kann.
+                // Ein früheres app.ready blendet den Splash ohne künstliche Wartezeit aus.
+                mainHandler.postDelayed(() -> hidePremiumSplashOverlay(), 2800L);
             }
 
             @Override
@@ -287,6 +488,7 @@ public final class MainActivity extends Activity {
             ) {
                 super.onReceivedError(view, request, error);
                 if (request.isForMainFrame()) {
+                    hidePremiumSplashOverlay();
                     progressBar.setVisibility(View.GONE);
                     errorPanel.setVisibility(View.VISIBLE);
                     Log.w(TAG, "Web-App konnte nicht geladen werden: " + error.getDescription());
@@ -301,6 +503,7 @@ public final class MainActivity extends Activity {
             ) {
                 // Zertifikatsfehler werden niemals übergangen.
                 handler.cancel();
+                hidePremiumSplashOverlay();
                 errorPanel.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.GONE);
                 Log.e(TAG, "TLS-Zertifikatsfehler: " + error);
@@ -401,7 +604,11 @@ public final class MainActivity extends Activity {
                             String type = request.optString("type", "");
                             String requestId = request.optString("requestId", "");
 
-                            if ("bridge.ping".equals(type)) {
+                            if ("app.ready".equals(type)) {
+                                runOnUiThread(() -> hidePremiumSplashOverlay());
+                            } else if ("haptics.trigger".equals(type)) {
+                                triggerAdaptiveHaptic(request.optString("pattern", ""));
+                            } else if ("bridge.ping".equals(type)) {
                                 // Auch der Verbindungstest muss seine Anfrage-ID zurückgeben.
                                 // Andernfalls kann die JavaScript-Seite den Pong keiner offenen
                                 // Anfrage zuordnen und stuft die Bridge nach dem Timeout als offline ein.
@@ -421,6 +628,8 @@ public final class MainActivity extends Activity {
                                 features.put("backup.export.v1");
                                 features.put("pdf.export.v1");
                                 features.put("backup.file.link.v1");
+                                features.put("haptics.adaptive.v1");
+                                features.put("splash.hybrid.v1");
                                 response.put("features", features);
                                 replyToBridge(replyProxy, response);
                                 Log.i(TAG, "Sichere JavaScript-Bridge ist erreichbar (Request-ID bestätigt).");
@@ -1508,6 +1717,10 @@ public final class MainActivity extends Activity {
     }
     @Override
     protected void onDestroy() {
+        if (premiumSplashSheenAnimator != null) {
+            premiumSplashSheenAnimator.cancel();
+            premiumSplashSheenAnimator = null;
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
                 && backInvokedCallback != null) {
             Api33Back.unregister(this, backInvokedCallback);
