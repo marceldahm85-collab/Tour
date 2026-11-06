@@ -184,10 +184,12 @@ public final class MainActivity extends Activity {
         FrameLayout emblem = new FrameLayout(this);
         emblem.setClipChildren(true);
         emblem.setClipToPadding(true);
-        emblem.setBackground(new GradientDrawable(
+        GradientDrawable emblemMetal = new GradientDrawable(
                 GradientDrawable.Orientation.TL_BR,
                 new int[] { 0xFFF4D99C, 0xFF6D512A, 0xFFD7B46D, 0xFF302719 }
-        ));
+        );
+        emblemMetal.setShape(GradientDrawable.OVAL);
+        emblem.setBackground(emblemMetal);
         GradientDrawable emblemBorder = new GradientDrawable();
         emblemBorder.setShape(GradientDrawable.OVAL);
         emblemBorder.setColor(Color.TRANSPARENT);
