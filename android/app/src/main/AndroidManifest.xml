@@ -30,6 +30,7 @@
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:exported="true"
             android:screenOrientation="portrait"
+            android:theme="@style/AppLaunchTheme"
             android:windowSoftInputMode="adjustResize">
 
             <intent-filter>
