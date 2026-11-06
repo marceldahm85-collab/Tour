@@ -13854,554 +13854,6 @@ if (
 
 // ---------------- Diagramme -----------------
 
-function getScatterTourValues(entry) {
-    const difficulty = String(entry?.difficulty || '')
-        .trim()
-        .toLowerCase();
-
-    /*
-     * Reine Radtouren werden aus allen
-     * Streudiagrammen ausgeschlossen.
-     */
-    if (difficulty === 'radtour') {
-        return null;
-    }
-
-    const parseNumber = value => {
-        const number = parseFloat(
-            String(value ?? '').replace(',', '.')
-        );
-
-        return Number.isFinite(number)
-            ? number
-            : 0;
-    };
-
-    const parseMinutes = value => {
-        if (
-            !value ||
-            !String(value).includes(':')
-        ) {
-            return 0;
-        }
-
-        const [hours, minutes] =
-            String(value).split(':').map(Number);
-
-        if (
-            !Number.isFinite(hours) ||
-            !Number.isFinite(minutes)
-        ) {
-            return 0;
-        }
-
-        return Math.max(
-            0,
-            hours * 60 + minutes
-        );
-    };
-
-    /*
-     * Für alle zugelassenen Touren werden ausschließlich
-     * die normalen Hike-Werte verwendet.
-     *
-     * Das gilt auch für:
-     * - Hike & Climb
-     * - Bike & Hike
-     *
-     * Die separaten Rad- beziehungsweise
-     * Klettersteigwerte werden hier bewusst ignoriert.
-     */
-    return {
-        distance: parseNumber(entry.strecke),
-        ascent: parseNumber(entry.aufstieg),
-        minutes: parseMinutes(entry.zeit)
-    };
-}
-
-function getScatterActivityColor(entry) {
-    const difficulty = String(entry?.difficulty || '')
-        .trim()
-        .toLowerCase();
-
-    if (difficulty === 'radtour') {
-        return '#c0392b';
-    }
-
-    if (
-        difficulty === 'bike & hike'
-    ) {
-        return '#d35400';
-    }
-
-    if (
-        difficulty === 'klettersteig' ||
-        difficulty === 'hike & climb'
-    ) {
-        return '#467dbE';
-    }
-
-    if (difficulty === 'mehrtägig') {
-        return '#8e44ad';
-    }
-
-    return '#469664';
-}
-
-function drawScatterDiagram({
-    canvas,
-    title,
-    xLabel,
-    yLabel,
-    getX,
-    getY,
-    formatX,
-    formatY
-}) {
-    if (!canvas) return;
-
-    const ctx = resizeCanvasToDisplaySize(canvas);
-    const { textColor, isDark } = getChartTheme();
-
-    ctx.clearRect(0, 0, getCanvasLogicalWidth(canvas), getCanvasLogicalHeight(canvas));
-
-    const data = getDiagramFilteredTours();
-
-    const points = data
-    .map(entry => {
-        const values =
-            getScatterTourValues(entry);
-
-        /*
-         * Radtouren liefern null und werden
-         * vollständig aus den Punkten entfernt.
-         */
-        if (!values) {
-            return null;
-        }
-
-        const x = getX(values);
-        const y = getY(values);
-
-        if (
-            !Number.isFinite(x) ||
-            !Number.isFinite(y) ||
-            x <= 0 ||
-            y <= 0
-        ) {
-            return null;
-        }
-
-        return {
-            x,
-            y,
-            entry
-        };
-    })
-    .filter(Boolean);
-
-    const paddingLeft = 54;
-    const paddingRight = 20;
-    const paddingTop = 34;
-    const paddingBottom = 78;
-
-    const chartWidth =
-        getCanvasLogicalWidth(canvas) - paddingLeft - paddingRight;
-
-    const chartHeight =
-        getCanvasLogicalHeight(canvas) - paddingTop - paddingBottom;
-
-    drawChartTitleWithTotal(
-        ctx,
-        canvas,
-        title,
-        `${points.length} Touren`
-    );
-
-    if (points.length === 0) {
-        ctx.fillStyle = textColor;
-        ctx.font = getThemeEditorCanvasFont(14, 400);
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-
-        ctx.fillText(
-            'Keine Daten · Jahr oder Filter ändern',
-            getCanvasLogicalWidth(canvas) / 2,
-            getCanvasLogicalHeight(canvas) / 2
-        );
-
-        return;
-    }
-
-    const maxX = Math.max(
-        1,
-        ...points.map(point => point.x)
-    );
-
-    const maxY = Math.max(
-        1,
-        ...points.map(point => point.y)
-    );
-
-    function niceStep(maxValue) {
-        const rawStep = maxValue / 5;
-        const magnitude =
-            Math.pow(10, Math.floor(Math.log10(rawStep)));
-
-        const normalized = rawStep / magnitude;
-
-        let step;
-
-        if (normalized <= 1) {
-            step = 1;
-        } else if (normalized <= 2) {
-            step = 2;
-        } else if (normalized <= 5) {
-            step = 5;
-        } else {
-            step = 10;
-        }
-
-        return step * magnitude;
-    }
-
-    const xStep = niceStep(maxX);
-    const yStep = niceStep(maxY);
-
-    const axisMaxX =
-        Math.max(xStep, Math.ceil(maxX / xStep) * xStep);
-
-    const axisMaxY =
-        Math.max(yStep, Math.ceil(maxY / yStep) * yStep);
-
-    const xFor = value =>
-        paddingLeft +
-        (value / axisMaxX) * chartWidth;
-
-    const yFor = value =>
-        paddingTop +
-        chartHeight -
-        (value / axisMaxY) * chartHeight;
-
-    /*
-     * Hilfslinien und Achsenbeschriftungen
-     */
-    ctx.font = getThemeEditorCanvasFont(9, 400);
-    ctx.textBaseline = 'middle';
-
-    for (
-        let value = 0;
-        value <= axisMaxY;
-        value += yStep
-    ) {
-        const y = yFor(value);
-
-        ctx.strokeStyle =
-            isDark
-                ? 'rgba(214,225,240,0.20)'
-                : 'rgba(46,64,54,0.10)';
-
-        ctx.lineWidth = 1;
-        ctx.setLineDash([3, 5]);
-
-        ctx.beginPath();
-        ctx.moveTo(paddingLeft, y);
-        ctx.lineTo(
-            getCanvasLogicalWidth(canvas) - paddingRight,
-            y
-        );
-        ctx.stroke();
-
-        ctx.fillStyle = textColor;
-        ctx.textAlign = 'right';
-
-        ctx.fillText(
-            formatY(value),
-            paddingLeft - 7,
-            y
-        );
-    }
-
-    for (
-        let value = 0;
-        value <= axisMaxX;
-        value += xStep
-    ) {
-        const x = xFor(value);
-
-        ctx.strokeStyle =
-            isDark
-                ? 'rgba(214,225,240,0.08)'
-                : 'rgba(46,64,54,0.08)';
-
-        ctx.beginPath();
-        ctx.moveTo(x, paddingTop);
-        ctx.lineTo(
-            x,
-            paddingTop + chartHeight
-        );
-        ctx.stroke();
-
-        ctx.fillStyle = textColor;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-
-        ctx.fillText(
-            formatX(value),
-            x,
-            paddingTop + chartHeight + 8
-        );
-    }
-
-    ctx.setLineDash([]);
-
-    /*
-     * Achsen
-     */
-    ctx.strokeStyle =
-        isDark
-            ? '#d6e1f030'
-            : '#2e403630';
-
-    ctx.lineWidth = 1;
-
-    ctx.beginPath();
-    ctx.moveTo(
-        paddingLeft,
-        paddingTop + chartHeight
-    );
-    ctx.lineTo(
-        getCanvasLogicalWidth(canvas) - paddingRight,
-        paddingTop + chartHeight
-    );
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(paddingLeft, paddingTop);
-    ctx.lineTo(
-        paddingLeft,
-        paddingTop + chartHeight
-    );
-    ctx.stroke();
-
-    /*
-     * Achsen-Titel
-     */
-    ctx.fillStyle = textColor;
-    ctx.font = getThemeEditorCanvasFont(10, 400);
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-
-    ctx.fillText(
-        xLabel,
-        paddingLeft + chartWidth / 2,
-        getCanvasLogicalHeight(canvas) - 34
-    );
-
-    /*
- * Legende unter der X-Achse
- */
-const legend = [
-    ['Wandern', '#469664'],
-    ['Klettern', '#467dbe'],
-    ['Bike & Hike', '#d35400'],
-    ['Mehrtägig', '#8e44ad']
-];
-
-let legendX = paddingLeft;
-const legendY = getCanvasLogicalHeight(canvas) - 12;
-
-ctx.font = getThemeEditorCanvasFont(9, 400);
-ctx.textBaseline = 'middle';
-
-legend.forEach(([label, colour]) => {
-    ctx.fillStyle = colour;
-    ctx.beginPath();
-    ctx.arc(
-        legendX,
-        legendY,
-        3.5,
-        0,
-        Math.PI * 2
-    );
-    ctx.fill();
-
-    ctx.fillStyle = textColor;
-    ctx.textAlign = 'left';
-
-    ctx.fillText(
-        label,
-        legendX + 7,
-        legendY
-    );
-
-    legendX +=
-        ctx.measureText(label).width + 24;
-});
-
-    ctx.save();
-    ctx.translate(14, paddingTop + chartHeight / 2);
-    ctx.rotate(-Math.PI / 2);
-    ctx.fillText(yLabel, 0, 0);
-    ctx.restore();
-
-
-
-    /*
-     * Punkte zeichnen
-     */
-    points.forEach(point => {
-        const x = xFor(point.x);
-        const y = yFor(point.y);
-        const colour =
-            getScatterActivityColor(point.entry);
-
-        ctx.fillStyle = colour;
-        ctx.globalAlpha = 0.82;
-
-        ctx.beginPath();
-        ctx.arc(x, y, 5, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle =
-            isDark
-                ? 'rgba(255,255,255,0.65)'
-                : 'rgba(255,255,255,0.85)';
-
-        ctx.lineWidth = 1;
-        ctx.stroke();
-    });
-
-    ctx.globalAlpha = 1;
-
-canvas.onclick = event => {
-        if (
-            !canvas.classList.contains(
-                'active-chart-canvas'
-            )
-        ) {
-            return;
-        }
-
-        const rect = canvas.getBoundingClientRect();
-
-        const scaleX =
-            getCanvasLogicalWidth(canvas) / rect.width;
-
-        const scaleY =
-            getCanvasLogicalHeight(canvas) / rect.height;
-
-        const clickX =
-            (event.clientX - rect.left) * scaleX;
-
-        const clickY =
-            (event.clientY - rect.top) * scaleY;
-
-        let closestPoint = null;
-        let closestDistance = Infinity;
-
-        points.forEach(point => {
-            const pointX = xFor(point.x);
-            const pointY = yFor(point.y);
-
-            const distance = Math.hypot(
-                clickX - pointX,
-                clickY - pointY
-            );
-
-            if (
-                distance < closestDistance
-            ) {
-                closestDistance = distance;
-                closestPoint = point;
-            }
-        });
-
-        if (
-            !closestPoint ||
-            closestDistance > 18
-        ) {
-            return;
-        }
-
-        openTourDetail(closestPoint.entry);
-    };
-
-}
-
-function drawScatterDistanceAscentDiagram() {
-    drawScatterDiagram({
-        canvas: document.getElementById(
-            'scatter-distance-ascent-canvas'
-        ),
-        title: 'Strecke und Aufstieg',
-        xLabel: 'Strecke (km)',
-        yLabel: 'Aufstieg (hm)',
-        getX: values => values.distance,
-        getY: values => values.ascent,
-        formatX: value =>
-    Number(value).toFixed(0),
-formatY: value =>
-    Math.round(value).toLocaleString('de-AT')
-    });
-}
-
-function drawScatterTimeAscentDiagram() {
-    drawScatterDiagram({
-        canvas: document.getElementById(
-            'scatter-time-ascent-canvas'
-        ),
-        title: 'Gehzeit und Aufstieg',
-        xLabel: 'Gehzeit (h:mm)',
-        yLabel: 'Aufstieg (hm)',
-        getX: values => values.minutes / 60,
-        getY: values => values.ascent,
-        formatX: value => {
-            const totalMinutes =
-                Math.round(value * 60);
-
-            const hours =
-                Math.floor(totalMinutes / 60);
-
-            const minutes =
-                totalMinutes % 60;
-
-            return `${hours}:${String(minutes).padStart(2, '0')}`;
-        },
-        formatY: value =>
-    Math.round(value).toLocaleString('de-AT')
-    });
-}
-
-function drawScatterTimeDistanceDiagram() {
-    drawScatterDiagram({
-        canvas: document.getElementById(
-            'scatter-time-distance-canvas'
-        ),
-        title: 'Gehzeit und Strecke',
-        xLabel: 'Gehzeit (h:mm)',
-        yLabel: 'Strecke (km)',
-        getX: values => values.minutes / 60,
-        getY: values => values.distance,
-        formatX: value => {
-            const totalMinutes =
-                Math.round(value * 60);
-
-            const hours =
-                Math.floor(totalMinutes / 60);
-
-            const minutes =
-                totalMinutes % 60;
-
-            return `${hours}:${String(minutes).padStart(2, '0')}`;
-        },
-        formatY: value =>
-    Number(value).toFixed(0)
-    });
-}
-
-
-
 function drawAverageStepsDiagram() {
     const canvas =
         document.getElementById('avg-steps-canvas');
@@ -15593,11 +15045,6 @@ const chartCanvasMap = {
         'performance-index-canvas'
     ),
 
-regions:
-    document.getElementById(
-        'regions-canvas'
-    ),
-
     msDistance:
         document.getElementById('ms-dist-canvas'),
 
@@ -15609,15 +15056,6 @@ regions:
 
     msPeaks:
         document.getElementById('ms-peaks-canvas'),
-
-    scatterDistanceAscent:
-        document.getElementById('scatter-distance-ascent-canvas'),
-
-    scatterTimeAscent:
-        document.getElementById('scatter-time-ascent-canvas'),
-
-    scatterTimeDistance:
-        document.getElementById('scatter-time-distance-canvas'),
 
     avgSteps:
         document.getElementById('avg-steps-canvas')
@@ -15660,23 +15098,7 @@ function drawActiveChart() {
     drawPerformanceIndexDiagram();
     break;
 
-case 'regions':
-    drawRegionsDiagram();
-    break;
-
-        case 'scatterDistanceAscent':
-            drawScatterDistanceAscentDiagram();
-            break;
-
-        case 'scatterTimeAscent':
-            drawScatterTimeAscentDiagram();
-            break;
-
-        case 'scatterTimeDistance':
-            drawScatterTimeDistanceDiagram();
-            break;
-
-        case 'avgSteps':
+case 'avgSteps':
             drawAverageStepsDiagram();
             break;
 
@@ -16774,91 +16196,6 @@ ctx.fillText(
     );
 
     ctx.stroke();
-}
-
-function drawRegionsDiagram() {
-    const canvas =
-        document.getElementById('regions-canvas');
-
-    if (!canvas) return;
-
-    const data = getDiagramFilteredTours();
-
-    const regionGroups = [
-        {
-            label: 'Osttirol',
-            regions: [
-                'Talboden & Dolomiten',
-                'Iseltal',
-                'Oberland & Pustertal',
-                'Defereggental'
-            ]
-        },
-        {
-            label: 'Kärnten',
-            regions: [
-                'Drautal',
-                'Gailtal',
-                'Mölltal',
-                'Donautal',
-                'Karawanken',
-                'Nockberge'
-            ]
-        },
-        {
-            label: 'Nordtirol',
-            regions: ['Nordtirol']
-        },
-        {
-            label: 'Südtirol',
-            regions: ['Südtirol']
-        },
-        {
-            label: 'Salzburg',
-            regions: ['Salzburg']
-        },
-        {
-            label: 'Anderswo',
-            regions: ['Anderswo']
-        }
-    ];
-
-    const labels = regionGroups.map(group => group.label);
-
-    const values = regionGroups.map(group =>
-        data.filter(entry =>
-            group.regions.includes(
-                String(entry.region || '')
-            )
-        ).length
-    );
-
-    const total = values.reduce(
-        (sum, value) => sum + value,
-        0
-    );
-
-    const regionEntries = regionGroups.map(group =>
-    data.filter(entry =>
-        group.regions.includes(
-            String(entry.region || '')
-        )
-    )
-);
-
-drawCategoryBars(
-    canvas,
-    labels,
-    values,
-    'Touren nach Region',
-    `${total} Touren`,
-    index => {
-        openTourListModal(
-            `Region · ${labels[index]}`,
-            regionEntries[index]
-        );
-    }
-);
 }
 
 function drawStepsDiagram() {
@@ -24684,20 +24021,29 @@ async function attachWrappedPhotos(slides, year) {
     const findPhotoEntry = entry => {
         if (!entry) return null;
         if (entry.id && photosById.has(String(entry.id))) return photosById.get(String(entry.id));
-        return entry.hasImage || (typeof entry.imageData === 'string' && entry.imageData) ? entry : null;
+        return entry.hasImage || (typeof entry.imageData === 'string' && entry.imageData)
+            ? entry
+            : null;
     };
 
     slides.forEach(slide => {
         slide.photoImages = null;
+        slide.photoEntries = null;
         slide.photoLoadPromise = null;
         slide.photoCacheKeys = [];
-        if (slide.key !== 'tourPhoto') return;
-
-        const needsCover = (slide.data?.photos || []).some(photo => photo?.source === 'cover');
-        const photoEntry = needsCover ? findPhotoEntry(slide.data?.entry) : null;
-        slide.photoEntry = photoEntry ? { ...photoEntry } : null;
         slide.photoLoadFailed = false;
+
+        if (slide.key !== 'tourPhoto') return;
+        slide.photoEntries = (Array.isArray(slide.data?.tours) ? slide.data.tours : [])
+            .slice(0, 4)
+            .map(item => {
+                const source = item?.photo?.source === 'cover'
+                    ? findPhotoEntry(item.entry)
+                    : null;
+                return source ? { ...source } : null;
+            });
     });
+
     return slides;
 }
 
@@ -24857,8 +24203,9 @@ function buildWrappedSlideData(year) {
     const topCompanion = getWrappedTopCompanion(entries);
     const activeMonthIndex = monthlyTours.indexOf(Math.max(...monthlyTours));
 
-    // Fotos derselben Tour bleiben zusammen; pro Folie maximal vier Fotos.
-    const photoSlides = [];
+    // Pro Einzeltour wird ein repräsentatives Bild gewählt.
+    // Anschließend werden bis zu vier unterschiedliche Touren pro Folie gruppiert.
+    const tourPhotoItems = [];
     const orderedPhotoEntries = entries.slice().sort((a, b) => {
         const dateA = parseStatsCalendarDate(a?.date);
         const dateB = parseStatsCalendarDate(b?.date);
@@ -24868,19 +24215,22 @@ function buildWrappedSlideData(year) {
     const seenGalleryUris = new Set();
 
     orderedPhotoEntries.forEach(entry => {
-        const photos = [];
+        let photo = null;
         const hasCover = Boolean(entry?.hasImage || (typeof entry?.imageData === 'string' && entry.imageData));
+
         if (hasCover) {
             const coverKey = typeof entry.imageData === 'string' && entry.imageData
                 ? entry.imageData
                 : 'cover:' + String(entry.id || [entry.date, entry.tourname, entry.region].join('|'));
+
             if (!seenCoverImages.has(coverKey)) {
                 seenCoverImages.add(coverKey);
-                photos.push({ source: 'cover' });
+                photo = { source: 'cover' };
             }
         }
 
-        if (typeof window.__tourGalleryLoadPhotoThumbnail === 'function') {
+        // Wenn kein eigenes Titelbild verfügbar ist, wird das erste eindeutige Galeriefoto verwendet.
+        if (!photo && typeof window.__tourGalleryLoadPhotoThumbnail === 'function') {
             const galleryPhotos = (Array.isArray(entry?.galleryPhotos) ? entry.galleryPhotos : [])
                 .filter(media => media && typeof media.uri === 'string' &&
                     media.uri.includes('/images/media/') && media.mediaType !== 'video')
@@ -24891,25 +24241,27 @@ function buildWrappedSlideData(year) {
                     return timeA - timeB;
                 });
 
-            galleryPhotos.forEach(media => {
-                if (seenGalleryUris.has(media.uri)) return;
-                seenGalleryUris.add(media.uri);
-                photos.push({ source: 'gallery', media });
-            });
+            const representative = galleryPhotos.find(media => !seenGalleryUris.has(media.uri));
+            if (representative) {
+                seenGalleryUris.add(representative.uri);
+                photo = { source: 'gallery', media: representative };
+            }
         }
 
-        for (let offset = 0; offset < photos.length; offset += 4) {
-            photoSlides.push({
-                key: 'tourPhoto',
-                type: 'photo',
-                duration: WRAPPED_SLIDE_DURATIONS.photo,
-                data: {
-                    entry,
-                    photos: photos.slice(offset, offset + 4)
-                }
-            });
-        }
+        if (photo) tourPhotoItems.push({ entry, photo });
     });
+
+    const photoSlides = [];
+    for (let offset = 0; offset < tourPhotoItems.length; offset += 4) {
+        photoSlides.push({
+            key: 'tourPhoto',
+            type: 'photo',
+            duration: WRAPPED_SLIDE_DURATIONS.photo,
+            data: {
+                tours: tourPhotoItems.slice(offset, offset + 4)
+            }
+        });
+    }
 
     const highlightPageCount = Math.ceil(highlights.length / 2);
     const highlightSlides = Array.from({ length: highlightPageCount }, (_, index) => ({
@@ -35967,7 +35319,7 @@ function renderWrappedSlideToCanvas(slide, width, height) {
         case 'highestPeak': renderWrappedHighestPeakSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
         case 'topRegion': renderWrappedTopRegionSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
         case 'highlights': renderWrappedHighlightsSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
-        case 'tourPhoto': renderWrappedTourPhotoSlide(ctx, logicalWidth, logicalHeight, colors, slide.data, slide.photoImages || [], Boolean(slide.photoLoadFailed)); break;
+        case 'tourPhoto': renderWrappedTourPhotoSlide(ctx, logicalWidth, logicalHeight, colors, slide.data, slide.photoImages || []); break;
         case 'top3': renderWrappedTop3Slide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
         case 'topCompanion': renderWrappedTopCompanionSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
         case 'outro': renderWrappedOutroSlide(ctx, logicalWidth, logicalHeight, colors, slide.data); break;
@@ -36387,7 +35739,7 @@ const endHold = () => {
         if (!document.querySelector('link[data-bergwelt-badge-styles="20261022-year-ascent-donut"]')) {
             const styleLink = document.createElement('link');
             styleLink.rel = 'stylesheet';
-            styleLink.href = './bergwelt-badges-20261019.css?v=1';
+            styleLink.href = './bergwelt-badges-20261019.css?v=2';
             styleLink.dataset.bergweltBadgeStyles = '20261022-year-ascent-donut';
             document.head.appendChild(styleLink);
         }
@@ -36399,7 +35751,7 @@ const endHold = () => {
             document.head.appendChild(premiumStyleLink);
         }
         const script = document.createElement('script');
-        script.src = './bergwelt-badges-20261019.js?v=5';
+        script.src = './bergwelt-badges-20261019.js?v=6';
         script.onload = () => {
             window.__BERGWELT_BADGE_LOADING__ = false;
             window.__BERGWELT_LOADING__ = false;
@@ -36453,31 +35805,36 @@ function releaseWrappedGalleryPhoto(slide) {
     });
     slide.photoCacheKeys = [];
     slide.photoImages = null;
+    slide.photoEntries = null;
     slide.photoLoadPromise = null;
 }
 
 async function ensureWrappedGalleryPhotoLoaded(slide) {
-    if (!slide || slide.key !== 'tourPhoto') return slide?.photoImages || [];
+    if (!slide || slide.key !== 'tourPhoto') return [];
     if (Array.isArray(slide.photoImages)) return slide.photoImages;
     if (slide.photoLoadPromise) return slide.photoLoadPromise;
 
     slide.photoLoadPromise = (async () => {
         try {
-            const sources = Array.isArray(slide.data?.photos) ? slide.data.photos.slice(0, 4) : [];
-            const loaded = await Promise.all(sources.map(async photo => {
+            const tours = Array.isArray(slide.data?.tours) ? slide.data.tours.slice(0, 4) : [];
+            const loaded = await Promise.all(tours.map(async (item, index) => {
                 try {
                     let dataUrl = null;
-                    if (photo?.source === 'gallery') {
+                    if (item?.photo?.source === 'gallery') {
                         const loadThumbnail = window.__tourGalleryLoadPhotoThumbnail;
-                        if (typeof loadThumbnail !== 'function') return { image: null, cacheKey: null };
-                        dataUrl = await loadThumbnail(photo.media);
-                    } else if (photo?.source === 'cover') {
-                        const entry = slide.photoEntry ? { ...slide.photoEntry } : { ...(slide.data?.entry || {}) };
+                        if (typeof loadThumbnail === 'function') {
+                            dataUrl = await loadThumbnail(item.photo.media);
+                        }
+                    } else if (item?.photo?.source === 'cover') {
+                        const entry = slide.photoEntries?.[index]
+                            ? { ...slide.photoEntries[index] }
+                            : { ...(item.entry || {}) };
                         if (Object.keys(entry).length) {
                             await loadTourImageData(entry);
                             dataUrl = entry.imageData || null;
                         }
                     }
+
                     const image = dataUrl ? await loadWrappedImage(dataUrl) : null;
                     return { image, cacheKey: dataUrl || null };
                 } catch (error) {
@@ -36485,40 +35842,28 @@ async function ensureWrappedGalleryPhotoLoaded(slide) {
                     return { image: null, cacheKey: null };
                 }
             }));
+
             slide.photoImages = loaded;
             slide.photoCacheKeys = loaded.map(photo => photo.cacheKey).filter(Boolean);
             slide.photoLoadFailed = !loaded.some(photo => photo.image);
-            if (slide.photoEntry?.imageData) delete slide.photoEntry.imageData;
+            if (Array.isArray(slide.photoEntries)) {
+                slide.photoEntries.forEach(entry => {
+                    if (entry?.imageData) delete entry.imageData;
+                });
+            }
             return slide.photoImages;
         } catch (error) {
             console.warn('[Jahresrückblick] Tourfotos konnten nicht geladen werden.', error);
-            slide.photoImages = [];
+            slide.photoImages = (Array.isArray(slide.data?.tours) ? slide.data.tours : [])
+                .slice(0, 4)
+                .map(() => ({ image: null, cacheKey: null }));
             slide.photoLoadFailed = true;
             return slide.photoImages;
         }
     })();
+
     return slide.photoLoadPromise;
 }
-
-const WRAPPED_BACKGROUND_IMAGE_SOURCES = Object.freeze({
-    distance: 'https://images.unsplash.com/photo-1632665099926-094c0d6b92bb?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
-    ascent: 'https://images.unsplash.com/photo-1516733745173-62e8f8651711?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
-    peaks: 'https://images.unsplash.com/photo-1789909145224-b12f9ac21ab9?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
-    time: 'https://images.unsplash.com/photo-1486068720048-47715511ce71?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
-    activeMonth: 'https://images.unsplash.com/photo-1636043982206-a2255072410e?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
-    highestPeak: 'https://images.unsplash.com/photo-1642520175002-90a1168a0d57?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
-    topRegion: 'https://images.unsplash.com/photo-1789414297236-295409dfeb37?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
-    'highlights-1': 'https://images.unsplash.com/photo-1699448095339-c07828dee7c4?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
-    'highlights-2': 'https://images.unsplash.com/photo-1762375212956-46c0a0964336?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
-    'highlights-3': 'https://images.unsplash.com/photo-1757330878011-418ff67dd845?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
-    bestTour: 'https://images.unsplash.com/photo-1628091864452-095d137137e0?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
-    top3: 'https://images.unsplash.com/photo-1666567693318-27238d192d6a?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
-    topCompanion: 'https://images.unsplash.com/photo-1792928442695-aaa9c0bf9cd5?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
-    intro: 'https://images.unsplash.com/photo-1666567693318-27238d192d6a?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
-    outro: 'https://images.unsplash.com/photo-1792928442695-aaa9c0bf9cd5?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560'
-});
-
-const wrappedBackgroundImageCache = new Map();
 
 function getWrappedBackgroundImageKey(slideKey, slideData) {
     if (slideKey === 'highlights') {
@@ -37441,7 +36786,7 @@ function drawWrappedSlideIntoCanvas(index, targetCanvas) {
         case 'highestPeak': renderWrappedHighestPeakSlide(ctx, w, h, colors, slide.data); break;
         case 'topRegion': renderWrappedTopRegionSlide(ctx, w, h, colors, slide.data); break;
         case 'highlights': renderWrappedHighlightsSlide(ctx, w, h, colors, slide.data); break;
-        case 'tourPhoto': renderWrappedTourPhotoSlide(ctx, w, h, colors, slide.data, slide.photoImages || [], Boolean(slide.photoLoadFailed)); break;
+        case 'tourPhoto': renderWrappedTourPhotoSlide(ctx, w, h, colors, slide.data, slide.photoImages || []); break;
         case 'top3': renderWrappedTop3Slide(ctx, w, h, colors, slide.data); break;
         case 'topCompanion': renderWrappedTopCompanionSlide(ctx, w, h, colors, slide.data); break;
         case 'outro': renderWrappedOutroSlide(ctx, w, h, colors, slide.data); break;
@@ -37867,26 +37212,70 @@ function renderWrappedPeakCountSlide(ctx, w, h, colors, data) {
 }
 
 function renderWrappedTourPhotoSlide(ctx, w, h, colors, data, photoImages = []) {
-    const title = data.entry?.tourname || data.entry?.region || 'Tourfoto';
-    drawWrappedCenteredTitle(ctx, title, 170, 58, colors.text, w);
-    const images = (Array.isArray(photoImages) ? photoImages : [])
-        .map(item => item?.image || item)
-        .filter(image => image && image.complete !== false && image.width > 0 && image.height > 0)
-        .slice(0, 4);
-    if (!images.length) return;
-    const margin = 64, top = 285, bottom = h - 125, gap = 22;
-    const availableW = Math.max(1, w - margin * 2);
+    const tours = (Array.isArray(data?.tours) ? data.tours : []).slice(0, 4);
+    if (!tours.length) return;
+
+    const marginX = 56;
+    const top = 190;
+    const bottom = h - 112;
+    const gapX = 22;
+    const gapY = 24;
+    const columns = tours.length === 1 ? 1 : 2;
+    const rows = Math.ceil(tours.length / columns);
+    const availableW = Math.max(1, w - marginX * 2);
     const availableH = Math.max(1, bottom - top);
-    const columns = images.length === 1 ? 1 : 2;
-    const rows = Math.ceil(images.length / columns);
-    const cellW = (availableW - gap * (columns - 1)) / columns;
-    const cellH = (availableH - gap * (rows - 1)) / rows;
-    images.forEach((image, index) => {
+    const cardW = columns === 1
+        ? Math.min(availableW, w * 0.82)
+        : (availableW - gapX) / 2;
+    const cardH = (availableH - gapY * (rows - 1)) / rows;
+
+    tours.forEach((item, index) => {
         const row = Math.floor(index / columns);
-        const rowCount = Math.min(columns, images.length - row * columns);
+        const rowCount = Math.min(columns, tours.length - row * columns);
         const col = index % columns;
-        const offsetX = rowCount === 1 ? (availableW - cellW) / 2 : col * (cellW + gap);
-        drawWrappedContainedImage(ctx, image, margin + offsetX, top + row * (cellH + gap), cellW, cellH, 26);
+        const rowStartX = rowCount === 1
+            ? (w - cardW) / 2
+            : marginX;
+        const x = rowStartX + col * (cardW + gapX);
+        const y = top + row * (cardH + gapY);
+        const title = item?.entry?.tourname || item?.entry?.region || 'Tour';
+        const image = photoImages[index]?.image || null;
+
+        ctx.save();
+        ctx.fillStyle = 'rgba(4,18,27,0.34)';
+        ctx.beginPath();
+        ctx.roundRect(x, y, cardW, cardH, 28);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.16)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        setWrappedFont(ctx, columns === 1 ? 42 : 30, 'bold');
+        ctx.fillStyle = colors.text;
+        wrapWrappedText(
+            ctx,
+            title,
+            x + cardW / 2,
+            y + 52,
+            Math.max(1, cardW - 44),
+            columns === 1 ? 48 : 36
+        );
+
+        const imageInset = 16;
+        const imageTop = y + 112;
+        const imageHeight = Math.max(1, cardH - (imageTop - y) - imageInset);
+        drawWrappedContainedImage(
+            ctx,
+            image,
+            x + imageInset,
+            imageTop,
+            Math.max(1, cardW - imageInset * 2),
+            imageHeight,
+            20
+        );
+        ctx.restore();
     });
 }
 
