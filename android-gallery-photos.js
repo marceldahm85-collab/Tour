@@ -1083,6 +1083,41 @@
             return null;
         }
     };
+    
+    // Für die vier Tourfotos im Jahresrückblick die native 2048-px-Variante
+    // verwenden. Die Vorschaugitter bleiben weiterhin bei 480 px.
+    window.__tourGalleryLoadPhotoFull = async function (media) {
+        const item = cleanMedia(media);
+        if (!item || item.mediaType !== 'photo') return null;
+
+        try {
+            if (!nativeFeatures.has('gallery.thumbnail.v1')) {
+                const available = await checkNativeGalleryBridge();
+                if (!available) return null;
+            }
+
+            const action = nativeFeatures.has('gallery.image.full.v1')
+                ? 'gallery.image.full'
+                : 'gallery.thumbnail';
+            const response = await nativeRequest(action, { uri: item.uri }, 30000);
+
+            if (response && response.status === 'ok' && response.data) {
+                return 'data:' + (response.mimeType || 'image/jpeg') + ';base64,' + response.data;
+            }
+
+            if (action !== 'gallery.thumbnail' &&
+                typeof window.__tourGalleryLoadPhotoThumbnail === 'function') {
+                return window.__tourGalleryLoadPhotoThumbnail(item);
+            }
+            return null;
+        } catch (error) {
+            console.warn('[Jahresrückblick] Hochauflösendes Tourfoto konnte nicht geladen werden.', error);
+            if (typeof window.__tourGalleryLoadPhotoThumbnail === 'function') {
+                return window.__tourGalleryLoadPhotoThumbnail(item);
+            }
+            return null;
+        }
+    };
 
     installTourDetailHook();
     installTourDetailObserver();
