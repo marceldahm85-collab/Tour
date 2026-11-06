@@ -1,0 +1,63 @@
+/* Premium Alpine — ruhige, einheitliche Touch-Rückmeldungen.
+   Bestehende Ansichten, Maße, Inhalte, Navigation und Datenabläufe bleiben unverändert. */
+
+:root {
+    --premium-motion-ease: cubic-bezier(.2, .75, .25, 1);
+}
+
+/* Gleiche weiche Auslaufkurve für die vorhandenen Dashboard-Übergänge. */
+#dashboard-view .dash-stat-tile,
+#dashboard-view .dash-milestone-tile,
+#chart-view .stats-section-btn,
+#chart-view #chart-tabs .chart-tab,
+#chart-view button.chart-stat-tile,
+#chart-view button.development-metric-card,
+#chart-view button.tour-profile-summary-card,
+#chart-view button.activity-summary-card,
+#tour-view .plan-section-btn,
+#wrapped-view.bergwelt-ready .bergwelt-tabs > .bergwelt-tab {
+    transition-timing-function: var(--premium-motion-ease) !important;
+}
+
+/* Ältere 0.96–0.97-Skalierungen werden auf ein dezentes Druckgefühl reduziert. */
+#dashboard-view .dash-stat-tile:active,
+#dashboard-view .dash-milestone-tile:active,
+#chart-view .stats-section-btn:active,
+#chart-view #stats-diagrams-page #chart-tabs .chart-tab:active,
+#chart-view button.chart-stat-tile:active,
+#chart-view button.development-metric-card:active,
+#chart-view button.tour-profile-summary-card:active,
+#chart-view button.activity-summary-card:active,
+#tour-view .plan-section-btn:active,
+#wrapped-view.bergwelt-ready .bergwelt-tabs > .bergwelt-tab:active {
+    transform: scale(.985) !important;
+}
+
+/* Keine Bewegung erzwingen, wenn das Android-/Systemprofil sie reduziert. */
+@media (prefers-reduced-motion: reduce) {
+    #dashboard-view .dash-stat-tile,
+    #dashboard-view .dash-milestone-tile,
+    #chart-view .stats-section-btn,
+    #chart-view #chart-tabs .chart-tab,
+    #chart-view button.chart-stat-tile,
+    #chart-view button.development-metric-card,
+    #chart-view button.tour-profile-summary-card,
+    #chart-view button.activity-summary-card,
+    #tour-view .plan-section-btn,
+    #wrapped-view.bergwelt-ready .bergwelt-tabs > .bergwelt-tab {
+        transition: none !important;
+    }
+
+    #dashboard-view .dash-stat-tile:active,
+    #dashboard-view .dash-milestone-tile:active,
+    #chart-view .stats-section-btn:active,
+    #chart-view #stats-diagrams-page #chart-tabs .chart-tab:active,
+    #chart-view button.chart-stat-tile:active,
+    #chart-view button.development-metric-card:active,
+    #chart-view button.tour-profile-summary-card:active,
+    #chart-view button.activity-summary-card:active,
+    #tour-view .plan-section-btn:active,
+    #wrapped-view.bergwelt-ready .bergwelt-tabs > .bergwelt-tab:active {
+        transform: none !important;
+    }
+}
