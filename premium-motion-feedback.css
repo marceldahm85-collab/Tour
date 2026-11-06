@@ -63,21 +63,40 @@
 }
 
 
-/* Premium Experience — ausgeglichene, systembewusste Bewegungszeiten. */
+/* Premium Experience — zentral definierte, ausgeglichene Bewegungszeiten. */
 :root {
+    --premium-motion-control-duration: 150ms;
+    --premium-motion-view-duration: 360ms;
+    --premium-motion-secondary-duration: 280ms;
     --premium-motion-modal-duration: 320ms;
     --premium-motion-modal-ease: cubic-bezier(.2, .75, .25, 1);
+    --premium-motion-achievement-duration: 580ms;
+    --premium-motion-splash-exit-duration: 260ms;
+}
+
+/* Zentraler MotionController hält die bestehenden View-Swipe-Werte stabil. */
+.view {
+    transition-duration:
+        var(--premium-motion-view-duration),
+        var(--premium-motion-secondary-duration),
+        var(--premium-motion-secondary-duration);
 }
 
 /* Normale mobile Modale öffnen direkter. TOP-3 bleibt bewusst bei seiner
    längeren Metall-Einblendung und dem separaten, kontinuierlichen Glanz. */
-@media (prefers-reduced-motion: no-preference) and
-       ((max-width: 768px) or
-        (max-width: 1024px) and (orientation: landscape) and (pointer: coarse)) {
+@media (prefers-reduced-motion: no-preference) and (max-width: 768px),
+       (prefers-reduced-motion: no-preference) and (max-width: 1024px) and
+       (orientation: landscape) and (pointer: coarse) {
     .modal:not(.hidden) .modal-card:not(.is-dragging):not(.highlight-modal-gold):not(.highlight-modal-silver):not(.highlight-modal-bronze) {
         animation-duration: var(--premium-motion-modal-duration) !important;
         animation-timing-function: var(--premium-motion-modal-ease) !important;
     }
+}
+
+/* Die bereits vorhandene Auszeichnungsdramaturgie behält ihre Abfolge;
+   nur die Einblenddauer kommt nun aus demselben Bewegungsprofil. */
+.achievement-unlock-card {
+    animation-duration: var(--premium-motion-achievement-duration, 580ms);
 }
 
 /* Systemweite Bewegungsreduktion hat Vorrang vor dekorativen Übergängen. */
