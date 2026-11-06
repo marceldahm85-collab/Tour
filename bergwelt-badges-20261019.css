@@ -3009,3 +3009,13 @@ body.green .leaf {
         height: 68px;
     }
 }
+
+
+/* Tourbuch: separate Sammelbox um den Modus-Umschalter entfernen. */
+#wrapped-view #bergwelt-tourbuch-panel #pdf-export-card .compare-mode-toggle {
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
