@@ -18,6 +18,9 @@ on:
       - "theme-editor-workflow.js"
       - "index.html"
       - "styles-overrides.css"
+      - "premium-top3-metal.css"
+      - "premium-image-presentation.css"
+      - "premium-image-presentation.js"
       - "sw.js"
       - ".github/workflows/android-debug-apk.yml"
   workflow_dispatch:
