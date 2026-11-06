@@ -61,3 +61,37 @@
         transform: none !important;
     }
 }
+
+
+/* Premium Experience — ausgeglichene, systembewusste Bewegungszeiten. */
+:root {
+    --premium-motion-modal-duration: 320ms;
+    --premium-motion-modal-ease: cubic-bezier(.2, .75, .25, 1);
+}
+
+/* Normale mobile Modale öffnen direkter. TOP-3 bleibt bewusst bei seiner
+   längeren Metall-Einblendung und dem separaten, kontinuierlichen Glanz. */
+@media (prefers-reduced-motion: no-preference) and
+       ((max-width: 768px) or
+        (max-width: 1024px) and (orientation: landscape) and (pointer: coarse)) {
+    .modal:not(.hidden) .modal-card:not(.is-dragging):not(.highlight-modal-gold):not(.highlight-modal-silver):not(.highlight-modal-bronze) {
+        animation-duration: var(--premium-motion-modal-duration) !important;
+        animation-timing-function: var(--premium-motion-modal-ease) !important;
+    }
+}
+
+/* Systemweite Bewegungsreduktion hat Vorrang vor dekorativen Übergängen. */
+@media (prefers-reduced-motion: reduce) {
+    .premium-reduced-motion .view,
+    .premium-reduced-motion .modal-card,
+    .premium-reduced-motion .dash-stat-tile,
+    .premium-reduced-motion .dash-milestone-tile,
+    .premium-reduced-motion .achievement-unlock-card,
+    .premium-reduced-motion .achievement-unlock-art-stage,
+    .premium-reduced-motion .achievement-unlock-art,
+    .premium-reduced-motion .success-celebration-toast {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
