@@ -1,0 +1,101 @@
+/* Premium Alpine — vorhandene Tourfotos und Galerie hochwertiger präsentieren.
+   Keine zusätzlichen Medien, keine Änderung an Bildzuordnung oder Originaldateien. */
+
+#tour-detail-modal .tour-detail-image-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 138px;
+    overflow: hidden;
+    border: 1px solid var(--premium-border, var(--app-surface-border, rgba(255,255,255,.14))) !important;
+    border-radius: var(--editor-radius, var(--premium-radius-card, 16px)) !important;
+    background:
+        radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 10%, transparent), transparent 66%),
+        linear-gradient(145deg, rgba(255,255,255,.035), rgba(0,0,0,.18)) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.07),
+        0 7px 18px rgba(0,0,0,.16) !important;
+}
+
+#tour-detail-modal .tour-detail-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: min(44svh, 380px);
+    margin: 0 auto;
+    object-fit: contain !important;
+    object-position: center;
+    image-rendering: auto;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    transition:
+        opacity 280ms cubic-bezier(.2,.75,.25,1),
+        filter 320ms ease;
+}
+
+#tour-detail-modal .tour-detail-image.premium-photo-pending,
+#image-lightbox-img.premium-photo-pending,
+#atg-photo-viewer .atg-viewer-image.premium-photo-pending {
+    opacity: 0;
+}
+
+#tour-detail-modal .tour-detail-image.premium-photo-ready,
+#image-lightbox-img.premium-photo-ready,
+#atg-photo-viewer .atg-viewer-image.premium-photo-ready {
+    opacity: 1;
+}
+
+#image-lightbox-img,
+#atg-photo-viewer .atg-viewer-image {
+    transition:
+        opacity 300ms cubic-bezier(.2,.75,.25,1),
+        transform 340ms cubic-bezier(.2,.75,.25,1);
+    backface-visibility: hidden;
+}
+
+/* Galerievorschau: das vorhandene 4:3-Format bleibt; nur das Einblenden wird weicher. */
+#td-gallery-panel .atg-thumb {
+    opacity: 0;
+    transform: scale(1.012);
+    transition:
+        opacity 300ms cubic-bezier(.2,.75,.25,1),
+        transform 420ms cubic-bezier(.2,.75,.25,1);
+}
+
+#td-gallery-panel .atg-thumb-wrap.has-image .atg-thumb {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Vollbildfotos bleiben vollständig sichtbar und erhalten ihre native Bildschärfe. */
+#atg-photo-viewer .atg-viewer-image,
+#image-lightbox-img {
+    image-rendering: auto;
+    object-fit: contain;
+}
+
+#wrapped-canvas {
+    image-rendering: auto;
+    backface-visibility: hidden;
+}
+
+@media (max-width: 768px), (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    #tour-detail-modal .tour-detail-image-wrap {
+        min-height: 128px;
+    }
+
+    #tour-detail-modal .tour-detail-image {
+        max-height: min(42svh, 350px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #tour-detail-modal .tour-detail-image,
+    #image-lightbox-img,
+    #atg-photo-viewer .atg-viewer-image,
+    #td-gallery-panel .atg-thumb {
+        transition: none !important;
+        transform: none !important;
+    }
+}
