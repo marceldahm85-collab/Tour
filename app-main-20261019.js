@@ -35429,16 +35429,20 @@ function updatePeakStatsPage() {
         <div class="stats-inline-pagination is-top">
             <button
                 type="button"
+                class="dash-year-arrow-btn"
                 data-stats-peak-page="prev"
+                aria-label="Vorherige Gipfelseite"
                 ${statsPeakPage <= 1 ? 'disabled' : ''}>
-                ◀
+                <svg class="view-nav-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5m0 0 6-6m-6 6 6 6"/></svg>
             </button>
             <span>${statsPeakPage} / ${totalPages}</span>
             <button
                 type="button"
+                class="dash-year-arrow-btn"
                 data-stats-peak-page="next"
+                aria-label="Nächste Gipfelseite"
                 ${statsPeakPage >= totalPages ? 'disabled' : ''}>
-                ▶
+                <svg class="view-nav-arrow is-next" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5m0 0 6-6m-6 6 6 6"/></svg>
             </button>
         </div>
     ` : '';
@@ -35490,16 +35494,6 @@ function updatePeakStatsPage() {
                     ${visibleRows.map((row, offset) => {
                         const index = start + offset;
                         const selected = row.selectedGroup;
-                        const full = row.fullGroup;
-                        const totalCount = Number(full.count || full.entries?.length || 0);
-                        const selectedCount = Number(selected.count || selected.entries?.length || 0);
-
-                        const countSelectedText = `${selectedCount}×`;
-
-const countTotalText =
-    statsYearFilter === 'all'
-        ? ''
-        : ` · ${totalCount}× gesamt`;
 
                         return `
                             <li
@@ -35512,14 +35506,6 @@ const countTotalText =
                                         ${escapeHtml(selected.name)}
                                         ${selected.rawHoehe > 0 ? ` · ${Math.round(selected.rawHoehe)} m` : ''}
                                     </span>
-                                    <span class="stats-peak-history-count">
-    <span class="peak-count-selected">
-        ${countSelectedText}
-    </span>
-    <span class="peak-count-total">
-        ${countTotalText}
-    </span>
-</span>
                                 </div>
                             </li>
                         `;
