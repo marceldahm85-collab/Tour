@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <style name="AppLaunchTheme" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#0B0F14</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_pwa</item>
+        <item name="windowSplashScreenAnimationDuration">420</item>
+        <item name="postSplashScreenTheme">@style/AppTheme</item>
+    </style>
+
     <style name="AppTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
         <item name="android:fontFamily">sans</item>
         <item name="android:colorAccent">#C7A66A</item>
