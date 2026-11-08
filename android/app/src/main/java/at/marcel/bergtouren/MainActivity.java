@@ -600,9 +600,11 @@ public final class MainActivity extends Activity {
                 progressBar.setVisibility(View.GONE);
                 sendBridgeHandshake();
                 deliverPendingDashboardWidgetNavigation();
-                // Fallback, falls die PWA keinen eigenen Ready-Impuls senden kann.
-                // Ein früheres app.ready blendet den Splash ohne künstliche Wartezeit aus.
-                mainHandler.postDelayed(() -> hidePremiumSplashOverlay(), 2800L);
+                // Reiner Sicherheits-Fallback: Normalerweise beendet app.ready
+                // den Splash unmittelbar nach erfolgreicher Storage-Initialisierung.
+                // Die längere Frist verhindert, dass langsame Tourdaten-Ladevorgänge
+                // vorzeitig einen noch nicht fertigen App-Inhalt freigeben.
+                mainHandler.postDelayed(() -> hidePremiumSplashOverlay(), 6500L);
             }
 
             @Override
