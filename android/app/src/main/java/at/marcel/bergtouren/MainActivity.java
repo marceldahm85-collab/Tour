@@ -163,7 +163,7 @@ public final class MainActivity extends Activity {
         // einen echten Bildhintergrund. Das Overlay liegt bewusst außerhalb
         // der inset-geschützten WebView-Fläche und reicht bis an alle Displayränder.
         ImageView panorama = new ImageView(this);
-        panorama.setImageResource(R.drawable.widget_alpine_background);
+        panorama.setImageResource(R.drawable.splash_alpine_panorama);
         panorama.setScaleType(ImageView.ScaleType.CENTER_CROP);
         overlay.addView(panorama, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -334,6 +334,11 @@ public final class MainActivity extends Activity {
         if (ValueAnimator.areAnimatorsEnabled()) {
             overlay.setAlpha(0f);
             overlay.post(() -> {
+                // app.ready kann bei warmem Start sehr früh eintreffen. In
+                // diesem Fall darf die noch ausstehende Einblendsequenz den
+                // bereits laufenden Splash-Ausgang nicht wieder sichtbar machen.
+                if (premiumSplashHiding || premiumSplashOverlay != overlay) return;
+
                 overlay.animate()
                         .alpha(1f)
                         .setDuration(360L)
