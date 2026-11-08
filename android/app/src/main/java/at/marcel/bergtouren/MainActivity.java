@@ -85,6 +85,7 @@ public final class MainActivity extends Activity {
 
     private WebView webView;
     private FrameLayout root;
+    private FrameLayout appContent;
     private ProgressBar progressBar;
     private LinearLayout errorPanel;
     private FrameLayout premiumSplashOverlay;
@@ -158,8 +159,11 @@ public final class MainActivity extends Activity {
         overlay.setFocusable(true);
         overlay.setBackgroundColor(Color.rgb(7, 12, 18));
 
+        // Das vorhandene, lokal gebündelte Alpenmotiv sorgt auch offline für
+        // einen echten Bildhintergrund. Das Overlay liegt bewusst außerhalb
+        // der inset-geschützten WebView-Fläche und reicht bis an alle Displayränder.
         ImageView panorama = new ImageView(this);
-        panorama.setImageResource(R.drawable.widget_alpine_background);
+        panorama.setImageResource(R.drawable.splash_alpine_panorama);
         panorama.setScaleType(ImageView.ScaleType.CENTER_CROP);
         overlay.addView(panorama, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -169,9 +173,24 @@ public final class MainActivity extends Activity {
         View shade = new View(this);
         shade.setBackground(new GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
-                new int[] { 0x28070D14, 0x74070D14, 0xE8070D14 }
+                new int[] { 0x1A060B12, 0x48070D14, 0xA8070D14, 0xF20A1017 }
         ));
         overlay.addView(shade, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        ));
+
+        // Dezente Randabdunklung gibt dem Panorama Tiefe, ohne ein künstliches
+        // Bergmotiv oder weitere grafische Elemente darüberzulegen.
+        View vignette = new View(this);
+        GradientDrawable vignetteDrawable = new GradientDrawable();
+        vignetteDrawable.setShape(GradientDrawable.RECTANGLE);
+        vignetteDrawable.setGradientType(GradientDrawable.RADIAL_GRADIENT);
+        vignetteDrawable.setGradientCenter(0.5f, 0.46f);
+        vignetteDrawable.setGradientRadius(dp(560));
+        vignetteDrawable.setColors(new int[] { 0x00000000, 0x56040A12 });
+        vignette.setBackground(vignetteDrawable);
+        overlay.addView(vignette, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
         ));
@@ -180,73 +199,122 @@ public final class MainActivity extends Activity {
         content.setOrientation(LinearLayout.VERTICAL);
         content.setGravity(Gravity.CENTER);
         content.setPadding(dp(24), dp(24), dp(24), dp(24));
+        content.setAlpha(0f);
+        content.setTranslationY(dp(12));
 
+        // Eine weiche Lichtaura trennt das Emblem optisch vom Fotohintergrund.
+        FrameLayout emblemStage = new FrameLayout(this);
+        GradientDrawable emblemGlow = new GradientDrawable();
+        emblemGlow.setShape(GradientDrawable.OVAL);
+        emblemGlow.setGradientType(GradientDrawable.RADIAL_GRADIENT);
+        emblemGlow.setGradientRadius(dp(96));
+        emblemGlow.setGradientCenter(0.5f, 0.5f);
+        emblemGlow.setColors(new int[] { 0x55E4BC75, 0x18C69A54, 0x00000000 });
+        View glow = new View(this);
+        glow.setBackground(emblemGlow);
+        emblemStage.addView(glow, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        ));
+
+        // Das Emblem verwendet ausdrücklich dasselbe 192er-PNG wie PWA- und
+        // Android-Appsymbol: R.drawable.ic_launcher_pwa.
         FrameLayout emblem = new FrameLayout(this);
         emblem.setClipChildren(true);
         emblem.setClipToPadding(true);
         GradientDrawable emblemMetal = new GradientDrawable(
                 GradientDrawable.Orientation.TL_BR,
-                new int[] { 0xFFF4D99C, 0xFF6D512A, 0xFFD7B46D, 0xFF302719 }
+                new int[] { 0xFFFFE9B8, 0xFF8A6838, 0xFFE2BD78, 0xFF3B2C1C }
         );
         emblemMetal.setShape(GradientDrawable.OVAL);
         emblem.setBackground(emblemMetal);
-        GradientDrawable emblemBorder = new GradientDrawable();
-        emblemBorder.setShape(GradientDrawable.OVAL);
-        emblemBorder.setColor(Color.TRANSPARENT);
-        emblemBorder.setStroke(dp(2), 0xFFE9D3A0);
-        emblem.setForeground(emblemBorder);
-        emblem.setElevation(dp(16));
+        emblem.setElevation(dp(20));
         emblem.setClipToOutline(true);
+
+        FrameLayout innerPlate = new FrameLayout(this);
+        GradientDrawable innerMetal = new GradientDrawable(
+                GradientDrawable.Orientation.TL_BR,
+                new int[] { 0xFF263342, 0xFF101923, 0xFF182431 }
+        );
+        innerMetal.setShape(GradientDrawable.OVAL);
+        innerMetal.setStroke(dp(1), 0xFFBFA06A);
+        innerPlate.setBackground(innerMetal);
+        FrameLayout.LayoutParams innerParams = new FrameLayout.LayoutParams(
+                dp(132), dp(132), Gravity.CENTER
+        );
+        emblem.addView(innerPlate, innerParams);
 
         ImageView emblemIcon = new ImageView(this);
         emblemIcon.setImageResource(R.drawable.ic_launcher_pwa);
         emblemIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        emblemIcon.setPadding(dp(20), dp(20), dp(20), dp(20));
-        emblem.addView(emblemIcon, new FrameLayout.LayoutParams(
+        emblemIcon.setPadding(dp(8), dp(8), dp(8), dp(8));
+        innerPlate.addView(emblemIcon, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
         ));
 
+        GradientDrawable outerRim = new GradientDrawable();
+        outerRim.setShape(GradientDrawable.OVAL);
+        outerRim.setColor(Color.TRANSPARENT);
+        outerRim.setStroke(dp(2), 0xFFE9D3A0);
+        emblem.setForeground(outerRim);
+
         View sheen = new View(this);
         sheen.setBackground(new GradientDrawable(
                 GradientDrawable.Orientation.LEFT_RIGHT,
-                new int[] { 0x00FFFFFF, 0xA6FFFFFF, 0x00FFFFFF }
+                new int[] { 0x00FFFFFF, 0x08FFFFFF, 0xC8FFFFFF, 0x18FFFFFF, 0x00FFFFFF }
         ));
         sheen.setRotation(22f);
         FrameLayout.LayoutParams sheenParams = new FrameLayout.LayoutParams(
-                dp(38), dp(154), Gravity.CENTER
+                dp(42), dp(184), Gravity.CENTER
         );
         emblem.addView(sheen, sheenParams);
 
-        content.addView(emblem, new LinearLayout.LayoutParams(dp(116), dp(116)));
+        FrameLayout.LayoutParams emblemParams = new FrameLayout.LayoutParams(
+                dp(148), dp(148), Gravity.CENTER
+        );
+        emblemStage.addView(emblem, emblemParams);
+        content.addView(emblemStage, new LinearLayout.LayoutParams(dp(190), dp(190)));
 
         TextView title = new TextView(this);
         title.setText("BERGTOUREN");
-        title.setTextColor(0xFFF5F1E8);
-        title.setTextSize(19);
+        title.setTextColor(0xFFFFF8EC);
+        title.setTextSize(20);
         title.setTypeface(Typeface.create("sans-serif", Typeface.BOLD));
-        title.setLetterSpacing(0.20f);
+        title.setLetterSpacing(0.22f);
         title.setGravity(Gravity.CENTER);
         title.setIncludeFontPadding(false);
+        title.setShadowLayer(dp(8), 0f, dp(2), 0xB0000000);
         LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
         );
-        titleParams.topMargin = dp(24);
+        titleParams.topMargin = dp(4);
         content.addView(title, titleParams);
+
+        View divider = new View(this);
+        GradientDrawable dividerGradient = new GradientDrawable(
+                GradientDrawable.Orientation.LEFT_RIGHT,
+                new int[] { 0x00D5B77D, 0xD5B77D, 0x00D5B77D }
+        );
+        dividerGradient.setSize(dp(48), dp(1));
+        divider.setBackground(dividerGradient);
+        LinearLayout.LayoutParams dividerParams = new LinearLayout.LayoutParams(dp(48), dp(1));
+        dividerParams.topMargin = dp(12);
+        content.addView(divider, dividerParams);
 
         TextView subtitle = new TextView(this);
         subtitle.setText("TOUREN  ·  GIPFEL  ·  ERLEBNISSE");
-        subtitle.setTextColor(0xCDE8DCC5);
+        subtitle.setTextColor(0xE8E8DCC8);
         subtitle.setTextSize(10);
-        subtitle.setLetterSpacing(0.15f);
+        subtitle.setLetterSpacing(0.16f);
         subtitle.setGravity(Gravity.CENTER);
         subtitle.setIncludeFontPadding(false);
         LinearLayout.LayoutParams subtitleParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
         );
-        subtitleParams.topMargin = dp(9);
+        subtitleParams.topMargin = dp(10);
         content.addView(subtitle, subtitleParams);
 
         overlay.addView(content, new FrameLayout.LayoutParams(
@@ -261,14 +329,54 @@ public final class MainActivity extends Activity {
         ));
         premiumSplashOverlay = overlay;
 
-        premiumSplashSheenAnimator = ValueAnimator.ofFloat(-dp(128), dp(128));
-        premiumSplashSheenAnimator.setStartDelay(170L);
-        premiumSplashSheenAnimator.setDuration(1180L);
-        premiumSplashSheenAnimator.setInterpolator(new DecelerateInterpolator());
-        premiumSplashSheenAnimator.addUpdateListener(animation ->
-                sheen.setTranslationX((Float) animation.getAnimatedValue())
-        );
-        premiumSplashSheenAnimator.start();
+        // Ruhiger Einstieg: Panorama zuerst, anschließend Emblem und Schrift.
+        // Die einmalige Lichtreflexion läuft erst über das bereits sichtbare Emblem.
+        if (ValueAnimator.areAnimatorsEnabled()) {
+            overlay.setAlpha(0f);
+            overlay.post(() -> {
+                // app.ready kann bei warmem Start sehr früh eintreffen. In
+                // diesem Fall darf die noch ausstehende Einblendsequenz den
+                // bereits laufenden Splash-Ausgang nicht wieder sichtbar machen.
+                if (premiumSplashHiding || premiumSplashOverlay != overlay) return;
+
+                overlay.animate()
+                        .alpha(1f)
+                        .setDuration(360L)
+                        .setInterpolator(new DecelerateInterpolator())
+                        .start();
+                content.animate()
+                        .alpha(1f)
+                        .translationY(0f)
+                        .setStartDelay(110L)
+                        .setDuration(480L)
+                        .setInterpolator(new DecelerateInterpolator())
+                        .start();
+                emblem.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setStartDelay(130L)
+                        .setDuration(560L)
+                        .setInterpolator(new DecelerateInterpolator())
+                        .start();
+
+                premiumSplashSheenAnimator = ValueAnimator.ofFloat(-dp(164), dp(164));
+                premiumSplashSheenAnimator.setStartDelay(470L);
+                premiumSplashSheenAnimator.setDuration(1280L);
+                premiumSplashSheenAnimator.setInterpolator(new DecelerateInterpolator());
+                premiumSplashSheenAnimator.addUpdateListener(animation ->
+                        sheen.setTranslationX((Float) animation.getAnimatedValue())
+                );
+                premiumSplashSheenAnimator.start();
+            });
+            emblem.setScaleX(0.92f);
+            emblem.setScaleY(0.92f);
+        } else {
+            content.setAlpha(1f);
+            content.setTranslationY(0f);
+            emblem.setScaleX(1f);
+            emblem.setScaleY(1f);
+            sheen.setVisibility(View.GONE);
+        }
     }
 
     private void hidePremiumSplashOverlay() {
@@ -281,6 +389,13 @@ public final class MainActivity extends Activity {
         }
 
         FrameLayout overlay = premiumSplashOverlay;
+        if (!ValueAnimator.areAnimatorsEnabled()) {
+            overlay.setAlpha(0f);
+            if (root != null) root.removeView(overlay);
+            if (premiumSplashOverlay == overlay) premiumSplashOverlay = null;
+            return;
+        }
+
         overlay.animate()
                 .alpha(0f)
                 .setDuration(260L)
@@ -338,16 +453,22 @@ public final class MainActivity extends Activity {
 
     private void createWebViewLayout() {
         root = new FrameLayout(this);
-        root.setBackgroundColor(Color.rgb(11, 15, 20));
+        root.setBackgroundColor(Color.rgb(7, 12, 18));
+
+        // Nur der eigentliche App-Inhalt erhält Systemleisten-/Cutout-Insets.
+        // Der Splash liegt als separates Root-Overlay darüber und bleibt dadurch
+        // wirklich vollflächig bis hinter Status- und Navigationsleiste sichtbar.
+        appContent = new FrameLayout(this);
+        root.addView(appContent, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        ));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            root.setOnApplyWindowInsetsListener((view, insets) -> {
+            appContent.setOnApplyWindowInsetsListener((view, insets) -> {
                 Insets systemBars = insets.getInsets(
                         WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout()
                 );
-                // Die Android-Activity reserviert die Statusleisten-Safe-Area.
-                // Die Android-spezifische CSS-Regel entfernt nur den doppelten
-                // zusätzlichen PWA-Abstand innerhalb der WebView.
                 view.setPadding(
                         systemBars.left,
                         systemBars.top,
@@ -364,7 +485,7 @@ public final class MainActivity extends Activity {
                 ViewGroup.LayoutParams.MATCH_PARENT
         ));
         webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        root.addView(webView);
+        appContent.addView(webView);
 
         progressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
         FrameLayout.LayoutParams progressParams = new FrameLayout.LayoutParams(
@@ -376,16 +497,18 @@ public final class MainActivity extends Activity {
         progressBar.setProgressTintList(android.content.res.ColorStateList.valueOf(
                 Color.rgb(199, 166, 106)
         ));
-        root.addView(progressBar, progressParams);
-
-        createPremiumSplashOverlay();
+        appContent.addView(progressBar, progressParams);
 
         errorPanel = createErrorPanel();
         errorPanel.setVisibility(View.GONE);
-        root.addView(errorPanel, new FrameLayout.LayoutParams(
+        appContent.addView(errorPanel, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
         ));
+
+        // Das native Splash-Overlay wird zuletzt angelegt und verdeckt den noch
+        // ladenden WebView-Inhalt bis app.ready oder zum Sicherheits-Fallback.
+        createPremiumSplashOverlay();
 
         setContentView(root);
     }
@@ -477,9 +600,11 @@ public final class MainActivity extends Activity {
                 progressBar.setVisibility(View.GONE);
                 sendBridgeHandshake();
                 deliverPendingDashboardWidgetNavigation();
-                // Fallback, falls die PWA keinen eigenen Ready-Impuls senden kann.
-                // Ein früheres app.ready blendet den Splash ohne künstliche Wartezeit aus.
-                mainHandler.postDelayed(() -> hidePremiumSplashOverlay(), 2800L);
+                // Reiner Sicherheits-Fallback: Normalerweise beendet app.ready
+                // den Splash unmittelbar nach erfolgreicher Storage-Initialisierung.
+                // Die längere Frist verhindert, dass langsame Tourdaten-Ladevorgänge
+                // vorzeitig einen noch nicht fertigen App-Inhalt freigeben.
+                mainHandler.postDelayed(() -> hidePremiumSplashOverlay(), 6500L);
             }
 
             @Override
