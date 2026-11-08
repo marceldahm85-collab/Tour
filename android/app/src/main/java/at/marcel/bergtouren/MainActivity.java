@@ -261,14 +261,20 @@ public final class MainActivity extends Activity {
         ));
         premiumSplashOverlay = overlay;
 
-        premiumSplashSheenAnimator = ValueAnimator.ofFloat(-dp(128), dp(128));
-        premiumSplashSheenAnimator.setStartDelay(170L);
-        premiumSplashSheenAnimator.setDuration(1180L);
-        premiumSplashSheenAnimator.setInterpolator(new DecelerateInterpolator());
-        premiumSplashSheenAnimator.addUpdateListener(animation ->
-                sheen.setTranslationX((Float) animation.getAnimatedValue())
-        );
-        premiumSplashSheenAnimator.start();
+        // Respektiert die systemweite Android-Animationsskalierung. Bei
+        // deaktivierten Animationen bleibt das Startbild statisch und ruhig.
+        if (ValueAnimator.areAnimatorsEnabled()) {
+            premiumSplashSheenAnimator = ValueAnimator.ofFloat(-dp(128), dp(128));
+            premiumSplashSheenAnimator.setStartDelay(170L);
+            premiumSplashSheenAnimator.setDuration(1180L);
+            premiumSplashSheenAnimator.setInterpolator(new DecelerateInterpolator());
+            premiumSplashSheenAnimator.addUpdateListener(animation ->
+                    sheen.setTranslationX((Float) animation.getAnimatedValue())
+            );
+            premiumSplashSheenAnimator.start();
+        } else {
+            sheen.setVisibility(View.GONE);
+        }
     }
 
     private void hidePremiumSplashOverlay() {
@@ -281,6 +287,13 @@ public final class MainActivity extends Activity {
         }
 
         FrameLayout overlay = premiumSplashOverlay;
+        if (!ValueAnimator.areAnimatorsEnabled()) {
+            overlay.setAlpha(0f);
+            if (root != null) root.removeView(overlay);
+            if (premiumSplashOverlay == overlay) premiumSplashOverlay = null;
+            return;
+        }
+
         overlay.animate()
                 .alpha(0f)
                 .setDuration(260L)
