@@ -207,7 +207,7 @@
         return { width: size.width, height: size.height, plot, palette };
     }
 
-    function drawAxes(ctx, plot, palette) {
+    function drawAxes(ctx, plot) {
         // Dezente horizontale Orientierungslinien bleiben; die linke Zahlenskala entfällt.
         ctx.save();
         for (let i = 0; i <= 4; i++) {
@@ -305,7 +305,7 @@
         const { plot, palette, height, width } = base;
         const valid = values.filter(value => Number.isFinite(value) && value > 0);
         const maxValue = Math.max(1, ...valid) * 1.16;
-        drawAxes(ctx, plot, palette);
+        drawAxes(ctx, plot);
 
         const points = values.map((value, index) => ({
             x: monthX(index, plot),
@@ -603,7 +603,7 @@
             average > 0 ? 'Ø ' + Math.round(average) + ' hm/h' : '–', { reliefStrength: .2 });
         const { plot, palette, height } = base;
         const max = Math.max(100, ...valid) * 1.18;
-        drawAxes(ctx, plot, palette);
+        drawAxes(ctx, plot);
 
         values.forEach((value, index) => {
             const x = monthX(index, plot), y = plot.bottom - value / max * plot.height;
