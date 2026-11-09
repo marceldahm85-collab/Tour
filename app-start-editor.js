@@ -170,14 +170,32 @@
         if (!sourceWidth || !sourceHeight) return;
         const positionX = Math.max(0, Math.min(100, Number(crop?.x ?? 50)));
         const positionY = Math.max(0, Math.min(100, Number(crop?.y ?? 50)));
+        const coverScale = Math.max(width / sourceWidth, height / sourceHeight);
         const zoom = Math.max(0.8, Math.min(1.8, Number(crop?.zoom ?? 1)));
-        const scale = Math.max(width / sourceWidth, height / sourceHeight) * zoom;
+        const scale = coverScale * zoom;
         const drawWidth = sourceWidth * scale;
         const drawHeight = sourceHeight * scale;
         const drawX = -(drawWidth - width) * positionX / 100;
         const drawY = -(drawHeight - height) * positionY / 100;
+
+        // Unter 100 % bleibt das Vollbild ohne schwarze Balken erhalten:
+        // Das gleiche Motiv füllt den Hintergrund weichgezeichnet und abgedunkelt,
+        // während der eigentliche Bildausschnitt davor kleiner dargestellt wird.
         context.fillStyle = '#101923';
         context.fillRect(0, 0, width, height);
+        if (zoom < 0.999) {
+            const backgroundScale = coverScale * 1.08;
+            const backgroundWidth = sourceWidth * backgroundScale;
+            const backgroundHeight = sourceHeight * backgroundScale;
+            const backgroundX = -(backgroundWidth - width) * positionX / 100;
+            const backgroundY = -(backgroundHeight - height) * positionY / 100;
+            context.save();
+            context.filter = 'blur(' + Math.max(8, Math.round(width * 0.035)) + 'px)';
+            context.drawImage(image, backgroundX, backgroundY, backgroundWidth, backgroundHeight);
+            context.restore();
+            context.fillStyle = 'rgba(7, 13, 20, 0.42)';
+            context.fillRect(0, 0, width, height);
+        }
         context.drawImage(image, drawX, drawY, drawWidth, drawHeight);
     }
 
@@ -236,16 +254,25 @@
             if (!preset) throw new Error('Das gewählte Alpenmotiv ist nicht mehr verfügbar.');
             const url = preset.preview || preset.sourceUrl;
             if (!sourceBlobCache.has(url)) {
-                sourceBlobCache.set(url, fetchImageBlob(url, 'Das gewählte Alpenmotiv konnte nicht geladen werden.'));
+                const pending = fetchImageBlob(url, 'Das gewählte Alpenmotiv konnte nicht geladen werden.')
+                    .catch(error => {
+                        sourceBlobCache.delete(url);
+                        throw error;
+                    });
+                sourceBlobCache.set(url, pending);
             }
             return sourceBlobCache.get(url);
         }
 
         if (!sourceBlobCache.has('standard')) {
-            sourceBlobCache.set('standard', fetchImageBlob(
+            const pending = fetchImageBlob(
                 STANDARD_IMAGE_URL,
                 'Das Standard-Alpenpanorama konnte nicht geladen werden.'
-            ));
+            ).catch(error => {
+                sourceBlobCache.delete('standard');
+                throw error;
+            });
+            sourceBlobCache.set('standard', pending);
         }
         return sourceBlobCache.get('standard');
     }
