@@ -1501,13 +1501,17 @@
             speed.dataset.premiumSpeedSelection = 'true';
             speed.addEventListener('click', event => {
                 if (!speed.classList.contains('active-chart-canvas') || !event.isTrusted) return;
+                event.stopImmediatePropagation();
                 const rect = speed.getBoundingClientRect(), size = logicalSize(speed);
                 const x = (event.clientX - rect.left) * size.width / rect.width;
                 const y = (event.clientY - rect.top) * size.height / rect.height;
                 const geometry = speed.__premiumTrendGeometry;
                 if (!geometry || y < geometry.top - 8 || y > size.height - 24 ||
-                    x < geometry.left - 6 || x > geometry.right + 6) return;
-                event.stopImmediatePropagation();
+                    x < geometry.left - 6 || x > geometry.right + 6) {
+                    selectedMonths.speed = null;
+                    drawSpeedDiagram();
+                    return;
+                }
                 const index = Math.max(0, Math.min(11,
                     Math.round((x - geometry.left) / Math.max(1, geometry.right - geometry.left) * 11)));
                 selectMonthlyValue(speed, 'speed', index);
