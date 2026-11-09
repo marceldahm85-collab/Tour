@@ -865,6 +865,10 @@
                     }
                 }
 
+                if (meta.appStartSettings && typeof meta.appStartSettings === 'object') {
+                    window.dispatchEvent(new CustomEvent('app-start-settings-restored'));
+                }
+
                 if (typeof appStorage?.flush === 'function') {
                     await appStorage.flush();
                 }
