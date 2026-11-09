@@ -388,3 +388,349 @@ html body #tour-view #plan-form #plan-save-btn {
         transition: none !important;
     }
 }
+
+
+/* =========================================================
+   FLOATING GLASS V3 — sichtbarere räumliche Trennung
+   Absichtlich stärkere Licht-/Schattenstaffelung für mobile
+   Geräte. Keine Layoutmaße oder Inhalte verändern.
+   ========================================================= */
+
+body {
+    --depth-v3-panel:
+        inset 0 1.5px 0 rgba(244,249,255,.30),
+        inset 0 -2px 0 rgba(0,0,0,.34),
+        0 3px 0 rgba(0,0,0,.34),
+        0 12px 22px rgba(0,0,0,.43),
+        0 24px 38px rgba(0,0,0,.30),
+        0 0 0 1px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 18%, transparent);
+
+    --depth-v3-card:
+        inset 0 1.25px 0 rgba(244,249,255,.25),
+        inset 0 -1.5px 0 rgba(0,0,0,.32),
+        0 2px 0 rgba(0,0,0,.30),
+        0 9px 16px rgba(0,0,0,.39),
+        0 16px 26px rgba(0,0,0,.22);
+
+    --depth-v3-control:
+        inset 0 1px 0 rgba(244,249,255,.22),
+        inset 0 -1px 0 rgba(0,0,0,.30),
+        0 2px 0 rgba(0,0,0,.28),
+        0 6px 12px rgba(0,0,0,.34);
+
+    --depth-v3-active:
+        inset 0 1.5px 0 rgba(255,255,255,.30),
+        inset 0 -1.5px 0 rgba(0,0,0,.30),
+        0 3px 0 rgba(0,0,0,.32),
+        0 9px 18px rgba(0,0,0,.40),
+        0 0 0 1px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 48%, transparent),
+        0 0 18px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 18%, transparent);
+}
+
+/* Hauptflächen: klare, helle Oberkante und deutlich dunklere Unterkante. */
+#dashboard-view .dash-section,
+#chart-view .stats-analysis-section,
+#chart-view .stats-structure-section,
+#chart-view .stats-chart-block,
+#chart-view .chart-card,
+html body #tour-view #plan-form > .plan-form-column,
+#app-view .save-form-card,
+#wrapped-view.bergwelt-ready .bergwelt-card,
+#wrapped-view.bergwelt-ready #pdf-export-card {
+    border-top-color: rgba(238,247,255,.34) !important;
+    border-bottom-color: rgba(0,0,0,.62) !important;
+    box-shadow: var(--depth-v3-panel) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(132%);
+    backdrop-filter: blur(12px) saturate(132%);
+}
+
+/* Dashboard: kompakte Kennzahlen stehen als eigene Glasplättchen vor dem Bild. */
+#dashboard-view .dash-stat-tile {
+    border-top-color: rgba(240,248,255,.38) !important;
+    border-bottom-color: rgba(0,0,0,.62) !important;
+    background-image:
+        radial-gradient(ellipse at 16% 0%, rgba(225,239,255,.17), transparent 58%),
+        linear-gradient(150deg,
+            color-mix(in srgb, var(--premium-surface-1, rgba(40,55,72,.88)) 86%, rgba(180,205,228,.20)),
+            var(--premium-surface-2, rgba(7,13,21,.82))
+        ) !important;
+    box-shadow: var(--depth-v3-card) !important;
+    -webkit-backdrop-filter: blur(9px) saturate(135%);
+    backdrop-filter: blur(9px) saturate(135%);
+}
+
+/* Meilensteine behalten ihre scharfen Alpenbilder; nur der Kartenkörper bekommt Tiefe. */
+#dashboard-view #dash-milestones-section .dash-milestone-tile {
+    border-top-color: rgba(245,250,255,.58) !important;
+    border-bottom-color: rgba(0,0,0,.78) !important;
+    box-shadow:
+        inset 0 1.5px 0 rgba(255,255,255,.36),
+        inset 0 -2px 0 rgba(0,0,0,.40),
+        0 3px 0 rgba(0,0,0,.42),
+        0 12px 22px rgba(0,0,0,.48),
+        0 20px 30px rgba(0,0,0,.28) !important;
+}
+
+/* Tourzeilen sind eine Stufe tiefer als die übergeordnete Dashboard-Karte. */
+#dashboard-view #dash-recent-section .dash-tour-list > .dash-recent-item,
+#dashboard-view .dash-tour-list > li {
+    border-top-color: rgba(235,245,255,.24) !important;
+    border-bottom-color: rgba(0,0,0,.54) !important;
+    box-shadow: var(--depth-v3-control) !important;
+}
+
+/* Stats: Sektionen schweben als größere Platten, Kennzahlen als kleinere Plättchen. */
+#chart-view .chart-stat-tile,
+#chart-view .development-metric-card,
+#chart-view .best-form-card,
+#chart-view .tour-profile-summary-card,
+#chart-view .activity-summary-card,
+#chart-view .peak-summary-card,
+#chart-view .stats-structure-typical-card,
+#chart-view .stats-structure-type-card,
+#chart-view .stats-structure-burden-card,
+#chart-view .stats-peak-history-item,
+#stats-highlights-page #highlights-content .highlight-group {
+    border-top-color: rgba(235,245,255,.30) !important;
+    border-bottom-color: rgba(0,0,0,.60) !important;
+    box-shadow: var(--depth-v3-card) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(128%);
+    backdrop-filter: blur(8px) saturate(128%);
+}
+#chart-view .stats-section-btn,
+#chart-view #chart-tabs .chart-tab,
+#chart-view .stats-year-filter-wrap > .dash-year-arrow-btn,
+#chart-view .stats-year-filter-wrap > select {
+    border-top-color: rgba(240,248,255,.30) !important;
+    border-bottom-color: rgba(0,0,0,.56) !important;
+    box-shadow: var(--depth-v3-control) !important;
+}
+#chart-view .stats-section-btn.active,
+#chart-view #chart-tabs .chart-tab.active,
+#chart-view .chart-stat-tile.active,
+#chart-view .development-metric-card.active,
+#chart-view .tour-profile-summary-card.active,
+#chart-view .activity-summary-card.active {
+    box-shadow: var(--depth-v3-active) !important;
+}
+
+/* Tourplanung: die beiden Formhälften bekommen einen sichtbaren Seitenkörper. */
+html body #tour-view #plan-form > .plan-form-column {
+    border-top-color: rgba(240,248,255,.36) !important;
+    border-bottom-color: rgba(0,0,0,.66) !important;
+}
+html body #tour-view .plan-overview-tile,
+html body #tour-view #plan-form #plan-live-preview,
+html body #tour-view #planned-tours-list > .box-content,
+html body #tour-view #planned-peaks-box > .box-content,
+html body #tour-view #checklist-box .checklist-section {
+    border-top-color: rgba(238,247,255,.30) !important;
+    border-bottom-color: rgba(0,0,0,.60) !important;
+    box-shadow: var(--depth-v3-card) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(128%);
+    backdrop-filter: blur(8px) saturate(128%);
+}
+html body #tour-view .plan-section-btn,
+html body #tour-view #checklist-box .checklist-mode-btn,
+html body #tour-view #planned-tours-list .tour-list > li,
+html body #tour-view #planned-peaks-container .peak-tour-list > li:not(.peak-tier-1):not(.peak-tier-2):not(.peak-tier-3),
+html body #tour-view #checklist-box .checklist-item {
+    border-top-color: rgba(238,247,255,.25) !important;
+    border-bottom-color: rgba(0,0,0,.58) !important;
+    box-shadow: var(--depth-v3-control) !important;
+}
+html body #tour-view .plan-section-btn.active,
+html body #tour-view #checklist-box .checklist-mode-btn.active {
+    box-shadow: var(--depth-v3-active) !important;
+}
+
+/* Tour speichern: Felder sind leicht eingelassen, Aktionsflächen liegen darüber. */
+#app-view .tour-form input:not([type="file"]):not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+#app-view .tour-form select,
+#app-view .tour-form textarea,
+html body #tour-view #plan-form input:not([type="file"]):not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+html body #tour-view #plan-form select,
+html body #tour-view #plan-form textarea {
+    box-shadow:
+        inset 0 2px 4px rgba(0,0,0,.28),
+        inset 0 1px 0 rgba(255,255,255,.09),
+        0 1px 0 rgba(255,255,255,.08) !important;
+}
+#app-view #save-btn,
+#app-view #geo-search-btn:not(:disabled),
+#app-view #tour-image-pick-btn,
+#app-view .slope-toggle,
+html body #tour-view #plan-form #plan-save-btn {
+    border-top-color: rgba(250,252,255,.42) !important;
+    border-bottom-color: rgba(0,0,0,.55) !important;
+    box-shadow: var(--depth-v3-active) !important;
+}
+
+/* Karte: ausschließlich die schwebenden Steuerelemente, niemals die Kartenkacheln. */
+#map-view .map-mode-toggle,
+#map-view #map-quick-filters,
+#map-view #map-performance-legend,
+#map-view #map-info-bar,
+#map-view .map-year-filter-wrap > select,
+#map-view .map-year-filter-wrap > .mob-sel-wrap > .mob-sel-btn,
+#map-view .map-year-filter-wrap > .dash-year-arrow-btn {
+    border-top-color: rgba(240,248,255,.34) !important;
+    border-bottom-color: rgba(0,0,0,.62) !important;
+    box-shadow: var(--depth-v3-panel) !important;
+}
+#map-view .map-mode-btn,
+#map-view #map-quick-filters .quick-filter-btn {
+    border-top-color: rgba(238,247,255,.26) !important;
+    border-bottom-color: rgba(0,0,0,.58) !important;
+    box-shadow: var(--depth-v3-control) !important;
+}
+#map-view .map-mode-btn.active,
+#map-view #map-quick-filters .quick-filter-btn.active {
+    box-shadow: var(--depth-v3-active) !important;
+}
+#map-view .leaflet-popup-content-wrapper {
+    box-shadow:
+        inset 0 1.5px 0 rgba(255,255,255,.28),
+        inset 0 -2px 0 rgba(0,0,0,.32),
+        0 4px 0 rgba(0,0,0,.36),
+        0 18px 34px rgba(0,0,0,.52) !important;
+}
+
+/* Bergwelt: sichtbarer Glasrand plus deutlicher Kontakt-/Abstandsschatten. */
+#wrapped-view.bergwelt-ready .bergwelt-card,
+#wrapped-view.bergwelt-ready .bergwelt-level-badge,
+#wrapped-view.bergwelt-ready .bergwelt-height-milestone,
+#wrapped-view.bergwelt-ready .bergwelt-height-year-donut-section,
+#wrapped-view.bergwelt-ready .bergwelt-height-years-chart-section,
+#wrapped-view.bergwelt-ready .bergwelt-level-modal-metric,
+#wrapped-view.bergwelt-ready .bergwelt-level-modal-progress,
+#wrapped-view.bergwelt-ready .bergwelt-level-modal-rank-row,
+#wrapped-view.bergwelt-ready .bergwelt-story-rail,
+#wrapped-view.bergwelt-ready .bergwelt-cinematic-stat,
+#wrapped-view.bergwelt-ready .bergwelt-cinematic-highlight {
+    border-top-color: rgba(240,248,255,.34) !important;
+    border-bottom-color: rgba(0,0,0,.62) !important;
+    box-shadow: var(--depth-v3-card) !important;
+    -webkit-backdrop-filter: blur(9px) saturate(132%);
+    backdrop-filter: blur(9px) saturate(132%);
+}
+#wrapped-view.bergwelt-ready .bergwelt-tabs > .bergwelt-tab,
+#wrapped-view.bergwelt-ready .wrapped-header .wrapped-year-select,
+#wrapped-view.bergwelt-ready .wrapped-header .dash-year-arrow-btn,
+#wrapped-view.bergwelt-ready .wrapped-header .mob-sel-btn {
+    box-shadow: var(--depth-v3-control) !important;
+}
+#wrapped-view.bergwelt-ready .bergwelt-tabs > .bergwelt-tab.is-active {
+    box-shadow: var(--depth-v3-active) !important;
+}
+
+/* Navigation: eine klar abgegrenzte, mehrschichtige Bedienebene. */
+.top-main-nav {
+    border-top-color: rgba(245,250,255,.36) !important;
+    border-bottom-color: rgba(0,0,0,.62) !important;
+    box-shadow:
+        inset 0 1.5px 0 rgba(255,255,255,.28),
+        inset 0 -2px 0 rgba(0,0,0,.30),
+        0 4px 0 rgba(0,0,0,.34),
+        0 16px 28px rgba(0,0,0,.42),
+        0 26px 40px rgba(0,0,0,.24) !important;
+}
+.top-main-nav .top-nav-btn:not(.top-nav-save) {
+    border: 1px solid rgba(230,241,252,.18) !important;
+    background: linear-gradient(155deg, rgba(225,238,250,.15), rgba(8,15,24,.30)) !important;
+    box-shadow: var(--depth-v3-control) !important;
+}
+.top-main-nav .top-nav-btn.view-active,
+.top-main-nav .top-nav-btn.more-view-active {
+    border-color: color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 72%, rgba(245,250,255,.38)) !important;
+    box-shadow: var(--depth-v3-active) !important;
+}
+#more-menu {
+    border-top-color: rgba(245,250,255,.38) !important;
+    border-bottom-color: rgba(0,0,0,.70) !important;
+    box-shadow:
+        inset 0 1.5px 0 rgba(255,255,255,.28),
+        0 6px 0 rgba(0,0,0,.35),
+        0 22px 42px rgba(0,0,0,.54) !important;
+}
+#more-menu .more-menu-item {
+    box-shadow: var(--depth-v3-control) !important;
+}
+
+/* Modale: schwebende Dialogebene. TOP-3-Metallflächen ausdrücklich ausgenommen. */
+.modal:not(.hidden) .modal-card:not(.highlight-modal-bronze):not(.highlight-modal-silver):not(.highlight-modal-gold) {
+    border-top-color: rgba(245,250,255,.42) !important;
+    border-bottom-color: rgba(0,0,0,.68) !important;
+    box-shadow:
+        inset 0 1.5px 0 rgba(255,255,255,.27),
+        inset 0 -2px 0 rgba(0,0,0,.30),
+        0 5px 0 rgba(0,0,0,.38),
+        0 22px 44px rgba(0,0,0,.56),
+        0 34px 54px rgba(0,0,0,.28) !important;
+}
+
+/* Nebenbereiche — gleiche sichtbare Materialkante ohne zusätzliche Layoutboxen. */
+#theme-view details.theme-editor-panel,
+#theme-view details.theme-editor-subgroup,
+#backup-view .backup-status-panel,
+#backup-view .backup-info-card,
+#backup-view .backup-file-status,
+#filter-view .compare-row,
+#filter-view .compare-period-card,
+#filter-view .compare-list-card {
+    border-top-color: rgba(238,247,255,.30) !important;
+    border-bottom-color: rgba(0,0,0,.60) !important;
+    box-shadow: var(--depth-v3-card) !important;
+}
+#theme-view .theme-editor-option,
+#theme-view .theme-editor-widget-choice,
+#filter-view .compare-chip {
+    box-shadow: var(--depth-v3-control) !important;
+}
+
+/* Mobile GPU-Budget: keine Daueranimation, nur statische Schatten und Kanten. */
+@media (max-width: 600px) {
+    body {
+        --depth-v3-panel:
+            inset 0 1.25px 0 rgba(244,249,255,.29),
+            inset 0 -1.75px 0 rgba(0,0,0,.34),
+            0 3px 0 rgba(0,0,0,.34),
+            0 10px 19px rgba(0,0,0,.46),
+            0 20px 32px rgba(0,0,0,.34),
+            0 0 0 1px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 16%, transparent);
+
+        --depth-v3-card:
+            inset 0 1px 0 rgba(244,249,255,.25),
+            inset 0 -1.25px 0 rgba(0,0,0,.32),
+            0 2px 0 rgba(0,0,0,.32),
+            0 8px 14px rgba(0,0,0,.42),
+            0 14px 23px rgba(0,0,0,.25);
+
+        --depth-v3-control:
+            inset 0 1px 0 rgba(244,249,255,.20),
+            inset 0 -1px 0 rgba(0,0,0,.30),
+            0 2px 0 rgba(0,0,0,.30),
+            0 5px 10px rgba(0,0,0,.36);
+
+        --depth-v3-active:
+            inset 0 1.25px 0 rgba(255,255,255,.28),
+            inset 0 -1.25px 0 rgba(0,0,0,.30),
+            0 3px 0 rgba(0,0,0,.34),
+            0 7px 14px rgba(0,0,0,.43),
+            0 0 0 1px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 48%, transparent),
+            0 0 14px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 17%, transparent);
+    }
+}
+
+/* Systemweite Bewegungsreduktion bleibt respektiert. */
+@media (prefers-reduced-motion: reduce) {
+    #dashboard-view .dash-stat-tile,
+    #dashboard-view #dash-milestones-section .dash-milestone-tile,
+    #chart-view .stats-section-btn,
+    #chart-view #chart-tabs .chart-tab,
+    html body #tour-view .plan-section-btn,
+    #wrapped-view.bergwelt-ready .bergwelt-tabs > .bergwelt-tab,
+    .top-main-nav .top-nav-btn {
+        transition: none !important;
+    }
+}
