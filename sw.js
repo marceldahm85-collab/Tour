@@ -1,6 +1,6 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Der PDF-Magazin-Renderer wird direkt über index.html geladen.
-const CACHE_NAME = 'bergtouren-cache-premium-alpine-v341';
+const CACHE_NAME = 'bergtouren-cache-premium-alpine-v342';
 
 const APP_SHELL = [
   './',
@@ -18,8 +18,8 @@ const APP_SHELL = [
   './assets/osttirol-lienz-background.webp',
   './android/app/src/main/res/drawable-nodpi/splash_alpine_panorama.webp',
   './stats-premium-alpine.js?v=10',
-  './stats-premium-charts.js?v=4',
-  './stats-premium-charts.css?v=4',
+  './stats-premium-charts.js?v=5',
+  './stats-premium-charts.css?v=5',
   './theme-editor-unified.js?v=32',
   './background-image-manager.js?v=13',
   './background-image-picker.js?v=8',
