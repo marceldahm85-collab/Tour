@@ -135,6 +135,7 @@ jobs:
           node --check background-image-manager.js
           node --check theme-editor-unified.js
           node --check theme-editor-workflow.js
+          node --check app-start-editor.js
 
       - name: Assemble debug APK
         run: ./android/gradlew --no-daemon --stacktrace -p android :app:assembleDebug
