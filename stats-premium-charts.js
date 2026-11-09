@@ -1494,12 +1494,14 @@
                 const y = (event.clientY - rect.top) * size.height / rect.height;
                 let index;
                 if (category === 'avgSteps') {
+                    if (x < 14 || x > size.width - 14) return;
                     const col = Math.max(0, Math.min(5, Math.floor((x - 14) / ((size.width - 28) / 6))));
                     const row = y < size.height * .56 ? 0 : 1;
                     index = row * 6 + col;
                 } else {
                     const left = 44;
                     const right = size.width - 18;
+                    if (x < left || x > right) return;
                     index = Math.floor((x - left) / Math.max(1, right - left) * 12);
                     index = Math.max(0, Math.min(11, index));
                 }
