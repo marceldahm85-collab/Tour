@@ -6558,69 +6558,6 @@ body:not(.touch-mode).dark #td-close:hover, body:not(.touch-mode).dark #ms-close
 }
 
 /* =========================
-   Ripple-Effekt (Mobile Tap)
-   ========================= */
-button.save-btn,
-.toggle-btn,
-#theme-toggle,
-.delete-btn,
-.edit-btn,
-.load-btn,
-.chart-tab,
-.quick-filter-btn,
-.yc-metric-btn,
-.yc-year-toggle-btn,
-.map-mode-btn,
-.compare-mode-btn,
-.checklist-mode-btn,
-.chart-stat-tile,
-.dash-stat-tile,
-.dash-milestone-tile,
-.tour-page-btn,
-.mob-sel-opt,
-.checklist-item,
-.highlight-clickable,
-.peak-tour-list li,
-.dash-tour-list li,
-#saved-tours-list .tour-list li,
-#planned-tours-list .tour-list li,
-.box-header,
-.map-popup-btn,
-.dash-year-arrow-btn {
-    position: relative;
-    overflow: hidden;
-}
-
-.ripple-el {
-    position: absolute;
-    top: 0;
-    left: 0;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.55);
-    transform: scale(0);
-    opacity: 0.65;
-    pointer-events: none;
-    will-change: transform, opacity;
-    z-index: 5;
-}
-
-.ripple-el.ripple-animate {
-    animation: rippleExpand 550ms ease-out forwards;
-}
-
-@keyframes rippleExpand {
-    to {
-        transform: scale(1);
-        opacity: 0;
-    }
-}
-
-body.dark .ripple-el,
-body.green .ripple-el {
-    background: rgba(255,255,255,0.24);
-}
-
-/* =========================
    Icon-Bounce bei Werteänderung
    ========================= */
 @keyframes iconPopBounce {
@@ -10638,14 +10575,6 @@ body.summit .mob-sel-opt.selected {
     background: rgba(99,183,255,0.09);
 }
 
-
-/* ---------------------------------------------------------
-   Ripple / Press
-   --------------------------------------------------------- */
-
-body.summit .ripple-el {
-    background: rgba(255,255,255,0.36);
-}
 
 body.summit button.save-btn:active,
 body.summit .chart-tab:active,

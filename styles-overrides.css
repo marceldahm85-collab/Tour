@@ -9524,3 +9524,9 @@ body.summit .top-main-nav [aria-current="page"] {
     align-items: center;
     justify-content: center;
 }
+
+/* Premium Alpine: den systemseitigen blauen Tap-/Klick-Highlight appweit deaktivieren.
+   Eigene Fokusmarkierungen für Tastaturbedienung bleiben davon unberührt. */
+html body, html body * {
+    -webkit-tap-highlight-color: transparent !important;
+}
