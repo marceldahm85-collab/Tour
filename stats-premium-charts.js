@@ -4,7 +4,7 @@
 (() => {
     'use strict';
 
-    const MONTHS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+    const MONTHS = ['Jän', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
     const MONTH_NAMES = ['Jänner', 'Februar', 'März', 'April', 'Mai', 'Juni',
         'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
@@ -31,27 +31,26 @@
     }
 
     function chartPalette() {
-        let theme = {};
-        let settings = {};
+        let theme = {}, settings = {};
         try {
             theme = typeof getChartTheme === 'function' ? getChartTheme() : {};
-            if (typeof getThemeEditorSettings === 'function' &&
-                typeof themeEditorGetActiveTheme === 'function') {
+            if (typeof getThemeEditorSettings === 'function' && typeof themeEditorGetActiveTheme === 'function') {
                 settings = getThemeEditorSettings()[themeEditorGetActiveTheme()] || {};
             }
         } catch (_) {}
-
         const stops = Array.isArray(theme.gradientStops) && theme.gradientStops.length
-            ? theme.gradientStops : [[0, '#9B7945'], [0.5, '#D4B36F'], [1, '#F1DDAA']];
-        const primary = settings.accent || stops[stops.length - 1][1] || '#D5A64C';
-        const secondary = settings.accent2 || '#A9B7C6';
+            ? theme.gradientStops : [[0, '#9B7945'], [.5, '#D4B36F'], [1, '#F1DDAA']];
         return {
             text: theme.textColor || '#F3F5F7',
-            muted: theme.isDark === false ? 'rgba(34,46,56,.72)' : 'rgba(225,232,239,.68)',
-            primary,
-            secondary,
+            muted: theme.isDark === false ? 'rgba(34,46,56,.78)' : 'rgba(225,232,239,.72)',
+            primary: settings.accent || stops[stops.length - 1][1],
+            secondary: settings.accent2 || stops[Math.min(1, stops.length - 1)][1] || '#A9B7C6',
             stops,
-            dark: theme.isDark !== false
+            dark: theme.isDark !== false,
+            direction: settings.gradientDirection || '180deg',
+            transition: Number(settings.transition) || 55,
+            glassOpacity: Number(settings.glassOpacity) || 68,
+            radius: Number(settings.radius) || 14
         };
     }
 
@@ -68,6 +67,17 @@
             return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
         }
         return colour;
+    }
+
+    const selectedMonths = {
+        bigTours: null, steps: null, peaks: null, performanceIndex: null,
+        speed: null, gradient: null, ascentRate: null, avgSteps: null
+    };
+    const animatedGaugeValues = { performanceIndex: null, speed: null };
+    const gaugeAnimationFrames = { performanceIndex: null, speed: null };
+
+    function activeMonthValue(values, month) {
+        return month !== null && month >= 0 && month < 12 ? (Number(values[month]) || 0) : null;
     }
 
     function applyGradient(ctx, x1, y1, x2, y2, stops) {
@@ -93,106 +103,102 @@
         ctx.closePath();
     }
 
-    function drawHeader(ctx, canvas, title, total) {
-        const size = logicalSize(canvas);
+    function drawHeader(ctx, canvas, title, total, subtitle) {
+        const width = logicalSize(canvas).width;
         const palette = chartPalette();
-        const width = size.width;
         ctx.save();
-        ctx.fillStyle = palette.text;
-        ctx.font = editorFont(12, 700);
-        ctx.textAlign = 'left';
         ctx.textBaseline = 'alphabetic';
-        ctx.fillText(title, 24, 25, Math.max(110, width * 0.57));
+        ctx.textAlign = 'left';
+        ctx.fillStyle = palette.text;
         ctx.font = editorFont(12, 800);
+        ctx.fillText(title, 22, 25, Math.max(120, width * .62));
         ctx.textAlign = 'right';
         ctx.fillStyle = palette.primary;
-        ctx.fillText(total || '–', width - 24, 25, Math.max(90, width * 0.38));
+        ctx.font = editorFont(12, 800);
+        ctx.fillText(total || '–', width - 22, 25, Math.max(75, width * .30));
+        if (subtitle) {
+            ctx.textAlign = 'left';
+            ctx.fillStyle = palette.muted;
+            ctx.font = editorFont(8, 650);
+            ctx.fillText(subtitle, 22, 39, width - 44);
+        }
         ctx.restore();
     }
 
-    function drawTopographicRelief(ctx, plot, palette) {
+    function drawTopographicRelief(ctx, plot, palette, strength) {
+        const alpha = Number.isFinite(strength) ? strength : 1;
         ctx.save();
         ctx.beginPath();
         ctx.rect(plot.left, plot.top, plot.width, plot.height);
         ctx.clip();
-
-        // Organische Höhenlinien mit unregelmäßigen Kuppen und Talformen.
-        // Keine konzentrischen Ellipsen und kein zusätzliches horizontales Raster.
         const terrain = [
-            { x: 0.74, y: 0.31, phase: 0.55, scaleX: 0.10, scaleY: 0.10, lean: 0.035 },
-            { x: 0.27, y: 0.73, phase: 2.15, scaleX: 0.095, scaleY: 0.105, lean: -0.045 }
+            { x: .72, y: .36, phase: .48, sx: .075, sy: .12, lean: .035 },
+            { x: .23, y: .74, phase: 2.12, sx: .065, sy: .10, lean: -.04 }
         ];
-
-        terrain.forEach((landform, groupIndex) => {
-            const centerX = plot.left + plot.width * landform.x;
-            const centerY = plot.top + plot.height * landform.y;
-
-            for (let level = 0; level < 9; level++) {
-                const rx = plot.width * (landform.scaleX + level * 0.032);
-                const ry = plot.height * (landform.scaleY + level * 0.043);
-                const phase = landform.phase + level * 0.17;
-
+        terrain.forEach(landform => {
+            const cx = plot.left + plot.width * landform.x;
+            const cy = plot.top + plot.height * landform.y;
+            for (let ring = 0; ring < 8; ring++) {
+                const rx = plot.width * (landform.sx + ring * .025);
+                const ry = plot.height * (landform.sy + ring * .038);
+                const phase = landform.phase + ring * .21;
                 ctx.beginPath();
-                for (let step = 0; step <= 96; step++) {
-                    const angle = Math.PI * 2 * step / 96;
-                    const shape =
-                        1 +
-                        Math.sin(angle * 3 + phase) * 0.082 +
-                        Math.cos(angle * 5 - phase * 1.35) * 0.048 +
-                        Math.sin(angle * 7 + phase * 0.72) * 0.022;
-                    const x = centerX +
-                        Math.cos(angle) * rx * shape +
-                        Math.sin(angle * 2 + phase) * rx * landform.lean;
-                    const y = centerY +
-                        Math.sin(angle) * ry * shape +
-                        Math.cos(angle * 3 - phase) * ry * 0.026;
-
-                    if (step === 0) ctx.moveTo(x, y);
-                    else ctx.lineTo(x, y);
+                for (let i = 0; i <= 100; i++) {
+                    const a = i / 100 * Math.PI * 2;
+                    const shape = 1 + Math.sin(a * 3 + phase) * .09 +
+                        Math.cos(a * 5 - phase) * .05 + Math.sin(a * 7 + phase) * .025;
+                    const x = cx + Math.cos(a) * rx * shape + Math.sin(a * 2 + phase) * rx * landform.lean;
+                    const y = cy + Math.sin(a) * ry * shape + Math.cos(a * 3 - phase) * ry * .035;
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
                 }
                 ctx.closePath();
-
-                const indexContour = level === 0 || level === 4 || level === 8;
-                const contourColour = indexContour ? palette.secondary : palette.primary;
-                const opacity = indexContour ? 0.13 : 0.065;
-                ctx.strokeStyle = colourWithAlpha(contourColour, opacity);
-                ctx.lineWidth = indexContour ? 1.05 : 0.68;
+                const index = ring === 0 || ring === 4 || ring === 7;
+                ctx.strokeStyle = colourWithAlpha(index ? palette.secondary : palette.primary,
+                    (index ? .16 : .075) * alpha);
+                ctx.lineWidth = index ? 1.05 : .65;
                 ctx.stroke();
             }
         });
-
-        // Einzelne feine Höhenzüge verbinden die beiden Reliefbereiche dezent.
-        ctx.beginPath();
-        ctx.moveTo(plot.left + plot.width * 0.39, plot.top + plot.height * 0.08);
-        ctx.bezierCurveTo(
-            plot.left + plot.width * 0.48, plot.top + plot.height * 0.20,
-            plot.left + plot.width * 0.37, plot.top + plot.height * 0.36,
-            plot.left + plot.width * 0.49, plot.top + plot.height * 0.48
-        );
-        ctx.strokeStyle = colourWithAlpha(palette.secondary, 0.055);
-        ctx.lineWidth = 0.75;
-        ctx.stroke();
-
         ctx.restore();
     }
 
-    function baseChart(canvas, ctx, title, total) {
-        const size = logicalSize(canvas);
-        const palette = chartPalette();
-        const width = size.width;
-        const height = size.height;
-        ctx.clearRect(0, 0, width, height);
-        drawHeader(ctx, canvas, title, total);
+    function drawInstrumentSurface(ctx, width, height, palette) {
+        const inset = 8, y = 7, h = height - 14;
+        roundedPath(ctx, inset, y, width - inset * 2, h, Math.max(5, palette.radius - 3));
+        const bg = ctx.createLinearGradient(8, 8, width - 8, height - 8);
+        bg.addColorStop(0, 'rgba(38,52,66,.94)');
+        bg.addColorStop(.46, 'rgba(13,22,32,.97)');
+        bg.addColorStop(1, 'rgba(5,11,18,.98)');
+        ctx.fillStyle = bg;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(220,231,241,.12)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.save();
+        roundedPath(ctx, inset + 1, y + 1, width - inset * 2 - 2, h - 2, Math.max(5, palette.radius - 4));
+        ctx.clip();
+        const sheen = ctx.createLinearGradient(0, y, 0, y + 76);
+        sheen.addColorStop(0, 'rgba(255,255,255,.075)');
+        sheen.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = sheen;
+        ctx.fillRect(inset, y, width - inset * 2, 76);
+        ctx.restore();
+    }
+
+    function baseChart(canvas, ctx, title, total, options) {
+        const size = logicalSize(canvas), palette = chartPalette();
+        ctx.clearRect(0, 0, size.width, size.height);
+        drawInstrumentSurface(ctx, size.width, size.height, palette);
+        drawHeader(ctx, canvas, title, total, options && options.subtitle);
         const plot = {
-            left: 43,
-            right: width - 24,
-            top: 56,
-            bottom: height - 39
+            left: 44, right: size.width - 18,
+            top: options && options.subtitle ? 68 : 53,
+            bottom: size.height - 42
         };
         plot.width = Math.max(40, plot.right - plot.left);
         plot.height = Math.max(40, plot.bottom - plot.top);
-        drawTopographicRelief(ctx, plot, palette);
-        return { width, height, plot, palette };
+        drawTopographicRelief(ctx, plot, palette, options && options.reliefStrength);
+        return { width: size.width, height: size.height, plot, palette };
     }
 
     function yAxisLabel(value, maxValue) {
@@ -209,9 +215,9 @@
         return (Math.round(value * 10) / 10).toLocaleString('de-AT');
     }
 
-    function drawAxes(ctx, plot, maxValue, palette) {
+    function drawAxes(ctx, plot, maxValue, palette, unit) {
         ctx.save();
-        ctx.font = editorFont(9, 500);
+        ctx.font = editorFont(8.5, 550);
         ctx.fillStyle = palette.muted;
         ctx.textAlign = 'right';
         ctx.textBaseline = 'middle';
@@ -221,28 +227,26 @@
             ctx.beginPath();
             ctx.moveTo(plot.left, y);
             ctx.lineTo(plot.right, y);
-            ctx.strokeStyle = i === 0 ? 'rgba(230,238,245,.20)' : 'rgba(230,238,245,.075)';
-            ctx.lineWidth = i === 0 ? 1.1 : 0.7;
+            ctx.strokeStyle = i === 0 ? 'rgba(230,238,245,.25)' : 'rgba(230,238,245,.075)';
+            ctx.lineWidth = i === 0 ? 1.05 : .65;
             ctx.stroke();
-            ctx.fillText(yAxisLabel(maxValue * ratio, maxValue), plot.left - 7, y);
+            const label = yAxisLabel(maxValue * ratio, maxValue);
+            ctx.fillText(unit ? label + ' ' + unit : label, plot.left - 6, y);
         }
         ctx.restore();
     }
 
     function monthX(index, plot) {
-        const step = plot.width / 12;
-        return plot.left + step * (index + 0.5);
+        return plot.left + (plot.width / 12) * (index + .5);
     }
 
     function drawMonthLabels(ctx, plot, height, palette) {
         ctx.save();
-        ctx.font = editorFont(10, 600);
+        ctx.font = editorFont(8.5, 650);
         ctx.fillStyle = palette.muted;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'alphabetic';
-        MONTHS.forEach((month, index) => {
-            ctx.fillText(month, monthX(index, plot), height - 16);
-        });
+        MONTHS.forEach((month, index) => ctx.fillText(month, monthX(index, plot), height - 14));
         ctx.restore();
     }
 
