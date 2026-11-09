@@ -2165,6 +2165,7 @@ public final class MainActivity extends Activity {
 
         pendingGalleryPermissionReply = null;
         pendingGalleryPermissionRequestId = null;
+        clearAppStartImageTransfer();
         galleryExecutor.shutdownNow();
 
         if (webView != null) {
