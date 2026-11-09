@@ -461,6 +461,33 @@
         return blob instanceof Blob?blob:null;
     }
 
+    async function getSplashBackgroundAsset() {
+        await initialize();
+        const settings = getSettingsSnapshot();
+        if (settings.mode === 'custom') {
+            const blob = await getCustomImageBlob();
+            if (!(blob instanceof Blob) || !blob.type.startsWith('image/')) {
+                throw new Error('Das eigene Editor-Hintergrundbild ist nicht verfügbar.');
+            }
+            return { blob, settings };
+        }
+
+        const preset = findPreset(settings.presetId);
+        const response = await fetch(preset.src, {
+            mode: 'cors',
+            credentials: 'omit',
+            cache: 'force-cache'
+        });
+        if (!response.ok) {
+            throw new Error('Das aktuelle Editor-Hintergrundbild konnte nicht geladen werden.');
+        }
+        const blob = await response.blob();
+        if (!(blob instanceof Blob) || !blob.type.startsWith('image/')) {
+            throw new Error('Das aktuelle Editor-Hintergrundbild ist kein gültiges Bild.');
+        }
+        return { blob, settings };
+    }
+
     async function clearCustomImage() {
         // Das Bild bleibt gespeichert, falls ein Design-Preset darauf verweist.
         if(pendingCustomBlob instanceof Blob && pendingCustomImageId===currentSettings?.customImageId){pendingCustomBlob=null;pendingCustomImageId='';}
@@ -694,6 +721,21 @@
                         meta.themeEditorUnifiedSettings = unifiedSettings;
                     }
                     meta.appBackground = await createBackupData();
+
+                    const startSettings = typeof appStorage !== 'undefined' && appStorage
+                        ? appStorage.get('premiumAppStartSettings_v1')
+                        : null;
+                    if (startSettings && typeof startSettings === 'object') {
+                        meta.appStartSettings = startSettings;
+                    }
+                    const startImage = typeof appStorage !== 'undefined' && appStorage
+                        ? appStorage.get('premiumAppStartImage_v1')
+                        : null;
+                    if (startImage instanceof Blob && startImage.type.startsWith('image/') &&
+                        startImage.size > 0 && startImage.size <= 5 * 1024 * 1024) {
+                        meta.appStartCustomImageDataUrl = await blobToDataUrl(startImage);
+                    }
+
                     payload.meta = meta;
                     return payload;
                 } catch (error) {
@@ -742,6 +784,36 @@
                     }
                 }
 
+                if (meta.appStartSettings && typeof meta.appStartSettings === 'object' &&
+                    typeof appStorage !== 'undefined' && appStorage) {
+                    appStorage.set('premiumAppStartSettings_v1', meta.appStartSettings);
+                    try {
+                        localStorage.setItem('premiumAppStartSettings_v1', JSON.stringify(meta.appStartSettings));
+                    } catch (_) {}
+                }
+                if (typeof meta.appStartCustomImageDataUrl === 'string' &&
+                    meta.appStartCustomImageDataUrl) {
+                    try {
+                        const match = /^data:(image\\/[a-z0-9.+-]+);base64,([a-z0-9+/=]+)$/i.exec(meta.appStartCustomImageDataUrl);
+                        if (!match || meta.appStartCustomImageDataUrl.length > 7 * 1024 * 1024) {
+                            throw new Error('Das eigene Startbild in der Sicherung ist ungültig oder zu groß.');
+                        }
+                        const binary = atob(match[2]);
+                        if (!binary.length || binary.length > 5 * 1024 * 1024) {
+                            throw new Error('Das eigene Startbild in der Sicherung überschreitet 5 MB.');
+                        }
+                        const bytes = new Uint8Array(binary.length);
+                        for (let index = 0; index < binary.length; index++) bytes[index] = binary.charCodeAt(index);
+                        const blob = new Blob([bytes], { type: match[1] });
+                        if (typeof appStorage !== 'undefined' && appStorage) {
+                            appStorage.set('premiumAppStartImage_v1', blob);
+                        }
+                    } catch (error) {
+                        console.error('[Editor-Sicherung] Eigenes App-Startbild konnte nicht wiederhergestellt werden.', error);
+                        throw error;
+                    }
+                }
+
                 if (meta.appBackground && typeof meta.appBackground === 'object') {
                     try {
                         await restoreBackupData(meta.appBackground);
@@ -787,6 +859,7 @@
         }));
     };
     window.getAppBackgroundSettings=getSettingsSnapshot;
+    window.getAppBackgroundSplashAsset = getSplashBackgroundAsset;
     window.beginAppBackgroundEditorDraft=beginEditorDraft;
     window.persistAppBackgroundDraftAsset=persistDraftAsset;
     window.commitAppBackgroundEditorDraft=commitEditorDraft;
