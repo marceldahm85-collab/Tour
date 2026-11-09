@@ -1103,13 +1103,263 @@
         ctx.restore();
     }
 
-    const originalMilestoneRenderer = window.drawMilestoneChartView;
-    if (typeof originalMilestoneRenderer === 'function') {
-        window.drawMilestoneChartView = function (type) {
-            originalMilestoneRenderer.apply(this, arguments);
-            enhanceMilestoneMarkers(type);
-        };
+    function formatMilestoneNumber(type, value) {
+        if (type === 'time') {
+            const totalMinutes = Math.round(value * 60);
+            return Math.floor(totalMinutes / 60) + ':' + String(totalMinutes % 60).padStart(2, '0');
+        }
+        if (type === 'dist') return Number(value).toLocaleString('de-AT', { maximumFractionDigits: 1 });
+        return Math.round(value).toLocaleString('de-AT');
     }
+
+    function drawMetalPlaque(ctx, x, y, label, palette, achieved) {
+        const w = Math.max(19, Math.min(32, label.length * 5.2 + 10)), h = 17;
+        ctx.save(); ctx.translate(x, y);
+        ctx.beginPath();
+        ctx.moveTo(-w / 2 + 3, -h / 2); ctx.lineTo(w / 2 - 3, -h / 2);
+        ctx.lineTo(w / 2, -h / 2 + 4); ctx.lineTo(w / 2, h / 2 - 4);
+        ctx.lineTo(w / 2 - 3, h / 2); ctx.lineTo(-w / 2 + 3, h / 2);
+        ctx.lineTo(-w / 2, h / 2 - 4); ctx.lineTo(-w / 2, -h / 2 + 4); ctx.closePath();
+        const metal = ctx.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2);
+        metal.addColorStop(0, achieved ? '#FFF8E8' : 'rgba(226,236,244,.38)');
+        metal.addColorStop(.24, achieved ? palette.secondary : 'rgba(120,137,151,.32)');
+        metal.addColorStop(.56, achieved ? palette.primary : 'rgba(40,53,66,.5)');
+        metal.addColorStop(1, achieved ? '#596775' : 'rgba(14,24,34,.7)');
+        ctx.fillStyle = metal; ctx.shadowColor = achieved ? 'rgba(0,0,0,.5)' : 'transparent';
+        ctx.shadowBlur = achieved ? 6 : 0; ctx.fill(); ctx.shadowBlur = 0;
+        ctx.strokeStyle = achieved ? 'rgba(255,255,255,.72)' : 'rgba(225,236,245,.25)';
+        ctx.lineWidth = 1; ctx.stroke();
+        ctx.fillStyle = achieved ? '#101923' : 'rgba(230,238,245,.72)';
+        ctx.font = editorFont(6.5, 850); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(label, 0, .5, w - 3);
+        ctx.restore();
+    }
+
+    function drawMilestoneChartPremium(type) {
+        const ids = { dist: 'ms-dist-canvas', asc: 'ms-asc-canvas', time: 'ms-time-canvas', peaks: 'ms-peaks-canvas' };
+        const canvas = canvasById(ids[type]);
+        if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
+        const ctx = resizeCanvasToDisplaySize(canvas);
+        if (!ctx) return;
+        const width = logicalSize(canvas).width, height = logicalSize(canvas).height;
+        const palette = chartPalette();
+        ctx.clearRect(0, 0, width, height);
+        drawInstrumentSurface(ctx, width, height, palette);
+        msDotHitTargets[type] = [];
+
+        const names = { dist: 'Distanz', asc: 'Höhenmeter', time: 'Zeit', peaks: 'Gipfel' };
+        const units = { dist: 'km', asc: 'hm', time: 'h', peaks: 'Gipfel' };
+        const milestones = (typeof MILESTONE_DEFS !== 'undefined' && MILESTONE_DEFS[type]) || [];
+        const allData = getFilteredTours().filter(entry => entry && entry.date);
+        const yearSet = new Set();
+        allData.forEach(entry => {
+            const date = new Date(entry.date);
+            if (!Number.isNaN(date.getTime())) yearSet.add(date.getFullYear());
+        });
+        const timelineYears = Array.from(yearSet).sort((a, b) => a - b);
+        const aggregate = typeof statsYearFilter !== 'undefined' &&
+            (statsYearFilter === 'all' || statsYearFilter === 'past');
+        const keyAll = '__total__';
+        const years = aggregate ? [keyAll] : timelineYears.slice();
+        const bucketCount = aggregate ? timelineYears.length : 12;
+        const labels = aggregate ? timelineYears.map(String) :
+            ['Jän', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+
+        const empty = () => {
+            ctx.fillStyle = palette.muted; ctx.font = editorFont(11, 650);
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('Keine Daten · Jahr oder Filter ändern', width / 2, height / 2);
+        };
+        if (!milestones.length || !years.length || !allData.length || !bucketCount) {
+            drawHeader(ctx, canvas, 'Meilensteine · ' + names[type], '–'); empty(); return;
+        }
+
+        const getValue = entry => {
+            if (type === 'dist') return parseFloat(String(entry.strecke || '').replace(',', '.')) || 0;
+            if (type === 'asc') return parseFloat(String(entry.aufstieg || '').replace(',', '.')) || 0;
+            if (type === 'peaks') return parseInt(entry.gipfel, 10) || 0;
+            if (type === 'time') {
+                if (!entry.zeit || !String(entry.zeit).includes(':')) return 0;
+                const parts = String(entry.zeit).split(':').map(Number);
+                return Number.isFinite(parts[0]) && Number.isFinite(parts[1]) ? (parts[0] * 60 + parts[1]) / 60 : 0;
+            }
+            return 0;
+        };
+
+        const sums = {}, entries = {};
+        years.forEach(year => { sums[year] = Array(bucketCount).fill(0); entries[year] = []; });
+        allData.forEach(entry => {
+            const date = new Date(entry.date);
+            if (Number.isNaN(date.getTime())) return;
+            const series = aggregate ? keyAll : date.getFullYear();
+            if (!sums[series]) return;
+            const bucket = aggregate ? timelineYears.indexOf(date.getFullYear()) : date.getMonth();
+            if (bucket < 0) return;
+            const value = getValue(entry);
+            sums[series][bucket] += value;
+            entries[series].push({ entry, date, value });
+        });
+
+        const cumulative = {}, tourCumulative = {}, lastActive = {};
+        years.forEach(year => {
+            let running = 0;
+            cumulative[year] = sums[year].map(value => { running += value; return running; });
+            running = 0;
+            tourCumulative[year] = entries[year].slice()
+                .sort((a, b) => a.date.getTime() - b.date.getTime())
+                .map(item => { running += item.value; return { cumVal: running, entry: item.entry }; });
+            let last = -1;
+            sums[year].forEach((value, index) => { if (value > 0) last = index; });
+            lastActive[year] = last;
+        });
+
+        const yearsWithData = years.filter(year => lastActive[year] >= 0);
+        if (!yearsWithData.length) { drawHeader(ctx, canvas, 'Meilensteine · ' + names[type], '–'); empty(); return; }
+        const actualMax = Math.max(...yearsWithData.map(year => cumulative[year][lastActive[year]]));
+        const reached = milestones.filter(value => value <= actualMax);
+        const next = milestones.find(value => value > actualMax);
+        const visibleTargets = next === undefined ? reached : reached.concat([next]);
+        const maxValue = Math.max(actualMax, visibleTargets[visibleTargets.length - 1] || milestones[0] || 1, 1);
+
+        const mobile = width < 430;
+        const plot = {
+            left: mobile ? 39 : 49,
+            right: width - (mobile ? 16 : 20),
+            top: years.length > 1 && !aggregate ? 54 : 44,
+            bottom: height - 43
+        };
+        plot.width = Math.max(40, plot.right - plot.left);
+        plot.height = Math.max(40, plot.bottom - plot.top);
+        drawHeader(ctx, canvas, 'Meilensteine · ' + names[type],
+            formatMilestoneNumber(type, actualMax) + ' ' + units[type]);
+
+        // A shared line system, with a distinct material cue per milestone category.
+        drawTopographicRelief(ctx, plot, palette, type === 'asc' ? 1 : type === 'peaks' ? .48 : .20);
+        if (type === 'time') {
+            for (let i = 0; i < 24; i++) {
+                const x = plot.left + plot.width * i / 23;
+                ctx.beginPath(); ctx.moveTo(x, plot.bottom - (i % 2 === 0 ? 7 : 3)); ctx.lineTo(x, plot.bottom);
+                ctx.strokeStyle = 'rgba(229,238,245,.16)'; ctx.lineWidth = .7; ctx.stroke();
+            }
+        }
+        if (type === 'peaks') {
+            ctx.beginPath(); ctx.moveTo(plot.left, plot.bottom);
+            for (let i = 0; i <= 32; i++) {
+                const x = plot.left + plot.width * i / 32;
+                const y = plot.bottom - 7 - Math.abs(Math.sin(i * .83)) * 7 - Math.abs(Math.cos(i * .31)) * 4;
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(plot.right, plot.bottom); ctx.closePath();
+            ctx.fillStyle = colourWithAlpha(palette.secondary, .075); ctx.fill();
+        }
+
+        const stepX = plot.width / bucketCount;
+        const xFor = index => bucketCount === 1 ? plot.left + plot.width / 2 : plot.left + (index + 1) * stepX;
+        const xPrevious = index => index === 0 ? plot.left : xFor(index - 1);
+        const yFor = value => plot.bottom - value / maxValue * plot.height;
+
+        for (let i = 0; i <= 4; i++) {
+            const ratio = i / 4, value = maxValue * ratio, y = yFor(value);
+            ctx.beginPath(); ctx.moveTo(plot.left, y); ctx.lineTo(plot.right, y);
+            ctx.strokeStyle = i === 0 ? 'rgba(235,243,248,.26)' : 'rgba(235,243,248,.065)';
+            ctx.lineWidth = i === 0 ? 1.05 : .7; ctx.stroke();
+            ctx.fillStyle = palette.muted; ctx.font = editorFont(8, 600);
+            ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+            ctx.fillText(type === 'time' ? formatMilestoneNumber(type, value) : Math.round(value).toLocaleString('de-AT'),
+                plot.left - 6, y);
+        }
+
+        visibleTargets.forEach(target => {
+            const y = yFor(target);
+            ctx.beginPath(); ctx.moveTo(plot.left, y); ctx.lineTo(plot.right, y);
+            ctx.setLineDash([3, 5]);
+            ctx.strokeStyle = reached.includes(target)
+                ? colourWithAlpha(palette.secondary, .10)
+                : colourWithAlpha(palette.primary, .28);
+            ctx.lineWidth = reached.includes(target) ? .65 : 1;
+            ctx.stroke(); ctx.setLineDash([]);
+        });
+        if (next !== undefined) {
+            drawMetalPlaque(ctx, plot.right - 20, yFor(next) - 10,
+                formatMilestoneNumber(type, next), palette, false);
+        }
+
+        if (years.length > 1 && !aggregate) {
+            const itemWidth = 56;
+            let x = Math.max(plot.left, (width - years.length * itemWidth) / 2);
+            years.forEach(year => {
+                const stops = getYearCompareGradientStops(year, years);
+                ctx.beginPath(); ctx.moveTo(x, 38); ctx.lineTo(x + 15, 38);
+                ctx.strokeStyle = applyGradient(ctx, x, 0, x + 15, 0, stops);
+                ctx.lineWidth = 2.5; ctx.stroke();
+                ctx.fillStyle = palette.text; ctx.font = editorFont(8, 650);
+                ctx.textAlign = 'left'; ctx.fillText(String(year), x + 20, 41);
+                x += itemWidth;
+            });
+        }
+
+        yearsWithData.forEach(year => {
+            const last = lastActive[year], values = cumulative[year];
+            const stops = years.length === 1 ? palette.stops : getYearCompareGradientStops(year, years);
+            const line = ctx.createLinearGradient(plot.left, 0, plot.right, 0);
+            stops.forEach(([at, colour]) => line.addColorStop(at, colour));
+
+            ctx.beginPath(); ctx.moveTo(plot.left, yFor(0));
+            for (let index = 0; index <= last; index++) ctx.lineTo(xFor(index), yFor(values[index]));
+            ctx.lineTo(xFor(last), plot.bottom); ctx.lineTo(plot.left, plot.bottom); ctx.closePath();
+            const area = ctx.createLinearGradient(0, plot.top, 0, plot.bottom);
+            area.addColorStop(0, colourWithAlpha(stops[stops.length - 1][1], .20));
+            area.addColorStop(1, colourWithAlpha(stops[0][1], .015));
+            ctx.fillStyle = area; ctx.fill();
+
+            ctx.beginPath(); ctx.moveTo(plot.left, yFor(0));
+            for (let index = 0; index <= last; index++) ctx.lineTo(xFor(index), yFor(values[index]));
+            ctx.strokeStyle = line; ctx.lineWidth = 3.0;
+            ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+            ctx.shadowColor = colourWithAlpha(stops[stops.length - 1][1], .32);
+            ctx.shadowBlur = 7; ctx.stroke(); ctx.shadowBlur = 0;
+
+            for (let index = 0; index <= last; index++) {
+                drawMetalMarker(ctx, xFor(index), yFor(values[index]), palette, 2.6);
+            }
+
+            visibleTargets.forEach(target => {
+                if (values[last] < target) return;
+                let crossing = null;
+                for (let index = 0; index <= last; index++) {
+                    const previous = index === 0 ? 0 : values[index - 1];
+                    const current = values[index];
+                    if (current >= target && previous < target) {
+                        const portion = current === previous ? 1 : Math.max(0, Math.min(1, (target - previous) / (current - previous)));
+                        crossing = xPrevious(index) + portion * (xFor(index) - xPrevious(index));
+                        break;
+                    }
+                }
+                if (crossing === null) return;
+                const y = yFor(target);
+                const milestoneTour = (tourCumulative[year] || []).find(item => item.cumVal >= target);
+                const entry = milestoneTour ? milestoneTour.entry : null;
+                msDotHitTargets[type].push({ x: crossing, y, entry, milestone: target, year });
+
+                // Raised metal plaque anchors each threshold directly to the cumulative line.
+                ctx.beginPath(); ctx.moveTo(crossing, y - 10); ctx.lineTo(crossing, y - 4);
+                ctx.strokeStyle = colourWithAlpha(palette.secondary, .78); ctx.lineWidth = 1; ctx.stroke();
+                drawMetalPlaque(ctx, crossing, y - 18, formatMilestoneNumber(type, target), palette, true);
+                drawMetalMarker(ctx, crossing, y, palette, 4.2);
+            });
+        });
+
+        // Years in the all-years view stay horizontal and compact rather than rotated.
+        labels.forEach((label, index) => {
+            const x = xFor(index);
+            ctx.fillStyle = palette.muted; ctx.font = editorFont(aggregate ? 8 : 8.5, 650);
+            ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+            ctx.fillText(label, x, height - 15, stepX ? stepX - 2 : 42);
+        });
+        canvas.__premiumMilestoneType = type;
+    }
+
+    window.drawMilestoneChartView = drawMilestoneChartPremium;
 
     function hapticEnabled() {
         try {
