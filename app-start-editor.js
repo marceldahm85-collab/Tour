@@ -388,7 +388,7 @@
         }
         const loaded = await loadImage(blob);
         const targetWidth = 1080;
-        const targetHeight = 1920;
+        const targetHeight = 2340;
         const canvas = document.createElement('canvas');
         canvas.width = targetWidth;
         canvas.height = targetHeight;
