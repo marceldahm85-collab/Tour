@@ -3,3 +3,10 @@
 local.properties
 **/build/
 *.iml
+
+# Private Android release signing material — never commit to source control.
+*.jks
+*.keystore
+*.p12
+keystore.properties
+app/release-signing/
