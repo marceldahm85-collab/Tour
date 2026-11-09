@@ -541,7 +541,7 @@
 
         counts.forEach((count, index) => {
             const x0 = plot.left + index * segment, cx = x0 + segment * .5;
-            const h = count > 0 ? 20 + (count / max) * plot.height * .58 : 7;
+            const h = count > 0 ? Math.max(2, (count / max) * plot.height * .68) : 0;
             const top = baseline - h;
             const shoulderL = x0 + segment * .10, shoulderR = x0 + segment * .90;
             const sideY = baseline - h * (.43 + ((index * 7) % 4) * .055);
@@ -794,7 +794,7 @@
 
         counts.forEach((count, index) => {
             const center = monthX(index, plot), w = Math.min(17, step * .72);
-            const h = count > 0 ? Math.max(11, count / max * plot.height * .72) : 3;
+            const h = count > 0 ? Math.max(2, count / max * plot.height * .72) : 0;
             const top = baseline - h, half = w / 2, cut = Math.min(4, w * .22);
             ctx.save();
             ctx.beginPath();
