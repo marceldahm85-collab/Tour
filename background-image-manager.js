@@ -827,7 +827,7 @@
                 if (typeof meta.appStartCustomImageDataUrl === 'string' &&
                     meta.appStartCustomImageDataUrl) {
                     try {
-                        const match = /^data:(image\\/[a-z0-9.+-]+);base64,([a-z0-9+/=]+)$/i.exec(meta.appStartCustomImageDataUrl);
+                        const match = /^data:(image\/[a-z0-9.+-]+);base64,([a-z0-9+/=]+)$/i.exec(meta.appStartCustomImageDataUrl);
                         if (!match || meta.appStartCustomImageDataUrl.length > 7 * 1024 * 1024) {
                             throw new Error('Das eigene Startbild in der Sicherung ist ungültig oder zu groß.');
                         }
