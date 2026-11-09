@@ -185,57 +185,10 @@
         ctx.restore();
     }
 
-    function drawInstrumentSurface(ctx, width, height, palette) {
-        const inset = 8, y = 7, h = height - 14;
-        const activeCanvas = ctx.canvas;
-        const stage = activeCanvas && activeCanvas.closest ? activeCanvas.closest('.chart-canvas-stage') : null;
-        if (stage && stage.style) {
-            const transition = Math.max(10, Math.min(90, palette.transition || 55)) / 100;
-            const primaryTint = colourWithAlpha(palette.primary, .12);
-            const secondaryTint = colourWithAlpha(palette.secondary, .10);
-            const baseGlass = 'linear-gradient(145deg, rgba(36,51,66,.74), rgba(9,16,25,.82))';
-            const editorGradient = palette.direction === 'radial'
-                ? 'radial-gradient(circle at 28% 18%, ' + primaryTint + ' 0%, ' +
-                    primaryTint + ' ' + (transition * 100) + '%, ' + secondaryTint + ' 100%), ' + baseGlass
-                : 'linear-gradient(' + (palette.direction || '180deg') + ', ' +
-                    primaryTint + ' 0%, ' + primaryTint + ' ' + (transition * 100) +
-                    '%, ' + secondaryTint + ' 100%), ' + baseGlass;
-            stage.style.setProperty('--stats-editor-gradient-direction', palette.direction === 'radial' ? '180deg' : (palette.direction || '180deg'));
-            stage.style.setProperty('--stats-editor-card-gradient', editorGradient);
-            stage.style.setProperty('--stats-editor-accent', palette.primary);
-            stage.style.setProperty('--stats-editor-accent2', palette.secondary);
-            stage.style.setProperty('--stats-editor-transition-point', (transition * 100) + '%');
-            stage.style.setProperty('--stats-glass-opacity', String(Math.max(.35, Math.min(.78, palette.glassOpacity / 100))));
-            stage.style.setProperty('--stats-editor-radius', Math.max(0, palette.radius) + 'px');
-        }
-        roundedPath(ctx, inset, y, width - inset * 2, h, Math.max(0, palette.radius - 3));
-        let bg;
-        if (palette.direction === 'radial') {
-            bg = ctx.createRadialGradient(width * .28, height * .18, 2, width * .52, height * .55, Math.max(width, height));
-        } else {
-            const degrees = Number.parseFloat(String(palette.direction).replace('deg', '')) || 180;
-            const angle = (degrees - 90) * Math.PI / 180;
-            const dx = Math.cos(angle) * width * .5;
-            const dy = Math.sin(angle) * height * .5;
-            bg = ctx.createLinearGradient(width / 2 - dx, height / 2 - dy, width / 2 + dx, height / 2 + dy);
-        }
-        bg.addColorStop(0, 'rgba(38,52,66,.94)');
-        bg.addColorStop(Math.max(.10, Math.min(.90, palette.transition / 100)), 'rgba(13,22,32,.97)');
-        bg.addColorStop(1, 'rgba(5,11,18,.98)');
-        ctx.fillStyle = bg;
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(220,231,241,.12)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        ctx.save();
-        roundedPath(ctx, inset + 1, y + 1, width - inset * 2 - 2, h - 2, Math.max(0, palette.radius - 4));
-        ctx.clip();
-        const sheen = ctx.createLinearGradient(0, y, 0, y + 76);
-        sheen.addColorStop(0, 'rgba(255,255,255,.075)');
-        sheen.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = sheen;
-        ctx.fillRect(inset, y, width - inset * 2, 76);
-        ctx.restore();
+    // Absichtlich transparente Diagrammfläche: Das Alpine-App-Design bleibt sichtbar.
+    // Die Diagramme zeichnen nur ihre Daten, Linien und Instrumente – keinen dunklen Kartenhintergrund.
+    function drawInstrumentSurface() {
+        // No-op: Canvas wurde vom jeweiligen Renderer bereits geleert.
     }
 
     function baseChart(canvas, ctx, title, total, options) {
@@ -244,8 +197,8 @@
         drawInstrumentSurface(ctx, size.width, size.height, palette);
         drawHeader(ctx, canvas, title, total, options && options.subtitle);
         const plot = {
-            left: 44, right: size.width - 18,
-            top: options && options.subtitle ? 68 : 53,
+            left: 18, right: size.width - 18,
+            top: options && options.subtitle ? 68 : 50,
             bottom: size.height - 42
         };
         plot.width = Math.max(40, plot.right - plot.left);
@@ -254,37 +207,18 @@
         return { width: size.width, height: size.height, plot, palette };
     }
 
-    function yAxisLabel(value, maxValue) {
-        if (!Number.isFinite(value)) return '0';
-        if (Math.abs(maxValue) >= 100000) {
-            return Math.round(value / 1000).toLocaleString('de-AT') + 'k';
-        }
-        if (Math.abs(maxValue) >= 10000) {
-            return Math.round(value / 1000).toLocaleString('de-AT') + 'k';
-        }
-        if (Math.abs(maxValue) >= 1000) {
-            return Math.round(value).toLocaleString('de-AT');
-        }
-        return (Math.round(value * 10) / 10).toLocaleString('de-AT');
-    }
-
-    function drawAxes(ctx, plot, maxValue, palette, unit) {
+    function drawAxes(ctx, plot, palette) {
+        // Dezente horizontale Orientierungslinien bleiben; die linke Zahlenskala entfällt.
         ctx.save();
-        ctx.font = editorFont(8.5, 550);
-        ctx.fillStyle = palette.muted;
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'middle';
         for (let i = 0; i <= 4; i++) {
             const ratio = i / 4;
             const y = plot.bottom - plot.height * ratio;
             ctx.beginPath();
             ctx.moveTo(plot.left, y);
             ctx.lineTo(plot.right, y);
-            ctx.strokeStyle = i === 0 ? 'rgba(230,238,245,.25)' : 'rgba(230,238,245,.075)';
+            ctx.strokeStyle = i === 0 ? 'rgba(230,238,245,.24)' : 'rgba(230,238,245,.065)';
             ctx.lineWidth = i === 0 ? 1.05 : .65;
             ctx.stroke();
-            const label = yAxisLabel(maxValue * ratio, maxValue);
-            ctx.fillText(unit ? label + ' ' + unit : label, plot.left - 6, y);
         }
         ctx.restore();
     }
@@ -371,7 +305,7 @@
         const { plot, palette, height, width } = base;
         const valid = values.filter(value => Number.isFinite(value) && value > 0);
         const maxValue = Math.max(1, ...valid) * 1.16;
-        drawAxes(ctx, plot, maxValue, palette, config.axisUnit || '');
+        drawAxes(ctx, plot, palette);
 
         const points = values.map((value, index) => ({
             x: monthX(index, plot),
@@ -669,17 +603,8 @@
             average > 0 ? 'Ø ' + Math.round(average) + ' hm/h' : '–', { reliefStrength: .2 });
         const { plot, palette, height } = base;
         const max = Math.max(100, ...valid) * 1.18;
-        drawAxes(ctx, plot, max, palette, 'hm/h');
+        drawAxes(ctx, plot, palette);
 
-        for (let i = 0; i <= 6; i++) {
-            const y = plot.bottom - plot.height * i / 6;
-            ctx.beginPath();
-            ctx.moveTo(plot.left - 3, y);
-            ctx.lineTo(plot.left, y);
-            ctx.strokeStyle = 'rgba(225,236,245,.38)';
-            ctx.lineWidth = .8;
-            ctx.stroke();
-        }
         values.forEach((value, index) => {
             const x = monthX(index, plot), y = plot.bottom - value / max * plot.height;
             if (value > 0) {
@@ -1374,10 +1299,9 @@
         const visibleTargets = next === undefined ? reached : reached.concat([next]);
         const maxValue = Math.max(actualMax, visibleTargets[visibleTargets.length - 1] || milestones[0] || 1, 1);
 
-        const mobile = width < 430;
         const plot = {
-            left: mobile ? 39 : 49,
-            right: width - (mobile ? 16 : 20),
+            left: 18,
+            right: width - 18,
             top: years.length > 1 && !aggregate ? 54 : 44,
             bottom: height - 43
         };
@@ -1416,10 +1340,6 @@
             ctx.beginPath(); ctx.moveTo(plot.left, y); ctx.lineTo(plot.right, y);
             ctx.strokeStyle = i === 0 ? 'rgba(235,243,248,.26)' : 'rgba(235,243,248,.065)';
             ctx.lineWidth = i === 0 ? 1.05 : .7; ctx.stroke();
-            ctx.fillStyle = palette.muted; ctx.font = editorFont(8, 600);
-            ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-            ctx.fillText(type === 'time' ? formatMilestoneNumber(type, value) : Math.round(value).toLocaleString('de-AT'),
-                plot.left - 6, y);
         }
 
         visibleTargets.forEach(target => {
