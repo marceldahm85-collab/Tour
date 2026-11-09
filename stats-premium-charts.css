@@ -1,24 +1,23 @@
-/* Premium Alpine Performance Cockpit — schwebende Glasfläche und metallische Kontur. */
+/* Stats Performance Cockpit — vorhandene Glas-Karte außen, vertiefte Instrumentenfläche innen. */
 #chart-view .chart-canvas-stage {
     position: relative;
     isolation: isolate;
     overflow: hidden;
-    border: 1px solid color-mix(in srgb, var(--accent, #D5A64C) 30%, rgba(230,239,246,.24)) !important;
-    border-radius: var(--editor-radius, 16px) !important;
+    border: 1px solid color-mix(in srgb, var(--accent, #D5A64C) 25%, rgba(230,239,246,.22)) !important;
+    border-radius: var(--stats-editor-radius, var(--editor-radius, 16px)) !important;
     background:
         radial-gradient(ellipse at 82% 0%,
-            color-mix(in srgb, var(--accent, #D5A64C) 13%, transparent),
-            transparent 40%),
-        linear-gradient(145deg,
-            rgba(37, 53, 68, .66),
-            rgba(9, 16, 25, .70)) !important;
+            color-mix(in srgb, var(--accent, #D5A64C) 12%, transparent),
+            transparent 43%),
+        linear-gradient(var(--stats-editor-gradient-direction, 180deg),
+            rgba(36, 51, 66, .74),
+            rgba(9, 16, 25, .82)) !important;
     box-shadow:
-        0 18px 34px rgba(0,0,0,.34),
-        0 0 20px color-mix(in srgb, var(--accent, #D5A64C) 8%, transparent),
-        inset 0 1px 0 rgba(255,255,255,.22),
-        inset 0 -1px 0 rgba(0,0,0,.36) !important;
-    backdrop-filter: blur(18px) saturate(1.18) !important;
-    -webkit-backdrop-filter: blur(18px) saturate(1.18) !important;
+        0 14px 28px rgba(0,0,0,.30),
+        inset 0 1px 0 rgba(255,255,255,.18),
+        inset 0 -1px 0 rgba(0,0,0,.34) !important;
+    backdrop-filter: blur(16px) saturate(1.14) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(1.14) !important;
 }
 
 #chart-view .chart-canvas-stage::before {
@@ -26,9 +25,9 @@
     position: absolute;
     z-index: 0;
     inset: 0;
-    border-radius: inherit;
     pointer-events: none;
-    opacity: .15;
+    border-radius: inherit;
+    opacity: .12;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 720 400'%3E%3Cg fill='none' stroke='%23dce7ef' stroke-width='1.1'%3E%3Cpath d='M500 42 C548 4 630 22 671 67 C710 111 674 166 615 172 C555 179 481 142 470 97 C462 72 478 55 500 42Z'/%3E%3Cpath d='M514 65 C550 35 614 43 644 77 C673 111 645 145 607 151 C562 157 510 131 500 98 C494 83 501 73 514 65Z'/%3E%3Cpath d='M530 83 C557 62 599 66 619 89 C637 110 617 131 590 136 C559 141 529 121 522 102 C518 94 522 88 530 83Z'/%3E%3Cpath d='M-18 267 C26 215 107 210 155 243 C202 275 181 334 132 367 C85 401 14 383 -18 345 C-36 324 -35 288 -18 267Z'/%3E%3Cpath d='M12 278 C46 239 105 237 139 261 C173 285 160 326 124 350 C89 374 37 362 12 333 C-1 317 -1 292 12 278Z'/%3E%3Cpath d='M37 291 C59 267 98 265 120 281 C143 298 135 323 111 338 C86 354 53 345 37 326 C28 315 28 301 37 291Z'/%3E%3Cpath d='M270 18 C305 53 309 86 292 116 C274 148 283 177 316 202'/%3E%3Cpath d='M316 0 C341 39 347 77 330 111 C313 145 324 182 355 208'/%3E%3C/g%3E%3C/svg%3E");
     background-size: cover;
     background-position: center;
@@ -46,12 +45,13 @@
     pointer-events: none;
     background: linear-gradient(90deg,
         transparent,
-        rgba(255,255,255,.56),
-        color-mix(in srgb, var(--accent, #D5A64C) 52%, rgba(255,255,255,.3)),
+        rgba(255,255,255,.48),
+        color-mix(in srgb, var(--accent, #D5A64C) 50%, rgba(255,255,255,.3)),
         transparent);
-    opacity: .58;
+    opacity: .52;
 }
 
+/* Der Canvas zeichnet nur die vertiefte Oberfläche und Instrumente; keine zweite Kartenkante. */
 #chart-view .chart-canvas-stage canvas {
     background: transparent !important;
     border: 0 !important;
@@ -65,14 +65,54 @@
     cursor: pointer;
 }
 
+#chart-view .chart-premium-tooltip {
+    position: absolute;
+    z-index: 5;
+    top: 45px;
+    right: 12px;
+    max-width: min(78%, 250px);
+    padding: 7px 11px;
+    border: 1px solid color-mix(in srgb, var(--accent, #D5A64C) 40%, rgba(255,255,255,.2));
+    border-radius: var(--stats-editor-radius, var(--editor-radius, 12px));
+    background: linear-gradient(var(--stats-editor-gradient-direction, 180deg),
+        rgba(40,55,70,.96), rgba(8,15,23,.97));
+    box-shadow: 0 8px 20px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.15);
+    color: var(--app-text-primary, #F4F6F8);
+    font: 700 11px/1.25 inherit;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 140ms ease, transform 140ms ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#chart-view .chart-premium-tooltip.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 @media (max-width: 600px) {
     #chart-view .chart-canvas-stage {
         box-shadow:
-            0 12px 25px rgba(0,0,0,.32),
-            0 0 14px color-mix(in srgb, var(--accent, #D5A64C) 7%, transparent),
-            inset 0 1px 0 rgba(255,255,255,.19),
-            inset 0 -1px 0 rgba(0,0,0,.34) !important;
-        backdrop-filter: blur(14px) saturate(1.14) !important;
-        -webkit-backdrop-filter: blur(14px) saturate(1.14) !important;
+            0 10px 23px rgba(0,0,0,.29),
+            inset 0 1px 0 rgba(255,255,255,.16),
+            inset 0 -1px 0 rgba(0,0,0,.32) !important;
+        backdrop-filter: blur(13px) saturate(1.1) !important;
+        -webkit-backdrop-filter: blur(13px) saturate(1.1) !important;
+    }
+
+    #chart-view .chart-premium-tooltip {
+        top: 43px;
+        right: 10px;
+        padding: 6px 9px;
+        font-size: 10px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #chart-view .chart-premium-tooltip {
+        transition: none !important;
     }
 }
