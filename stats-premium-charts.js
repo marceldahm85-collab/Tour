@@ -668,8 +668,8 @@
         drawHeader(ctx, canvas, 'Leistungsindex', totalCount ? Math.round(overall) + ' / 100' : '–');
 
         const cx = size.width / 2;
-        const cy = Math.max(106, Math.min(size.height * 0.43, size.height - 112));
-        const radius = Math.min(98, size.height * 0.255, size.width * 0.265);
+        const cy = Math.max(96, Math.min(size.height * 0.39, size.height - 120));
+        const radius = Math.min(96, size.height * 0.235, size.width * 0.255);
         const startAngle = Math.PI * 0.75;
         const sweep = Math.PI * 1.5;
 
@@ -956,16 +956,33 @@
             }, true);
         }
 
-        [
-            'steps-canvas', 'peaks-canvas', 'speed-canvas',
-            'gradient-canvas', 'ascent-rate-canvas', 'avg-steps-canvas'
-        ].forEach(id => {
+        const monthlyCategories = {
+            'steps-canvas': 'steps',
+            'peaks-canvas': 'peaks',
+            'speed-canvas': 'speed',
+            'gradient-canvas': 'gradient',
+            'ascent-rate-canvas': 'ascentRate',
+            'avg-steps-canvas': 'avgSteps'
+        };
+        Object.entries(monthlyCategories).forEach(([id, category]) => {
             const canvas = canvasById(id);
-            if (!canvas || canvas.dataset.premiumChartHaptic === 'true') return;
-            canvas.dataset.premiumChartHaptic = 'true';
+            if (!canvas || canvas.dataset.premiumChartMonthTap === 'true') return;
+            canvas.dataset.premiumChartMonthTap = 'true';
             canvas.addEventListener('click', event => {
-                if (canvas.classList.contains('active-chart-canvas') && event.isTrusted) {
-                    adaptiveHaptic('selection');
+                if (!canvas.classList.contains('active-chart-canvas')) return;
+                event.stopImmediatePropagation();
+                if (!event.isTrusted) return;
+                const rect = canvas.getBoundingClientRect();
+                const width = logicalSize(canvas).width;
+                const x = (event.clientX - rect.left) * width / rect.width;
+                const padding = typeof getChartHorizontalPadding === 'function'
+                    ? getChartHorizontalPadding() : 40;
+                const plotWidth = Math.max(1, width - padding * 2);
+                const monthIndex = Math.floor((x - padding) / plotWidth * 12);
+                if (monthIndex < 0 || monthIndex > 11) return;
+                adaptiveHaptic('selection');
+                if (typeof openMonthCategoryModal === 'function') {
+                    openMonthCategoryModal(category, monthIndex);
                 }
             }, true);
         });
