@@ -1386,30 +1386,75 @@
         }
     }
 
+    function formatChartValue(canvas, value) {
+        const data = canvas.__premiumChartData || {};
+        if (typeof data.formatter === 'function') return data.formatter(value);
+        return Math.round(value).toLocaleString('de-AT') + (data.unit ? ' ' + data.unit : '');
+    }
+
+    function showChartTooltip(canvas, monthIndex, value) {
+        const stage = canvas.closest('.chart-canvas-stage');
+        if (!stage) return;
+        let tooltip = stage.querySelector('.chart-premium-tooltip');
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.className = 'chart-premium-tooltip';
+            tooltip.setAttribute('role', 'status');
+            tooltip.setAttribute('aria-live', 'polite');
+            stage.appendChild(tooltip);
+        }
+        tooltip.textContent = MONTH_NAMES[monthIndex] + ' · ' + formatChartValue(canvas, value);
+        tooltip.classList.add('is-visible');
+        if (tooltip.__hideTimer) clearTimeout(tooltip.__hideTimer);
+        tooltip.__hideTimer = setTimeout(() => tooltip.classList.remove('is-visible'), 3200);
+    }
+
+    function selectMonthlyValue(canvas, category, monthIndex) {
+        const values = canvas.__premiumChartData && canvas.__premiumChartData.values;
+        if (!Array.isArray(values)) return;
+        selectedMonths[category] = monthIndex;
+        if (typeof window.drawActiveChart === 'function') window.drawActiveChart();
+        else if (category === 'performanceIndex') drawPerformanceIndexDiagram();
+        else if (category === 'speed') drawSpeedDiagram();
+        showChartTooltip(canvas, monthIndex, Number(values[monthIndex]) || 0);
+        adaptiveHaptic('selection');
+        if (typeof openMonthCategoryModal === 'function') openMonthCategoryModal(category, monthIndex);
+    }
+
     function installCanvasInteractions() {
-        const heatmap = canvasById('big-tours-canvas');
-        if (heatmap && heatmap.dataset.premiumHeatmapTap !== 'true') {
-            heatmap.dataset.premiumHeatmapTap = 'true';
-            heatmap.addEventListener('click', event => {
-                if (!heatmap.classList.contains('active-chart-canvas') || !event.isTrusted) return;
+        const monthlyCategories = {
+            'big-tours-canvas': 'bigTours',
+            'steps-canvas': 'steps',
+            'peaks-canvas': 'peaks',
+            'gradient-canvas': 'gradient',
+            'ascent-rate-canvas': 'ascentRate',
+            'avg-steps-canvas': 'avgSteps'
+        };
+        Object.entries(monthlyCategories).forEach(([id, category]) => {
+            const canvas = canvasById(id);
+            if (!canvas || canvas.dataset.premiumExactTap === 'true') return;
+            canvas.dataset.premiumExactTap = 'true';
+            canvas.addEventListener('click', event => {
+                if (!canvas.classList.contains('active-chart-canvas') || !event.isTrusted) return;
                 event.stopImmediatePropagation();
-                const rect = heatmap.getBoundingClientRect();
-                const size = logicalSize(heatmap);
+                const rect = canvas.getBoundingClientRect(), size = logicalSize(canvas);
                 const x = (event.clientX - rect.left) * size.width / rect.width;
                 const y = (event.clientY - rect.top) * size.height / rect.height;
-                const cells = cellRectangles(size.width, size.height);
-                const index = cells.findIndex(cell =>
-                    x >= cell.x && x <= cell.x + cell.width &&
-                    y >= cell.y && y <= cell.y + cell.height
-                );
-                if (index >= 0) {
-                    adaptiveHaptic('selection');
-                    if (typeof openMonthCategoryModal === 'function') {
-                        openMonthCategoryModal('bigTours', index);
-                    }
+                let index;
+                if (category === 'avgSteps') {
+                    const col = Math.max(0, Math.min(5, Math.floor((x - 14) / ((size.width - 28) / 6))));
+                    const row = y < size.height * .56 ? 0 : 1;
+                    index = row * 6 + col;
+                } else {
+                    const left = category === 'bigTours' ? 26 : 34;
+                    const right = size.width - 18;
+                    index = Math.floor((x - left) / Math.max(1, right - left) * 12);
+                    index = Math.max(0, Math.min(11, index));
                 }
+                if (y < 48 || y > size.height - 18) return;
+                selectMonthlyValue(canvas, category, index);
             }, true);
-        }
+        });
 
         const compass = canvasById('performance-index-canvas');
         if (compass && compass.dataset.premiumCompassTap !== 'true') {
@@ -1417,50 +1462,38 @@
             compass.addEventListener('click', event => {
                 if (!compass.classList.contains('active-chart-canvas') || !event.isTrusted) return;
                 event.stopImmediatePropagation();
-                const rect = compass.getBoundingClientRect();
-                const size = logicalSize(compass);
+                const rect = compass.getBoundingClientRect(), size = logicalSize(compass);
                 const x = (event.clientX - rect.left) * size.width / rect.width;
                 const y = (event.clientY - rect.top) * size.height / rect.height;
-                if (y < size.height - 49 || y > size.height - 26 || x < 24 || x > size.width - 24) return;
-                const monthIndex = Math.max(0, Math.min(11,
-                    Math.round((x - 34) / Math.max(1, size.width - 68) * 11)));
-                adaptiveHaptic('selection');
-                if (typeof openMonthCategoryModal === 'function') {
-                    openMonthCategoryModal('performanceIndex', monthIndex);
+                const geometry = compass.__premiumTrendGeometry;
+                if (!geometry || y < geometry.top - 8 || y > geometry.bottom + 12) {
+                    selectedMonths.performanceIndex = null;
+                    drawPerformanceIndexDiagram();
+                    return;
                 }
+                const index = Math.max(0, Math.min(11,
+                    Math.round((x - geometry.left) / Math.max(1, geometry.right - geometry.left) * 11)));
+                selectMonthlyValue(compass, 'performanceIndex', index);
             }, true);
         }
 
-        const monthlyCategories = {
-            'steps-canvas': 'steps',
-            'peaks-canvas': 'peaks',
-            'speed-canvas': 'speed',
-            'gradient-canvas': 'gradient',
-            'ascent-rate-canvas': 'ascentRate',
-            'avg-steps-canvas': 'avgSteps'
-        };
-        Object.entries(monthlyCategories).forEach(([id, category]) => {
-            const canvas = canvasById(id);
-            if (!canvas || canvas.dataset.premiumChartMonthTap === 'true') return;
-            canvas.dataset.premiumChartMonthTap = 'true';
-            canvas.addEventListener('click', event => {
-                if (!canvas.classList.contains('active-chart-canvas')) return;
+        const speed = canvasById('speed-canvas');
+        if (speed && speed.dataset.premiumSpeedSelection !== 'true') {
+            speed.dataset.premiumSpeedSelection = 'true';
+            speed.addEventListener('click', event => {
+                if (!speed.classList.contains('active-chart-canvas') || !event.isTrusted) return;
+                const rect = speed.getBoundingClientRect(), size = logicalSize(speed);
+                const x = (event.clientX - rect.left) * size.width / rect.width;
+                const y = (event.clientY - rect.top) * size.height / rect.height;
+                const geometry = speed.__premiumTrendGeometry;
+                if (!geometry || y < geometry.top - 8 || y > size.height - 24 ||
+                    x < geometry.left - 6 || x > geometry.right + 6) return;
                 event.stopImmediatePropagation();
-                if (!event.isTrusted) return;
-                const rect = canvas.getBoundingClientRect();
-                const width = logicalSize(canvas).width;
-                const x = (event.clientX - rect.left) * width / rect.width;
-                const padding = typeof getChartHorizontalPadding === 'function'
-                    ? getChartHorizontalPadding() : 40;
-                const plotWidth = Math.max(1, width - padding * 2);
-                const monthIndex = Math.floor((x - padding) / plotWidth * 12);
-                if (monthIndex < 0 || monthIndex > 11) return;
-                adaptiveHaptic('selection');
-                if (typeof openMonthCategoryModal === 'function') {
-                    openMonthCategoryModal(category, monthIndex);
-                }
+                const index = Math.max(0, Math.min(11,
+                    Math.round((x - geometry.left) / Math.max(1, geometry.right - geometry.left) * 11)));
+                selectMonthlyValue(speed, 'speed', index);
             }, true);
-        });
+        }
     }
 
     const originalInitCanvasBarClicks = window.initCanvasBarClicks;
