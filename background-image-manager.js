@@ -865,8 +865,12 @@
                     }
                 }
 
-                if (meta.appStartSettings && typeof meta.appStartSettings === 'object') {
-                    window.dispatchEvent(new CustomEvent('app-start-settings-restored'));
+                if (meta.appStartSettings && typeof meta.appStartSettings === 'object' &&
+                    typeof window.syncAppStartNativeSettings === 'function') {
+                    const nativeStartSync = await window.syncAppStartNativeSettings();
+                    if (nativeStartSync?.status === 'failed') {
+                        console.warn('[Editor-Sicherung] App-Start-Einstellungen wurden wiederhergestellt, aber Android konnte sie noch nicht übernehmen:', nativeStartSync.error);
+                    }
                 }
 
                 if (typeof appStorage?.flush === 'function') {
