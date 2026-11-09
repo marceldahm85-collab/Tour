@@ -782,8 +782,7 @@
             if (month !== null && isBigTourCountable(entry, data)) counts[month]++;
         });
         const total = counts.reduce((sum, value) => sum + value, 0);
-        const base = baseChart(canvas, ctx, 'Große Touren', total + ' Touren', {
-            subtitle: 'Definition: mindestens 10 km und mindestens 1.000 Höhenmeter',
+        const base = baseChart(canvas, ctx, '', total + ' Touren', {
             reliefStrength: .18
         });
         const { height, plot, palette } = base;
