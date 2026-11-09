@@ -50,7 +50,7 @@
             direction: settings.gradientDirection || '180deg',
             transition: Number(settings.transition) || 55,
             glassOpacity: Number(settings.glassOpacity) || 68,
-            radius: Number(settings.radius) || 14
+            radius: Number.isFinite(Number(settings.radius)) ? Number(settings.radius) : 14
         };
     }
 
@@ -167,11 +167,11 @@
         const activeCanvas = ctx.canvas;
         const stage = activeCanvas && activeCanvas.closest ? activeCanvas.closest('.chart-canvas-stage') : null;
         if (stage && stage.style) {
-            stage.style.setProperty('--stats-editor-gradient-direction', palette.direction || '180deg');
+            stage.style.setProperty('--stats-editor-gradient-direction', palette.direction === 'radial' ? '180deg' : (palette.direction || '180deg'));
             stage.style.setProperty('--stats-glass-opacity', String(Math.max(.35, Math.min(.78, palette.glassOpacity / 100))));
             stage.style.setProperty('--stats-editor-radius', Math.max(0, palette.radius) + 'px');
         }
-        roundedPath(ctx, inset, y, width - inset * 2, h, Math.max(5, palette.radius - 3));
+        roundedPath(ctx, inset, y, width - inset * 2, h, Math.max(0, palette.radius - 3));
         let bg;
         if (palette.direction === 'radial') {
             bg = ctx.createRadialGradient(width * .28, height * .18, 2, width * .52, height * .55, Math.max(width, height));
@@ -191,7 +191,7 @@
         ctx.lineWidth = 1;
         ctx.stroke();
         ctx.save();
-        roundedPath(ctx, inset + 1, y + 1, width - inset * 2 - 2, h - 2, Math.max(5, palette.radius - 4));
+        roundedPath(ctx, inset + 1, y + 1, width - inset * 2 - 2, h - 2, Math.max(0, palette.radius - 4));
         ctx.clip();
         const sheen = ctx.createLinearGradient(0, y, 0, y + 76);
         sheen.addColorStop(0, 'rgba(255,255,255,.075)');
@@ -917,8 +917,8 @@
         drawHeader(ctx, canvas, 'Leistungsindex · Präzisionskompass',
             Math.round(selectedMonth === null ? overall : (values[selectedMonth] || 0)) + ' / 100');
 
-        const cx = size.width / 2, cy = Math.min(size.height * .46, 190);
-        const radius = Math.min(105, size.width * .285, (size.height - 128) * .50);
+        const cx = size.width / 2, cy = Math.min(size.height * .43, size.height - 145);
+        const radius = Math.min(105, size.width * .285, Math.max(36, (size.height - 165) * .47));
         const start = Math.PI * .75, sweep = Math.PI * 1.5;
         ctx.save(); ctx.translate(cx, cy);
 
@@ -990,8 +990,8 @@
         drawHeader(ctx, canvas, 'Geschwindigkeit · Tachometer',
             shown > 0 ? formatDecimalAT(shown, 1) + ' km/h' : '–');
 
-        const cx = size.width / 2, cy = Math.min(size.height * .60, 235);
-        const radius = Math.min(112, size.width * .30, (size.height - 135) * .68);
+        const cx = size.width / 2, cy = Math.min(size.height * .52, size.height - 150);
+        const radius = Math.min(112, size.width * .30, Math.max(34, (size.height - 155) * .48));
         const max = Math.max(6, Math.ceil(Math.max(overall, ...values) * 1.18 / 2) * 2);
         const start = Math.PI, sweep = Math.PI;
 
