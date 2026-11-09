@@ -548,7 +548,7 @@
         const total = sums.reduce((sum, value) => sum + value, 0);
         const maxValue = Math.max(1, ...sums) * 1.14;
         const selected = selectedMonths.steps;
-        const duration = 1180;
+        const duration = 900;
         const startTime = performance.now();
 
         canvas.__premiumChartData = {
@@ -589,6 +589,19 @@
             }));
 
             drawAxes(ctx, plot);
+
+            if (!points.length) {
+                ctx.save();
+                ctx.fillStyle = palette.muted;
+                ctx.font = editorFont(11, 600);
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('Noch keine Werte im gewählten Zeitraum', width / 2, plot.top + plot.height / 2);
+                ctx.restore();
+                drawMonthLabels(ctx, plot, height, palette);
+                canvas.__stepsAnimationFrame = 0;
+                return;
+            }
 
             // Linien- und Flächenverlauf wird von links nach rechts freigelegt.
             if (points.length > 1 && progress > 0) {
