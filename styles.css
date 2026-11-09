@@ -2786,15 +2786,16 @@ body.dark .chart-tab.active{
 .chart-canvas-stage {
     position: relative;
     width: 100%;
-    max-width: 700px;
+    max-width: none;
     height: 260px;
     margin: 0 auto 18px;
+    box-sizing: border-box;
 }
 
 @media (max-width: 768px), (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
     .chart-canvas-stage {
-        width: calc(100vw - 40px);
-        max-width: calc(100vw - 40px);
+        width: 100%;
+        max-width: none;
         height: 400px;
         margin-bottom: 16px;
     }
@@ -2817,16 +2818,12 @@ body.dark .chart-tab.active{
         opacity 0.50s ease-out,
         visibility 0s linear 0.16s;
 
-    background: rgba(127,209,185,0.25);
-    border-radius: 18px;
-    border: 1px solid rgba(255,255,255,0.3);
-
-    box-shadow:
-        0 8px 20px rgba(40,60,50,0.16),
-        inset 0 1px 1px rgba(255,255,255,0.24);
-
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
 
     padding: 0;
     box-sizing: border-box;
@@ -2851,11 +2848,9 @@ body.dark .chart-tab.active{
 }
 
 body.dark #chart-view .chart-canvas-stage canvas {
-    background: rgba(20,30,40,0.45);
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow:
-    0 8px 20px rgba(0,0,0,0.38),
-    inset 0 1px 1px rgba(255,255,255,0.05);
+    background: transparent;
+    border: 0;
+    box-shadow: none;
 }
 
 
@@ -5379,9 +5374,9 @@ body.green .chart-stat-tile.active .chart-stat-icon { color: #ffffff; opacity: 1
 
 /* Canvas */
 body.green #chart-view .chart-canvas-stage canvas {
-    background: rgba(0,0,0,0.68);
-    border: 1px solid rgba(255,255,255,0.10);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.38);
+    background: transparent;
+    border: 0;
+    box-shadow: none;
 }
 
 /* Checkliste */
