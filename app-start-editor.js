@@ -3,65 +3,51 @@
     'use strict';
 
     const SETTINGS_KEY = 'premiumAppStartSettings_v1';
-    const IMAGE_KEY = 'premiumAppStartImage_v1';
-    const DEFAULTS = Object.freeze({
-        background: 'standard',
-        duration: 'auto',
-        animation: 'premium'
-    });
+    const DEFAULTS = Object.freeze({ background: 'standard', duration: 'auto', animation: 'premium' });
 
     let draft = null;
     let editorActive = false;
     let bound = false;
     let previewUrl = '';
+    let originalCustomImageBlob = null;
+    let pendingCustomImageBlob = null;
+    let removeCustomImage = false;
 
     const byId = id => document.getElementById(id);
     const appStore = () => {
-        try {
-            return typeof appStorage !== 'undefined' && appStorage ? appStorage : null;
-        } catch (_) {
-            return null;
-        }
+        try { return typeof appStorage !== 'undefined' && appStorage ? appStorage : null; }
+        catch (_) { return null; }
     };
 
     function readStored(key) {
-        const store = appStore();
         try {
-            const value = store?.get(key);
+            const value = appStore()?.get(key);
             if (value !== undefined && value !== null) return value;
         } catch (_) {}
         try {
             const raw = localStorage.getItem(key);
-            if (raw == null) return null;
-            return JSON.parse(raw);
-        } catch (_) {
-            return null;
-        }
+            return raw == null ? null : JSON.parse(raw);
+        } catch (_) { return null; }
     }
 
     function writeStored(key, value) {
-        const store = appStore();
-        try {
-            store?.set(key, value);
-        } catch (error) {
-            console.warn('[App-Start] Lokaler App-Speicher konnte nicht aktualisiert werden.', error);
-        }
+        try { appStore()?.set(key, value); }
+        catch (error) { console.warn('[App-Start] Lokaler App-Speicher konnte nicht aktualisiert werden.', error); }
         if (key === SETTINGS_KEY) {
-            try {
-                localStorage.setItem(key, JSON.stringify(value));
-            } catch (_) {}
+            try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {}
         }
     }
 
     function normalize(value) {
         const source = value && typeof value === 'object' ? value : {};
-        const background = ['standard', 'editor', 'custom'].includes(source.background)
-            ? source.background : DEFAULTS.background;
-        const duration = ['auto', '1500', '2000', '2500'].includes(String(source.duration))
-            ? String(source.duration) : DEFAULTS.duration;
-        const animation = ['off', 'subtle', 'premium'].includes(source.animation)
-            ? source.animation : DEFAULTS.animation;
-        return { background, duration, animation };
+        return {
+            background: ['standard', 'editor', 'custom'].includes(source.background)
+                ? source.background : DEFAULTS.background,
+            duration: ['auto', '1500', '2000', '2500'].includes(String(source.duration))
+                ? String(source.duration) : DEFAULTS.duration,
+            animation: ['off', 'subtle', 'premium'].includes(source.animation)
+                ? source.animation : DEFAULTS.animation
+        };
     }
 
     function currentDraft() {
@@ -103,7 +89,7 @@
         }
     }
 
-    function fillControls(settings) {
+    function fillControls(settings, imageBlob) {
         const value = normalize(settings);
         draft = value;
         const background = byId('te-app-start-background');
@@ -112,16 +98,9 @@
         if (background) background.value = value.background;
         if (duration) duration.value = value.duration;
         if (animation) animation.value = value.animation;
-
         const panel = byId('te-app-start-custom-panel');
         if (panel) panel.hidden = value.background !== 'custom';
-
-        const blob = window.getAppStartCustomImageBlob?.();
-        if (blob && typeof blob.then === 'function') {
-            blob.then(paintPreview).catch(() => paintPreview(null));
-        } else {
-            paintPreview(blob);
-        }
+        paintPreview(imageBlob);
         return value;
     }
 
@@ -139,8 +118,12 @@
 
     function setAppStartSettingsSnapshot(value) {
         draft = normalize(value);
-        writeStored(SETTINGS_KEY, draft);
-        if (editorActive) fillControls(draft);
+        if (editorActive) {
+            const imageBlob = removeCustomImage ? null : (pendingCustomImageBlob || originalCustomImageBlob);
+            fillControls(draft, imageBlob);
+        } else {
+            writeStored(SETTINGS_KEY, draft);
+        }
         return { ...draft };
     }
 
@@ -148,30 +131,33 @@
         return currentDraft();
     }
 
+    async function loadImage(blob) {
+        const objectUrl = URL.createObjectURL(blob);
+        try {
+            return await new Promise((resolve, reject) => {
+                const element = new Image();
+                element.onload = () => resolve({ image: element, objectUrl });
+                element.onerror = () => reject(new Error('Das Startbild konnte nicht geöffnet werden.'));
+                element.src = objectUrl;
+            });
+        } catch (error) {
+            URL.revokeObjectURL(objectUrl);
+            throw error;
+        }
+    }
+
     async function compressImageToPortrait(blob, backgroundSettings) {
         if (!(blob instanceof Blob) || !blob.type.startsWith('image/')) {
             throw new TypeError('Die ausgewählte Bildquelle ist kein gültiges Bild.');
         }
-
-        const objectUrl = URL.createObjectURL(blob);
-        let image;
-        try {
-            image = await new Promise((resolve, reject) => {
-                const element = new Image();
-                element.onload = () => resolve(element);
-                element.onerror = () => reject(new Error('Das Startbild konnte nicht geöffnet werden.'));
-                element.src = objectUrl;
-            });
-        } finally {
-            // Die Image-Instanz hält den decodierten Pixelinhalt auch nach Freigabe der URL.
-        }
-
+        const loaded = await loadImage(blob);
+        const image = loaded.image;
         const targetWidth = 1080;
         const targetHeight = 1920;
         const sourceWidth = image.naturalWidth || image.width;
         const sourceHeight = image.naturalHeight || image.height;
         if (!sourceWidth || !sourceHeight) {
-            URL.revokeObjectURL(objectUrl);
+            URL.revokeObjectURL(loaded.objectUrl);
             throw new Error('Das Startbild hat keine gültigen Bildabmessungen.');
         }
 
@@ -189,17 +175,17 @@
         canvas.height = targetHeight;
         const context = canvas.getContext('2d', { alpha: false });
         if (!context) {
-            URL.revokeObjectURL(objectUrl);
+            URL.revokeObjectURL(loaded.objectUrl);
             throw new Error('Das Startbild konnte nicht für Android vorbereitet werden.');
         }
         context.fillStyle = '#101923';
         context.fillRect(0, 0, targetWidth, targetHeight);
         context.drawImage(image, drawX, drawY, drawWidth, drawHeight);
-        URL.revokeObjectURL(objectUrl);
+        URL.revokeObjectURL(loaded.objectUrl);
 
         const output = await new Promise((resolve, reject) => {
-            canvas.toBlob(blobResult => {
-                if (blobResult instanceof Blob) resolve(blobResult);
+            canvas.toBlob(result => {
+                if (result instanceof Blob) resolve(result);
                 else reject(new Error('Das Startbild konnte nicht komprimiert werden.'));
             }, 'image/jpeg', 0.84);
         });
@@ -234,38 +220,45 @@
         const chunkSize = 30 * 1024;
         const totalChunks = Math.ceil(bytes.length / chunkSize);
 
-        const ready = await nativeRequest('splash.image.start', {
-            transferId,
-            totalBytes: bytes.length,
-            totalChunks,
-            mimeType: 'image/jpeg'
-        }, 30000);
-        if (!ready || ready.type !== 'splash.image.ready' || ready.ok !== true) {
-            throw new Error(ready?.error || 'Android konnte das Startbild nicht vorbereiten.');
-        }
-
-        for (let index = 0; index < totalChunks; index++) {
-            const start = index * chunkSize;
-            const end = Math.min(bytes.length, start + chunkSize);
-            const response = await nativeRequest('splash.image.chunk', {
+        try {
+            const ready = await nativeRequest('splash.image.start', {
                 transferId,
-                index,
-                data: bytesToBase64(bytes.subarray(start, end))
+                totalBytes: bytes.length,
+                totalChunks,
+                mimeType: 'image/jpeg'
             }, 30000);
-            if (!response || response.type !== 'splash.image.chunk.ack' || response.ok !== true) {
-                throw new Error(response?.error || 'Ein Teil des Startbildes konnte nicht übertragen werden.');
+            if (!ready || ready.type !== 'splash.image.ready' || ready.ok !== true) {
+                throw new Error(ready?.error || 'Android konnte das Startbild nicht vorbereiten.');
             }
-        }
 
-        const complete = await nativeRequest('splash.image.finish', { transferId }, 60000);
-        if (!complete || complete.type !== 'splash.image.complete' || complete.ok !== true) {
-            throw new Error(complete?.error || 'Android konnte das Startbild nicht dauerhaft speichern.');
+            for (let index = 0; index < totalChunks; index++) {
+                const start = index * chunkSize;
+                const end = Math.min(bytes.length, start + chunkSize);
+                const response = await nativeRequest('splash.image.chunk', {
+                    transferId,
+                    index,
+                    data: bytesToBase64(bytes.subarray(start, end))
+                }, 30000);
+                if (!response || response.type !== 'splash.image.chunk.ack' || response.ok !== true) {
+                    throw new Error(response?.error || 'Ein Teil des Startbildes konnte nicht übertragen werden.');
+                }
+            }
+
+            const complete = await nativeRequest('splash.image.finish', { transferId }, 60000);
+            if (!complete || complete.type !== 'splash.image.complete' || complete.ok !== true) {
+                throw new Error(complete?.error || 'Android konnte das Startbild nicht dauerhaft speichern.');
+            }
+        } catch (error) {
+            nativeRequest('splash.image.abort', { transferId }, 5000).catch(() => {});
+            throw error;
         }
     }
 
-    async function resolveBackgroundBlob(settings) {
+    async function resolveBackgroundBlob(settings, customBlobOverride) {
         if (settings.background === 'custom') {
-            const blob = await window.getAppStartCustomImageBlob?.();
+            const blob = customBlobOverride instanceof Blob
+                ? customBlobOverride
+                : await window.getAppStartCustomImageBlob?.();
             if (!(blob instanceof Blob)) {
                 throw new Error('Bitte zuerst ein eigenes Startbild aus der Galerie auswählen.');
             }
@@ -283,7 +276,7 @@
         return null;
     }
 
-    async function syncNative(settings) {
+    async function syncNative(settings, customBlobOverride) {
         const nativeRequest = window.__androidNativeRequest;
         if (typeof nativeRequest !== 'function') return { status: 'not-native' };
 
@@ -294,7 +287,7 @@
         }
 
         if (settings.background !== 'standard') {
-            const source = await resolveBackgroundBlob(settings);
+            const source = await resolveBackgroundBlob(settings, customBlobOverride);
             const optimized = await compressImageToPortrait(source.blob, source.crop);
             await uploadNativeImage(optimized);
         }
@@ -312,8 +305,11 @@
 
     async function beginDraft() {
         editorActive = true;
+        originalCustomImageBlob = await window.getAppStartCustomImageBlob?.() || null;
+        pendingCustomImageBlob = null;
+        removeCustomImage = false;
         const stored = normalize(readStored(SETTINGS_KEY) || DEFAULTS);
-        fillControls(stored);
+        fillControls(stored, originalCustomImageBlob);
         setStatus('', false);
         bindControls();
         return { ...stored };
@@ -346,15 +342,16 @@
             }
             setStatus('Startbild wird für das Hochformat optimiert …', false);
             try {
-                const optimized = await compressImageToPortrait(file, {});
-                await window.setAppStartCustomImageBlob?.(optimized);
-                paintPreview(optimized);
+                pendingCustomImageBlob = await compressImageToPortrait(file, {});
+                removeCustomImage = false;
+                paintPreview(pendingCustomImageBlob);
                 const background = byId('te-app-start-background');
                 if (background) background.value = 'custom';
                 draft = { ...currentDraft(), background: 'custom' };
                 const panel = byId('te-app-start-custom-panel');
                 if (panel) panel.hidden = false;
                 setStatus('Eigenes Startbild ausgewählt. Mit „Änderungen speichern“ übernehmen.', false);
+                root.dispatchEvent(new Event('input', { bubbles: true }));
             } catch (error) {
                 console.error('[App-Start] Eigenes Startbild konnte nicht verarbeitet werden.', error);
                 setStatus(error?.message || 'Das Startbild konnte nicht gespeichert werden.', true);
@@ -362,40 +359,45 @@
         });
 
         byId('te-app-start-image-remove')?.addEventListener('click', async () => {
-            try {
-                await window.clearAppStartCustomImageBlob?.();
-                paintPreview(null);
-                const background = byId('te-app-start-background');
-                if (background) background.value = 'standard';
-                draft = { ...currentDraft(), background: 'standard' };
-                const panel = byId('te-app-start-custom-panel');
-                if (panel) panel.hidden = true;
-                setStatus('Eigenes Startbild entfernt. Der Standard bleibt als Hintergrund aktiv.', false);
-                root.dispatchEvent(new Event('input', { bubbles: true }));
-            } catch (error) {
-                setStatus(error?.message || 'Das Startbild konnte nicht entfernt werden.', true);
-            }
+            pendingCustomImageBlob = null;
+            removeCustomImage = true;
+            paintPreview(null);
+            const background = byId('te-app-start-background');
+            if (background) background.value = 'standard';
+            draft = { ...currentDraft(), background: 'standard' };
+            const panel = byId('te-app-start-custom-panel');
+            if (panel) panel.hidden = true;
+            setStatus('Eigenes Startbild zum Entfernen vorgemerkt. Mit „Änderungen speichern“ übernehmen.', false);
+            root.dispatchEvent(new Event('input', { bubbles: true }));
         });
     }
 
     async function commitDraft() {
         const settings = readControls();
-        if (settings.background === 'custom') {
-            const image = await window.getAppStartCustomImageBlob?.();
-            if (!(image instanceof Blob)) {
-                settings.background = 'standard';
-                draft = settings;
-                const background = byId('te-app-start-background');
-                if (background) background.value = 'standard';
-                setStatus('Es ist kein eigenes Bild gespeichert. Der Standard wurde beibehalten.', true);
-            }
+        const existingImage = removeCustomImage
+            ? null
+            : (pendingCustomImageBlob || originalCustomImageBlob);
+
+        if (settings.background === 'custom' && !(existingImage instanceof Blob)) {
+            settings.background = 'standard';
+            draft = settings;
+            const background = byId('te-app-start-background');
+            if (background) background.value = 'standard';
+            setStatus('Es ist kein eigenes Bild gespeichert. Der Standard wurde beibehalten.', true);
+        }
+
+        if (removeCustomImage) {
+            await window.clearAppStartCustomImageBlob?.();
+        } else if (pendingCustomImageBlob instanceof Blob) {
+            await window.setAppStartCustomImageBlob?.(pendingCustomImageBlob);
         }
 
         writeStored(SETTINGS_KEY, settings);
         editorActive = false;
+        originalCustomImageBlob = pendingCustomImageBlob || (removeCustomImage ? null : originalCustomImageBlob);
 
         try {
-            const result = await syncNative(settings);
+            const result = await syncNative(settings, pendingCustomImageBlob || existingImage);
             setStatus(result.status === 'synced'
                 ? 'App-Start gespeichert und mit Android synchronisiert.'
                 : 'App-Start-Einstellungen gespeichert.', false);
@@ -406,13 +408,30 @@
             const bar = byId('theme-editor-savebar-status');
             if (bar) bar.textContent = 'Editor gespeichert · App-Start in Android nicht aktualisiert';
         }
+
+        pendingCustomImageBlob = null;
+        removeCustomImage = false;
         return { ...settings };
     }
 
     async function discardDraft() {
         editorActive = false;
-        fillControls(normalize(readStored(SETTINGS_KEY) || DEFAULTS));
+        pendingCustomImageBlob = null;
+        removeCustomImage = false;
+        const stored = normalize(readStored(SETTINGS_KEY) || DEFAULTS);
+        originalCustomImageBlob = await window.getAppStartCustomImageBlob?.() || null;
+        fillControls(stored, originalCustomImageBlob);
         setStatus('', false);
+    }
+
+    async function syncRestoredSettings() {
+        const stored = readStored(SETTINGS_KEY);
+        if (!stored || typeof stored !== 'object') return;
+        try {
+            await syncNative(normalize(stored));
+        } catch (error) {
+            console.warn('[App-Start] Wiederhergestellte Einstellungen konnten noch nicht an Android übertragen werden.', error);
+        }
     }
 
     window.getAppStartSettings = getAppStartSettings;
@@ -421,6 +440,7 @@
     window.__commitAppStartEditorDraft = commitDraft;
     window.__discardAppStartEditorDraft = discardDraft;
 
+    document.addEventListener('app-start-settings-restored', syncRestoredSettings);
     document.addEventListener('DOMContentLoaded', () => {
         if (!draft) draft = normalize(readStored(SETTINGS_KEY) || DEFAULTS);
     }, { once: true });
