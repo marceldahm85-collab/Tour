@@ -167,7 +167,21 @@
         const activeCanvas = ctx.canvas;
         const stage = activeCanvas && activeCanvas.closest ? activeCanvas.closest('.chart-canvas-stage') : null;
         if (stage && stage.style) {
+            const transition = Math.max(10, Math.min(90, palette.transition || 55)) / 100;
+            const primaryTint = colourWithAlpha(palette.primary, .12);
+            const secondaryTint = colourWithAlpha(palette.secondary, .10);
+            const baseGlass = 'linear-gradient(145deg, rgba(36,51,66,.74), rgba(9,16,25,.82))';
+            const editorGradient = palette.direction === 'radial'
+                ? 'radial-gradient(circle at 28% 18%, ' + primaryTint + ' 0%, ' +
+                    primaryTint + ' ' + (transition * 100) + '%, ' + secondaryTint + ' 100%), ' + baseGlass
+                : 'linear-gradient(' + (palette.direction || '180deg') + ', ' +
+                    primaryTint + ' 0%, ' + primaryTint + ' ' + (transition * 100) +
+                    '%, ' + secondaryTint + ' 100%), ' + baseGlass;
             stage.style.setProperty('--stats-editor-gradient-direction', palette.direction === 'radial' ? '180deg' : (palette.direction || '180deg'));
+            stage.style.setProperty('--stats-editor-card-gradient', editorGradient);
+            stage.style.setProperty('--stats-editor-accent', palette.primary);
+            stage.style.setProperty('--stats-editor-accent2', palette.secondary);
+            stage.style.setProperty('--stats-editor-transition-point', (transition * 100) + '%');
             stage.style.setProperty('--stats-glass-opacity', String(Math.max(.35, Math.min(.78, palette.glassOpacity / 100))));
             stage.style.setProperty('--stats-editor-radius', Math.max(0, palette.radius) + 'px');
         }
@@ -183,7 +197,7 @@
             bg = ctx.createLinearGradient(width / 2 - dx, height / 2 - dy, width / 2 + dx, height / 2 + dy);
         }
         bg.addColorStop(0, 'rgba(38,52,66,.94)');
-        bg.addColorStop(.46, 'rgba(13,22,32,.97)');
+        bg.addColorStop(Math.max(.10, Math.min(.90, palette.transition / 100)), 'rgba(13,22,32,.97)');
         bg.addColorStop(1, 'rgba(5,11,18,.98)');
         ctx.fillStyle = bg;
         ctx.fill();
