@@ -792,62 +792,156 @@
         ctx.beginPath(); ctx.moveTo(plot.left, baseline); ctx.lineTo(plot.right, baseline);
         ctx.strokeStyle = 'rgba(225,236,245,.28)'; ctx.lineWidth = 1.1; ctx.stroke();
 
+        // Zwölf leicht unterschiedliche Schliffe: wechselnde Kronen, Schultern und Facettenachsen.
+        // Alle Profile enden bewusst mit einer geraden, waagerechten Standkante.
+        const crystalCuts = [
+            { left: .31, right: .34, crest: [[-.30,.13],[-.07,.00],[.20,.10]], seams: [-.17,.19], width: .73 },
+            { left: .26, right: .38, crest: [[-.27,.07],[-.02,.15],[.18,.02],[.34,.11]], seams: [-.21,.13], width: .70 },
+            { left: .38, right: .27, crest: [[-.30,.18],[-.10,.08],[.12,.00],[.34,.14]], seams: [-.08,.25], width: .76 },
+            { left: .29, right: .32, crest: [[-.34,.09],[-.14,.01],[.10,.12],[.29,.03]], seams: [-.23,.16], width: .69 },
+            { left: .34, right: .36, crest: [[-.28,.16],[-.03,.00],[.12,.08],[.33,.18]], seams: [-.12,.23], width: .74 },
+            { left: .24, right: .30, crest: [[-.32,.10],[-.15,.17],[.08,.04],[.27,.00],[.39,.13]], seams: [-.19,.22], width: .72 },
+            { left: .36, right: .25, crest: [[-.29,.14],[-.05,.02],[.16,.13],[.31,.00]], seams: [-.06,.18], width: .75 },
+            { left: .30, right: .39, crest: [[-.36,.11],[-.18,.00],[.04,.09],[.25,.02],[.38,.16]], seams: [-.24,.12], width: .71 },
+            { left: .27, right: .29, crest: [[-.26,.04],[-.04,.13],[.19,.00],[.35,.10]], seams: [-.14,.25], width: .76 },
+            { left: .39, right: .33, crest: [[-.33,.17],[-.12,.05],[.08,.00],[.30,.12]], seams: [-.20,.17], width: .68 },
+            { left: .25, right: .36, crest: [[-.38,.12],[-.20,.02],[.02,.11],[.22,.00],[.36,.08]], seams: [-.11,.21], width: .74 },
+            { left: .33, right: .26, crest: [[-.31,.08],[-.08,.00],[.13,.16],[.32,.06]], seams: [-.22,.18], width: .72 }
+        ];
+
         counts.forEach((count, index) => {
             // Monate ohne große Tour bleiben vollständig leer: keine Säule, keine Null.
             if (count <= 0) return;
 
-            const center = monthX(index, plot), w = Math.min(17, step * .72);
-            const h = Math.max(2, count / max * plot.height * .72);
-            const top = baseline - h, half = w / 2, cut = Math.min(4, w * .22);
-            const facetY = top + Math.min(h * .32, 14);
+            const shape = crystalCuts[index];
+            const center = monthX(index, plot), w = Math.min(18, step * shape.width);
+            const h = Math.min(plot.height * .72, Math.max(8, count / max * plot.height * .72));
+            const top = baseline - h, half = w / 2;
+            const point = (x, y) => ({ x: center + x * half * 2, y: top + y * h });
+            const crestPoints = shape.crest.map(([x, y]) => point(x, y));
+
+            // Außenkontur: asymmetrische Kristallkrone, klare Seiten und flacher Boden.
+            const traceSilhouette = () => {
+                ctx.beginPath();
+                ctx.moveTo(point(-.5, 1).x, point(-.5, 1).y);
+                ctx.lineTo(point(-.5, shape.left).x, point(-.5, shape.left).y);
+                crestPoints.forEach(vertex => ctx.lineTo(vertex.x, vertex.y));
+                ctx.lineTo(point(.5, shape.right).x, point(.5, shape.right).y);
+                ctx.lineTo(point(.5, 1).x, point(.5, 1).y);
+                ctx.closePath();
+            };
+
             ctx.save();
-
-            // Kristallsäule mit geschliffener Krone, geraden Seiten und exakt horizontaler Standkante.
-            ctx.beginPath();
-            ctx.moveTo(center - half + cut, top);
-            ctx.lineTo(center + half - cut, top);
-            ctx.lineTo(center + half, top + cut);
-            ctx.lineTo(center + half, baseline);
-            ctx.lineTo(center - half, baseline);
-            ctx.lineTo(center - half, top + cut);
-            ctx.closePath();
-
+            traceSilhouette();
             const body = ctx.createLinearGradient(center - half, top, center + half, baseline);
-            body.addColorStop(0, '#F4F8FB');
-            body.addColorStop(.18, palette.secondary);
-            body.addColorStop(.48, palette.primary);
-            body.addColorStop(.78, colourWithAlpha(palette.primary, .70));
+            body.addColorStop(0, '#F7FBFF');
+            body.addColorStop(.16, palette.secondary);
+            body.addColorStop(.43, palette.primary);
+            body.addColorStop(.72, colourWithAlpha(palette.secondary, .72));
             body.addColorStop(1, '#101A25');
             ctx.fillStyle = body;
-            ctx.shadowColor = colourWithAlpha(palette.primary, .30); ctx.shadowBlur = 8;
-            ctx.fill(); ctx.shadowBlur = 0;
-            ctx.strokeStyle = 'rgba(245,249,252,.66)'; ctx.lineWidth = .8; ctx.stroke();
+            ctx.shadowColor = colourWithAlpha(palette.primary, .38);
+            ctx.shadowBlur = 9;
+            ctx.fill();
+            ctx.shadowBlur = 0;
 
-            // Helle linke Kristallfläche.
+            // Sämtliche Innenflächen werden an der individuellen Kristallkontur beschnitten.
+            traceSilhouette();
+            ctx.clip();
+
+            const leftSeam = shape.seams[0], rightSeam = shape.seams[1];
+            const leftFace = ctx.createLinearGradient(center - half, top, center, baseline);
+            leftFace.addColorStop(0, 'rgba(255,255,255,.34)');
+            leftFace.addColorStop(.58, 'rgba(255,255,255,.16)');
+            leftFace.addColorStop(1, colourWithAlpha(palette.secondary, .10));
             ctx.beginPath();
-            ctx.moveTo(center - half + cut + 1, top + 1);
-            ctx.lineTo(center, facetY);
-            ctx.lineTo(center, baseline - 1);
-            ctx.lineTo(center - half + 1, baseline - 1);
-            ctx.lineTo(center - half + 1, top + cut);
+            ctx.moveTo(point(-.5, shape.left).x, point(-.5, shape.left).y);
+            ctx.lineTo(crestPoints[0].x, crestPoints[0].y);
+            ctx.lineTo(point(leftSeam, .69).x, point(leftSeam, .69).y);
+            ctx.lineTo(point(leftSeam, 1).x, point(leftSeam, 1).y);
+            ctx.lineTo(point(-.5, 1).x, point(-.5, 1).y);
             ctx.closePath();
-            ctx.fillStyle = 'rgba(255,255,255,.19)'; ctx.fill();
+            ctx.fillStyle = leftFace;
+            ctx.fill();
 
-            // Dunklere rechte Fläche erzeugt eine klar erkennbare facettierte Tiefe.
+            // Helle, leicht transparente Mittelspitze mit eigenem Lichtbrechungswinkel.
+            const middleVertex = crestPoints[Math.floor(crestPoints.length / 2)];
             ctx.beginPath();
-            ctx.moveTo(center + half - cut, top + 1);
-            ctx.lineTo(center + half - 1, top + cut);
-            ctx.lineTo(center + half - 1, baseline - 1);
-            ctx.lineTo(center, baseline - 1);
-            ctx.lineTo(center, facetY);
+            ctx.moveTo(middleVertex.x, middleVertex.y);
+            ctx.lineTo(point(rightSeam, .43).x, point(rightSeam, .43).y);
+            ctx.lineTo(point(rightSeam, 1).x, point(rightSeam, 1).y);
+            ctx.lineTo(point(leftSeam, 1).x, point(leftSeam, 1).y);
+            ctx.lineTo(point(leftSeam, .69).x, point(leftSeam, .69).y);
             ctx.closePath();
-            ctx.fillStyle = 'rgba(3,9,16,.30)'; ctx.fill();
+            const centralRefraction = ctx.createLinearGradient(center - half * .2, top, center + half * .25, baseline);
+            centralRefraction.addColorStop(0, 'rgba(255,255,255,.25)');
+            centralRefraction.addColorStop(.52, 'rgba(255,255,255,.07)');
+            centralRefraction.addColorStop(1, colourWithAlpha(palette.secondary, .13));
+            ctx.fillStyle = centralRefraction;
+            ctx.fill();
 
-            // Feiner Lichtschliff entlang der linken Krone.
+            // Dunkle Seitenfacette verstärkt die räumliche Tiefe.
+            const rightFace = ctx.createLinearGradient(center, top, center + half, baseline);
+            rightFace.addColorStop(0, 'rgba(255,255,255,.05)');
+            rightFace.addColorStop(.48, 'rgba(3,9,16,.18)');
+            rightFace.addColorStop(1, 'rgba(3,9,16,.43)');
             ctx.beginPath();
-            ctx.moveTo(center - half + cut + 1, top + 2);
-            ctx.lineTo(center - 1, facetY);
-            ctx.strokeStyle = 'rgba(255,255,255,.78)'; ctx.lineWidth = .8; ctx.stroke();
+            ctx.moveTo(point(rightSeam, .43).x, point(rightSeam, .43).y);
+            ctx.lineTo(crestPoints[crestPoints.length - 1].x, crestPoints[crestPoints.length - 1].y);
+            ctx.lineTo(point(.5, shape.right).x, point(.5, shape.right).y);
+            ctx.lineTo(point(.5, 1).x, point(.5, 1).y);
+            ctx.lineTo(point(rightSeam, 1).x, point(rightSeam, 1).y);
+            ctx.closePath();
+            ctx.fillStyle = rightFace;
+            ctx.fill();
+
+            // Schmale zusätzliche Reflektionsfläche: je nach Monat leicht anders geneigt.
+            ctx.beginPath();
+            ctx.moveTo(point(leftSeam, .27).x, point(leftSeam, .27).y);
+            ctx.lineTo(point(rightSeam, .60).x, point(rightSeam, .60).y);
+            ctx.lineTo(point(rightSeam - .035, .83).x, point(rightSeam - .035, .83).y);
+            ctx.lineTo(point(leftSeam - .025, .55).x, point(leftSeam - .025, .55).y);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(255,255,255,.075)';
+            ctx.fill();
+
+            // Feine Lichtkanten an Krone und Schliffrillen.
+            ctx.beginPath();
+            crestPoints.forEach((vertex, vertexIndex) => {
+                if (vertexIndex === 0) ctx.moveTo(vertex.x, vertex.y);
+                else ctx.lineTo(vertex.x, vertex.y);
+            });
+            ctx.strokeStyle = 'rgba(255,255,255,.78)';
+            ctx.lineWidth = .75;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(crestPoints[0].x, crestPoints[0].y);
+            ctx.lineTo(point(leftSeam, .76).x, point(leftSeam, .76).y);
+            ctx.strokeStyle = 'rgba(255,255,255,.65)';
+            ctx.lineWidth = .8;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(middleVertex.x, middleVertex.y);
+            ctx.lineTo(point((leftSeam + rightSeam) / 2, 1).x, point((leftSeam + rightSeam) / 2, 1).y);
+            ctx.strokeStyle = 'rgba(255,255,255,.30)';
+            ctx.lineWidth = .65;
+            ctx.stroke();
+
+            ctx.restore();
+
+            // Außenkontur separat zeichnen; die Standkante bleibt exakt horizontal.
+            traceSilhouette();
+            ctx.strokeStyle = 'rgba(245,249,252,.78)';
+            ctx.lineWidth = .8;
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(center - half + .5, baseline - .35);
+            ctx.lineTo(center + half - .5, baseline - .35);
+            ctx.strokeStyle = 'rgba(255,255,255,.46)';
+            ctx.lineWidth = .65;
+            ctx.stroke();
 
             ctx.fillStyle = palette.text; ctx.font = editorFont(8, 850);
             ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
