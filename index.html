@@ -126,7 +126,7 @@
 <link rel="stylesheet" href="./styles-overrides.css?v=99">
 <link rel="stylesheet" href="./background-image-picker.css?v=3">
 <link rel="stylesheet" href="./theme-editor-workflow.css?v=10">
-<link rel="stylesheet" href="./app-start-editor.css?v=1">
+<link rel="stylesheet" href="./app-start-editor.css?v=2">
 <link rel="stylesheet" href="./android-gallery-photos.css?v=5">
 <link rel="stylesheet" href="./dashboard-premium-alpine.css?v=27">
 <link rel="stylesheet" href="./dashboard-stat-modal-premium.css?v=5">
@@ -2498,20 +2498,46 @@
         <select id="te-app-start-background">
             <option value="standard">Alpenpanorama (Standard)</option>
             <option value="editor">Aktuelles Editor-Hintergrundbild</option>
+            <optgroup id="te-app-start-presets" label="Voreingestellte App-Hintergründe"></optgroup>
             <option value="custom">Eigenes Startbild</option>
         </select>
 
+        <div class="theme-editor-start-crop-panel" id="te-app-start-crop-panel">
+            <div class="theme-editor-start-crop-preview-wrap">
+                <canvas id="te-app-start-crop-preview" width="270" height="480" aria-label="Vorschau des zugeschnittenen App-Startbildes"></canvas>
+            </div>
+            <div class="theme-editor-start-crop-controls">
+                <div class="background-image-position-control">
+                    <div class="background-image-position-label">
+                        <label for="te-app-start-crop-x">Horizontaler Bildausschnitt</label>
+                        <span id="te-app-start-crop-x-value">50 %</span>
+                    </div>
+                    <input type="range" id="te-app-start-crop-x" min="0" max="100" step="1" value="50">
+                </div>
+                <div class="background-image-position-control">
+                    <div class="background-image-position-label">
+                        <label for="te-app-start-crop-y">Vertikaler Bildausschnitt</label>
+                        <span id="te-app-start-crop-y-value">50 %</span>
+                    </div>
+                    <input type="range" id="te-app-start-crop-y" min="0" max="100" step="1" value="50">
+                </div>
+                <div class="background-image-position-control">
+                    <div class="background-image-position-label">
+                        <label for="te-app-start-crop-zoom">Zoom / Vergrößerung</label>
+                        <span id="te-app-start-crop-zoom-value">100 %</span>
+                    </div>
+                    <input type="range" id="te-app-start-crop-zoom" min="100" max="180" step="1" value="100">
+                </div>
+                <button type="button" class="background-image-secondary-button" id="te-app-start-crop-reset">Bildzuschnitt zurücksetzen</button>
+            </div>
+        </div>
+
         <div class="theme-editor-start-image-panel" id="te-app-start-custom-panel" hidden>
             <input type="file" id="te-app-start-image-file" accept="image/*" hidden>
-            <div class="theme-editor-start-image-preview-wrap">
-                <img id="te-app-start-image-preview" alt="Vorschau des eigenen App-Startbildes" hidden>
-                <div class="theme-editor-start-image-empty" id="te-app-start-image-empty"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m4 16 5-5 4 4 3-3 4 4"/><circle cx="8.5" cy="8.5" r="1.2"/></svg><span>Noch kein eigenes Startbild ausgewählt</span></div>
-            </div>
             <div class="theme-editor-start-image-actions">
                 <button type="button" class="background-image-upload-button" id="te-app-start-image-choose"><span aria-hidden="true">＋</span><span>Startbild aus Galerie wählen</span></button>
-                <button type="button" class="background-image-secondary-button" id="te-app-start-image-remove" hidden>Eigenes Bild entfernen</button>
+                <button type="button" class="background-image-secondary-button" id="te-app-start-image-remove">Eigenes Bild entfernen</button>
             </div>
-            <p class="background-image-upload-status" id="te-app-start-image-status" role="status" aria-live="polite" hidden></p>
         </div>
 
         <label for="te-app-start-duration">Präsentationsdauer</label>
@@ -2596,7 +2622,7 @@
 <script src="./background-image-picker.js?v=8" defer></script>
 <script src="./dashboard-premium-alpine.js?v=37" defer></script>
 <script src="./theme-editor-workflow.js?v=8" defer></script>
-<script src="./app-start-editor.js?v=1" defer></script>
+<script src="./app-start-editor.js?v=2" defer></script>
 <script src="./app-navigation-history.js?v=1" defer></script>
 <script src="./android-gallery-photos.js?v=9" defer></script>
 <script src="./premium-alpine-icons.js?v=3" defer></script>
