@@ -699,22 +699,20 @@
     function drawBigToursDiagram() {
         const canvas = canvasById('big-tours-canvas');
         if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
-        const ctx = resizeCanvasToDisplaySize(canvas);
-        if (!ctx) return;
+
+        // Ein neuer Aufruf (Kachelwechsel, Jahreswechsel oder Monatsauswahl)
+        // beendet einen eventuell noch laufenden Durchgang und startet sauber neu.
+        if (canvas.__bigToursAnimationFrame) {
+            cancelAnimationFrame(canvas.__bigToursAnimationFrame);
+            canvas.__bigToursAnimationFrame = 0;
+        }
+
         const data = getFilteredTours(), counts = Array(12).fill(0);
         data.forEach(entry => {
             const month = monthOf(entry);
             if (month !== null && isBigTourCountable(entry, data)) counts[month]++;
         });
         const total = counts.reduce((sum, value) => sum + value, 0);
-        const base = baseChart(canvas, ctx, '', total + ' Touren', {
-            reliefStrength: .18
-        });
-        const { height, plot, palette } = base;
-        const max = Math.max(1, ...counts), step = plot.width / 12, baseline = plot.bottom - 5;
-
-        ctx.beginPath(); ctx.moveTo(plot.left, baseline); ctx.lineTo(plot.right, baseline);
-        ctx.strokeStyle = 'rgba(225,236,245,.28)'; ctx.lineWidth = 1.1; ctx.stroke();
 
         // Zwölf leicht unterschiedliche Schliffe: wechselnde Kronen, Schultern und Facettenachsen.
         // Alle Profile enden bewusst mit einer geraden, waagerechten Standkante.
@@ -733,147 +731,191 @@
             { left: .33, right: .26, crest: [[-.31,.08],[-.08,.00],[.13,.16],[.32,.06]], seams: [-.22,.18], width: .72 }
         ];
 
-        counts.forEach((count, index) => {
-            // Monate ohne große Tour bleiben vollständig leer: keine Säule, keine Null.
-            if (count <= 0) return;
-
-            const shape = crystalCuts[index];
-            const center = monthX(index, plot), w = Math.min(18, step * shape.width);
-            const h = Math.min(plot.height * .72, Math.max(8, count / max * plot.height * .72));
-            const top = baseline - h, half = w / 2;
-            const point = (x, y) => ({ x: center + x * half * 2, y: top + y * h });
-            const crestPoints = shape.crest.map(([x, y]) => point(x, y));
-
-            // Außenkontur: asymmetrische Kristallkrone, klare Seiten und flacher Boden.
-            const traceSilhouette = () => {
-                ctx.beginPath();
-                ctx.moveTo(point(-.5, 1).x, point(-.5, 1).y);
-                ctx.lineTo(point(-.5, shape.left).x, point(-.5, shape.left).y);
-                crestPoints.forEach(vertex => ctx.lineTo(vertex.x, vertex.y));
-                ctx.lineTo(point(.5, shape.right).x, point(.5, shape.right).y);
-                ctx.lineTo(point(.5, 1).x, point(.5, 1).y);
-                ctx.closePath();
-            };
-
-            ctx.save();
-            traceSilhouette();
-            const body = ctx.createLinearGradient(center - half, top, center + half, baseline);
-            body.addColorStop(0, '#F7FBFF');
-            body.addColorStop(.16, palette.secondary);
-            body.addColorStop(.43, palette.primary);
-            body.addColorStop(.72, colourWithAlpha(palette.secondary, .72));
-            body.addColorStop(1, '#101A25');
-            ctx.fillStyle = body;
-            ctx.shadowColor = colourWithAlpha(palette.primary, .38);
-            ctx.shadowBlur = 9;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-
-            // Sämtliche Innenflächen werden an der individuellen Kristallkontur beschnitten.
-            traceSilhouette();
-            ctx.clip();
-
-            const leftSeam = shape.seams[0], rightSeam = shape.seams[1];
-            const leftFace = ctx.createLinearGradient(center - half, top, center, baseline);
-            leftFace.addColorStop(0, 'rgba(255,255,255,.34)');
-            leftFace.addColorStop(.58, 'rgba(255,255,255,.16)');
-            leftFace.addColorStop(1, colourWithAlpha(palette.secondary, .10));
-            ctx.beginPath();
-            ctx.moveTo(point(-.5, shape.left).x, point(-.5, shape.left).y);
-            ctx.lineTo(crestPoints[0].x, crestPoints[0].y);
-            ctx.lineTo(point(leftSeam, .69).x, point(leftSeam, .69).y);
-            ctx.lineTo(point(leftSeam, 1).x, point(leftSeam, 1).y);
-            ctx.lineTo(point(-.5, 1).x, point(-.5, 1).y);
-            ctx.closePath();
-            ctx.fillStyle = leftFace;
-            ctx.fill();
-
-            // Helle, leicht transparente Mittelspitze mit eigenem Lichtbrechungswinkel.
-            const middleVertex = crestPoints[Math.floor(crestPoints.length / 2)];
-            ctx.beginPath();
-            ctx.moveTo(middleVertex.x, middleVertex.y);
-            ctx.lineTo(point(rightSeam, .43).x, point(rightSeam, .43).y);
-            ctx.lineTo(point(rightSeam, 1).x, point(rightSeam, 1).y);
-            ctx.lineTo(point(leftSeam, 1).x, point(leftSeam, 1).y);
-            ctx.lineTo(point(leftSeam, .69).x, point(leftSeam, .69).y);
-            ctx.closePath();
-            const centralRefraction = ctx.createLinearGradient(center - half * .2, top, center + half * .25, baseline);
-            centralRefraction.addColorStop(0, 'rgba(255,255,255,.25)');
-            centralRefraction.addColorStop(.52, 'rgba(255,255,255,.07)');
-            centralRefraction.addColorStop(1, colourWithAlpha(palette.secondary, .13));
-            ctx.fillStyle = centralRefraction;
-            ctx.fill();
-
-            // Dunkle Seitenfacette verstärkt die räumliche Tiefe.
-            const rightFace = ctx.createLinearGradient(center, top, center + half, baseline);
-            rightFace.addColorStop(0, 'rgba(255,255,255,.05)');
-            rightFace.addColorStop(.48, 'rgba(3,9,16,.18)');
-            rightFace.addColorStop(1, 'rgba(3,9,16,.43)');
-            ctx.beginPath();
-            ctx.moveTo(point(rightSeam, .43).x, point(rightSeam, .43).y);
-            ctx.lineTo(crestPoints[crestPoints.length - 1].x, crestPoints[crestPoints.length - 1].y);
-            ctx.lineTo(point(.5, shape.right).x, point(.5, shape.right).y);
-            ctx.lineTo(point(.5, 1).x, point(.5, 1).y);
-            ctx.lineTo(point(rightSeam, 1).x, point(rightSeam, 1).y);
-            ctx.closePath();
-            ctx.fillStyle = rightFace;
-            ctx.fill();
-
-            // Schmale zusätzliche Reflektionsfläche: je nach Monat leicht anders geneigt.
-            ctx.beginPath();
-            ctx.moveTo(point(leftSeam, .27).x, point(leftSeam, .27).y);
-            ctx.lineTo(point(rightSeam, .60).x, point(rightSeam, .60).y);
-            ctx.lineTo(point(rightSeam - .035, .83).x, point(rightSeam - .035, .83).y);
-            ctx.lineTo(point(leftSeam - .025, .55).x, point(leftSeam - .025, .55).y);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(255,255,255,.075)';
-            ctx.fill();
-
-            // Feine Lichtkanten an Krone und Schliffrillen.
-            ctx.beginPath();
-            crestPoints.forEach((vertex, vertexIndex) => {
-                if (vertexIndex === 0) ctx.moveTo(vertex.x, vertex.y);
-                else ctx.lineTo(vertex.x, vertex.y);
-            });
-            ctx.strokeStyle = 'rgba(255,255,255,.78)';
-            ctx.lineWidth = .75;
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(crestPoints[0].x, crestPoints[0].y);
-            ctx.lineTo(point(leftSeam, .76).x, point(leftSeam, .76).y);
-            ctx.strokeStyle = 'rgba(255,255,255,.65)';
-            ctx.lineWidth = .8;
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(middleVertex.x, middleVertex.y);
-            ctx.lineTo(point((leftSeam + rightSeam) / 2, 1).x, point((leftSeam + rightSeam) / 2, 1).y);
-            ctx.strokeStyle = 'rgba(255,255,255,.30)';
-            ctx.lineWidth = .65;
-            ctx.stroke();
-
-            ctx.restore();
-
-            // Außenkontur separat zeichnen; die Standkante bleibt exakt horizontal.
-            traceSilhouette();
-            ctx.strokeStyle = 'rgba(245,249,252,.78)';
-            ctx.lineWidth = .8;
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(center - half + .5, baseline - .35);
-            ctx.lineTo(center + half - .5, baseline - .35);
-            ctx.strokeStyle = 'rgba(255,255,255,.46)';
-            ctx.lineWidth = .65;
-            ctx.stroke();
-
-            ctx.fillStyle = palette.text; ctx.font = editorFont(8, 850);
-            ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-            ctx.fillText(String(count), center, top - 5, step + 2);
-        });
-        drawMonthLabels(ctx, plot, height, palette);
         canvas.__premiumChartData = { values: counts, unit: 'große Touren', key: 'bigTours',
             formatter: value => value + ' große Touren' };
+
+        const startTime = performance.now();
+        const duration = 760;
+
+        const renderFrame = timestamp => {
+            // Wird auf eine andere Diagrammkachel gewechselt, endet der alte Lauf sofort.
+            if (!canvas.classList.contains('active-chart-canvas')) {
+                canvas.__bigToursAnimationFrame = 0;
+                return;
+            }
+
+            const rawProgress = Math.min(1, Math.max(0, (timestamp - startTime) / duration));
+            // Schneller, weicher Anstieg mit sanftem Auslaufen am Ende.
+            const progress = 1 - Math.pow(1 - rawProgress, 3);
+            const ctx = resizeCanvasToDisplaySize(canvas);
+            if (!ctx) {
+                canvas.__bigToursAnimationFrame = 0;
+                return;
+            }
+            const base = baseChart(canvas, ctx, '', total + ' Touren', {
+                reliefStrength: .18
+            });
+            const { height, plot, palette } = base;
+            const max = Math.max(1, ...counts), step = plot.width / 12, baseline = plot.bottom - 5;
+
+            ctx.beginPath(); ctx.moveTo(plot.left, baseline); ctx.lineTo(plot.right, baseline);
+            ctx.strokeStyle = 'rgba(225,236,245,.28)'; ctx.lineWidth = 1.1; ctx.stroke();
+
+            counts.forEach((count, index) => {
+                // Monate ohne große Tour bleiben vollständig leer: keine Säule, keine Null.
+                if (count <= 0) return;
+
+                const shape = crystalCuts[index];
+                const center = monthX(index, plot), w = Math.min(18, step * shape.width);
+                const finalHeight = Math.min(plot.height * .72, Math.max(8, count / max * plot.height * .72));
+                const h = finalHeight * progress;
+                if (h < .8) return;
+
+                // Die Standkante bleibt fest; nur die Kristallkrone wandert von unten nach oben.
+                const top = baseline - h, half = w / 2;
+                const point = (x, y) => ({ x: center + x * half * 2, y: top + y * h });
+                const crestPoints = shape.crest.map(([x, y]) => point(x, y));
+
+                const traceSilhouette = () => {
+                    ctx.beginPath();
+                    ctx.moveTo(point(-.5, 1).x, point(-.5, 1).y);
+                    ctx.lineTo(point(-.5, shape.left).x, point(-.5, shape.left).y);
+                    crestPoints.forEach(vertex => ctx.lineTo(vertex.x, vertex.y));
+                    ctx.lineTo(point(.5, shape.right).x, point(.5, shape.right).y);
+                    ctx.lineTo(point(.5, 1).x, point(.5, 1).y);
+                    ctx.closePath();
+                };
+
+                ctx.save();
+                traceSilhouette();
+                const body = ctx.createLinearGradient(center - half, top, center + half, baseline);
+                body.addColorStop(0, '#F7FBFF');
+                body.addColorStop(.16, palette.secondary);
+                body.addColorStop(.43, palette.primary);
+                body.addColorStop(.72, colourWithAlpha(palette.secondary, .72));
+                body.addColorStop(1, '#101A25');
+                ctx.fillStyle = body;
+                ctx.shadowColor = colourWithAlpha(palette.primary, .38);
+                ctx.shadowBlur = 9;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // Sämtliche Innenflächen werden an der individuellen Kristallkontur beschnitten.
+                traceSilhouette();
+                ctx.clip();
+
+                const leftSeam = shape.seams[0], rightSeam = shape.seams[1];
+                const leftFace = ctx.createLinearGradient(center - half, top, center, baseline);
+                leftFace.addColorStop(0, 'rgba(255,255,255,.34)');
+                leftFace.addColorStop(.58, 'rgba(255,255,255,.16)');
+                leftFace.addColorStop(1, colourWithAlpha(palette.secondary, .10));
+                ctx.beginPath();
+                ctx.moveTo(point(-.5, shape.left).x, point(-.5, shape.left).y);
+                ctx.lineTo(crestPoints[0].x, crestPoints[0].y);
+                ctx.lineTo(point(leftSeam, .69).x, point(leftSeam, .69).y);
+                ctx.lineTo(point(leftSeam, 1).x, point(leftSeam, 1).y);
+                ctx.lineTo(point(-.5, 1).x, point(-.5, 1).y);
+                ctx.closePath();
+                ctx.fillStyle = leftFace;
+                ctx.fill();
+
+                // Helle, leicht transparente Mittelfacette.
+                const middleVertex = crestPoints[Math.floor(crestPoints.length / 2)];
+                ctx.beginPath();
+                ctx.moveTo(middleVertex.x, middleVertex.y);
+                ctx.lineTo(point(rightSeam, .43).x, point(rightSeam, .43).y);
+                ctx.lineTo(point(rightSeam, 1).x, point(rightSeam, 1).y);
+                ctx.lineTo(point(leftSeam, 1).x, point(leftSeam, 1).y);
+                ctx.lineTo(point(leftSeam, .69).x, point(leftSeam, .69).y);
+                ctx.closePath();
+                const centralRefraction = ctx.createLinearGradient(center - half * .2, top, center + half * .25, baseline);
+                centralRefraction.addColorStop(0, 'rgba(255,255,255,.25)');
+                centralRefraction.addColorStop(.52, 'rgba(255,255,255,.07)');
+                centralRefraction.addColorStop(1, colourWithAlpha(palette.secondary, .13));
+                ctx.fillStyle = centralRefraction;
+                ctx.fill();
+
+                // Dunkle Seitenfacette.
+                const rightFace = ctx.createLinearGradient(center, top, center + half, baseline);
+                rightFace.addColorStop(0, 'rgba(255,255,255,.05)');
+                rightFace.addColorStop(.48, 'rgba(3,9,16,.18)');
+                rightFace.addColorStop(1, 'rgba(3,9,16,.43)');
+                ctx.beginPath();
+                ctx.moveTo(point(rightSeam, .43).x, point(rightSeam, .43).y);
+                ctx.lineTo(crestPoints[crestPoints.length - 1].x, crestPoints[crestPoints.length - 1].y);
+                ctx.lineTo(point(.5, shape.right).x, point(.5, shape.right).y);
+                ctx.lineTo(point(.5, 1).x, point(.5, 1).y);
+                ctx.lineTo(point(rightSeam, 1).x, point(rightSeam, 1).y);
+                ctx.closePath();
+                ctx.fillStyle = rightFace;
+                ctx.fill();
+
+                // Schmale zusätzliche Reflektionsfläche.
+                ctx.beginPath();
+                ctx.moveTo(point(leftSeam, .27).x, point(leftSeam, .27).y);
+                ctx.lineTo(point(rightSeam, .60).x, point(rightSeam, .60).y);
+                ctx.lineTo(point(rightSeam - .035, .83).x, point(rightSeam - .035, .83).y);
+                ctx.lineTo(point(leftSeam - .025, .55).x, point(leftSeam - .025, .55).y);
+                ctx.closePath();
+                ctx.fillStyle = 'rgba(255,255,255,.075)';
+                ctx.fill();
+
+                // Feine Lichtkanten an Krone und Schliffrillen.
+                ctx.beginPath();
+                crestPoints.forEach((vertex, vertexIndex) => {
+                    if (vertexIndex === 0) ctx.moveTo(vertex.x, vertex.y);
+                    else ctx.lineTo(vertex.x, vertex.y);
+                });
+                ctx.strokeStyle = 'rgba(255,255,255,.78)';
+                ctx.lineWidth = .75;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(crestPoints[0].x, crestPoints[0].y);
+                ctx.lineTo(point(leftSeam, .76).x, point(leftSeam, .76).y);
+                ctx.strokeStyle = 'rgba(255,255,255,.65)';
+                ctx.lineWidth = .8;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(middleVertex.x, middleVertex.y);
+                ctx.lineTo(point((leftSeam + rightSeam) / 2, 1).x, point((leftSeam + rightSeam) / 2, 1).y);
+                ctx.strokeStyle = 'rgba(255,255,255,.30)';
+                ctx.lineWidth = .65;
+                ctx.stroke();
+                ctx.restore();
+
+                // Außenkontur und exakt waagerechte Standkante.
+                traceSilhouette();
+                ctx.strokeStyle = 'rgba(245,249,252,.78)';
+                ctx.lineWidth = .8;
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(center - half + .5, baseline - .35);
+                ctx.lineTo(center + half - .5, baseline - .35);
+                ctx.strokeStyle = 'rgba(255,255,255,.46)';
+                ctx.lineWidth = .65;
+                ctx.stroke();
+
+                // Zahlen erscheinen weich zusammen mit ihren Kristallen.
+                ctx.save();
+                ctx.globalAlpha = Math.min(1, progress * 1.35);
+                ctx.fillStyle = palette.text; ctx.font = editorFont(8, 850);
+                ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+                ctx.fillText(String(count), center, top - 5, step + 2);
+                ctx.restore();
+            });
+
+            drawMonthLabels(ctx, plot, height, palette);
+
+            if (rawProgress < 1) {
+                canvas.__bigToursAnimationFrame = requestAnimationFrame(renderFrame);
+            } else {
+                canvas.__bigToursAnimationFrame = 0;
+            }
+        };
+
+        canvas.__bigToursAnimationFrame = requestAnimationFrame(renderFrame);
     }
 
     function drawGaugeNeedle(ctx, cx, cy, radius, angle, palette, redGold) {
@@ -1539,7 +1581,7 @@
                     const row = y < size.height * .56 ? 0 : 1;
                     index = row * 6 + col;
                 } else {
-                    const left = 44;
+                    const left = 18;
                     const right = size.width - 18;
                     if (x < left || x > right) return;
                     index = Math.floor((x - left) / Math.max(1, right - left) * 12);
