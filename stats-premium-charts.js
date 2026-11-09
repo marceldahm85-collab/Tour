@@ -164,8 +164,24 @@
 
     function drawInstrumentSurface(ctx, width, height, palette) {
         const inset = 8, y = 7, h = height - 14;
+        const activeCanvas = ctx.canvas;
+        const stage = activeCanvas && activeCanvas.closest ? activeCanvas.closest('.chart-canvas-stage') : null;
+        if (stage && stage.style) {
+            stage.style.setProperty('--stats-editor-gradient-direction', palette.direction || '180deg');
+            stage.style.setProperty('--stats-glass-opacity', String(Math.max(.35, Math.min(.78, palette.glassOpacity / 100))));
+            stage.style.setProperty('--stats-editor-radius', Math.max(0, palette.radius) + 'px');
+        }
         roundedPath(ctx, inset, y, width - inset * 2, h, Math.max(5, palette.radius - 3));
-        const bg = ctx.createLinearGradient(8, 8, width - 8, height - 8);
+        let bg;
+        if (palette.direction === 'radial') {
+            bg = ctx.createRadialGradient(width * .28, height * .18, 2, width * .52, height * .55, Math.max(width, height));
+        } else {
+            const degrees = Number.parseFloat(String(palette.direction).replace('deg', '')) || 180;
+            const angle = (degrees - 90) * Math.PI / 180;
+            const dx = Math.cos(angle) * width * .5;
+            const dy = Math.sin(angle) * height * .5;
+            bg = ctx.createLinearGradient(width / 2 - dx, height / 2 - dy, width / 2 + dx, height / 2 + dy);
+        }
         bg.addColorStop(0, 'rgba(38,52,66,.94)');
         bg.addColorStop(.46, 'rgba(13,22,32,.97)');
         bg.addColorStop(1, 'rgba(5,11,18,.98)');
