@@ -548,7 +548,12 @@
         const total = sums.reduce((sum, value) => sum + value, 0);
         const maxValue = Math.max(1, ...sums) * 1.14;
         const selected = selectedMonths.steps;
-        const duration = 900;
+
+        // Die gesamte Sequenz dauert 1,5 Sekunden. Die Linie läuft voraus,
+        // jeder Schuh erhält danach ein eigenes, gut sichtbares Aufsetzen.
+        const duration = 1500;
+        const shoeDuration = 360;
+        const lineDuration = duration - shoeDuration;
         const startTime = performance.now();
 
         canvas.__premiumChartData = {
@@ -564,8 +569,11 @@
                 return;
             }
 
-            const rawProgress = Math.min(1, Math.max(0, (timestamp - startTime) / duration));
-            const progress = 1 - Math.pow(1 - rawProgress, 2.7);
+            const elapsed = Math.max(0, timestamp - startTime);
+            const rawProgress = Math.min(1, elapsed / duration);
+            // Die Linie wird gleichmäßig gezeichnet, damit die Schuhe exakt
+            // dann aufsetzen, wenn der Verlauf ihren jeweiligen Monat erreicht.
+            const lineProgress = Math.min(1, elapsed / lineDuration);
             const ctx = resizeCanvasToDisplaySize(canvas);
             if (!ctx) {
                 canvas.__stepsAnimationFrame = 0;
@@ -580,13 +588,13 @@
             const monthStep = plot.width / 12;
             const shoeWidth = Math.min(31, monthStep * .94);
             const shoeHeight = shoeWidth * .55;
-            const positive = sums.map((value, index) => ({ index, value }))
-                .filter(point => point.value > 0);
-            const points = positive.map(point => ({
-                ...point,
-                x: monthX(point.index, plot),
-                y: baseline - (point.value / maxValue) * plot.height * .91
-            }));
+            const points = sums.map((value, index) => ({ index, value }))
+                .filter(point => point.value > 0)
+                .map(point => ({
+                    ...point,
+                    x: monthX(point.index, plot),
+                    y: baseline - (point.value / maxValue) * plot.height * .91
+                }));
 
             drawAxes(ctx, plot);
 
@@ -603,11 +611,11 @@
                 return;
             }
 
-            // Linien- und Flächenverlauf wird von links nach rechts freigelegt.
-            if (points.length > 1 && progress > 0) {
+            // Linien- und Flächenverlauf wird über 1,14 Sekunden freigelegt.
+            if (points.length > 1 && lineProgress > 0) {
                 ctx.save();
                 ctx.beginPath();
-                ctx.rect(plot.left, plot.top, plot.width * progress, plot.height);
+                ctx.rect(plot.left, plot.top, plot.width * lineProgress, plot.height);
                 ctx.clip();
 
                 ctx.beginPath();
@@ -639,31 +647,47 @@
                 ctx.shadowBlur = 7;
                 ctx.stroke();
                 ctx.restore();
-            } else if (points.length === 1 && progress > 0) {
+            } else if (points.length === 1 && lineProgress > 0) {
+                const point = points[0];
+                const lineStart = Math.max(0, point.x - monthStep * .25);
+                const lineEnd = Math.min(width, point.x + monthStep * .25);
+                ctx.save();
                 ctx.beginPath();
-                ctx.moveTo(points[0].x - monthStep * .25, points[0].y);
-                ctx.lineTo(points[0].x + monthStep * .25, points[0].y);
+                ctx.rect(plot.left, plot.top, plot.width * lineProgress, plot.height);
+                ctx.clip();
+                ctx.beginPath();
+                ctx.moveTo(lineStart, point.y);
+                ctx.lineTo(lineEnd, point.y);
                 ctx.strokeStyle = palette.primary;
                 ctx.lineWidth = 2.4;
                 ctx.stroke();
+                ctx.restore();
             }
 
-            // Jeder Schuh setzt nacheinander auf seinem Monatspunkt auf.
-            points.forEach(point => {
-                const revealAt = point.index / 12;
-                const local = Math.max(0, Math.min(1, (progress - revealAt) * 15));
+            // Jeder Schuh startet passend zum Monatsanteil der Linie und
+            // bekommt 360 ms für eine deutlich sichtbare Aufwärts-/Landebewegung.
+            points.forEach((point, pointIndex) => {
+                const shoeStart = ((point.index + .5) / 12) * lineDuration;
+                const local = Math.max(0, Math.min(1, (elapsed - shoeStart) / shoeDuration));
                 if (local <= 0) return;
-                const eased = 1 - Math.pow(1 - local, 2.4);
-                const rise = (1 - eased) * 6;
-                const shoeY = point.y - shoeHeight + 2 + rise;
-                const shoeScale = .84 + eased * .16;
+
+                // Sichtbarer Schritt: von unterhalb des Datenpunkts aufsetzen,
+                // leicht überschwingen und anschließend ruhig einrasten.
+                const c1 = 1.70158;
+                const c3 = c1 + 1;
+                const eased = 1 + c3 * Math.pow(local - 1, 3) + c1 * Math.pow(local - 1, 2);
+                const rise = 17 * (1 - eased);
+                const restingShoeY = point.y - shoeHeight + 2;
+                const shoeY = restingShoeY + rise;
+                const shoeScale = .76 + .24 * Math.max(0, eased);
                 const drawWidth = shoeWidth * shoeScale;
                 const drawHeight = shoeHeight * shoeScale;
                 const shoeX = point.x - drawWidth / 2;
+                const shoeAlpha = Math.min(1, local / .30);
 
-                // Dezenter Lichtpunkt am Datenpunkt, kein zusätzlicher Kreismarker.
+                // Dezenter Kontaktlichtpunkt am Datenpunkt, kein Monatskreis.
                 ctx.save();
-                ctx.globalAlpha = eased * .48;
+                ctx.globalAlpha = shoeAlpha * .48;
                 ctx.beginPath();
                 ctx.ellipse(point.x, point.y + 1.5, shoeWidth * .30, 2.2, 0, 0, Math.PI * 2);
                 ctx.fillStyle = palette.primary;
@@ -673,7 +697,7 @@
                 ctx.restore();
 
                 ctx.save();
-                ctx.globalAlpha = eased;
+                ctx.globalAlpha = shoeAlpha;
                 ctx.shadowColor = 'rgba(0,0,0,.55)';
                 ctx.shadowBlur = 4;
                 ctx.shadowOffsetY = 2;
@@ -681,27 +705,48 @@
                 ctx.drawImage(STEPS_SHOE_IMAGE, shoeX, shoeY, drawWidth, drawHeight);
                 ctx.restore();
 
-                // Nur der reine Zahlenwert, ohne Einheit oder Zusatztext.
+                // Wertseite folgt dem lokalen Trend: bei ansteigendem Verlauf
+                // oberhalb, bei fallendem Verlauf unterhalb der Linie.
+                const previous = points[Math.max(0, pointIndex - 1)];
+                const next = points[Math.min(points.length - 1, pointIndex + 1)];
+                const trendDelta = next.y - previous.y;
                 const label = Math.round(point.value).toLocaleString('de-AT');
-                ctx.save();
-                ctx.globalAlpha = eased;
                 let fontSize = 7.1;
+                ctx.save();
                 ctx.font = editorFont(fontSize, 850);
-                while (fontSize > 5.2 && ctx.measureText(label).width > monthStep - 1) {
+                while (fontSize > 5.2 && ctx.measureText(label).width > monthStep - 2) {
                     fontSize -= .3;
                     ctx.font = editorFont(fontSize, 850);
                 }
+                const labelHeight = fontSize + 2;
+                const labelBottomAbove = restingShoeY - 4;
+                const labelTopBelow = point.y + 10;
+                const spaceAbove = labelBottomAbove - labelHeight - (plot.top + 2);
+                const spaceBelow = (plot.bottom - 2) - (labelTopBelow + labelHeight);
+
+                let labelAbove;
+                if (Math.abs(trendDelta) > 1.5) {
+                    labelAbove = trendDelta < 0;
+                } else {
+                    labelAbove = spaceAbove >= spaceBelow;
+                }
+                if (labelAbove && spaceAbove < 0 && spaceBelow >= 0) labelAbove = false;
+                if (!labelAbove && spaceBelow < 0 && spaceAbove >= 0) labelAbove = true;
+                if (spaceAbove < 0 && spaceBelow < 0) labelAbove = spaceAbove >= spaceBelow;
+
+                const labelY = labelAbove ? labelBottomAbove : labelTopBelow;
+                ctx.globalAlpha = shoeAlpha * (labelAbove ? 1 : Math.max(0, Math.min(1, (local - .42) / .58)));
                 ctx.textAlign = 'center';
-                ctx.textBaseline = 'bottom';
+                ctx.textBaseline = labelAbove ? 'bottom' : 'top';
                 ctx.fillStyle = selected === point.index ? palette.secondary : palette.text;
-                ctx.shadowColor = 'rgba(0,0,0,.72)';
+                ctx.shadowColor = 'rgba(0,0,0,.78)';
                 ctx.shadowBlur = 3;
-                ctx.fillText(label, point.x, shoeY - 1, monthStep - 1);
+                ctx.fillText(label, point.x, labelY, monthStep - 2);
                 ctx.restore();
 
                 if (selected === point.index) {
                     ctx.save();
-                    ctx.globalAlpha = eased;
+                    ctx.globalAlpha = shoeAlpha;
                     ctx.beginPath();
                     ctx.moveTo(point.x - shoeWidth * .30, point.y + 4);
                     ctx.lineTo(point.x + shoeWidth * .30, point.y + 4);
