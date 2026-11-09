@@ -461,7 +461,7 @@
         return blob instanceof Blob?blob:null;
     }
 
-    async function getSplashBackgroundAsset() {
+    async function getSplashBackgroundSource() {
         await initialize();
         const settings = getSettingsSnapshot();
         if (settings.mode === 'custom') {
@@ -473,7 +473,19 @@
         }
 
         const preset = findPreset(settings.presetId);
-        const response = await fetch(preset.src, {
+        return {
+            url: preset.src,
+            preview: preset.preview || preset.src,
+            settings,
+            presetId: preset.id,
+            presetName: preset.name
+        };
+    }
+
+    async function getSplashBackgroundAsset() {
+        const source = await getSplashBackgroundSource();
+        if (source.blob instanceof Blob) return source;
+        const response = await fetch(source.url, {
             mode: 'cors',
             credentials: 'omit',
             cache: 'force-cache'
@@ -485,7 +497,7 @@
         if (!(blob instanceof Blob) || !blob.type.startsWith('image/')) {
             throw new Error('Das aktuelle Editor-Hintergrundbild ist kein gültiges Bild.');
         }
-        return { blob, settings };
+        return { blob, settings: source.settings, url: source.url };
     }
 
     async function getAppStartCustomImageBlob() {
@@ -901,6 +913,7 @@
     };
     window.getAppBackgroundSettings=getSettingsSnapshot;
     window.getAppBackgroundSplashAsset = getSplashBackgroundAsset;
+    window.getAppBackgroundSplashSource = getSplashBackgroundSource;
     window.getAppStartCustomImageBlob = getAppStartCustomImageBlob;
     window.setAppStartCustomImageBlob = setAppStartCustomImageBlob;
     window.clearAppStartCustomImageBlob = clearAppStartCustomImageBlob;
