@@ -793,19 +793,25 @@
         ctx.strokeStyle = 'rgba(225,236,245,.28)'; ctx.lineWidth = 1.1; ctx.stroke();
 
         counts.forEach((count, index) => {
+            // Monate ohne große Tour bleiben vollständig leer: keine Säule, keine Null.
+            if (count <= 0) return;
+
             const center = monthX(index, plot), w = Math.min(17, step * .72);
-            const h = count > 0 ? Math.max(2, count / max * plot.height * .72) : 0;
+            const h = Math.max(2, count / max * plot.height * .72);
             const top = baseline - h, half = w / 2, cut = Math.min(4, w * .22);
+            const facetY = top + Math.min(h * .32, 14);
             ctx.save();
+
+            // Kristallsäule mit geschliffener Krone, geraden Seiten und exakt horizontaler Standkante.
             ctx.beginPath();
             ctx.moveTo(center - half + cut, top);
             ctx.lineTo(center + half - cut, top);
             ctx.lineTo(center + half, top + cut);
-            ctx.lineTo(center + half, baseline - cut);
-            ctx.lineTo(center, baseline);
-            ctx.lineTo(center - half, baseline - cut);
+            ctx.lineTo(center + half, baseline);
+            ctx.lineTo(center - half, baseline);
             ctx.lineTo(center - half, top + cut);
             ctx.closePath();
+
             const body = ctx.createLinearGradient(center - half, top, center + half, baseline);
             body.addColorStop(0, '#F4F8FB');
             body.addColorStop(.18, palette.secondary);
@@ -817,36 +823,35 @@
             ctx.fill(); ctx.shadowBlur = 0;
             ctx.strokeStyle = 'rgba(245,249,252,.66)'; ctx.lineWidth = .8; ctx.stroke();
 
+            // Helle linke Kristallfläche.
             ctx.beginPath();
             ctx.moveTo(center - half + cut + 1, top + 1);
-            ctx.lineTo(center, top + Math.min(h * .32, 14));
+            ctx.lineTo(center, facetY);
             ctx.lineTo(center, baseline - 1);
-            ctx.lineTo(center - half + 1, baseline - cut);
+            ctx.lineTo(center - half + 1, baseline - 1);
+            ctx.lineTo(center - half + 1, top + cut);
             ctx.closePath();
             ctx.fillStyle = 'rgba(255,255,255,.19)'; ctx.fill();
 
+            // Dunklere rechte Fläche erzeugt eine klar erkennbare facettierte Tiefe.
             ctx.beginPath();
             ctx.moveTo(center + half - cut, top + 1);
             ctx.lineTo(center + half - 1, top + cut);
-            ctx.lineTo(center + half - 1, baseline - cut);
+            ctx.lineTo(center + half - 1, baseline - 1);
             ctx.lineTo(center, baseline - 1);
-            ctx.lineTo(center, top + Math.min(h * .32, 14));
+            ctx.lineTo(center, facetY);
             ctx.closePath();
             ctx.fillStyle = 'rgba(3,9,16,.30)'; ctx.fill();
 
+            // Feiner Lichtschliff entlang der linken Krone.
             ctx.beginPath();
             ctx.moveTo(center - half + cut + 1, top + 2);
-            ctx.lineTo(center - 1, top + Math.min(h * .32, 14));
+            ctx.lineTo(center - 1, facetY);
             ctx.strokeStyle = 'rgba(255,255,255,.78)'; ctx.lineWidth = .8; ctx.stroke();
 
             ctx.fillStyle = palette.text; ctx.font = editorFont(8, 850);
             ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
             ctx.fillText(String(count), center, top - 5, step + 2);
-            if (selectedMonths.bigTours === index) {
-                ctx.beginPath(); ctx.ellipse(center, baseline - h / 2, half + 4, h / 2 + 5, 0, 0, Math.PI * 2);
-                ctx.strokeStyle = palette.primary; ctx.lineWidth = 1.25;
-                ctx.shadowColor = palette.primary; ctx.shadowBlur = 8; ctx.stroke();
-            }
             ctx.restore();
         });
         drawMonthLabels(ctx, plot, height, palette);
