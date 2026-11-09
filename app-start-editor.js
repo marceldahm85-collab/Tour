@@ -12,6 +12,7 @@
     let originalCustomImageBlob = null;
     let pendingCustomImageBlob = null;
     let removeCustomImage = false;
+    let lastNativeSyncMessage = '';
 
     const byId = id => document.getElementById(id);
     const appStore = () => {
@@ -305,12 +306,18 @@
 
     async function beginDraft() {
         editorActive = true;
-        originalCustomImageBlob = await window.getAppStartCustomImageBlob?.() || null;
+        try {
+            originalCustomImageBlob = await window.getAppStartCustomImageBlob?.() || null;
+        } catch (error) {
+            console.warn('[App-Start] Gespeichertes Startbild konnte nicht gelesen werden.', error);
+            originalCustomImageBlob = null;
+        }
         pendingCustomImageBlob = null;
         removeCustomImage = false;
         const stored = normalize(readStored(SETTINGS_KEY) || DEFAULTS);
         fillControls(stored, originalCustomImageBlob);
-        setStatus('', false);
+        setStatus(lastNativeSyncMessage, Boolean(lastNativeSyncMessage));
+        lastNativeSyncMessage = '';
         bindControls();
         return { ...stored };
     }
@@ -398,13 +405,15 @@
 
         try {
             const result = await syncNative(settings, pendingCustomImageBlob || existingImage);
-            setStatus(result.status === 'synced'
+            lastNativeSyncMessage = result.status === 'synced'
                 ? 'App-Start gespeichert und mit Android synchronisiert.'
-                : 'App-Start-Einstellungen gespeichert.', false);
+                : 'App-Start-Einstellungen gespeichert.';
+            setStatus(lastNativeSyncMessage, false);
         } catch (error) {
             console.error('[App-Start] Android konnte die Start-Einstellungen nicht übernehmen.', error);
-            setStatus('Lokal gespeichert · Android konnte nicht aktualisiert werden: ' +
-                (error?.message || 'Unbekannter Fehler'), true);
+            lastNativeSyncMessage = 'Lokal gespeichert · Android konnte nicht aktualisiert werden: ' +
+                (error?.message || 'Unbekannter Fehler');
+            setStatus(lastNativeSyncMessage, true);
             const bar = byId('theme-editor-savebar-status');
             if (bar) bar.textContent = 'Editor gespeichert · App-Start in Android nicht aktualisiert';
         }
@@ -424,13 +433,15 @@
         setStatus('', false);
     }
 
-    async function syncRestoredSettings() {
+    async function syncAppStartNativeSettings() {
         const stored = readStored(SETTINGS_KEY);
-        if (!stored || typeof stored !== 'object') return;
+        if (!stored || typeof stored !== 'object') return { status: 'no-settings' };
         try {
-            await syncNative(normalize(stored));
+            const result = await syncNative(normalize(stored));
+            return result;
         } catch (error) {
-            console.warn('[App-Start] Wiederhergestellte Einstellungen konnten noch nicht an Android übertragen werden.', error);
+            console.warn('[App-Start] Wiederhergestellte Einstellungen konnten nicht an Android übertragen werden.', error);
+            return { status: 'failed', error: error?.message || 'Unbekannter Fehler' };
         }
     }
 
@@ -439,8 +450,8 @@
     window.__beginAppStartEditorDraft = beginDraft;
     window.__commitAppStartEditorDraft = commitDraft;
     window.__discardAppStartEditorDraft = discardDraft;
+    window.syncAppStartNativeSettings = syncAppStartNativeSettings;
 
-    document.addEventListener('app-start-settings-restored', syncRestoredSettings);
     document.addEventListener('DOMContentLoaded', () => {
         if (!draft) draft = normalize(readStored(SETTINGS_KEY) || DEFAULTS);
     }, { once: true });
