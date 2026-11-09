@@ -80,7 +80,7 @@
                 ? source.animation : DEFAULTS.animation,
             cropX: clamp(source.cropX, 0, 100, DEFAULTS.cropX),
             cropY: clamp(source.cropY, 0, 100, DEFAULTS.cropY),
-            cropZoom: clamp(source.cropZoom, 1, 1.8, DEFAULTS.cropZoom)
+            cropZoom: clamp(source.cropZoom, 0.8, 1.8, DEFAULTS.cropZoom)
         };
     }
 
@@ -170,7 +170,7 @@
         if (!sourceWidth || !sourceHeight) return;
         const positionX = Math.max(0, Math.min(100, Number(crop?.x ?? 50)));
         const positionY = Math.max(0, Math.min(100, Number(crop?.y ?? 50)));
-        const zoom = Math.max(1, Math.min(1.8, Number(crop?.zoom ?? 1)));
+        const zoom = Math.max(0.8, Math.min(1.8, Number(crop?.zoom ?? 1)));
         const scale = Math.max(width / sourceWidth, height / sourceHeight) * zoom;
         const drawWidth = sourceWidth * scale;
         const drawHeight = sourceHeight * scale;
@@ -247,38 +247,82 @@
         return sourceBlobCache.get('standard');
     }
 
+    async function resolveBackgroundPreviewSource(settings, customBlobOverride) {
+        if (settings.background === 'custom') {
+            const blob = customBlobOverride instanceof Blob
+                ? customBlobOverride
+                : await window.getAppStartCustomImageBlob?.();
+            if (!(blob instanceof Blob)) {
+                throw new Error('Bitte zuerst ein eigenes Startbild aus der Galerie auswählen.');
+            }
+            return { blob };
+        }
+
+        if (settings.background === 'editor') {
+            const source = await window.getAppBackgroundSplashSource?.();
+            if (source?.blob instanceof Blob) return { blob: source.blob };
+            if (typeof source?.url === 'string' && source.url) return { url: source.url };
+            const asset = await window.getAppBackgroundSplashAsset?.();
+            if (asset?.blob instanceof Blob) return { blob: asset.blob };
+            throw new Error('Das aktuelle Editor-Hintergrundbild ist nicht verfügbar.');
+        }
+
+        if (settings.background.startsWith('preset:')) {
+            const preset = getPresetCatalog().find(item => item.id === settings.background.slice(7));
+            if (!preset) throw new Error('Das gewählte Alpenmotiv ist nicht mehr verfügbar.');
+            return { url: preset.preview || preset.sourceUrl };
+        }
+
+        return { url: STANDARD_IMAGE_URL };
+    }
+
     async function updateCropPreview(settingsOverride) {
         const settings = normalize(settingsOverride || readControls());
         const token = ++previewSequence;
+        let objectUrl = '';
         try {
-            const blob = await resolveBackgroundBlob(
+            const source = await resolveBackgroundPreviewSource(
                 settings,
                 settings.background === 'custom'
                     ? (pendingCustomImageBlob || (removeCustomImage ? null : originalCustomImageBlob))
                     : null
             );
             if (token !== previewSequence) return;
-            const url = URL.createObjectURL(blob);
+
+            // Eine Bildvorschau muss die Quelldatei nur darstellen, nicht auslesen.
+            // Deshalb wird eine URL direkt als img.src geladen und nicht per fetch()
+            // in einen Blob umgewandelt. So funktionieren auch die bestehenden
+            // Wikimedia-/Unsplash-Presets ohne unnötige CORS-Abhängigkeit.
+            if (source.blob instanceof Blob) {
+                objectUrl = URL.createObjectURL(source.blob);
+            } else if (typeof source.url === 'string' && source.url) {
+                objectUrl = source.url;
+            } else {
+                throw new Error('Für diese Bildquelle ist keine Vorschau verfügbar.');
+            }
+
             const image = new Image();
+            image.decoding = 'async';
             image.onload = () => {
                 if (token !== previewSequence) {
-                    URL.revokeObjectURL(url);
+                    if (source.blob instanceof Blob) URL.revokeObjectURL(objectUrl);
                     return;
                 }
                 revokePreview();
-                previewUrl = url;
+                previewUrl = source.blob instanceof Blob ? objectUrl : '';
                 previewImage = image;
                 drawCurrentCropPreview();
                 setStatus('', false);
             };
             image.onerror = () => {
-                URL.revokeObjectURL(url);
+                if (source.blob instanceof Blob) URL.revokeObjectURL(objectUrl);
                 if (token === previewSequence) {
-                    setStatus('Die Bildvorschau konnte nicht geladen werden.', true);
+                    revokePreview();
                     drawCurrentCropPreview();
+                    setStatus('Das ausgewählte Alpenmotiv konnte nicht geladen werden. Bitte Internetverbindung prüfen.', true);
                 }
             };
-            image.src = url;
+            image.src = objectUrl;
         } catch (error) {
             if (token !== previewSequence) return;
             revokePreview();
