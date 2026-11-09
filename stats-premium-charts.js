@@ -628,7 +628,7 @@
         if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
         const ctx = resizeCanvasToDisplaySize(canvas);
         if (!ctx) return;
-        const base = baseChart(canvas, ctx, 'Aufstiegsgeschwindigkeit · Höhenmesser',
+        const base = baseChart(canvas, ctx, 'Aufstieg · Höhenmesser',
             average > 0 ? 'Ø ' + Math.round(average) + ' hm/h' : '–', { reliefStrength: .2 });
         const { plot, palette, height } = base;
         const max = Math.max(100, ...valid) * 1.18;
@@ -636,9 +636,12 @@
 
         for (let i = 0; i <= 6; i++) {
             const y = plot.bottom - plot.height * i / 6;
-            ctx.beginPath(); ctx.moveTo(plot.left, y); ctx.lineTo(plot.right, y);
-            ctx.strokeStyle = i === 0 ? 'rgba(226,237,246,.24)' : 'rgba(226,237,246,.045)';
-            ctx.lineWidth = .6; ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(plot.left - 3, y);
+            ctx.lineTo(plot.left, y);
+            ctx.strokeStyle = 'rgba(225,236,245,.38)';
+            ctx.lineWidth = .8;
+            ctx.stroke();
         }
         values.forEach((value, index) => {
             const x = monthX(index, plot), y = plot.bottom - value / max * plot.height;
@@ -686,7 +689,7 @@
         if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
         const ctx = resizeCanvasToDisplaySize(canvas);
         if (!ctx) return;
-        const base = baseChart(canvas, ctx, 'Durchschnittliche Schritte · je Tour',
+        const base = baseChart(canvas, ctx, 'Ø Schritte pro Tour',
             average > 0 ? Math.round(average).toLocaleString('de-AT') : '–', { reliefStrength: .3 });
         const { width, height, palette } = base;
         const max = Math.max(1, ...valid), left = 14, cols = 6, cellW = (width - 28) / cols;
@@ -742,7 +745,7 @@
             if (month !== null && isBigTourCountable(entry, data)) counts[month]++;
         });
         const total = counts.reduce((sum, value) => sum + value, 0);
-        const base = baseChart(canvas, ctx, 'Große Touren · Alpine Kristallsäulen', total + ' Touren', {
+        const base = baseChart(canvas, ctx, 'Große Touren', total + ' Touren', {
             subtitle: 'Definition: mindestens 10 km und mindestens 1.000 Höhenmeter',
             reliefStrength: .18
         });
@@ -914,7 +917,7 @@
         const ctx = canvas.getContext('2d'), size = logicalSize(canvas), palette = chartPalette();
         ctx.clearRect(0, 0, size.width, size.height);
         drawInstrumentSurface(ctx, size.width, size.height, palette);
-        drawHeader(ctx, canvas, 'Leistungsindex · Präzisionskompass',
+        drawHeader(ctx, canvas, 'Leistungsindex · Kompass',
             Math.round(selectedMonth === null ? overall : (values[selectedMonth] || 0)) + ' / 100');
 
         const cx = size.width / 2, cy = Math.min(size.height * .43, size.height - 145);
@@ -1462,7 +1465,7 @@
                     const row = y < size.height * .56 ? 0 : 1;
                     index = row * 6 + col;
                 } else {
-                    const left = category === 'bigTours' ? 26 : 34;
+                    const left = 44;
                     const right = size.width - 18;
                     index = Math.floor((x - left) / Math.max(1, right - left) * 12);
                     index = Math.max(0, Math.min(11, index));
