@@ -8,6 +8,100 @@
     const MONTH_NAMES = ['Jänner', 'Februar', 'März', 'April', 'Mai', 'Juni',
         'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
+    // Freigestellter, nach rechts gerichteter Ledermultifunktions-Wanderschuh.
+    // Als SVG bleibt er auch auf hochauflösenden Smartphone-Displays scharf.
+    const STEPS_SHOE_IMAGE = new Image();
+    STEPS_SHOE_IMAGE.onload = () => {
+        const canvas = canvasById('steps-canvas');
+        if (canvas && canvas.classList.contains('active-chart-canvas')) drawStepsDiagram();
+    };
+    STEPS_SHOE_IMAGE.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 132">
+          <defs>
+            <linearGradient id="leather" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#A97542"/>
+              <stop offset=".27" stop-color="#80512D"/>
+              <stop offset=".62" stop-color="#56351F"/>
+              <stop offset="1" stop-color="#2B1C16"/>
+            </linearGradient>
+            <linearGradient id="leatherLight" x1="0" y1="0" x2=".9" y2="1">
+              <stop offset="0" stop-color="#D3A16A"/>
+              <stop offset=".48" stop-color="#98663A"/>
+              <stop offset="1" stop-color="#54351F"/>
+            </linearGradient>
+            <linearGradient id="sole" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#55585A"/>
+              <stop offset=".26" stop-color="#25292D"/>
+              <stop offset="1" stop-color="#080D12"/>
+            </linearGradient>
+            <linearGradient id="welt" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#D4C1A2"/>
+              <stop offset=".36" stop-color="#71614F"/>
+              <stop offset="1" stop-color="#27231F"/>
+            </linearGradient>
+            <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#F7F1DD"/>
+              <stop offset=".45" stop-color="#AAB1B3"/>
+              <stop offset="1" stop-color="#414B52"/>
+            </linearGradient>
+            <linearGradient id="lace" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#E9D8B8"/>
+              <stop offset="1" stop-color="#78634C"/>
+            </linearGradient>
+            <filter id="shadow" x="-15%" y="-25%" width="135%" height="160%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+              <feOffset dx="1" dy="3" result="offset"/>
+              <feComponentTransfer><feFuncA type="linear" slope=".42"/></feComponentTransfer>
+              <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <g filter="url(#shadow)">
+            <!-- Profilierte Gummisohle und umlaufender Sohlenrand -->
+            <path d="M13 91 C25 88 37 87 49 88 L92 88 C111 88 132 89 153 86 L190 78 C207 77 224 83 231 93 L230 103 C220 109 193 111 166 111 L42 111 C25 110 13 106 10 100 C9 97 10 94 13 91Z" fill="url(#sole)" stroke="#0A0F13" stroke-width="2"/>
+            <path d="M15 91 C42 91 65 91 91 92 C128 93 167 88 193 82 C211 81 224 86 229 93 L226 99 C200 103 174 105 143 105 L33 103 C22 102 16 99 15 95Z" fill="url(#welt)" stroke="#D0C4AF" stroke-opacity=".42" stroke-width="1"/>
+            <path d="M20 105 L29 109 L37 105 L47 110 L58 106 L69 110 L81 106 L93 110 L105 106 L117 110 L129 106 L141 109 L153 104 L167 107 L181 102 L195 104 L209 98 L222 99" fill="none" stroke="#080D12" stroke-width="3" stroke-linejoin="round"/>
+            <!-- Hauptkörper des Lederschafts: Ferse links, Schuhspitze rechts -->
+            <path d="M15 91 C20 82 28 75 37 65 L48 34 C51 25 60 20 71 23 L96 31 C105 42 113 52 124 57 C139 63 164 65 190 71 C211 75 226 83 231 93 L227 99 C209 102 187 101 169 101 L42 100 C25 100 15 98 13 95Z" fill="url(#leather)" stroke="#24170F" stroke-width="2"/>
+            <!-- Fersenverstärkung -->
+            <path d="M17 88 C24 77 33 70 41 62 L52 35 C57 27 64 25 72 27 L76 31 L62 66 C53 80 44 91 38 99 L21 98Z" fill="#38271D" stroke="#C08A55" stroke-opacity=".72" stroke-width="1.4"/>
+            <path d="M23 86 C30 78 36 71 42 62" fill="none" stroke="#D4A16B" stroke-opacity=".68" stroke-width="1.3"/>
+            <!-- Knöchelpolster und Schaftrand -->
+            <path d="M42 38 C46 27 55 18 70 18 L91 25 L102 38 L91 49 L63 45 L51 63 L39 66Z" fill="url(#leatherLight)" stroke="#422A1B" stroke-width="2"/>
+            <path d="M46 35 C51 21 61 15 76 18 L97 26 L102 35 L91 39 L69 31 L55 48Z" fill="#4C3020" stroke="#D0A16F" stroke-width="1.2"/>
+            <path d="M50 27 C62 18 81 21 94 30" fill="none" stroke="#E4BD8D" stroke-opacity=".72" stroke-width="1.4"/>
+            <!-- Zunge und textile Manschette -->
+            <path d="M67 24 C77 21 87 26 96 35 L119 57 L105 67 L79 47 L61 39Z" fill="#5C3C28" stroke="#C08B5B" stroke-width="1.5"/>
+            <path d="M67 25 C75 24 85 29 93 38 L111 56" fill="none" stroke="#E0B783" stroke-opacity=".7" stroke-width="1.2"/>
+            <path d="M48 22 C54 13 69 10 83 15 L99 23 L96 29 L73 23 L57 30Z" fill="#292A29" stroke="#A77B53" stroke-width="1"/>
+            <!-- Seitliche Lederauflagen und Zehenschutz -->
+            <path d="M79 50 C100 64 118 72 145 75 C166 77 188 80 208 88 L205 96 C181 92 157 92 133 91 L88 86 C73 80 66 69 79 50Z" fill="url(#leatherLight)" fill-opacity=".64" stroke="#D4A16B" stroke-opacity=".85" stroke-width="1.3"/>
+            <path d="M133 65 C155 68 184 70 207 82 C218 87 224 92 225 97 L206 97 C188 89 166 86 145 84Z" fill="#332319" fill-opacity=".74" stroke="#B77E4E" stroke-width="1.1"/>
+            <path d="M182 75 C204 77 222 86 229 94 L225 99 C207 96 191 92 176 88Z" fill="#30231B" stroke="#D3A06B" stroke-opacity=".65" stroke-width="1.1"/>
+            <!-- Schnürleisten mit robusten Metallhaken und Ösen -->
+            <path d="M75 31 L109 56" stroke="#34251A" stroke-width="8" stroke-linecap="round"/>
+            <path d="M75 31 L109 56" stroke="#B78354" stroke-width="1.3" stroke-linecap="round"/>
+            <g fill="#20272B" stroke="url(#metal)" stroke-width="2">
+              <ellipse cx="78" cy="31" rx="3.4" ry="4.6" transform="rotate(-28 78 31)"/>
+              <ellipse cx="85" cy="38" rx="3.4" ry="4.6" transform="rotate(-28 85 38)"/>
+              <ellipse cx="93" cy="45" rx="3.4" ry="4.6" transform="rotate(-28 93 45)"/>
+              <ellipse cx="101" cy="51" rx="3.4" ry="4.6" transform="rotate(-28 101 51)"/>
+              <ellipse cx="110" cy="57" rx="3.4" ry="4.6" transform="rotate(-28 110 57)"/>
+            </g>
+            <path d="M77 30 L103 51 L86 42 L110 57 L94 48 L116 63" fill="none" stroke="url(#lace)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M74 35 L97 53 L82 48 L106 63 L91 56 L117 68" fill="none" stroke="#E2D0B1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Nähte und feine Lederkanten -->
+            <path d="M54 47 C61 41 71 40 81 47 M47 63 C61 69 70 77 82 84 M83 86 C118 96 167 95 203 91" fill="none" stroke="#E4B982" stroke-opacity=".74" stroke-width="1" stroke-dasharray="2 2.4"/>
+            <path d="M51 50 C45 66 38 81 29 92 M99 67 C119 78 149 80 176 85" fill="none" stroke="#281A12" stroke-opacity=".64" stroke-width="1.4"/>
+            <!-- Kleine Zuglasche, Schnürsenkelknoten und Highlights -->
+            <path d="M55 20 L57 7 Q63 3 69 7 L73 17" fill="none" stroke="#252728" stroke-width="5" stroke-linecap="round"/>
+            <path d="M57 8 Q63 4 69 8" fill="none" stroke="#B6A38C" stroke-width="1.1"/>
+            <path d="M107 57 Q119 58 123 51 Q127 50 129 55 L119 66 Q113 67 107 61Z" fill="#D0A06B" stroke="#49301F" stroke-width="1"/>
+            <path d="M123 53 L132 48 M123 54 L135 57" stroke="#E7D6B9" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M17 91 C37 91 56 92 78 93 M116 94 C155 95 190 91 214 90" fill="none" stroke="#F1D7B1" stroke-opacity=".32" stroke-width="1.1"/>
+          </g>
+        </svg>
+    `);
+
     function canvasById(id) {
         return document.getElementById(id);
     }
@@ -436,18 +530,187 @@
     }
 
     function drawStepsDiagram() {
-        const data = getFilteredTours();
+        const canvas = canvasById('steps-canvas');
+        if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
+
+        // Vorherige Animation bei Kachel- oder Jahreswechsel sicher beenden.
+        if (canvas.__stepsAnimationFrame) {
+            cancelAnimationFrame(canvas.__stepsAnimationFrame);
+            canvas.__stepsAnimationFrame = 0;
+        }
+        if (!STEPS_SHOE_IMAGE.complete || !STEPS_SHOE_IMAGE.naturalWidth) return;
+
         const sums = Array(12).fill(0);
-        data.forEach(entry => {
+        getFilteredTours().forEach(entry => {
             const month = monthOf(entry);
             if (month !== null) sums[month] += Number(calculateEntrySteps(entry)) || 0;
         });
         const total = sums.reduce((sum, value) => sum + value, 0);
-        drawMonthlyProfile(canvasById('steps-canvas'), 'Schritte · Monatssumme',
-            Math.round(total).toLocaleString('de-AT'), sums, {
-                style: 'area', showZeroMonths: true, selectionKey: 'steps',
-                unit: 'Schritte', valueLabel: value => Math.round(value).toLocaleString('de-AT') + ' Schritte'
+        const maxValue = Math.max(1, ...sums) * 1.14;
+        const selected = selectedMonths.steps;
+        const duration = 1180;
+        const startTime = performance.now();
+
+        canvas.__premiumChartData = {
+            values: sums,
+            unit: 'Schritte',
+            key: 'steps',
+            formatter: value => Math.round(value).toLocaleString('de-AT') + ' Schritte'
+        };
+
+        const renderFrame = timestamp => {
+            if (!canvas.classList.contains('active-chart-canvas')) {
+                canvas.__stepsAnimationFrame = 0;
+                return;
+            }
+
+            const rawProgress = Math.min(1, Math.max(0, (timestamp - startTime) / duration));
+            const progress = 1 - Math.pow(1 - rawProgress, 2.7);
+            const ctx = resizeCanvasToDisplaySize(canvas);
+            if (!ctx) {
+                canvas.__stepsAnimationFrame = 0;
+                return;
+            }
+
+            const base = baseChart(canvas, ctx, '', Math.round(total).toLocaleString('de-AT'), {
+                reliefStrength: .22
             });
+            const { plot, palette, height, width } = base;
+            const baseline = plot.bottom - 3;
+            const monthStep = plot.width / 12;
+            const shoeWidth = Math.min(31, monthStep * .94);
+            const shoeHeight = shoeWidth * .55;
+            const positive = sums.map((value, index) => ({ index, value }))
+                .filter(point => point.value > 0);
+            const points = positive.map(point => ({
+                ...point,
+                x: monthX(point.index, plot),
+                y: baseline - (point.value / maxValue) * plot.height * .91
+            }));
+
+            drawAxes(ctx, plot);
+
+            // Linien- und Flächenverlauf wird von links nach rechts freigelegt.
+            if (points.length > 1 && progress > 0) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(plot.left, plot.top, plot.width * progress, plot.height);
+                ctx.clip();
+
+                ctx.beginPath();
+                ctx.moveTo(points[0].x, baseline);
+                smoothStroke(ctx, points);
+                ctx.lineTo(points[points.length - 1].x, baseline);
+                ctx.closePath();
+                const area = ctx.createLinearGradient(0, plot.top, 0, baseline);
+                area.addColorStop(0, colourWithAlpha(palette.primary, .25));
+                area.addColorStop(.55, colourWithAlpha(palette.secondary, .10));
+                area.addColorStop(1, colourWithAlpha(palette.primary, .015));
+                ctx.fillStyle = area;
+                ctx.fill();
+
+                ctx.beginPath();
+                smoothStroke(ctx, points);
+                ctx.strokeStyle = colourWithAlpha(palette.primary, .22);
+                ctx.lineWidth = 7;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+
+                ctx.beginPath();
+                smoothStroke(ctx, points);
+                ctx.strokeStyle = applyGradient(ctx, plot.left, 0, plot.right, 0, palette.stops);
+                ctx.lineWidth = 2.6;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.shadowColor = colourWithAlpha(palette.primary, .36);
+                ctx.shadowBlur = 7;
+                ctx.stroke();
+                ctx.restore();
+            } else if (points.length === 1 && progress > 0) {
+                ctx.beginPath();
+                ctx.moveTo(points[0].x - monthStep * .25, points[0].y);
+                ctx.lineTo(points[0].x + monthStep * .25, points[0].y);
+                ctx.strokeStyle = palette.primary;
+                ctx.lineWidth = 2.4;
+                ctx.stroke();
+            }
+
+            // Jeder Schuh setzt nacheinander auf seinem Monatspunkt auf.
+            points.forEach(point => {
+                const revealAt = point.index / 12;
+                const local = Math.max(0, Math.min(1, (progress - revealAt) * 15));
+                if (local <= 0) return;
+                const eased = 1 - Math.pow(1 - local, 2.4);
+                const rise = (1 - eased) * 6;
+                const shoeY = point.y - shoeHeight + 2 + rise;
+                const shoeScale = .84 + eased * .16;
+                const drawWidth = shoeWidth * shoeScale;
+                const drawHeight = shoeHeight * shoeScale;
+                const shoeX = point.x - drawWidth / 2;
+
+                // Dezenter Lichtpunkt am Datenpunkt, kein zusätzlicher Kreismarker.
+                ctx.save();
+                ctx.globalAlpha = eased * .48;
+                ctx.beginPath();
+                ctx.ellipse(point.x, point.y + 1.5, shoeWidth * .30, 2.2, 0, 0, Math.PI * 2);
+                ctx.fillStyle = palette.primary;
+                ctx.shadowColor = palette.primary;
+                ctx.shadowBlur = 7;
+                ctx.fill();
+                ctx.restore();
+
+                ctx.save();
+                ctx.globalAlpha = eased;
+                ctx.shadowColor = 'rgba(0,0,0,.55)';
+                ctx.shadowBlur = 4;
+                ctx.shadowOffsetY = 2;
+                // Das SVG ist seitlich gezeichnet: die Schuhspitze zeigt nach rechts.
+                ctx.drawImage(STEPS_SHOE_IMAGE, shoeX, shoeY, drawWidth, drawHeight);
+                ctx.restore();
+
+                // Nur der reine Zahlenwert, ohne Einheit oder Zusatztext.
+                const label = Math.round(point.value).toLocaleString('de-AT');
+                ctx.save();
+                ctx.globalAlpha = eased;
+                let fontSize = 7.1;
+                ctx.font = editorFont(fontSize, 850);
+                while (fontSize > 5.2 && ctx.measureText(label).width > monthStep - 1) {
+                    fontSize -= .3;
+                    ctx.font = editorFont(fontSize, 850);
+                }
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillStyle = selected === point.index ? palette.secondary : palette.text;
+                ctx.shadowColor = 'rgba(0,0,0,.72)';
+                ctx.shadowBlur = 3;
+                ctx.fillText(label, point.x, shoeY - 1, monthStep - 1);
+                ctx.restore();
+
+                if (selected === point.index) {
+                    ctx.save();
+                    ctx.globalAlpha = eased;
+                    ctx.beginPath();
+                    ctx.moveTo(point.x - shoeWidth * .30, point.y + 4);
+                    ctx.lineTo(point.x + shoeWidth * .30, point.y + 4);
+                    ctx.strokeStyle = palette.primary;
+                    ctx.lineWidth = 1.4;
+                    ctx.shadowColor = palette.primary;
+                    ctx.shadowBlur = 6;
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            });
+
+            drawMonthLabels(ctx, plot, height, palette);
+
+            if (rawProgress < 1) {
+                canvas.__stepsAnimationFrame = requestAnimationFrame(renderFrame);
+            } else {
+                canvas.__stepsAnimationFrame = 0;
+            }
+        };
+
+        canvas.__stepsAnimationFrame = requestAnimationFrame(renderFrame);
     }
 
     function drawPeaksDiagram() {
