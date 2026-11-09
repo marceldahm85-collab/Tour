@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Insets;
@@ -16,6 +17,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorManager;
@@ -55,6 +57,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -72,6 +76,10 @@ public final class MainActivity extends Activity {
     private static final int MAX_PDF_BYTES = 64 * 1024 * 1024;
     private static final int MAX_BACKUP_CHUNKS = 2048;
     private static final int MAX_BACKUP_CHUNK_CHARS = 48 * 1024;
+    private static final int MAX_APP_START_IMAGE_BYTES = 5 * 1024 * 1024;
+    private static final int MAX_APP_START_IMAGE_CHUNK_CHARS = 44 * 1024;
+    private static final String APP_START_PREFERENCES = "premium_app_start_v1";
+    private static final String APP_START_IMAGE_FILE = "premium-app-start-image.jpg";
     private static final String BRIDGE_NAME = "TourNative";
     public static final String ACTION_OPEN_YEAR_STATS =
             "at.marcel.bergtouren.action.OPEN_YEAR_STATS";
@@ -91,6 +99,13 @@ public final class MainActivity extends Activity {
     private FrameLayout premiumSplashOverlay;
     private ValueAnimator premiumSplashSheenAnimator;
     private boolean premiumSplashHiding;
+    private boolean premiumSplashHideScheduled;
+    private long premiumSplashStartedAt;
+    private ByteArrayOutputStream pendingSplashImageStream;
+    private String pendingSplashImageTransferId;
+    private int pendingSplashImageExpectedBytes;
+    private int pendingSplashImageExpectedChunks;
+    private int pendingSplashImageNextChunk;
     private ValueCallback<Uri[]> pendingFileChooser;
     private boolean bridgeAvailable;
     private boolean webPageLoaded;
@@ -154,6 +169,11 @@ public final class MainActivity extends Activity {
     }
 
     private void createPremiumSplashOverlay() {
+        premiumSplashStartedAt = SystemClock.elapsedRealtime();
+        SharedPreferences splashPreferences = getSharedPreferences(APP_START_PREFERENCES, MODE_PRIVATE);
+        String splashBackground = splashPreferences.getString("background", "standard");
+        String splashAnimation = splashPreferences.getString("animation", "premium");
+
         FrameLayout overlay = new FrameLayout(this);
         overlay.setClickable(true);
         overlay.setFocusable(true);
@@ -163,7 +183,18 @@ public final class MainActivity extends Activity {
         // einen echten Bildhintergrund. Das Overlay liegt bewusst außerhalb
         // der inset-geschützten WebView-Fläche und reicht bis an alle Displayränder.
         ImageView panorama = new ImageView(this);
-        panorama.setImageResource(R.drawable.splash_alpine_panorama);
+        File selectedSplashImage = new File(getFilesDir(), APP_START_IMAGE_FILE);
+        boolean useSelectedImage = !"standard".equals(splashBackground)
+                && selectedSplashImage.isFile()
+                && selectedSplashImage.length() > 0;
+        if (useSelectedImage) {
+            panorama.setImageURI(Uri.fromFile(selectedSplashImage));
+            if (panorama.getDrawable() == null) {
+                panorama.setImageResource(R.drawable.splash_alpine_panorama);
+            }
+        } else {
+            panorama.setImageResource(R.drawable.splash_alpine_panorama);
+        }
         panorama.setScaleType(ImageView.ScaleType.CENTER_CROP);
         overlay.addView(panorama, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -329,47 +360,62 @@ public final class MainActivity extends Activity {
         ));
         premiumSplashOverlay = overlay;
 
-        // Ruhiger Einstieg: Panorama zuerst, anschließend Emblem und Schrift.
-        // Die einmalige Lichtreflexion läuft erst über das bereits sichtbare Emblem.
-        if (ValueAnimator.areAnimatorsEnabled()) {
+        // Animationseinstellungen aus dem Editor bleiben vollständig nativ.
+        if (ValueAnimator.areAnimatorsEnabled() && !"off".equals(splashAnimation)) {
             overlay.setAlpha(0f);
             overlay.post(() -> {
                 // app.ready kann bei warmem Start sehr früh eintreffen. In
-                // diesem Fall darf die noch ausstehende Einblendsequenz den
-                // bereits laufenden Splash-Ausgang nicht wieder sichtbar machen.
+                // diesem Fall darf die Einblendsequenz den bereits laufenden
+                // Splash-Ausgang nicht wieder sichtbar machen.
                 if (premiumSplashHiding || premiumSplashOverlay != overlay) return;
 
                 overlay.animate()
                         .alpha(1f)
-                        .setDuration(360L)
-                        .setInterpolator(new DecelerateInterpolator())
-                        .start();
-                content.animate()
-                        .alpha(1f)
-                        .translationY(0f)
-                        .setStartDelay(110L)
-                        .setDuration(480L)
-                        .setInterpolator(new DecelerateInterpolator())
-                        .start();
-                emblem.animate()
-                        .scaleX(1f)
-                        .scaleY(1f)
-                        .setStartDelay(130L)
-                        .setDuration(560L)
+                        .setDuration("premium".equals(splashAnimation) ? 360L : 280L)
                         .setInterpolator(new DecelerateInterpolator())
                         .start();
 
-                premiumSplashSheenAnimator = ValueAnimator.ofFloat(-dp(164), dp(164));
-                premiumSplashSheenAnimator.setStartDelay(470L);
-                premiumSplashSheenAnimator.setDuration(1280L);
-                premiumSplashSheenAnimator.setInterpolator(new DecelerateInterpolator());
-                premiumSplashSheenAnimator.addUpdateListener(animation ->
-                        sheen.setTranslationX((Float) animation.getAnimatedValue())
-                );
-                premiumSplashSheenAnimator.start();
+                if ("premium".equals(splashAnimation)) {
+                    content.animate()
+                            .alpha(1f)
+                            .translationY(0f)
+                            .setStartDelay(110L)
+                            .setDuration(480L)
+                            .setInterpolator(new DecelerateInterpolator())
+                            .start();
+                    emblem.animate()
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .setStartDelay(130L)
+                            .setDuration(560L)
+                            .setInterpolator(new DecelerateInterpolator())
+                            .start();
+
+                    premiumSplashSheenAnimator = ValueAnimator.ofFloat(-dp(164), dp(164));
+                    premiumSplashSheenAnimator.setStartDelay(470L);
+                    premiumSplashSheenAnimator.setDuration(1280L);
+                    premiumSplashSheenAnimator.setInterpolator(new DecelerateInterpolator());
+                    premiumSplashSheenAnimator.addUpdateListener(animation ->
+                            sheen.setTranslationX((Float) animation.getAnimatedValue())
+                    );
+                    premiumSplashSheenAnimator.start();
+                } else {
+                    content.animate()
+                            .alpha(1f)
+                            .translationY(0f)
+                            .setStartDelay(70L)
+                            .setDuration(390L)
+                            .setInterpolator(new DecelerateInterpolator())
+                            .start();
+                    emblem.setScaleX(1f);
+                    emblem.setScaleY(1f);
+                    sheen.setVisibility(View.GONE);
+                }
             });
-            emblem.setScaleX(0.92f);
-            emblem.setScaleY(0.92f);
+            if ("premium".equals(splashAnimation)) {
+                emblem.setScaleX(0.92f);
+                emblem.setScaleY(0.92f);
+            }
         } else {
             content.setAlpha(1f);
             content.setTranslationY(0f);
@@ -380,16 +426,30 @@ public final class MainActivity extends Activity {
     }
 
     private void hidePremiumSplashOverlay() {
-        if (premiumSplashOverlay == null || premiumSplashHiding) return;
-        premiumSplashHiding = true;
+        if (premiumSplashOverlay == null || premiumSplashHiding || premiumSplashHideScheduled) return;
 
+        SharedPreferences splashPreferences = getSharedPreferences(APP_START_PREFERENCES, MODE_PRIVATE);
+        long minimumDuration = splashPreferences.getInt("durationMs", 0);
+        long elapsed = Math.max(0L, SystemClock.elapsedRealtime() - premiumSplashStartedAt);
+        long remaining = Math.max(0L, minimumDuration - elapsed);
+        if (remaining > 0L) {
+            premiumSplashHideScheduled = true;
+            mainHandler.postDelayed(() -> {
+                premiumSplashHideScheduled = false;
+                hidePremiumSplashOverlay();
+            }, remaining);
+            return;
+        }
+
+        premiumSplashHiding = true;
         if (premiumSplashSheenAnimator != null) {
             premiumSplashSheenAnimator.cancel();
             premiumSplashSheenAnimator = null;
         }
 
         FrameLayout overlay = premiumSplashOverlay;
-        if (!ValueAnimator.areAnimatorsEnabled()) {
+        String animation = splashPreferences.getString("animation", "premium");
+        if (!ValueAnimator.areAnimatorsEnabled() || "off".equals(animation)) {
             overlay.setAlpha(0f);
             if (root != null) root.removeView(overlay);
             if (premiumSplashOverlay == overlay) premiumSplashOverlay = null;
@@ -398,7 +458,7 @@ public final class MainActivity extends Activity {
 
         overlay.animate()
                 .alpha(0f)
-                .setDuration(260L)
+                .setDuration("subtle".equals(animation) ? 210L : 260L)
                 .setInterpolator(new DecelerateInterpolator())
                 .withEndAction(() -> {
                     if (root != null) root.removeView(overlay);
@@ -733,6 +793,16 @@ public final class MainActivity extends Activity {
 
                             if ("app.ready".equals(type)) {
                                 runOnUiThread(() -> hidePremiumSplashOverlay());
+                            } else if ("splash.settings.save".equals(type)) {
+                                saveAppStartSettings(request, replyProxy, requestId);
+                            } else if ("splash.image.start".equals(type)) {
+                                startAppStartImageTransfer(request, replyProxy, requestId);
+                            } else if ("splash.image.chunk".equals(type)) {
+                                appendAppStartImageChunk(request, replyProxy, requestId);
+                            } else if ("splash.image.finish".equals(type)) {
+                                finishAppStartImageTransfer(replyProxy, requestId);
+                            } else if ("splash.image.abort".equals(type)) {
+                                abortAppStartImageTransfer(request, replyProxy, requestId);
                             } else if ("haptics.trigger".equals(type)) {
                                 triggerAdaptiveHaptic(request.optString("pattern", ""));
                             } else if ("bridge.ping".equals(type)) {
@@ -757,6 +827,8 @@ public final class MainActivity extends Activity {
                                 features.put("backup.file.link.v1");
                                 features.put("haptics.adaptive.v1");
                                 features.put("splash.hybrid.v1");
+                                features.put("splash.settings.v1");
+                                features.put("splash.image.v1");
                                 response.put("features", features);
                                 replyToBridge(replyProxy, response);
                                 Log.i(TAG, "Sichere JavaScript-Bridge ist erreichbar (Request-ID bestätigt).");
@@ -916,6 +988,238 @@ public final class MainActivity extends Activity {
     }
 
     
+    private JSONObject createAppStartResponse(String type, String requestId, boolean ok, String error) {
+        JSONObject response = createGalleryResponse(type, requestId);
+        try {
+            response.put("ok", ok);
+            if (error != null && !error.isEmpty()) response.put("error", error);
+        } catch (JSONException serializationError) {
+            Log.e(TAG, "App-Start-Antwort konnte nicht serialisiert werden.", serializationError);
+        }
+        return response;
+    }
+
+    private void saveAppStartSettings(
+            JSONObject request,
+            JavaScriptReplyProxy replyProxy,
+            String requestId
+    ) {
+        String background = request.optString("background", "standard");
+        String animation = request.optString("animation", "premium");
+        int durationMs = request.optInt("durationMs", 0);
+        boolean validBackground = "standard".equals(background)
+                || "editor".equals(background)
+                || "custom".equals(background);
+        boolean validAnimation = "off".equals(animation)
+                || "subtle".equals(animation)
+                || "premium".equals(animation);
+        boolean validDuration = durationMs == 0 || durationMs == 1500
+                || durationMs == 2000 || durationMs == 2500;
+        File image = new File(getFilesDir(), APP_START_IMAGE_FILE);
+        boolean validImage = "standard".equals(background)
+                || (image.isFile() && image.length() > 0 && image.length() <= MAX_APP_START_IMAGE_BYTES);
+
+        if (!validBackground || !validAnimation || !validDuration || !validImage) {
+            JSONObject response = createAppStartResponse(
+                    "splash.settings.result", requestId, false,
+                    !validImage
+                            ? "Für diese Hintergrundauswahl ist noch kein Startbild auf dem Gerät gespeichert."
+                            : "Die App-Start-Einstellungen enthalten ungültige Werte."
+            );
+            replyToBridge(replyProxy, response);
+            return;
+        }
+
+        boolean saved = getSharedPreferences(APP_START_PREFERENCES, MODE_PRIVATE)
+                .edit()
+                .putString("background", background)
+                .putString("animation", animation)
+                .putInt("durationMs", durationMs)
+                .commit();
+
+        JSONObject response = createAppStartResponse(
+                "splash.settings.result",
+                requestId,
+                saved,
+                saved ? null : "Android konnte die App-Start-Einstellungen nicht dauerhaft speichern."
+        );
+        replyToBridge(replyProxy, response);
+    }
+
+    private void startAppStartImageTransfer(
+            JSONObject request,
+            JavaScriptReplyProxy replyProxy,
+            String requestId
+    ) {
+        if (pendingSplashImageStream != null) {
+            replyToBridge(replyProxy, createAppStartResponse(
+                    "splash.image.ready", requestId, false,
+                    "Ein anderer Startbild-Upload ist noch aktiv."
+            ));
+            return;
+        }
+
+        String transferId = request.optString("transferId", "");
+        int totalBytes = request.optInt("totalBytes", -1);
+        int totalChunks = request.optInt("totalChunks", -1);
+        String mimeType = request.optString("mimeType", "");
+
+        if (transferId.isEmpty() || transferId.length() > 100
+                || totalBytes <= 0 || totalBytes > MAX_APP_START_IMAGE_BYTES
+                || totalChunks <= 0 || totalChunks > 200
+                || !"image/jpeg".equals(mimeType)) {
+            replyToBridge(replyProxy, createAppStartResponse(
+                    "splash.image.ready", requestId, false,
+                    "Das Startbild ist ungültig oder überschreitet 5 MB."
+            ));
+            return;
+        }
+
+        pendingSplashImageTransferId = transferId;
+        pendingSplashImageExpectedBytes = totalBytes;
+        pendingSplashImageExpectedChunks = totalChunks;
+        pendingSplashImageNextChunk = 0;
+        pendingSplashImageStream = new ByteArrayOutputStream(Math.min(totalBytes, 512 * 1024));
+        replyToBridge(replyProxy, createAppStartResponse("splash.image.ready", requestId, true, null));
+    }
+
+    private void appendAppStartImageChunk(
+            JSONObject request,
+            JavaScriptReplyProxy replyProxy,
+            String requestId
+    ) {
+        String transferId = request.optString("transferId", "");
+        int index = request.optInt("index", -1);
+        String encoded = request.optString("data", "");
+
+        if (pendingSplashImageStream == null
+                || pendingSplashImageTransferId == null
+                || !pendingSplashImageTransferId.equals(transferId)
+                || index != pendingSplashImageNextChunk
+                || encoded.isEmpty()
+                || encoded.length() > MAX_APP_START_IMAGE_CHUNK_CHARS) {
+            replyToBridge(replyProxy, createAppStartResponse(
+                    "splash.image.chunk.ack", requestId, false,
+                    "Ein Startbild-Teil ist ungültig oder unvollständig."
+            ));
+            clearAppStartImageTransfer();
+            return;
+        }
+
+        try {
+            byte[] decoded = Base64.decode(encoded, Base64.NO_WRAP);
+            if (decoded.length <= 0
+                    || pendingSplashImageStream.size() + decoded.length > pendingSplashImageExpectedBytes) {
+                throw new IllegalArgumentException("Ungültige Länge eines Startbild-Teils.");
+            }
+            pendingSplashImageStream.write(decoded);
+            pendingSplashImageNextChunk++;
+            replyToBridge(replyProxy, createAppStartResponse("splash.image.chunk.ack", requestId, true, null));
+        } catch (RuntimeException | IOException error) {
+            Log.w(TAG, "Startbild-Teil konnte nicht verarbeitet werden.", error);
+            replyToBridge(replyProxy, createAppStartResponse(
+                    "splash.image.chunk.ack", requestId, false,
+                    "Das Startbild konnte nicht vollständig übertragen werden."
+            ));
+            clearAppStartImageTransfer();
+        }
+    }
+
+    private void finishAppStartImageTransfer(JavaScriptReplyProxy replyProxy, String requestId) {
+        if (pendingSplashImageStream == null
+                || pendingSplashImageNextChunk != pendingSplashImageExpectedChunks
+                || pendingSplashImageStream.size() != pendingSplashImageExpectedBytes) {
+            replyToBridge(replyProxy, createAppStartResponse(
+                    "splash.image.complete", requestId, false,
+                    "Das Startbild wurde nicht vollständig übertragen."
+            ));
+            clearAppStartImageTransfer();
+            return;
+        }
+
+        byte[] bytes = pendingSplashImageStream.toByteArray();
+        if (bytes.length < 3
+                || (bytes[0] & 0xFF) != 0xFF
+                || (bytes[1] & 0xFF) != 0xD8
+                || (bytes[2] & 0xFF) != 0xFF) {
+            replyToBridge(replyProxy, createAppStartResponse(
+                    "splash.image.complete", requestId, false,
+                    "Das übertragene Startbild ist keine gültige JPEG-Datei."
+            ));
+            clearAppStartImageTransfer();
+            return;
+        }
+
+        File temporary = new File(getFilesDir(), APP_START_IMAGE_FILE + ".tmp");
+        File destination = new File(getFilesDir(), APP_START_IMAGE_FILE);
+        try (FileOutputStream output = new FileOutputStream(temporary, false)) {
+            output.write(bytes);
+            output.flush();
+        } catch (IOException error) {
+            Log.e(TAG, "Startbild konnte nicht im App-Speicher abgelegt werden.", error);
+            temporary.delete();
+            replyToBridge(replyProxy, createAppStartResponse(
+                    "splash.image.complete", requestId, false,
+                    "Android konnte das Startbild nicht dauerhaft speichern."
+            ));
+            clearAppStartImageTransfer();
+            return;
+        }
+
+        if (destination.exists() && !destination.delete()) {
+            temporary.delete();
+            replyToBridge(replyProxy, createAppStartResponse(
+                    "splash.image.complete", requestId, false,
+                    "Das bisherige Startbild konnte nicht ersetzt werden."
+            ));
+            clearAppStartImageTransfer();
+            return;
+        }
+        boolean moved = temporary.renameTo(destination);
+        if (!moved) {
+            temporary.delete();
+            replyToBridge(replyProxy, createAppStartResponse(
+                    "splash.image.complete", requestId, false,
+                    "Das neue Startbild konnte nicht aktiviert werden."
+            ));
+            clearAppStartImageTransfer();
+            return;
+        }
+
+        replyToBridge(replyProxy, createAppStartResponse("splash.image.complete", requestId, true, null));
+        clearAppStartImageTransfer();
+    }
+
+    private void abortAppStartImageTransfer(
+            JSONObject request,
+            JavaScriptReplyProxy replyProxy,
+            String requestId
+    ) {
+        String transferId = request.optString("transferId", "");
+        boolean matches = pendingSplashImageTransferId != null
+                && pendingSplashImageTransferId.equals(transferId);
+        if (matches) clearAppStartImageTransfer();
+        replyToBridge(replyProxy, createAppStartResponse(
+                "splash.image.aborted", requestId, matches,
+                matches ? null : "Der Startbild-Upload ist nicht mehr aktiv."
+        ));
+    }
+
+    private void clearAppStartImageTransfer() {
+        if (pendingSplashImageStream != null) {
+            try {
+                pendingSplashImageStream.close();
+            } catch (IOException ignored) {
+                // ByteArrayOutputStream hält keinen nativen Deskriptor.
+            }
+        }
+        pendingSplashImageStream = null;
+        pendingSplashImageTransferId = null;
+        pendingSplashImageExpectedBytes = 0;
+        pendingSplashImageExpectedChunks = 0;
+        pendingSplashImageNextChunk = 0;
+    }
+
     private void replyBackupExport(
             JavaScriptReplyProxy replyProxy,
             String responseType,
