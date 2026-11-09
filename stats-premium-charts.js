@@ -715,344 +715,356 @@
             formatter: value => Math.round(value).toLocaleString('de-AT') + ' Schritte/Tour' };
     }
 
-    function cellRectangles(width, height) {
-        const left = 25;
-        const right = width - 25;
-        const top = 62;
-        const bottom = height - 17;
-        const gapX = 8;
-        const gapY = 8;
-        const cellWidth = (right - left - gapX * 3) / 4;
-        const cellHeight = (bottom - top - gapY * 2) / 3;
-        return MONTHS.map((_, index) => {
-            const column = index % 4;
-            const row = Math.floor(index / 4);
-            return {
-                x: left + column * (cellWidth + gapX),
-                y: top + row * (cellHeight + gapY),
-                width: cellWidth,
-                height: cellHeight
-            };
-        });
-    }
-
     function drawBigToursDiagram() {
         const canvas = canvasById('big-tours-canvas');
         if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
         const ctx = resizeCanvasToDisplaySize(canvas);
         if (!ctx) return;
-        const size = logicalSize(canvas);
-        const palette = chartPalette();
-        const data = getFilteredTours();
-        const counts = Array(12).fill(0);
+        const data = getFilteredTours(), counts = Array(12).fill(0);
         data.forEach(entry => {
             const month = monthOf(entry);
             if (month !== null && isBigTourCountable(entry, data)) counts[month]++;
         });
         const total = counts.reduce((sum, value) => sum + value, 0);
-        ctx.clearRect(0, 0, size.width, size.height);
-        drawHeader(ctx, canvas, 'Big Tours · ≥10 km und ≥1.000 hm', String(total) + ' Touren');
-        const cells = cellRectangles(size.width, size.height);
-        const maximum = Math.max(1, ...counts);
-        cells.forEach((cell, index) => {
-            const intensity = counts[index] / maximum;
-            roundedPath(ctx, cell.x, cell.y, cell.width, cell.height, 12);
-            ctx.save();
-            ctx.shadowColor = 'rgba(0,0,0,.42)';
-            ctx.shadowBlur = 9;
-            ctx.shadowOffsetY = 3;
-            const gradient = ctx.createLinearGradient(cell.x, cell.y, cell.x, cell.y + cell.height);
-            gradient.addColorStop(0, colourWithAlpha(palette.primary, 0.10 + intensity * 0.42));
-            gradient.addColorStop(0.48, colourWithAlpha(palette.primary, 0.06 + intensity * 0.28));
-            gradient.addColorStop(1, 'rgba(8,15,23,.74)');
-            ctx.fillStyle = gradient;
-            ctx.fill();
-            ctx.restore();
+        const base = baseChart(canvas, ctx, 'Große Touren · Alpine Kristallsäulen', total + ' Touren', {
+            subtitle: 'Definition: mindestens 10 km und mindestens 1.000 Höhenmeter',
+            reliefStrength: .18
+        });
+        const { height, plot, palette } = base;
+        const max = Math.max(1, ...counts), step = plot.width / 12, baseline = plot.bottom - 5;
 
-            roundedPath(ctx, cell.x, cell.y, cell.width, cell.height, 12);
-            ctx.strokeStyle = colourWithAlpha(palette.secondary, 0.20 + intensity * 0.28);
-            ctx.lineWidth = 1;
-            ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(plot.left, baseline); ctx.lineTo(plot.right, baseline);
+        ctx.strokeStyle = 'rgba(225,236,245,.28)'; ctx.lineWidth = 1.1; ctx.stroke();
 
+        counts.forEach((count, index) => {
+            const center = monthX(index, plot), w = Math.min(17, step * .72);
+            const h = count > 0 ? Math.max(11, count / max * plot.height * .72) : 3;
+            const top = baseline - h, half = w / 2, cut = Math.min(4, w * .22);
             ctx.save();
             ctx.beginPath();
-            ctx.moveTo(cell.x + 8, cell.y + 1);
-            ctx.lineTo(cell.x + cell.width - 8, cell.y + 1);
-            ctx.strokeStyle = 'rgba(255,255,255,.24)';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'top';
-            ctx.fillStyle = palette.muted;
-            ctx.font = editorFont(10, 700);
-            ctx.fillText(MONTH_NAMES[index], cell.x + 9, cell.y + 8, cell.width - 18);
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = palette.text;
-            ctx.font = editorFont(Math.min(23, Math.max(16, cell.height * 0.34)), 800);
-            ctx.fillText(String(counts[index]), cell.x + cell.width / 2, cell.y + cell.height * 0.62);
-            ctx.restore();
+            ctx.moveTo(center - half + cut, top);
+            ctx.lineTo(center + half - cut, top);
+            ctx.lineTo(center + half, top + cut);
+            ctx.lineTo(center + half, baseline - cut);
+            ctx.lineTo(center, baseline);
+            ctx.lineTo(center - half, baseline - cut);
+            ctx.lineTo(center - half, top + cut);
+            ctx.closePath();
+            const body = ctx.createLinearGradient(center - half, top, center + half, baseline);
+            body.addColorStop(0, '#F4F8FB');
+            body.addColorStop(.18, palette.secondary);
+            body.addColorStop(.48, palette.primary);
+            body.addColorStop(.78, colourWithAlpha(palette.primary, .70));
+            body.addColorStop(1, '#101A25');
+            ctx.fillStyle = body;
+            ctx.shadowColor = colourWithAlpha(palette.primary, .30); ctx.shadowBlur = 8;
+            ctx.fill(); ctx.shadowBlur = 0;
+            ctx.strokeStyle = 'rgba(245,249,252,.66)'; ctx.lineWidth = .8; ctx.stroke();
 
-            if (counts[index] > 0) {
-                const barWidth = (cell.width - 18) * intensity;
-                roundedPath(ctx, cell.x + 9, cell.y + cell.height - 8, Math.max(2, barWidth), 3, 2);
-                ctx.fillStyle = applyGradient(ctx, cell.x + 9, 0, cell.x + cell.width - 9, 0, palette.stops);
-                ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(center - half + cut + 1, top + 1);
+            ctx.lineTo(center, top + Math.min(h * .32, 14));
+            ctx.lineTo(center, baseline - 1);
+            ctx.lineTo(center - half + 1, baseline - cut);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(255,255,255,.19)'; ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(center + half - cut, top + 1);
+            ctx.lineTo(center + half - 1, top + cut);
+            ctx.lineTo(center + half - 1, baseline - cut);
+            ctx.lineTo(center, baseline - 1);
+            ctx.lineTo(center, top + Math.min(h * .32, 14));
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(3,9,16,.30)'; ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(center - half + cut + 1, top + 2);
+            ctx.lineTo(center - 1, top + Math.min(h * .32, 14));
+            ctx.strokeStyle = 'rgba(255,255,255,.78)'; ctx.lineWidth = .8; ctx.stroke();
+
+            ctx.fillStyle = palette.text; ctx.font = editorFont(8, 850);
+            ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+            ctx.fillText(String(count), center, top - 5, step + 2);
+            if (selectedMonths.bigTours === index) {
+                ctx.beginPath(); ctx.ellipse(center, baseline - h / 2, half + 4, h / 2 + 5, 0, 0, Math.PI * 2);
+                ctx.strokeStyle = palette.primary; ctx.lineWidth = 1.25;
+                ctx.shadowColor = palette.primary; ctx.shadowBlur = 8; ctx.stroke();
             }
+            ctx.restore();
         });
+        drawMonthLabels(ctx, plot, height, palette);
+        canvas.__premiumChartData = { values: counts, unit: 'große Touren', key: 'bigTours',
+            formatter: value => value + ' große Touren' };
     }
 
-    function drawCompassTick(ctx, radius, angle, major, palette) {
-        const inner = radius - (major ? 11 : 5);
-        const outer = radius - 1;
+    function drawGaugeNeedle(ctx, cx, cy, radius, angle, palette, redGold) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(angle + Math.PI / 2);
+        ctx.shadowColor = 'rgba(0,0,0,.72)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 3;
         ctx.beginPath();
-        ctx.moveTo(Math.cos(angle) * inner, Math.sin(angle) * inner);
-        ctx.lineTo(Math.cos(angle) * outer, Math.sin(angle) * outer);
-        ctx.strokeStyle = major ? colourWithAlpha(palette.secondary, 0.88) : 'rgba(231,239,246,.42)';
-        ctx.lineWidth = major ? 1.7 : 0.8;
+        ctx.moveTo(0, -radius * .76);
+        ctx.lineTo(radius * .075, 4);
+        ctx.lineTo(0, radius * .20);
+        ctx.lineTo(-radius * .075, 4);
+        ctx.closePath();
+        const needle = redGold
+            ? [[0, '#FFF4DA'], [.20, '#E8B85D'], [.46, '#C93635'], [.74, '#781F27'], [1, '#E5B75D']]
+            : [[0, '#FFF4DA'], [.32, palette.primary], [.68, palette.secondary], [1, '#344452']];
+        ctx.fillStyle = applyGradient(ctx, -radius * .08, -radius * .76, radius * .08, radius * .20, needle);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.beginPath();
+        ctx.moveTo(0, -radius * .72);
+        ctx.lineTo(0, radius * .14);
+        ctx.lineTo(-radius * .075, 4);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(255,255,255,.25)';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(-radius * .018, -radius * .60);
+        ctx.lineTo(-radius * .018, -radius * .04);
+        ctx.strokeStyle = 'rgba(255,255,255,.76)';
+        ctx.lineWidth = .8;
         ctx.stroke();
+        ctx.restore();
+
+        ctx.beginPath(); ctx.arc(cx, cy, 8, 0, Math.PI * 2);
+        ctx.fillStyle = applyGradient(ctx, cx - 8, cy - 8, cx + 8, cy + 8,
+            [[0, '#FFFFFF'], [.36, palette.secondary], [.72, palette.primary], [1, '#25313C']]);
+        ctx.fill();
+        ctx.beginPath(); ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+        ctx.fillStyle = redGold ? '#C83D37' : palette.primary; ctx.fill();
+    }
+
+    function drawTrendStrip(ctx, canvas, values, palette, selectedMonth) {
+        const size = logicalSize(canvas), left = 28, right = size.width - 28;
+        const top = size.height - 66, bottom = size.height - 35;
+        const max = Math.max(1, ...values.filter(value => value > 0)) * 1.08;
+        ctx.save();
+        ctx.fillStyle = palette.muted; ctx.font = editorFont(7.5, 750);
+        ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+        ctx.fillText('MONATSENTWICKLUNG', left, top - 8);
+        ctx.beginPath(); ctx.moveTo(left, bottom); ctx.lineTo(right, bottom);
+        ctx.strokeStyle = 'rgba(225,236,245,.22)'; ctx.lineWidth = 1; ctx.stroke();
+
+        const points = values.map((value, index) => ({
+            x: left + (right - left) * index / 11,
+            y: bottom - (value > 0 ? value / max : 0) * (bottom - top),
+            value, index
+        }));
+        const groups = [];
+        points.filter(point => point.value > 0).forEach(point => {
+            const current = groups[groups.length - 1];
+            if (!current || point.index !== current[current.length - 1].index + 1) groups.push([point]);
+            else current.push(point);
+        });
+        groups.forEach(group => {
+            if (group.length < 2) return;
+            ctx.save(); smoothStroke(ctx, group);
+            ctx.strokeStyle = colourWithAlpha(palette.primary, .20);
+            ctx.lineWidth = 5; ctx.stroke(); ctx.restore();
+            ctx.save(); smoothStroke(ctx, group);
+            ctx.strokeStyle = applyGradient(ctx, left, 0, right, 0, palette.stops);
+            ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.stroke(); ctx.restore();
+        });
+        points.forEach(point => {
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, point.index === selectedMonth ? 5 : 3, 0, Math.PI * 2);
+            ctx.fillStyle = point.value > 0 ? palette.secondary : 'rgba(225,235,245,.22)';
+            ctx.fill();
+            if (point.value > 0) {
+                ctx.beginPath(); ctx.arc(point.x, point.y, 1.4, 0, Math.PI * 2);
+                ctx.fillStyle = '#FFFFFF'; ctx.fill();
+            }
+            if (point.index === selectedMonth) {
+                ctx.beginPath(); ctx.arc(point.x, point.y, 8, 0, Math.PI * 2);
+                ctx.strokeStyle = palette.primary; ctx.lineWidth = 1.4; ctx.stroke();
+            }
+        });
+        ctx.font = editorFont(7.5, 650); ctx.fillStyle = palette.muted;
+        ctx.textAlign = 'center';
+        MONTHS.forEach((month, index) => {
+            ctx.fillText(month, left + (right - left) * index / 11, size.height - 14);
+        });
+        ctx.restore();
+        canvas.__premiumTrendGeometry = { left, right, top, bottom, points };
+    }
+
+    function renderCompassFrame(canvas, overall, values, selectedMonth, angleValue) {
+        const ctx = canvas.getContext('2d'), size = logicalSize(canvas), palette = chartPalette();
+        ctx.clearRect(0, 0, size.width, size.height);
+        drawInstrumentSurface(ctx, size.width, size.height, palette);
+        drawHeader(ctx, canvas, 'Leistungsindex · Präzisionskompass',
+            Math.round(selectedMonth === null ? overall : (values[selectedMonth] || 0)) + ' / 100');
+
+        const cx = size.width / 2, cy = Math.min(size.height * .46, 190);
+        const radius = Math.min(105, size.width * .285, (size.height - 128) * .50);
+        const start = Math.PI * .75, sweep = Math.PI * 1.5;
+        ctx.save(); ctx.translate(cx, cy);
+
+        const bezel = ctx.createRadialGradient(-radius * .32, -radius * .4, radius * .08, 0, 0, radius * 1.24);
+        bezel.addColorStop(0, '#FFFFFF'); bezel.addColorStop(.18, palette.secondary);
+        bezel.addColorStop(.43, '#586674'); bezel.addColorStop(.62, palette.primary);
+        bezel.addColorStop(.83, '#253341'); bezel.addColorStop(1, '#050B12');
+        ctx.beginPath(); ctx.arc(0, 0, radius + 9, 0, Math.PI * 2);
+        ctx.fillStyle = bezel; ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = 12; ctx.fill(); ctx.shadowBlur = 0;
+
+        const glass = ctx.createRadialGradient(-radius * .35, -radius * .45, 1, 0, 0, radius + 2);
+        glass.addColorStop(0, 'rgba(42,59,75,.96)'); glass.addColorStop(.7, 'rgba(10,20,31,.98)');
+        glass.addColorStop(1, 'rgba(4,10,17,1)');
+        ctx.beginPath(); ctx.arc(0, 0, radius + 1, 0, Math.PI * 2); ctx.fillStyle = glass; ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 0, radius + 5.2, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 1.1; ctx.stroke();
+
+        for (let i = 0; i <= 100; i += 2) {
+            const a = start + sweep * i / 100, major = i % 10 === 0;
+            ctx.beginPath();
+            ctx.moveTo(Math.cos(a) * (radius - (major ? 14 : 7)), Math.sin(a) * (radius - (major ? 14 : 7)));
+            ctx.lineTo(Math.cos(a) * (radius - 2), Math.sin(a) * (radius - 2));
+            ctx.strokeStyle = major ? colourWithAlpha(palette.secondary, .94) : 'rgba(235,242,247,.40)';
+            ctx.lineWidth = major ? 1.45 : .65; ctx.stroke();
+        }
+        [0, 25, 50, 75, 100].forEach(value => {
+            const a = start + sweep * value / 100, r = radius - 30;
+            ctx.fillStyle = palette.text; ctx.font = editorFont(8.5, 750);
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(String(value), Math.cos(a) * r, Math.sin(a) * r);
+        });
+
+        [['N', -Math.PI / 2], ['O', 0], ['S', Math.PI / 2], ['W', Math.PI]].forEach(([label, a]) => {
+            ctx.fillStyle = label === 'N' ? palette.primary : 'rgba(239,245,249,.9)';
+            ctx.font = editorFont(9, 850); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(label, Math.cos(a) * (radius + 18), Math.sin(a) * (radius + 18));
+        });
+
+        // Eight-point compass rose, purely ornamental around the performance scale.
+        for (let i = 0; i < 8; i++) {
+            const a = -Math.PI / 2 + i * Math.PI / 4, len = i % 2 === 0 ? radius * .36 : radius * .23;
+            const w = i % 2 === 0 ? 5.2 : 3.2;
+            ctx.beginPath();
+            ctx.moveTo(Math.cos(a) * len, Math.sin(a) * len);
+            ctx.lineTo(Math.cos(a + Math.PI / 2) * w, Math.sin(a + Math.PI / 2) * w);
+            ctx.lineTo(-Math.cos(a) * len * .22, -Math.sin(a) * len * .22);
+            ctx.lineTo(-Math.cos(a + Math.PI / 2) * w, -Math.sin(a + Math.PI / 2) * w);
+            ctx.closePath();
+            ctx.fillStyle = i % 2 === 0 ? colourWithAlpha(palette.primary, .68) : 'rgba(223,234,243,.52)';
+            ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.36)'; ctx.lineWidth = .6; ctx.stroke();
+        }
+        const needleAngle = start + sweep * Math.max(0, Math.min(100, angleValue)) / 100;
+        drawGaugeNeedle(ctx, 0, 0, radius * .88, needleAngle, palette, true);
+        const shown = selectedMonth === null ? overall : (values[selectedMonth] || 0);
+        ctx.fillStyle = '#FFF8E8'; ctx.font = editorFont(23, 850);
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(String(Math.round(shown)), 0, radius * .47);
+        ctx.fillStyle = 'rgba(231,239,245,.68)'; ctx.font = editorFont(7.5, 750);
+        ctx.fillText('LEISTUNGSINDEX · 0–100', 0, radius * .70);
+        ctx.restore();
+        drawTrendStrip(ctx, canvas, values, palette, selectedMonth);
+    }
+
+    function renderSpeedometerFrame(canvas, overall, values, selectedMonth, angleValue) {
+        const ctx = canvas.getContext('2d'), size = logicalSize(canvas), palette = chartPalette();
+        ctx.clearRect(0, 0, size.width, size.height);
+        drawInstrumentSurface(ctx, size.width, size.height, palette);
+        const shown = selectedMonth === null ? overall : (values[selectedMonth] || 0);
+        drawHeader(ctx, canvas, 'Geschwindigkeit · Tachometer',
+            shown > 0 ? formatDecimalAT(shown, 1) + ' km/h' : '–');
+
+        const cx = size.width / 2, cy = Math.min(size.height * .60, 235);
+        const radius = Math.min(112, size.width * .30, (size.height - 135) * .68);
+        const max = Math.max(6, Math.ceil(Math.max(overall, ...values) * 1.18 / 2) * 2);
+        const start = Math.PI, sweep = Math.PI;
+
+        ctx.beginPath(); ctx.arc(cx, cy, radius + 9, start - .04, start + sweep + .04);
+        ctx.strokeStyle = '#263442'; ctx.lineWidth = 13; ctx.stroke();
+        const rim = ctx.createLinearGradient(cx - radius, cy - radius, cx + radius, cy + 3);
+        rim.addColorStop(0, '#FFF2D4'); rim.addColorStop(.25, palette.secondary);
+        rim.addColorStop(.52, palette.primary); rim.addColorStop(.78, '#5B6874'); rim.addColorStop(1, '#111B25');
+        ctx.beginPath(); ctx.arc(cx, cy, radius + 8, start, start + sweep);
+        ctx.strokeStyle = rim; ctx.lineWidth = 8; ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx, cy, radius + 2, start, start + sweep);
+        ctx.strokeStyle = 'rgba(255,255,255,.38)'; ctx.lineWidth = 1; ctx.stroke();
+
+        for (let i = 0; i <= 40; i++) {
+            const value = max * i / 40, a = start + sweep * i / 40, major = i % 5 === 0;
+            const r1 = radius - (major ? 15 : 7);
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1);
+            ctx.lineTo(cx + Math.cos(a) * (radius - 1), cy + Math.sin(a) * (radius - 1));
+            ctx.strokeStyle = major ? palette.secondary : 'rgba(236,243,248,.43)';
+            ctx.lineWidth = major ? 1.55 : .7; ctx.stroke();
+            if (major) {
+                ctx.fillStyle = palette.text; ctx.font = editorFont(8, 750);
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(String(Math.round(value)), cx + Math.cos(a) * (radius - 28), cy + Math.sin(a) * (radius - 28));
+            }
+        }
+        ctx.beginPath(); ctx.arc(cx, cy, radius - 4, start + sweep * .82, start + sweep);
+        ctx.strokeStyle = 'rgba(197,54,49,.72)'; ctx.lineWidth = 3; ctx.stroke();
+        const angle = start + sweep * Math.max(0, Math.min(max, angleValue)) / max;
+        drawGaugeNeedle(ctx, cx, cy, radius * .82, angle, palette, true);
+
+        ctx.fillStyle = palette.text; ctx.font = editorFont(24, 850);
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(shown > 0 ? formatDecimalAT(shown, 1) : '–', cx, cy + 32);
+        ctx.fillStyle = palette.muted; ctx.font = editorFont(9, 750);
+        ctx.fillText('km/h · MONATSMITTEL', cx, cy + 52);
+        drawTrendStrip(ctx, canvas, values, palette, selectedMonth);
+    }
+
+    function animateGauge(type, target, drawFrame) {
+        const previous = Number.isFinite(animatedGaugeValues[type]) ? animatedGaugeValues[type] : target;
+        if (!window.requestAnimationFrame || Math.abs(previous - target) < .2) {
+            animatedGaugeValues[type] = target; drawFrame(target); return;
+        }
+        if (gaugeAnimationFrames[type] && window.cancelAnimationFrame) window.cancelAnimationFrame(gaugeAnimationFrames[type]);
+        const started = performance.now(), duration = 520, from = previous;
+        const step = now => {
+            const t = Math.min(1, (now - started) / duration);
+            const eased = 1 - Math.pow(1 - t, 3);
+            drawFrame(from + (target - from) * eased);
+            if (t < 1) gaugeAnimationFrames[type] = window.requestAnimationFrame(step);
+            else { gaugeAnimationFrames[type] = null; animatedGaugeValues[type] = target; }
+        };
+        gaugeAnimationFrames[type] = window.requestAnimationFrame(step);
     }
 
     function drawPerformanceIndexDiagram() {
+        const sums = Array(12).fill(0), counts = Array(12).fill(0);
+        let total = 0, n = 0;
+        getFilteredTours().forEach(entry => {
+            const month = monthOf(entry); if (month === null) return;
+            const result = calculatePerformanceIndex(entry);
+            if (!result || !Number.isFinite(result.score)) return;
+            const score = Math.max(0, Math.min(100, result.score));
+            sums[month] += score; counts[month]++; total += score; n++;
+        });
+        const values = sums.map((sum, i) => counts[i] ? sum / counts[i] : 0);
+        const overall = n ? total / n : 0, selected = selectedMonths.performanceIndex;
+        const selectedValue = activeMonthValue(values, selected);
+        const target = selectedValue === null ? overall : selectedValue;
         const canvas = canvasById('performance-index-canvas');
         if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
-        const ctx = resizeCanvasToDisplaySize(canvas);
-        if (!ctx) return;
-        const size = logicalSize(canvas);
-        const palette = chartPalette();
-        const data = getFilteredTours();
-        const sums = Array(12).fill(0);
-        const counts = Array(12).fill(0);
-        let totalScore = 0;
-        let totalCount = 0;
+        resizeCanvasToDisplaySize(canvas);
+        canvas.__premiumChartData = { values, unit: 'Punkte', key: 'performanceIndex',
+            formatter: value => Math.round(value) + ' / 100' };
+        animateGauge('performanceIndex', target,
+            angle => renderCompassFrame(canvas, overall, values, selected, angle));
+    }
 
-        data.forEach(entry => {
-            const month = monthOf(entry);
-            if (month === null) return;
-            const performance = calculatePerformanceIndex(entry);
-            if (!performance || !Number.isFinite(performance.score)) return;
-            const score = Math.max(0, Math.min(100, performance.score));
-            sums[month] += score;
-            counts[month]++;
-            totalScore += score;
-            totalCount++;
-        });
-
-        const monthAverages = sums.map((sum, index) => counts[index] ? sum / counts[index] : 0);
-        const overall = totalCount ? totalScore / totalCount : 0;
-        ctx.clearRect(0, 0, size.width, size.height);
-        drawHeader(ctx, canvas, 'Leistungsindex', totalCount ? Math.round(overall) + ' / 100' : '–');
-
-        const cx = size.width / 2;
-        const cy = Math.max(120, Math.min(size.height * 0.49, size.height - 110));
-        const radius = Math.min(94, size.width * 0.235, Math.max(42, (size.height - 130) * 0.42));
-        const startAngle = Math.PI * 0.75;
-        const sweep = Math.PI * 1.5;
-
-        ctx.save();
-        ctx.translate(cx, cy);
-
-        // Präzisionsgehäuse mit metallischem Außenring und innerer Glasfläche.
-        const outerMetal = ctx.createRadialGradient(-radius * 0.35, -radius * 0.45, radius * 0.12, 0, 0, radius * 1.35);
-        outerMetal.addColorStop(0, '#FFF9E8');
-        outerMetal.addColorStop(0.24, palette.secondary);
-        outerMetal.addColorStop(0.52, '#5A6570');
-        outerMetal.addColorStop(0.72, palette.primary);
-        outerMetal.addColorStop(1, '#17212B');
-        ctx.fillStyle = outerMetal;
-        ctx.beginPath();
-        ctx.arc(0, 0, radius + 8, 0, Math.PI * 2);
-        ctx.fill();
-
-        const innerGlass = ctx.createRadialGradient(-radius * 0.35, -radius * 0.48, 1, 0, 0, radius + 1);
-        innerGlass.addColorStop(0, 'rgba(45,61,76,.96)');
-        innerGlass.addColorStop(0.6, 'rgba(14,24,35,.98)');
-        innerGlass.addColorStop(1, 'rgba(5,11,18,1)');
-        ctx.fillStyle = innerGlass;
-        ctx.beginPath();
-        ctx.arc(0, 0, radius + 1, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.arc(0, 0, radius + 4.5, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(255,255,255,.58)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-
-        // 0–100 wird auf dem Instrument abgetragen; Himmelsrichtungen sind nur Kompass-Anmutung.
-        for (let tick = 0; tick <= 60; tick++) {
-            const angle = startAngle + sweep * tick / 60;
-            drawCompassTick(ctx, radius - 3, angle, tick % 5 === 0, palette);
-        }
-
-        [0, 25, 50, 75, 100].forEach(value => {
-            const angle = startAngle + sweep * value / 100;
-            const labelRadius = radius - 22;
-            ctx.save();
-            ctx.translate(Math.cos(angle) * labelRadius, Math.sin(angle) * labelRadius);
-            ctx.fillStyle = palette.text;
-            ctx.font = editorFont(9, 700);
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(String(value), 0, 0);
-            ctx.restore();
-        });
-
-        const directions = [
-            ['N', -Math.PI / 2],
-            ['O', 0],
-            ['S', Math.PI / 2],
-            ['W', Math.PI]
-        ];
-        directions.forEach(([label, angle]) => {
-            ctx.save();
-            ctx.translate(Math.cos(angle) * (radius + 18), Math.sin(angle) * (radius + 18));
-            ctx.fillStyle = label === 'N' ? palette.primary : 'rgba(229,236,243,.82)';
-            ctx.font = editorFont(9, 800);
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(label, 0, 0);
-            ctx.restore();
-        });
-
-        if (totalCount) {
-            const needleAngle = startAngle + sweep * overall / 100;
-            const nx = Math.cos(needleAngle);
-            const ny = Math.sin(needleAngle);
-            ctx.save();
-            ctx.rotate(needleAngle + Math.PI / 2);
-            ctx.shadowColor = 'rgba(0,0,0,.7)';
-            ctx.shadowBlur = 9;
-            ctx.shadowOffsetY = 3;
-            ctx.beginPath();
-            ctx.moveTo(0, -radius * 0.72);
-            ctx.lineTo(radius * 0.105, 2);
-            ctx.lineTo(0, radius * 0.19);
-            ctx.lineTo(-radius * 0.105, 2);
-            ctx.closePath();
-            ctx.fillStyle = applyGradient(ctx, -radius * 0.105, -radius * 0.72, radius * 0.105, radius * 0.19, [
-                [0, '#FFF9E8'], [0.30, palette.primary], [0.68, palette.secondary], [1, '#53616E']
-            ]);
-            ctx.fill();
-
-            // Seitliche Facette und Lichtkante erzeugen die sichtbare Metalltiefe.
-            ctx.beginPath();
-            ctx.moveTo(0, -radius * 0.72);
-            ctx.lineTo(0, radius * 0.15);
-            ctx.lineTo(-radius * 0.105, 2);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(255,255,255,.25)';
-            ctx.fill();
-
-            ctx.beginPath();
-            ctx.moveTo(-radius * 0.025, -radius * 0.60);
-            ctx.lineTo(-radius * 0.025, -radius * 0.04);
-            ctx.strokeStyle = 'rgba(255,255,255,.72)';
-            ctx.lineWidth = 0.9;
-            ctx.stroke();
-            ctx.restore();
-
-            // Gegengewicht und zentrale Lagerkappe.
-            ctx.beginPath();
-            ctx.arc(0, 0, 8, 0, Math.PI * 2);
-            ctx.fillStyle = applyGradient(ctx, -8, -8, 8, 8, [
-                [0, '#FFFFFF'], [0.36, palette.secondary], [1, '#384451']
-            ]);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(0, 0, 3, 0, Math.PI * 2);
-            ctx.fillStyle = palette.primary;
-            ctx.fill();
-
-            ctx.fillStyle = palette.text;
-            ctx.font = editorFont(25, 800);
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(String(Math.round(overall)), 0, radius * 0.35);
-            ctx.fillStyle = 'rgba(229,236,243,.64)';
-            ctx.font = editorFont(8, 700);
-            ctx.fillText('LEISTUNGSINDEX', 0, radius * 0.60);
-        } else {
-            ctx.fillStyle = palette.text;
-            ctx.font = editorFont(13, 700);
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('Noch keine Werte', 0, 0);
-        }
-        ctx.restore();
-
-        // Monatsverlauf als eigenständige, gut lesbare Instrumentenskala.
-        const trendLeft = 34;
-        const trendRight = size.width - 34;
-        const trendTop = size.height - 49;
-        const trendBottom = size.height - 29;
-        ctx.save();
-        ctx.fillStyle = palette.muted;
-        ctx.font = editorFont(8, 700);
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'alphabetic';
-        ctx.fillText('MONATSVERLAUF', trendLeft, trendTop - 8);
-        ctx.beginPath();
-        ctx.moveTo(trendLeft, trendBottom);
-        ctx.lineTo(trendRight, trendBottom);
-        ctx.strokeStyle = 'rgba(229,236,243,.18)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-
-        const trendPoints = monthAverages.map((value, index) => ({
-            x: trendLeft + (trendRight - trendLeft) * index / 11,
-            y: trendBottom - (Math.max(0, value) / 100) * (trendBottom - trendTop),
-            value,
-            index
-        })).filter(point => point.value > 0);
-        const trendRuns = [];
-        trendPoints.forEach(point => {
-            const current = trendRuns[trendRuns.length - 1];
-            if (!current || point.index !== current[current.length - 1].index + 1) {
-                trendRuns.push([point]);
-            } else {
-                current.push(point);
-            }
-        });
-
-        trendRuns.forEach(run => {
-            if (run.length < 2) return;
-            ctx.save();
-            smoothStroke(ctx, run);
-            ctx.strokeStyle = colourWithAlpha(palette.primary, 0.20);
-            ctx.lineWidth = 5;
-            ctx.stroke();
-            ctx.restore();
-
-            ctx.save();
-            smoothStroke(ctx, run);
-            ctx.strokeStyle = applyGradient(ctx, trendLeft, 0, trendRight, 0, palette.stops);
-            ctx.lineWidth = 2.1;
-            ctx.lineCap = 'round';
-            ctx.stroke();
-            ctx.restore();
-        });
-
-        trendPoints.forEach(point => {
-            ctx.beginPath();
-            ctx.arc(point.x, point.y, 3.0, 0, Math.PI * 2);
-            ctx.fillStyle = palette.secondary;
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(point.x, point.y, 1.55, 0, Math.PI * 2);
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fill();
-        });
-
-        ctx.font = editorFont(8, 650);
-        ctx.fillStyle = palette.muted;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'alphabetic';
-        MONTHS.forEach((month, index) => {
-            const monthX = trendLeft + (trendRight - trendLeft) * index / 11;
-            ctx.fillText(month, monthX, size.height - 11);
-        });
-        ctx.restore();
+    function drawSpeedometer(canvas, values, overall) {
+        if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
+        resizeCanvasToDisplaySize(canvas);
+        const selected = selectedMonths.speed, selectedValue = activeMonthValue(values, selected);
+        const target = selectedValue === null ? overall : selectedValue;
+        canvas.__premiumChartData = { values, unit: 'km/h', key: 'speed',
+            formatter: value => formatDecimalAT(value, 1) + ' km/h' };
+        animateGauge('speed', target,
+            angle => renderSpeedometerFrame(canvas, overall, values, selected, angle));
     }
 
     function enhanceMilestoneMarkers(type) {
