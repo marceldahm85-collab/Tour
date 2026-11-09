@@ -839,6 +839,14 @@
             ctx.fillStyle = '#FFFFFF';
             ctx.fill();
         });
+        ctx.font = editorFont(7, 600);
+        ctx.fillStyle = palette.muted;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        MONTHS.forEach((month, index) => {
+            const monthX = trendLeft + (trendRight - trendLeft) * index / 11;
+            ctx.fillText(month, monthX, size.height - 18);
+        });
         ctx.restore();
     }
 
@@ -946,7 +954,7 @@
                 const size = logicalSize(compass);
                 const x = (event.clientX - rect.left) * size.width / rect.width;
                 const y = (event.clientY - rect.top) * size.height / rect.height;
-                if (y < size.height - 82 || x < 24 || x > size.width - 24) return;
+                if (y < size.height - 74 || x < 24 || x > size.width - 24) return;
                 const monthIndex = Math.max(0, Math.min(11,
                     Math.round((x - 34) / Math.max(1, size.width - 68) * 11)));
                 adaptiveHaptic('selection');
