@@ -220,11 +220,14 @@
         }
 
         if (settings.background === 'editor') {
-            const asset = await window.getAppBackgroundSplashAsset?.();
-            if (!asset || !(asset.blob instanceof Blob)) {
-                throw new Error('Das aktuelle Editor-Hintergrundbild ist nicht verfügbar.');
+            const source = await window.getAppBackgroundSplashSource?.();
+            if (source?.blob instanceof Blob) return source.blob;
+            if (typeof source?.url === 'string' && source.url) {
+                return fetchImageBlob(source.url, 'Das aktuelle Editor-Hintergrundbild konnte nicht geladen werden.');
             }
-            return asset.blob;
+            const asset = await window.getAppBackgroundSplashAsset?.();
+            if (asset?.blob instanceof Blob) return asset.blob;
+            throw new Error('Das aktuelle Editor-Hintergrundbild ist nicht verfügbar.');
         }
 
         if (settings.background.startsWith('preset:')) {
