@@ -98,3 +98,293 @@ html body #tour-view #planned-peaks-container .peak-tour-list > li {
             inset 0 1px 0 rgba(255,255,255,.065) !important;
     }
 }
+
+
+/* =========================================================
+   PREMIUM DEPTH SYSTEM — einheitliche räumliche Ebenen
+   Rein visuelle Veredelung: keine Maße, Abstände, Inhalte,
+   Bildmotive, Karten-Layer oder Daten-/Navigationslogik ändern.
+   ========================================================= */
+
+body {
+    --premium-depth-panel:
+        0 16px 34px rgba(0,0,0,.27),
+        0 4px 10px rgba(0,0,0,.13),
+        0 0 18px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 5%, transparent),
+        inset 0 1px 0 rgba(255,255,255,.10),
+        inset 0 -1px 0 rgba(0,0,0,.14);
+
+    --premium-depth-card:
+        0 9px 21px rgba(0,0,0,.23),
+        0 2px 6px rgba(0,0,0,.12),
+        inset 0 1px 0 rgba(255,255,255,.085),
+        inset 0 -1px 0 rgba(0,0,0,.10);
+
+    --premium-depth-control:
+        0 5px 12px rgba(0,0,0,.20),
+        0 1px 3px rgba(0,0,0,.12),
+        inset 0 1px 0 rgba(255,255,255,.095),
+        inset 0 -1px 0 rgba(0,0,0,.10);
+
+    --premium-depth-active:
+        0 8px 17px rgba(0,0,0,.25),
+        0 0 12px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 9%, transparent),
+        inset 0 1px 0 rgba(255,255,255,.14),
+        inset 0 -1px 0 rgba(0,0,0,.12);
+}
+
+/* EBENE 1 — größere Inhaltsflächen schweben sichtbar vor dem Panorama. */
+#dashboard-view .dash-section,
+#chart-view .stats-analysis-section,
+#chart-view .stats-structure-section,
+#chart-view .stats-chart-block,
+#chart-view .chart-card,
+html body #tour-view #plan-form > .plan-form-column,
+#app-view .save-form-card,
+#wrapped-view.bergwelt-ready #pdf-export-card {
+    box-shadow: var(--premium-depth-panel) !important;
+}
+
+/* EBENE 2 — Dashboard-Kacheln und Listen liegen eine Stufe über den Hauptflächen.
+   Die Bildmotive der Meilensteine bleiben unverändert und vollständig sichtbar. */
+#dashboard-view .dash-stat-tile,
+#dashboard-view #dash-milestones-section .dash-milestone-tile,
+#dashboard-view #dash-recent-section .dash-tour-list > .dash-recent-item,
+#dashboard-view .dash-tour-list > li,
+#achievements-view .achievements-inner .dash-section,
+#achievements-view .achievement-tile {
+    box-shadow: var(--premium-depth-card) !important;
+}
+
+/* EBENE 2 — Statistik: Strukturkarten, Kennzahlen und Diagrammflächen. */
+#chart-view .chart-stat-tile,
+#chart-view .development-metric-card,
+#chart-view .best-form-card,
+#chart-view .tour-profile-summary-card,
+#chart-view .activity-summary-card,
+#chart-view .peak-summary-card,
+#chart-view .stats-structure-typical-card,
+#chart-view .stats-structure-type-card,
+#chart-view .stats-structure-burden-card,
+#chart-view .stats-peak-history-item,
+#stats-highlights-page #highlights-content .highlight-group {
+    box-shadow: var(--premium-depth-card) !important;
+}
+
+/* Statistik-Navigation und Diagramm-Umschalter: kompakte, eigene Oberfläche. */
+#chart-view .stats-section-btn,
+#chart-view #chart-tabs .chart-tab,
+#chart-view .stats-year-filter-wrap > .dash-year-arrow-btn,
+#chart-view .stats-year-filter-wrap > select {
+    box-shadow: var(--premium-depth-control) !important;
+}
+#chart-view .stats-section-btn.active,
+#chart-view #chart-tabs .chart-tab.active,
+#chart-view .chart-stat-tile.active,
+#chart-view .development-metric-card.active,
+#chart-view .tour-profile-summary-card.active,
+#chart-view .activity-summary-card.active {
+    box-shadow: var(--premium-depth-active) !important;
+}
+
+/* EBENE 2 — Tour planen: Übersicht, Planungsnavigation und Vorschau. */
+html body #tour-view .plan-overview-tile,
+html body #tour-view #plan-form #plan-live-preview,
+html body #tour-view #planned-tours-list > .box-content,
+html body #tour-view #planned-peaks-box > .box-content,
+html body #tour-view #checklist-box .checklist-section {
+    box-shadow: var(--premium-depth-card) !important;
+}
+html body #tour-view .plan-section-btn,
+html body #tour-view #checklist-box .checklist-mode-btn {
+    box-shadow: var(--premium-depth-control) !important;
+}
+html body #tour-view .plan-section-btn.active,
+html body #tour-view #checklist-box .checklist-mode-btn.active {
+    box-shadow: var(--premium-depth-active) !important;
+}
+html body #tour-view #planned-tours-list .tour-list > li,
+html body #tour-view #planned-peaks-container .peak-tour-list > li:not(.peak-tier-1):not(.peak-tier-2):not(.peak-tier-3),
+html body #tour-view #checklist-box .checklist-item {
+    box-shadow: var(--premium-depth-control) !important;
+}
+
+/* EBENE 3 — Eingabefelder und Aktionen: leichte Erhebung statt flacher Flächen. */
+#app-view .tour-form input:not([type="file"]):not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+#app-view .tour-form select,
+#app-view .tour-form textarea,
+#app-view #geo-search-btn:not(:disabled),
+#app-view #tour-image-pick-btn,
+#app-view .save-peak-row,
+html body #tour-view #plan-form input:not([type="file"]):not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+html body #tour-view #plan-form select,
+html body #tour-view #plan-form textarea {
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.075),
+        0 3px 8px rgba(0,0,0,.12) !important;
+}
+#app-view #save-btn,
+#app-view .slope-toggle,
+html body #tour-view #plan-form #plan-save-btn {
+    box-shadow:
+        0 6px 14px rgba(0,0,0,.22),
+        inset 0 1px 0 rgba(255,255,255,.13),
+        inset 0 -1px 0 rgba(0,0,0,.12) !important;
+}
+
+/* KARTE — nur die darüberliegenden Bedienelemente erhalten Tiefe.
+   Leaflet-Kartenfläche, Marker, Höhenlinien und Kartenkacheln bleiben unangetastet. */
+#map-view .map-mode-toggle,
+#map-view #map-quick-filters,
+#map-view #map-performance-legend,
+#map-view #map-info-bar,
+#map-view .map-year-filter-wrap > select,
+#map-view .map-year-filter-wrap > .mob-sel-wrap > .mob-sel-btn,
+#map-view .map-year-filter-wrap > .dash-year-arrow-btn {
+    box-shadow: var(--premium-depth-card) !important;
+}
+#map-view .map-mode-btn,
+#map-view #map-quick-filters .quick-filter-btn {
+    box-shadow: var(--premium-depth-control) !important;
+}
+#map-view .map-mode-btn.active,
+#map-view #map-quick-filters .quick-filter-btn.active {
+    box-shadow: var(--premium-depth-active) !important;
+}
+#map-view .leaflet-popup-content-wrapper {
+    box-shadow:
+        0 13px 28px rgba(0,0,0,.30),
+        inset 0 1px 0 rgba(255,255,255,.10) !important;
+}
+
+/* BERGWELT — bestehende Glas- und Achievement-Flächen stärker staffeln. */
+#wrapped-view.bergwelt-ready .bergwelt-card,
+#wrapped-view.bergwelt-ready .bergwelt-level-badge,
+#wrapped-view.bergwelt-ready .bergwelt-height-milestone,
+#wrapped-view.bergwelt-ready .bergwelt-height-year-donut-section,
+#wrapped-view.bergwelt-ready .bergwelt-height-years-chart-section,
+#wrapped-view.bergwelt-ready .bergwelt-level-modal-metric,
+#wrapped-view.bergwelt-ready .bergwelt-level-modal-progress,
+#wrapped-view.bergwelt-ready .bergwelt-level-modal-rank-row,
+#wrapped-view.bergwelt-ready .bergwelt-story-rail,
+#wrapped-view.bergwelt-ready .bergwelt-cinematic-stat,
+#wrapped-view.bergwelt-ready .bergwelt-cinematic-highlight {
+    box-shadow: var(--premium-depth-card) !important;
+}
+#wrapped-view.bergwelt-ready .bergwelt-tabs > .bergwelt-tab,
+#wrapped-view.bergwelt-ready .wrapped-header .wrapped-year-select,
+#wrapped-view.bergwelt-ready .wrapped-header .dash-year-arrow-btn,
+#wrapped-view.bergwelt-ready .wrapped-header .mob-sel-btn {
+    box-shadow: var(--premium-depth-control) !important;
+}
+#wrapped-view.bergwelt-ready .bergwelt-tabs > .bergwelt-tab.is-active {
+    box-shadow: var(--premium-depth-active) !important;
+}
+#wrapped-view.bergwelt-ready .bergwelt-cinematic-hero {
+    box-shadow: var(--premium-depth-panel) !important;
+}
+
+/* NAVIGATION — die Leiste selbst liegt vor dem Hintergrund, die Ziele sind einzeln gefasst. */
+.top-main-nav {
+    box-shadow:
+        0 13px 28px rgba(0,0,0,.25),
+        0 3px 8px rgba(0,0,0,.12),
+        inset 0 1px 0 rgba(255,255,255,.12),
+        inset 0 -1px 0 rgba(0,0,0,.12) !important;
+}
+.top-main-nav .top-nav-btn {
+    box-shadow:
+        0 4px 10px rgba(0,0,0,.14),
+        inset 0 1px 0 rgba(255,255,255,.075) !important;
+}
+.top-main-nav .top-nav-btn.view-active,
+.top-main-nav .top-nav-btn.more-view-active {
+    box-shadow:
+        0 7px 15px rgba(0,0,0,.22),
+        0 0 0 1px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 36%, transparent),
+        inset 0 1px 0 rgba(255,255,255,.13) !important;
+}
+#more-menu {
+    box-shadow:
+        0 18px 38px rgba(0,0,0,.34),
+        0 4px 12px rgba(0,0,0,.16),
+        inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+#more-menu .more-menu-item {
+    box-shadow:
+        0 4px 10px rgba(0,0,0,.14),
+        inset 0 1px 0 rgba(255,255,255,.075) !important;
+}
+
+/* EDITOR, SICHERUNG UND VERGLEICH — dieselbe Tiefenstaffelung auch in den Nebenbereichen. */
+#theme-view details.theme-editor-panel,
+#theme-view details.theme-editor-subgroup,
+#backup-view .backup-status-panel,
+#backup-view .backup-info-card,
+#backup-view .backup-file-status,
+#filter-view .compare-row,
+#filter-view .compare-period-card,
+#filter-view .compare-list-card {
+    box-shadow: var(--premium-depth-card) !important;
+}
+#theme-view .theme-editor-option,
+#theme-view .theme-editor-widget-choice,
+#filter-view .compare-chip {
+    box-shadow: var(--premium-depth-control) !important;
+}
+
+/* MODALE — als oberste räumliche Ebene; die drei TOP-3-Metallflächen
+   behalten ausdrücklich ihren separaten metallischen Licht-/Schattenaufbau. */
+.modal:not(.hidden) .modal-card:not(.highlight-modal-bronze):not(.highlight-modal-silver):not(.highlight-modal-gold) {
+    box-shadow:
+        0 22px 48px rgba(0,0,0,.40),
+        0 7px 18px rgba(0,0,0,.20),
+        inset 0 1px 0 rgba(255,255,255,.12),
+        inset 0 -1px 0 rgba(0,0,0,.16) !important;
+}
+.modal:not(.hidden) .modal-card:not(.highlight-modal-bronze):not(.highlight-modal-silver):not(.highlight-modal-gold) .modal-header {
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.075);
+}
+
+/* Kleine Geräte: gleiche Tiefenwirkung mit kompakteren Schatten für die GPU. */
+@media (max-width: 600px) {
+    body {
+        --premium-depth-panel:
+            0 11px 24px rgba(0,0,0,.25),
+            0 3px 7px rgba(0,0,0,.12),
+            0 0 12px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 4%, transparent),
+            inset 0 1px 0 rgba(255,255,255,.09),
+            inset 0 -1px 0 rgba(0,0,0,.12);
+
+        --premium-depth-card:
+            0 7px 16px rgba(0,0,0,.22),
+            0 2px 5px rgba(0,0,0,.11),
+            inset 0 1px 0 rgba(255,255,255,.075),
+            inset 0 -1px 0 rgba(0,0,0,.09);
+
+        --premium-depth-control:
+            0 4px 9px rgba(0,0,0,.18),
+            inset 0 1px 0 rgba(255,255,255,.085),
+            inset 0 -1px 0 rgba(0,0,0,.09);
+
+        --premium-depth-active:
+            0 6px 13px rgba(0,0,0,.23),
+            0 0 9px color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 8%, transparent),
+            inset 0 1px 0 rgba(255,255,255,.12);
+    }
+
+    .modal:not(.hidden) .modal-card:not(.highlight-modal-bronze):not(.highlight-modal-silver):not(.highlight-modal-gold) {
+        box-shadow:
+            0 16px 34px rgba(0,0,0,.38),
+            0 5px 12px rgba(0,0,0,.18),
+            inset 0 1px 0 rgba(255,255,255,.10) !important;
+    }
+}
+
+/* Nutzerpräferenz hat Vorrang: Dekorative Übergänge werden nicht erzwungen. */
+@media (prefers-reduced-motion: reduce) {
+    .top-main-nav .top-nav-btn,
+    #more-menu .more-menu-item {
+        transition: none !important;
+    }
+}
