@@ -1181,7 +1181,7 @@
         const keyAll = '__total__';
         const years = aggregate ? [keyAll] : timelineYears.slice();
         const bucketCount = aggregate ? timelineYears.length : 12;
-        const labels = aggregate ? timelineYears.map(String) :
+        const labels = aggregate ? timelineYears.map(year => timelineYears.length > 6 ? String(year).slice(-2) : String(year)) :
             ['Jän', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 
         const empty = () => {
@@ -1323,20 +1323,33 @@
             const line = ctx.createLinearGradient(plot.left, 0, plot.right, 0);
             stops.forEach(([at, colour]) => line.addColorStop(at, colour));
 
-            ctx.beginPath(); ctx.moveTo(plot.left, yFor(0));
-            for (let index = 0; index <= last; index++) ctx.lineTo(xFor(index), yFor(values[index]));
-            ctx.lineTo(xFor(last), plot.bottom); ctx.lineTo(plot.left, plot.bottom); ctx.closePath();
+            const curvePoints = [{ x: plot.left, y: yFor(0) }];
+            for (let index = 0; index <= last; index++) {
+                curvePoints.push({ x: xFor(index), y: yFor(values[index]) });
+            }
+
+            // Weicher, plastischer Progressionsverlauf statt kantiger Monatssegmente.
+            ctx.beginPath();
+            smoothStroke(ctx, curvePoints);
+            ctx.lineTo(xFor(last), plot.bottom);
+            ctx.lineTo(plot.left, plot.bottom);
+            ctx.closePath();
             const area = ctx.createLinearGradient(0, plot.top, 0, plot.bottom);
             area.addColorStop(0, colourWithAlpha(stops[stops.length - 1][1], .20));
             area.addColorStop(1, colourWithAlpha(stops[0][1], .015));
-            ctx.fillStyle = area; ctx.fill();
+            ctx.fillStyle = area;
+            ctx.fill();
 
-            ctx.beginPath(); ctx.moveTo(plot.left, yFor(0));
-            for (let index = 0; index <= last; index++) ctx.lineTo(xFor(index), yFor(values[index]));
-            ctx.strokeStyle = line; ctx.lineWidth = 3.0;
-            ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+            ctx.beginPath();
+            smoothStroke(ctx, curvePoints);
+            ctx.strokeStyle = line;
+            ctx.lineWidth = 3.0;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
             ctx.shadowColor = colourWithAlpha(stops[stops.length - 1][1], .32);
-            ctx.shadowBlur = 7; ctx.stroke(); ctx.shadowBlur = 0;
+            ctx.shadowBlur = 7;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
 
             for (let index = 0; index <= last; index++) {
                 drawMetalMarker(ctx, xFor(index), yFor(values[index]), palette, 2.6);
@@ -1361,9 +1374,15 @@
                 msDotHitTargets[type].push({ x: crossing, y, entry, milestone: target, year });
 
                 // Raised metal plaque anchors each threshold directly to the cumulative line.
-                ctx.beginPath(); ctx.moveTo(crossing, y - 10); ctx.lineTo(crossing, y - 4);
-                ctx.strokeStyle = colourWithAlpha(palette.secondary, .78); ctx.lineWidth = 1; ctx.stroke();
-                drawMetalPlaque(ctx, crossing, y - 18, formatMilestoneNumber(type, target), palette, true);
+                const plaqueOffset = y - 14 < plot.top + 2 ? 14 : -14;
+                const plaqueY = y + plaqueOffset;
+                ctx.beginPath();
+                ctx.moveTo(crossing, y + (plaqueOffset > 0 ? 7 : -7));
+                ctx.lineTo(crossing, plaqueY + (plaqueOffset > 0 ? -9 : 9));
+                ctx.strokeStyle = colourWithAlpha(palette.secondary, .78);
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                drawMetalPlaque(ctx, crossing, plaqueY, formatMilestoneNumber(type, target), palette, true);
                 drawMetalMarker(ctx, crossing, y, palette, 4.2);
             });
         });
