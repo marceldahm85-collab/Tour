@@ -30,6 +30,23 @@
         return String(weight || 500) + ' ' + String(size || 12) + 'px sans-serif';
     }
 
+    function ensureReadableSecondary(colour) {
+        if (typeof colour !== 'string') return '#A9B7C6';
+        let hex = colour.trim();
+        if (/^#[0-9a-f]{3}$/i.test(hex)) {
+            hex = '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+        }
+        if (!/^#[0-9a-f]{6}$/i.test(hex)) return colour;
+        const rgb = [1, 3, 5].map(index => parseInt(hex.slice(index, index + 2), 16));
+        const luminance = .2126 * rgb[0] + .7152 * rgb[1] + .0722 * rgb[2];
+        const minimum = 148;
+        if (luminance >= minimum) return colour;
+        const target = 232;
+        const mix = Math.min(1, (minimum - luminance) / (target - luminance));
+        const lifted = rgb.map(channel => Math.round(channel + (target - channel) * mix));
+        return '#' + lifted.map(channel => channel.toString(16).padStart(2, '0')).join('');
+    }
+
     function chartPalette() {
         let theme = {}, settings = {};
         try {
@@ -38,13 +55,19 @@
                 settings = getThemeEditorSettings()[themeEditorGetActiveTheme()] || {};
             }
         } catch (_) {}
-        const stops = Array.isArray(theme.gradientStops) && theme.gradientStops.length
+        const rawStops = Array.isArray(theme.gradientStops) && theme.gradientStops.length
             ? theme.gradientStops : [[0, '#9B7945'], [.5, '#D4B36F'], [1, '#F1DDAA']];
+        const primary = settings.accent || rawStops[rawStops.length - 1][1];
+        const rawSecondary = settings.accent2 || rawStops[Math.min(1, rawStops.length - 1)][1] || '#A9B7C6';
+        const secondary = ensureReadableSecondary(rawSecondary);
+        const stops = rawStops.map((stop, index) =>
+            index === rawStops.length - 1 ? [stop[0], secondary] : stop
+        );
         return {
             text: theme.textColor || '#F3F5F7',
             muted: theme.isDark === false ? 'rgba(34,46,56,.78)' : 'rgba(225,232,239,.72)',
-            primary: settings.accent || stops[stops.length - 1][1],
-            secondary: settings.accent2 || stops[Math.min(1, stops.length - 1)][1] || '#A9B7C6',
+            primary,
+            secondary,
             stops,
             dark: theme.isDark !== false,
             direction: settings.gradientDirection || '180deg',
