@@ -116,40 +116,63 @@
         ctx.rect(plot.left, plot.top, plot.width, plot.height);
         ctx.clip();
 
-        // Dezente, geschlossene Höhenlinien statt dekorativer Berg-Silhouetten.
-        const centres = [
-            [plot.left + plot.width * 0.72, plot.top + plot.height * 0.38],
-            [plot.left + plot.width * 0.24, plot.top + plot.height * 0.70]
+        // Organische Höhenlinien mit unregelmäßigen Kuppen und Talformen.
+        // Keine konzentrischen Ellipsen und kein zusätzliches horizontales Raster.
+        const terrain = [
+            { x: 0.74, y: 0.31, phase: 0.55, scaleX: 0.10, scaleY: 0.10, lean: 0.035 },
+            { x: 0.27, y: 0.73, phase: 2.15, scaleX: 0.095, scaleY: 0.105, lean: -0.045 }
         ];
-        centres.forEach((centre, groupIndex) => {
-            for (let ring = 0; ring < 7; ring++) {
-                const rx = plot.width * (0.12 + ring * 0.055);
-                const ry = plot.height * (0.10 + ring * 0.055);
+
+        terrain.forEach((landform, groupIndex) => {
+            const centerX = plot.left + plot.width * landform.x;
+            const centerY = plot.top + plot.height * landform.y;
+
+            for (let level = 0; level < 9; level++) {
+                const rx = plot.width * (landform.scaleX + level * 0.032);
+                const ry = plot.height * (landform.scaleY + level * 0.043);
+                const phase = landform.phase + level * 0.17;
+
                 ctx.beginPath();
-                ctx.ellipse(
-                    centre[0] + (groupIndex ? -ring * 1.4 : ring * 1.2),
-                    centre[1] + (groupIndex ? ring * 1.2 : -ring * 0.7),
-                    rx,
-                    ry,
-                    groupIndex ? -0.22 : 0.16,
-                    0,
-                    Math.PI * 2
-                );
-                ctx.strokeStyle = colourWithAlpha(palette.primary, 0.065 - ring * 0.004);
-                ctx.lineWidth = 0.8;
+                for (let step = 0; step <= 96; step++) {
+                    const angle = Math.PI * 2 * step / 96;
+                    const shape =
+                        1 +
+                        Math.sin(angle * 3 + phase) * 0.082 +
+                        Math.cos(angle * 5 - phase * 1.35) * 0.048 +
+                        Math.sin(angle * 7 + phase * 0.72) * 0.022;
+                    const x = centerX +
+                        Math.cos(angle) * rx * shape +
+                        Math.sin(angle * 2 + phase) * rx * landform.lean;
+                    const y = centerY +
+                        Math.sin(angle) * ry * shape +
+                        Math.cos(angle * 3 - phase) * ry * 0.026;
+
+                    if (step === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+
+                const indexContour = level === 0 || level === 4 || level === 8;
+                const contourColour = indexContour ? palette.secondary : palette.primary;
+                const opacity = indexContour ? 0.13 : 0.065;
+                ctx.strokeStyle = colourWithAlpha(contourColour, opacity);
+                ctx.lineWidth = indexContour ? 1.05 : 0.68;
                 ctx.stroke();
             }
         });
 
-        for (let i = 0; i < 5; i++) {
-            const y = plot.top + plot.height * (i + 1) / 6;
-            ctx.beginPath();
-            ctx.moveTo(plot.left, y);
-            ctx.lineTo(plot.left + plot.width, y);
-            ctx.strokeStyle = 'rgba(225,235,245,.045)';
-            ctx.lineWidth = 0.7;
-            ctx.stroke();
-        }
+        // Einzelne feine Höhenzüge verbinden die beiden Reliefbereiche dezent.
+        ctx.beginPath();
+        ctx.moveTo(plot.left + plot.width * 0.39, plot.top + plot.height * 0.08);
+        ctx.bezierCurveTo(
+            plot.left + plot.width * 0.48, plot.top + plot.height * 0.20,
+            plot.left + plot.width * 0.37, plot.top + plot.height * 0.36,
+            plot.left + plot.width * 0.49, plot.top + plot.height * 0.48
+        );
+        ctx.strokeStyle = colourWithAlpha(palette.secondary, 0.055);
+        ctx.lineWidth = 0.75;
+        ctx.stroke();
+
         ctx.restore();
     }
 
@@ -313,14 +336,27 @@
             index
         })).filter(point => point.value > 0);
 
+        // Monatslücken bleiben echte Lücken: Linien verbinden nur direkt
+        // aufeinanderfolgende Monate und erfinden keine Zwischenverläufe.
+        const runs = [];
+        points.forEach(point => {
+            const current = runs[runs.length - 1];
+            if (!current || point.index !== current[current.length - 1].index + 1) {
+                runs.push([point]);
+            } else {
+                current.push(point);
+            }
+        });
+
         if (config.style === 'lollipop') {
             points.forEach(point => {
                 const stem = ctx.createLinearGradient(0, point.y, 0, plot.bottom);
-                stem.addColorStop(0, colourWithAlpha(palette.primary, 0.92));
-                stem.addColorStop(1, colourWithAlpha(palette.secondary, 0.14));
+                stem.addColorStop(0, colourWithAlpha(palette.primary, 0.94));
+                stem.addColorStop(0.58, colourWithAlpha(palette.secondary, 0.38));
+                stem.addColorStop(1, colourWithAlpha(palette.secondary, 0.08));
                 ctx.save();
                 ctx.strokeStyle = stem;
-                ctx.lineWidth = 2.2;
+                ctx.lineWidth = 2.35;
                 ctx.beginPath();
                 ctx.moveTo(point.x, point.y + 3);
                 ctx.lineTo(point.x, plot.bottom);
@@ -329,46 +365,58 @@
             });
         }
 
-        if (points.length > 1) {
-            ctx.save();
-            smoothStroke(ctx, points);
-            ctx.strokeStyle = colourWithAlpha(palette.primary, 0.22);
-            ctx.lineWidth = config.style === 'lollipop' ? 5.5 : 8;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.stroke();
-            ctx.restore();
+        runs.forEach(run => {
+            if (run.length < 2) return;
 
-            if (config.style !== 'lollipop') {
+            if (config.style !== 'lollipop' && config.style !== 'line') {
                 ctx.save();
                 ctx.beginPath();
-                ctx.moveTo(points[0].x, plot.bottom);
-                smoothStroke(ctx, points);
-                ctx.lineTo(points[points.length - 1].x, plot.bottom);
+                ctx.moveTo(run[0].x, plot.bottom);
+                smoothStroke(ctx, run);
+                ctx.lineTo(run[run.length - 1].x, plot.bottom);
                 ctx.closePath();
                 const area = ctx.createLinearGradient(0, plot.top, 0, plot.bottom);
-                area.addColorStop(0, colourWithAlpha(palette.primary, 0.28));
-                area.addColorStop(1, colourWithAlpha(palette.primary, 0.015));
+                const areaStrength = config.style === 'average' ? 0.105 : 0.26;
+                area.addColorStop(0, colourWithAlpha(palette.primary, areaStrength));
+                area.addColorStop(1, colourWithAlpha(palette.primary, 0.012));
                 ctx.fillStyle = area;
                 ctx.fill();
                 ctx.restore();
             }
 
-            const stroke = applyGradient(ctx, plot.left, 0, plot.right, 0, palette.stops);
             ctx.save();
-            smoothStroke(ctx, points);
-            ctx.strokeStyle = stroke;
-            ctx.lineWidth = config.style === 'ridge' ? 3.4 : 2.8;
+            smoothStroke(ctx, run);
+            ctx.strokeStyle = colourWithAlpha(palette.primary,
+                config.style === 'line' ? 0.18 : 0.22);
+            ctx.lineWidth = config.style === 'lollipop' ? 5
+                : config.style === 'line' ? 4
+                : config.style === 'average' ? 5.4 : 8;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
-            ctx.shadowColor = colourWithAlpha(palette.primary, 0.35);
-            ctx.shadowBlur = 8;
             ctx.stroke();
             ctx.restore();
-        }
+
+            const stroke = applyGradient(ctx, plot.left, 0, plot.right, 0, palette.stops);
+            ctx.save();
+            smoothStroke(ctx, run);
+            ctx.strokeStyle = stroke;
+            ctx.lineWidth = config.style === 'ridge' ? 3.5
+                : config.style === 'lollipop' ? 2.25
+                : config.style === 'line' ? 2.3
+                : config.style === 'average' ? 2.45 : 2.8;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.shadowColor = colourWithAlpha(palette.primary, 0.32);
+            ctx.shadowBlur = config.style === 'line' ? 5 : 8;
+            ctx.stroke();
+            ctx.restore();
+        });
 
         points.forEach(point => {
-            drawMetalMarker(ctx, point.x, point.y, palette, config.style === 'ridge' ? 4.8 : 3.8);
+            const markerRadius = config.style === 'ridge' ? 4.8
+                : config.style === 'line' ? 3.25
+                : config.style === 'average' ? 3.35 : 3.8;
+            drawMetalMarker(ctx, point.x, point.y, palette, markerRadius);
         });
 
         if (config.style === 'ridge') {
@@ -469,7 +517,7 @@
         const average = totalMinutes > 0 ? totalDistance / (totalMinutes / 60) : 0;
         drawMonthlyProfile(canvasById('speed-canvas'), 'Ø Geschwindigkeit',
             average > 0 ? 'Ø ' + formatDecimalAT(average) + ' km/h' : '–',
-            values, { style: 'area', valueLabel: value => formatDecimalAT(value, 1) + ' km/h' });
+            values, { style: 'line', valueLabel: value => formatDecimalAT(value, 1) + ' km/h' });
     }
 
     function drawGradientDiagram() {
@@ -536,7 +584,7 @@
             : values.filter(value => value > 0).reduce((sum, value, _, all) => sum + value / all.length, 0);
         drawMonthlyProfile(canvasById('avg-steps-canvas'), 'Ø Schritte pro Tour',
             average > 0 ? Math.round(average).toLocaleString('de-AT') : '–',
-            values, { style: 'area', valueLabel: value => Math.round(value).toLocaleString('de-AT') });
+            values, { style: 'average', valueLabel: value => Math.round(value).toLocaleString('de-AT') });
     }
 
     function cellRectangles(width, height) {
@@ -668,8 +716,8 @@
         drawHeader(ctx, canvas, 'Leistungsindex', totalCount ? Math.round(overall) + ' / 100' : '–');
 
         const cx = size.width / 2;
-        const cy = Math.max(96, Math.min(size.height * 0.39, size.height - 120));
-        const radius = Math.min(96, size.height * 0.235, size.width * 0.255);
+        const cy = Math.max(120, Math.min(size.height * 0.49, size.height - 110));
+        const radius = Math.min(94, size.width * 0.235, Math.max(42, (size.height - 130) * 0.42));
         const startAngle = Math.PI * 0.75;
         const sweep = Math.PI * 1.5;
 
@@ -749,15 +797,31 @@
             ctx.shadowBlur = 9;
             ctx.shadowOffsetY = 3;
             ctx.beginPath();
-            ctx.moveTo(0, -radius * 0.70);
-            ctx.lineTo(radius * 0.12, 3);
-            ctx.lineTo(0, radius * 0.24);
-            ctx.lineTo(-radius * 0.12, 3);
+            ctx.moveTo(0, -radius * 0.72);
+            ctx.lineTo(radius * 0.105, 2);
+            ctx.lineTo(0, radius * 0.19);
+            ctx.lineTo(-radius * 0.105, 2);
             ctx.closePath();
-            ctx.fillStyle = applyGradient(ctx, -radius * 0.12, -radius * 0.7, radius * 0.12, radius * 0.25, [
-                [0, '#FFF2D3'], [0.36, palette.primary], [1, palette.secondary]
+            ctx.fillStyle = applyGradient(ctx, -radius * 0.105, -radius * 0.72, radius * 0.105, radius * 0.19, [
+                [0, '#FFF9E8'], [0.30, palette.primary], [0.68, palette.secondary], [1, '#53616E']
             ]);
             ctx.fill();
+
+            // Seitliche Facette und Lichtkante erzeugen die sichtbare Metalltiefe.
+            ctx.beginPath();
+            ctx.moveTo(0, -radius * 0.72);
+            ctx.lineTo(0, radius * 0.15);
+            ctx.lineTo(-radius * 0.105, 2);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(255,255,255,.25)';
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(-radius * 0.025, -radius * 0.60);
+            ctx.lineTo(-radius * 0.025, -radius * 0.04);
+            ctx.strokeStyle = 'rgba(255,255,255,.72)';
+            ctx.lineWidth = 0.9;
+            ctx.stroke();
             ctx.restore();
 
             // Gegengewicht und zentrale Lagerkappe.
@@ -789,11 +853,11 @@
         }
         ctx.restore();
 
-        // Kleine Monatskurve unterhalb des Instruments; die zwölf Punkte bleiben antippbar.
+        // Monatsverlauf als eigenständige, gut lesbare Instrumentenskala.
         const trendLeft = 34;
         const trendRight = size.width - 34;
-        const trendTop = size.height - 68;
-        const trendBottom = size.height - 36;
+        const trendTop = size.height - 49;
+        const trendBottom = size.height - 29;
         ctx.save();
         ctx.fillStyle = palette.muted;
         ctx.font = editorFont(8, 700);
@@ -803,35 +867,47 @@
         ctx.beginPath();
         ctx.moveTo(trendLeft, trendBottom);
         ctx.lineTo(trendRight, trendBottom);
-        ctx.strokeStyle = 'rgba(229,236,243,.16)';
+        ctx.strokeStyle = 'rgba(229,236,243,.18)';
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        const points = monthAverages.map((value, index) => ({
+        const trendPoints = monthAverages.map((value, index) => ({
             x: trendLeft + (trendRight - trendLeft) * index / 11,
             y: trendBottom - (Math.max(0, value) / 100) * (trendBottom - trendTop),
             value,
             index
         })).filter(point => point.value > 0);
+        const trendRuns = [];
+        trendPoints.forEach(point => {
+            const current = trendRuns[trendRuns.length - 1];
+            if (!current || point.index !== current[current.length - 1].index + 1) {
+                trendRuns.push([point]);
+            } else {
+                current.push(point);
+            }
+        });
 
-        if (points.length > 1) {
+        trendRuns.forEach(run => {
+            if (run.length < 2) return;
             ctx.save();
-            smoothStroke(ctx, points);
-            ctx.strokeStyle = colourWithAlpha(palette.primary, 0.24);
-            ctx.lineWidth = 6;
+            smoothStroke(ctx, run);
+            ctx.strokeStyle = colourWithAlpha(palette.primary, 0.20);
+            ctx.lineWidth = 5;
             ctx.stroke();
             ctx.restore();
+
             ctx.save();
-            smoothStroke(ctx, points);
+            smoothStroke(ctx, run);
             ctx.strokeStyle = applyGradient(ctx, trendLeft, 0, trendRight, 0, palette.stops);
-            ctx.lineWidth = 2.2;
+            ctx.lineWidth = 2.1;
             ctx.lineCap = 'round';
             ctx.stroke();
             ctx.restore();
-        }
-        points.forEach(point => {
+        });
+
+        trendPoints.forEach(point => {
             ctx.beginPath();
-            ctx.arc(point.x, point.y, 2.9, 0, Math.PI * 2);
+            ctx.arc(point.x, point.y, 3.0, 0, Math.PI * 2);
             ctx.fillStyle = palette.secondary;
             ctx.fill();
             ctx.beginPath();
@@ -839,13 +915,14 @@
             ctx.fillStyle = '#FFFFFF';
             ctx.fill();
         });
-        ctx.font = editorFont(7, 600);
+
+        ctx.font = editorFont(8, 650);
         ctx.fillStyle = palette.muted;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'alphabetic';
         MONTHS.forEach((month, index) => {
             const monthX = trendLeft + (trendRight - trendLeft) * index / 11;
-            ctx.fillText(month, monthX, size.height - 18);
+            ctx.fillText(month, monthX, size.height - 11);
         });
         ctx.restore();
     }
@@ -954,7 +1031,7 @@
                 const size = logicalSize(compass);
                 const x = (event.clientX - rect.left) * size.width / rect.width;
                 const y = (event.clientY - rect.top) * size.height / rect.height;
-                if (y < size.height - 74 || x < 24 || x > size.width - 24) return;
+                if (y < size.height - 49 || y > size.height - 26 || x < 24 || x > size.width - 24) return;
                 const monthIndex = Math.max(0, Math.min(11,
                     Math.round((x - 34) / Math.max(1, size.width - 68) * 11)));
                 adaptiveHaptic('selection');
