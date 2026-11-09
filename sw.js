@@ -157,7 +157,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   const isCriticalAppAsset = requestUrl.origin === self.location.origin &&
-    /\/(?:index\.html|app-main(?:-20261019)?\.js|theme-editor-unified\.js|premium-experience\.js|background-image-(?:manager|picker)\.js|android-gallery-photos\.js|bergwelt(?:-badges-20261019)?\.(?:js|css))$/.test(requestUrl.pathname);
+    /\/(?:index\.html|app-main(?:-20261019)?\.js|stats-premium-charts\.js|theme-editor-unified\.js|premium-experience\.js|background-image-(?:manager|picker)\.js|android-gallery-photos\.js|bergwelt(?:-badges-20261019)?\.(?:js|css))$/.test(requestUrl.pathname);
 
   // App-Einstieg und kritische Module netzwerkzuerst laden. Bei Offline-Betrieb
   // wird auf die im aktuellen Cache gespeicherte Datei zurückgegriffen.
