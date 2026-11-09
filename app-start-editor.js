@@ -3,6 +3,7 @@
     'use strict';
 
     const SETTINGS_KEY = 'premiumAppStartSettings_v1';
+    const NATIVE_SYNC_FINGERPRINT_KEY = 'premiumAppStartNativeSyncFingerprint_v1';
     const STANDARD_IMAGE_URL = './android/app/src/main/res/drawable-nodpi/splash_alpine_panorama.webp';
     const DEFAULTS = Object.freeze({
         background: 'standard',
@@ -545,7 +546,34 @@
         }
     }
 
-    async function syncNative(settings, customBlobOverride) {
+    function createNativeSyncFingerprint(settings, sourceBlob) {
+        return JSON.stringify({
+            version: 1,
+            settings: normalize(settings),
+            image: {
+                type: sourceBlob.type,
+                size: sourceBlob.size
+            }
+        });
+    }
+
+    function readNativeSyncFingerprint() {
+        try {
+            return localStorage.getItem(NATIVE_SYNC_FINGERPRINT_KEY) || '';
+        } catch (_) {
+            return '';
+        }
+    }
+
+    function writeNativeSyncFingerprint(value) {
+        try {
+            localStorage.setItem(NATIVE_SYNC_FINGERPRINT_KEY, value);
+        } catch (error) {
+            console.warn('[App-Start] Synchronisierungsstatus konnte nicht lokal gemerkt werden.', error);
+        }
+    }
+
+    async function syncNative(settings, customBlobOverride, preparedSourceBlob) {
         const nativeRequest = window.__androidNativeRequest;
         if (typeof nativeRequest !== 'function') return { status: 'not-native' };
 
@@ -555,7 +583,9 @@
             throw new Error('Diese APK unterstützt die neuen App-Start-Einstellungen noch nicht.');
         }
 
-        const sourceBlob = await resolveBackgroundBlob(settings, customBlobOverride);
+        const sourceBlob = preparedSourceBlob instanceof Blob
+            ? preparedSourceBlob
+            : await resolveBackgroundBlob(settings, customBlobOverride);
         const optimized = await compressImageToPortrait(sourceBlob, cropParameters(settings));
         await uploadNativeImage(optimized);
 
@@ -569,6 +599,11 @@
         if (!response || response.type !== 'splash.settings.result' || response.ok !== true) {
             throw new Error(response?.error || 'Android hat die App-Start-Einstellungen nicht bestätigt.');
         }
+
+        // Dieser Marker liegt absichtlich nur im lokalen WebView-Speicher,
+        // nicht im übertragbaren Backup. Eine neu installierte Release-App
+        // gleicht dadurch übernommene Editor-Werte einmal mit Android ab.
+        writeNativeSyncFingerprint(createNativeSyncFingerprint(settings, sourceBlob));
         return { status: 'synced' };
     }
 
@@ -733,14 +768,23 @@
         setStatus('', false);
     }
 
-    async function syncAppStartNativeSettings() {
+    async function syncAppStartNativeSettings(options) {
         const stored = readStored(SETTINGS_KEY);
         if (!stored || typeof stored !== 'object') return { status: 'no-settings' };
+        if (typeof window.__androidNativeRequest !== 'function') return { status: 'not-native' };
+
         try {
-            const result = await syncNative(normalize(stored));
-            return result;
+            const settings = normalize(stored);
+            const sourceBlob = await resolveBackgroundBlob(settings);
+            const fingerprint = createNativeSyncFingerprint(settings, sourceBlob);
+
+            if (options?.force !== true && fingerprint === readNativeSyncFingerprint()) {
+                return { status: 'already-synced' };
+            }
+
+            return await syncNative(settings, null, sourceBlob);
         } catch (error) {
-            console.warn('[App-Start] Wiederhergestellte Einstellungen konnten nicht an Android übertragen werden.', error);
+            console.warn('[App-Start] Gespeicherte Einstellungen konnten nicht mit Android synchronisiert werden.', error);
             return { status: 'failed', error: error?.message || 'Unbekannter Fehler' };
         }
     }
