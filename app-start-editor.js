@@ -1,18 +1,29 @@
-/* Alpine Premium App-Start – Editorsteuerung, lokale Bildablage und native Synchronisierung. */
+/* Alpine Premium App-Start – eigenständige Bildquelle, Zuschnitt und native Synchronisierung. */
 (function () {
     'use strict';
 
     const SETTINGS_KEY = 'premiumAppStartSettings_v1';
-    const DEFAULTS = Object.freeze({ background: 'standard', duration: 'auto', animation: 'premium' });
+    const STANDARD_IMAGE_URL = './android/app/src/main/res/drawable-nodpi/splash_alpine_panorama.webp';
+    const DEFAULTS = Object.freeze({
+        background: 'standard',
+        duration: 'auto',
+        animation: 'premium',
+        cropX: 50,
+        cropY: 50,
+        cropZoom: 1
+    });
 
     let draft = null;
     let editorActive = false;
     let bound = false;
-    let previewUrl = '';
     let originalCustomImageBlob = null;
     let pendingCustomImageBlob = null;
     let removeCustomImage = false;
     let lastNativeSyncMessage = '';
+    let previewUrl = '';
+    let previewImage = null;
+    let previewSequence = 0;
+    const sourceBlobCache = new Map();
 
     const byId = id => document.getElementById(id);
     const appStore = () => {
@@ -39,15 +50,37 @@
         }
     }
 
+    function getPresetCatalog() {
+        try {
+            const catalog = window.getAppBackgroundPresetCatalog?.();
+            return Array.isArray(catalog) ? catalog.filter(item =>
+                item && typeof item.id === 'string' &&
+                /^[a-zA-Z0-9_-]{1,80}$/.test(item.id) &&
+                typeof (item.preview || item.sourceUrl) === 'string'
+            ) : [];
+        } catch (_) { return []; }
+    }
+
     function normalize(value) {
         const source = value && typeof value === 'object' ? value : {};
+        const backgroundValue = typeof source.background === 'string' ? source.background : DEFAULTS.background;
+        const validPreset = backgroundValue.startsWith('preset:') &&
+            getPresetCatalog().some(item => item.id === backgroundValue.slice(7));
+        const background = ['standard', 'editor', 'custom'].includes(backgroundValue) || validPreset
+            ? backgroundValue : DEFAULTS.background;
+        const clamp = (number, min, max, fallback) => {
+            const parsed = Number(number);
+            return Number.isFinite(parsed) ? Math.min(max, Math.max(min, parsed)) : fallback;
+        };
         return {
-            background: ['standard', 'editor', 'custom'].includes(source.background)
-                ? source.background : DEFAULTS.background,
+            background,
             duration: ['auto', '1500', '2000', '2500'].includes(String(source.duration))
                 ? String(source.duration) : DEFAULTS.duration,
             animation: ['off', 'subtle', 'premium'].includes(source.animation)
-                ? source.animation : DEFAULTS.animation
+                ? source.animation : DEFAULTS.animation,
+            cropX: clamp(source.cropX, 0, 100, DEFAULTS.cropX),
+            cropY: clamp(source.cropY, 0, 100, DEFAULTS.cropY),
+            cropZoom: clamp(source.cropZoom, 1, 1.8, DEFAULTS.cropZoom)
         };
     }
 
@@ -64,33 +97,197 @@
     }
 
     function revokePreview() {
-        if (!previewUrl) return;
-        try { URL.revokeObjectURL(previewUrl); } catch (_) {}
+        if (previewUrl) {
+            try { URL.revokeObjectURL(previewUrl); } catch (_) {}
+        }
         previewUrl = '';
+        previewImage = null;
     }
 
-    function paintPreview(blob) {
-        const image = byId('te-app-start-image-preview');
-        const empty = byId('te-app-start-image-empty');
-        const remove = byId('te-app-start-image-remove');
-        if (!image || !empty) return;
+    function sourceLabel(settings) {
+        if (settings.background === 'standard') return 'Standard-Alpenpanorama';
+        if (settings.background === 'editor') return 'Aktuelles Editor-Hintergrundbild';
+        if (settings.background === 'custom') return 'Eigenes Startbild';
+        const id = settings.background.slice(7);
+        return getPresetCatalog().find(item => item.id === id)?.name || 'Alpenmotiv';
+    }
 
-        revokePreview();
-        if (blob instanceof Blob && blob.type.startsWith('image/')) {
-            previewUrl = URL.createObjectURL(blob);
-            image.src = previewUrl;
-            image.hidden = false;
-            empty.hidden = true;
-            if (remove) remove.hidden = false;
-        } else {
-            image.removeAttribute('src');
-            image.hidden = true;
-            empty.hidden = false;
-            if (remove) remove.hidden = true;
+    function renderPresetOptions() {
+        const group = byId('te-app-start-presets');
+        if (!group) return;
+        group.replaceChildren();
+        getPresetCatalog().forEach(preset => {
+            const option = document.createElement('option');
+            option.value = 'preset:' + preset.id;
+            option.textContent = preset.name;
+            group.appendChild(option);
+        });
+    }
+
+    function fillCropControls(settings) {
+        const value = normalize(settings);
+        const controls = [
+            ['te-app-start-crop-x', 'te-app-start-crop-x-value', value.cropX, '%'],
+            ['te-app-start-crop-y', 'te-app-start-crop-y-value', value.cropY, '%'],
+            ['te-app-start-crop-zoom', 'te-app-start-crop-zoom-value', Math.round(value.cropZoom * 100), '%']
+        ];
+        controls.forEach(([inputId, outputId, number, suffix]) => {
+            const input = byId(inputId);
+            const output = byId(outputId);
+            if (input) input.value = String(number);
+            if (output) output.textContent = String(number) + ' ' + suffix;
+        });
+    }
+
+    function readControls() {
+        const value = normalize({
+            background: byId('te-app-start-background')?.value,
+            duration: byId('te-app-start-duration')?.value,
+            animation: byId('te-app-start-animation')?.value,
+            cropX: byId('te-app-start-crop-x')?.value,
+            cropY: byId('te-app-start-crop-y')?.value,
+            cropZoom: Number(byId('te-app-start-crop-zoom')?.value || 100) / 100
+        });
+        draft = value;
+        const panel = byId('te-app-start-custom-panel');
+        if (panel) panel.hidden = value.background !== 'custom';
+        fillCropControls(value);
+        return { ...value };
+    }
+
+    function cropParameters(settings) {
+        const value = normalize(settings);
+        return {
+            x: value.cropX,
+            y: value.cropY,
+            zoom: value.cropZoom
+        };
+    }
+
+    function drawCrop(context, image, width, height, crop) {
+        const sourceWidth = image.naturalWidth || image.width;
+        const sourceHeight = image.naturalHeight || image.height;
+        if (!sourceWidth || !sourceHeight) return;
+        const positionX = Math.max(0, Math.min(100, Number(crop?.x ?? 50)));
+        const positionY = Math.max(0, Math.min(100, Number(crop?.y ?? 50)));
+        const zoom = Math.max(1, Math.min(1.8, Number(crop?.zoom ?? 1)));
+        const scale = Math.max(width / sourceWidth, height / sourceHeight) * zoom;
+        const drawWidth = sourceWidth * scale;
+        const drawHeight = sourceHeight * scale;
+        const drawX = -(drawWidth - width) * positionX / 100;
+        const drawY = -(drawHeight - height) * positionY / 100;
+        context.fillStyle = '#101923';
+        context.fillRect(0, 0, width, height);
+        context.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+    }
+
+    function drawCurrentCropPreview() {
+        const canvas = byId('te-app-start-crop-preview');
+        if (!canvas) return;
+        const context = canvas.getContext('2d', { alpha: false });
+        if (!context) return;
+        if (!previewImage) {
+            context.fillStyle = '#101923';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            return;
+        }
+        drawCrop(context, previewImage, canvas.width, canvas.height, cropParameters(readControls()));
+    }
+
+    async function fetchImageBlob(url, message) {
+        const response = await fetch(url, {
+            mode: 'cors',
+            credentials: 'omit',
+            cache: 'force-cache'
+        });
+        if (!response.ok) throw new Error(message);
+        const blob = await response.blob();
+        if (!(blob instanceof Blob) || !blob.type.startsWith('image/') || !blob.size) {
+            throw new Error(message);
+        }
+        return blob;
+    }
+
+    async function resolveBackgroundBlob(settings, customBlobOverride) {
+        if (settings.background === 'custom') {
+            const blob = customBlobOverride instanceof Blob
+                ? customBlobOverride
+                : await window.getAppStartCustomImageBlob?.();
+            if (!(blob instanceof Blob)) {
+                throw new Error('Bitte zuerst ein eigenes Startbild aus der Galerie auswählen.');
+            }
+            return blob;
+        }
+
+        if (settings.background === 'editor') {
+            const asset = await window.getAppBackgroundSplashAsset?.();
+            if (!asset || !(asset.blob instanceof Blob)) {
+                throw new Error('Das aktuelle Editor-Hintergrundbild ist nicht verfügbar.');
+            }
+            return asset.blob;
+        }
+
+        if (settings.background.startsWith('preset:')) {
+            const id = settings.background.slice(7);
+            const preset = getPresetCatalog().find(item => item.id === id);
+            if (!preset) throw new Error('Das gewählte Alpenmotiv ist nicht mehr verfügbar.');
+            const url = preset.preview || preset.sourceUrl;
+            if (!sourceBlobCache.has(url)) {
+                sourceBlobCache.set(url, fetchImageBlob(url, 'Das gewählte Alpenmotiv konnte nicht geladen werden.'));
+            }
+            return sourceBlobCache.get(url);
+        }
+
+        if (!sourceBlobCache.has('standard')) {
+            sourceBlobCache.set('standard', fetchImageBlob(
+                STANDARD_IMAGE_URL,
+                'Das Standard-Alpenpanorama konnte nicht geladen werden.'
+            ));
+        }
+        return sourceBlobCache.get('standard');
+    }
+
+    async function updateCropPreview(settingsOverride) {
+        const settings = normalize(settingsOverride || readControls());
+        const token = ++previewSequence;
+        try {
+            const blob = await resolveBackgroundBlob(
+                settings,
+                settings.background === 'custom'
+                    ? (pendingCustomImageBlob || (removeCustomImage ? null : originalCustomImageBlob))
+                    : null
+            );
+            if (token !== previewSequence) return;
+            const url = URL.createObjectURL(blob);
+            const image = new Image();
+            image.onload = () => {
+                if (token !== previewSequence) {
+                    URL.revokeObjectURL(url);
+                    return;
+                }
+                revokePreview();
+                previewUrl = url;
+                previewImage = image;
+                drawCurrentCropPreview();
+                setStatus('', false);
+            };
+            image.onerror = () => {
+                URL.revokeObjectURL(url);
+                if (token === previewSequence) {
+                    setStatus('Die Bildvorschau konnte nicht geladen werden.', true);
+                    drawCurrentCropPreview();
+                }
+            };
+            image.src = url;
+        } catch (error) {
+            if (token !== previewSequence) return;
+            revokePreview();
+            drawCurrentCropPreview();
+            setStatus(error?.message || ('Bildquelle nicht verfügbar: ' + sourceLabel(settings)), true);
         }
     }
 
-    function fillControls(settings, imageBlob) {
+    function fillControls(settings, customImageBlob) {
         const value = normalize(settings);
         draft = value;
         const background = byId('te-app-start-background');
@@ -101,23 +298,17 @@
         if (animation) animation.value = value.animation;
         const panel = byId('te-app-start-custom-panel');
         if (panel) panel.hidden = value.background !== 'custom';
-        paintPreview(imageBlob);
+        fillCropControls(value);
+        if (customImageBlob instanceof Blob) {
+            pendingCustomImageBlob = pendingCustomImageBlob || null;
+        }
+        updateCropPreview(value).catch(error => {
+            console.warn('[App-Start] Bildvorschau konnte nicht aktualisiert werden.', error);
+        });
         return value;
     }
 
-    function readControls() {
-        const value = normalize({
-            background: byId('te-app-start-background')?.value,
-            duration: byId('te-app-start-duration')?.value,
-            animation: byId('te-app-start-animation')?.value
-        });
-        draft = value;
-        const panel = byId('te-app-start-custom-panel');
-        if (panel) panel.hidden = value.background !== 'custom';
-        return { ...value };
-    }
-
-    function setAppStartSettingsSnapshot(value) {
+    async function setAppStartSettingsSnapshot(value) {
         draft = normalize(value);
         if (editorActive) {
             const imageBlob = removeCustomImage ? null : (pendingCustomImageBlob || originalCustomImageBlob);
@@ -147,30 +338,57 @@
         }
     }
 
-    async function compressImageToPortrait(blob, backgroundSettings) {
+    async function blobToJpeg(blob, width, height, quality) {
+        const loaded = await loadImage(blob);
+        try {
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const context = canvas.getContext('2d', { alpha: false });
+            if (!context) throw new Error('Das Bild konnte nicht verarbeitet werden.');
+            context.fillStyle = '#101923';
+            context.fillRect(0, 0, width, height);
+            context.drawImage(loaded.image, 0, 0, width, height);
+            return await new Promise((resolve, reject) => {
+                canvas.toBlob(result => {
+                    if (result instanceof Blob && result.size) resolve(result);
+                    else reject(new Error('Das Bild konnte nicht komprimiert werden.'));
+                }, 'image/jpeg', quality);
+            });
+        } finally {
+            URL.revokeObjectURL(loaded.objectUrl);
+        }
+    }
+
+    async function optimizeSourceImage(blob) {
         if (!(blob instanceof Blob) || !blob.type.startsWith('image/')) {
             throw new TypeError('Die ausgewählte Bildquelle ist kein gültiges Bild.');
         }
         const loaded = await loadImage(blob);
-        const image = loaded.image;
+        const sourceWidth = loaded.image.naturalWidth || loaded.image.width;
+        const sourceHeight = loaded.image.naturalHeight || loaded.image.height;
+        URL.revokeObjectURL(loaded.objectUrl);
+        if (!sourceWidth || !sourceHeight) throw new Error('Das Bild hat keine gültigen Bildabmessungen.');
+
+        let scale = Math.min(1, 3200 / Math.max(sourceWidth, sourceHeight));
+        for (let attempt = 0; attempt < 7; attempt++) {
+            const width = Math.max(1, Math.round(sourceWidth * scale));
+            const height = Math.max(1, Math.round(sourceHeight * scale));
+            const quality = [0.9, 0.86, 0.82, 0.78][Math.min(attempt, 3)];
+            const optimized = await blobToJpeg(blob, width, height, quality);
+            if (optimized.size <= 5 * 1024 * 1024) return optimized;
+            scale *= 0.86;
+        }
+        throw new RangeError('Das optimierte Startbild überschreitet die erlaubten 5 MB.');
+    }
+
+    async function compressImageToPortrait(blob, crop) {
+        if (!(blob instanceof Blob) || !blob.type.startsWith('image/')) {
+            throw new TypeError('Die ausgewählte Bildquelle ist kein gültiges Bild.');
+        }
+        const loaded = await loadImage(blob);
         const targetWidth = 1080;
         const targetHeight = 1920;
-        const sourceWidth = image.naturalWidth || image.width;
-        const sourceHeight = image.naturalHeight || image.height;
-        if (!sourceWidth || !sourceHeight) {
-            URL.revokeObjectURL(loaded.objectUrl);
-            throw new Error('Das Startbild hat keine gültigen Bildabmessungen.');
-        }
-
-        const positionX = Math.max(0, Math.min(100, Number(backgroundSettings?.mobilePositionX ?? backgroundSettings?.positionX ?? 50)));
-        const positionY = Math.max(0, Math.min(100, Number(backgroundSettings?.positionY ?? 50)));
-        const zoom = Math.max(1, Math.min(1.6, Number(backgroundSettings?.zoom ?? 1)));
-        const scale = Math.max(targetWidth / sourceWidth, targetHeight / sourceHeight) * zoom;
-        const drawWidth = sourceWidth * scale;
-        const drawHeight = sourceHeight * scale;
-        const drawX = -(drawWidth - targetWidth) * positionX / 100;
-        const drawY = -(drawHeight - targetHeight) * positionY / 100;
-
         const canvas = document.createElement('canvas');
         canvas.width = targetWidth;
         canvas.height = targetHeight;
@@ -179,18 +397,16 @@
             URL.revokeObjectURL(loaded.objectUrl);
             throw new Error('Das Startbild konnte nicht für Android vorbereitet werden.');
         }
-        context.fillStyle = '#101923';
-        context.fillRect(0, 0, targetWidth, targetHeight);
-        context.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+        drawCrop(context, loaded.image, targetWidth, targetHeight, crop);
         URL.revokeObjectURL(loaded.objectUrl);
 
         const output = await new Promise((resolve, reject) => {
             canvas.toBlob(result => {
-                if (result instanceof Blob) resolve(result);
-                else reject(new Error('Das Startbild konnte nicht komprimiert werden.'));
+                if (result instanceof Blob && result.size) resolve(result);
+                else reject(new Error('Das Startbild konnte nicht für Android komprimiert werden.'));
             }, 'image/jpeg', 0.84);
         });
-        if (!output.size || output.size > 5 * 1024 * 1024) {
+        if (output.size > 5 * 1024 * 1024) {
             throw new RangeError('Das optimierte Startbild überschreitet die erlaubten 5 MB.');
         }
         return output;
@@ -255,28 +471,6 @@
         }
     }
 
-    async function resolveBackgroundBlob(settings, customBlobOverride) {
-        if (settings.background === 'custom') {
-            const blob = customBlobOverride instanceof Blob
-                ? customBlobOverride
-                : await window.getAppStartCustomImageBlob?.();
-            if (!(blob instanceof Blob)) {
-                throw new Error('Bitte zuerst ein eigenes Startbild aus der Galerie auswählen.');
-            }
-            return { blob, crop: { positionX: 50, positionY: 50, zoom: 1 } };
-        }
-
-        if (settings.background === 'editor') {
-            const asset = await window.getAppBackgroundSplashAsset?.();
-            if (!asset || !(asset.blob instanceof Blob)) {
-                throw new Error('Das aktuelle Editor-Hintergrundbild ist nicht verfügbar.');
-            }
-            return { blob: asset.blob, crop: asset.settings || {} };
-        }
-
-        return null;
-    }
-
     async function syncNative(settings, customBlobOverride) {
         const nativeRequest = window.__androidNativeRequest;
         if (typeof nativeRequest !== 'function') return { status: 'not-native' };
@@ -287,14 +481,14 @@
             throw new Error('Diese APK unterstützt die neuen App-Start-Einstellungen noch nicht.');
         }
 
-        if (settings.background !== 'standard') {
-            const source = await resolveBackgroundBlob(settings, customBlobOverride);
-            const optimized = await compressImageToPortrait(source.blob, source.crop);
-            await uploadNativeImage(optimized);
-        }
+        const sourceBlob = await resolveBackgroundBlob(settings, customBlobOverride);
+        const optimized = await compressImageToPortrait(sourceBlob, cropParameters(settings));
+        await uploadNativeImage(optimized);
 
+        // Android braucht nur noch den Hinweis, dass ein lokal gespeichertes,
+        // bereits passend zugeschnittenes Startbild verwendet werden soll.
         const response = await nativeRequest('splash.settings.save', {
-            background: settings.background,
+            background: 'custom',
             durationMs: settings.duration === 'auto' ? 0 : Number(settings.duration),
             animation: settings.animation
         }, 20000);
@@ -314,12 +508,19 @@
         }
         pendingCustomImageBlob = null;
         removeCustomImage = false;
+        renderPresetOptions();
         const stored = normalize(readStored(SETTINGS_KEY) || DEFAULTS);
         fillControls(stored, originalCustomImageBlob);
         setStatus(lastNativeSyncMessage, Boolean(lastNativeSyncMessage));
         lastNativeSyncMessage = '';
         bindControls();
         return { ...stored };
+    }
+
+    function markEditorDirty(target) {
+        const trigger = target || byId('te-app-start-background');
+        if (!trigger) return;
+        trigger.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
     function bindControls() {
@@ -330,9 +531,33 @@
 
         root.addEventListener('change', event => {
             if (event.target?.matches?.('#te-app-start-background,#te-app-start-duration,#te-app-start-animation')) {
-                readControls();
+                const settings = readControls();
+                setStatus('', false);
+                if (event.target.matches('#te-app-start-background')) {
+                    updateCropPreview(settings);
+                }
+            }
+        });
+
+        root.addEventListener('input', event => {
+            if (event.target?.matches?.('#te-app-start-crop-x,#te-app-start-crop-y,#te-app-start-crop-zoom')) {
+                const settings = readControls();
+                drawCurrentCropPreview();
                 setStatus('', false);
             }
+        });
+
+        byId('te-app-start-crop-reset')?.addEventListener('click', () => {
+            const x = byId('te-app-start-crop-x');
+            const y = byId('te-app-start-crop-y');
+            const zoom = byId('te-app-start-crop-zoom');
+            if (x) x.value = '50';
+            if (y) y.value = '50';
+            if (zoom) zoom.value = '100';
+            const settings = readControls();
+            drawCurrentCropPreview();
+            setStatus('', false);
+            markEditorDirty(x);
         });
 
         byId('te-app-start-image-choose')?.addEventListener('click', () => {
@@ -347,35 +572,35 @@
                 setStatus('Bitte ein Bild unter 15 MB auswählen.', true);
                 return;
             }
-            setStatus('Startbild wird für das Hochformat optimiert …', false);
+            setStatus('Startbild wird vorbereitet …', false);
             try {
-                pendingCustomImageBlob = await compressImageToPortrait(file, {});
+                pendingCustomImageBlob = await optimizeSourceImage(file);
                 removeCustomImage = false;
-                paintPreview(pendingCustomImageBlob);
                 const background = byId('te-app-start-background');
                 if (background) background.value = 'custom';
-                draft = { ...currentDraft(), background: 'custom' };
+                draft = { ...readControls(), background: 'custom' };
                 const panel = byId('te-app-start-custom-panel');
                 if (panel) panel.hidden = false;
-                setStatus('Eigenes Startbild ausgewählt. Mit „Änderungen speichern“ übernehmen.', false);
-                root.dispatchEvent(new Event('input', { bubbles: true }));
+                await updateCropPreview(draft);
+                setStatus('Eigenes Startbild ausgewählt.', false);
+                markEditorDirty(byId('te-app-start-image-choose'));
             } catch (error) {
                 console.error('[App-Start] Eigenes Startbild konnte nicht verarbeitet werden.', error);
-                setStatus(error?.message || 'Das Startbild konnte nicht gespeichert werden.', true);
+                setStatus(error?.message || 'Das Startbild konnte nicht vorbereitet werden.', true);
             }
         });
 
         byId('te-app-start-image-remove')?.addEventListener('click', async () => {
             pendingCustomImageBlob = null;
             removeCustomImage = true;
-            paintPreview(null);
             const background = byId('te-app-start-background');
             if (background) background.value = 'standard';
-            draft = { ...currentDraft(), background: 'standard' };
+            draft = { ...readControls(), background: 'standard' };
             const panel = byId('te-app-start-custom-panel');
             if (panel) panel.hidden = true;
-            setStatus('Eigenes Startbild zum Entfernen vorgemerkt. Mit „Änderungen speichern“ übernehmen.', false);
-            root.dispatchEvent(new Event('input', { bubbles: true }));
+            await updateCropPreview(draft);
+            setStatus('Eigenes Startbild entfernt.', false);
+            markEditorDirty(byId('te-app-start-image-remove'));
         });
     }
 
@@ -429,6 +654,7 @@
         removeCustomImage = false;
         const stored = normalize(readStored(SETTINGS_KEY) || DEFAULTS);
         originalCustomImageBlob = await window.getAppStartCustomImageBlob?.() || null;
+        renderPresetOptions();
         fillControls(stored, originalCustomImageBlob);
         setStatus('', false);
     }
@@ -454,5 +680,13 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         if (!draft) draft = normalize(readStored(SETTINGS_KEY) || DEFAULTS);
+        const canvas = byId('te-app-start-crop-preview');
+        if (canvas) {
+            const context = canvas.getContext('2d', { alpha: false });
+            if (context) {
+                context.fillStyle = '#101923';
+                context.fillRect(0, 0, canvas.width, canvas.height);
+            }
+        }
     }, { once: true });
 })();
