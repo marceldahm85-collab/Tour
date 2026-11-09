@@ -1,0 +1,39 @@
+/* Premium Alpine Performance Cockpit — zusätzliche Chartoberfläche */
+#chart-view .chart-canvas-stage canvas {
+    background-color: rgba(7, 13, 21, .94) !important;
+    background-image:
+        radial-gradient(ellipse at 82% 24%,
+            color-mix(in srgb, var(--accent, #D5A64C) 11%, transparent),
+            transparent 44%),
+        repeating-radial-gradient(ellipse at 62% 48%,
+            rgba(215, 229, 240, .035) 0,
+            rgba(215, 229, 240, .035) 1px,
+            transparent 1px,
+            transparent 16px),
+        linear-gradient(152deg,
+            rgba(25, 37, 49, .58),
+            rgba(6, 12, 19, .96)) !important;
+    border: 1px solid color-mix(in srgb, var(--accent, #D5A64C) 22%, rgba(255,255,255,.18)) !important;
+    border-radius: var(--editor-radius, 16px) !important;
+    box-shadow:
+        0 16px 30px rgba(0,0,0,.36),
+        0 0 18px color-mix(in srgb, var(--accent, #D5A64C) 7%, transparent),
+        inset 0 1px 0 rgba(255,255,255,.15),
+        inset 0 -1px 0 rgba(0,0,0,.5) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+#chart-view .chart-canvas-stage canvas.active-chart-canvas {
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    #chart-view .chart-canvas-stage canvas {
+        box-shadow:
+            0 10px 22px rgba(0,0,0,.34),
+            0 0 12px color-mix(in srgb, var(--accent, #D5A64C) 6%, transparent),
+            inset 0 1px 0 rgba(255,255,255,.13),
+            inset 0 -1px 0 rgba(0,0,0,.45) !important;
+    }
+}
