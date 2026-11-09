@@ -1,57 +1,26 @@
-/* Stats Performance Cockpit — vorhandene Glas-Karte außen, vertiefte Instrumentenfläche innen. */
+/* Alle zwölf Diagramme liegen transparent und zentriert auf dem vorhandenen App-Hintergrund. */
 #chart-view .chart-canvas-stage {
     position: relative;
     isolation: isolate;
-    overflow: hidden;
-    border: 1px solid color-mix(in srgb, var(--stats-editor-accent, var(--accent, #D5A64C)) 25%, rgba(230,239,246,.22)) !important;
-    border-radius: var(--stats-editor-radius, var(--editor-radius, 16px)) !important;
-    background-color: rgba(12, 20, 30, var(--stats-glass-opacity, .68)) !important;
-    background-image: var(--stats-editor-card-gradient,
-        linear-gradient(180deg, rgba(36, 51, 66, .74), rgba(9, 16, 25, .82))) !important;
-    box-shadow:
-        0 14px 28px rgba(0,0,0,.30),
-        inset 0 1px 0 rgba(255,255,255,.18),
-        inset 0 -1px 0 rgba(0,0,0,.34) !important;
-    backdrop-filter: blur(16px) saturate(1.14) !important;
-    -webkit-backdrop-filter: blur(16px) saturate(1.14) !important;
+    overflow: visible;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
 }
 
-#chart-view .chart-canvas-stage::before {
-    content: "";
-    position: absolute;
-    z-index: 0;
-    inset: 0;
-    pointer-events: none;
-    border-radius: inherit;
-    opacity: .12;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 720 400'%3E%3Cg fill='none' stroke='%23dce7ef' stroke-width='1.1'%3E%3Cpath d='M500 42 C548 4 630 22 671 67 C710 111 674 166 615 172 C555 179 481 142 470 97 C462 72 478 55 500 42Z'/%3E%3Cpath d='M514 65 C550 35 614 43 644 77 C673 111 645 145 607 151 C562 157 510 131 500 98 C494 83 501 73 514 65Z'/%3E%3Cpath d='M530 83 C557 62 599 66 619 89 C637 110 617 131 590 136 C559 141 529 121 522 102 C518 94 522 88 530 83Z'/%3E%3Cpath d='M-18 267 C26 215 107 210 155 243 C202 275 181 334 132 367 C85 401 14 383 -18 345 C-36 324 -35 288 -18 267Z'/%3E%3Cpath d='M12 278 C46 239 105 237 139 261 C173 285 160 326 124 350 C89 374 37 362 12 333 C-1 317 -1 292 12 278Z'/%3E%3Cpath d='M37 291 C59 267 98 265 120 281 C143 298 135 323 111 338 C86 354 53 345 37 326 C28 315 28 301 37 291Z'/%3E%3Cpath d='M270 18 C305 53 309 86 292 116 C274 148 283 177 316 202'/%3E%3Cpath d='M316 0 C341 39 347 77 330 111 C313 145 324 182 355 208'/%3E%3C/g%3E%3C/svg%3E");
-    background-size: cover;
-    background-position: center;
-    mix-blend-mode: screen;
-}
-
+#chart-view .chart-canvas-stage::before,
 #chart-view .chart-canvas-stage::after {
-    content: "";
-    position: absolute;
-    z-index: 3;
-    top: 1px;
-    left: 8%;
-    right: 8%;
-    height: 1px;
-    pointer-events: none;
-    background: linear-gradient(90deg,
-        transparent,
-        rgba(255,255,255,.48),
-        color-mix(in srgb, var(--stats-editor-accent2, var(--accent, #D5A64C)) 50%, rgba(255,255,255,.3)),
-        transparent);
-    opacity: .52;
+    content: none !important;
+    display: none !important;
 }
 
-/* Der Canvas zeichnet nur die vertiefte Oberfläche und Instrumente; keine zweite Kartenkante. */
 #chart-view .chart-canvas-stage canvas {
     background: transparent !important;
     border: 0 !important;
-    border-radius: inherit !important;
+    border-radius: 0 !important;
     box-shadow: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -90,24 +59,6 @@
 #chart-view .chart-premium-tooltip.is-visible {
     opacity: 1;
     transform: translateY(0);
-}
-
-@media (max-width: 600px) {
-    #chart-view .chart-canvas-stage {
-        box-shadow:
-            0 10px 23px rgba(0,0,0,.29),
-            inset 0 1px 0 rgba(255,255,255,.16),
-            inset 0 -1px 0 rgba(0,0,0,.32) !important;
-        backdrop-filter: blur(13px) saturate(1.1) !important;
-        -webkit-backdrop-filter: blur(13px) saturate(1.1) !important;
-    }
-
-    #chart-view .chart-premium-tooltip {
-        top: 43px;
-        right: 10px;
-        padding: 6px 9px;
-        font-size: 10px;
-    }
 }
 
 @media (prefers-reduced-motion: reduce) {
