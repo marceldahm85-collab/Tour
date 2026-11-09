@@ -126,6 +126,7 @@
 <link rel="stylesheet" href="./styles-overrides.css?v=99">
 <link rel="stylesheet" href="./background-image-picker.css?v=3">
 <link rel="stylesheet" href="./theme-editor-workflow.css?v=10">
+<link rel="stylesheet" href="./app-start-editor.css?v=1">
 <link rel="stylesheet" href="./android-gallery-photos.css?v=5">
 <link rel="stylesheet" href="./dashboard-premium-alpine.css?v=27">
 <link rel="stylesheet" href="./dashboard-stat-modal-premium.css?v=5">
@@ -2490,6 +2491,50 @@
             <div class="dashboard-editor-inline-body" id="dashboard-editor-body"></div>
         </details>
 <details class="theme-editor-panel dashboard-editor-section theme-editor-extra-section theme-editor-section-card" id="theme-editor-widget-section" data-theme-editor-accordion="widget"><summary class="theme-editor-panel-title stats-analysis-title"><span class="theme-editor-title-text stats-premium-title-label"><span class="theme-editor-title-icon stats-premium-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="6" y="2.8" width="12" height="18.4" rx="2"/><path d="M9 6h6M9 9h6M9 12h3M11 18h2"/></svg></span>Android-App-Widget</span></summary><div class="theme-editor-extra-body"><label for="te-widget-title">Widget-Titel</label><input type="text" id="te-widget-title" maxlength="20" value="BERGJAHR" placeholder="BERGJAHR"><label>Kennzahlen und Position</label><div class="theme-editor-widget-grid" id="te-widget-metrics"><div class="theme-editor-widget-choice" data-widget-choice="tours"><label><input type="checkbox" data-widget-metric="tours" checked><span>Touren</span></label><div class="theme-editor-widget-move"><button type="button" data-widget-move="-1" aria-label="Touren nach oben">↑</button><button type="button" data-widget-move="1" aria-label="Touren nach unten">↓</button></div></div><div class="theme-editor-widget-choice" data-widget-choice="distance"><label><input type="checkbox" data-widget-metric="distance" checked><span>Strecke</span></label><div class="theme-editor-widget-move"><button type="button" data-widget-move="-1" aria-label="Strecke nach oben">↑</button><button type="button" data-widget-move="1" aria-label="Strecke nach unten">↓</button></div></div><div class="theme-editor-widget-choice" data-widget-choice="ascent"><label><input type="checkbox" data-widget-metric="ascent" checked><span>Aufstieg</span></label><div class="theme-editor-widget-move"><button type="button" data-widget-move="-1" aria-label="Aufstieg nach oben">↑</button><button type="button" data-widget-move="1" aria-label="Aufstieg nach unten">↓</button></div></div><div class="theme-editor-widget-choice" data-widget-choice="peaks"><label><input type="checkbox" data-widget-metric="peaks" checked><span>Gipfel</span></label><div class="theme-editor-widget-move"><button type="button" data-widget-move="-1" aria-label="Gipfel nach oben">↑</button><button type="button" data-widget-move="1" aria-label="Gipfel nach unten">↓</button></div></div><div class="theme-editor-widget-choice" data-widget-choice="steps"><label><input type="checkbox" data-widget-metric="steps" checked><span>Schritte</span></label><div class="theme-editor-widget-move"><button type="button" data-widget-move="-1" aria-label="Schritte nach oben">↑</button><button type="button" data-widget-move="1" aria-label="Schritte nach unten">↓</button></div></div><div class="theme-editor-widget-choice" data-widget-choice="time"><label><input type="checkbox" data-widget-metric="time" checked><span>Gehzeit</span></label><div class="theme-editor-widget-move"><button type="button" data-widget-move="-1" aria-label="Gehzeit nach oben">↑</button><button type="button" data-widget-move="1" aria-label="Gehzeit nach unten">↓</button></div></div><div class="theme-editor-widget-choice" data-widget-choice="speed"><label><input type="checkbox" data-widget-metric="speed"><span>Ø Speed</span></label><div class="theme-editor-widget-move"><button type="button" data-widget-move="-1" aria-label="Ø Speed nach oben">↑</button><button type="button" data-widget-move="1" aria-label="Ø Speed nach unten">↓</button></div></div><div class="theme-editor-widget-choice" data-widget-choice="gradient"><label><input type="checkbox" data-widget-metric="gradient"><span>Ø Steigung</span></label><div class="theme-editor-widget-move"><button type="button" data-widget-move="-1" aria-label="Ø Steigung nach oben">↑</button><button type="button" data-widget-move="1" aria-label="Ø Steigung nach unten">↓</button></div></div><div class="theme-editor-widget-choice" data-widget-choice="ascentRate"><label><input type="checkbox" data-widget-metric="ascentRate"><span>Ø Anstieg</span></label><div class="theme-editor-widget-move"><button type="button" data-widget-move="-1" aria-label="Ø Anstieg nach oben">↑</button><button type="button" data-widget-move="1" aria-label="Ø Anstieg nach unten">↓</button></div></div></div><div class="theme-editor-widget-count" id="te-widget-count" aria-live="polite">6/6</div><label for="te-widget-background">Widget-Hintergrund</label><select id="te-widget-background"><option value="alpine">Alpenmotiv</option><option value="dark">Dunkel / ohne Foto</option></select></div></details>
+<details class="theme-editor-panel dashboard-editor-section theme-editor-extra-section theme-editor-section-card theme-editor-card" id="theme-editor-app-start-section" data-theme-editor-accordion="app-start">
+    <summary class="theme-editor-panel-title stats-analysis-title"><span class="theme-editor-title-text stats-premium-title-label"><span class="theme-editor-title-icon stats-premium-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 17.5 8.5 8l3.2 5 2.4-3.6 6.9 8.1H3Z"/><path d="M4.5 20h15"/><path d="M16.8 4.2v2.6M15.5 5.5h2.6"/></svg></span>App-Start</span></summary>
+    <div class="theme-editor-extra-body">
+        <div class="theme-editor-description">Gestalte den nativen Startbildschirm deiner Android-App. Änderungen werden mit „Änderungen speichern“ übernommen.</div>
+
+        <label for="te-app-start-background">Hintergrundbild</label>
+        <select id="te-app-start-background">
+            <option value="standard">Alpenpanorama (Standard)</option>
+            <option value="editor">Aktuelles Editor-Hintergrundbild</option>
+            <option value="custom">Eigenes Startbild</option>
+        </select>
+
+        <div class="theme-editor-start-image-panel" id="te-app-start-custom-panel" hidden>
+            <input type="file" id="te-app-start-image-file" accept="image/*" hidden>
+            <div class="theme-editor-start-image-preview-wrap">
+                <img id="te-app-start-image-preview" alt="Vorschau des eigenen App-Startbildes" hidden>
+                <div class="theme-editor-start-image-empty" id="te-app-start-image-empty"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m4 16 5-5 4 4 3-3 4 4"/><circle cx="8.5" cy="8.5" r="1.2"/></svg><span>Noch kein eigenes Startbild ausgewählt</span></div>
+            </div>
+            <div class="theme-editor-start-image-actions">
+                <button type="button" class="background-image-upload-button" id="te-app-start-image-choose"><span aria-hidden="true">＋</span><span>Startbild aus Galerie wählen</span></button>
+                <button type="button" class="background-image-secondary-button" id="te-app-start-image-remove" hidden>Eigenes Bild entfernen</button>
+            </div>
+            <p class="background-image-upload-status" id="te-app-start-image-status" role="status" aria-live="polite" hidden></p>
+        </div>
+
+        <label for="te-app-start-duration">Präsentationsdauer</label>
+        <select id="te-app-start-duration">
+            <option value="auto">Automatisch – sobald die App bereit ist</option>
+            <option value="1500">Mindestens 1,5 Sekunden</option>
+            <option value="2000">Mindestens 2 Sekunden</option>
+            <option value="2500">Mindestens 2,5 Sekunden</option>
+        </select>
+
+        <label for="te-app-start-animation">Startanimation</label>
+        <select id="te-app-start-animation">
+            <option value="off">Aus – statischer Start</option>
+            <option value="subtle">Dezent – sanftes Einblenden</option>
+            <option value="premium">Premium – Emblem und Lichtreflex</option>
+        </select>
+
+        <div class="theme-editor-start-hint">Die App wechselt erst ins Dashboard, wenn die Daten geladen sind. Eine gewählte Mindestdauer wird nur zusätzlich berücksichtigt – sie verzögert keinen ohnehin längeren Ladevorgang.</div>
+        <div id="te-app-start-save-status" class="theme-editor-start-save-status" role="status" aria-live="polite"></div>
+    </div>
+</details>
 <details class="theme-editor-panel dashboard-editor-section theme-editor-extra-section theme-editor-section-card" id="theme-editor-presets-section" data-theme-editor-accordion="presets"><summary class="theme-editor-panel-title stats-analysis-title"><span class="theme-editor-title-text stats-premium-title-label"><span class="theme-editor-title-icon stats-premium-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></svg></span>Design-Presets</span></summary><div class="theme-editor-extra-body"><label for="te-preset-select">Gespeichertes Preset</label><select id="te-preset-select"><option value="">Kein Preset ausgewählt</option></select><label for="te-preset-name">Name des Presets</label><input type="text" id="te-preset-name" maxlength="32" placeholder="Preset-Name"><div class="theme-editor-preset-actions"><button type="button" class="save-btn" id="te-preset-save">Preset speichern</button><button type="button" class="save-btn" id="te-preset-load">Preset laden</button><button type="button" class="save-btn theme-editor-preset-delete" id="te-preset-delete">Preset löschen</button></div><div id="te-preset-status" aria-live="polite"></div></div></details>
     </div>
 
@@ -2554,6 +2599,7 @@
 <script src="./background-image-picker.js?v=8" defer></script>
 <script src="./dashboard-premium-alpine.js?v=37" defer></script>
 <script src="./theme-editor-workflow.js?v=8" defer></script>
+<script src="./app-start-editor.js?v=1" defer></script>
 <script src="./app-navigation-history.js?v=1" defer></script>
 <script src="./android-gallery-photos.js?v=9" defer></script>
 <script src="./premium-alpine-icons.js?v=3" defer></script>
