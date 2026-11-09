@@ -946,7 +946,6 @@
             ctx.fillStyle = palette.text; ctx.font = editorFont(8, 850);
             ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
             ctx.fillText(String(count), center, top - 5, step + 2);
-            ctx.restore();
         });
         drawMonthLabels(ctx, plot, height, palette);
         canvas.__premiumChartData = { values: counts, unit: 'große Touren', key: 'bigTours',
