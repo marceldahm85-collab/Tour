@@ -8,7 +8,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.graphics.Insets;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
@@ -62,6 +67,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
+import javax.net.ssl.HttpsURLConnection;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -113,6 +120,7 @@ public final class MainActivity extends Activity {
     private Object backInvokedCallback;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final ExecutorService galleryExecutor = Executors.newSingleThreadExecutor();
+    private final ExecutorService splashImageExecutor = Executors.newSingleThreadExecutor();
     private JavaScriptReplyProxy pendingGalleryPermissionReply;
     private String pendingGalleryPermissionRequestId;
     private ByteArrayOutputStream pendingBackupStream;
@@ -795,6 +803,8 @@ public final class MainActivity extends Activity {
                                 runOnUiThread(() -> hidePremiumSplashOverlay());
                             } else if ("splash.settings.save".equals(type)) {
                                 saveAppStartSettings(request, replyProxy, requestId);
+                            } else if ("splash.image.remote".equals(type)) {
+                                downloadRemoteAppStartImage(request, replyProxy, requestId);
                             } else if ("splash.image.start".equals(type)) {
                                 startAppStartImageTransfer(request, replyProxy, requestId);
                             } else if ("splash.image.chunk".equals(type)) {
@@ -829,6 +839,7 @@ public final class MainActivity extends Activity {
                                 features.put("splash.hybrid.v1");
                                 features.put("splash.settings.v1");
                                 features.put("splash.image.v1");
+                                features.put("splash.image.remote.v1");
                                 response.put("features", features);
                                 replyToBridge(replyProxy, response);
                                 Log.i(TAG, "Sichere JavaScript-Bridge ist erreichbar (Request-ID bestätigt).");
@@ -1218,6 +1229,240 @@ public final class MainActivity extends Activity {
         pendingSplashImageExpectedBytes = 0;
         pendingSplashImageExpectedChunks = 0;
         pendingSplashImageNextChunk = 0;
+    }
+
+    private boolean isAllowedSplashImageUri(Uri uri) {
+        if (uri == null
+                || !"https".equalsIgnoreCase(uri.getScheme())
+                || uri.getHost() == null
+                || uri.getUserInfo() != null
+                || (uri.getPort() != -1 && uri.getPort() != 443)) {
+            return false;
+        }
+
+        String host = uri.getHost().toLowerCase(java.util.Locale.ROOT);
+        return "images.unsplash.com".equals(host)
+                || "thumb.wikimedia.org".equals(host)
+                || "upload.wikimedia.org".equals(host)
+                || "marceldahm85-collab.github.io".equals(host);
+    }
+
+    private void downloadRemoteAppStartImage(
+            JSONObject request,
+            JavaScriptReplyProxy replyProxy,
+            String requestId
+    ) {
+        String imageUrl = request.optString("url", "");
+        Uri imageUri = Uri.parse(imageUrl);
+        if (imageUrl.isEmpty() || imageUrl.length() > 2048 || !isAllowedSplashImageUri(imageUri)) {
+            replyToBridge(replyProxy, createAppStartResponse(
+                    "splash.image.remote.result", requestId, false,
+                    "Diese Bildquelle ist für den Android-App-Start nicht freigegeben."
+            ));
+            return;
+        }
+
+        double cropX = request.optDouble("cropX", 50.0);
+        double cropY = request.optDouble("cropY", 50.0);
+        double cropZoom = request.optDouble("cropZoom", 1.0);
+
+        splashImageExecutor.execute(() -> {
+            try {
+                byte[] source = downloadAllowedSplashImage(imageUrl);
+                byte[] jpeg = renderRemoteSplashImage(source, cropX, cropY, cropZoom);
+                storeRemoteSplashImage(jpeg);
+                replyToBridge(replyProxy, createAppStartResponse(
+                        "splash.image.remote.result", requestId, true, null
+                ));
+            } catch (Exception error) {
+                Log.w(TAG, "Externes App-Startbild konnte nicht geladen oder verarbeitet werden.", error);
+                String message = error.getMessage();
+                if (message == null || message.trim().isEmpty()) {
+                    message = "Das Alpenmotiv konnte nicht für den Android-App-Start vorbereitet werden.";
+                }
+                replyToBridge(replyProxy, createAppStartResponse(
+                        "splash.image.remote.result", requestId, false, message
+                ));
+            }
+        });
+    }
+
+    private byte[] downloadAllowedSplashImage(String imageUrl) throws IOException {
+        URL current = new URL(imageUrl);
+        for (int redirect = 0; redirect <= 5; redirect++) {
+            Uri currentUri = Uri.parse(current.toString());
+            if (!isAllowedSplashImageUri(currentUri)) {
+                throw new IOException("Das Bild wurde auf einen nicht freigegebenen Server umgeleitet.");
+            }
+
+            HttpsURLConnection connection = (HttpsURLConnection) current.openConnection();
+            connection.setInstanceFollowRedirects(false);
+            connection.setConnectTimeout(15000);
+            connection.setReadTimeout(25000);
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("User-Agent", "BergtourenAndroid/0.7.1");
+            connection.setRequestProperty("Accept", "image/jpeg,image/png,image/webp,image/avif,*/*");
+
+            try {
+                int status = connection.getResponseCode();
+                if (status >= 300 && status < 400) {
+                    String location = connection.getHeaderField("Location");
+                    if (location == null || location.trim().isEmpty() || redirect == 5) {
+                        throw new IOException("Das Alpenmotiv konnte nicht sicher weitergeleitet werden.");
+                    }
+                    current = new URL(current, location);
+                    continue;
+                }
+                if (status != HttpsURLConnection.HTTP_OK) {
+                    throw new IOException("Der Bildserver antwortet mit HTTP " + status + ".");
+                }
+
+                String contentType = connection.getContentType();
+                if (contentType == null || !contentType.toLowerCase(java.util.Locale.ROOT).startsWith("image/")) {
+                    throw new IOException("Der Bildserver hat keine gültige Bilddatei geliefert.");
+                }
+
+                int contentLength = connection.getContentLength();
+                if (contentLength > 15 * 1024 * 1024) {
+                    throw new IOException("Das Alpenmotiv überschreitet die erlaubte Dateigröße.");
+                }
+
+                try (InputStream input = connection.getInputStream();
+                     ByteArrayOutputStream output = new ByteArrayOutputStream(
+                             Math.max(16 * 1024, Math.min(contentLength > 0 ? contentLength : 128 * 1024, 1024 * 1024))
+                     )) {
+                    byte[] buffer = new byte[8192];
+                    int count;
+                    while ((count = input.read(buffer)) != -1) {
+                        output.write(buffer, 0, count);
+                        if (output.size() > 15 * 1024 * 1024) {
+                            throw new IOException("Das Alpenmotiv überschreitet die erlaubte Dateigröße.");
+                        }
+                    }
+                    if (output.size() == 0) {
+                        throw new IOException("Der Bildserver hat eine leere Datei geliefert.");
+                    }
+                    return output.toByteArray();
+                }
+            } finally {
+                connection.disconnect();
+            }
+        }
+        throw new IOException("Zu viele Weiterleitungen beim Laden des Alpenmotivs.");
+    }
+
+    private byte[] renderRemoteSplashImage(
+            byte[] sourceBytes,
+            double cropXValue,
+            double cropYValue,
+            double cropZoomValue
+    ) throws IOException {
+        BitmapFactory.Options bounds = new BitmapFactory.Options();
+        bounds.inJustDecodeBounds = true;
+        BitmapFactory.decodeByteArray(sourceBytes, 0, sourceBytes.length, bounds);
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) {
+            throw new IOException("Die geladene Datei enthält kein lesbares Bild.");
+        }
+
+        int sampleSize = 1;
+        while (bounds.outWidth / sampleSize > 3600 || bounds.outHeight / sampleSize > 6000) {
+            sampleSize *= 2;
+        }
+        BitmapFactory.Options decode = new BitmapFactory.Options();
+        decode.inSampleSize = sampleSize;
+        decode.inPreferredConfig = Bitmap.Config.RGB_565;
+        Bitmap source = BitmapFactory.decodeByteArray(sourceBytes, 0, sourceBytes.length, decode);
+        if (source == null) {
+            throw new IOException("Das Alpenmotiv konnte nicht dekodiert werden.");
+        }
+
+        Bitmap target = null;
+        try {
+            final int targetWidth = 1080;
+            final int targetHeight = 2340;
+            target = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(target);
+            canvas.drawColor(Color.rgb(16, 25, 35));
+
+            float positionX = (float) (Math.max(0.0, Math.min(100.0, cropXValue)) / 100.0);
+            float positionY = (float) (Math.max(0.0, Math.min(100.0, cropYValue)) / 100.0);
+            float zoom = (float) Math.max(0.8, Math.min(1.8, cropZoomValue));
+            float coverScale = Math.max(
+                    targetWidth / (float) source.getWidth(),
+                    targetHeight / (float) source.getHeight()
+            );
+
+            Paint imagePaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+
+            // Bei einem Zoom unter 100 % bleibt das Bild vollflächig:
+            // ein leicht vergrößerter, abgedunkelter Ausschnitt liegt darunter.
+            if (zoom < 0.999f) {
+                float backgroundScale = coverScale * 1.08f;
+                float backgroundWidth = source.getWidth() * backgroundScale;
+                float backgroundHeight = source.getHeight() * backgroundScale;
+                float backgroundLeft = -(backgroundWidth - targetWidth) * positionX;
+                float backgroundTop = -(backgroundHeight - targetHeight) * positionY;
+                canvas.drawBitmap(source, null, new RectF(
+                        backgroundLeft,
+                        backgroundTop,
+                        backgroundLeft + backgroundWidth,
+                        backgroundTop + backgroundHeight
+                ), imagePaint);
+
+                Paint shade = new Paint();
+                shade.setColor(0x6B070D14);
+                canvas.drawRect(0, 0, targetWidth, targetHeight, shade);
+            }
+
+            float scale = coverScale * zoom;
+            float drawWidth = source.getWidth() * scale;
+            float drawHeight = source.getHeight() * scale;
+            float drawLeft = -(drawWidth - targetWidth) * positionX;
+            float drawTop = -(drawHeight - targetHeight) * positionY;
+            canvas.drawBitmap(source, null, new RectF(
+                    drawLeft,
+                    drawTop,
+                    drawLeft + drawWidth,
+                    drawTop + drawHeight
+            ), imagePaint);
+
+            ByteArrayOutputStream output = new ByteArrayOutputStream(512 * 1024);
+            if (!target.compress(Bitmap.CompressFormat.JPEG, 84, output)) {
+                throw new IOException("Das Alpenmotiv konnte nicht komprimiert werden.");
+            }
+            byte[] jpeg = output.toByteArray();
+            if (jpeg.length <= 0 || jpeg.length > MAX_APP_START_IMAGE_BYTES) {
+                throw new IOException("Das vorbereitete Startbild überschreitet 5 MB.");
+            }
+            return jpeg;
+        } finally {
+            source.recycle();
+            if (target != null && !target.isRecycled()) target.recycle();
+        }
+    }
+
+    private void storeRemoteSplashImage(byte[] jpeg) throws IOException {
+        if (jpeg == null || jpeg.length < 3 || jpeg.length > MAX_APP_START_IMAGE_BYTES
+                || (jpeg[0] & 0xFF) != 0xFF || (jpeg[1] & 0xFF) != 0xD8) {
+            throw new IOException("Das vorbereitete Startbild ist ungültig.");
+        }
+
+        File temporary = new File(getFilesDir(), APP_START_IMAGE_FILE + ".tmp");
+        File destination = new File(getFilesDir(), APP_START_IMAGE_FILE);
+        try (FileOutputStream output = new FileOutputStream(temporary, false)) {
+            output.write(jpeg);
+            output.flush();
+            output.getFD().sync();
+        }
+
+        if (destination.exists() && !destination.delete()) {
+            temporary.delete();
+            throw new IOException("Das bisherige Startbild konnte nicht ersetzt werden.");
+        }
+        if (!temporary.renameTo(destination)) {
+            temporary.delete();
+            throw new IOException("Das neue Startbild konnte nicht aktiviert werden.");
+        }
     }
 
     private void replyBackupExport(

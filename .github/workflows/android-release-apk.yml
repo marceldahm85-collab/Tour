@@ -2,6 +2,12 @@ name: Android Release APK
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "android/**"
+      - ".github/workflows/android-release-apk.yml"
 
 permissions:
   contents: read
@@ -112,7 +118,7 @@ jobs:
             echo "## Bergtouren Android — Release APK"
             echo
             echo "- Package: at.marcel.bergtouren"
-            echo "- Version: 0.7.0 (15)"
+            echo "- Version: 0.7.1 (16)"
             echo "- Build type: signed, non-debuggable Release"
             echo "- Artifact: bergtouren-release.apk"
             echo

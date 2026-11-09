@@ -24,7 +24,6 @@
     let previewUrl = '';
     let previewImage = null;
     let previewSequence = 0;
-    const sourceBlobCache = new Map();
 
     const byId = id => document.getElementById(id);
     const appStore = () => {
@@ -211,71 +210,6 @@
             return;
         }
         drawCrop(context, previewImage, canvas.width, canvas.height, cropParameters(readControls()));
-    }
-
-    async function fetchImageBlob(url, message) {
-        const response = await fetch(url, {
-            mode: 'cors',
-            credentials: 'omit',
-            cache: 'force-cache'
-        });
-        if (!response.ok) throw new Error(message);
-        const blob = await response.blob();
-        if (!(blob instanceof Blob) || !blob.type.startsWith('image/') || !blob.size) {
-            throw new Error(message);
-        }
-        return blob;
-    }
-
-    async function resolveBackgroundBlob(settings, customBlobOverride) {
-        if (settings.background === 'custom') {
-            const blob = customBlobOverride instanceof Blob
-                ? customBlobOverride
-                : await window.getAppStartCustomImageBlob?.();
-            if (!(blob instanceof Blob)) {
-                throw new Error('Bitte zuerst ein eigenes Startbild aus der Galerie auswählen.');
-            }
-            return blob;
-        }
-
-        if (settings.background === 'editor') {
-            const source = await window.getAppBackgroundSplashSource?.();
-            if (source?.blob instanceof Blob) return source.blob;
-            if (typeof source?.url === 'string' && source.url) {
-                return fetchImageBlob(source.url, 'Das aktuelle Editor-Hintergrundbild konnte nicht geladen werden.');
-            }
-            const asset = await window.getAppBackgroundSplashAsset?.();
-            if (asset?.blob instanceof Blob) return asset.blob;
-            throw new Error('Das aktuelle Editor-Hintergrundbild ist nicht verfügbar.');
-        }
-
-        if (settings.background.startsWith('preset:')) {
-            const id = settings.background.slice(7);
-            const preset = getPresetCatalog().find(item => item.id === id);
-            if (!preset) throw new Error('Das gewählte Alpenmotiv ist nicht mehr verfügbar.');
-            const url = preset.preview || preset.sourceUrl;
-            if (!sourceBlobCache.has(url)) {
-                const pending = fetchImageBlob(url, 'Das gewählte Alpenmotiv konnte nicht geladen werden.')
-                    .catch(error => {
-                        sourceBlobCache.delete(url);
-                        throw error;
-                    });
-                sourceBlobCache.set(url, pending);
-            }
-            return sourceBlobCache.get(url);
-        }
-
-        if (!sourceBlobCache.has('standard')) {
-            const pending = fetchImageBlob(
-                STANDARD_IMAGE_URL,
-                'Das Standard-Alpenpanorama konnte nicht geladen werden.'
-            ).catch(error => {
-                sourceBlobCache.delete('standard');
-                throw error;
-            });
-            sourceBlobCache.set('standard', pending);
-        }
-        return sourceBlobCache.get('standard');
     }
 
     async function resolveBackgroundPreviewSource(settings, customBlobOverride) {
@@ -546,14 +480,14 @@
         }
     }
 
-    function createNativeSyncFingerprint(settings, sourceBlob) {
+    function createNativeSyncFingerprint(settings, source) {
+        const image = source?.blob instanceof Blob
+            ? { kind: 'blob', type: source.blob.type, size: source.blob.size }
+            : { kind: 'url', url: new URL(source.url, window.location.href).href };
         return JSON.stringify({
-            version: 1,
+            version: 2,
             settings: normalize(settings),
-            image: {
-                type: sourceBlob.type,
-                size: sourceBlob.size
-            }
+            image
         });
     }
 
@@ -573,7 +507,7 @@
         }
     }
 
-    async function syncNative(settings, customBlobOverride, preparedSourceBlob) {
+    async function syncNative(settings, customBlobOverride, preparedSource) {
         const nativeRequest = window.__androidNativeRequest;
         if (typeof nativeRequest !== 'function') return { status: 'not-native' };
 
@@ -583,11 +517,31 @@
             throw new Error('Diese APK unterstützt die neuen App-Start-Einstellungen noch nicht.');
         }
 
-        const sourceBlob = preparedSourceBlob instanceof Blob
-            ? preparedSourceBlob
-            : await resolveBackgroundBlob(settings, customBlobOverride);
-        const optimized = await compressImageToPortrait(sourceBlob, cropParameters(settings));
-        await uploadNativeImage(optimized);
+        const source = preparedSource &&
+            (preparedSource.blob instanceof Blob || typeof preparedSource.url === 'string')
+            ? preparedSource
+            : await resolveBackgroundPreviewSource(settings, customBlobOverride);
+
+        if (source.blob instanceof Blob) {
+            const optimized = await compressImageToPortrait(source.blob, cropParameters(settings));
+            await uploadNativeImage(optimized);
+        } else if (typeof source.url === 'string' && source.url) {
+            if (!features.includes('splash.image.remote.v1')) {
+                throw new Error('Diese APK kann externe Alpenmotive noch nicht direkt mit Android synchronisieren. Bitte installiere die aktuelle Release-Version.');
+            }
+            const imageUrl = new URL(source.url, window.location.href);
+            const remote = await nativeRequest('splash.image.remote', {
+                url: imageUrl.href,
+                cropX: settings.cropX,
+                cropY: settings.cropY,
+                cropZoom: settings.cropZoom
+            }, 90000);
+            if (!remote || remote.type !== 'splash.image.remote.result' || remote.ok !== true) {
+                throw new Error(remote?.error || 'Android konnte das ausgewählte Alpenmotiv nicht laden.');
+            }
+        } else {
+            throw new Error('Für den App-Start ist keine gültige Bildquelle verfügbar.');
+        }
 
         // Android braucht nur noch den Hinweis, dass ein lokal gespeichertes,
         // bereits passend zugeschnittenes Startbild verwendet werden soll.
@@ -603,7 +557,7 @@
         // Dieser Marker liegt absichtlich nur im lokalen WebView-Speicher,
         // nicht im übertragbaren Backup. Eine neu installierte Release-App
         // gleicht dadurch übernommene Editor-Werte einmal mit Android ab.
-        writeNativeSyncFingerprint(createNativeSyncFingerprint(settings, sourceBlob));
+        writeNativeSyncFingerprint(createNativeSyncFingerprint(settings, source));
         return { status: 'synced' };
     }
 
@@ -775,14 +729,14 @@
 
         try {
             const settings = normalize(stored);
-            const sourceBlob = await resolveBackgroundBlob(settings);
-            const fingerprint = createNativeSyncFingerprint(settings, sourceBlob);
+            const source = await resolveBackgroundPreviewSource(settings);
+            const fingerprint = createNativeSyncFingerprint(settings, source);
 
             if (options?.force !== true && fingerprint === readNativeSyncFingerprint()) {
                 return { status: 'already-synced' };
             }
 
-            return await syncNative(settings, null, sourceBlob);
+            return await syncNative(settings, null, source);
         } catch (error) {
             console.warn('[App-Start] Gespeicherte Einstellungen konnten nicht mit Android synchronisiert werden.', error);
             return { status: 'failed', error: error?.message || 'Unbekannter Fehler' };
