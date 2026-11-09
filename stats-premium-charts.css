@@ -115,3 +115,21 @@
         transition: none !important;
     }
 }
+
+
+/* Nur die zwölf neu gestalteten Stats-Diagramme: Android/WebView-Tap-Blau entfernen.
+   Die vorhandenen Diagramm-Klickfunktionen (Monatsdetails und Gipfel-Touren) bleiben aktiv. */
+#chart-view #big-tours-canvas,
+#chart-view #steps-canvas,
+#chart-view #peaks-canvas,
+#chart-view #performance-index-canvas,
+#chart-view #speed-canvas,
+#chart-view #gradient-canvas,
+#chart-view #ascent-rate-canvas,
+#chart-view #avg-steps-canvas,
+#chart-view #ms-dist-canvas,
+#chart-view #ms-asc-canvas,
+#chart-view #ms-time-canvas,
+#chart-view #ms-peaks-canvas {
+    -webkit-tap-highlight-color: transparent !important;
+}
