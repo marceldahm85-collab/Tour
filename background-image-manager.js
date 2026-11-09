@@ -488,6 +488,39 @@
         return { blob, settings };
     }
 
+    async function getAppStartCustomImageBlob() {
+        const cached = typeof appStorage !== 'undefined' && appStorage
+            ? appStorage.get('premiumAppStartImage_v1')
+            : null;
+        if (cached instanceof Blob) return cached;
+        if (typeof _idbGet !== 'function') return null;
+        const stored = await _idbGet('premiumAppStartImage_v1');
+        if (stored instanceof Blob && typeof appStorage !== 'undefined' && appStorage) {
+            appStorage.set('premiumAppStartImage_v1', stored);
+        }
+        return stored instanceof Blob ? stored : null;
+    }
+
+    async function setAppStartCustomImageBlob(blob) {
+        if (!(blob instanceof Blob) || !blob.type.startsWith('image/') ||
+            blob.size <= 0 || blob.size > 5 * 1024 * 1024) {
+            throw new RangeError('Das eigene Startbild muss ein gültiges Bild unter 5 MB sein.');
+        }
+        await _idbSet('premiumAppStartImage_v1', blob);
+        if (typeof appStorage !== 'undefined' && appStorage) {
+            appStorage.set('premiumAppStartImage_v1', blob);
+        }
+        return true;
+    }
+
+    async function clearAppStartCustomImageBlob() {
+        if (typeof appStorage !== 'undefined' && appStorage?.remove) {
+            appStorage.remove('premiumAppStartImage_v1');
+        }
+        await _idbDel('premiumAppStartImage_v1');
+        return true;
+    }
+
     async function clearCustomImage() {
         // Das Bild bleibt gespeichert, falls ein Design-Preset darauf verweist.
         if(pendingCustomBlob instanceof Blob && pendingCustomImageId===currentSettings?.customImageId){pendingCustomBlob=null;pendingCustomImageId='';}
@@ -860,6 +893,9 @@
     };
     window.getAppBackgroundSettings=getSettingsSnapshot;
     window.getAppBackgroundSplashAsset = getSplashBackgroundAsset;
+    window.getAppStartCustomImageBlob = getAppStartCustomImageBlob;
+    window.setAppStartCustomImageBlob = setAppStartCustomImageBlob;
+    window.clearAppStartCustomImageBlob = clearAppStartCustomImageBlob;
     window.beginAppBackgroundEditorDraft=beginEditorDraft;
     window.persistAppBackgroundDraftAsset=persistDraftAsset;
     window.commitAppBackgroundEditorDraft=commitEditorDraft;
