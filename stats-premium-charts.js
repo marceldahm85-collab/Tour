@@ -1701,6 +1701,23 @@
         ctx.beginPath(); ctx.arc(0,0,radius+3.5,0,Math.PI*2);
         ctx.strokeStyle='rgba(3,9,15,.96)'; ctx.lineWidth=2.4; ctx.stroke();
 
+        // Monatsbereich: Minimum und Maximum als leuchtendes Akzentsegment im äußeren Metallring.
+        const monthRange = (canvas.__performanceIndexRanges || [])[selectedMonth];
+        if (monthRange && Number.isFinite(monthRange.min) && Number.isFinite(monthRange.max)) {
+            const rangeStart = start + sweep * Math.max(0, Math.min(100, monthRange.min)) / 100;
+            const rangeEnd = start + sweep * Math.max(0, Math.min(100, monthRange.max)) / 100;
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(0, 0, radius + 7, rangeStart, Math.max(rangeStart + .012, rangeEnd));
+            ctx.strokeStyle = palette.primary;
+            ctx.lineWidth = 3.4;
+            ctx.lineCap = 'round';
+            ctx.shadowColor = colourWithAlpha(palette.primary, .9);
+            ctx.shadowBlur = 7;
+            ctx.stroke();
+            ctx.restore();
+        }
+
         // Flüssigkeitskapsel und gewölbte Glasoberfläche.
         // Tiefes, leicht akzentgefärbtes Zifferblatt statt heller Innenkontur.
         const liquid=ctx.createRadialGradient(-radius*.42,-radius*.48,2,0,0,radius+5);
@@ -1887,16 +1904,23 @@
 
     function drawPerformanceIndexDiagram() {
         const sums = Array(12).fill(0), counts = Array(12).fill(0);
+        const monthlyRanges = Array.from({ length: 12 }, () => ({ min: Infinity, max: -Infinity }));
         getFilteredTours().forEach(entry => {
             const month = monthOf(entry); if (month === null) return;
             const result = calculatePerformanceIndex(entry);
             if (!result || !Number.isFinite(result.score)) return;
             const score = Math.max(0, Math.min(100, result.score));
             sums[month] += score; counts[month]++;
+            monthlyRanges[month].min = Math.min(monthlyRanges[month].min, score);
+            monthlyRanges[month].max = Math.max(monthlyRanges[month].max, score);
         });
         const values = sums.map((sum, i) => counts[i] ? sum / counts[i] : 0);
+        monthlyRanges.forEach((range, month) => {
+            if (!counts[month]) monthlyRanges[month] = null;
+        });
         const canvas = canvasById('performance-index-canvas');
         if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
+        canvas.__performanceIndexRanges = monthlyRanges;
 
         const isActive = canvas.classList.contains('active-chart-canvas');
         const yearSelect = document.getElementById('stats-year-select');
