@@ -1283,52 +1283,130 @@
             : 0;
         const canvas = canvasById('avg-steps-canvas');
         if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
-        const ctx = resizeCanvasToDisplaySize(canvas);
-        if (!ctx) return;
-        const base = baseChart(canvas, ctx, '',
-            average > 0 ? Math.round(average).toLocaleString('de-AT') : '–',
-            { reliefStrength: .3, hideTitle: true, headerUnit: 'averageSteps' });
-        const { width, height, palette } = base;
-        const max = Math.max(1, ...valid), left = 14, cols = 6, cellW = (width - 28) / cols;
-        const rowY = [height * .39, height * .74];
-
-        values.forEach((value, index) => {
-            const row = Math.floor(index / cols), col = index % cols;
-            const cx = left + cellW * (col + .5), cy = rowY[row];
-            const ratio = value > 0 ? value / max : 0;
-            const radius = 12 + ratio * 6.5;
-            ctx.save();
-            ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-            ctx.fillStyle = palette.muted; ctx.font = editorFont(8, 700);
-            ctx.fillText(MONTHS[index], cx, cy - 28);
-
-            const glass = ctx.createRadialGradient(cx - radius * .35, cy - radius * .45, 1, cx, cy, radius * 1.35);
-            glass.addColorStop(0, 'rgba(255,255,255,' + (.20 + ratio * .14) + ')');
-            glass.addColorStop(.28, colourWithAlpha(palette.primary, .22 + ratio * .48));
-            glass.addColorStop(.72, colourWithAlpha(palette.secondary, .10 + ratio * .24));
-            glass.addColorStop(1, 'rgba(4,10,17,.98)');
-            ctx.shadowColor = colourWithAlpha(palette.primary, .18 + ratio * .22);
-            ctx.shadowBlur = 7 + ratio * 5;
-            ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-            ctx.fillStyle = glass; ctx.fill(); ctx.shadowBlur = 0;
-            ctx.strokeStyle = colourWithAlpha(palette.secondary, .3 + ratio * .36);
-            ctx.lineWidth = 1; ctx.stroke();
-            ctx.beginPath();
-            ctx.arc(cx - radius * .22, cy - radius * .25, radius * .62, Math.PI * 1.12, Math.PI * 1.78);
-            ctx.strokeStyle = 'rgba(255,255,255,.34)'; ctx.lineWidth = 1.2; ctx.stroke();
-
-            ctx.fillStyle = palette.text; ctx.font = editorFont(7.5, 800);
-            ctx.fillText(value > 0 ? Math.round(value).toLocaleString('de-AT') : '–',
-                cx, cy + radius + 13, cellW - 2);
-            if (selectedMonths.avgSteps === index) {
-                ctx.beginPath(); ctx.arc(cx, cy, radius + 4, 0, Math.PI * 2);
-                ctx.strokeStyle = palette.primary; ctx.lineWidth = 1.5;
-                ctx.shadowColor = palette.primary; ctx.shadowBlur = 8; ctx.stroke();
-            }
-            ctx.restore();
-        });
+        if (canvas.__avgStepsAnimationFrame) {
+            cancelAnimationFrame(canvas.__avgStepsAnimationFrame);
+            canvas.__avgStepsAnimationFrame = 0;
+        }
         canvas.__premiumChartData = { values, unit: 'Schritte/Tour', key: 'avgSteps',
             formatter: value => Math.round(value).toLocaleString('de-AT') + ' Schritte/Tour' };
+
+        const started = performance.now();
+        const duration = 1050;
+        const renderFrame = timestamp => {
+            if (!canvas.classList.contains('active-chart-canvas')) {
+                canvas.__avgStepsAnimationFrame = 0;
+                return;
+            }
+            const progress = Math.min(1, Math.max(0, (timestamp - started) / duration));
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const ctx = resizeCanvasToDisplaySize(canvas);
+            if (!ctx) {
+                canvas.__avgStepsAnimationFrame = 0;
+                return;
+            }
+            const base = baseChart(canvas, ctx, '',
+                average > 0 ? Math.round(average).toLocaleString('de-AT') : '–',
+                { reliefStrength: .3, hideTitle: true, headerUnit: 'averageSteps' });
+            const { width, height, palette } = base;
+            const cols = 4, rows = 3, left = 14, right = width - 14;
+            const top = 48, bottom = height - 5;
+            const cellW = (right - left) / cols;
+            const cellH = (bottom - top) / rows;
+            const max = Math.max(1, ...valid);
+
+            values.forEach((value, index) => {
+                const row = Math.floor(index / cols), col = index % cols;
+                const cx = left + cellW * (col + .5);
+                const cy = top + cellH * (row + .5);
+                const ratio = value > 0 ? value / max : 0;
+                const targetScale = value > 0 ? .52 + ratio * .48 : 0;
+                const scale = targetScale * eased;
+                const soleW = Math.min(cellW * .38, 20) * scale;
+                const soleH = Math.min(cellH * .59, 31) * scale;
+                const label = value > 0 ? Math.round(value).toLocaleString('de-AT') : '–';
+
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'alphabetic';
+                ctx.fillStyle = palette.text;
+                ctx.font = editorFont(7.2, 800);
+                ctx.shadowColor = 'rgba(0,0,0,.72)';
+                ctx.shadowBlur = 3;
+                ctx.fillText(label, cx, cy - Math.min(cellH * .27, 14), cellW - 3);
+
+                if (value > 0 && scale > .001) {
+                    // Bergschuh-Sohlenabdruck: breite Zehenpartie, schmale Mitte,
+                    // kräftige Ferse und klar erkennbare, segmentierte Profilstollen.
+                    const x = cx - soleW / 2, y = cy - soleH / 2;
+                    ctx.translate(x, y);
+                    ctx.scale(soleW / 20, soleH / 31);
+                    ctx.shadowColor = colourWithAlpha(palette.primary, .48);
+                    ctx.shadowBlur = 5 + ratio * 5;
+                    ctx.beginPath();
+                    ctx.moveTo(10, 0);
+                    ctx.bezierCurveTo(15.5, .2, 19, 4.8, 18.3, 10);
+                    ctx.lineTo(16.5, 16);
+                    ctx.bezierCurveTo(15.8, 19, 17.2, 22, 17.5, 25);
+                    ctx.bezierCurveTo(17.8, 29, 14.5, 31, 10, 31);
+                    ctx.bezierCurveTo(5.5, 31, 2.2, 29, 2.5, 25);
+                    ctx.bezierCurveTo(2.8, 22, 4.2, 19, 3.5, 16);
+                    ctx.lineTo(1.7, 10);
+                    ctx.bezierCurveTo(1, 4.8, 4.5, .2, 10, 0);
+                    ctx.closePath();
+                    const sole = ctx.createLinearGradient(0, 0, 20, 31);
+                    sole.addColorStop(0, colourWithAlpha(palette.secondary, .92));
+                    sole.addColorStop(.42, colourWithAlpha(palette.primary, .82));
+                    sole.addColorStop(1, 'rgba(8,15,22,.94)');
+                    ctx.fillStyle = sole;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    ctx.strokeStyle = colourWithAlpha(palette.secondary, .88);
+                    ctx.lineWidth = .85;
+                    ctx.stroke();
+
+                    ctx.fillStyle = 'rgba(5,10,15,.78)';
+                    [[5,4,4,2.1],[11,4,4,2.1],[3.8,8,4.3,2],[11.9,8,4.3,2],
+                     [5.1,12,3.8,2],[11.1,12,3.8,2],[6.2,17,7.6,1.8],
+                     [4.4,22,4.2,2],[11.4,22,4.2,2],[5.1,26,4.2,2],[10.7,26,4.2,2]]
+                        .forEach(([tx,ty,tw,th]) => {
+                            roundedPath(ctx, tx, ty, tw, th, .65);
+                            ctx.fill();
+                        });
+                    ctx.strokeStyle = 'rgba(255,255,255,.34)';
+                    ctx.lineWidth = .65;
+                    ctx.beginPath();
+                    ctx.moveTo(5, 2.2); ctx.quadraticCurveTo(10, .7, 15, 2.2);
+                    ctx.stroke();
+                }
+                ctx.restore();
+
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'alphabetic';
+                ctx.font = editorFont(8, 800);
+                ctx.fillStyle = selectedMonths.avgSteps === index ? palette.primary : palette.muted;
+                const monthY = cy + Math.min(cellH * .34, 19);
+                ctx.fillText(MONTHS[index], cx, monthY);
+                if (selectedMonths.avgSteps === index) {
+                    ctx.beginPath();
+                    ctx.moveTo(cx - 5, monthY + 2);
+                    ctx.lineTo(cx + 5, monthY + 2);
+                    ctx.strokeStyle = palette.primary;
+                    ctx.lineWidth = 1.3;
+                    ctx.shadowColor = palette.primary;
+                    ctx.shadowBlur = 5;
+                    ctx.stroke();
+                }
+                ctx.restore();
+            });
+
+            if (progress < 1) {
+                canvas.__avgStepsAnimationFrame = requestAnimationFrame(renderFrame);
+            } else {
+                canvas.__avgStepsAnimationFrame = 0;
+            }
+        };
+        canvas.__avgStepsAnimationFrame = requestAnimationFrame(renderFrame);
     }
 
     function drawBigToursDiagram() {
@@ -2870,10 +2948,11 @@
 
                 let index;
                 if (category === 'avgSteps') {
-                    if (x < 14 || x > size.width - 14) return;
-                    const col = Math.max(0, Math.min(5, Math.floor((x - 14) / ((size.width - 28) / 6))));
-                    const row = y < size.height * .56 ? 0 : 1;
-                    index = row * 6 + col;
+                    const left = 14, right = size.width - 14, top = 48, bottom = size.height - 5;
+                    if (x < left || x > right || y < top || y > bottom) return;
+                    const col = Math.max(0, Math.min(3, Math.floor((x - left) / ((right - left) / 4))));
+                    const row = Math.max(0, Math.min(2, Math.floor((y - top) / ((bottom - top) / 3))));
+                    index = row * 4 + col;
                 } else {
                     const left = 18, right = size.width - 18;
                     if (x < left || x > right) return;
