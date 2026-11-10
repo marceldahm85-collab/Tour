@@ -1752,8 +1752,9 @@
         ctx.restore();
 
         // Der Zahlenwert folgt der Pfeilachse, bleibt aber horizontal lesbar.
-        const labelX = cx + Math.cos(angle) * length * .02;
-        const labelY = cy - Math.sin(angle) * length * .02;
+        const labelOffset = length * .20;
+        const labelX = cx + Math.cos(angle) * labelOffset;
+        const labelY = cy - Math.sin(angle) * labelOffset;
         const shown = Number(value) || 0;
         const label = shown > 0 ? Math.round(shown).toLocaleString('de-AT') + ' hm/h' : '– hm/h';
         ctx.save();
@@ -2559,8 +2560,12 @@
                 const y = (event.clientY - rect.top) * size.height / rect.height;
                 const trend = canvas.__premiumTrendGeometry;
                 if (trend && y >= trend.top - 8 && y <= size.height - 4) return;
-                const selected = selectedMonths[category];
-                if (selected === null || selected === undefined) return;
+                let selected = selectedMonths[category];
+                if (selected === null || selected === undefined) {
+                    selected = defaultPerformanceIndexMonth();
+                    selectedMonths[category] = selected;
+                    if (typeof window.drawActiveChart === 'function') window.drawActiveChart();
+                }
                 if (typeof openMonthCategoryModal === 'function') {
                     openMonthCategoryModal(category, selected);
                 }
