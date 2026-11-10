@@ -1822,8 +1822,8 @@
             ctx.restore();
         }
 
-        for (let i = 0; i <= 40; i++) {
-            const value = max * i / 40, a = start + sweep * i / 40, major = i % 5 === 0;
+        for (let i = 0; i <= 48; i++) {
+            const value = max * i / 48, a = start + sweep * i / 48, major = i % 8 === 0;
             const r1 = radius - (major ? 15 : 7);
             ctx.beginPath();
             ctx.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1);
