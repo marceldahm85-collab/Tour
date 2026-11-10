@@ -209,10 +209,10 @@
     const gaugeAnimationFrames = { performanceIndex: null, speed: null };
     const chartIntroFrames = { gradient: null, ascentRate: null };
 
-    function animateChartIntro(canvas, type, renderFrame) {
+    function animateChartIntro(canvas, type, renderFrame, requestedDuration) {
         if (!window.requestAnimationFrame) { renderFrame(1); return; }
         if (chartIntroFrames[type] && window.cancelAnimationFrame) window.cancelAnimationFrame(chartIntroFrames[type]);
-        const started = performance.now(), duration = 1050;
+        const started = performance.now(), duration = Math.max(1, Number(requestedDuration) || 1050);
         const step = now => {
             const progress = Math.min(1, (now - started) / duration);
             renderFrame(progress);
@@ -1186,8 +1186,9 @@
         const yearSelect=document.getElementById('stats-year-select');
         const yearFilter=yearSelect?String(yearSelect.value||'all'):'all';
         const yearChanged=canvas.__gradientYearFilter!==yearFilter;
-        // Wie beim Speedometer: Beim erneuten Aktivieren oder Jahreswechsel immer zum Jahresdurchschnitt zurückkehren.
-        if(isActive&&(!canvas.__gradientWasActive||yearChanged)){
+        const shouldAnimateIntro=isActive&&(!canvas.__gradientWasActive||yearChanged);
+        // Beim Neueinstieg oder Jahreswechsel wie beim Speedometer zum Jahresdurchschnitt zurückkehren.
+        if(shouldAnimateIntro){
             selectedMonths.gradient=null;
             animatedGaugeValues.gradient=0;
         }
@@ -1197,7 +1198,7 @@
         canvas.__premiumChartData={values,unit:'hm/km',key:'gradient',formatter:value=>Math.round(value)+' hm/km'};
         resizeCanvasToDisplaySize(canvas);
         const render=progress=>renderAscentArrowFrame(canvas,values,selected,target,progress,'hm/km','gradient');
-        if(isActive&&!canvas.__gradientIntroPlayed){canvas.__gradientIntroPlayed=true;animateChartIntro(canvas,'gradient',render);}
+        if(shouldAnimateIntro) animateChartIntro(canvas,'gradient',render,1700);
         else render(1);
         animatedGaugeValues.gradient=target;
     }
