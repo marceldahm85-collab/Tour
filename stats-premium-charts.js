@@ -2590,9 +2590,15 @@
         selectedMonths[category] = monthIndex;
         const target = Number(values[monthIndex]) || 0;
         if (category === 'gradient') {
-            animateGauge('gradient', target, value => renderGradientReliefFrame(canvas, values, monthIndex, value));
+            // Steigung bleibt auch bei Monatsauswahl das metallische Winkelmesser-Instrument.
+            animateGauge('gradient', target, value =>
+                renderAscentArrowFrame(canvas, values, monthIndex, value, 1, 'hm/km', 'gradient'));
+        } else if (category === 'ascentRate') {
+            // Anstieg bleibt auch bei Monatsauswahl das alpine Bergrelief.
+            animateGauge('ascentRate', target, value =>
+                renderGradientReliefFrame(canvas, values, monthIndex, value, 1, 'hm/h', 'ascentRate'));
         } else {
-            animateGauge('ascentRate', target, value => renderAscentArrowFrame(canvas, values, monthIndex, value));
+            return;
         }
         showChartTooltip(canvas, monthIndex, target);
         adaptiveHaptic('selection');
