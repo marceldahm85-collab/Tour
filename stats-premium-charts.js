@@ -1215,14 +1215,18 @@
         if(!canvas||typeof resizeCanvasToDisplaySize!=='function')return;
         const isActive=canvas.classList.contains('active-chart-canvas');
         const yearSelect=document.getElementById('stats-year-select'),yearFilter=yearSelect?String(yearSelect.value||'all'):'all';
-        if(isActive&&(!canvas.__ascentRateWasActive||canvas.__ascentRateYearFilter!==yearFilter)){
-            selectedMonths.ascentRate=null;animatedGaugeValues.ascentRate=0;}
+        const yearChanged=canvas.__ascentRateYearFilter!==yearFilter;
+        const shouldAnimateIntro=isActive&&(!canvas.__ascentRateWasActive||yearChanged);
+        if(shouldAnimateIntro){
+            selectedMonths.ascentRate=null;
+            animatedGaugeValues.ascentRate=0;
+        }
         canvas.__ascentRateWasActive=isActive;canvas.__ascentRateYearFilter=yearFilter;
         const selected=selectedMonths.ascentRate,target=selected===null?average:(Number(values[selected])||0);
         canvas.__premiumChartData={values,unit:'hm/h',key:'ascentRate',formatter:value=>Math.round(value)+' hm/h'};
         resizeCanvasToDisplaySize(canvas);
         const render=progress=>renderGradientReliefFrame(canvas,values,selected,target,progress,'hm/h','ascentRate');
-        if(isActive&&!canvas.__ascentRateIntroPlayed){canvas.__ascentRateIntroPlayed=true;animateChartIntro(canvas,'ascentRate',render);}
+        if(shouldAnimateIntro) animateChartIntro(canvas,'ascentRate',render,1700);
         else render(1);
         animatedGaugeValues.ascentRate=target;
     }
@@ -1677,103 +1681,179 @@
         const ctx=canvas.getContext('2d'),size=logicalSize(canvas),palette=chartPalette();
         ctx.clearRect(0,0,size.width,size.height);
         drawInstrumentSurface(ctx,size.width,size.height,palette);
+
         const progress=Math.max(0,Math.min(1,Number.isFinite(introProgress)?introProgress:1));
         const ease=1-Math.pow(1-progress,3);
         const valid=values.filter(number=>Number.isFinite(number)&&number>0);
         const max=Math.max(1,...valid);
         const ratio=Math.max(0,Math.min(1,(Number(value)||0)/max));
-        const shown=(Number(value)||0)*ease;
-        const sceneW=Math.min(size.width*.90,370),sceneH=Math.min(size.height*.62,250);
-        const left=(size.width-sceneW)/2,top=Math.max(12,(size.height-92-sceneH)*.40);
-        const baseY=top+sceneH*.88,centerX=size.width/2;
-        ctx.save();
-        ctx.globalAlpha=ease;
-        ctx.translate(centerX,baseY);
-        ctx.scale(.88+.12*ease,.88+.12*ease);
-        ctx.translate(-centerX,-baseY);
+        const shown=(Number(value)||0);
+        const sceneW=Math.min(size.width*.91,380);
+        const baseY=size.height-88;
+        const sceneH=Math.min(size.height*.61,224);
+        const left=(size.width-sceneW)/2;
+        const top=Math.max(10,baseY-sceneH);
+        const px=(x)=>left+x*sceneW, py=(y)=>top+y*sceneH;
+        const mountainBase=baseY+3;
 
-        const ridgeGradient=(x1,y1,x2,y2,stops)=>{
+        const makeGradient=(x1,y1,x2,y2,stops)=>{
             const g=ctx.createLinearGradient(x1,y1,x2,y2);
             stops.forEach(([p,c])=>g.addColorStop(p,c));
             return g;
         };
-        const drawRidge=(points,fill,stroke,shadow)=>{
-            ctx.beginPath();ctx.moveTo(left+points[0][0]*sceneW,baseY);
-            points.forEach(([x,y])=>ctx.lineTo(left+x*sceneW,top+y*sceneH));
-            ctx.lineTo(left+points[points.length-1][0]*sceneW,baseY);ctx.closePath();
-            ctx.fillStyle=fill;ctx.shadowColor=shadow||'rgba(0,0,0,.35)';
-            ctx.shadowBlur=12;ctx.shadowOffsetY=5;ctx.fill();ctx.shadowBlur=0;ctx.shadowOffsetY=0;
-            if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.15;ctx.stroke();}
+        const drawMountain=(path,fill,stroke,shadow='rgba(0,0,0,.48)')=>{
+            ctx.save();
+            ctx.beginPath();
+            path();
+            ctx.lineTo(px(1),mountainBase);
+            ctx.lineTo(px(0),mountainBase);
+            ctx.closePath();
+            ctx.fillStyle=fill;
+            ctx.shadowColor=shadow;ctx.shadowBlur=15;ctx.shadowOffsetY=6;
+            ctx.fill();ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+            if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.1;ctx.stroke();}
+            ctx.restore();
         };
 
-        // Mehrere räumlich gestaffelte alpine Grate statt einer Karten-/Höhenlinienfläche.
-        drawRidge([[0,.70],[.12,.54],[.22,.63],[.35,.39],[.45,.55],[.58,.30],[.69,.52],[.82,.42],[1,.68]],
-            ridgeGradient(left,top,left+sceneW,baseY,[[0,'rgba(119,145,160,.62)'],[.55,'rgba(56,79,96,.82)'],[1,'rgba(18,34,48,.94)']]),
-            'rgba(205,220,226,.24)','rgba(4,12,20,.2)');
-        drawRidge([[0,.78],[.10,.66],[.19,.70],[.31,.34],[.39,.47],[.51,.12],[.60,.40],[.70,.29],[.80,.55],[.90,.47],[1,.76]],
-            ridgeGradient(left,top,left+sceneW,baseY,[[0,'#DCE4E5'],[.20,'#899BA4'],[.42,'#43596A'],[.72,'#1E3446'],[1,'#091722']]),
-            'rgba(241,247,245,.68)',colourWithAlpha(palette.primary,.38));
+        // Hintere, weich gestaffelte Bergkette für räumliche Tiefe.
+        drawMountain(()=>{
+            ctx.moveTo(px(0),py(.77));
+            ctx.lineTo(px(.13),py(.55));ctx.lineTo(px(.23),py(.64));
+            ctx.lineTo(px(.38),py(.39));ctx.lineTo(px(.49),py(.57));
+            ctx.lineTo(px(.66),py(.34));ctx.lineTo(px(.78),py(.52));
+            ctx.lineTo(px(.90),py(.43));ctx.lineTo(px(1),py(.67));
+        },makeGradient(left,top,left+sceneW,mountainBase,[
+            [0,'rgba(127,151,164,.46)'],[.48,'rgba(67,91,108,.72)'],[1,'rgba(13,29,43,.94)']
+        ]),'rgba(214,228,233,.18)');
 
+        // Vorderer Hauptgrat mit zwei klar ausgeprägten Gipfeln und tiefem Sattel.
+        const mainOutline=()=>{
+            ctx.moveTo(px(.035),py(.91));
+            ctx.lineTo(px(.145),py(.76));
+            ctx.quadraticCurveTo(px(.205),py(.66),px(.255),py(.51));
+            ctx.quadraticCurveTo(px(.302),py(.37),px(.365),py(.245));
+            ctx.quadraticCurveTo(px(.405),py(.34),px(.455),py(.475));
+            ctx.quadraticCurveTo(px(.505),py(.59),px(.555),py(.49));
+            ctx.quadraticCurveTo(px(.615),py(.36),px(.685),py(.17));
+            ctx.quadraticCurveTo(px(.735),py(.31),px(.785),py(.48));
+            ctx.quadraticCurveTo(px(.855),py(.66),px(.965),py(.86));
+        };
+        drawMountain(mainOutline,makeGradient(left,top,left+sceneW,mountainBase,[
+            [0,'#DCE5E7'],[.16,'#879CA7'],[.38,'#526C7C'],[.66,'#263F52'],[1,'#071521']
+        ]),'rgba(242,248,247,.72)','rgba(0,0,0,.62)');
+
+        // Facetten folgen den beiden Flanken und geben dem Relief alpine Felsstruktur.
         const facets=[
-            [[.31,.34],[.39,.47],[.43,.77],[.22,.83]],
-            [[.31,.34],[.51,.12],[.46,.52],[.43,.77]],
-            [[.51,.12],[.60,.40],[.69,.83],[.46,.52]],
-            [[.60,.40],[.70,.29],[.80,.55],[.69,.83]],
-            [[.10,.66],[.31,.34],[.22,.83],[0,.90]],
-            [[.70,.29],[.90,.47],[1,.82],[.80,.55]]
+            [[.145,.76],[.255,.51],[.365,.245],[.326,.57],[.255,.83]],
+            [[.255,.51],[.365,.245],[.455,.475],[.405,.72],[.326,.57]],
+            [[.365,.245],[.405,.34],[.455,.475],[.326,.57]],
+            [[.455,.475],[.555,.49],[.685,.17],[.615,.58],[.505,.72]],
+            [[.555,.49],[.685,.17],[.785,.48],[.715,.73],[.615,.58]],
+            [[.685,.17],[.735,.31],[.785,.48],[.715,.73]],
+            [[.035,.91],[.145,.76],[.255,.83],[.33,.94],[.16,.98]],
+            [[.785,.48],[.965,.86],[.86,.96],[.715,.86]]
         ];
         facets.forEach((points,index)=>{
-            ctx.beginPath();ctx.moveTo(left+points[0][0]*sceneW,top+points[0][1]*sceneH);
-            points.slice(1).forEach(([x,y])=>ctx.lineTo(left+x*sceneW,top+y*sceneH));
+            ctx.beginPath();ctx.moveTo(px(points[0][0]),py(points[0][1]));
+            points.slice(1).forEach(([x,y])=>ctx.lineTo(px(x),py(y)));
             ctx.closePath();
-            const lightSide=index===1||index===3||index===4;
-            ctx.fillStyle=lightSide
-                ?ridgeGradient(left,top,left+sceneW*.55,baseY,[[0,'rgba(250,250,241,.42)'],[1,'rgba(170,190,196,.035)']])
-                :'rgba(2,13,23,.30)';
+            const lit=[0,2,4,6].includes(index);
+            ctx.fillStyle=lit
+                ?makeGradient(left,top,left+sceneW*.55,mountainBase,[[0,'rgba(250,252,247,.42)'],[1,'rgba(171,194,202,.025)']])
+                :'rgba(2,13,23,.27)';
             ctx.fill();
+            ctx.strokeStyle=lit?'rgba(235,244,242,.12)':'rgba(1,8,15,.20)';
+            ctx.lineWidth=.7;ctx.stroke();
         });
-        const snow=[
-            [[.31,.34],[.35,.40],[.39,.47],[.365,.445],[.345,.455]],
-            [[.51,.12],[.55,.25],[.60,.40],[.565,.34],[.545,.36],[.525,.26]],
-            [[.70,.29],[.735,.39],[.80,.55],[.765,.49],[.745,.50],[.72,.40]]
-        ];
-        snow.forEach(points=>{
-            ctx.beginPath();ctx.moveTo(left+points[0][0]*sceneW,top+points[0][1]*sceneH);
-            points.slice(1).forEach(([x,y])=>ctx.lineTo(left+x*sceneW,top+y*sceneH));
-            ctx.closePath();
-            const sg=ctx.createLinearGradient(left,top,left+sceneW*.42,baseY);
-            sg.addColorStop(0,'#FFFFFF');sg.addColorStop(.48,'#E6EEF0');sg.addColorStop(1,'#8FA5B1');
-            ctx.fillStyle=sg;ctx.fill();ctx.strokeStyle='rgba(255,255,255,.74)';ctx.lineWidth=.85;ctx.stroke();
-        });
-        drawRidge([[0,.89],[.13,.78],[.24,.83],[.38,.68],[.50,.79],[.65,.64],[.78,.81],[.91,.73],[1,.88]],
-            ridgeGradient(left,top,left+sceneW,baseY,[[0,'rgba(183,198,201,.72)'],[.28,'rgba(83,108,120,.94)'],[.68,'rgba(27,47,61,.98)'],[1,'rgba(5,15,24,1)']]),
-            'rgba(224,234,234,.38)',colourWithAlpha(palette.primary,.30));
-        ctx.beginPath();
-        [[.10,.66],[.19,.70],[.31,.34],[.39,.47],[.51,.12],[.60,.40],[.70,.29],[.80,.55],[.90,.47]]
-            .forEach(([x,y],i)=>i?ctx.lineTo(left+x*sceneW,top+y*sceneH):ctx.moveTo(left+x*sceneW,top+y*sceneH));
-        ctx.strokeStyle=applyGradient(ctx,left,top,left+sceneW,top+sceneH,
-            [[0,'rgba(255,255,255,.18)'],[.34,palette.secondary],[.72,palette.primary],[1,'rgba(12,26,39,.25)']]);
-        ctx.lineWidth=2.2;ctx.shadowColor=colourWithAlpha(palette.primary,.55);ctx.shadowBlur=9;ctx.stroke();
-        ctx.restore();
 
-        const valueText=shown>0?Math.round(shown).toLocaleString('de-AT'):'–';
-        const plaqueW=Math.min(148,size.width*.43),plaqueH=43;
-        const plaqueX=centerX-plaqueW/2,plaqueY=Math.min(size.height-112,baseY-3);
-        ctx.save();roundedPath(ctx,plaqueX,plaqueY,plaqueW,plaqueH,12);
-        const glass=ctx.createLinearGradient(plaqueX,plaqueY,plaqueX+plaqueW,plaqueY+plaqueH);
-        glass.addColorStop(0,'rgba(240,246,247,.92)');glass.addColorStop(.20,colourWithAlpha(palette.secondary,.92));
-        glass.addColorStop(.52,'rgba(19,34,47,.97)');glass.addColorStop(1,'rgba(4,12,20,.98)');
-        ctx.fillStyle=glass;ctx.shadowColor='rgba(0,0,0,.68)';ctx.shadowBlur=11;ctx.fill();
-        ctx.strokeStyle='rgba(255,255,255,.76)';ctx.lineWidth=1.05;ctx.stroke();
-        ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=editorFont(21,900);ctx.fillStyle='#FFFFFF';
-        ctx.shadowColor='rgba(0,0,0,.8)';ctx.shadowBlur=4;ctx.fillText(valueText,centerX,plaqueY+19);
-        ctx.shadowBlur=0;ctx.font=editorFont(8,850);ctx.fillStyle='#E8E0CD';ctx.fillText(unit||'hm/km',centerX,plaqueY+34);
-        ctx.restore();
-        ctx.font=editorFont(8.5,800);ctx.fillStyle=palette.text;ctx.textAlign='center';ctx.textBaseline='middle';
-        ctx.fillText(selectedMonth!==null&&selectedMonth>=0?MONTH_NAMES[selectedMonth]:'Jahresdurchschnitt',
-            centerX,Math.min(size.height-78,plaqueY+plaqueH+13));
-        drawTrendStrip(ctx,canvas,values,palette,selectedMonth,category||'gradient');
-        canvas.__premiumReliefGeometry={x:left,y:top,width:sceneW,height:sceneH};
+        // Schneekappen und feine Firnlinien auf beiden Gipfeln.
+        const snowPatches=[
+            [[.365,.245],[.392,.315],[.455,.475],[.423,.421],[.401,.435],[.381,.345]],
+            [[.685,.17],[.715,.275],[.785,.48],[.748,.414],[.725,.43],[.704,.315]]
+        ];
+        snowPatches.forEach((points,index)=>{
+            ctx.beginPath();ctx.moveTo(px(points[0][0]),py(points[0][1]));
+            points.slice(1).forEach(([x,y])=>ctx.lineTo(px(x),py(y)));
+            ctx.closePath();
+            ctx.fillStyle=makeGradient(left,top,left+sceneW*.48,baseY,[
+                [0,'rgba(255,255,255,.98)'],[.46,'rgba(224,236,238,.94)'],[1,'rgba(126,153,166,.72)']
+            ]);
+            ctx.fill();ctx.strokeStyle='rgba(255,255,255,.78)';ctx.lineWidth=.85;ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(px(points[0][0]+.008),py(points[0][1]+.018));
+            ctx.lineTo(px(points[1][0]),py(points[1][1]+.035));
+            ctx.lineTo(px(points[2][0]-.018),py(points[2][1]-.035));
+            ctx.strokeStyle='rgba(255,255,255,.68)';ctx.lineWidth=.8;ctx.stroke();
+        });
+
+        // Schmale Lichtkanten betonen den Grat, ohne die Silhouette grafisch wirken zu lassen.
+        ctx.beginPath();
+        ctx.moveTo(px(.145),py(.76));
+        ctx.quadraticCurveTo(px(.205),py(.66),px(.255),py(.51));
+        ctx.quadraticCurveTo(px(.302),py(.37),px(.365),py(.245));
+        ctx.quadraticCurveTo(px(.405),py(.34),px(.455),py(.475));
+        ctx.quadraticCurveTo(px(.505),py(.59),px(.555),py(.49));
+        ctx.quadraticCurveTo(px(.615),py(.36),px(.685),py(.17));
+        ctx.quadraticCurveTo(px(.735),py(.31),px(.785),py(.48));
+        ctx.strokeStyle=makeGradient(left,top,left+sceneW,baseY,[
+            [0,'rgba(255,255,255,.42)'],[.35,palette.secondary],[.72,palette.primary],[1,'rgba(12,26,39,.18)']
+        ]);
+        ctx.lineWidth=1.8;ctx.shadowColor=colourWithAlpha(palette.primary,.38);ctx.shadowBlur=7;ctx.stroke();ctx.shadowBlur=0;
+
+        // Der Anstiegspfeil wächst vom Fußpunkt entlang der linken Flanke bis zur wertabhängigen Höhe.
+        const startX=px(.145),startY=py(.76);
+        const summitX=px(.365),summitY=py(.245);
+        const arrowProgress=ratio*ease;
+        const endX=startX+(summitX-startX)*arrowProgress;
+        const endY=startY+(summitY-startY)*arrowProgress;
+        const dx=endX-startX,dy=endY-startY;
+        const arrowLength=Math.hypot(dx,dy);
+        const arrowAngle=Math.atan2(dy,dx);
+        if(arrowLength>1.5){
+            ctx.save();
+            ctx.lineCap='round';ctx.lineJoin='round';
+            ctx.beginPath();ctx.moveTo(startX,startY);ctx.lineTo(endX,endY);
+            ctx.strokeStyle='rgba(0,0,0,.78)';ctx.lineWidth=8;ctx.shadowColor='rgba(0,0,0,.65)';ctx.shadowBlur=7;ctx.stroke();
+            ctx.beginPath();ctx.moveTo(startX,startY);ctx.lineTo(endX,endY);
+            ctx.strokeStyle=makeGradient(startX,startY,endX,endY,[
+                [0,'#263743'],[.28,'#DDE7EA'],[.56,'#718792'],[.82,'#F7FAFA'],[1,'#AABAC1']
+            ]);
+            ctx.lineWidth=4.2;ctx.shadowBlur=0;ctx.stroke();
+            ctx.beginPath();ctx.moveTo(startX,startY-1.2);ctx.lineTo(endX,endY-1.2);
+            ctx.strokeStyle='rgba(255,255,255,.78)';ctx.lineWidth=.75;ctx.stroke();
+            // Pfeilspitze zeigt tangential entlang der Flanke bergauf.
+            const head=Math.max(8,Math.min(15,arrowLength*.27));
+            ctx.translate(endX,endY);ctx.rotate(arrowAngle);
+            ctx.beginPath();ctx.moveTo(head*.72,0);ctx.lineTo(-head*.62,-head*.55);
+            ctx.lineTo(-head*.34,0);ctx.lineTo(-head*.62,head*.55);ctx.closePath();
+            const headMetal=ctx.createLinearGradient(0,-head*.55,0,head*.55);
+            headMetal.addColorStop(0,'#FFF3EE');headMetal.addColorStop(.38,'#D94B49');
+            headMetal.addColorStop(1,'#761D2A');
+            ctx.fillStyle=headMetal;ctx.shadowColor='rgba(0,0,0,.62)';ctx.shadowBlur=4;ctx.fill();
+            ctx.strokeStyle='rgba(255,255,255,.82)';ctx.lineWidth=.7;ctx.stroke();
+            ctx.restore();
+
+            // Wert und Einheit sitzen direkt auf dem Pfeilschaft und folgen seiner Neigung.
+            if(arrowLength>35){
+                const labelX=startX+dx*.52,labelY=startY+dy*.52;
+                ctx.save();ctx.translate(labelX,labelY);ctx.rotate(arrowAngle);
+                const labelText=Math.round(shown*ease).toLocaleString('de-AT')+' '+(unit||'hm/h');
+                ctx.font=editorFont(Math.max(8,Math.min(10,sceneW*.027)),900);
+                const labelWidth=ctx.measureText(labelText).width+12,labelHeight=17;
+                roundedPath(ctx,-labelWidth/2,-labelHeight/2,labelWidth,labelHeight,5);
+                ctx.fillStyle='rgba(5,15,24,.88)';ctx.shadowColor='rgba(0,0,0,.65)';ctx.shadowBlur=5;ctx.fill();
+                ctx.strokeStyle='rgba(226,237,240,.78)';ctx.lineWidth=.75;ctx.stroke();
+                ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#FFFFFF';
+                ctx.shadowBlur=1.5;ctx.fillText(labelText,0,.3,labelWidth-7);
+                ctx.restore();
+            }
+        } else {
+            ctx.beginPath();ctx.arc(startX,startY,2.5,0,Math.PI*2);
+            ctx.fillStyle='#EAF1F3';ctx.fill();
+        }
+
+        drawTrendStrip(ctx,canvas,values,palette,selectedMonth,category||'ascentRate');
+        canvas.__premiumReliefGeometry={x:left,y:top,width:sceneW,height:sceneH,arrow:{startX,startY,endX,endY,ratio}};
     }
 
     function renderAscentArrowFrame(canvas, values, selectedMonth, value, introProgress, unit, category) {
@@ -2735,6 +2815,16 @@
                 const tab = event.target.closest('[data-chart]');
                 if (tab && tab.dataset.chart !== 'performanceIndex' && compass) {
                     compass.__performanceIndexWasActive = false;
+                }
+            }, true);
+        }
+        const ascentRateLifecycle = canvasById('ascent-rate-canvas');
+        if (chartTabs && chartTabs.dataset.ascentRateLifecycle !== 'true') {
+            chartTabs.dataset.ascentRateLifecycle = 'true';
+            chartTabs.addEventListener('click', event => {
+                const tab = event.target.closest('[data-chart]');
+                if (tab && tab.dataset.chart !== 'ascentRate' && ascentRateLifecycle) {
+                    ascentRateLifecycle.__ascentRateWasActive = false;
                 }
             }, true);
         }
