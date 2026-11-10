@@ -266,50 +266,26 @@
 
         if (config.headerUnit === 'averageSteps') {
             const valueText = total || '–';
-            const unitText = 'durchschnittliche Schritte';
+            const unitText = 'Ø Schritte';
             const valueFont = editorFont(12, 800);
             const unitFont = editorFont(8, 700);
             ctx.font = valueFont;
             const valueWidth = ctx.measureText(valueText).width;
             ctx.font = unitFont;
             const unitWidth = ctx.measureText(unitText).width;
-            const iconWidth = 17;
-            const gap = 5;
-            const totalWidth = valueWidth + gap + iconWidth + 4 + unitWidth;
-            let x = width - 22 - totalWidth;
+            const gap = 6;
+            const totalWidth = valueWidth + gap + unitWidth;
+            const x = width - 22 - totalWidth;
 
             ctx.textAlign = 'left';
             ctx.font = valueFont;
             ctx.fillStyle = palette.primary;
             ctx.fillText(valueText, x, 25);
-            x += valueWidth + gap;
-
-            // Dezentes, metallisch gezeichnetes Fußspuren-Symbol.
-            ctx.save();
-            ctx.translate(x, 12);
-            ctx.fillStyle = palette.secondary;
-            ctx.strokeStyle = 'rgba(255,255,255,.72)';
-            ctx.lineWidth = .65;
-            [[3.5, 6.5, -.32], [11.5, 2.5, .32]].forEach(([fx, fy, rotation]) => {
-                ctx.save();
-                ctx.translate(fx, fy);
-                ctx.rotate(rotation);
-                ctx.beginPath();
-                ctx.ellipse(0, 2.2, 2.1, 3.5, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.arc(-.8, -2.1, 1.05, 0, Math.PI * 2);
-                ctx.arc(.8, -1.7, .85, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            });
-            ctx.restore();
-            x += iconWidth + 4;
 
             ctx.font = unitFont;
-            ctx.fillStyle = palette.muted;
-            ctx.fillText(unitText, x, 24, Math.max(40, width - 22 - x));
+            ctx.fillStyle = palette.primary;
+            ctx.fillText(unitText, x + valueWidth + gap, 24, Math.max(40, width - 22 - (x + valueWidth + gap)));
+
         } else {
             ctx.textAlign = 'right';
             ctx.fillStyle = palette.primary;
