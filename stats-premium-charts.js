@@ -8,20 +8,6 @@
     const MONTH_NAMES = ['Jänner', 'Februar', 'März', 'April', 'Mai', 'Juni',
         'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
-    // Reales Höhenlinienmaterial der Lienzer Dolomiten aus den bereits vorhandenen App-Assets.
-    const TERRAIN_FINE_IMAGE = new Image();
-    const TERRAIN_INDEX_IMAGE = new Image();
-    const redrawTerrainCharts = () => {
-        const gradient = canvasById('gradient-canvas');
-        const ascent = canvasById('ascent-rate-canvas');
-        if (gradient && gradient.classList.contains('active-chart-canvas')) drawGradientDiagram();
-        if (ascent && ascent.classList.contains('active-chart-canvas')) drawAscentRateDiagram();
-    };
-    TERRAIN_FINE_IMAGE.onload = redrawTerrainCharts;
-    TERRAIN_INDEX_IMAGE.onload = redrawTerrainCharts;
-    TERRAIN_FINE_IMAGE.src = 'assets/topography/lienzer-dolomiten-contours-fine.svg';
-    TERRAIN_INDEX_IMAGE.src = 'assets/topography/lienzer-dolomiten-contours-index.svg';
-
     // Freigestellter alpiner Leder-Bergschuh in Seitenansicht, Spitze nach rechts.
     // Hoher Schaft, Knöchelstütze, Metallhaken und grobstollige Bergsohle.
     const STEPS_SHOE_IMAGE = new Image();
@@ -221,6 +207,21 @@
     };
     const animatedGaugeValues = { performanceIndex: null, speed: null, gradient: null, ascentRate: null };
     const gaugeAnimationFrames = { performanceIndex: null, speed: null };
+    const chartIntroFrames = { gradient: null, ascentRate: null };
+
+    function animateChartIntro(canvas, type, renderFrame) {
+        if (!window.requestAnimationFrame) { renderFrame(1); return; }
+        if (chartIntroFrames[type] && window.cancelAnimationFrame) window.cancelAnimationFrame(chartIntroFrames[type]);
+        const started = performance.now(), duration = 1050;
+        const step = now => {
+            const progress = Math.min(1, (now - started) / duration);
+            renderFrame(progress);
+            if (progress < 1) chartIntroFrames[type] = window.requestAnimationFrame(step);
+            else chartIntroFrames[type] = null;
+        };
+        renderFrame(0);
+        chartIntroFrames[type] = window.requestAnimationFrame(step);
+    }
 
     function activeMonthValue(values, month) {
         return month !== null && month >= 0 && month < 12 ? (Number(values[month]) || 0) : null;
@@ -1172,69 +1173,51 @@
 
 
     function drawGradientDiagram() {
-        const data = getFilteredTours();
-        const sums = Array(12).fill(0), counts = Array(12).fill(0);
-        data.forEach(entry => {
-            const month = monthOf(entry);
-            if (month === null) return;
-            const ascent = getAdjustedAscent(entry), distance = getAdjustedDistance(entry);
-            if (ascent > 0 && distance > 0) { sums[month] += ascent / distance; counts[month]++; }
-        });
-        const values = sums.map((sum, index) => counts[index] ? sum / counts[index] : 0);
-        const valid = values.filter(value => value > 0);
-        const average = typeof getBoundedAverage === 'function' ? getBoundedAverage(valid) || 0 :
-            (valid.length ? valid.reduce((sum, value) => sum + value, 0) / valid.length : 0);
-        const canvas = canvasById('gradient-canvas');
-        if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
-        const isActive = canvas.classList.contains('active-chart-canvas');
-        const yearSelect = document.getElementById('stats-year-select');
-        const yearFilter = yearSelect ? String(yearSelect.value || 'all') : 'all';
-        if (isActive && (!canvas.__gradientWasActive || canvas.__gradientYearFilter !== yearFilter)) {
-            selectedMonths.gradient = null;
-            animatedGaugeValues.gradient = average;
-        }
-        canvas.__gradientWasActive = isActive;
-        canvas.__gradientYearFilter = yearFilter;
-        const selected = selectedMonths.gradient;
-        const target = selected === null ? average : (Number(values[selected]) || 0);
-        canvas.__premiumChartData = { values, unit: 'hm/km', key: 'gradient',
-            formatter: value => Math.round(value) + ' hm/km' };
+        const data=getFilteredTours(),sums=Array(12).fill(0),counts=Array(12).fill(0);
+        data.forEach(entry=>{const month=monthOf(entry);if(month===null)return;
+            const ascent=getAdjustedAscent(entry),distance=getAdjustedDistance(entry);
+            if(ascent>0&&distance>0){sums[month]+=ascent/distance;counts[month]++;}});
+        const values=sums.map((sum,index)=>counts[index]?sum/counts[index]:0),valid=values.filter(value=>value>0);
+        const average=typeof getBoundedAverage==='function'?getBoundedAverage(valid)||0:
+            (valid.length?valid.reduce((sum,value)=>sum+value,0)/valid.length:0);
+        const canvas=canvasById('gradient-canvas');
+        if(!canvas||typeof resizeCanvasToDisplaySize!=='function')return;
+        const isActive=canvas.classList.contains('active-chart-canvas');
+        const yearSelect=document.getElementById('stats-year-select'),yearFilter=yearSelect?String(yearSelect.value||'all'):'all';
+        if(isActive&&(!canvas.__gradientWasActive||canvas.__gradientYearFilter!==yearFilter)){
+            selectedMonths.gradient=null;animatedGaugeValues.gradient=0;}
+        canvas.__gradientWasActive=isActive;canvas.__gradientYearFilter=yearFilter;
+        const selected=selectedMonths.gradient,target=selected===null?average:(Number(values[selected])||0);
+        canvas.__premiumChartData={values,unit:'hm/km',key:'gradient',formatter:value=>Math.round(value)+' hm/km'};
         resizeCanvasToDisplaySize(canvas);
-        renderGradientReliefFrame(canvas, values, selected, target);
-        animatedGaugeValues.gradient = target;
+        const render=progress=>renderGradientReliefFrame(canvas,values,selected,target,progress);
+        if(isActive&&!canvas.__gradientIntroPlayed){canvas.__gradientIntroPlayed=true;animateChartIntro(canvas,'gradient',render);}
+        else render(1);
+        animatedGaugeValues.gradient=target;
     }
 
     function drawAscentRateDiagram() {
-        const data = getFilteredTours();
-        const sums = Array(12).fill(0), counts = Array(12).fill(0);
-        data.forEach(entry => {
-            const month = monthOf(entry);
-            if (month === null) return;
-            const ascent = getAdjustedAscent(entry), hours = getAdjustedTimeHours(entry);
-            if (ascent > 0 && hours > 0) { sums[month] += ascent / hours; counts[month]++; }
-        });
-        const values = sums.map((sum, index) => counts[index] ? sum / counts[index] : 0);
-        const valid = values.filter(value => value > 0);
-        const average = typeof getBoundedAverage === 'function' ? getBoundedAverage(valid) || 0 :
-            (valid.length ? valid.reduce((sum, value) => sum + value, 0) / valid.length : 0);
-        const canvas = canvasById('ascent-rate-canvas');
-        if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
-        const isActive = canvas.classList.contains('active-chart-canvas');
-        const yearSelect = document.getElementById('stats-year-select');
-        const yearFilter = yearSelect ? String(yearSelect.value || 'all') : 'all';
-        if (isActive && (!canvas.__ascentRateWasActive || canvas.__ascentRateYearFilter !== yearFilter)) {
-            selectedMonths.ascentRate = null;
-            animatedGaugeValues.ascentRate = average;
-        }
-        canvas.__ascentRateWasActive = isActive;
-        canvas.__ascentRateYearFilter = yearFilter;
-        const selected = selectedMonths.ascentRate;
-        const target = selected === null ? average : (Number(values[selected]) || 0);
-        canvas.__premiumChartData = { values, unit: 'hm/h', key: 'ascentRate',
-            formatter: value => Math.round(value) + ' hm/h' };
+        const data=getFilteredTours(),sums=Array(12).fill(0),counts=Array(12).fill(0);
+        data.forEach(entry=>{const month=monthOf(entry);if(month===null)return;
+            const ascent=getAdjustedAscent(entry),hours=getAdjustedTimeHours(entry);
+            if(ascent>0&&hours>0){sums[month]+=ascent/hours;counts[month]++;}});
+        const values=sums.map((sum,index)=>counts[index]?sum/counts[index]:0),valid=values.filter(value=>value>0);
+        const average=typeof getBoundedAverage==='function'?getBoundedAverage(valid)||0:
+            (valid.length?valid.reduce((sum,value)=>sum+value,0)/valid.length:0);
+        const canvas=canvasById('ascent-rate-canvas');
+        if(!canvas||typeof resizeCanvasToDisplaySize!=='function')return;
+        const isActive=canvas.classList.contains('active-chart-canvas');
+        const yearSelect=document.getElementById('stats-year-select'),yearFilter=yearSelect?String(yearSelect.value||'all'):'all';
+        if(isActive&&(!canvas.__ascentRateWasActive||canvas.__ascentRateYearFilter!==yearFilter)){
+            selectedMonths.ascentRate=null;animatedGaugeValues.ascentRate=0;}
+        canvas.__ascentRateWasActive=isActive;canvas.__ascentRateYearFilter=yearFilter;
+        const selected=selectedMonths.ascentRate,target=selected===null?average:(Number(values[selected])||0);
+        canvas.__premiumChartData={values,unit:'hm/h',key:'ascentRate',formatter:value=>Math.round(value)+' hm/h'};
         resizeCanvasToDisplaySize(canvas);
-        renderAscentArrowFrame(canvas, values, selected, target);
-        animatedGaugeValues.ascentRate = target;
+        const render=progress=>renderAscentArrowFrame(canvas,values,selected,target,progress);
+        if(isActive&&!canvas.__ascentRateIntroPlayed){canvas.__ascentRateIntroPlayed=true;animateChartIntro(canvas,'ascentRate',render);}
+        else render(1);
+        animatedGaugeValues.ascentRate=target;
     }
 
     function drawAverageStepsDiagram() {
@@ -1673,217 +1656,180 @@
         ctx.restore();
     }
 
-    function renderGradientReliefFrame(canvas, values, selectedMonth, value) {
-        const ctx = canvas.getContext('2d'), size = logicalSize(canvas), palette = chartPalette();
-        ctx.clearRect(0, 0, size.width, size.height);
-        drawInstrumentSurface(ctx, size.width, size.height, palette);
-        const valid = values.filter(number => Number.isFinite(number) && number > 0);
-        const max = Math.max(1, ...valid);
-        const ratio = Math.max(0, Math.min(1, (Number(value) || 0) / max));
+    function renderGradientReliefFrame(canvas, values, selectedMonth, value, introProgress) {
+        const ctx=canvas.getContext('2d'),size=logicalSize(canvas),palette=chartPalette();
+        ctx.clearRect(0,0,size.width,size.height);
+        drawInstrumentSurface(ctx,size.width,size.height,palette);
+        const progress=Math.max(0,Math.min(1,Number.isFinite(introProgress)?introProgress:1));
+        const ease=1-Math.pow(1-progress,3);
+        const valid=values.filter(number=>Number.isFinite(number)&&number>0);
+        const max=Math.max(1,...valid);
+        const ratio=Math.max(0,Math.min(1,(Number(value)||0)/max));
+        const shown=(Number(value)||0)*ease;
+        const sceneW=Math.min(size.width*.90,370),sceneH=Math.min(size.height*.62,250);
+        const left=(size.width-sceneW)/2,top=Math.max(12,(size.height-92-sceneH)*.40);
+        const baseY=top+sceneH*.88,centerX=size.width/2;
+        ctx.save();
+        ctx.globalAlpha=ease;
+        ctx.translate(centerX,baseY);
+        ctx.scale(.88+.12*ease,.88+.12*ease);
+        ctx.translate(-centerX,-baseY);
 
-        const mapHeight = Math.min(size.height * .65, 264);
-        const mapWidth = mapHeight * (661 / 871);
-        const mapX = (size.width - mapWidth) / 2;
-        const mapY = Math.max(8, (size.height - 72 - mapHeight) * .43);
-        const centerX = size.width / 2;
-        const centerY = mapY + mapHeight * .53;
-        const traceTerrainBoundary = () => {
-            ctx.beginPath();
-            ctx.moveTo(mapX + mapWidth * .17, mapY + mapHeight * .96);
-            ctx.bezierCurveTo(mapX + mapWidth * .04, mapY + mapHeight * .84,
-                mapX + mapWidth * .02, mapY + mapHeight * .69, mapX + mapWidth * .09, mapY + mapHeight * .57);
-            ctx.bezierCurveTo(mapX + mapWidth * .02, mapY + mapHeight * .43,
-                mapX + mapWidth * .08, mapY + mapHeight * .31, mapX + mapWidth * .20, mapY + mapHeight * .25);
-            ctx.bezierCurveTo(mapX + mapWidth * .20, mapY + mapHeight * .11,
-                mapX + mapWidth * .34, mapY + mapHeight * .06, mapX + mapWidth * .43, mapY + mapHeight * .20);
-            ctx.bezierCurveTo(mapX + mapWidth * .52, mapY + mapHeight * .02,
-                mapX + mapWidth * .65, mapY + mapHeight * .09, mapX + mapWidth * .67, mapY + mapHeight * .26);
-            ctx.bezierCurveTo(mapX + mapWidth * .82, mapY + mapHeight * .14,
-                mapX + mapWidth * .94, mapY + mapHeight * .26, mapX + mapWidth * .88, mapY + mapHeight * .42);
-            ctx.bezierCurveTo(mapX + mapWidth * 1.01, mapY + mapHeight * .55,
-                mapX + mapWidth * .92, mapY + mapHeight * .72, mapX + mapWidth * .81, mapY + mapHeight * .76);
-            ctx.bezierCurveTo(mapX + mapWidth * .87, mapY + mapHeight * .91,
-                mapX + mapWidth * .70, mapY + mapHeight * .99, mapX + mapWidth * .59, mapY + mapHeight * .91);
-            ctx.bezierCurveTo(mapX + mapWidth * .47, mapY + mapHeight * 1.02,
-                mapX + mapWidth * .34, mapY + mapHeight * .91, mapX + mapWidth * .27, mapY + mapHeight * .97);
-            ctx.closePath();
+        const ridgeGradient=(x1,y1,x2,y2,stops)=>{
+            const g=ctx.createLinearGradient(x1,y1,x2,y2);
+            stops.forEach(([p,c])=>g.addColorStop(p,c));
+            return g;
+        };
+        const drawRidge=(points,fill,stroke,shadow)=>{
+            ctx.beginPath();ctx.moveTo(left+points[0][0]*sceneW,baseY);
+            points.forEach(([x,y])=>ctx.lineTo(left+x*sceneW,top+y*sceneH));
+            ctx.lineTo(left+points[points.length-1][0]*sceneW,baseY);ctx.closePath();
+            ctx.fillStyle=fill;ctx.shadowColor=shadow||'rgba(0,0,0,.35)';
+            ctx.shadowBlur=12;ctx.shadowOffsetY=5;ctx.fill();ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+            if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.15;ctx.stroke();}
         };
 
-        // Organische, alpine Reliefsilhouette. Ihre Außenkante ist die äußerste Höhenlinie;
-        // darunter liegen die originalen, unregelmäßigen Lienzer-Dolomiten-Konturen.
-        ctx.save();
-        traceTerrainBoundary();
-        const base = ctx.createLinearGradient(mapX, mapY, mapX + mapWidth, mapY + mapHeight);
-        base.addColorStop(0, 'rgba(235,241,242,.94)');
-        base.addColorStop(.14, colourWithAlpha(palette.secondary, .92));
-        base.addColorStop(.42, colourWithAlpha(palette.primary, .74));
-        base.addColorStop(.72, 'rgba(23,42,56,.96)');
-        base.addColorStop(1, 'rgba(4,12,20,.99)');
-        ctx.fillStyle = base;
-        ctx.shadowColor = colourWithAlpha(palette.primary, .42);
-        ctx.shadowBlur = 19;
-        ctx.shadowOffsetY = 7;
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetY = 0;
-        traceTerrainBoundary();
-        ctx.clip();
+        // Mehrere räumlich gestaffelte alpine Grate statt einer Karten-/Höhenlinienfläche.
+        drawRidge([[0,.70],[.12,.54],[.22,.63],[.35,.39],[.45,.55],[.58,.30],[.69,.52],[.82,.42],[1,.68]],
+            ridgeGradient(left,top,left+sceneW,baseY,[[0,'rgba(119,145,160,.62)'],[.55,'rgba(56,79,96,.82)'],[1,'rgba(18,34,48,.94)']]),
+            'rgba(205,220,226,.24)','rgba(4,12,20,.2)');
+        drawRidge([[0,.78],[.10,.66],[.19,.70],[.31,.34],[.39,.47],[.51,.12],[.60,.40],[.70,.29],[.80,.55],[.90,.47],[1,.76]],
+            ridgeGradient(left,top,left+sceneW,baseY,[[0,'#DCE4E5'],[.20,'#899BA4'],[.42,'#43596A'],[.72,'#1E3446'],[1,'#091722']]),
+            'rgba(241,247,245,.68)',colourWithAlpha(palette.primary,.38));
 
-        // Topografische Linien werden nicht künstlich vervielfacht: Das reale Kartenrelief
-        // liefert Form, Verlauf und Verzweigungen. Der Monatswert steuert Licht und Kontrast.
-        const detailAlpha = .50 + ratio * .38;
-        const indexAlpha = .42 + ratio * .34;
-        drawTerrainTexture(ctx, TERRAIN_FINE_IMAGE, mapX, mapY, mapWidth, mapHeight,
-            ['#FFF9E9', palette.secondary, palette.primary], detailAlpha, 8);
-        drawTerrainTexture(ctx, TERRAIN_INDEX_IMAGE, mapX, mapY, mapWidth, mapHeight,
-            ['#FFFFFF', palette.primary, '#718391'], indexAlpha, 10);
-
-        // Schräges Streiflicht erzeugt die plastische Reliefwirkung, ohne die Höhenlinien zu überdecken.
-        const light = ctx.createLinearGradient(mapX, mapY, mapX + mapWidth, mapY + mapHeight);
-        light.addColorStop(0, 'rgba(255,255,255,.20)');
-        light.addColorStop(.28, 'rgba(255,255,255,.035)');
-        light.addColorStop(.68, 'rgba(0,0,0,.015)');
-        light.addColorStop(1, 'rgba(0,0,0,.34)');
-        ctx.fillStyle = light;
-        ctx.fillRect(mapX, mapY, mapWidth, mapHeight);
-        ctx.restore();
-
-        traceTerrainBoundary();
-        ctx.strokeStyle = applyGradient(ctx, mapX, mapY, mapX + mapWidth, mapY + mapHeight, [
-            [0, '#FFFDF2'], [.24, palette.secondary], [.62, palette.primary], [1, '#354756']
-        ]);
-        ctx.lineWidth = 2.1;
-        ctx.shadowColor = colourWithAlpha(palette.primary, .75);
-        ctx.shadowBlur = 10;
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-
-        // Wertplakette sitzt im Relief und übernimmt dessen Metall-/Glasmaterial.
-        const shown = Number(value) || 0;
-        const valueText = shown > 0 ? Math.round(shown).toLocaleString('de-AT') : '–';
-        const plaqueWidth = Math.min(150, mapWidth * .74);
-        const plaqueHeight = 48;
-        const plaqueX = centerX - plaqueWidth / 2;
-        const plaqueY = centerY - plaqueHeight / 2;
-        ctx.save();
-        roundedPath(ctx, plaqueX, plaqueY, plaqueWidth, plaqueHeight, 13);
-        const glass = ctx.createLinearGradient(plaqueX, plaqueY, plaqueX + plaqueWidth, plaqueY + plaqueHeight);
-        glass.addColorStop(0, 'rgba(235,242,246,.90)');
-        glass.addColorStop(.18, colourWithAlpha(palette.secondary, .88));
-        glass.addColorStop(.55, 'rgba(17,31,43,.95)');
-        glass.addColorStop(1, 'rgba(4,12,20,.96)');
-        ctx.fillStyle = glass;
-        ctx.shadowColor = 'rgba(0,0,0,.7)'; ctx.shadowBlur = 12; ctx.fill();
-        ctx.strokeStyle = 'rgba(255,255,255,.72)'; ctx.lineWidth = 1.15; ctx.stroke();
+        const facets=[
+            [[.31,.34],[.39,.47],[.43,.77],[.22,.83]],
+            [[.31,.34],[.51,.12],[.46,.52],[.43,.77]],
+            [[.51,.12],[.60,.40],[.69,.83],[.46,.52]],
+            [[.60,.40],[.70,.29],[.80,.55],[.69,.83]],
+            [[.10,.66],[.31,.34],[.22,.83],[0,.90]],
+            [[.70,.29],[.90,.47],[1,.82],[.80,.55]]
+        ];
+        facets.forEach((points,index)=>{
+            ctx.beginPath();ctx.moveTo(left+points[0][0]*sceneW,top+points[0][1]*sceneH);
+            points.slice(1).forEach(([x,y])=>ctx.lineTo(left+x*sceneW,top+y*sceneH));
+            ctx.closePath();
+            const lightSide=index===1||index===3||index===4;
+            ctx.fillStyle=lightSide
+                ?ridgeGradient(left,top,left+sceneW*.55,baseY,[[0,'rgba(250,250,241,.42)'],[1,'rgba(170,190,196,.035)']])
+                :'rgba(2,13,23,.30)';
+            ctx.fill();
+        });
+        const snow=[
+            [[.31,.34],[.35,.40],[.39,.47],[.365,.445],[.345,.455]],
+            [[.51,.12],[.55,.25],[.60,.40],[.565,.34],[.545,.36],[.525,.26]],
+            [[.70,.29],[.735,.39],[.80,.55],[.765,.49],[.745,.50],[.72,.40]]
+        ];
+        snow.forEach(points=>{
+            ctx.beginPath();ctx.moveTo(left+points[0][0]*sceneW,top+points[0][1]*sceneH);
+            points.slice(1).forEach(([x,y])=>ctx.lineTo(left+x*sceneW,top+y*sceneH));
+            ctx.closePath();
+            const sg=ctx.createLinearGradient(left,top,left+sceneW*.42,baseY);
+            sg.addColorStop(0,'#FFFFFF');sg.addColorStop(.48,'#E6EEF0');sg.addColorStop(1,'#8FA5B1');
+            ctx.fillStyle=sg;ctx.fill();ctx.strokeStyle='rgba(255,255,255,.74)';ctx.lineWidth=.85;ctx.stroke();
+        });
+        drawRidge([[0,.89],[.13,.78],[.24,.83],[.38,.68],[.50,.79],[.65,.64],[.78,.81],[.91,.73],[1,.88]],
+            ridgeGradient(left,top,left+sceneW,baseY,[[0,'rgba(183,198,201,.72)'],[.28,'rgba(83,108,120,.94)'],[.68,'rgba(27,47,61,.98)'],[1,'rgba(5,15,24,1)']]),
+            'rgba(224,234,234,.38)',colourWithAlpha(palette.primary,.30));
         ctx.beginPath();
-        ctx.moveTo(plaqueX + 9, plaqueY + 3);
-        ctx.lineTo(plaqueX + plaqueWidth - 9, plaqueY + 3);
-        ctx.strokeStyle = 'rgba(255,255,255,.30)'; ctx.lineWidth = .8; ctx.stroke();
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.font = editorFont(23, 900); ctx.fillStyle = '#FFFFFF';
-        ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 5;
-        ctx.fillText(valueText, centerX, centerY - 3);
-        ctx.shadowBlur = 0;
-        ctx.font = editorFont(8.5, 850); ctx.fillStyle = '#F1E5C9';
-        ctx.fillText('hm/km', centerX, centerY + 17);
+        [[.10,.66],[.19,.70],[.31,.34],[.39,.47],[.51,.12],[.60,.40],[.70,.29],[.80,.55],[.90,.47]]
+            .forEach(([x,y],i)=>i?ctx.lineTo(left+x*sceneW,top+y*sceneH):ctx.moveTo(left+x*sceneW,top+y*sceneH));
+        ctx.strokeStyle=applyGradient(ctx,left,top,left+sceneW,top+sceneH,
+            [[0,'rgba(255,255,255,.18)'],[.34,palette.secondary],[.72,palette.primary],[1,'rgba(12,26,39,.25)']]);
+        ctx.lineWidth=2.2;ctx.shadowColor=colourWithAlpha(palette.primary,.55);ctx.shadowBlur=9;ctx.stroke();
         ctx.restore();
 
-        ctx.font = editorFont(8.5, 800);
-        ctx.fillStyle = palette.text;
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(selectedMonth !== null && selectedMonth >= 0 ? MONTH_NAMES[selectedMonth] : 'Jahresdurchschnitt',
-            centerX, Math.min(size.height - 82, mapY + mapHeight + 7));
-        drawTrendStrip(ctx, canvas, values, palette, selectedMonth, 'gradient');
-        canvas.__premiumReliefGeometry = { x: mapX, y: mapY, width: mapWidth, height: mapHeight };
+        const valueText=shown>0?Math.round(shown).toLocaleString('de-AT'):'–';
+        const plaqueW=Math.min(148,size.width*.43),plaqueH=43;
+        const plaqueX=centerX-plaqueW/2,plaqueY=Math.min(size.height-112,baseY-3);
+        ctx.save();roundedPath(ctx,plaqueX,plaqueY,plaqueW,plaqueH,12);
+        const glass=ctx.createLinearGradient(plaqueX,plaqueY,plaqueX+plaqueW,plaqueY+plaqueH);
+        glass.addColorStop(0,'rgba(240,246,247,.92)');glass.addColorStop(.20,colourWithAlpha(palette.secondary,.92));
+        glass.addColorStop(.52,'rgba(19,34,47,.97)');glass.addColorStop(1,'rgba(4,12,20,.98)');
+        ctx.fillStyle=glass;ctx.shadowColor='rgba(0,0,0,.68)';ctx.shadowBlur=11;ctx.fill();
+        ctx.strokeStyle='rgba(255,255,255,.76)';ctx.lineWidth=1.05;ctx.stroke();
+        ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=editorFont(21,900);ctx.fillStyle='#FFFFFF';
+        ctx.shadowColor='rgba(0,0,0,.8)';ctx.shadowBlur=4;ctx.fillText(valueText,centerX,plaqueY+19);
+        ctx.shadowBlur=0;ctx.font=editorFont(8,850);ctx.fillStyle='#E8E0CD';ctx.fillText('hm/km',centerX,plaqueY+34);
+        ctx.restore();
+        ctx.font=editorFont(8.5,800);ctx.fillStyle=palette.text;ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(selectedMonth!==null&&selectedMonth>=0?MONTH_NAMES[selectedMonth]:'Jahresdurchschnitt',
+            centerX,Math.min(size.height-78,plaqueY+plaqueH+13));
+        drawTrendStrip(ctx,canvas,values,palette,selectedMonth,'gradient');
+        canvas.__premiumReliefGeometry={x:left,y:top,width:sceneW,height:sceneH};
     }
 
-    function renderAscentArrowFrame(canvas, values, selectedMonth, value) {
-        const ctx = canvas.getContext('2d'), size = logicalSize(canvas), palette = chartPalette();
-        ctx.clearRect(0, 0, size.width, size.height);
-        drawInstrumentSurface(ctx, size.width, size.height, palette);
-        const valid = values.filter(number => Number.isFinite(number) && number > 0);
-        const max = Math.max(1, ...valid);
-        const ratio = Math.max(0, Math.min(1, (Number(value) || 0) / max));
-        const angle = (12 + ratio * 42) * Math.PI / 180;
-        const cx = size.width * .5, cy = Math.min(size.height * .40, size.height - 138);
-        const length = Math.min(size.width * .78, 294);
-        const shaft = Math.max(24, Math.min(34, size.width * .09));
-        const head = Math.max(46, shaft * 1.72);
-        const tail = -length * .48, shoulder = length * .24, tip = length * .5;
+    function renderAscentArrowFrame(canvas, values, selectedMonth, value, introProgress) {
+        const ctx=canvas.getContext('2d'),size=logicalSize(canvas),palette=chartPalette();
+        ctx.clearRect(0,0,size.width,size.height);drawInstrumentSurface(ctx,size.width,size.height,palette);
+        const valid=values.filter(number=>Number.isFinite(number)&&number>0),max=Math.max(1,...valid);
+        const progress=Math.max(0,Math.min(1,Number.isFinite(introProgress)?introProgress:1));
+        const ease=1-Math.pow(1-progress,3);
+        const ratio=Math.max(0,Math.min(1,(Number(value)||0)/max));
+        const angle=((12+ratio*42)*Math.PI/180)*ease;
+        const cx=size.width*.5,cy=Math.min(size.height*.39,size.height-142);
+        const length=Math.min(size.width*.76,286),shaft=Math.max(13,Math.min(19,size.width*.052));
+        const head=Math.max(35,shaft*2.25),pivotX=cx-length*.34,pivotY=cy+Math.min(12,size.height*.025);
+        const tip=length*.66;
 
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(-angle);
-        // Mehrschichtiger, facettierter Pfeilkörper mit echter Fase und Tiefenkante.
-        ctx.beginPath();
-        ctx.moveTo(tail, -shaft * .5);
-        ctx.lineTo(shoulder, -shaft * .5);
-        ctx.lineTo(shoulder, -head * .5);
-        ctx.lineTo(tip, 0);
-        ctx.lineTo(shoulder, head * .5);
-        ctx.lineTo(shoulder, shaft * .5);
-        ctx.lineTo(tail, shaft * .5);
-        ctx.closePath();
-        const metal = ctx.createLinearGradient(0, -head * .5, 0, head * .5);
-        metal.addColorStop(0, '#FFFDF4');
-        metal.addColorStop(.13, '#D9E0E3');
-        metal.addColorStop(.28, palette.secondary);
-        metal.addColorStop(.54, palette.primary);
-        metal.addColorStop(.78, '#596B79');
-        metal.addColorStop(1, '#101D28');
-        ctx.fillStyle = metal;
-        ctx.shadowColor = colourWithAlpha(palette.primary, .5); ctx.shadowBlur = 18;
-        ctx.shadowOffsetY = 6; ctx.fill(); ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
-        ctx.strokeStyle = 'rgba(255,255,255,.82)'; ctx.lineWidth = 1.35; ctx.stroke();
+        // Kompassnadel mit festem Lagerpunkt am hinteren Ende und realistischer Zweifarb-Metallspitze.
+        ctx.save();ctx.translate(pivotX,pivotY);ctx.rotate(-angle);
+        ctx.beginPath();ctx.moveTo(-5,-shaft*.48);ctx.lineTo(tip-head*.18,-shaft*.48);
+        ctx.lineTo(tip-head*.50,-head*.50);ctx.lineTo(tip,0);
+        ctx.lineTo(tip-head*.50,head*.50);ctx.lineTo(tip-head*.18,shaft*.48);
+        ctx.lineTo(-5,shaft*.48);ctx.closePath();
+        const body=ctx.createLinearGradient(0,-head*.5,0,head*.5);
+        body.addColorStop(0,'#F9FBF8');body.addColorStop(.18,'#D4DEE2');body.addColorStop(.46,'#8999A2');
+        body.addColorStop(.52,'#344957');body.addColorStop(.82,'#182B39');body.addColorStop(1,'#07131D');
+        ctx.fillStyle=body;ctx.shadowColor='rgba(0,0,0,.68)';ctx.shadowBlur=13;ctx.shadowOffsetY=5;
+        ctx.fill();ctx.shadowBlur=0;ctx.shadowOffsetY=0;ctx.strokeStyle='rgba(255,255,255,.82)';ctx.lineWidth=1.25;ctx.stroke();
 
-        // Helle obere Fase und dunkle untere Facette geben dem Pfeil Volumen.
-        ctx.beginPath();
-        ctx.moveTo(tail + 5, -shaft * .39);
-        ctx.lineTo(shoulder - 7, -shaft * .39);
-        ctx.lineTo(shoulder - 7, -head * .39);
-        ctx.lineTo(tip - 9, 0);
-        ctx.lineTo(shoulder + 2, -shaft * .06);
-        ctx.lineTo(tail + 5, -shaft * .06);
-        ctx.closePath();
-        ctx.fillStyle = 'rgba(255,255,255,.24)'; ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(tail + 4, shaft * .18);
-        ctx.lineTo(shoulder - 5, shaft * .18);
-        ctx.lineTo(shoulder - 5, head * .35);
-        ctx.lineTo(tip - 9, 0);
-        ctx.lineTo(shoulder + 5, shaft * .43);
-        ctx.lineTo(tail + 4, shaft * .43);
-        ctx.closePath();
-        ctx.fillStyle = 'rgba(2,10,18,.30)'; ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(tail + 8, -shaft * .5 + 1.5);
-        ctx.lineTo(shoulder - 10, -shaft * .5 + 1.5);
-        ctx.strokeStyle = 'rgba(255,255,255,.64)'; ctx.lineWidth = 1.2; ctx.stroke();
+        ctx.beginPath();ctx.moveTo(tip,0);ctx.lineTo(tip-head*.50,-head*.50);
+        ctx.lineTo(tip-head*.18,-shaft*.12);ctx.lineTo(0,0);ctx.closePath();
+        const red=ctx.createLinearGradient(tip,0,tip-head*.45,-head*.5);
+        red.addColorStop(0,'#F8E4DC');red.addColorStop(.28,'#D94745');red.addColorStop(.72,'#A51F2B');red.addColorStop(1,'#5C1723');
+        ctx.fillStyle=red;ctx.fill();ctx.strokeStyle='rgba(255,232,222,.78)';ctx.lineWidth=.75;ctx.stroke();
 
-        // Integrierte Wertgravur: horizontal lesbar, aber an der Pfeilachse verankert.
-        const shown = Number(value) || 0;
-        const label = shown > 0 ? Math.round(shown).toLocaleString('de-AT') : '–';
-        const labelX = -length * .105;
-        ctx.save();
-        ctx.font = editorFont(15, 900);
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillStyle = 'rgba(8,17,25,.88)';
-        ctx.shadowColor = 'rgba(255,255,255,.30)'; ctx.shadowBlur = 1.5;
-        ctx.fillText(label, labelX, 1);
-        ctx.shadowBlur = 0;
-        const textWidth = ctx.measureText(label).width;
-        ctx.font = editorFont(8, 850);
-        ctx.fillStyle = 'rgba(8,17,25,.82)';
-        ctx.fillText('hm/h', labelX + textWidth / 2 + 16, 1);
-        ctx.restore();
-        ctx.restore();
+        ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(tip-head*.18,shaft*.12);
+        ctx.lineTo(tip-head*.50,head*.50);ctx.lineTo(tip,0);ctx.closePath();
+        const steel=ctx.createLinearGradient(tip,0,tip-head*.5,head*.5);
+        steel.addColorStop(0,'#FFFFFF');steel.addColorStop(.36,'#C5D0D5');
+        steel.addColorStop(.76,'#667985');steel.addColorStop(1,'#273B48');
+        ctx.fillStyle=steel;ctx.fill();ctx.strokeStyle='rgba(241,247,249,.60)';ctx.lineWidth=.7;ctx.stroke();
 
-        ctx.font = editorFont(9, 800); ctx.fillStyle = palette.text;
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(selectedMonth !== null && selectedMonth >= 0 ? MONTH_NAMES[selectedMonth] : 'Jahresdurchschnitt',
-            cx, cy + Math.min(82, size.height * .22));
-        drawTrendStrip(ctx, canvas, values, palette, selectedMonth, 'ascentRate');
-        canvas.__ascentArrowGeometry = { cx, cy, length, angle };
+        ctx.beginPath();ctx.moveTo(2,0);ctx.lineTo(tip-head*.48,-1);
+        ctx.strokeStyle='rgba(255,255,255,.58)';ctx.lineWidth=.9;ctx.stroke();
+        ctx.beginPath();ctx.moveTo(5,-shaft*.36);ctx.lineTo(tip-head*.25,-shaft*.36);
+        ctx.strokeStyle='rgba(255,255,255,.66)';ctx.lineWidth=1.05;ctx.stroke();
+
+        ctx.beginPath();ctx.arc(0,0,shaft*.93,0,Math.PI*2);
+        const bearing=ctx.createRadialGradient(-shaft*.28,-shaft*.32,1,0,0,shaft);
+        bearing.addColorStop(0,'#FFFFFF');bearing.addColorStop(.24,palette.secondary);
+        bearing.addColorStop(.58,'#586B78');bearing.addColorStop(1,'#07131D');
+        ctx.fillStyle=bearing;ctx.shadowColor=colourWithAlpha(palette.primary,.75);ctx.shadowBlur=9;
+        ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='rgba(255,255,255,.88)';ctx.lineWidth=1.1;ctx.stroke();
+        ctx.beginPath();ctx.arc(0,0,shaft*.30,0,Math.PI*2);ctx.fillStyle='#101D27';ctx.fill();
+        ctx.beginPath();ctx.arc(-shaft*.10,-shaft*.11,shaft*.09,0,Math.PI*2);
+        ctx.fillStyle='rgba(255,255,255,.92)';ctx.fill();ctx.restore();
+
+        const shown=(Number(value)||0)*ease,valueText=shown>0?Math.round(shown).toLocaleString('de-AT'):'–';
+        const plaqueW=Math.min(142,size.width*.42),plaqueH=38,plaqueX=cx-plaqueW/2;
+        const plaqueY=cy+Math.min(62,size.height*.17);
+        ctx.save();roundedPath(ctx,plaqueX,plaqueY,plaqueW,plaqueH,11);
+        const plate=ctx.createLinearGradient(plaqueX,plaqueY,plaqueX+plaqueW,plaqueY+plaqueH);
+        plate.addColorStop(0,'rgba(240,246,247,.88)');plate.addColorStop(.22,colourWithAlpha(palette.secondary,.88));
+        plate.addColorStop(.58,'rgba(16,31,43,.96)');plate.addColorStop(1,'rgba(4,12,20,.98)');
+        ctx.fillStyle=plate;ctx.shadowColor='rgba(0,0,0,.65)';ctx.shadowBlur=10;ctx.fill();
+        ctx.strokeStyle='rgba(255,255,255,.72)';ctx.lineWidth=1;ctx.stroke();
+        ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=editorFont(19,900);ctx.fillStyle='#FFFFFF';
+        ctx.fillText(valueText,cx,plaqueY+17);ctx.font=editorFont(7.8,850);ctx.fillStyle='#E8E0CD';
+        ctx.fillText('hm/h',cx,plaqueY+30);ctx.restore();
+
+        ctx.font=editorFont(9,800);ctx.fillStyle=palette.text;ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(selectedMonth!==null&&selectedMonth>=0?MONTH_NAMES[selectedMonth]:'Jahresdurchschnitt',
+            cx,Math.min(size.height-78,plaqueY+plaqueH+13));
+        drawTrendStrip(ctx,canvas,values,palette,selectedMonth,'ascentRate');
+        canvas.__ascentArrowGeometry={cx:pivotX,cy:pivotY,length,angle,pivot:'rear'};
     }
 
     function drawPerformanceNeedle(ctx, radius, angle, palette) {
@@ -2646,13 +2592,15 @@
                         return;
                     }
                     if (trend && y > trend.top - 12) return;
-                    let selected = selectedMonths[category];
+                    const selected = selectedMonths[category];
                     if (selected === null || selected === undefined) {
-                        selected = defaultPerformanceIndexMonth();
-                        selectedMonths[category] = selected;
-                        if (typeof window.drawActiveChart === 'function') window.drawActiveChart();
-                    }
-                    if (typeof openMonthCategoryModal === 'function') {
+                        // Jahresdurchschnitt: wie beim Speed-Diagramm die passende Dashboard-Kachel öffnen.
+                        const dashboardType = category === 'gradient' ? 'steigung' : 'anstieg';
+                        if (typeof openDashStatModal === 'function' &&
+                            typeof getDiagramFilteredTours === 'function') {
+                            openDashStatModal(dashboardType, getDiagramFilteredTours());
+                        }
+                    } else if (typeof openMonthCategoryModal === 'function') {
                         openMonthCategoryModal(category, selected);
                     }
                     adaptiveHaptic('selection');
