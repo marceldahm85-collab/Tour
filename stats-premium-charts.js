@@ -1559,7 +1559,7 @@
         ctx.beginPath(); ctx.arc(-radius*.22,-radius*.35,radius*.72,-2.15,-1.12);
         ctx.strokeStyle='rgba(255,255,255,.075)'; ctx.lineWidth=4; ctx.stroke();
 
-        const shown=selectedMonth===null?0:(Number(values[selectedMonth])||0);
+        const shown=Math.max(0,Math.min(100,Number(angleValue)||0));
         ctx.fillStyle='#FFF8E8'; ctx.font=editorFont(Math.max(18,radius*.22),850);
         ctx.textAlign='center'; ctx.textBaseline='middle';
         ctx.fillText(String(Math.round(shown)),0,radius*.43);
@@ -1625,7 +1625,7 @@
             animatedGaugeValues[type] = target; drawFrame(target); return;
         }
         if (gaugeAnimationFrames[type] && window.cancelAnimationFrame) window.cancelAnimationFrame(gaugeAnimationFrames[type]);
-        const started = performance.now(), duration = 520, from = previous;
+        const started = performance.now(), duration = type === 'performanceIndex' ? 1250 : 520, from = previous;
         const step = now => {
             const t = Math.min(1, (now - started) / duration);
             const eased = 1 - Math.pow(1 - t, 3);
