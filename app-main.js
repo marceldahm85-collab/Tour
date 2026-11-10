@@ -1299,8 +1299,8 @@ function getPerformanceComparisonContext(
                     distP * 0.25 +
                     ascentP * 0.25 +
                     speedP * 0.15 +
-                    ascentRateP * 0.15 +
-                    gradientP * 0.10 +
+                    ascentRateP * 0.20 +
+                    gradientP * 0.05 +
                     enduranceP * 0.10
                 );
             }
@@ -1475,16 +1475,16 @@ function calculatePerformanceIndex(entry) {
      * 25 % Strecke
      * 25 % Aufstieg
      * 15 % Geschwindigkeit
-     * 15 % Anstieg
-     * 10 % Steigung
+     * 20 % Anstieg
+     * 5 % Steigung
      * 10 % Dauerleistung
      */
     const rawScore =
         distancePercentile * 0.25 +
         ascentPercentile * 0.25 +
         speedPercentile * 0.15 +
-        ascentRatePercentile * 0.15 +
-        gradientPercentile * 0.10 +
+        ascentRatePercentile * 0.20 +
+        gradientPercentile * 0.05 +
         endurancePercentile * 0.10;
 
 
@@ -5346,14 +5346,14 @@ ${(() => {
 
     {
         label: 'Anstieg',
-        weight: 15,
+        weight: 20,
         value:
             performance.ascentRatePercentile
     },
 
     {
         label: 'Steigung',
-        weight: 10,
+        weight: 5,
         value:
             performance.gradientPercentile
     },
