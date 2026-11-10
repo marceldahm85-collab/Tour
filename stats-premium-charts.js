@@ -1291,7 +1291,7 @@
             formatter: value => Math.round(value).toLocaleString('de-AT') + ' Schritte/Tour' };
 
         const started = performance.now();
-        const duration = 1050;
+        const duration = 1700;
         const renderFrame = timestamp => {
             if (!canvas.classList.contains('active-chart-canvas')) {
                 canvas.__avgStepsAnimationFrame = 0;
@@ -1319,10 +1319,10 @@
                 const cx = left + cellW * (col + .5);
                 const cy = top + cellH * (row + .5);
                 const ratio = value > 0 ? value / max : 0;
-                const targetScale = value > 0 ? .52 + ratio * .48 : 0;
+                const targetScale = value > 0 ? .30 + .70 * Math.pow(ratio, .75) : 0;
                 const scale = targetScale * eased;
-                const soleW = Math.min(cellW * .38, 20) * scale;
-                const soleH = Math.min(cellH * .59, 31) * scale;
+                const soleW = Math.min(cellW * .60, 31) * scale;
+                const soleH = Math.min(cellH * .38, 20) * scale;
                 const label = value > 0 ? Math.round(value).toLocaleString('de-AT') : '–';
 
                 ctx.save();
@@ -1338,8 +1338,9 @@
                     // Bergschuh-Sohlenabdruck: breite Zehenpartie, schmale Mitte,
                     // kräftige Ferse und klar erkennbare, segmentierte Profilstollen.
                     const x = cx - soleW / 2, y = cy - soleH / 2;
-                    ctx.translate(x, y);
-                    ctx.scale(soleW / 20, soleH / 31);
+                    ctx.translate(x + soleW, y);
+                    ctx.rotate(Math.PI / 2);
+                    ctx.scale(soleH / 20, soleW / 31);
                     ctx.shadowColor = colourWithAlpha(palette.primary, .48);
                     ctx.shadowBlur = 5 + ratio * 5;
                     ctx.beginPath();
