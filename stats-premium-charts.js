@@ -2442,7 +2442,13 @@
                 const dial = speed.__premiumSpeedometerGeometry;
                 if (!dial || Math.hypot(x - dial.cx, y - dial.cy) > dial.radius + 18) return;
                 const monthIndex = selectedMonths.speed;
-                if (typeof openMonthCategoryModal === 'function') {
+                if (monthIndex === null) {
+                    // Jahresansicht: dieselbe Speed-Übersicht wie auf dem Dashboard.
+                    if (typeof openDashStatModal === 'function' &&
+                        typeof getDiagramFilteredTours === 'function') {
+                        openDashStatModal('speed', getDiagramFilteredTours());
+                    }
+                } else if (typeof openMonthCategoryModal === 'function') {
                     openMonthCategoryModal('speed', monthIndex);
                 }
                 adaptiveHaptic('selection');
