@@ -1268,15 +1268,15 @@
         data.forEach(entry => {
             const month = monthOf(entry);
             if (month === null) return;
-            const steps = Number(calculateEntrySteps(entry)) || 0;
-            if (steps > 0) {
+            const steps = Number(calculateEntrySteps(entry));
+            if (Number.isFinite(steps) && steps > 0) {
                 sums[month] += steps;
                 counts[month]++;
                 tourStepValues.push(steps);
             }
         });
         const values = sums.map((sum, index) => counts[index] ? sum / counts[index] : 0);
-        const valid = values.filter(value => value > 0);
+        const valid = values.filter(value => Number.isFinite(value) && value > 0);
         // Jahresdurchschnitt: jede einzelne Tour zählt genau einmal (nicht jeder Monat gleich viel).
         const average = tourStepValues.length
             ? tourStepValues.reduce((sum, value) => sum + value, 0) / tourStepValues.length
@@ -1312,13 +1312,13 @@
             const top = 48, bottom = height - 5;
             const cellW = (right - left) / cols;
             const cellH = (bottom - top) / rows;
-            const max = Math.max(1, ...valid);
+            const max = valid.length ? Math.max(...valid) : 0;
 
             values.forEach((value, index) => {
                 const row = Math.floor(index / cols), col = index % cols;
                 const cx = left + cellW * (col + .5);
                 const cy = top + cellH * (row + .5);
-                const ratio = value > 0 ? value / max : 0;
+                const ratio = value > 0 && max > 0 ? Math.min(1, Math.max(0, value / max)) : 0;
                 const targetScale = value > 0 ? .16 + .84 * Math.pow(ratio, .48) : 0;
                 const scale = targetScale * eased;
                 const soleW = Math.min(cellW * .82, 44) * scale;
