@@ -1482,7 +1482,8 @@
         const cx = size.width / 2;
         const radius = Math.min(126, size.width * .345, Math.max(38, (size.height - 104) * .47));
         const cy = Math.min(size.height * .415, size.height - radius - 72);
-        const start = Math.PI * .75, sweep = Math.PI * 1.5;
+        // Leistungsindex: 0 im Süden, dann im Uhrzeigersinn über O, N und W bis 100 im Süden.
+        const start = Math.PI / 2, sweep = -Math.PI * 2;
         canvas.__performanceIndexCompassGeometry = { cx, cy, radius };
 
         ctx.save(); ctx.translate(cx, cy);
@@ -1506,38 +1507,43 @@
         ctx.beginPath(); ctx.arc(0,0,radius-2,0,Math.PI*2);
         ctx.strokeStyle='rgba(230,240,247,.22)'; ctx.lineWidth=1; ctx.stroke();
 
-        // 360°-Teilung des Außenrings, mit längeren 10°- und Hauptstrichen.
-        for(let degree=0;degree<360;degree+=5){
-            const a=(degree-90)*Math.PI/180, major=degree%30===0, medium=degree%10===0;
+        // Gleichmäßig verteilte 0–100-Teilung über den vollständigen Kreis.
+        for(let value=0;value<100;value+=1){
+            const a=start+sweep*value/100, major=value%10===0, medium=value%5===0;
             const r1=radius-(major?15:medium?10:6);
             ctx.beginPath(); ctx.moveTo(Math.cos(a)*r1,Math.sin(a)*r1);
             ctx.lineTo(Math.cos(a)*(radius-3),Math.sin(a)*(radius-3));
-            ctx.strokeStyle=major?'rgba(255,245,220,.96)':medium?'rgba(224,235,243,.72)':'rgba(224,235,243,.38)';
-            ctx.lineWidth=major?1.45:medium?.95:.55; ctx.stroke();
+            ctx.strokeStyle=major?'rgba(255,245,220,.98)':medium?'rgba(224,235,243,.76)':'rgba(224,235,243,.40)';
+            ctx.lineWidth=major?1.5:medium?1:.55; ctx.stroke();
         }
-        [0,30,60,90,120,150,180,210,240,270,300,330].forEach(degree=>{
-            const a=(degree-90)*Math.PI/180, r=radius-24;
-            ctx.fillStyle='rgba(242,246,248,.86)'; ctx.font=editorFont(7.2,700);
+        // 0 und 100 treffen sich am Südpunkt; die beiden Beschriftungen bleiben getrennt lesbar.
+        [0,25,50,75,100].forEach(value=>{
+            const a=start+sweep*value/100, r=radius-27;
+            const x=Math.cos(a)*r, y=Math.sin(a)*r;
+            ctx.fillStyle='rgba(248,244,232,.96)'; ctx.font=editorFont(8.5,850);
             ctx.textAlign='center'; ctx.textBaseline='middle';
-            ctx.fillText(String(degree),Math.cos(a)*r,Math.sin(a)*r);
+            if(value===0) ctx.fillText('0',x-10,y);
+            else if(value===100) ctx.fillText('100',x+11,y);
+            else ctx.fillText(String(value),x,y);
         });
+
+        // Himmelsrichtungen außerhalb des Instruments mit vier feinen Metall-Zierspitzen.
         [['N',-Math.PI/2],['O',0],['S',Math.PI/2],['W',Math.PI]].forEach(([label,a])=>{
+            const ux=Math.cos(a), uy=Math.sin(a), px=-uy, py=ux;
+            const tip=radius+22, base=radius+11, half=4.2;
+            ctx.beginPath();
+            ctx.moveTo(ux*tip,uy*tip);
+            ctx.lineTo(ux*base+px*half,uy*base+py*half);
+            ctx.lineTo(ux*(base-4),uy*(base-4));
+            ctx.lineTo(ux*base-px*half,uy*base-py*half);
+            ctx.closePath();
+            ctx.fillStyle=applyGradient(ctx,ux*(base-4),uy*(base-4),ux*tip,uy*tip,
+                [[0,'#657582'],[.45,'#F5E5BE'],[1,'#9A8050']]);
+            ctx.strokeStyle='rgba(255,255,255,.68)'; ctx.lineWidth=.65; ctx.fill(); ctx.stroke();
             ctx.fillStyle=label==='N'?'#E45A50':'#F1E8D5';
             ctx.font=editorFont(10,900); ctx.textAlign='center'; ctx.textBaseline='middle';
-            ctx.fillText(label,Math.cos(a)*(radius-39),Math.sin(a)*(radius-39));
+            ctx.fillText(label,ux*(radius+36),uy*(radius+36));
         });
-
-        // Skala für den Leistungsindex, dezent in den inneren Ring integriert.
-        [0,25,50,75,100].forEach(value=>{
-            const a=start+sweep*value/100, r=radius-55;
-            ctx.fillStyle=palette.text; ctx.font=editorFont(8,800);
-            ctx.textAlign='center'; ctx.textBaseline='middle';
-            ctx.fillText(String(value),Math.cos(a)*r,Math.sin(a)*r);
-        });
-
-        // Nordmarkierung am festen Index, feine Orientierungsrose und Glasreflex.
-        ctx.beginPath(); ctx.moveTo(0,-radius+18); ctx.lineTo(-5,-radius+29); ctx.lineTo(5,-radius+29); ctx.closePath();
-        ctx.fillStyle='#E7C47D'; ctx.fill(); ctx.strokeStyle='rgba(255,255,255,.8)'; ctx.lineWidth=.65; ctx.stroke();
         for(let i=0;i<8;i++){
             const a=-Math.PI/2+i*Math.PI/4, len=i%2===0?radius*.19:radius*.12, w=i%2===0?3.2:2;
             ctx.beginPath(); ctx.moveTo(Math.cos(a)*len,Math.sin(a)*len);
@@ -1564,8 +1570,6 @@
         ctx.fillStyle='#FFF8E8'; ctx.font=editorFont(Math.max(18,radius*.22),850);
         ctx.textAlign='center'; ctx.textBaseline='middle';
         ctx.fillText(String(Math.round(shown)),0,radius*.43);
-        ctx.fillStyle='rgba(235,241,245,.88)'; ctx.font=editorFont(Math.max(7,radius*.075),800);
-        ctx.fillText(MONTH_NAMES[selectedMonth===null?0:selectedMonth].toUpperCase(),0,radius*.66);
         ctx.restore();
         drawTrendStrip(ctx,canvas,values,palette,selectedMonth);
     }
