@@ -1386,7 +1386,12 @@
                 ctx.textBaseline = 'alphabetic';
                 ctx.font = editorFont(8, 800);
                 ctx.fillStyle = selectedMonths.avgSteps === index ? palette.primary : palette.muted;
-                const monthY = cy + Math.min(cellH * .44, 22);
+                const monthY = cy + Math.min(cellH * .44, 22) + 8;
+                ctx.lineJoin = 'round';
+                ctx.lineWidth = 1.15;
+                ctx.strokeStyle = 'rgba(0,0,0,.96)';
+                ctx.strokeText(MONTHS[index], cx, monthY);
+                ctx.fillStyle = '#FFFFFF';
                 ctx.fillText(MONTHS[index], cx, monthY);
                 if (selectedMonths.avgSteps === index) {
                     ctx.beginPath();
