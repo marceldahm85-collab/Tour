@@ -1183,10 +1183,16 @@
         const canvas=canvasById('gradient-canvas');
         if(!canvas||typeof resizeCanvasToDisplaySize!=='function')return;
         const isActive=canvas.classList.contains('active-chart-canvas');
-        const yearSelect=document.getElementById('stats-year-select'),yearFilter=yearSelect?String(yearSelect.value||'all'):'all';
-        if(isActive&&(!canvas.__gradientWasActive||canvas.__gradientYearFilter!==yearFilter)){
-            selectedMonths.gradient=null;animatedGaugeValues.gradient=0;}
-        canvas.__gradientWasActive=isActive;canvas.__gradientYearFilter=yearFilter;
+        const yearSelect=document.getElementById('stats-year-select');
+        const yearFilter=yearSelect?String(yearSelect.value||'all'):'all';
+        const yearChanged=canvas.__gradientYearFilter!==yearFilter;
+        // Wie beim Speedometer: Beim erneuten Aktivieren oder Jahreswechsel immer zum Jahresdurchschnitt zurückkehren.
+        if(isActive&&(!canvas.__gradientWasActive||yearChanged)){
+            selectedMonths.gradient=null;
+            animatedGaugeValues.gradient=0;
+        }
+        canvas.__gradientYearFilter=yearFilter;
+        canvas.__gradientWasActive=isActive;
         const selected=selectedMonths.gradient,target=selected===null?average:(Number(values[selected])||0);
         canvas.__premiumChartData={values,unit:'hm/km',key:'gradient',formatter:value=>Math.round(value)+' hm/km'};
         resizeCanvasToDisplaySize(canvas);
@@ -1778,8 +1784,9 @@
         const progress=Math.max(0,Math.min(1,Number.isFinite(introProgress)?introProgress:1));
         const ease=1-Math.pow(1-progress,3);
         const ratio=Math.max(0,Math.min(1,(Number(value)||0)/max));
-        const baselineY=Math.min(size.height-126,size.height*.59);
-        const armLength=Math.max(86,Math.min((size.width-48)*.48,(baselineY-20)*.94,170));
+        // Etwas großzügiger als zuvor, bleibt aber mit sicherem Abstand zum Monatsverlauf im Canvas.
+        const baselineY=Math.min(size.height-116,size.height*.61);
+        const armLength=Math.max(86,Math.min((size.width-40)*.54,(baselineY-18)*.98,190));
         const cx=(size.width-armLength)*.5,cy=baselineY,arcRadius=armLength/3;
         const angle=(Math.PI/2)*ratio*ease,needleLength=armLength*.94;
         const needleWidth=Math.max(7,Math.min(10,armLength*.055));
@@ -2727,6 +2734,17 @@
                 const tab = event.target.closest('[data-chart]');
                 if (tab && tab.dataset.chart !== 'performanceIndex' && compass) {
                     compass.__performanceIndexWasActive = false;
+                }
+            }, true);
+        }
+        const gradientLifecycle = canvasById('gradient-canvas');
+        if (chartTabs && chartTabs.dataset.gradientLifecycle !== 'true') {
+            chartTabs.dataset.gradientLifecycle = 'true';
+            chartTabs.addEventListener('click', event => {
+                const tab = event.target.closest('[data-chart]');
+                if (tab && tab.dataset.chart !== 'gradient' && gradientLifecycle) {
+                    // Beim Verlassen der Steigungskachel den nächsten Aufruf als Neueinstieg behandeln.
+                    gradientLifecycle.__gradientWasActive = false;
                 }
             }, true);
         }
