@@ -1381,12 +1381,9 @@
 
     function drawTrendStrip(ctx, canvas, values, palette, selectedMonth) {
         const size = logicalSize(canvas), left = 28, right = size.width - 28;
-        const top = size.height - 66, bottom = size.height - 35;
+        const top = size.height - 58, bottom = size.height - 29;
         const max = Math.max(1, ...values.filter(value => value > 0)) * 1.08;
         ctx.save();
-        ctx.fillStyle = palette.muted; ctx.font = editorFont(7.5, 750);
-        ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
-        ctx.fillText('MONATSENTWICKLUNG', left, top - 8);
         ctx.beginPath(); ctx.moveTo(left, bottom); ctx.lineTo(right, bottom);
         ctx.strokeStyle = 'rgba(225,236,245,.22)'; ctx.lineWidth = 1; ctx.stroke();
 
@@ -1411,100 +1408,166 @@
             ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.stroke(); ctx.restore();
         });
         points.forEach(point => {
-            ctx.beginPath();
-            ctx.arc(point.x, point.y, point.index === selectedMonth ? 5 : 3, 0, Math.PI * 2);
+            if (point.index === selectedMonth) return;
+            ctx.beginPath(); ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
             ctx.fillStyle = point.value > 0 ? palette.secondary : 'rgba(225,235,245,.22)';
             ctx.fill();
             if (point.value > 0) {
-                ctx.beginPath(); ctx.arc(point.x, point.y, 1.4, 0, Math.PI * 2);
+                ctx.beginPath(); ctx.arc(point.x, point.y, 1.2, 0, Math.PI * 2);
                 ctx.fillStyle = '#FFFFFF'; ctx.fill();
             }
-            if (point.index === selectedMonth) {
-                ctx.beginPath(); ctx.arc(point.x, point.y, 8, 0, Math.PI * 2);
-                ctx.strokeStyle = palette.primary; ctx.lineWidth = 1.4; ctx.stroke();
-            }
         });
+
+        // Kleiner, metallischer Kompass als aktive Monatsmarkierung.
+        if (selectedMonth !== null && points[selectedMonth]) {
+            const point = points[selectedMonth], r = 7.2;
+            ctx.save();
+            ctx.shadowColor = colourWithAlpha(palette.primary, .65); ctx.shadowBlur = 7;
+            ctx.beginPath(); ctx.arc(point.x, point.y, r, 0, Math.PI * 2);
+            const bezel = ctx.createLinearGradient(point.x-r, point.y-r, point.x+r, point.y+r);
+            bezel.addColorStop(0, '#FFF8E8'); bezel.addColorStop(.28, palette.secondary);
+            bezel.addColorStop(.62, palette.primary); bezel.addColorStop(1, '#263442');
+            ctx.fillStyle = bezel; ctx.fill(); ctx.shadowBlur = 0;
+            ctx.beginPath(); ctx.arc(point.x, point.y, r-1.5, 0, Math.PI*2);
+            ctx.fillStyle = '#172633'; ctx.fill();
+            ctx.save(); ctx.translate(point.x, point.y);
+            ctx.rotate(Math.PI / 4);
+            ctx.beginPath(); ctx.moveTo(0,-4.6); ctx.lineTo(2.1,0); ctx.lineTo(0,4.6); ctx.lineTo(-2.1,0); ctx.closePath();
+            ctx.fillStyle = '#D94B43'; ctx.fill();
+            ctx.beginPath(); ctx.moveTo(0,4.6); ctx.lineTo(2.1,0); ctx.lineTo(0,-4.6); ctx.lineTo(-2.1,0); ctx.closePath();
+            ctx.fillStyle = '#F1E8D5'; ctx.fill();
+            ctx.beginPath(); ctx.arc(0,0,1.1,0,Math.PI*2); ctx.fillStyle='#D5B36B'; ctx.fill();
+            ctx.restore();
+            ctx.beginPath(); ctx.arc(point.x, point.y, r, 0, Math.PI*2);
+            ctx.strokeStyle='rgba(255,255,255,.85)'; ctx.lineWidth=.7; ctx.stroke();
+            ctx.restore();
+        }
         ctx.font = editorFont(7.5, 650); ctx.fillStyle = palette.muted;
         ctx.textAlign = 'center';
         MONTHS.forEach((month, index) => {
-            ctx.fillText(month, left + (right - left) * index / 11, size.height - 14);
+            ctx.fillText(month, left + (right - left) * index / 11, size.height - 10);
         });
         ctx.restore();
         canvas.__premiumTrendGeometry = { left, right, top, bottom, points };
+    }
+
+    function drawPerformanceNeedle(ctx, radius, angle, palette) {
+        ctx.save();
+        ctx.rotate(angle + Math.PI / 2);
+        ctx.shadowColor = 'rgba(0,0,0,.72)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2;
+        // Nordspitze in Rot, Gegengewicht in hellem Metall – wie bei einem Feldkompass.
+        ctx.beginPath();
+        ctx.moveTo(0, -radius * .78); ctx.lineTo(radius * .065, 0);
+        ctx.lineTo(0, radius * .48); ctx.lineTo(-radius * .065, 0); ctx.closePath();
+        ctx.fillStyle = applyGradient(ctx, -radius*.07, -radius*.78, radius*.07, radius*.48,
+            [[0,'#FFF3D9'],[.24,'#D94A43'],[.52,'#A92E32'],[1,'#5D2028']]);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.beginPath();
+        ctx.moveTo(0, radius*.48); ctx.lineTo(radius*.065, 0);
+        ctx.lineTo(0, -radius*.78); ctx.lineTo(-radius*.065, 0); ctx.closePath();
+        ctx.fillStyle = applyGradient(ctx, 0, -radius*.78, 0, radius*.48,
+            [[0,'#F8F4E9'],[.5,'#AEB9C2'],[1,'#596875']]);
+        ctx.globalAlpha = .92; ctx.fill(); ctx.globalAlpha = 1;
+        ctx.beginPath(); ctx.moveTo(-radius*.018,-radius*.60); ctx.lineTo(-radius*.018,-radius*.04);
+        ctx.strokeStyle='rgba(255,255,255,.85)'; ctx.lineWidth=.8; ctx.stroke();
+        ctx.restore();
     }
 
     function renderCompassFrame(canvas, overall, values, selectedMonth, angleValue) {
         const ctx = canvas.getContext('2d'), size = logicalSize(canvas), palette = chartPalette();
         ctx.clearRect(0, 0, size.width, size.height);
         drawInstrumentSurface(ctx, size.width, size.height, palette);
-        drawHeader(ctx, canvas, 'Leistungsindex · Kompass',
-            Math.round(selectedMonth === null ? overall : (values[selectedMonth] || 0)) + ' / 100');
 
-        const cx = size.width / 2, cy = Math.min(size.height * .43, size.height - 145);
-        const radius = Math.min(105, size.width * .285, Math.max(36, (size.height - 165) * .47));
+        const cx = size.width / 2;
+        const radius = Math.min(126, size.width * .345, Math.max(38, (size.height - 104) * .47));
+        const cy = Math.min(size.height * .415, size.height - radius - 72);
         const start = Math.PI * .75, sweep = Math.PI * 1.5;
+
         ctx.save(); ctx.translate(cx, cy);
+        // Gedrehter, gerändelter Metallring mit mehreren fein abgestuften Fasen.
+        ctx.beginPath(); ctx.arc(0,0,radius+11,0,Math.PI*2);
+        const outer = ctx.createRadialGradient(-radius*.38,-radius*.48,radius*.12,0,0,radius+14);
+        outer.addColorStop(0,'#FFF9E9'); outer.addColorStop(.14,palette.secondary);
+        outer.addColorStop(.34,'#71808D'); outer.addColorStop(.52,'#263746');
+        outer.addColorStop(.73,palette.primary); outer.addColorStop(.88,'#101B25'); outer.addColorStop(1,'#050A10');
+        ctx.fillStyle=outer; ctx.shadowColor='rgba(0,0,0,.62)'; ctx.shadowBlur=13; ctx.fill(); ctx.shadowBlur=0;
+        ctx.beginPath(); ctx.arc(0,0,radius+7,0,Math.PI*2);
+        ctx.strokeStyle='rgba(255,255,255,.76)'; ctx.lineWidth=1.2; ctx.stroke();
+        ctx.beginPath(); ctx.arc(0,0,radius+3.5,0,Math.PI*2);
+        ctx.strokeStyle='rgba(5,12,19,.9)'; ctx.lineWidth=2.2; ctx.stroke();
 
-        const bezel = ctx.createRadialGradient(-radius * .32, -radius * .4, radius * .08, 0, 0, radius * 1.24);
-        bezel.addColorStop(0, '#FFFFFF'); bezel.addColorStop(.18, palette.secondary);
-        bezel.addColorStop(.43, '#586674'); bezel.addColorStop(.62, palette.primary);
-        bezel.addColorStop(.83, '#253341'); bezel.addColorStop(1, '#050B12');
-        ctx.beginPath(); ctx.arc(0, 0, radius + 9, 0, Math.PI * 2);
-        ctx.fillStyle = bezel; ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = 12; ctx.fill(); ctx.shadowBlur = 0;
+        // Flüssigkeitskapsel und gewölbte Glasoberfläche.
+        const liquid=ctx.createRadialGradient(-radius*.36,-radius*.42,2,0,0,radius+2);
+        liquid.addColorStop(0,'rgba(62,87,105,.98)'); liquid.addColorStop(.52,'rgba(19,36,50,.99)');
+        liquid.addColorStop(1,'rgba(5,13,22,1)');
+        ctx.beginPath(); ctx.arc(0,0,radius+1,0,Math.PI*2); ctx.fillStyle=liquid; ctx.fill();
+        ctx.beginPath(); ctx.arc(0,0,radius-2,0,Math.PI*2);
+        ctx.strokeStyle='rgba(230,240,247,.22)'; ctx.lineWidth=1; ctx.stroke();
 
-        const glass = ctx.createRadialGradient(-radius * .35, -radius * .45, 1, 0, 0, radius + 2);
-        glass.addColorStop(0, 'rgba(42,59,75,.96)'); glass.addColorStop(.7, 'rgba(10,20,31,.98)');
-        glass.addColorStop(1, 'rgba(4,10,17,1)');
-        ctx.beginPath(); ctx.arc(0, 0, radius + 1, 0, Math.PI * 2); ctx.fillStyle = glass; ctx.fill();
-        ctx.beginPath(); ctx.arc(0, 0, radius + 5.2, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 1.1; ctx.stroke();
-
-        for (let i = 0; i <= 100; i += 2) {
-            const a = start + sweep * i / 100, major = i % 10 === 0;
-            ctx.beginPath();
-            ctx.moveTo(Math.cos(a) * (radius - (major ? 14 : 7)), Math.sin(a) * (radius - (major ? 14 : 7)));
-            ctx.lineTo(Math.cos(a) * (radius - 2), Math.sin(a) * (radius - 2));
-            ctx.strokeStyle = major ? colourWithAlpha(palette.secondary, .94) : 'rgba(235,242,247,.40)';
-            ctx.lineWidth = major ? 1.45 : .65; ctx.stroke();
+        // 360°-Teilung des Außenrings, mit längeren 10°- und Hauptstrichen.
+        for(let degree=0;degree<360;degree+=5){
+            const a=(degree-90)*Math.PI/180, major=degree%30===0, medium=degree%10===0;
+            const r1=radius-(major?15:medium?10:6);
+            ctx.beginPath(); ctx.moveTo(Math.cos(a)*r1,Math.sin(a)*r1);
+            ctx.lineTo(Math.cos(a)*(radius-3),Math.sin(a)*(radius-3));
+            ctx.strokeStyle=major?'rgba(255,245,220,.96)':medium?'rgba(224,235,243,.72)':'rgba(224,235,243,.38)';
+            ctx.lineWidth=major?1.45:medium?.95:.55; ctx.stroke();
         }
-        [0, 25, 50, 75, 100].forEach(value => {
-            const a = start + sweep * value / 100, r = radius - 30;
-            ctx.fillStyle = palette.text; ctx.font = editorFont(8.5, 750);
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText(String(value), Math.cos(a) * r, Math.sin(a) * r);
+        [0,30,60,90,120,150,180,210,240,270,300,330].forEach(degree=>{
+            const a=(degree-90)*Math.PI/180, r=radius-24;
+            ctx.fillStyle='rgba(242,246,248,.86)'; ctx.font=editorFont(7.2,700);
+            ctx.textAlign='center'; ctx.textBaseline='middle';
+            ctx.fillText(String(degree),Math.cos(a)*r,Math.sin(a)*r);
+        });
+        [['N',-Math.PI/2],['O',0],['S',Math.PI/2],['W',Math.PI]].forEach(([label,a])=>{
+            ctx.fillStyle=label==='N'?'#E45A50':'#F1E8D5';
+            ctx.font=editorFont(10,900); ctx.textAlign='center'; ctx.textBaseline='middle';
+            ctx.fillText(label,Math.cos(a)*(radius-39),Math.sin(a)*(radius-39));
         });
 
-        [['N', -Math.PI / 2], ['O', 0], ['S', Math.PI / 2], ['W', Math.PI]].forEach(([label, a]) => {
-            ctx.fillStyle = label === 'N' ? palette.primary : 'rgba(239,245,249,.9)';
-            ctx.font = editorFont(9, 850); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText(label, Math.cos(a) * (radius + 18), Math.sin(a) * (radius + 18));
+        // Skala für den Leistungsindex, dezent in den inneren Ring integriert.
+        [0,25,50,75,100].forEach(value=>{
+            const a=start+sweep*value/100, r=radius-55;
+            ctx.fillStyle=palette.text; ctx.font=editorFont(8,800);
+            ctx.textAlign='center'; ctx.textBaseline='middle';
+            ctx.fillText(String(value),Math.cos(a)*r,Math.sin(a)*r);
         });
 
-        // Eight-point compass rose, purely ornamental around the performance scale.
-        for (let i = 0; i < 8; i++) {
-            const a = -Math.PI / 2 + i * Math.PI / 4, len = i % 2 === 0 ? radius * .36 : radius * .23;
-            const w = i % 2 === 0 ? 5.2 : 3.2;
-            ctx.beginPath();
-            ctx.moveTo(Math.cos(a) * len, Math.sin(a) * len);
-            ctx.lineTo(Math.cos(a + Math.PI / 2) * w, Math.sin(a + Math.PI / 2) * w);
-            ctx.lineTo(-Math.cos(a) * len * .22, -Math.sin(a) * len * .22);
-            ctx.lineTo(-Math.cos(a + Math.PI / 2) * w, -Math.sin(a + Math.PI / 2) * w);
-            ctx.closePath();
-            ctx.fillStyle = i % 2 === 0 ? colourWithAlpha(palette.primary, .68) : 'rgba(223,234,243,.52)';
-            ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.36)'; ctx.lineWidth = .6; ctx.stroke();
+        // Nordmarkierung am festen Index, feine Orientierungsrose und Glasreflex.
+        ctx.beginPath(); ctx.moveTo(0,-radius+18); ctx.lineTo(-5,-radius+29); ctx.lineTo(5,-radius+29); ctx.closePath();
+        ctx.fillStyle='#E7C47D'; ctx.fill(); ctx.strokeStyle='rgba(255,255,255,.8)'; ctx.lineWidth=.65; ctx.stroke();
+        for(let i=0;i<8;i++){
+            const a=-Math.PI/2+i*Math.PI/4, len=i%2===0?radius*.19:radius*.12, w=i%2===0?3.2:2;
+            ctx.beginPath(); ctx.moveTo(Math.cos(a)*len,Math.sin(a)*len);
+            ctx.lineTo(Math.cos(a+Math.PI/2)*w,Math.sin(a+Math.PI/2)*w);
+            ctx.lineTo(-Math.cos(a)*len*.18,-Math.sin(a)*len*.18);
+            ctx.lineTo(-Math.cos(a+Math.PI/2)*w,-Math.sin(a+Math.PI/2)*w); ctx.closePath();
+            ctx.fillStyle=i%2===0?'rgba(220,190,126,.55)':'rgba(226,236,243,.38)'; ctx.fill();
         }
-        const needleAngle = start + sweep * Math.max(0, Math.min(100, angleValue)) / 100;
-        drawGaugeNeedle(ctx, 0, 0, radius * .88, needleAngle, palette, true);
-        const shown = selectedMonth === null ? overall : (values[selectedMonth] || 0);
-        ctx.fillStyle = '#FFF8E8'; ctx.font = editorFont(23, 850);
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(String(Math.round(shown)), 0, radius * .47);
-        ctx.fillStyle = 'rgba(231,239,245,.68)'; ctx.font = editorFont(7.5, 750);
-        ctx.fillText('LEISTUNGSINDEX · 0–100', 0, radius * .70);
+
+        drawPerformanceNeedle(ctx,radius*.83,start+sweep*Math.max(0,Math.min(100,angleValue))/100,palette);
+        // Lager, Achskappe und konzentrische Metallringe.
+        ctx.beginPath(); ctx.arc(0,0,8.5,0,Math.PI*2);
+        ctx.fillStyle=applyGradient(ctx,-8,-8,8,8,[[0,'#FFFDF4'],[.25,'#D7C18E'],[.58,'#667784'],[1,'#17232D']]); ctx.fill();
+        ctx.beginPath(); ctx.arc(0,0,3.1,0,Math.PI*2); ctx.fillStyle='#D9B96E'; ctx.fill();
+        ctx.beginPath(); ctx.arc(0,0,1.1,0,Math.PI*2); ctx.fillStyle='#FFF8E8'; ctx.fill();
+
+        // Subtiler Lichtreflex auf dem gewölbten Glas.
+        ctx.beginPath(); ctx.ellipse(-radius*.22,-radius*.35,radius*.48,radius*.16,-.58,Math.PI,Math.PI*2);
+        ctx.strokeStyle='rgba(255,255,255,.16)'; ctx.lineWidth=2.2; ctx.stroke();
+        ctx.beginPath(); ctx.arc(-radius*.22,-radius*.35,radius*.72,-2.15,-1.12);
+        ctx.strokeStyle='rgba(255,255,255,.075)'; ctx.lineWidth=4; ctx.stroke();
+
+        const shown=selectedMonth===null?0:(Number(values[selectedMonth])||0);
+        ctx.fillStyle='#FFF8E8'; ctx.font=editorFont(Math.max(18,radius*.22),850);
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(String(Math.round(shown)),0,radius*.43);
+        ctx.fillStyle='rgba(235,241,245,.88)'; ctx.font=editorFont(Math.max(7,radius*.075),800);
+        ctx.fillText(MONTH_NAMES[selectedMonth===null?0:selectedMonth].toUpperCase(),0,radius*.66);
         ctx.restore();
-        drawTrendStrip(ctx, canvas, values, palette, selectedMonth);
+        drawTrendStrip(ctx,canvas,values,palette,selectedMonth);
     }
-
     function renderSpeedometerFrame(canvas, overall, values, selectedMonth, angleValue) {
         const ctx = canvas.getContext('2d'), size = logicalSize(canvas), palette = chartPalette();
         ctx.clearRect(0, 0, size.width, size.height);
