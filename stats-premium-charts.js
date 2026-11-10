@@ -1483,6 +1483,7 @@
         const radius = Math.min(126, size.width * .345, Math.max(38, (size.height - 104) * .47));
         const cy = Math.min(size.height * .415, size.height - radius - 72);
         const start = Math.PI * .75, sweep = Math.PI * 1.5;
+        canvas.__performanceIndexCompassGeometry = { cx, cy, radius };
 
         ctx.save(); ctx.translate(cx, cy);
         // Gedrehter, gerändelter Metallring mit mehreren fein abgestuften Fasen.
@@ -1658,10 +1659,14 @@
         if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
 
         const isActive = canvas.classList.contains('active-chart-canvas');
-        if (isActive && !canvas.__performanceIndexWasActive) {
+        const yearSelect = document.getElementById('stats-year-select');
+        const yearFilter = yearSelect ? String(yearSelect.value || 'all') : 'all';
+        const yearChanged = canvas.__performanceIndexYearFilter !== yearFilter;
+        if (isActive && (!canvas.__performanceIndexWasActive || yearChanged)) {
             selectedMonths.performanceIndex = defaultPerformanceIndexMonth();
-            animatedGaugeValues.performanceIndex = 0;
+            if (!canvas.__performanceIndexWasActive) animatedGaugeValues.performanceIndex = 0;
         }
+        canvas.__performanceIndexYearFilter = yearFilter;
         canvas.__performanceIndexWasActive = isActive;
         if (selectedMonths.performanceIndex === null) {
             selectedMonths.performanceIndex = defaultPerformanceIndexMonth();
@@ -2122,19 +2127,23 @@
                 const x = (event.clientX - rect.left) * size.width / rect.width;
                 const y = (event.clientY - rect.top) * size.height / rect.height;
                 const geometry = compass.__premiumTrendGeometry;
-                if (!geometry || y < geometry.top - 8 || y > geometry.bottom + 12) {
-                    const monthIndex = selectedMonths.performanceIndex === null
-                        ? defaultPerformanceIndexMonth() : selectedMonths.performanceIndex;
-                    selectedMonths.performanceIndex = monthIndex;
-                    if (typeof openMonthCategoryModal === 'function') {
-                        openMonthCategoryModal('performanceIndex', monthIndex);
-                    }
-                    adaptiveHaptic('selection');
+                if (geometry && y >= geometry.top - 8 && y <= size.height - 4) {
+                    const index = Math.max(0, Math.min(11,
+                        Math.round((x - geometry.left) / Math.max(1, geometry.right - geometry.left) * 11)));
+                    selectPerformanceIndexMonth(compass, index);
                     return;
                 }
-                const index = Math.max(0, Math.min(11,
-                    Math.round((x - geometry.left) / Math.max(1, geometry.right - geometry.left) * 11)));
-                selectPerformanceIndexMonth(compass, index);
+                const dial = compass.__performanceIndexCompassGeometry;
+                if (!dial || Math.hypot(x - dial.cx, y - dial.cy) > dial.radius + 15) return;
+                const monthIndex = selectedMonths.performanceIndex === null
+                    ? defaultPerformanceIndexMonth() : selectedMonths.performanceIndex;
+                selectedMonths.performanceIndex = monthIndex;
+                if (typeof openMonthCategoryModal === 'function') {
+                    openMonthCategoryModal('performanceIndex', monthIndex);
+                }
+                adaptiveHaptic('selection');
+                return;
+
             }, true);
         }
 
