@@ -1190,7 +1190,7 @@
         const selected=selectedMonths.gradient,target=selected===null?average:(Number(values[selected])||0);
         canvas.__premiumChartData={values,unit:'hm/km',key:'gradient',formatter:value=>Math.round(value)+' hm/km'};
         resizeCanvasToDisplaySize(canvas);
-        const render=progress=>renderGradientReliefFrame(canvas,values,selected,target,progress);
+        const render=progress=>renderAscentArrowFrame(canvas,values,selected,target,progress,'hm/km','gradient');
         if(isActive&&!canvas.__gradientIntroPlayed){canvas.__gradientIntroPlayed=true;animateChartIntro(canvas,'gradient',render);}
         else render(1);
         animatedGaugeValues.gradient=target;
@@ -1214,7 +1214,7 @@
         const selected=selectedMonths.ascentRate,target=selected===null?average:(Number(values[selected])||0);
         canvas.__premiumChartData={values,unit:'hm/h',key:'ascentRate',formatter:value=>Math.round(value)+' hm/h'};
         resizeCanvasToDisplaySize(canvas);
-        const render=progress=>renderAscentArrowFrame(canvas,values,selected,target,progress);
+        const render=progress=>renderGradientReliefFrame(canvas,values,selected,target,progress,'hm/h','ascentRate');
         if(isActive&&!canvas.__ascentRateIntroPlayed){canvas.__ascentRateIntroPlayed=true;animateChartIntro(canvas,'ascentRate',render);}
         else render(1);
         animatedGaugeValues.ascentRate=target;
@@ -1656,7 +1656,7 @@
         ctx.restore();
     }
 
-    function renderGradientReliefFrame(canvas, values, selectedMonth, value, introProgress) {
+    function renderGradientReliefFrame(canvas, values, selectedMonth, value, introProgress, unit, category) {
         const ctx=canvas.getContext('2d'),size=logicalSize(canvas),palette=chartPalette();
         ctx.clearRect(0,0,size.width,size.height);
         drawInstrumentSurface(ctx,size.width,size.height,palette);
@@ -1750,16 +1750,16 @@
         ctx.strokeStyle='rgba(255,255,255,.76)';ctx.lineWidth=1.05;ctx.stroke();
         ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=editorFont(21,900);ctx.fillStyle='#FFFFFF';
         ctx.shadowColor='rgba(0,0,0,.8)';ctx.shadowBlur=4;ctx.fillText(valueText,centerX,plaqueY+19);
-        ctx.shadowBlur=0;ctx.font=editorFont(8,850);ctx.fillStyle='#E8E0CD';ctx.fillText('hm/km',centerX,plaqueY+34);
+        ctx.shadowBlur=0;ctx.font=editorFont(8,850);ctx.fillStyle='#E8E0CD';ctx.fillText(unit||'hm/km',centerX,plaqueY+34);
         ctx.restore();
         ctx.font=editorFont(8.5,800);ctx.fillStyle=palette.text;ctx.textAlign='center';ctx.textBaseline='middle';
         ctx.fillText(selectedMonth!==null&&selectedMonth>=0?MONTH_NAMES[selectedMonth]:'Jahresdurchschnitt',
             centerX,Math.min(size.height-78,plaqueY+plaqueH+13));
-        drawTrendStrip(ctx,canvas,values,palette,selectedMonth,'gradient');
+        drawTrendStrip(ctx,canvas,values,palette,selectedMonth,category||'gradient');
         canvas.__premiumReliefGeometry={x:left,y:top,width:sceneW,height:sceneH};
     }
 
-    function renderAscentArrowFrame(canvas, values, selectedMonth, value, introProgress) {
+    function renderAscentArrowFrame(canvas, values, selectedMonth, value, introProgress, unit, category) {
         const ctx=canvas.getContext('2d'),size=logicalSize(canvas),palette=chartPalette();
         ctx.clearRect(0,0,size.width,size.height);drawInstrumentSurface(ctx,size.width,size.height,palette);
         const valid=values.filter(number=>Number.isFinite(number)&&number>0),max=Math.max(1,...valid);
@@ -1823,12 +1823,12 @@
         ctx.strokeStyle='rgba(255,255,255,.72)';ctx.lineWidth=1;ctx.stroke();
         ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=editorFont(19,900);ctx.fillStyle='#FFFFFF';
         ctx.fillText(valueText,cx,plaqueY+17);ctx.font=editorFont(7.8,850);ctx.fillStyle='#E8E0CD';
-        ctx.fillText('hm/h',cx,plaqueY+30);ctx.restore();
+        ctx.fillText(unit||'hm/h',cx,plaqueY+30);ctx.restore();
 
         ctx.font=editorFont(9,800);ctx.fillStyle=palette.text;ctx.textAlign='center';ctx.textBaseline='middle';
         ctx.fillText(selectedMonth!==null&&selectedMonth>=0?MONTH_NAMES[selectedMonth]:'Jahresdurchschnitt',
             cx,Math.min(size.height-78,plaqueY+plaqueH+13));
-        drawTrendStrip(ctx,canvas,values,palette,selectedMonth,'ascentRate');
+        drawTrendStrip(ctx,canvas,values,palette,selectedMonth,category||'ascentRate');
         canvas.__ascentArrowGeometry={cx:pivotX,cy:pivotY,length,angle,pivot:'rear'};
     }
 
