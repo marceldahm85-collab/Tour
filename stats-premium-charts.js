@@ -1619,7 +1619,8 @@
     }
 
     function animateGauge(type, target, drawFrame) {
-        const previous = Number.isFinite(animatedGaugeValues[type]) ? animatedGaugeValues[type] : target;
+        const previous = Number.isFinite(animatedGaugeValues[type])
+            ? animatedGaugeValues[type] : (type === 'performanceIndex' ? 0 : target);
         if (!window.requestAnimationFrame || Math.abs(previous - target) < .2) {
             animatedGaugeValues[type] = target; drawFrame(target); return;
         }
@@ -1635,27 +1636,43 @@
         gaugeAnimationFrames[type] = window.requestAnimationFrame(step);
     }
 
+    function defaultPerformanceIndexMonth() {
+        const yearSelect = document.getElementById('stats-year-select');
+        const selectedYear = yearSelect ? String(yearSelect.value || 'all') : 'all';
+        const year = Number(selectedYear);
+        if (Number.isInteger(year) && year > 1900 && year < new Date().getFullYear()) return 0;
+        return new Date().getMonth();
+    }
+
     function drawPerformanceIndexDiagram() {
         const sums = Array(12).fill(0), counts = Array(12).fill(0);
-        let total = 0, n = 0;
         getFilteredTours().forEach(entry => {
             const month = monthOf(entry); if (month === null) return;
             const result = calculatePerformanceIndex(entry);
             if (!result || !Number.isFinite(result.score)) return;
             const score = Math.max(0, Math.min(100, result.score));
-            sums[month] += score; counts[month]++; total += score; n++;
+            sums[month] += score; counts[month]++;
         });
         const values = sums.map((sum, i) => counts[i] ? sum / counts[i] : 0);
-        const overall = n ? total / n : 0, selected = selectedMonths.performanceIndex;
-        const selectedValue = activeMonthValue(values, selected);
-        const target = selectedValue === null ? overall : selectedValue;
         const canvas = canvasById('performance-index-canvas');
         if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
+
+        const isActive = canvas.classList.contains('active-chart-canvas');
+        if (isActive && !canvas.__performanceIndexWasActive) {
+            selectedMonths.performanceIndex = defaultPerformanceIndexMonth();
+            animatedGaugeValues.performanceIndex = 0;
+        }
+        canvas.__performanceIndexWasActive = isActive;
+        if (selectedMonths.performanceIndex === null) {
+            selectedMonths.performanceIndex = defaultPerformanceIndexMonth();
+        }
+        const selected = selectedMonths.performanceIndex;
+        const target = Number(values[selected]) || 0;
         resizeCanvasToDisplaySize(canvas);
         canvas.__premiumChartData = { values, unit: 'Punkte', key: 'performanceIndex',
             formatter: value => Math.round(value) + ' / 100' };
         animateGauge('performanceIndex', target,
-            angle => renderCompassFrame(canvas, overall, values, selected, angle));
+            angle => renderCompassFrame(canvas, 0, values, selected, angle));
     }
 
     function drawSpeedometer(canvas, values, overall) {
@@ -2037,6 +2054,17 @@
         if (typeof openMonthCategoryModal === 'function') openMonthCategoryModal(category, monthIndex);
     }
 
+    function selectPerformanceIndexMonth(canvas, monthIndex) {
+        const values = canvas.__premiumChartData && canvas.__premiumChartData.values;
+        if (!Array.isArray(values)) return;
+        selectedMonths.performanceIndex = monthIndex;
+        const target = Number(values[monthIndex]) || 0;
+        animateGauge('performanceIndex', target,
+            angle => renderCompassFrame(canvas, 0, values, monthIndex, angle));
+        showChartTooltip(canvas, monthIndex, target);
+        adaptiveHaptic('selection');
+    }
+
     function installCanvasInteractions() {
         const monthlyCategories = {
             'big-tours-canvas': 'bigTours',
@@ -2075,6 +2103,16 @@
         });
 
         const compass = canvasById('performance-index-canvas');
+        const chartTabs = document.getElementById('chart-tabs');
+        if (chartTabs && chartTabs.dataset.performanceIndexLifecycle !== 'true') {
+            chartTabs.dataset.performanceIndexLifecycle = 'true';
+            chartTabs.addEventListener('click', event => {
+                const tab = event.target.closest('[data-chart]');
+                if (tab && tab.dataset.chart !== 'performanceIndex' && compass) {
+                    compass.__performanceIndexWasActive = false;
+                }
+            }, true);
+        }
         if (compass && compass.dataset.premiumCompassTap !== 'true') {
             compass.dataset.premiumCompassTap = 'true';
             compass.addEventListener('click', event => {
@@ -2085,13 +2123,18 @@
                 const y = (event.clientY - rect.top) * size.height / rect.height;
                 const geometry = compass.__premiumTrendGeometry;
                 if (!geometry || y < geometry.top - 8 || y > geometry.bottom + 12) {
-                    selectedMonths.performanceIndex = null;
-                    drawPerformanceIndexDiagram();
+                    const monthIndex = selectedMonths.performanceIndex === null
+                        ? defaultPerformanceIndexMonth() : selectedMonths.performanceIndex;
+                    selectedMonths.performanceIndex = monthIndex;
+                    if (typeof openMonthCategoryModal === 'function') {
+                        openMonthCategoryModal('performanceIndex', monthIndex);
+                    }
+                    adaptiveHaptic('selection');
                     return;
                 }
                 const index = Math.max(0, Math.min(11,
                     Math.round((x - geometry.left) / Math.max(1, geometry.right - geometry.left) * 11)));
-                selectMonthlyValue(compass, 'performanceIndex', index);
+                selectPerformanceIndexMonth(compass, index);
             }, true);
         }
 
