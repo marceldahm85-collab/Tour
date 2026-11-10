@@ -1703,8 +1703,8 @@
         const ratio=Math.max(0,Math.min(1,(Number(value)||0)/max));
         const shown=(Number(value)||0);
         const sceneW=Math.min(size.width*.91,380);
-        const baseY=size.height-88;
-        const sceneH=Math.min(size.height*.61,224);
+        const baseY=size.height-150;
+        const sceneH=Math.min(size.height*.69,260);
         const left=(size.width-sceneW)/2;
         const top=Math.max(10,baseY-sceneH);
         const px=(x)=>left+x*sceneW, py=(y)=>top+y*sceneH;
@@ -1780,6 +1780,33 @@
             ctx.lineWidth=.7;ctx.stroke();
         });
 
+        // Natürliche Fels- und Erosionsstrukturen: feine, gebrochene Schichtlinien
+        // liegen innerhalb der Silhouette und folgen dem Verlauf der Flanken.
+        ctx.save();
+        ctx.beginPath();mainOutline();ctx.lineTo(px(1),mountainBase);ctx.lineTo(px(0),mountainBase);ctx.closePath();ctx.clip();
+        for(let row=0;row<9;row++){
+            const y=.47+row*.055;
+            ctx.beginPath();
+            ctx.moveTo(px(.08),py(y+.11));
+            ctx.bezierCurveTo(px(.25),py(y-.08),px(.39),py(y+.13),px(.54),py(y+.025));
+            ctx.bezierCurveTo(px(.69),py(y-.09),px(.83),py(y+.08),px(.98),py(y+.16));
+            ctx.strokeStyle=row%3===0?'rgba(220,234,239,.105)':'rgba(2,12,20,.17)';
+            ctx.lineWidth=row%3===0?1.15:.75;ctx.stroke();
+        }
+        // Unregelmäßige Felsrippen und Rinnen brechen die großen glatten Flächen auf.
+        for(let i=0;i<34;i++){
+            const x=.12+((i*37)%73)/100;
+            const y=.43+((i*19)%43)/100;
+            const lean=((i%5)-2)*.012;
+            ctx.beginPath();
+            ctx.moveTo(px(x),py(y));
+            ctx.lineTo(px(x+lean-.012),py(y+.035+(i%4)*.008));
+            ctx.lineTo(px(x+lean+.006),py(y+.055+(i%3)*.009));
+            ctx.strokeStyle=i%3===0?'rgba(235,243,244,.18)':'rgba(1,10,18,.22)';
+            ctx.lineWidth=i%4===0?1.1:.65;ctx.stroke();
+        }
+        ctx.restore();
+
         // Schneekappen und feine Firnlinien auf beiden Gipfeln.
         const snowPatches=[
             [[.365,.17],[.392,.27],[.455,.475],[.423,.421],[.401,.365],[.381,.28]],
@@ -1798,6 +1825,21 @@
             ctx.lineTo(px(points[1][0]),py(points[1][1]+.035));
             ctx.lineTo(px(points[2][0]-.018),py(points[2][1]-.035));
             ctx.strokeStyle='rgba(255,255,255,.68)';ctx.lineWidth=.8;ctx.stroke();
+        });
+
+        // Feine, verzweigte Firnrinnen und schattige Felsbänder für mehr Tiefenwirkung.
+        const rockRidges=[
+            [[.18,.70],[.24,.60],[.29,.48],[.34,.34]],
+            [[.29,.78],[.34,.64],[.39,.51],[.43,.43]],
+            [[.49,.65],[.54,.59],[.59,.48],[.64,.37]],
+            [[.62,.72],[.67,.60],[.72,.48],[.76,.42]],
+            [[.80,.66],[.85,.76],[.90,.84]]
+        ];
+        rockRidges.forEach((line,index)=>{
+            ctx.beginPath();ctx.moveTo(px(line[0][0]),py(line[0][1]));
+            line.slice(1).forEach(([x,y])=>ctx.lineTo(px(x),py(y)));
+            ctx.strokeStyle=index%2?'rgba(1,9,16,.34)':'rgba(226,238,241,.22)';
+            ctx.lineWidth=index%2?2.1:1.15;ctx.stroke();
         });
 
         // Schmale Lichtkanten betonen den Grat, ohne die Silhouette grafisch wirken zu lassen.
