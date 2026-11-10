@@ -1454,23 +1454,49 @@
     function drawPerformanceNeedle(ctx, radius, angle, palette) {
         ctx.save();
         ctx.rotate(angle + Math.PI / 2);
-        ctx.shadowColor = 'rgba(0,0,0,.72)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2;
-        // Nordspitze in Rot, Gegengewicht in hellem Metall – wie bei einem Feldkompass.
+        const tip = radius * .80, tail = radius * .43, half = radius * .052;
+        ctx.shadowColor = 'rgba(0,0,0,.82)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 2;
+
+        // Schlanke, facettierte Kompassnadel mit roter Nordspitze.
         ctx.beginPath();
-        ctx.moveTo(0, -radius * .78); ctx.lineTo(radius * .065, 0);
-        ctx.lineTo(0, radius * .48); ctx.lineTo(-radius * .065, 0); ctx.closePath();
-        ctx.fillStyle = applyGradient(ctx, -radius*.07, -radius*.78, radius*.07, radius*.48,
-            [[0,'#FFF3D9'],[.24,'#D94A43'],[.52,'#A92E32'],[1,'#5D2028']]);
+        ctx.moveTo(0, -tip);
+        ctx.lineTo(half * .52, -radius * .075);
+        ctx.lineTo(half * .34, radius * .12);
+        ctx.lineTo(0, tail);
+        ctx.lineTo(-half * .34, radius * .12);
+        ctx.lineTo(-half * .52, -radius * .075);
+        ctx.closePath();
+        ctx.fillStyle = applyGradient(ctx, -half, -tip, half, tail,
+            [[0,'#F7F4EC'],[.18,'#C9363D'],[.48,'#8F202B'],[.51,'#D9E0E4'],[.78,'#8E9BA4'],[1,'#35434D']]);
         ctx.fill();
         ctx.shadowBlur = 0;
+
+        // Rote, leicht facettierte Nordhälfte.
         ctx.beginPath();
-        ctx.moveTo(0, radius*.48); ctx.lineTo(radius*.065, 0);
-        ctx.lineTo(0, -radius*.78); ctx.lineTo(-radius*.065, 0); ctx.closePath();
-        ctx.fillStyle = applyGradient(ctx, 0, -radius*.78, 0, radius*.48,
-            [[0,'#F8F4E9'],[.5,'#AEB9C2'],[1,'#596875']]);
-        ctx.globalAlpha = .92; ctx.fill(); ctx.globalAlpha = 1;
-        ctx.beginPath(); ctx.moveTo(-radius*.018,-radius*.60); ctx.lineTo(-radius*.018,-radius*.04);
-        ctx.strokeStyle='rgba(255,255,255,.85)'; ctx.lineWidth=.8; ctx.stroke();
+        ctx.moveTo(0, -tip);
+        ctx.lineTo(half * .52, -radius * .075);
+        ctx.lineTo(0, radius * .025);
+        ctx.lineTo(-half * .52, -radius * .075);
+        ctx.closePath();
+        ctx.fillStyle = applyGradient(ctx, -half*.5, -tip, half*.5, radius*.025,
+            [[0,'#F7D9D2'],[.22,'#E34B4D'],[.68,'#B52835'],[1,'#681B27']]);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,225,216,.78)'; ctx.lineWidth = .65; ctx.stroke();
+
+        // Gegengewicht aus gebürstetem Stahl mit dunkler Mittelrippe.
+        ctx.beginPath();
+        ctx.moveTo(0, radius*.035);
+        ctx.lineTo(half*.34, radius*.12);
+        ctx.lineTo(0, tail);
+        ctx.lineTo(-half*.34, radius*.12);
+        ctx.closePath();
+        ctx.fillStyle = applyGradient(ctx, -half*.35, radius*.04, half*.35, tail,
+            [[0,'#F5F3EA'],[.35,'#C7D0D5'],[.72,'#788994'],[1,'#394852']]);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(235,242,245,.55)'; ctx.lineWidth = .55; ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, -tip*.88); ctx.lineTo(0, -radius*.04);
+        ctx.strokeStyle = 'rgba(255,244,232,.72)'; ctx.lineWidth = .7; ctx.stroke();
         ctx.restore();
     }
 
@@ -1483,7 +1509,7 @@
         const radius = Math.min(126, size.width * .345, Math.max(38, (size.height - 104) * .47));
         const cy = Math.min(size.height * .415, size.height - radius - 72);
         // Leistungsindex: 0 im Süden, dann im Uhrzeigersinn über O, N und W bis 100 im Süden.
-        const start = Math.PI / 2, sweep = -Math.PI * 2;
+        const start = Math.PI / 2, sweep = Math.PI * 2;
         canvas.__performanceIndexCompassGeometry = { cx, cy, radius };
 
         ctx.save(); ctx.translate(cx, cy);
@@ -1495,17 +1521,23 @@
         outer.addColorStop(.73,palette.primary); outer.addColorStop(.88,'#101B25'); outer.addColorStop(1,'#050A10');
         ctx.fillStyle=outer; ctx.shadowColor='rgba(0,0,0,.62)'; ctx.shadowBlur=13; ctx.fill(); ctx.shadowBlur=0;
         ctx.beginPath(); ctx.arc(0,0,radius+7,0,Math.PI*2);
-        ctx.strokeStyle='rgba(255,255,255,.76)'; ctx.lineWidth=1.2; ctx.stroke();
+        ctx.strokeStyle=colourWithAlpha(palette.secondary,.62); ctx.lineWidth=1.05; ctx.stroke();
         ctx.beginPath(); ctx.arc(0,0,radius+3.5,0,Math.PI*2);
-        ctx.strokeStyle='rgba(5,12,19,.9)'; ctx.lineWidth=2.2; ctx.stroke();
+        ctx.strokeStyle='rgba(3,9,15,.96)'; ctx.lineWidth=2.4; ctx.stroke();
 
         // Flüssigkeitskapsel und gewölbte Glasoberfläche.
-        const liquid=ctx.createRadialGradient(-radius*.36,-radius*.42,2,0,0,radius+2);
-        liquid.addColorStop(0,'rgba(62,87,105,.98)'); liquid.addColorStop(.52,'rgba(19,36,50,.99)');
-        liquid.addColorStop(1,'rgba(5,13,22,1)');
+        // Tiefes, leicht akzentgefärbtes Zifferblatt statt heller Innenkontur.
+        const liquid=ctx.createRadialGradient(-radius*.42,-radius*.48,2,0,0,radius+5);
+        liquid.addColorStop(0,colourWithAlpha(palette.primary,.34));
+        liquid.addColorStop(.30,'rgba(29,45,59,.99)');
+        liquid.addColorStop(.72,'rgba(12,24,36,.995)');
+        liquid.addColorStop(1,'rgba(4,10,18,1)');
         ctx.beginPath(); ctx.arc(0,0,radius+1,0,Math.PI*2); ctx.fillStyle=liquid; ctx.fill();
-        ctx.beginPath(); ctx.arc(0,0,radius-2,0,Math.PI*2);
-        ctx.strokeStyle='rgba(230,240,247,.22)'; ctx.lineWidth=1; ctx.stroke();
+        const accentHalo=ctx.createRadialGradient(-radius*.22,-radius*.30,0,0,0,radius*.92);
+        accentHalo.addColorStop(0,colourWithAlpha(palette.secondary,.20));
+        accentHalo.addColorStop(.48,colourWithAlpha(palette.primary,.075));
+        accentHalo.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.beginPath(); ctx.arc(0,0,radius,0,Math.PI*2); ctx.fillStyle=accentHalo; ctx.fill();
 
         // Gleichmäßig verteilte 0–100-Teilung über den vollständigen Kreis.
         for(let value=0;value<100;value+=1){
@@ -1560,11 +1592,13 @@
         ctx.beginPath(); ctx.arc(0,0,3.1,0,Math.PI*2); ctx.fillStyle='#D9B96E'; ctx.fill();
         ctx.beginPath(); ctx.arc(0,0,1.1,0,Math.PI*2); ctx.fillStyle='#FFF8E8'; ctx.fill();
 
-        // Subtiler Lichtreflex auf dem gewölbten Glas.
-        ctx.beginPath(); ctx.ellipse(-radius*.22,-radius*.35,radius*.48,radius*.16,-.58,Math.PI,Math.PI*2);
-        ctx.strokeStyle='rgba(255,255,255,.16)'; ctx.lineWidth=2.2; ctx.stroke();
-        ctx.beginPath(); ctx.arc(-radius*.22,-radius*.35,radius*.72,-2.15,-1.12);
-        ctx.strokeStyle='rgba(255,255,255,.075)'; ctx.lineWidth=4; ctx.stroke();
+        // Sehr zurückhaltende Glasreflexion als weiche Fläche, ohne helle Kreislinie.
+        const glass=ctx.createLinearGradient(-radius*.65,-radius*.72,radius*.35,radius*.18);
+        glass.addColorStop(0,'rgba(255,255,255,.105)');
+        glass.addColorStop(.38,'rgba(255,255,255,.025)');
+        glass.addColorStop(1,'rgba(255,255,255,0)');
+        ctx.beginPath(); ctx.ellipse(-radius*.20,-radius*.30,radius*.56,radius*.22,-.58,Math.PI,Math.PI*2);
+        ctx.fillStyle=glass; ctx.fill();
 
         const shown=Math.max(0,Math.min(100,Number(angleValue)||0));
         ctx.fillStyle='#FFF8E8'; ctx.font=editorFont(Math.max(18,radius*.22),850);
