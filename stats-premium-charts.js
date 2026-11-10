@@ -1680,57 +1680,83 @@
         const valid = values.filter(number => Number.isFinite(number) && number > 0);
         const max = Math.max(1, ...valid);
         const ratio = Math.max(0, Math.min(1, (Number(value) || 0) / max));
+
         const mapHeight = Math.min(size.height * .65, 264);
         const mapWidth = mapHeight * (661 / 871);
         const mapX = (size.width - mapWidth) / 2;
         const mapY = Math.max(8, (size.height - 72 - mapHeight) * .43);
         const centerX = size.width / 2;
         const centerY = mapY + mapHeight * .53;
+        const traceTerrainBoundary = () => {
+            ctx.beginPath();
+            ctx.moveTo(mapX + mapWidth * .17, mapY + mapHeight * .96);
+            ctx.bezierCurveTo(mapX + mapWidth * .04, mapY + mapHeight * .84,
+                mapX + mapWidth * .02, mapY + mapHeight * .69, mapX + mapWidth * .09, mapY + mapHeight * .57);
+            ctx.bezierCurveTo(mapX + mapWidth * .02, mapY + mapHeight * .43,
+                mapX + mapWidth * .08, mapY + mapHeight * .31, mapX + mapWidth * .20, mapY + mapHeight * .25);
+            ctx.bezierCurveTo(mapX + mapWidth * .20, mapY + mapHeight * .11,
+                mapX + mapWidth * .34, mapY + mapHeight * .06, mapX + mapWidth * .43, mapY + mapHeight * .20);
+            ctx.bezierCurveTo(mapX + mapWidth * .52, mapY + mapHeight * .02,
+                mapX + mapWidth * .65, mapY + mapHeight * .09, mapX + mapWidth * .67, mapY + mapHeight * .26);
+            ctx.bezierCurveTo(mapX + mapWidth * .82, mapY + mapHeight * .14,
+                mapX + mapWidth * .94, mapY + mapHeight * .26, mapX + mapWidth * .88, mapY + mapHeight * .42);
+            ctx.bezierCurveTo(mapX + mapWidth * 1.01, mapY + mapHeight * .55,
+                mapX + mapWidth * .92, mapY + mapHeight * .72, mapX + mapWidth * .81, mapY + mapHeight * .76);
+            ctx.bezierCurveTo(mapX + mapWidth * .87, mapY + mapHeight * .91,
+                mapX + mapWidth * .70, mapY + mapHeight * .99, mapX + mapWidth * .59, mapY + mapHeight * .91);
+            ctx.bezierCurveTo(mapX + mapWidth * .47, mapY + mapHeight * 1.02,
+                mapX + mapWidth * .34, mapY + mapHeight * .91, mapX + mapWidth * .27, mapY + mapHeight * .97);
+            ctx.closePath();
+        };
 
-        // Die Silhouette folgt dem vorhandenen topografischen Kartenmaterial:
-        // feine Höhenlinien bilden die freie Außenkante statt künstlicher Ellipsenringe.
+        // Organische, alpine Reliefsilhouette. Ihre Außenkante ist die äußerste Höhenlinie;
+        // darunter liegen die originalen, unregelmäßigen Lienzer-Dolomiten-Konturen.
         ctx.save();
-        ctx.shadowColor = 'rgba(0,0,0,.62)';
-        ctx.shadowBlur = 20;
-        ctx.shadowOffsetY = 7;
-        ctx.globalAlpha = .18;
-        ctx.drawImage(TERRAIN_FINE_IMAGE, mapX, mapY, mapWidth, mapHeight);
-        ctx.restore();
-
-        // Dunkle, leicht gewölbte Reliefgrundlage unter dem echten Höhenliniennetz.
+        traceTerrainBoundary();
         const base = ctx.createLinearGradient(mapX, mapY, mapX + mapWidth, mapY + mapHeight);
-        base.addColorStop(0, 'rgba(225,235,239,.14)');
-        base.addColorStop(.22, colourWithAlpha(palette.secondary, .27));
-        base.addColorStop(.58, 'rgba(18,35,48,.78)');
-        base.addColorStop(1, 'rgba(4,12,20,.94)');
-        ctx.save();
-        ctx.beginPath();
-        ctx.ellipse(centerX, centerY, mapWidth * .46, mapHeight * .47, -.08, 0, Math.PI * 2);
+        base.addColorStop(0, 'rgba(235,241,242,.94)');
+        base.addColorStop(.14, colourWithAlpha(palette.secondary, .92));
+        base.addColorStop(.42, colourWithAlpha(palette.primary, .74));
+        base.addColorStop(.72, 'rgba(23,42,56,.96)');
+        base.addColorStop(1, 'rgba(4,12,20,.99)');
         ctx.fillStyle = base;
-        ctx.shadowColor = colourWithAlpha(palette.primary, .24);
-        ctx.shadowBlur = 16;
+        ctx.shadowColor = colourWithAlpha(palette.primary, .42);
+        ctx.shadowBlur = 19;
+        ctx.shadowOffsetY = 7;
         ctx.fill();
-        ctx.restore();
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+        traceTerrainBoundary();
+        ctx.clip();
 
-        // Originale, detailreiche Dolomiten-Höhenlinien; die Dichte wird über
-        // die Deckkraft der feinen und der indexierten Linien animiert.
-        const detailAlpha = .42 + ratio * .42;
-        const indexAlpha = .30 + ratio * .34;
+        // Topografische Linien werden nicht künstlich vervielfacht: Das reale Kartenrelief
+        // liefert Form, Verlauf und Verzweigungen. Der Monatswert steuert Licht und Kontrast.
+        const detailAlpha = .50 + ratio * .38;
+        const indexAlpha = .42 + ratio * .34;
         drawTerrainTexture(ctx, TERRAIN_FINE_IMAGE, mapX, mapY, mapWidth, mapHeight,
-            ['#F4F0E6', palette.secondary, palette.primary], detailAlpha, 8);
+            ['#FFF9E9', palette.secondary, palette.primary], detailAlpha, 8);
         drawTerrainTexture(ctx, TERRAIN_INDEX_IMAGE, mapX, mapY, mapWidth, mapHeight,
-            ['#FFF7DF', palette.primary, '#526577'], indexAlpha, 10);
+            ['#FFFFFF', palette.primary, '#718391'], indexAlpha, 10);
 
-        // Metallischer Rand folgt der tatsächlichen, unregelmäßigen Ausdehnung der Karte.
-        ctx.save();
-        ctx.globalAlpha = .78;
-        ctx.drawImage(TERRAIN_FINE_IMAGE, mapX, mapY, mapWidth, mapHeight);
-        ctx.globalCompositeOperation = 'source-in';
-        ctx.fillStyle = applyGradient(ctx, mapX, mapY, mapX + mapWidth, mapY + mapHeight, [
-            [0, 'rgba(255,255,255,.92)'], [.35, palette.secondary], [.72, palette.primary], [1, 'rgba(18,31,43,.9)']
-        ]);
+        // Schräges Streiflicht erzeugt die plastische Reliefwirkung, ohne die Höhenlinien zu überdecken.
+        const light = ctx.createLinearGradient(mapX, mapY, mapX + mapWidth, mapY + mapHeight);
+        light.addColorStop(0, 'rgba(255,255,255,.20)');
+        light.addColorStop(.28, 'rgba(255,255,255,.035)');
+        light.addColorStop(.68, 'rgba(0,0,0,.015)');
+        light.addColorStop(1, 'rgba(0,0,0,.34)');
+        ctx.fillStyle = light;
         ctx.fillRect(mapX, mapY, mapWidth, mapHeight);
         ctx.restore();
+
+        traceTerrainBoundary();
+        ctx.strokeStyle = applyGradient(ctx, mapX, mapY, mapX + mapWidth, mapY + mapHeight, [
+            [0, '#FFFDF2'], [.24, palette.secondary], [.62, palette.primary], [1, '#354756']
+        ]);
+        ctx.lineWidth = 2.1;
+        ctx.shadowColor = colourWithAlpha(palette.primary, .75);
+        ctx.shadowBlur = 10;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
 
         // Wertplakette sitzt im Relief und übernimmt dessen Metall-/Glasmaterial.
         const shown = Number(value) || 0;
