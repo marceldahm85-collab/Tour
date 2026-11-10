@@ -250,24 +250,78 @@
         ctx.closePath();
     }
 
-    function drawHeader(ctx, canvas, title, total, subtitle) {
+    function drawHeader(ctx, canvas, title, total, options) {
         const width = logicalSize(canvas).width;
         const palette = chartPalette();
+        const config = options && typeof options === 'object' ? options : { subtitle: options };
         ctx.save();
         ctx.textBaseline = 'alphabetic';
-        ctx.textAlign = 'left';
-        ctx.fillStyle = palette.text;
-        ctx.font = editorFont(12, 800);
-        ctx.fillText(title, 22, 25, Math.max(120, width * .62));
-        ctx.textAlign = 'right';
-        ctx.fillStyle = palette.primary;
-        ctx.font = editorFont(12, 800);
-        ctx.fillText(total || '–', width - 22, 25, Math.max(75, width * .30));
-        if (subtitle) {
+
+        if (!config.hideTitle) {
+            ctx.textAlign = 'left';
+            ctx.fillStyle = palette.text;
+            ctx.font = editorFont(12, 800);
+            ctx.fillText(title, 22, 25, Math.max(120, width * .62));
+        }
+
+        if (config.headerUnit === 'averageSteps') {
+            const valueText = total || '–';
+            const unitText = 'durchschnittliche Schritte';
+            const valueFont = editorFont(12, 800);
+            const unitFont = editorFont(8, 700);
+            ctx.font = valueFont;
+            const valueWidth = ctx.measureText(valueText).width;
+            ctx.font = unitFont;
+            const unitWidth = ctx.measureText(unitText).width;
+            const iconWidth = 17;
+            const gap = 5;
+            const totalWidth = valueWidth + gap + iconWidth + 4 + unitWidth;
+            let x = width - 22 - totalWidth;
+
+            ctx.textAlign = 'left';
+            ctx.font = valueFont;
+            ctx.fillStyle = palette.primary;
+            ctx.fillText(valueText, x, 25);
+            x += valueWidth + gap;
+
+            // Dezentes, metallisch gezeichnetes Fußspuren-Symbol.
+            ctx.save();
+            ctx.translate(x, 12);
+            ctx.fillStyle = palette.secondary;
+            ctx.strokeStyle = 'rgba(255,255,255,.72)';
+            ctx.lineWidth = .65;
+            [[3.5, 6.5, -.32], [11.5, 2.5, .32]].forEach(([fx, fy, rotation]) => {
+                ctx.save();
+                ctx.translate(fx, fy);
+                ctx.rotate(rotation);
+                ctx.beginPath();
+                ctx.ellipse(0, 2.2, 2.1, 3.5, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(-.8, -2.1, 1.05, 0, Math.PI * 2);
+                ctx.arc(.8, -1.7, .85, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+            ctx.restore();
+            x += iconWidth + 4;
+
+            ctx.font = unitFont;
+            ctx.fillStyle = palette.muted;
+            ctx.fillText(unitText, x, 24, Math.max(40, width - 22 - x));
+        } else {
+            ctx.textAlign = 'right';
+            ctx.fillStyle = palette.primary;
+            ctx.font = editorFont(12, 800);
+            ctx.fillText(total || '–', width - 22, 25, Math.max(75, width * .30));
+        }
+
+        if (config.subtitle) {
             ctx.textAlign = 'left';
             ctx.fillStyle = palette.muted;
             ctx.font = editorFont(8, 650);
-            ctx.fillText(subtitle, 22, 39, width - 44);
+            ctx.fillText(config.subtitle, 22, 39, width - 44);
         }
         ctx.restore();
     }
@@ -319,7 +373,7 @@
         const size = logicalSize(canvas), palette = chartPalette();
         ctx.clearRect(0, 0, size.width, size.height);
         drawInstrumentSurface(ctx, size.width, size.height, palette);
-        drawHeader(ctx, canvas, title, total, options && options.subtitle);
+        drawHeader(ctx, canvas, title, total, options || {});
         const plot = {
             left: 18, right: size.width - 18,
             top: options && options.subtitle ? 68 : 50,
@@ -1234,22 +1288,30 @@
     function drawAverageStepsDiagram() {
         const data = getFilteredTours();
         const sums = Array(12).fill(0), counts = Array(12).fill(0);
+        const tourStepValues = [];
         data.forEach(entry => {
             const month = monthOf(entry);
             if (month === null) return;
             const steps = Number(calculateEntrySteps(entry)) || 0;
-            if (steps > 0) { sums[month] += steps; counts[month]++; }
+            if (steps > 0) {
+                sums[month] += steps;
+                counts[month]++;
+                tourStepValues.push(steps);
+            }
         });
         const values = sums.map((sum, index) => counts[index] ? sum / counts[index] : 0);
         const valid = values.filter(value => value > 0);
-        const average = typeof getBoundedAverage === 'function' ? getBoundedAverage(valid) || 0 :
-            (valid.length ? valid.reduce((sum, value) => sum + value, 0) / valid.length : 0);
+        // Jahresdurchschnitt: jede einzelne Tour zählt genau einmal (nicht jeder Monat gleich viel).
+        const average = tourStepValues.length
+            ? tourStepValues.reduce((sum, value) => sum + value, 0) / tourStepValues.length
+            : 0;
         const canvas = canvasById('avg-steps-canvas');
         if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
         const ctx = resizeCanvasToDisplaySize(canvas);
         if (!ctx) return;
-        const base = baseChart(canvas, ctx, 'Ø Schritte pro Tour',
-            average > 0 ? Math.round(average).toLocaleString('de-AT') : '–', { reliefStrength: .3 });
+        const base = baseChart(canvas, ctx, '',
+            average > 0 ? Math.round(average).toLocaleString('de-AT') : '–',
+            { reliefStrength: .3, hideTitle: true, headerUnit: 'averageSteps' });
         const { width, height, palette } = base;
         const max = Math.max(1, ...valid), left = 14, cols = 6, cellW = (width - 28) / cols;
         const rowY = [height * .39, height * .74];
