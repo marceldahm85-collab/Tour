@@ -10,15 +10,6 @@
 
     // Freigestellter alpiner Leder-Bergschuh in Seitenansicht, Spitze nach rechts.
     // Hoher Schaft, Knöchelstütze, Metallhaken und grobstollige Bergsohle.
-    // Lokales, fotografisches Osttirol-Panorama für die Gipfel-Verlaufsfläche.
-    const PEAKS_LANDSCAPE_IMAGE = new Image();
-    PEAKS_LANDSCAPE_IMAGE.crossOrigin = 'anonymous';
-    PEAKS_LANDSCAPE_IMAGE.onload = () => {
-        const canvas = canvasById('peaks-canvas');
-        if (canvas) drawPeaksDiagram();
-    };
-    PEAKS_LANDSCAPE_IMAGE.src = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Dolomites.jpg/1280px-Dolomites.jpg';
-
     const STEPS_SHOE_IMAGE = new Image();
     STEPS_SHOE_IMAGE.onload = () => {
         const canvas = canvasById('steps-canvas');
@@ -798,9 +789,200 @@
         canvas.__stepsAnimationFrame = requestAnimationFrame(renderFrame);
     }
 
+    function drawPeaksIllustratedTerrain(ctx, plot, baseline, palette, reveal) {
+        const alpha = Math.max(0, Math.min(1, reveal));
+        if (alpha <= 0) return;
+        ctx.save();
+        ctx.globalAlpha = alpha;
+
+        const sky = ctx.createLinearGradient(0, plot.top, 0, baseline);
+        sky.addColorStop(0, '#142A3A');
+        sky.addColorStop(.48, '#263F4D');
+        sky.addColorStop(1, '#101C27');
+        ctx.fillStyle = sky;
+        ctx.fillRect(plot.left, plot.top, plot.width, plot.height);
+
+        const glow = ctx.createRadialGradient(
+            plot.left + plot.width * .52, plot.top + plot.height * .22, 2,
+            plot.left + plot.width * .52, plot.top + plot.height * .22, plot.width * .62
+        );
+        glow.addColorStop(0, colourWithAlpha(palette.secondary, .20));
+        glow.addColorStop(.48, 'rgba(91,125,145,.10)');
+        glow.addColorStop(1, 'rgba(12,24,35,0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(plot.left, plot.top, plot.width, plot.height);
+
+        const polygon = (coords, fill, stroke, lineWidth) => {
+            ctx.beginPath();
+            coords.forEach(([x, y], index) => {
+                const px = plot.left + x * plot.width;
+                const py = plot.top + y * plot.height;
+                if (index === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            });
+            ctx.lineTo(plot.right, baseline);
+            ctx.lineTo(plot.left, baseline);
+            ctx.closePath();
+            ctx.fillStyle = fill;
+            ctx.fill();
+            if (stroke) {
+                ctx.strokeStyle = stroke;
+                ctx.lineWidth = lineWidth || .7;
+                ctx.stroke();
+            }
+        };
+
+        // Ferne, kühle Bergkette: mehrere klar unterscheidbare Höhenstufen.
+        polygon([
+            [0,.65],[.09,.48],[.16,.57],[.29,.19],[.39,.48],[.48,.36],
+            [.59,.58],[.72,.25],[.82,.52],[.91,.34],[1,.49]
+        ], '#405767', 'rgba(190,211,222,.20)', .8);
+
+        // Schneefelder auf den höheren, weiter entfernten Graten.
+        const snow = (coords, opacity) => {
+            ctx.beginPath();
+            coords.forEach(([x,y],i) => {
+                const px=plot.left+x*plot.width, py=plot.top+y*plot.height;
+                if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+            });
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(220,233,239,'+opacity+')';
+            ctx.fill();
+        };
+        snow([[.245,.32],[.29,.19],[.335,.34],[.306,.30],[.29,.34],[.276,.29]], .82);
+        snow([[.675,.38],[.72,.25],[.765,.39],[.735,.35],[.718,.39],[.704,.34]], .72);
+        snow([[.885,.42],[.91,.34],[.946,.44],[.919,.41],[.907,.44]], .56);
+
+        // Mittlere Felsstufe mit kantigen Graten und Schattenflanken.
+        polygon([
+            [0,.79],[.10,.65],[.20,.72],[.34,.43],[.43,.67],[.55,.49],
+            [.68,.73],[.80,.45],[.90,.68],[1,.55]
+        ], '#293F4C', 'rgba(161,187,201,.16)', .7);
+
+        const facet = (coords, fill, stroke) => {
+            ctx.beginPath();
+            coords.forEach(([x,y],i) => {
+                const px=plot.left+x*plot.width, py=plot.top+y*plot.height;
+                if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+            });
+            ctx.closePath();
+            ctx.fillStyle=fill;
+            ctx.fill();
+            if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=.65;ctx.stroke();}
+        };
+        // Facettierte Felsflächen – bewusst kantig statt fotorealistisch.
+        facet([[.29,.19],[.34,.43],[.305,.57],[.255,.42]], 'rgba(137,163,176,.34)', 'rgba(211,225,232,.12)');
+        facet([[.29,.19],[.255,.42],[.20,.72],[.235,.46]], 'rgba(14,31,43,.48)');
+        facet([[.72,.25],[.80,.45],[.755,.62],[.69,.47]], 'rgba(145,169,181,.30)', 'rgba(215,228,234,.10)');
+        facet([[.72,.25],[.69,.47],[.62,.73],[.665,.44]], 'rgba(12,29,41,.48)');
+        facet([[.55,.49],[.68,.73],[.59,.82],[.49,.67]], 'rgba(111,139,153,.22)');
+        facet([[.10,.65],[.20,.72],[.16,.88],[.04,.91]], 'rgba(7,21,31,.42)');
+        facet([[.90,.68],[1,.55],[1,.91],[.84,.88]], 'rgba(7,21,31,.42)');
+
+        // Dunkle alpine Waldkante mit einzelnen erkennbaren Tannen.
+        const tree = (x, baseY, h, width) => {
+            const px=plot.left+x*plot.width, by=plot.top+baseY*plot.height;
+            ctx.beginPath();
+            ctx.moveTo(px,by-h);
+            ctx.lineTo(px-width*.52,by-h*.48);
+            ctx.lineTo(px-width*.24,by-h*.48);
+            ctx.lineTo(px-width*.72,by-h*.12);
+            ctx.lineTo(px-width*.28,by-h*.12);
+            ctx.lineTo(px-width,by);
+            ctx.lineTo(px+width,by);
+            ctx.lineTo(px+width*.28,by-h*.12);
+            ctx.lineTo(px+width*.72,by-h*.12);
+            ctx.lineTo(px+width*.24,by-h*.48);
+            ctx.lineTo(px+width*.52,by-h*.48);
+            ctx.closePath();
+            ctx.fillStyle='rgba(8,22,29,.88)';
+            ctx.fill();
+        };
+        for(let i=0;i<34;i++){
+            const x=.015+i*.029;
+            const h=plot.height*(.055+((i*17)%9)*.006);
+            tree(x,.995,h,Math.max(1.4,plot.width*.006));
+        }
+
+        // Feine Höhenlinien im Vordergrund, in der Editor-Akzentfarbe.
+        ctx.lineWidth=.75;
+        for(let i=0;i<5;i++){
+            const y=plot.top+plot.height*(.76+i*.052);
+            ctx.beginPath();
+            ctx.moveTo(plot.left,y);
+            ctx.bezierCurveTo(
+                plot.left+plot.width*.24,y-plot.height*.055,
+                plot.left+plot.width*.42,y+plot.height*.045,
+                plot.left+plot.width*.64,y-plot.height*.018
+            );
+            ctx.bezierCurveTo(
+                plot.left+plot.width*.80,y-plot.height*.055,
+                plot.left+plot.width*.91,y+plot.height*.025,
+                plot.right,y-plot.height*.012
+            );
+            ctx.strokeStyle=colourWithAlpha(i===2?palette.secondary:palette.primary,i===2?.30:.13);
+            ctx.stroke();
+        }
+
+        const foreground = ctx.createLinearGradient(0, plot.top+plot.height*.66, 0, baseline);
+        foreground.addColorStop(0,'rgba(14,29,39,0)');
+        foreground.addColorStop(1,'rgba(5,13,20,.62)');
+        ctx.fillStyle=foreground;
+        ctx.fillRect(plot.left,plot.top,plot.width,plot.height);
+        ctx.restore();
+    }
+
+    function drawPeaksRidge(ctx, ridge, progress, palette) {
+        const amount = Math.max(0, Math.min(ridge.length - 1, progress * (ridge.length - 1)));
+        const whole = Math.floor(amount), fraction = amount - whole;
+        if (whole < 1) return;
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(ridge[0].x, ridge[0].y);
+        for (let i=1;i<=whole;i++) ctx.lineTo(ridge[i].x,ridge[i].y);
+        if (whole < ridge.length - 1 && fraction > 0) {
+            const a=ridge[whole], b=ridge[whole+1];
+            ctx.lineTo(a.x+(b.x-a.x)*fraction,a.y+(b.y-a.y)*fraction);
+        }
+        ctx.strokeStyle='rgba(7,15,23,.82)';
+        ctx.lineWidth=2.2;
+        ctx.lineJoin='miter';
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(ridge[0].x,ridge[0].y-.35);
+        for(let i=1;i<=whole;i++) ctx.lineTo(ridge[i].x,ridge[i].y-.35);
+        if(whole<ridge.length-1&&fraction>0){
+            const a=ridge[whole],b=ridge[whole+1];
+            ctx.lineTo(a.x+(b.x-a.x)*fraction,a.y+(b.y-a.y)*fraction-.35);
+        }
+        ctx.strokeStyle=colourWithAlpha(palette.primary,.96);
+        ctx.lineWidth=1.1;
+        ctx.shadowColor=colourWithAlpha(palette.secondary,.58);
+        ctx.shadowBlur=4;
+        ctx.stroke();
+        ctx.restore();
+    }
+
     function drawPeaksDiagram() {
         const canvas = canvasById('peaks-canvas');
         if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
+        if (canvas.__peaksAnimationFrame && window.cancelAnimationFrame) {
+            window.cancelAnimationFrame(canvas.__peaksAnimationFrame);
+            canvas.__peaksAnimationFrame = 0;
+        }
+        const isActive = canvas.classList.contains('active-chart-canvas');
+        if (isActive && !canvas.__peaksWasActive) {
+            canvas.__peaksAnimationStart = performance.now();
+            canvas.__peaksWasActive = true;
+        } else if (!isActive) {
+            canvas.__peaksWasActive = false;
+            canvas.__peaksAnimationStart = null;
+        }
+        const elapsed = isActive && Number.isFinite(canvas.__peaksAnimationStart)
+            ? Math.max(0, performance.now() - canvas.__peaksAnimationStart) : 1900;
+        const animationDuration = 1900;
+        const animationProgress = Math.min(1, elapsed / animationDuration);
+        const easeOut = value => 1 - Math.pow(1 - Math.max(0, Math.min(1, value)), 3);
+
         const ctx = resizeCanvasToDisplaySize(canvas);
         if (!ctx) return;
         const data = getFilteredTours();
@@ -810,7 +992,8 @@
             if (month !== null) counts[month] += Math.max(0, parseInt(entry.gipfel, 10) || 0);
         });
         const yearlyTotal = counts.reduce((sum, value) => sum + value, 0);
-        const base = baseChart(canvas, ctx, '', yearlyTotal.toLocaleString('de-AT') + ' Gipfel', { reliefStrength: .12 });
+        const displayedTotal = Math.round(yearlyTotal * easeOut(elapsed / 1550));
+        const base = baseChart(canvas, ctx, '', displayedTotal.toLocaleString('de-AT') + ' Gipfel', { reliefStrength: .12 });
         const { height, plot, palette } = base;
 
         const max = Math.max(1, ...counts);
@@ -825,7 +1008,6 @@
             month: index
         }));
 
-        // Zwischen zwei Monatsgipfeln fällt der Grat kurz und deutlich in ein Tal ab.
         const ridge = [];
         points.forEach((point, index) => {
             ridge.push(point);
@@ -838,7 +1020,6 @@
             }
         });
 
-        // Das obere Bilddrittel der Dolomiten liefert ein markantes, felsiges Bergmassiv.
         ctx.save();
         ctx.beginPath();
         ctx.moveTo(plot.left, baseline);
@@ -847,104 +1028,74 @@
         ctx.lineTo(plot.right, baseline);
         ctx.closePath();
         ctx.clip();
-
-        if (PEAKS_LANDSCAPE_IMAGE.complete && PEAKS_LANDSCAPE_IMAGE.naturalWidth > 0) {
-            const imageWidth = PEAKS_LANDSCAPE_IMAGE.naturalWidth;
-            const imageHeight = PEAKS_LANDSCAPE_IMAGE.naturalHeight;
-            const sourceHeight = imageHeight * .62;
-            const targetRatio = plot.width / Math.max(1, plot.height);
-            let sourceWidth = imageWidth;
-            let cropHeight = sourceHeight;
-            if (sourceWidth / cropHeight > targetRatio) {
-                sourceWidth = cropHeight * targetRatio;
-            } else {
-                cropHeight = sourceWidth / targetRatio;
-            }
-            const sourceX = (imageWidth - sourceWidth) * .5;
-            ctx.drawImage(PEAKS_LANDSCAPE_IMAGE, sourceX, 0, sourceWidth, cropHeight,
-                plot.left, plot.top, plot.width, plot.height);
-        } else {
-            const fallback = ctx.createLinearGradient(0, plot.top, 0, baseline);
-            fallback.addColorStop(0, '#536d7d');
-            fallback.addColorStop(.55, '#263b49');
-            fallback.addColorStop(1, '#111d27');
-            ctx.fillStyle = fallback;
-            ctx.fillRect(plot.left, plot.top, plot.width, plot.height);
-        }
-
-        const photoShade = ctx.createLinearGradient(0, plot.top, 0, baseline);
-        photoShade.addColorStop(0, 'rgba(7,17,27,.10)');
-        photoShade.addColorStop(.48, 'rgba(7,17,27,.22)');
-        photoShade.addColorStop(1, 'rgba(5,12,19,.70)');
-        ctx.fillStyle = photoShade;
-        ctx.fillRect(plot.left, plot.top, plot.width, plot.height);
+        drawPeaksIllustratedTerrain(ctx, plot, baseline, palette, easeOut(elapsed / 720));
         ctx.restore();
 
-        // Schmaler Grat mit feinem metallischem Lichtsaum.
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(ridge[0].x, ridge[0].y);
-        for (let i = 1; i < ridge.length; i++) ctx.lineTo(ridge[i].x, ridge[i].y);
-        ctx.strokeStyle = 'rgba(8,16,24,.78)';
-        ctx.lineWidth = 2.1;
-        ctx.lineJoin = 'miter';
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(ridge[0].x, ridge[0].y - .35);
-        for (let i = 1; i < ridge.length; i++) ctx.lineTo(ridge[i].x, ridge[i].y - .35);
-        ctx.strokeStyle = colourWithAlpha(palette.primary, .92);
-        ctx.lineWidth = 1.05;
-        ctx.lineJoin = 'miter';
-        ctx.shadowColor = colourWithAlpha(palette.secondary, .52);
-        ctx.shadowBlur = 4;
-        ctx.stroke();
-        ctx.restore();
+        // Die Höhenlinie entfaltet sich dezent von links nach rechts.
+        drawPeaksRidge(ctx, ridge, easeOut(elapsed / 1280), palette);
 
-        // Kleine, metallische Gipfelkreuze markieren ausschließlich Monate mit Gipfeln.
+        // Gipfelkreuze erscheinen nacheinander; der kurze Lichtimpuls bleibt zurückhaltend.
         points.forEach(point => {
             if (!(point.value > 0)) return;
+            const local = easeOut((elapsed - point.month * 74) / 360);
+            if (local <= 0) return;
             ctx.save();
             const x = point.x, y = point.y - 1;
             const selected = selectedMonths.peaks === point.month;
-            const scale = selected ? 1.12 : 1;
+            const scale = .58 + .42 * local;
             ctx.translate(x, y);
             ctx.scale(scale, scale);
+            ctx.globalAlpha = local;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
-            ctx.shadowColor = 'rgba(0,0,0,.85)';
+
+            const flash = Math.max(0, 1 - Math.max(0, elapsed - point.month * 74) / 210);
+            if (flash > 0) {
+                const halo = ctx.createRadialGradient(0,-3,1,0,-3,12);
+                halo.addColorStop(0,colourWithAlpha(palette.secondary,.72*flash));
+                halo.addColorStop(1,colourWithAlpha(palette.primary,0));
+                ctx.fillStyle=halo;
+                ctx.beginPath();
+                ctx.arc(0,-3,12,0,Math.PI*2);
+                ctx.fill();
+            }
+
+            ctx.shadowColor = 'rgba(0,0,0,.88)';
             ctx.shadowBlur = 3;
-            ctx.strokeStyle = 'rgba(12,18,23,.95)';
+            ctx.strokeStyle = 'rgba(8,15,21,.98)';
             ctx.lineWidth = 2.8;
             ctx.beginPath();
-            ctx.moveTo(0, -8); ctx.lineTo(0, 5);
-            ctx.moveTo(-3.2, -4.5); ctx.lineTo(3.2, -4.5);
+            ctx.moveTo(0,-8); ctx.lineTo(0,5);
+            ctx.moveTo(-3.2,-4.5); ctx.lineTo(3.2,-4.5);
             ctx.stroke();
-            const metal = ctx.createLinearGradient(-2, -8, 2, 5);
-            metal.addColorStop(0, '#FFFFFF');
-            metal.addColorStop(.35, palette.secondary);
-            metal.addColorStop(.72, palette.primary);
-            metal.addColorStop(1, '#64717B');
-            ctx.shadowBlur = 0;
-            ctx.strokeStyle = metal;
-            ctx.lineWidth = 1.45;
+
+            const metal = ctx.createLinearGradient(-2,-8,2,5);
+            metal.addColorStop(0,'#FFFFFF');
+            metal.addColorStop(.35,palette.secondary);
+            metal.addColorStop(.72,palette.primary);
+            metal.addColorStop(1,'#64717B');
+            ctx.shadowBlur=0;
+            ctx.strokeStyle=metal;
+            ctx.lineWidth=1.45;
             ctx.beginPath();
-            ctx.moveTo(0, -8); ctx.lineTo(0, 5);
-            ctx.moveTo(-3.2, -4.5); ctx.lineTo(3.2, -4.5);
+            ctx.moveTo(0,-8); ctx.lineTo(0,5);
+            ctx.moveTo(-3.2,-4.5); ctx.lineTo(3.2,-4.5);
             ctx.stroke();
-            ctx.fillStyle = '#FFFFFF';
-            ctx.font = editorFont(8.5, 850);
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'bottom';
-            ctx.shadowColor = 'rgba(0,0,0,.95)';
-            ctx.shadowBlur = 5;
-            ctx.fillText(String(point.value), 0, -11, segment + 2);
-            if (selected) {
+
+            ctx.fillStyle='#FFFFFF';
+            ctx.font=editorFont(8.5,850);
+            ctx.textAlign='center';
+            ctx.textBaseline='bottom';
+            ctx.shadowColor='rgba(0,0,0,.95)';
+            ctx.shadowBlur=5;
+            ctx.fillText(String(point.value),0,-11,segment+2);
+            if(selected){
                 ctx.beginPath();
-                ctx.arc(0, -1, 8.5, 0, Math.PI * 2);
-                ctx.strokeStyle = palette.primary;
-                ctx.lineWidth = 1.1;
-                ctx.shadowColor = palette.primary;
-                ctx.shadowBlur = 6;
+                ctx.arc(0,-1,8.5,0,Math.PI*2);
+                ctx.strokeStyle=palette.primary;
+                ctx.lineWidth=1.1;
+                ctx.shadowColor=palette.primary;
+                ctx.shadowBlur=6;
                 ctx.stroke();
             }
             ctx.restore();
@@ -957,6 +1108,12 @@
             key: 'peaks',
             formatter: value => Math.round(value) + ' Gipfel'
         };
+
+        if (isActive && elapsed < animationDuration && window.requestAnimationFrame) {
+            canvas.__peaksAnimationFrame = window.requestAnimationFrame(() => drawPeaksDiagram());
+        } else {
+            canvas.__peaksAnimationFrame = 0;
+        }
     }
 
     function drawSpeedDiagram() {
@@ -2144,6 +2301,23 @@
                 selectMonthlyValue(canvas, category, index);
             }, true);
         });
+
+        const peaksCanvas = canvasById('peaks-canvas');
+        const peaksChartTabs = document.getElementById('chart-tabs');
+        if (peaksChartTabs && peaksChartTabs.dataset.peaksAnimationLifecycle !== 'true') {
+            peaksChartTabs.dataset.peaksAnimationLifecycle = 'true';
+            peaksChartTabs.addEventListener('click', event => {
+                const tab = event.target.closest('[data-chart]');
+                if (tab && tab.dataset.chart !== 'peaks' && peaksCanvas) {
+                    peaksCanvas.__peaksWasActive = false;
+                    peaksCanvas.__peaksAnimationStart = null;
+                    if (peaksCanvas.__peaksAnimationFrame && window.cancelAnimationFrame) {
+                        window.cancelAnimationFrame(peaksCanvas.__peaksAnimationFrame);
+                        peaksCanvas.__peaksAnimationFrame = 0;
+                    }
+                }
+            }, true);
+        }
 
         const compass = canvasById('performance-index-canvas');
         const chartTabs = document.getElementById('chart-tabs');
