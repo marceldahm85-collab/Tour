@@ -2520,7 +2520,6 @@
             canvas.dataset.premiumExactTap = 'true';
             canvas.addEventListener('click', event => {
                 if (!canvas.classList.contains('active-chart-canvas') || !event.isTrusted) return;
-                event.stopImmediatePropagation();
                 const rect = canvas.getBoundingClientRect(), size = logicalSize(canvas);
                 const x = (event.clientX - rect.left) * size.width / rect.width;
                 const y = (event.clientY - rect.top) * size.height / rect.height;
@@ -2540,9 +2539,11 @@
                 if (category === 'gradient' || category === 'ascentRate') {
                     const trend = canvas.__premiumTrendGeometry;
                     if (!trend || y < trend.top - 8 || y > size.height - 4) return;
+                    event.stopImmediatePropagation();
                     selectAnimatedTerrainMonth(canvas, category, index);
                 } else {
                     if (y < 48 || y > size.height - 18) return;
+                    event.stopImmediatePropagation();
                     selectMonthlyValue(canvas, category, index);
                 }
             }, true);
