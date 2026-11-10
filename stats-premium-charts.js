@@ -12,11 +12,12 @@
     // Hoher Schaft, Knöchelstütze, Metallhaken und grobstollige Bergsohle.
     // Lokales, fotografisches Osttirol-Panorama für die Gipfel-Verlaufsfläche.
     const PEAKS_LANDSCAPE_IMAGE = new Image();
+    PEAKS_LANDSCAPE_IMAGE.crossOrigin = 'anonymous';
     PEAKS_LANDSCAPE_IMAGE.onload = () => {
         const canvas = canvasById('peaks-canvas');
         if (canvas) drawPeaksDiagram();
     };
-    PEAKS_LANDSCAPE_IMAGE.src = 'assets/osttirol-lienz-background.webp';
+    PEAKS_LANDSCAPE_IMAGE.src = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Dolomites.jpg/1280px-Dolomites.jpg';
 
     const STEPS_SHOE_IMAGE = new Image();
     STEPS_SHOE_IMAGE.onload = () => {
@@ -802,14 +803,15 @@
         if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
         const ctx = resizeCanvasToDisplaySize(canvas);
         if (!ctx) return;
-        const base = baseChart(canvas, ctx, 'Gipfel · Alpine Gipfellinie', '', { reliefStrength: .18 });
-        const { width, height, plot, palette } = base;
         const data = getFilteredTours();
         const counts = Array(12).fill(0);
         data.forEach(entry => {
             const month = monthOf(entry);
             if (month !== null) counts[month] += Math.max(0, parseInt(entry.gipfel, 10) || 0);
         });
+        const yearlyTotal = counts.reduce((sum, value) => sum + value, 0);
+        const base = baseChart(canvas, ctx, '', yearlyTotal.toLocaleString('de-AT') + ' Gipfel', { reliefStrength: .12 });
+        const { height, plot, palette } = base;
 
         const max = Math.max(1, ...counts);
         const segment = plot.width / 12;
@@ -836,7 +838,7 @@
             }
         });
 
-        // Fotorealistisches Osttirol-Panorama als Bildfläche unter dem datenbasierten Grat.
+        // Das obere Bilddrittel der Dolomiten liefert ein markantes, felsiges Bergmassiv.
         ctx.save();
         ctx.beginPath();
         ctx.moveTo(plot.left, baseline);
@@ -847,17 +849,20 @@
         ctx.clip();
 
         if (PEAKS_LANDSCAPE_IMAGE.complete && PEAKS_LANDSCAPE_IMAGE.naturalWidth > 0) {
-            const imageRatio = PEAKS_LANDSCAPE_IMAGE.naturalWidth / PEAKS_LANDSCAPE_IMAGE.naturalHeight;
-            const areaRatio = plot.width / Math.max(1, plot.height);
-            let drawWidth = plot.width, drawHeight = plot.height, drawX = plot.left, drawY = plot.top;
-            if (imageRatio > areaRatio) {
-                drawWidth = plot.height * imageRatio;
-                drawX = plot.left - (drawWidth - plot.width) * .5;
+            const imageWidth = PEAKS_LANDSCAPE_IMAGE.naturalWidth;
+            const imageHeight = PEAKS_LANDSCAPE_IMAGE.naturalHeight;
+            const sourceHeight = imageHeight * .62;
+            const targetRatio = plot.width / Math.max(1, plot.height);
+            let sourceWidth = imageWidth;
+            let cropHeight = sourceHeight;
+            if (sourceWidth / cropHeight > targetRatio) {
+                sourceWidth = cropHeight * targetRatio;
             } else {
-                drawHeight = plot.width / imageRatio;
-                drawY = plot.top - (drawHeight - plot.height) * .56;
+                cropHeight = sourceWidth / targetRatio;
             }
-            ctx.drawImage(PEAKS_LANDSCAPE_IMAGE, drawX, drawY, drawWidth, drawHeight);
+            const sourceX = (imageWidth - sourceWidth) * .5;
+            ctx.drawImage(PEAKS_LANDSCAPE_IMAGE, sourceX, 0, sourceWidth, cropHeight,
+                plot.left, plot.top, plot.width, plot.height);
         } else {
             const fallback = ctx.createLinearGradient(0, plot.top, 0, baseline);
             fallback.addColorStop(0, '#536d7d');
@@ -868,53 +873,78 @@
         }
 
         const photoShade = ctx.createLinearGradient(0, plot.top, 0, baseline);
-        photoShade.addColorStop(0, 'rgba(7,17,27,.12)');
-        photoShade.addColorStop(.48, 'rgba(7,17,27,.24)');
-        photoShade.addColorStop(1, 'rgba(5,12,19,.76)');
+        photoShade.addColorStop(0, 'rgba(7,17,27,.10)');
+        photoShade.addColorStop(.48, 'rgba(7,17,27,.22)');
+        photoShade.addColorStop(1, 'rgba(5,12,19,.70)');
         ctx.fillStyle = photoShade;
         ctx.fillRect(plot.left, plot.top, plot.width, plot.height);
         ctx.restore();
 
-        // Feine Kontur und metallischer Lichtsaum zeichnen den scharf ausgeprägten Grat nach.
+        // Schmaler Grat mit feinem metallischem Lichtsaum.
         ctx.save();
         ctx.beginPath();
         ctx.moveTo(ridge[0].x, ridge[0].y);
         for (let i = 1; i < ridge.length; i++) ctx.lineTo(ridge[i].x, ridge[i].y);
-        ctx.strokeStyle = 'rgba(8,16,24,.88)';
-        ctx.lineWidth = 4;
+        ctx.strokeStyle = 'rgba(8,16,24,.78)';
+        ctx.lineWidth = 2.1;
         ctx.lineJoin = 'miter';
         ctx.stroke();
         ctx.beginPath();
-        ctx.moveTo(ridge[0].x, ridge[0].y - .7);
-        for (let i = 1; i < ridge.length; i++) ctx.lineTo(ridge[i].x, ridge[i].y - .7);
-        ctx.strokeStyle = colourWithAlpha(palette.primary, .96);
-        ctx.lineWidth = 1.8;
+        ctx.moveTo(ridge[0].x, ridge[0].y - .35);
+        for (let i = 1; i < ridge.length; i++) ctx.lineTo(ridge[i].x, ridge[i].y - .35);
+        ctx.strokeStyle = colourWithAlpha(palette.primary, .92);
+        ctx.lineWidth = 1.05;
         ctx.lineJoin = 'miter';
-        ctx.shadowColor = colourWithAlpha(palette.secondary, .7);
-        ctx.shadowBlur = 7;
+        ctx.shadowColor = colourWithAlpha(palette.secondary, .52);
+        ctx.shadowBlur = 4;
         ctx.stroke();
         ctx.restore();
 
-        // Werte ausschließlich an tatsächlich erreichten Gipfelpunkten ausgeben.
+        // Kleine, metallische Gipfelkreuze markieren ausschließlich Monate mit Gipfeln.
         points.forEach(point => {
             if (!(point.value > 0)) return;
             ctx.save();
-            const markerY = point.y - 1;
-            drawMetalMarker(ctx, point.x, markerY, palette, 3.8);
+            const x = point.x, y = point.y - 1;
+            const selected = selectedMonths.peaks === point.month;
+            const scale = selected ? 1.12 : 1;
+            ctx.translate(x, y);
+            ctx.scale(scale, scale);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.shadowColor = 'rgba(0,0,0,.85)';
+            ctx.shadowBlur = 3;
+            ctx.strokeStyle = 'rgba(12,18,23,.95)';
+            ctx.lineWidth = 2.8;
+            ctx.beginPath();
+            ctx.moveTo(0, -8); ctx.lineTo(0, 5);
+            ctx.moveTo(-3.2, -4.5); ctx.lineTo(3.2, -4.5);
+            ctx.stroke();
+            const metal = ctx.createLinearGradient(-2, -8, 2, 5);
+            metal.addColorStop(0, '#FFFFFF');
+            metal.addColorStop(.35, palette.secondary);
+            metal.addColorStop(.72, palette.primary);
+            metal.addColorStop(1, '#64717B');
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = metal;
+            ctx.lineWidth = 1.45;
+            ctx.beginPath();
+            ctx.moveTo(0, -8); ctx.lineTo(0, 5);
+            ctx.moveTo(-3.2, -4.5); ctx.lineTo(3.2, -4.5);
+            ctx.stroke();
             ctx.fillStyle = '#FFFFFF';
             ctx.font = editorFont(8.5, 850);
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
-            ctx.shadowColor = 'rgba(0,0,0,.9)';
+            ctx.shadowColor = 'rgba(0,0,0,.95)';
             ctx.shadowBlur = 5;
-            ctx.fillText(String(point.value), point.x, markerY - 7, segment + 2);
-            if (selectedMonths.peaks === point.month) {
+            ctx.fillText(String(point.value), 0, -11, segment + 2);
+            if (selected) {
                 ctx.beginPath();
-                ctx.arc(point.x, markerY, 8, 0, Math.PI * 2);
+                ctx.arc(0, -1, 8.5, 0, Math.PI * 2);
                 ctx.strokeStyle = palette.primary;
-                ctx.lineWidth = 1.4;
+                ctx.lineWidth = 1.1;
                 ctx.shadowColor = palette.primary;
-                ctx.shadowBlur = 8;
+                ctx.shadowBlur = 6;
                 ctx.stroke();
             }
             ctx.restore();
