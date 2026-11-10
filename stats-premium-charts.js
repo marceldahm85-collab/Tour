@@ -1702,7 +1702,10 @@
         const yearChanged = canvas.__performanceIndexYearFilter !== yearFilter;
         if (isActive && (!canvas.__performanceIndexWasActive || yearChanged)) {
             selectedMonths.performanceIndex = defaultPerformanceIndexMonth();
-            if (!canvas.__performanceIndexWasActive) animatedGaugeValues.performanceIndex = 0;
+            if (!canvas.__performanceIndexHasOpened) {
+                animatedGaugeValues.performanceIndex = 0;
+                canvas.__performanceIndexHasOpened = true;
+            }
         }
         canvas.__performanceIndexYearFilter = yearFilter;
         canvas.__performanceIndexWasActive = isActive;
