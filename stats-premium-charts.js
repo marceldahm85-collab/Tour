@@ -1119,20 +1119,41 @@
     function drawSpeedDiagram() {
         const data = getFilteredTours();
         const distance = Array(12).fill(0), minutes = Array(12).fill(0);
+        const tourSpeeds = Array.from({ length: 12 }, () => []);
         data.forEach(entry => {
             const month = monthOf(entry);
             if (month === null) return;
-            distance[month] += parseFloat(String(entry.strecke || '').replace(',', '.')) || 0;
-            if (entry.zeit && String(entry.zeit).includes(':')) {
-                const parts = String(entry.zeit).split(':').map(Number);
-                if (Number.isFinite(parts[0]) && Number.isFinite(parts[1])) minutes[month] += parts[0] * 60 + parts[1];
-            }
+            const tourDistance = parseFloat(String(entry.strecke || '').replace(',', '.')) || 0;
+            const timeText = String(entry.zeit || '');
+            const parts = timeText.split(':').map(Number);
+            if (!(tourDistance > 0) || parts.length < 2 ||
+                !Number.isFinite(parts[0]) || !Number.isFinite(parts[1])) return;
+            const tourMinutes = parts[0] * 60 + parts[1];
+            if (!(tourMinutes > 0)) return;
+            distance[month] += tourDistance;
+            minutes[month] += tourMinutes;
+            tourSpeeds[month].push(tourDistance / (tourMinutes / 60));
         });
         const values = distance.map((value, index) => minutes[index] > 0 ? value / (minutes[index] / 60) : 0);
+        const ranges = tourSpeeds.map(speeds => speeds.length
+            ? { min: Math.min(...speeds), max: Math.max(...speeds) } : null);
         const totalDistance = distance.reduce((sum, value) => sum + value, 0);
         const totalMinutes = minutes.reduce((sum, value) => sum + value, 0);
         const overall = totalMinutes > 0 ? totalDistance / (totalMinutes / 60) : 0;
-        drawSpeedometer(canvasById('speed-canvas'), values, overall);
+
+        const canvas = canvasById('speed-canvas');
+        if (!canvas) return;
+        const isActive = canvas.classList.contains('active-chart-canvas');
+        const yearSelect = document.getElementById('stats-year-select');
+        const yearFilter = yearSelect ? String(yearSelect.value || 'all') : 'all';
+        const yearChanged = canvas.__speedYearFilter !== yearFilter;
+        if (isActive && (!canvas.__speedWasActive || yearChanged)) {
+            selectedMonths.speed = null;
+            animatedGaugeValues.speed = 0;
+        }
+        canvas.__speedYearFilter = yearFilter;
+        canvas.__speedWasActive = isActive;
+        drawSpeedometer(canvas, values, overall, ranges);
     }
 
     function drawGradientDiagram() {
@@ -1538,7 +1559,7 @@
 
     function drawTrendStrip(ctx, canvas, values, palette, selectedMonth) {
         const size = logicalSize(canvas), left = 28, right = size.width - 28;
-        const top = size.height - 58, bottom = size.height - 29;
+        const top = size.height - 72, bottom = size.height - 28;
         const max = Math.max(1, ...values.filter(value => value > 0)) * 1.08;
         ctx.save();
         ctx.beginPath(); ctx.moveTo(left, bottom); ctx.lineTo(right, bottom);
@@ -1575,28 +1596,26 @@
             }
         });
 
-        // Kleiner, metallischer Kompass als aktive Monatsmarkierung.
+        // Drei präzise, nach rechts gerichtete Speed-Chevrons markieren den Monat.
         if (selectedMonth !== null && points[selectedMonth]) {
-            const point = points[selectedMonth], r = 7.2;
+            const point = points[selectedMonth];
             ctx.save();
-            ctx.shadowColor = colourWithAlpha(palette.primary, .65); ctx.shadowBlur = 7;
-            ctx.beginPath(); ctx.arc(point.x, point.y, r, 0, Math.PI * 2);
-            const bezel = ctx.createLinearGradient(point.x-r, point.y-r, point.x+r, point.y+r);
-            bezel.addColorStop(0, '#FFF8E8'); bezel.addColorStop(.28, palette.secondary);
-            bezel.addColorStop(.62, palette.primary); bezel.addColorStop(1, '#263442');
-            ctx.fillStyle = bezel; ctx.fill(); ctx.shadowBlur = 0;
-            ctx.beginPath(); ctx.arc(point.x, point.y, r-1.5, 0, Math.PI*2);
-            ctx.fillStyle = '#172633'; ctx.fill();
-            ctx.save(); ctx.translate(point.x, point.y);
-            ctx.rotate(Math.PI / 4);
-            ctx.beginPath(); ctx.moveTo(0,-4.6); ctx.lineTo(2.1,0); ctx.lineTo(0,4.6); ctx.lineTo(-2.1,0); ctx.closePath();
-            ctx.fillStyle = '#D94B43'; ctx.fill();
-            ctx.beginPath(); ctx.moveTo(0,4.6); ctx.lineTo(2.1,0); ctx.lineTo(0,-4.6); ctx.lineTo(-2.1,0); ctx.closePath();
-            ctx.fillStyle = '#F1E8D5'; ctx.fill();
-            ctx.beginPath(); ctx.arc(0,0,1.1,0,Math.PI*2); ctx.fillStyle='#D5B36B'; ctx.fill();
-            ctx.restore();
-            ctx.beginPath(); ctx.arc(point.x, point.y, r, 0, Math.PI*2);
-            ctx.strokeStyle='rgba(255,255,255,.85)'; ctx.lineWidth=.7; ctx.stroke();
+            ctx.translate(point.x, point.y);
+            ctx.shadowColor = colourWithAlpha(palette.primary, .9);
+            ctx.shadowBlur = 7;
+            for (let i = 0; i < 3; i++) {
+                const x = (i - 1) * 4.5;
+                ctx.beginPath();
+                ctx.moveTo(x - 2.6, -4.1);
+                ctx.lineTo(x + 2.6, 0);
+                ctx.lineTo(x - 2.6, 4.1);
+                ctx.closePath();
+                ctx.fillStyle = i === 1 ? palette.secondary : palette.primary;
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,.88)';
+                ctx.lineWidth = .65;
+                ctx.stroke();
+            }
             ctx.restore();
         }
         ctx.font = editorFont(7.5, 650); ctx.fillStyle = palette.muted;
@@ -1766,15 +1785,14 @@
     }
     function renderSpeedometerFrame(canvas, overall, values, selectedMonth, angleValue) {
         const ctx = canvas.getContext('2d'), size = logicalSize(canvas), palette = chartPalette();
+        const ranges = canvas.__premiumSpeedRanges || [];
         ctx.clearRect(0, 0, size.width, size.height);
         drawInstrumentSurface(ctx, size.width, size.height, palette);
         const shown = selectedMonth === null ? overall : (values[selectedMonth] || 0);
-        drawHeader(ctx, canvas, 'Geschwindigkeit · Tachometer',
-            shown > 0 ? formatDecimalAT(shown, 1) + ' km/h' : '–');
 
-        const cx = size.width / 2, cy = Math.min(size.height * .52, size.height - 150);
-        const radius = Math.min(112, size.width * .30, Math.max(34, (size.height - 155) * .48));
-        const max = Math.max(6, Math.ceil(Math.max(overall, ...values) * 1.18 / 2) * 2);
+        const cx = size.width / 2, cy = Math.min(size.height * .43, size.height - 126);
+        const radius = Math.min(112, size.width * .30, Math.max(34, (size.height - 128) * .48));
+        const max = 6;
         const start = Math.PI, sweep = Math.PI;
 
         ctx.beginPath(); ctx.arc(cx, cy, radius + 9, start - .04, start + sweep + .04);
@@ -1786,6 +1804,23 @@
         ctx.strokeStyle = rim; ctx.lineWidth = 8; ctx.stroke();
         ctx.beginPath(); ctx.arc(cx, cy, radius + 2, start, start + sweep);
         ctx.strokeStyle = 'rgba(255,255,255,.38)'; ctx.lineWidth = 1; ctx.stroke();
+
+        // Monatliche Extremwerte als Akzentsegment auf dem äußeren Metallring.
+        const range = selectedMonth === null ? null : ranges[selectedMonth];
+        if (range && Number.isFinite(range.min) && Number.isFinite(range.max)) {
+            const rangeStart = start + sweep * Math.max(0, Math.min(6, range.min)) / 6;
+            const rangeEnd = start + sweep * Math.max(0, Math.min(6, range.max)) / 6;
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius + 14, rangeStart, Math.max(rangeStart + .012, rangeEnd));
+            ctx.strokeStyle = palette.primary;
+            ctx.lineWidth = 3.4;
+            ctx.lineCap = 'round';
+            ctx.shadowColor = colourWithAlpha(palette.primary, .85);
+            ctx.shadowBlur = 7;
+            ctx.stroke();
+            ctx.restore();
+        }
 
         for (let i = 0; i <= 40; i++) {
             const value = max * i / 40, a = start + sweep * i / 40, major = i % 5 === 0;
@@ -1801,27 +1836,37 @@
                 ctx.fillText(String(Math.round(value)), cx + Math.cos(a) * (radius - 28), cy + Math.sin(a) * (radius - 28));
             }
         }
-        ctx.beginPath(); ctx.arc(cx, cy, radius - 4, start + sweep * .82, start + sweep);
-        ctx.strokeStyle = 'rgba(197,54,49,.72)'; ctx.lineWidth = 3; ctx.stroke();
-        const angle = start + sweep * Math.max(0, Math.min(max, angleValue)) / max;
+        // Roter Warnbereich beginnt fest bei 5 km/h.
+        ctx.beginPath(); ctx.arc(cx, cy, radius - 4, start + sweep * (5 / 6), start + sweep);
+        ctx.strokeStyle = 'rgba(197,54,49,.82)'; ctx.lineWidth = 3; ctx.stroke();
+        const angle = start + sweep * Math.max(0, Math.min(6, angleValue)) / 6;
         drawGaugeNeedle(ctx, cx, cy, radius * .82, angle, palette, true);
 
+        // Wert und Einheit als gemeinsame Zeile; darunter bleibt kein Zusatzlabel.
+        const numberText = shown > 0 ? formatDecimalAT(shown, 1) : '–';
+        ctx.font = editorFont(24, 850);
+        const numberWidth = ctx.measureText(numberText).width;
+        ctx.font = editorFont(10, 800);
+        const unitWidth = ctx.measureText('km/h').width;
+        const valueLeft = cx - (numberWidth + 5 + unitWidth) / 2;
+        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
         ctx.fillStyle = palette.text; ctx.font = editorFont(24, 850);
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(shown > 0 ? formatDecimalAT(shown, 1) : '–', cx, cy + 32);
-        ctx.fillStyle = palette.muted; ctx.font = editorFont(9, 750);
-        ctx.fillText('km/h · MONATSMITTEL', cx, cy + 52);
+        ctx.fillText(numberText, valueLeft, cy + 34);
+        ctx.fillStyle = palette.muted; ctx.font = editorFont(10, 800);
+        ctx.fillText('km/h', valueLeft + numberWidth + 5, cy + 34);
+
         drawTrendStrip(ctx, canvas, values, palette, selectedMonth);
+        canvas.__premiumSpeedometerGeometry = { cx, cy, radius };
     }
 
     function animateGauge(type, target, drawFrame) {
         const previous = Number.isFinite(animatedGaugeValues[type])
-            ? animatedGaugeValues[type] : (type === 'performanceIndex' ? 0 : target);
+            ? animatedGaugeValues[type] : ((type === 'performanceIndex' || type === 'speed') ? 0 : target);
         if (!window.requestAnimationFrame || Math.abs(previous - target) < .2) {
             animatedGaugeValues[type] = target; drawFrame(target); return;
         }
         if (gaugeAnimationFrames[type] && window.cancelAnimationFrame) window.cancelAnimationFrame(gaugeAnimationFrames[type]);
-        const started = performance.now(), duration = type === 'performanceIndex' ? 1250 : 520, from = previous;
+        const started = performance.now(), duration = type === 'performanceIndex' ? 1250 : (type === 'speed' ? 1550 : 520), from = previous;
         const step = now => {
             const t = Math.min(1, (now - started) / duration);
             const eased = 1 - Math.pow(1 - t, 3);
@@ -1875,9 +1920,11 @@
             angle => renderCompassFrame(canvas, 0, values, selected, angle));
     }
 
-    function drawSpeedometer(canvas, values, overall) {
+    function drawSpeedometer(canvas, values, overall, ranges) {
         if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
         resizeCanvasToDisplaySize(canvas);
+        canvas.__premiumSpeedRanges = ranges || [];
+        canvas.__premiumSpeedOverall = overall;
         const selected = selectedMonths.speed, selectedValue = activeMonthValue(values, selected);
         const target = selectedValue === null ? overall : selectedValue;
         canvas.__premiumChartData = { values, unit: 'km/h', key: 'speed',
@@ -2368,16 +2415,28 @@
                 const rect = speed.getBoundingClientRect(), size = logicalSize(speed);
                 const x = (event.clientX - rect.left) * size.width / rect.width;
                 const y = (event.clientY - rect.top) * size.height / rect.height;
-                const geometry = speed.__premiumTrendGeometry;
-                if (!geometry || y < geometry.top - 8 || y > size.height - 24 ||
-                    x < geometry.left - 6 || x > geometry.right + 6) {
-                    selectedMonths.speed = null;
-                    drawSpeedDiagram();
+                const trend = speed.__premiumTrendGeometry;
+                if (trend && y >= trend.top - 8 && y <= size.height - 4 &&
+                    x >= trend.left - 6 && x <= trend.right + 6) {
+                    const index = Math.max(0, Math.min(11,
+                        Math.round((x - trend.left) / Math.max(1, trend.right - trend.left) * 11)));
+                    selectedMonths.speed = index;
+                    const values = speed.__premiumChartData && speed.__premiumChartData.values;
+                    const target = values ? Number(values[index]) || 0 : 0;
+                    const overall = speed.__premiumSpeedOverall || 0;
+                    animateGauge('speed', target,
+                        angle => renderSpeedometerFrame(speed, overall, values || Array(12).fill(0), index, angle));
+                    showChartTooltip(speed, index, target);
+                    adaptiveHaptic('selection');
                     return;
                 }
-                const index = Math.max(0, Math.min(11,
-                    Math.round((x - geometry.left) / Math.max(1, geometry.right - geometry.left) * 11)));
-                selectMonthlyValue(speed, 'speed', index);
+                const dial = speed.__premiumSpeedometerGeometry;
+                if (!dial || Math.hypot(x - dial.cx, y - dial.cy) > dial.radius + 18) return;
+                const monthIndex = selectedMonths.speed;
+                if (typeof openMonthCategoryModal === 'function') {
+                    openMonthCategoryModal('speed', monthIndex);
+                }
+                adaptiveHaptic('selection');
             }, true);
         }
     }
