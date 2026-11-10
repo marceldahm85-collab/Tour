@@ -2536,9 +2536,14 @@
                     index = Math.floor((x - left) / Math.max(1, right - left) * 12);
                     index = Math.max(0, Math.min(11, index));
                 }
-                if (y < 48 || y > size.height - 18) return;
-                if (category === 'gradient' || category === 'ascentRate') selectAnimatedTerrainMonth(canvas, category, index);
-                else selectMonthlyValue(canvas, category, index);
+                if (category === 'gradient' || category === 'ascentRate') {
+                    const trend = canvas.__premiumTrendGeometry;
+                    if (!trend || y < trend.top - 8 || y > size.height - 4) return;
+                    selectAnimatedTerrainMonth(canvas, category, index);
+                } else {
+                    if (y < 48 || y > size.height - 18) return;
+                    selectMonthlyValue(canvas, category, index);
+                }
             }, true);
         });
 
