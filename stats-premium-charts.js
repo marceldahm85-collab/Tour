@@ -1557,7 +1557,7 @@
         ctx.fillStyle = redGold ? '#C83D37' : palette.primary; ctx.fill();
     }
 
-    function drawTrendStrip(ctx, canvas, values, palette, selectedMonth) {
+    function drawTrendStrip(ctx, canvas, values, palette, selectedMonth, markerType) {
         const size = logicalSize(canvas), left = 28, right = size.width - 28;
         const top = size.height - 72, bottom = size.height - 28;
         const max = Math.max(1, ...values.filter(value => value > 0)) * 1.08;
@@ -1596,25 +1596,40 @@
             }
         });
 
-        // Drei präzise, nach rechts gerichtete Speed-Chevrons markieren den Monat.
         if (selectedMonth !== null && points[selectedMonth]) {
             const point = points[selectedMonth];
             ctx.save();
             ctx.translate(point.x, point.y);
             ctx.shadowColor = colourWithAlpha(palette.primary, .9);
             ctx.shadowBlur = 7;
-            for (let i = 0; i < 3; i++) {
-                const x = (i - 1) * 4.5;
+            if (markerType === 'performanceIndex') {
+                // Kleiner Kompass als Monatsmarker im Leistungsindex-Verlauf.
+                ctx.beginPath(); ctx.arc(0, 0, 5.2, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(8,18,28,.96)'; ctx.fill();
+                ctx.strokeStyle = palette.secondary; ctx.lineWidth = 1.1; ctx.stroke();
+                ctx.rotate(-Math.PI / 4);
                 ctx.beginPath();
-                ctx.moveTo(x - 2.6, -4.1);
-                ctx.lineTo(x + 2.6, 0);
-                ctx.lineTo(x - 2.6, 4.1);
-                ctx.closePath();
-                ctx.fillStyle = i === 1 ? palette.secondary : palette.primary;
+                ctx.moveTo(0, -4.1); ctx.lineTo(1.35, 0); ctx.lineTo(0, 4.1);
+                ctx.lineTo(-1.35, 0); ctx.closePath();
+                ctx.fillStyle = applyGradient(ctx, -1.35, -4.1, 1.35, 4.1,
+                    [[0, '#F7D9D2'], [.28, '#D94A4B'], [.52, '#D7E0E5'], [1, palette.secondary]]);
                 ctx.fill();
-                ctx.strokeStyle = 'rgba(255,255,255,.88)';
-                ctx.lineWidth = .65;
-                ctx.stroke();
+                ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = .55; ctx.stroke();
+            } else {
+                // Drei nach rechts gerichtete Speed-Chevrons markieren den Monat.
+                for (let i = 0; i < 3; i++) {
+                    const x = (i - 1) * 4.5;
+                    ctx.beginPath();
+                    ctx.moveTo(x - 2.6, -4.1);
+                    ctx.lineTo(x + 2.6, 0);
+                    ctx.lineTo(x - 2.6, 4.1);
+                    ctx.closePath();
+                    ctx.fillStyle = i === 1 ? palette.secondary : palette.primary;
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(255,255,255,.88)';
+                    ctx.lineWidth = .65;
+                    ctx.stroke();
+                }
             }
             ctx.restore();
         }
@@ -1798,7 +1813,7 @@
         ctx.textAlign='center'; ctx.textBaseline='middle';
         ctx.fillText(String(Math.round(shown)),0,radius*.43);
         ctx.restore();
-        drawTrendStrip(ctx,canvas,values,palette,selectedMonth);
+        drawTrendStrip(ctx,canvas,values,palette,selectedMonth,'performanceIndex');
     }
     function renderSpeedometerFrame(canvas, overall, values, selectedMonth, angleValue) {
         const ctx = canvas.getContext('2d'), size = logicalSize(canvas), palette = chartPalette();
@@ -1872,7 +1887,7 @@
         ctx.fillStyle = palette.muted; ctx.font = editorFont(10, 800);
         ctx.fillText('km/h', valueLeft + numberWidth + 5, cy + 34);
 
-        drawTrendStrip(ctx, canvas, values, palette, selectedMonth);
+        drawTrendStrip(ctx, canvas, values, palette, selectedMonth, 'speed');
         canvas.__premiumSpeedometerGeometry = { cx, cy, radius };
     }
 
