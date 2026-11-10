@@ -2436,7 +2436,6 @@
                     const overall = speed.__premiumSpeedOverall || 0;
                     animateGauge('speed', target,
                         angle => renderSpeedometerFrame(speed, overall, values || Array(12).fill(0), index, angle));
-                    showChartTooltip(speed, index, target);
                     adaptiveHaptic('selection');
                     return;
                 }
