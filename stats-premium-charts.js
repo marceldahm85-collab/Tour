@@ -10,6 +10,14 @@
 
     // Freigestellter alpiner Leder-Bergschuh in Seitenansicht, Spitze nach rechts.
     // Hoher Schaft, Knöchelstütze, Metallhaken und grobstollige Bergsohle.
+    // Lokales, fotografisches Osttirol-Panorama für die Gipfel-Verlaufsfläche.
+    const PEAKS_LANDSCAPE_IMAGE = new Image();
+    PEAKS_LANDSCAPE_IMAGE.onload = () => {
+        const canvas = canvasById('peaks-canvas');
+        if (canvas) drawPeaksDiagram();
+    };
+    PEAKS_LANDSCAPE_IMAGE.src = 'assets/osttirol-lienz-background.webp';
+
     const STEPS_SHOE_IMAGE = new Image();
     STEPS_SHOE_IMAGE.onload = () => {
         const canvas = canvasById('steps-canvas');
@@ -794,78 +802,115 @@
         if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
         const ctx = resizeCanvasToDisplaySize(canvas);
         if (!ctx) return;
-        const base = baseChart(canvas, ctx, 'Gipfel · Alpine Gipfellinie', '', { reliefStrength: .3 });
+        const base = baseChart(canvas, ctx, 'Gipfel · Alpine Gipfellinie', '', { reliefStrength: .18 });
         const { width, height, plot, palette } = base;
         const data = getFilteredTours();
         const counts = Array(12).fill(0);
         data.forEach(entry => {
             const month = monthOf(entry);
-            if (month !== null) counts[month] += parseInt(entry.gipfel, 10) || 0;
+            if (month !== null) counts[month] += Math.max(0, parseInt(entry.gipfel, 10) || 0);
         });
+
         const max = Math.max(1, ...counts);
         const segment = plot.width / 12;
-        const baseline = plot.bottom - 8;
+        const baseline = plot.bottom - 5;
+        const points = counts.map((count, index) => ({
+            x: plot.left + segment * (index + .5),
+            y: count > 0
+                ? baseline - Math.max(8, (count / max) * plot.height * .70)
+                : baseline - 1,
+            value: count,
+            month: index
+        }));
+
+        // Zwischen zwei Monatsgipfeln fällt der Grat kurz und deutlich in ein Tal ab.
+        const ridge = [];
+        points.forEach((point, index) => {
+            ridge.push(point);
+            if (index < points.length - 1) {
+                const next = points[index + 1];
+                ridge.push({
+                    x: (point.x + next.x) / 2,
+                    y: Math.min(baseline - 1, Math.max(point.y, next.y) + Math.max(7, plot.height * .115))
+                });
+            }
+        });
+
+        // Fotorealistisches Osttirol-Panorama als Bildfläche unter dem datenbasierten Grat.
+        ctx.save();
         ctx.beginPath();
         ctx.moveTo(plot.left, baseline);
+        ctx.lineTo(ridge[0].x, ridge[0].y);
+        for (let i = 1; i < ridge.length; i++) ctx.lineTo(ridge[i].x, ridge[i].y);
         ctx.lineTo(plot.right, baseline);
-        ctx.strokeStyle = 'rgba(224,235,244,.24)';
-        ctx.lineWidth = 1;
+        ctx.closePath();
+        ctx.clip();
+
+        if (PEAKS_LANDSCAPE_IMAGE.complete && PEAKS_LANDSCAPE_IMAGE.naturalWidth > 0) {
+            const imageRatio = PEAKS_LANDSCAPE_IMAGE.naturalWidth / PEAKS_LANDSCAPE_IMAGE.naturalHeight;
+            const areaRatio = plot.width / Math.max(1, plot.height);
+            let drawWidth = plot.width, drawHeight = plot.height, drawX = plot.left, drawY = plot.top;
+            if (imageRatio > areaRatio) {
+                drawWidth = plot.height * imageRatio;
+                drawX = plot.left - (drawWidth - plot.width) * .5;
+            } else {
+                drawHeight = plot.width / imageRatio;
+                drawY = plot.top - (drawHeight - plot.height) * .56;
+            }
+            ctx.drawImage(PEAKS_LANDSCAPE_IMAGE, drawX, drawY, drawWidth, drawHeight);
+        } else {
+            const fallback = ctx.createLinearGradient(0, plot.top, 0, baseline);
+            fallback.addColorStop(0, '#536d7d');
+            fallback.addColorStop(.55, '#263b49');
+            fallback.addColorStop(1, '#111d27');
+            ctx.fillStyle = fallback;
+            ctx.fillRect(plot.left, plot.top, plot.width, plot.height);
+        }
+
+        const photoShade = ctx.createLinearGradient(0, plot.top, 0, baseline);
+        photoShade.addColorStop(0, 'rgba(7,17,27,.12)');
+        photoShade.addColorStop(.48, 'rgba(7,17,27,.24)');
+        photoShade.addColorStop(1, 'rgba(5,12,19,.76)');
+        ctx.fillStyle = photoShade;
+        ctx.fillRect(plot.left, plot.top, plot.width, plot.height);
+        ctx.restore();
+
+        // Feine Kontur und metallischer Lichtsaum zeichnen den scharf ausgeprägten Grat nach.
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(ridge[0].x, ridge[0].y);
+        for (let i = 1; i < ridge.length; i++) ctx.lineTo(ridge[i].x, ridge[i].y);
+        ctx.strokeStyle = 'rgba(8,16,24,.88)';
+        ctx.lineWidth = 4;
+        ctx.lineJoin = 'miter';
         ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(ridge[0].x, ridge[0].y - .7);
+        for (let i = 1; i < ridge.length; i++) ctx.lineTo(ridge[i].x, ridge[i].y - .7);
+        ctx.strokeStyle = colourWithAlpha(palette.primary, .96);
+        ctx.lineWidth = 1.8;
+        ctx.lineJoin = 'miter';
+        ctx.shadowColor = colourWithAlpha(palette.secondary, .7);
+        ctx.shadowBlur = 7;
+        ctx.stroke();
+        ctx.restore();
 
-        counts.forEach((count, index) => {
-            const x0 = plot.left + index * segment, cx = x0 + segment * .5;
-            const h = count > 0 ? Math.max(2, (count / max) * plot.height * .68) : 0;
-            const top = baseline - h;
-            const shoulderL = x0 + segment * .10, shoulderR = x0 + segment * .90;
-            const sideY = baseline - h * (.43 + ((index * 7) % 4) * .055);
+        // Werte ausschließlich an tatsächlich erreichten Gipfelpunkten ausgeben.
+        points.forEach(point => {
+            if (!(point.value > 0)) return;
             ctx.save();
-            ctx.beginPath();
-            ctx.moveTo(x0 + segment * .03, baseline);
-            ctx.lineTo(shoulderL, sideY);
-            ctx.lineTo(cx - segment * .12, top + h * .17);
-            ctx.lineTo(cx, top);
-            ctx.lineTo(cx + segment * .16, top + h * .22);
-            ctx.lineTo(shoulderR, sideY);
-            ctx.lineTo(x0 + segment * .97, baseline);
-            ctx.closePath();
-            const mountain = ctx.createLinearGradient(0, top, 0, baseline);
-            mountain.addColorStop(0, colourWithAlpha(palette.primary, .78));
-            mountain.addColorStop(.5, colourWithAlpha(palette.secondary, .25));
-            mountain.addColorStop(1, 'rgba(8,15,24,.12)');
-            ctx.fillStyle = mountain;
-            ctx.fill();
-            ctx.strokeStyle = colourWithAlpha(palette.secondary, .62);
-            ctx.lineWidth = .9;
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(cx - segment * .12, top + h * .17);
-            ctx.lineTo(cx, top);
-            ctx.lineTo(cx + segment * .16, top + h * .22);
-            ctx.lineTo(cx + segment * .035, top + h * .15);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(245,249,252,.43)';
-            ctx.fill();
-
-            ctx.beginPath();
-            ctx.moveTo(cx, top);
-            ctx.lineTo(cx + segment * .16, top + h * .22);
-            ctx.lineTo(shoulderR, sideY);
-            ctx.lineTo(cx + segment * .05, baseline - h * .22);
-            ctx.closePath();
-            ctx.fillStyle = colourWithAlpha(palette.secondary, .15);
-            ctx.fill();
-
-            const markerY = top - 6;
-            drawMetalMarker(ctx, cx, markerY, palette, 4);
-            ctx.fillStyle = palette.text;
-            ctx.font = editorFont(8, 850);
+            const markerY = point.y - 1;
+            drawMetalMarker(ctx, point.x, markerY, palette, 3.8);
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = editorFont(8.5, 850);
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
-            ctx.fillText(String(count), cx, markerY - 6, segment + 2);
-            if (selectedMonths.peaks === index) {
+            ctx.shadowColor = 'rgba(0,0,0,.9)';
+            ctx.shadowBlur = 5;
+            ctx.fillText(String(point.value), point.x, markerY - 7, segment + 2);
+            if (selectedMonths.peaks === point.month) {
                 ctx.beginPath();
-                ctx.arc(cx, markerY, 8, 0, Math.PI * 2);
+                ctx.arc(point.x, markerY, 8, 0, Math.PI * 2);
                 ctx.strokeStyle = palette.primary;
                 ctx.lineWidth = 1.4;
                 ctx.shadowColor = palette.primary;
@@ -874,9 +919,14 @@
             }
             ctx.restore();
         });
+
         drawMonthLabels(ctx, plot, height, palette);
-        canvas.__premiumChartData = { values: counts, unit: 'Gipfel', key: 'peaks',
-            formatter: value => Math.round(value) + ' Gipfel' };
+        canvas.__premiumChartData = {
+            values: counts,
+            unit: 'Gipfel',
+            key: 'peaks',
+            formatter: value => Math.round(value) + ' Gipfel'
+        };
     }
 
     function drawSpeedDiagram() {
