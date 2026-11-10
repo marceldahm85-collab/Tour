@@ -2377,6 +2377,16 @@
                 }
             }, true);
         }
+        const speedLifecycle = canvasById('speed-canvas');
+        if (chartTabs && chartTabs.dataset.speedLifecycle !== 'true') {
+            chartTabs.dataset.speedLifecycle = 'true';
+            chartTabs.addEventListener('click', event => {
+                const tab = event.target.closest('[data-chart]');
+                if (tab && tab.dataset.chart !== 'speed' && speedLifecycle) {
+                    speedLifecycle.__speedWasActive = false;
+                }
+            }, true);
+        }
         if (compass && compass.dataset.premiumCompassTap !== 'true') {
             compass.dataset.premiumCompassTap = 'true';
             compass.addEventListener('click', event => {
