@@ -8,98 +8,113 @@
     const MONTH_NAMES = ['Jänner', 'Februar', 'März', 'April', 'Mai', 'Juni',
         'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
-    // Freigestellter, nach rechts gerichteter Ledermultifunktions-Wanderschuh.
-    // Als SVG bleibt er auch auf hochauflösenden Smartphone-Displays scharf.
+    // Freigestellter alpiner Leder-Bergschuh in Seitenansicht, Spitze nach rechts.
+    // Hoher Schaft, Knöchelstütze, Metallhaken und grobstollige Bergsohle.
     const STEPS_SHOE_IMAGE = new Image();
     STEPS_SHOE_IMAGE.onload = () => {
         const canvas = canvasById('steps-canvas');
         if (canvas && canvas.classList.contains('active-chart-canvas')) drawStepsDiagram();
     };
     STEPS_SHOE_IMAGE.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 132">
-          <defs>
-            <linearGradient id="leather" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#A97542"/>
-              <stop offset=".27" stop-color="#80512D"/>
-              <stop offset=".62" stop-color="#56351F"/>
-              <stop offset="1" stop-color="#2B1C16"/>
-            </linearGradient>
-            <linearGradient id="leatherLight" x1="0" y1="0" x2=".9" y2="1">
-              <stop offset="0" stop-color="#D3A16A"/>
-              <stop offset=".48" stop-color="#98663A"/>
-              <stop offset="1" stop-color="#54351F"/>
-            </linearGradient>
-            <linearGradient id="sole" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#55585A"/>
-              <stop offset=".26" stop-color="#25292D"/>
-              <stop offset="1" stop-color="#080D12"/>
-            </linearGradient>
-            <linearGradient id="welt" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#D4C1A2"/>
-              <stop offset=".36" stop-color="#71614F"/>
-              <stop offset="1" stop-color="#27231F"/>
-            </linearGradient>
-            <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#F7F1DD"/>
-              <stop offset=".45" stop-color="#AAB1B3"/>
-              <stop offset="1" stop-color="#414B52"/>
-            </linearGradient>
-            <linearGradient id="lace" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#E9D8B8"/>
-              <stop offset="1" stop-color="#78634C"/>
-            </linearGradient>
-            <filter id="shadow" x="-15%" y="-25%" width="135%" height="160%">
-              <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
-              <feOffset dx="1" dy="3" result="offset"/>
-              <feComponentTransfer><feFuncA type="linear" slope=".42"/></feComponentTransfer>
-              <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-          <g filter="url(#shadow)">
-            <!-- Profilierte Gummisohle und umlaufender Sohlenrand -->
-            <path d="M13 91 C25 88 37 87 49 88 L92 88 C111 88 132 89 153 86 L190 78 C207 77 224 83 231 93 L230 103 C220 109 193 111 166 111 L42 111 C25 110 13 106 10 100 C9 97 10 94 13 91Z" fill="url(#sole)" stroke="#0A0F13" stroke-width="2"/>
-            <path d="M15 91 C42 91 65 91 91 92 C128 93 167 88 193 82 C211 81 224 86 229 93 L226 99 C200 103 174 105 143 105 L33 103 C22 102 16 99 15 95Z" fill="url(#welt)" stroke="#D0C4AF" stroke-opacity=".42" stroke-width="1"/>
-            <path d="M20 105 L29 109 L37 105 L47 110 L58 106 L69 110 L81 106 L93 110 L105 106 L117 110 L129 106 L141 109 L153 104 L167 107 L181 102 L195 104 L209 98 L222 99" fill="none" stroke="#080D12" stroke-width="3" stroke-linejoin="round"/>
-            <!-- Hauptkörper des Lederschafts: Ferse links, Schuhspitze rechts -->
-            <path d="M15 91 C20 82 28 75 37 65 L48 34 C51 25 60 20 71 23 L96 31 C105 42 113 52 124 57 C139 63 164 65 190 71 C211 75 226 83 231 93 L227 99 C209 102 187 101 169 101 L42 100 C25 100 15 98 13 95Z" fill="url(#leather)" stroke="#24170F" stroke-width="2"/>
-            <!-- Fersenverstärkung -->
-            <path d="M17 88 C24 77 33 70 41 62 L52 35 C57 27 64 25 72 27 L76 31 L62 66 C53 80 44 91 38 99 L21 98Z" fill="#38271D" stroke="#C08A55" stroke-opacity=".72" stroke-width="1.4"/>
-            <path d="M23 86 C30 78 36 71 42 62" fill="none" stroke="#D4A16B" stroke-opacity=".68" stroke-width="1.3"/>
-            <!-- Knöchelpolster und Schaftrand -->
-            <path d="M42 38 C46 27 55 18 70 18 L91 25 L102 38 L91 49 L63 45 L51 63 L39 66Z" fill="url(#leatherLight)" stroke="#422A1B" stroke-width="2"/>
-            <path d="M46 35 C51 21 61 15 76 18 L97 26 L102 35 L91 39 L69 31 L55 48Z" fill="#4C3020" stroke="#D0A16F" stroke-width="1.2"/>
-            <path d="M50 27 C62 18 81 21 94 30" fill="none" stroke="#E4BD8D" stroke-opacity=".72" stroke-width="1.4"/>
-            <!-- Zunge und textile Manschette -->
-            <path d="M67 24 C77 21 87 26 96 35 L119 57 L105 67 L79 47 L61 39Z" fill="#5C3C28" stroke="#C08B5B" stroke-width="1.5"/>
-            <path d="M67 25 C75 24 85 29 93 38 L111 56" fill="none" stroke="#E0B783" stroke-opacity=".7" stroke-width="1.2"/>
-            <path d="M48 22 C54 13 69 10 83 15 L99 23 L96 29 L73 23 L57 30Z" fill="#292A29" stroke="#A77B53" stroke-width="1"/>
-            <!-- Seitliche Lederauflagen und Zehenschutz -->
-            <path d="M79 50 C100 64 118 72 145 75 C166 77 188 80 208 88 L205 96 C181 92 157 92 133 91 L88 86 C73 80 66 69 79 50Z" fill="url(#leatherLight)" fill-opacity=".64" stroke="#D4A16B" stroke-opacity=".85" stroke-width="1.3"/>
-            <path d="M133 65 C155 68 184 70 207 82 C218 87 224 92 225 97 L206 97 C188 89 166 86 145 84Z" fill="#332319" fill-opacity=".74" stroke="#B77E4E" stroke-width="1.1"/>
-            <path d="M182 75 C204 77 222 86 229 94 L225 99 C207 96 191 92 176 88Z" fill="#30231B" stroke="#D3A06B" stroke-opacity=".65" stroke-width="1.1"/>
-            <!-- Schnürleisten mit robusten Metallhaken und Ösen -->
-            <path d="M75 31 L109 56" stroke="#34251A" stroke-width="8" stroke-linecap="round"/>
-            <path d="M75 31 L109 56" stroke="#B78354" stroke-width="1.3" stroke-linecap="round"/>
-            <g fill="#20272B" stroke="url(#metal)" stroke-width="2">
-              <ellipse cx="78" cy="31" rx="3.4" ry="4.6" transform="rotate(-28 78 31)"/>
-              <ellipse cx="85" cy="38" rx="3.4" ry="4.6" transform="rotate(-28 85 38)"/>
-              <ellipse cx="93" cy="45" rx="3.4" ry="4.6" transform="rotate(-28 93 45)"/>
-              <ellipse cx="101" cy="51" rx="3.4" ry="4.6" transform="rotate(-28 101 51)"/>
-              <ellipse cx="110" cy="57" rx="3.4" ry="4.6" transform="rotate(-28 110 57)"/>
-            </g>
-            <path d="M77 30 L103 51 L86 42 L110 57 L94 48 L116 63" fill="none" stroke="url(#lace)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M74 35 L97 53 L82 48 L106 63 L91 56 L117 68" fill="none" stroke="#E2D0B1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-            <!-- Nähte und feine Lederkanten -->
-            <path d="M54 47 C61 41 71 40 81 47 M47 63 C61 69 70 77 82 84 M83 86 C118 96 167 95 203 91" fill="none" stroke="#E4B982" stroke-opacity=".74" stroke-width="1" stroke-dasharray="2 2.4"/>
-            <path d="M51 50 C45 66 38 81 29 92 M99 67 C119 78 149 80 176 85" fill="none" stroke="#281A12" stroke-opacity=".64" stroke-width="1.4"/>
-            <!-- Kleine Zuglasche, Schnürsenkelknoten und Highlights -->
-            <path d="M55 20 L57 7 Q63 3 69 7 L73 17" fill="none" stroke="#252728" stroke-width="5" stroke-linecap="round"/>
-            <path d="M57 8 Q63 4 69 8" fill="none" stroke="#B6A38C" stroke-width="1.1"/>
-            <path d="M107 57 Q119 58 123 51 Q127 50 129 55 L119 66 Q113 67 107 61Z" fill="#D0A06B" stroke="#49301F" stroke-width="1"/>
-            <path d="M123 53 L132 48 M123 54 L135 57" stroke="#E7D6B9" stroke-width="1.8" stroke-linecap="round"/>
-            <path d="M17 91 C37 91 56 92 78 93 M116 94 C155 95 190 91 214 90" fill="none" stroke="#F1D7B1" stroke-opacity=".32" stroke-width="1.1"/>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 156">
+        <defs>
+          <linearGradient id="upper" x1="0" y1="0" x2=".85" y2="1">
+            <stop offset="0" stop-color="#C18A52"/><stop offset=".28" stop-color="#89572F"/>
+            <stop offset=".68" stop-color="#56351F"/><stop offset="1" stop-color="#2B1B13"/>
+          </linearGradient>
+          <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#D4A36C"/><stop offset=".5" stop-color="#966039"/><stop offset="1" stop-color="#4A2D1B"/>
+          </linearGradient>
+          <linearGradient id="rubber" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#51575A"/><stop offset=".22" stop-color="#252B30"/><stop offset="1" stop-color="#080C10"/>
+          </linearGradient>
+          <linearGradient id="welt" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#D6C4A8"/><stop offset=".45" stop-color="#75614A"/><stop offset="1" stop-color="#29231D"/>
+          </linearGradient>
+          <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#FFF8E7"/><stop offset=".45" stop-color="#AEB8BC"/><stop offset="1" stop-color="#38434A"/>
+          </linearGradient>
+          <linearGradient id="lace" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#F2E4C9"/><stop offset="1" stop-color="#8A7255"/>
+          </linearGradient>
+          <filter id="bootShadow" x="-15%" y="-20%" width="135%" height="155%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="2.8"/>
+            <feOffset dx="1" dy="3" result="s"/>
+            <feComponentTransfer><feFuncA type="linear" slope=".42"/></feComponentTransfer>
+            <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <g filter="url(#bootShadow)">
+          <!-- Massive alpine outsole with deep, separated lugs -->
+          <path d="M17 111 Q30 105 48 106 L112 107 Q151 107 181 100 L215 91 Q237 92 247 105 L245 119
+            L235 123 L229 132 L216 127 L205 136 L190 130 L176 137 L160 131 L143 137 L126 132
+            L108 137 L91 132 L74 137 L57 132 L41 135 L27 129 L15 125 Q9 119 17 111Z"
+            fill="url(#rubber)" stroke="#080D11" stroke-width="2"/>
+          <path d="M17 109 Q61 111 108 111 Q165 110 215 96 Q236 96 245 107 L242 114
+            Q194 122 151 122 L37 122 Q22 120 17 115Z" fill="url(#welt)" stroke="#D8C7AA" stroke-opacity=".45" stroke-width="1.2"/>
+          <path d="M24 124 L34 131 L44 125 L55 133 L66 126 L78 134 L90 127 L102 134 L114 127
+            L126 134 L139 127 L151 133 L164 125 L177 130 L190 121 L204 125 L218 116 L232 116"
+            fill="none" stroke="#080C10" stroke-width="4" stroke-linejoin="round"/>
+          <!-- Tall leather upper and pronounced ankle-support shaft -->
+          <path d="M17 109 Q22 95 34 84 L48 42 Q51 25 67 19 L99 20 Q113 25 119 42
+            L129 68 Q146 76 174 79 L211 88 Q237 94 247 106 L241 115
+            Q214 121 184 119 L47 119 Q24 118 17 113Z"
+            fill="url(#upper)" stroke="#24170F" stroke-width="2"/>
+          <!-- Rear heel counter -->
+          <path d="M22 106 Q31 91 42 81 L54 43 Q60 29 73 28 L83 34 L69 79
+            Q58 99 43 116 L25 115Z" fill="#38251A" stroke="#C18C58" stroke-width="1.6"/>
+          <path d="M31 96 Q43 79 49 61 M36 105 Q49 90 58 71" fill="none" stroke="#D5A36D" stroke-opacity=".72" stroke-width="1.4"/>
+          <!-- High padded collar, clearly above ankle -->
+          <path d="M47 43 Q50 20 68 13 Q88 7 111 20 L123 43 L112 57
+            L83 51 L61 69 L43 68Z" fill="url(#panel)" stroke="#3A2518" stroke-width="2"/>
+          <path d="M53 37 Q58 16 77 15 Q98 13 116 31 L122 43
+            L108 48 L84 34 L62 53Z" fill="#4A3020" stroke="#D4A36F" stroke-width="1.4"/>
+          <path d="M59 27 Q78 12 101 25" fill="none" stroke="#E6C394" stroke-opacity=".8" stroke-width="1.7"/>
+          <!-- Protective padded cuff -->
+          <path d="M49 22 Q55 7 73 7 L105 13 Q117 17 122 30
+            L114 38 L91 27 L68 27 L54 39Z" fill="#292C2B" stroke="#B88757" stroke-width="1.6"/>
+          <path d="M56 16 Q77 5 103 17" fill="none" stroke="#E0C39A" stroke-opacity=".72" stroke-width="1.4"/>
+          <!-- Tongue and gusset -->
+          <path d="M77 25 Q91 20 104 31 L133 68 L119 79 L91 50 L70 42Z"
+            fill="#62432C" stroke="#C18A58" stroke-width="1.6"/>
+          <path d="M83 27 Q96 29 108 43 L126 68" fill="none" stroke="#E0B982" stroke-width="1.3"/>
+          <!-- Reinforced side panels and toe rand -->
+          <path d="M69 65 Q94 77 119 84 Q156 94 190 91 L226 101 L229 113
+            Q199 108 174 108 L96 103 Q70 96 60 81Z"
+            fill="url(#panel)" fill-opacity=".72" stroke="#D4A36F" stroke-opacity=".78" stroke-width="1.4"/>
+          <path d="M168 84 Q202 84 229 101 L239 111 L225 117
+            Q202 110 181 107 L157 100Z" fill="#292019" stroke="#D0A06B" stroke-width="1.3"/>
+          <path d="M194 91 Q224 94 241 108 L235 117 Q214 112 191 105Z"
+            fill="#34302A" stroke="#C18A58" stroke-width="1.2"/>
+          <!-- Robust lace stay and metal speed hooks -->
+          <path d="M91 29 L124 69" stroke="#33251B" stroke-width="10" stroke-linecap="round"/>
+          <path d="M91 29 L124 69" stroke="#B9824F" stroke-width="1.5"/>
+          <g fill="#252B2E" stroke="url(#steel)" stroke-width="2.2">
+            <ellipse cx="91" cy="28" rx="4" ry="5.2" transform="rotate(-35 91 28)"/>
+            <ellipse cx="99" cy="39" rx="4" ry="5.2" transform="rotate(-35 99 39)"/>
+            <ellipse cx="108" cy="50" rx="4" ry="5.2" transform="rotate(-35 108 50)"/>
+            <ellipse cx="117" cy="61" rx="4" ry="5.2" transform="rotate(-35 117 61)"/>
+            <path d="M125 68 q-5 -7 1 -10 q7 -2 8 5 q0 5 -5 7Z"/>
+            <path d="M133 75 q-5 -7 1 -10 q7 -2 8 5 q0 5 -5 7Z"/>
           </g>
-        </svg>
+          <path d="M89 29 L118 62 L101 48 L131 76 L112 61 L139 83"
+            fill="none" stroke="url(#lace)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M85 36 L111 64 L96 55 L124 82 L108 72 L143 91"
+            fill="none" stroke="#E7D8BE" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- Toe cap seam, stitching and leather grain highlights -->
+          <path d="M170 92 Q198 91 224 106 M57 53 Q66 44 78 45 M48 76 Q62 83 72 94
+            M86 101 Q131 113 183 106" fill="none" stroke="#E6BE8E" stroke-opacity=".72"
+            stroke-width="1.1" stroke-dasharray="2.4 2.5"/>
+          <path d="M51 58 Q43 83 31 103 M108 84 Q146 99 183 99"
+            fill="none" stroke="#24180F" stroke-opacity=".62" stroke-width="1.6"/>
+          <!-- Pull loop at the rear of the cuff -->
+          <path d="M57 13 L58 3 Q66 -1 73 4 L76 14" fill="none" stroke="#292B2B" stroke-width="5" stroke-linecap="round"/>
+          <path d="M58 5 Q66 1 73 6" fill="none" stroke="#C6B397" stroke-width="1.2"/>
+          <!-- Subtle polished leather edge lights -->
+          <path d="M53 42 Q59 23 76 20 M18 109 Q40 115 65 115 M143 112 Q190 116 226 108"
+            fill="none" stroke="#F2D7B1" stroke-opacity=".36" stroke-width="1.2"/>
+        </g>
+      </svg>
     `);
 
     function canvasById(id) {
@@ -580,7 +595,7 @@
                 return;
             }
 
-            const base = baseChart(canvas, ctx, '', Math.round(total).toLocaleString('de-AT'), {
+            const base = baseChart(canvas, ctx, '', Math.round(total).toLocaleString('de-AT') + ' Schritte', {
                 reliefStrength: .22
             });
             const { plot, palette, height, width } = base;
@@ -725,7 +740,10 @@
                 const spaceBelow = (plot.bottom - 2) - (labelTopBelow + labelHeight);
 
                 let labelAbove;
-                if (Math.abs(trendDelta) > 1.5) {
+                const isHighestValue = point.value === Math.max(...sums);
+                if (isHighestValue) {
+                    labelAbove = true;
+                } else if (Math.abs(trendDelta) > 1.5) {
                     labelAbove = trendDelta < 0;
                 } else {
                     labelAbove = spaceAbove >= spaceBelow;
