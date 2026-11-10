@@ -1826,13 +1826,13 @@
         ctx.shadowColor='rgba(0,0,0,.7)';ctx.shadowBlur=8;ctx.stroke();
         ctx.beginPath();ctx.arc(cx,cy,arcRadius,-Math.PI/2,0,false);
         ctx.strokeStyle=metal;ctx.lineWidth=3.6;ctx.shadowBlur=0;ctx.stroke();
-        ctx.beginPath();ctx.arc(cx,cy,arcRadius-2,-Math.PI/2,0,false);
+        ctx.beginPath();ctx.arc(cx,cy,arcRadius,-Math.PI/2,0,false);
         ctx.strokeStyle='rgba(255,255,255,.58)';ctx.lineWidth=.7;ctx.stroke();
         for(let i=0;i<=36;i++){
             const a=-Math.PI/2+(i/36)*(Math.PI/2);
             const major=i%9===0,medium=i%3===0,tick=major?9:(medium?6:3.2);
             ctx.beginPath();
-            ctx.moveTo(cx+Math.cos(a)*(arcRadius-1),cy+Math.sin(a)*(arcRadius-1));
+            ctx.moveTo(cx+Math.cos(a)*arcRadius,cy+Math.sin(a)*arcRadius);
             ctx.lineTo(cx+Math.cos(a)*(arcRadius-tick),cy+Math.sin(a)*(arcRadius-tick));
             ctx.strokeStyle=major?'rgba(255,255,255,.96)':(medium?'rgba(229,238,242,.82)':'rgba(210,222,228,.58)');
             ctx.lineWidth=major?1.3:(medium?.95:.65);ctx.stroke();
