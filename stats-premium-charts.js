@@ -1319,10 +1319,10 @@
                 const cx = left + cellW * (col + .5);
                 const cy = top + cellH * (row + .5);
                 const ratio = value > 0 ? value / max : 0;
-                const targetScale = value > 0 ? .30 + .70 * Math.pow(ratio, .75) : 0;
+                const targetScale = value > 0 ? .16 + .84 * Math.pow(ratio, .48) : 0;
                 const scale = targetScale * eased;
-                const soleW = Math.min(cellW * .60, 31) * scale;
-                const soleH = Math.min(cellH * .38, 20) * scale;
+                const soleW = Math.min(cellW * .82, 44) * scale;
+                const soleH = Math.min(cellH * .56, 29) * scale;
                 const label = value > 0 ? Math.round(value).toLocaleString('de-AT') : '–';
 
                 ctx.save();
@@ -1332,7 +1332,7 @@
                 ctx.font = editorFont(7.2, 800);
                 ctx.shadowColor = 'rgba(0,0,0,.72)';
                 ctx.shadowBlur = 3;
-                ctx.fillText(label, cx, cy - Math.min(cellH * .27, 14), cellW - 3);
+                ctx.fillText(label, cx, cy - Math.min(cellH * .43, 22), cellW - 3);
 
                 if (value > 0 && scale > .001) {
                     // Bergschuh-Sohlenabdruck: breite Zehenpartie, schmale Mitte,
@@ -1386,7 +1386,7 @@
                 ctx.textBaseline = 'alphabetic';
                 ctx.font = editorFont(8, 800);
                 ctx.fillStyle = selectedMonths.avgSteps === index ? palette.primary : palette.muted;
-                const monthY = cy + Math.min(cellH * .34, 19);
+                const monthY = cy + Math.min(cellH * .44, 22);
                 ctx.fillText(MONTHS[index], cx, monthY);
                 if (selectedMonths.avgSteps === index) {
                     ctx.beginPath();
