@@ -1623,8 +1623,22 @@
                     ctx.closePath();ctx.fillStyle=colour;ctx.fill();
                     ctx.strokeStyle='rgba(255,255,255,.92)';ctx.lineWidth=.7;ctx.stroke();
                 };
-                triangle(-4.1,.88,palette.primary);
-                triangle(4.1,1.08,palette.secondary);
+                triangle(0,.88,palette.primary);
+                triangle(0,1.08,palette.secondary);
+            } else if (markerType === 'ascentRate') {
+                // Kleiner zweigipfeliger Berg als Monatsmarker im Anstieg-Verlauf.
+                ctx.beginPath();
+                ctx.moveTo(-6,4);ctx.lineTo(-4.4,-.2);ctx.lineTo(-2.4,1.2);
+                ctx.lineTo(.1,-4.2);ctx.lineTo(2.1,-.5);ctx.lineTo(3.2,.8);
+                ctx.lineTo(4.8,-1.2);ctx.lineTo(6,4);ctx.closePath();
+                const mountainMarker=ctx.createLinearGradient(0,-4.2,0,4);
+                mountainMarker.addColorStop(0,'#F7FBFC');
+                mountainMarker.addColorStop(.42,palette.secondary);
+                mountainMarker.addColorStop(1,palette.primary);
+                ctx.fillStyle=mountainMarker;ctx.fill();
+                ctx.strokeStyle='rgba(255,255,255,.94)';ctx.lineWidth=.75;ctx.stroke();
+                ctx.beginPath();ctx.moveTo(-2.4,1.2);ctx.lineTo(.1,-4.2);ctx.lineTo(1.1,-.9);
+                ctx.strokeStyle='rgba(255,255,255,.88)';ctx.lineWidth=.65;ctx.stroke();
             } else {
                 // Drei nach rechts gerichtete Speed-Chevrons markieren den Monat.
                 for (let i = 0; i < 3; i++) {
@@ -1731,10 +1745,10 @@
             ctx.moveTo(px(.035),py(.91));
             ctx.lineTo(px(.145),py(.76));
             ctx.quadraticCurveTo(px(.205),py(.66),px(.255),py(.51));
-            ctx.quadraticCurveTo(px(.302),py(.37),px(.365),py(.245));
-            ctx.quadraticCurveTo(px(.405),py(.34),px(.455),py(.475));
+            ctx.quadraticCurveTo(px(.302),py(.30),px(.365),py(.17));
+            ctx.quadraticCurveTo(px(.405),py(.29),px(.455),py(.475));
             ctx.quadraticCurveTo(px(.505),py(.59),px(.555),py(.49));
-            ctx.quadraticCurveTo(px(.615),py(.36),px(.685),py(.17));
+            ctx.quadraticCurveTo(px(.615),py(.40),px(.685),py(.245));
             ctx.quadraticCurveTo(px(.735),py(.31),px(.785),py(.48));
             ctx.quadraticCurveTo(px(.855),py(.66),px(.965),py(.86));
         };
@@ -1744,12 +1758,12 @@
 
         // Facetten folgen den beiden Flanken und geben dem Relief alpine Felsstruktur.
         const facets=[
-            [[.145,.76],[.255,.51],[.365,.245],[.326,.57],[.255,.83]],
-            [[.255,.51],[.365,.245],[.455,.475],[.405,.72],[.326,.57]],
-            [[.365,.245],[.405,.34],[.455,.475],[.326,.57]],
-            [[.455,.475],[.555,.49],[.685,.17],[.615,.58],[.505,.72]],
-            [[.555,.49],[.685,.17],[.785,.48],[.715,.73],[.615,.58]],
-            [[.685,.17],[.735,.31],[.785,.48],[.715,.73]],
+            [[.145,.76],[.255,.51],[.365,.17],[.326,.57],[.255,.83]],
+            [[.255,.51],[.365,.17],[.455,.475],[.405,.72],[.326,.57]],
+            [[.365,.17],[.405,.29],[.455,.475],[.326,.57]],
+            [[.455,.475],[.555,.49],[.685,.245],[.615,.58],[.505,.72]],
+            [[.555,.49],[.685,.245],[.785,.48],[.715,.73],[.615,.58]],
+            [[.685,.245],[.735,.36],[.785,.48],[.715,.73]],
             [[.035,.91],[.145,.76],[.255,.83],[.33,.94],[.16,.98]],
             [[.785,.48],[.965,.86],[.86,.96],[.715,.86]]
         ];
@@ -1768,8 +1782,8 @@
 
         // Schneekappen und feine Firnlinien auf beiden Gipfeln.
         const snowPatches=[
-            [[.365,.245],[.392,.315],[.455,.475],[.423,.421],[.401,.435],[.381,.345]],
-            [[.685,.17],[.715,.275],[.785,.48],[.748,.414],[.725,.43],[.704,.315]]
+            [[.365,.17],[.392,.27],[.455,.475],[.423,.421],[.401,.365],[.381,.28]],
+            [[.685,.245],[.715,.34],[.785,.48],[.748,.414],[.725,.43],[.704,.36]]
         ];
         snowPatches.forEach((points,index)=>{
             ctx.beginPath();ctx.moveTo(px(points[0][0]),py(points[0][1]));
@@ -1790,10 +1804,10 @@
         ctx.beginPath();
         ctx.moveTo(px(.145),py(.76));
         ctx.quadraticCurveTo(px(.205),py(.66),px(.255),py(.51));
-        ctx.quadraticCurveTo(px(.302),py(.37),px(.365),py(.245));
-        ctx.quadraticCurveTo(px(.405),py(.34),px(.455),py(.475));
+        ctx.quadraticCurveTo(px(.302),py(.30),px(.365),py(.17));
+        ctx.quadraticCurveTo(px(.405),py(.29),px(.455),py(.475));
         ctx.quadraticCurveTo(px(.505),py(.59),px(.555),py(.49));
-        ctx.quadraticCurveTo(px(.615),py(.36),px(.685),py(.17));
+        ctx.quadraticCurveTo(px(.615),py(.40),px(.685),py(.245));
         ctx.quadraticCurveTo(px(.735),py(.31),px(.785),py(.48));
         ctx.strokeStyle=makeGradient(left,top,left+sceneW,baseY,[
             [0,'rgba(255,255,255,.42)'],[.35,palette.secondary],[.72,palette.primary],[1,'rgba(12,26,39,.18)']
@@ -1802,7 +1816,7 @@
 
         // Der Anstiegspfeil wächst vom Fußpunkt entlang der linken Flanke bis zur wertabhängigen Höhe.
         const startX=px(.145),startY=py(.76);
-        const summitX=px(.365),summitY=py(.245);
+        const summitX=px(.365),summitY=py(.17);
         const arrowProgress=ratio*ease;
         const endX=startX+(summitX-startX)*arrowProgress;
         const endY=startY+(summitY-startY)*arrowProgress;
@@ -1833,18 +1847,19 @@
             ctx.strokeStyle='rgba(255,255,255,.82)';ctx.lineWidth=.7;ctx.stroke();
             ctx.restore();
 
-            // Wert und Einheit sitzen direkt auf dem Pfeilschaft und folgen seiner Neigung.
-            if(arrowLength>35){
-                const labelX=startX+dx*.52,labelY=startY+dy*.52;
-                ctx.save();ctx.translate(labelX,labelY);ctx.rotate(arrowAngle);
+            // Wert und Einheit stehen gut lesbar oberhalb des Pfeils – ohne Hintergrundbox.
+            if(arrowLength>12){
+                const labelX=startX+dx*.52+Math.sin(arrowAngle)*13;
+                const labelY=startY+dy*.52-Math.cos(arrowAngle)*13;
                 const labelText=Math.round(shown*ease).toLocaleString('de-AT')+' '+(unit||'hm/h');
-                ctx.font=editorFont(Math.max(8,Math.min(10,sceneW*.027)),900);
-                const labelWidth=ctx.measureText(labelText).width+12,labelHeight=17;
-                roundedPath(ctx,-labelWidth/2,-labelHeight/2,labelWidth,labelHeight,5);
-                ctx.fillStyle='rgba(5,15,24,.88)';ctx.shadowColor='rgba(0,0,0,.65)';ctx.shadowBlur=5;ctx.fill();
-                ctx.strokeStyle='rgba(226,237,240,.78)';ctx.lineWidth=.75;ctx.stroke();
-                ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#FFFFFF';
-                ctx.shadowBlur=1.5;ctx.fillText(labelText,0,.3,labelWidth-7);
+                ctx.save();
+                ctx.font=editorFont(Math.max(9,Math.min(11,sceneW*.03)),900);
+                ctx.textAlign='center';ctx.textBaseline='bottom';
+                ctx.lineJoin='round';ctx.lineWidth=3.2;ctx.strokeStyle='rgba(3,12,20,.92)';
+                ctx.shadowColor='rgba(0,0,0,.72)';ctx.shadowBlur=4;
+                ctx.strokeText(labelText,labelX,labelY);
+                ctx.fillStyle='#FFFFFF';ctx.shadowBlur=2;
+                ctx.fillText(labelText,labelX,labelY);
                 ctx.restore();
             }
         } else {
