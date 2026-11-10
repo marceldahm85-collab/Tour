@@ -205,7 +205,7 @@
         bigTours: null, steps: null, peaks: null, performanceIndex: null,
         speed: null, gradient: null, ascentRate: null, avgSteps: null
     };
-    const animatedGaugeValues = { performanceIndex: null, speed: null };
+    const animatedGaugeValues = { performanceIndex: null, speed: null, gradient: null, ascentRate: null };
     const gaugeAnimationFrames = { performanceIndex: null, speed: null };
 
     function activeMonthValue(values, month) {
@@ -1156,27 +1156,38 @@
         drawSpeedometer(canvas, values, overall, ranges);
     }
 
+
     function drawGradientDiagram() {
         const data = getFilteredTours();
-        const sums = Array(12).fill(0);
-        const counts = Array(12).fill(0);
+        const sums = Array(12).fill(0), counts = Array(12).fill(0);
         data.forEach(entry => {
             const month = monthOf(entry);
             if (month === null) return;
-            const ascent = getAdjustedAscent(entry);
-            const distance = getAdjustedDistance(entry);
-            if (ascent > 0 && distance > 0) {
-                sums[month] += ascent / distance;
-                counts[month]++;
-            }
+            const ascent = getAdjustedAscent(entry), distance = getAdjustedDistance(entry);
+            if (ascent > 0 && distance > 0) { sums[month] += ascent / distance; counts[month]++; }
         });
-        const values = sums.map((sum, index) => counts[index] > 0 ? sum / counts[index] : 0);
-        const average = typeof getBoundedAverage === 'function'
-            ? getBoundedAverage(values.filter(value => value > 0)) || 0
-            : values.filter(value => value > 0).reduce((sum, value, _, all) => sum + value / all.length, 0);
-        drawMonthlyProfile(canvasById('gradient-canvas'), 'Ø Steigung · hm pro km',
-            average > 0 ? 'Ø ' + Math.round(average) + ' hm/km' : '–',
-            values, { style: 'lollipop', axisUnit: 'hm/km', unit: 'hm/km', selectionKey: 'gradient', valueLabel: value => Math.round(value) + ' hm/km' });
+        const values = sums.map((sum, index) => counts[index] ? sum / counts[index] : 0);
+        const valid = values.filter(value => value > 0);
+        const average = typeof getBoundedAverage === 'function' ? getBoundedAverage(valid) || 0 :
+            (valid.length ? valid.reduce((sum, value) => sum + value, 0) / valid.length : 0);
+        const canvas = canvasById('gradient-canvas');
+        if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
+        const isActive = canvas.classList.contains('active-chart-canvas');
+        const yearSelect = document.getElementById('stats-year-select');
+        const yearFilter = yearSelect ? String(yearSelect.value || 'all') : 'all';
+        if (isActive && (!canvas.__gradientWasActive || canvas.__gradientYearFilter !== yearFilter)) {
+            selectedMonths.gradient = null;
+            animatedGaugeValues.gradient = average;
+        }
+        canvas.__gradientWasActive = isActive;
+        canvas.__gradientYearFilter = yearFilter;
+        const selected = selectedMonths.gradient;
+        const target = selected === null ? average : (Number(values[selected]) || 0);
+        canvas.__premiumChartData = { values, unit: 'hm/km', key: 'gradient',
+            formatter: value => Math.round(value) + ' hm/km' };
+        resizeCanvasToDisplaySize(canvas);
+        renderGradientReliefFrame(canvas, values, selected, target);
+        animatedGaugeValues.gradient = target;
     }
 
     function drawAscentRateDiagram() {
@@ -1194,41 +1205,22 @@
             (valid.length ? valid.reduce((sum, value) => sum + value, 0) / valid.length : 0);
         const canvas = canvasById('ascent-rate-canvas');
         if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
-        const ctx = resizeCanvasToDisplaySize(canvas);
-        if (!ctx) return;
-        const base = baseChart(canvas, ctx, 'Aufstieg · Höhenmesser',
-            average > 0 ? 'Ø ' + Math.round(average) + ' hm/h' : '–', { reliefStrength: .2 });
-        const { plot, palette, height } = base;
-        const max = Math.max(100, ...valid) * 1.18;
-        drawAxes(ctx, plot);
-
-        values.forEach((value, index) => {
-            const x = monthX(index, plot), y = plot.bottom - value / max * plot.height;
-            if (value > 0) {
-                const trace = ctx.createLinearGradient(0, y, 0, plot.bottom);
-                trace.addColorStop(0, colourWithAlpha(palette.primary, .96));
-                trace.addColorStop(.5, colourWithAlpha(palette.secondary, .26));
-                trace.addColorStop(1, 'rgba(229,238,246,.04)');
-                ctx.beginPath(); ctx.moveTo(x, y + 5); ctx.lineTo(x, plot.bottom);
-                ctx.strokeStyle = trace; ctx.lineWidth = 2.2; ctx.stroke();
-                ctx.beginPath(); ctx.arc(x, y, 6.2, 0, Math.PI * 2); ctx.fillStyle = 'rgba(6,13,21,.96)'; ctx.fill();
-                drawMetalMarker(ctx, x, y, palette, 3.4);
-                ctx.fillStyle = palette.text; ctx.font = editorFont(8, 750);
-                ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-                ctx.fillText(String(Math.round(value)), x, y - 9, 29);
-            } else {
-                ctx.beginPath(); ctx.arc(x, plot.bottom, 2, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(225,235,245,.24)'; ctx.fill();
-            }
-            if (selectedMonths.ascentRate === index && value > 0) {
-                ctx.beginPath(); ctx.arc(x, y, 9, 0, Math.PI * 2);
-                ctx.strokeStyle = palette.primary; ctx.lineWidth = 1.5;
-                ctx.shadowColor = palette.primary; ctx.shadowBlur = 8; ctx.stroke(); ctx.shadowBlur = 0;
-            }
-        });
-        drawMonthLabels(ctx, plot, height, palette);
+        const isActive = canvas.classList.contains('active-chart-canvas');
+        const yearSelect = document.getElementById('stats-year-select');
+        const yearFilter = yearSelect ? String(yearSelect.value || 'all') : 'all';
+        if (isActive && (!canvas.__ascentRateWasActive || canvas.__ascentRateYearFilter !== yearFilter)) {
+            selectedMonths.ascentRate = null;
+            animatedGaugeValues.ascentRate = average;
+        }
+        canvas.__ascentRateWasActive = isActive;
+        canvas.__ascentRateYearFilter = yearFilter;
+        const selected = selectedMonths.ascentRate;
+        const target = selected === null ? average : (Number(values[selected]) || 0);
         canvas.__premiumChartData = { values, unit: 'hm/h', key: 'ascentRate',
             formatter: value => Math.round(value) + ' hm/h' };
+        resizeCanvasToDisplaySize(canvas);
+        renderAscentArrowFrame(canvas, values, selected, target);
+        animatedGaugeValues.ascentRate = target;
     }
 
     function drawAverageStepsDiagram() {
@@ -1642,6 +1634,152 @@
         canvas.__premiumTrendGeometry = { left, right, top, bottom, points };
     }
 
+
+    function renderGradientReliefFrame(canvas, values, selectedMonth, value) {
+        const ctx = canvas.getContext('2d'), size = logicalSize(canvas), palette = chartPalette();
+        ctx.clearRect(0, 0, size.width, size.height);
+        drawInstrumentSurface(ctx, size.width, size.height, palette);
+        const valid = values.filter(number => Number.isFinite(number) && number > 0);
+        const max = Math.max(1, ...valid);
+        const ratio = Math.max(0, Math.min(1, (Number(value) || 0) / max));
+        const cx = size.width * .5, cy = size.height * .405;
+        const rx = Math.min(size.width * .39, 142), ry = Math.min(size.height * .235, 91);
+        const outerPath = () => {
+            ctx.beginPath();
+            ctx.moveTo(cx - rx * .96, cy + ry * .12);
+            ctx.bezierCurveTo(cx - rx * 1.02, cy - ry * .42, cx - rx * .70, cy - ry * .82, cx - rx * .34, cy - ry * .65);
+            ctx.bezierCurveTo(cx - rx * .12, cy - ry * 1.05, cx + rx * .08, cy - ry * .94, cx + rx * .25, cy - ry * .62);
+            ctx.bezierCurveTo(cx + rx * .56, cy - ry * .91, cx + rx * .91, cy - ry * .56, cx + rx * .94, cy - ry * .08);
+            ctx.bezierCurveTo(cx + rx * 1.05, cy + ry * .38, cx + rx * .62, cy + ry * .83, cx + rx * .20, cy + ry * .76);
+            ctx.bezierCurveTo(cx - rx * .12, cy + ry * 1.03, cx - rx * .62, cy + ry * .74, cx - rx * .96, cy + ry * .12);
+            ctx.closePath();
+        };
+        ctx.save();
+        outerPath();
+        const terrain = ctx.createLinearGradient(cx - rx, cy - ry, cx + rx, cy + ry);
+        terrain.addColorStop(0, colourWithAlpha(palette.secondary, .72));
+        terrain.addColorStop(.34, colourWithAlpha(palette.primary, .42));
+        terrain.addColorStop(.72, 'rgba(24,39,51,.92)');
+        terrain.addColorStop(1, 'rgba(5,13,22,.98)');
+        ctx.fillStyle = terrain;
+        ctx.shadowColor = colourWithAlpha(palette.primary, .36);
+        ctx.shadowBlur = 18;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        outerPath(); ctx.clip();
+        const ringCount = Math.round(5 + ratio * 13);
+        for (let ring = ringCount; ring >= 1; ring--) {
+            const scale = .12 + (ring / ringCount) * .82;
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.scale(scale, scale * (.88 + .12 * Math.sin(ring * .7)));
+            ctx.translate(-cx, -cy);
+            ctx.beginPath();
+            ctx.moveTo(cx - rx * .96, cy + ry * .12);
+            ctx.bezierCurveTo(cx - rx * 1.02, cy - ry * .42, cx - rx * .70, cy - ry * .82, cx - rx * .34, cy - ry * .65);
+            ctx.bezierCurveTo(cx - rx * .12, cy - ry * 1.05, cx + rx * .08, cy - ry * .94, cx + rx * .25, cy - ry * .62);
+            ctx.bezierCurveTo(cx + rx * .56, cy - ry * .91, cx + rx * .91, cy - ry * .56, cx + rx * .94, cy - ry * .08);
+            ctx.bezierCurveTo(cx + rx * 1.05, cy + ry * .38, cx + rx * .62, cy + ry * .83, cx + rx * .20, cy + ry * .76);
+            ctx.bezierCurveTo(cx - rx * .12, cy + ry * 1.03, cx - rx * .62, cy + ry * .74, cx - rx * .96, cy + ry * .12);
+            ctx.closePath();
+            const major = ring === ringCount || ring % 4 === 0;
+            ctx.strokeStyle = colourWithAlpha(major ? palette.secondary : palette.primary, major ? .82 : .42);
+            ctx.lineWidth = major ? 1.55 / scale : .9 / scale;
+            ctx.stroke();
+            ctx.restore();
+        }
+        ctx.restore();
+        outerPath();
+        ctx.strokeStyle = 'rgba(255,255,255,.88)';
+        ctx.lineWidth = 1.7;
+        ctx.shadowColor = palette.primary; ctx.shadowBlur = 9; ctx.stroke(); ctx.shadowBlur = 0;
+
+        const shown = Number(value) || 0;
+        const valueText = shown > 0 ? String(Math.round(shown)) : '–';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.font = editorFont(Math.min(31, Math.max(23, size.width * .075)), 900);
+        ctx.fillStyle = '#FFFFFF'; ctx.shadowColor = 'rgba(0,0,0,.9)'; ctx.shadowBlur = 8;
+        ctx.fillText(valueText, cx, cy + 5);
+        ctx.shadowBlur = 0;
+        ctx.font = editorFont(10, 850); ctx.fillStyle = palette.secondary;
+        ctx.fillText('hm/km', cx, cy + 28);
+        if (selectedMonth !== null && selectedMonth >= 0) {
+            ctx.font = editorFont(9, 750); ctx.fillStyle = palette.text;
+            ctx.fillText(MONTH_NAMES[selectedMonth], cx, cy + ry * .53, rx * 1.1);
+        } else {
+            ctx.font = editorFont(8.5, 700); ctx.fillStyle = palette.muted;
+            ctx.fillText('Jahresdurchschnitt', cx, cy + ry * .53, rx * 1.1);
+        }
+        drawTrendStrip(ctx, canvas, values, palette, selectedMonth, 'gradient');
+        canvas.__premiumReliefGeometry = { cx, cy, rx, ry };
+    }
+
+    function renderAscentArrowFrame(canvas, values, selectedMonth, value) {
+        const ctx = canvas.getContext('2d'), size = logicalSize(canvas), palette = chartPalette();
+        ctx.clearRect(0, 0, size.width, size.height);
+        drawInstrumentSurface(ctx, size.width, size.height, palette);
+        const valid = values.filter(number => Number.isFinite(number) && number > 0);
+        const max = Math.max(1, ...valid);
+        const ratio = Math.max(0, Math.min(1, (Number(value) || 0) / max));
+        const angle = (13 + ratio * 43) * Math.PI / 180;
+        const cx = size.width * .5, cy = size.height * .405;
+        const length = Math.min(size.width * .72, 270), shaft = Math.max(19, Math.min(27, size.width * .075));
+        const head = Math.max(34, shaft * 1.65);
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(-angle);
+        ctx.beginPath();
+        ctx.moveTo(-length * .48, -shaft * .5);
+        ctx.lineTo(length * .25, -shaft * .5);
+        ctx.lineTo(length * .25, -head * .5);
+        ctx.lineTo(length * .5, 0);
+        ctx.lineTo(length * .25, head * .5);
+        ctx.lineTo(length * .25, shaft * .5);
+        ctx.lineTo(-length * .48, shaft * .5);
+        ctx.closePath();
+        const metal = ctx.createLinearGradient(0, -head * .5, 0, head * .5);
+        metal.addColorStop(0, '#FFFDF3');
+        metal.addColorStop(.20, palette.secondary);
+        metal.addColorStop(.52, palette.primary);
+        metal.addColorStop(.82, '#657583');
+        metal.addColorStop(1, '#172632');
+        ctx.fillStyle = metal;
+        ctx.shadowColor = colourWithAlpha(palette.primary, .48); ctx.shadowBlur = 17;
+        ctx.fill(); ctx.shadowBlur = 0;
+        ctx.strokeStyle = 'rgba(255,255,255,.82)'; ctx.lineWidth = 1.15; ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-length * .39, -shaft * .18); ctx.lineTo(length * .22, -shaft * .18);
+        ctx.strokeStyle = 'rgba(255,255,255,.58)'; ctx.lineWidth = 1.1; ctx.stroke();
+        ctx.restore();
+
+        // Der Zahlenwert folgt der Pfeilachse, bleibt aber horizontal lesbar.
+        const labelX = cx + Math.cos(angle) * length * .02;
+        const labelY = cy - Math.sin(angle) * length * .02;
+        const shown = Number(value) || 0;
+        const label = shown > 0 ? Math.round(shown).toLocaleString('de-AT') + ' hm/h' : '– hm/h';
+        ctx.save();
+        ctx.translate(labelX, labelY);
+        ctx.font = editorFont(13, 900);
+        const labelWidth = ctx.measureText(label).width + 18;
+        roundedPath(ctx, -labelWidth / 2, -12, labelWidth, 24, 8);
+        ctx.fillStyle = 'rgba(7,16,25,.91)';
+        ctx.shadowColor = 'rgba(0,0,0,.65)'; ctx.shadowBlur = 7; ctx.fill(); ctx.shadowBlur = 0;
+        ctx.strokeStyle = colourWithAlpha(palette.secondary, .86); ctx.lineWidth = 1; ctx.stroke();
+        ctx.fillStyle = '#FFFFFF'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(label, 0, .5);
+        ctx.restore();
+        if (selectedMonth !== null && selectedMonth >= 0) {
+            ctx.font = editorFont(9, 750); ctx.fillStyle = palette.muted;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(MONTH_NAMES[selectedMonth], cx, cy + Math.min(78, size.height * .19));
+        } else {
+            ctx.font = editorFont(8.5, 700); ctx.fillStyle = palette.muted;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('Jahresdurchschnitt', cx, cy + Math.min(78, size.height * .19));
+        }
+        drawTrendStrip(ctx, canvas, values, palette, selectedMonth, 'ascentRate');
+        canvas.__ascentArrowGeometry = { cx, cy, length, angle };
+    }
+
     function drawPerformanceNeedle(ctx, radius, angle, palette) {
         ctx.save();
         ctx.rotate(angle + Math.PI / 2);
@@ -1893,7 +2031,7 @@
 
     function animateGauge(type, target, drawFrame) {
         const previous = Number.isFinite(animatedGaugeValues[type])
-            ? animatedGaugeValues[type] : ((type === 'performanceIndex' || type === 'speed') ? 0 : target);
+            ? animatedGaugeValues[type] : ((type === 'performanceIndex' || type === 'speed' || type === 'gradient' || type === 'ascentRate') ? 0 : target);
         if (!window.requestAnimationFrame || Math.abs(previous - target) < .2) {
             animatedGaugeValues[type] = target; drawFrame(target); return;
         }
@@ -2337,7 +2475,22 @@
         else if (category === 'speed') drawSpeedDiagram();
         showChartTooltip(canvas, monthIndex, Number(values[monthIndex]) || 0);
         adaptiveHaptic('selection');
-        if (typeof openMonthCategoryModal === 'function') openMonthCategoryModal(category, monthIndex);
+        if (category !== 'gradient' && category !== 'ascentRate' && typeof openMonthCategoryModal === 'function') openMonthCategoryModal(category, monthIndex);
+    }
+
+
+    function selectAnimatedTerrainMonth(canvas, category, monthIndex) {
+        const values = canvas.__premiumChartData && canvas.__premiumChartData.values;
+        if (!Array.isArray(values)) return;
+        selectedMonths[category] = monthIndex;
+        const target = Number(values[monthIndex]) || 0;
+        if (category === 'gradient') {
+            animateGauge('gradient', target, value => renderGradientReliefFrame(canvas, values, monthIndex, value));
+        } else {
+            animateGauge('ascentRate', target, value => renderAscentArrowFrame(canvas, values, monthIndex, value));
+        }
+        showChartTooltip(canvas, monthIndex, target);
+        adaptiveHaptic('selection');
     }
 
     function selectPerformanceIndexMonth(canvas, monthIndex) {
@@ -2384,7 +2537,29 @@
                     index = Math.max(0, Math.min(11, index));
                 }
                 if (y < 48 || y > size.height - 18) return;
-                selectMonthlyValue(canvas, category, index);
+                if (category === 'gradient' || category === 'ascentRate') selectAnimatedTerrainMonth(canvas, category, index);
+                else selectMonthlyValue(canvas, category, index);
+            }, true);
+        });
+
+
+        ['gradient', 'ascentRate'].forEach(category => {
+            const canvas = canvasById(category === 'gradient' ? 'gradient-canvas' : 'ascent-rate-canvas');
+            if (!canvas || canvas.dataset.premiumTerrainMainTap === 'true') return;
+            canvas.dataset.premiumTerrainMainTap = 'true';
+            canvas.addEventListener('click', event => {
+                if (!canvas.classList.contains('active-chart-canvas') || !event.isTrusted) return;
+                const rect = canvas.getBoundingClientRect(), size = logicalSize(canvas);
+                const x = (event.clientX - rect.left) * size.width / rect.width;
+                const y = (event.clientY - rect.top) * size.height / rect.height;
+                const trend = canvas.__premiumTrendGeometry;
+                if (trend && y >= trend.top - 8 && y <= size.height - 4) return;
+                const selected = selectedMonths[category];
+                if (selected === null || selected === undefined) return;
+                if (typeof openMonthCategoryModal === 'function') {
+                    openMonthCategoryModal(category, selected);
+                }
+                adaptiveHaptic('selection');
             }, true);
         });
 
