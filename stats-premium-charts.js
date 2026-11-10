@@ -1604,6 +1604,16 @@
                     [[0, '#F7D9D2'], [.28, '#D94A4B'], [.52, '#D7E0E5'], [1, palette.secondary]]);
                 ctx.fill();
                 ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = .55; ctx.stroke();
+            } else if (markerType === 'gradient') {
+                // Zwei nach oben gerichtete Dreiecke markieren den ausgewählten Steigungsmonat.
+                const triangle=(x,scale,colour)=>{
+                    ctx.beginPath();ctx.moveTo(x,-5.2*scale);
+                    ctx.lineTo(x+4.2*scale,3.2*scale);ctx.lineTo(x-4.2*scale,3.2*scale);
+                    ctx.closePath();ctx.fillStyle=colour;ctx.fill();
+                    ctx.strokeStyle='rgba(255,255,255,.92)';ctx.lineWidth=.7;ctx.stroke();
+                };
+                triangle(-4.1,.88,palette.primary);
+                triangle(4.1,1.08,palette.secondary);
             } else {
                 // Drei nach rechts gerichtete Speed-Chevrons markieren den Monat.
                 for (let i = 0; i < 3; i++) {
@@ -1761,77 +1771,124 @@
 
     function renderAscentArrowFrame(canvas, values, selectedMonth, value, introProgress, unit, category) {
         const ctx=canvas.getContext('2d'),size=logicalSize(canvas),palette=chartPalette();
-        ctx.clearRect(0,0,size.width,size.height);drawInstrumentSurface(ctx,size.width,size.height,palette);
-        const valid=values.filter(number=>Number.isFinite(number)&&number>0),max=Math.max(1,...valid);
+        ctx.clearRect(0,0,size.width,size.height);
+        drawInstrumentSurface(ctx,size.width,size.height,palette);
+        const valid=values.filter(number=>Number.isFinite(number)&&number>0);
+        const max=Math.max(1,...valid);
         const progress=Math.max(0,Math.min(1,Number.isFinite(introProgress)?introProgress:1));
         const ease=1-Math.pow(1-progress,3);
         const ratio=Math.max(0,Math.min(1,(Number(value)||0)/max));
-        const angle=((12+ratio*42)*Math.PI/180)*ease;
-        const cx=size.width*.5,cy=Math.min(size.height*.39,size.height-142);
-        const length=Math.min(size.width*.76,286),shaft=Math.max(13,Math.min(19,size.width*.052));
-        const head=Math.max(35,shaft*2.25),pivotX=cx-length*.34,pivotY=cy+Math.min(12,size.height*.025);
-        const tip=length*.66;
+        const cx=size.width*.5;
+        const baselineY=Math.min(size.height-126,size.height*.59);
+        const radius=Math.max(44,Math.min(size.width*.385,baselineY-18,148));
+        const angle=(15+ratio*60)*Math.PI/180*ease;
+        const needleLength=radius*.91,head=Math.max(27,Math.min(39,radius*.29));
+        const shaft=Math.max(25,Math.min(31,radius*.235)),tip=needleLength;
+        const metal=ctx.createLinearGradient(0,baselineY-radius,0,baselineY+5);
+        metal.addColorStop(0,'#F8FBFC');metal.addColorStop(.18,'#C9D3D8');
+        metal.addColorStop(.46,'#71838E');metal.addColorStop(.72,'#344956');metal.addColorStop(1,'#101E28');
 
-        // Kompassnadel mit festem Lagerpunkt am hinteren Ende und realistischer Zweifarb-Metallspitze.
-        ctx.save();ctx.translate(pivotX,pivotY);ctx.rotate(-angle);
-        ctx.beginPath();ctx.moveTo(-5,-shaft*.48);ctx.lineTo(tip-head*.18,-shaft*.48);
-        ctx.lineTo(tip-head*.50,-head*.50);ctx.lineTo(tip,0);
-        ctx.lineTo(tip-head*.50,head*.50);ctx.lineTo(tip-head*.18,shaft*.48);
-        ctx.lineTo(-5,shaft*.48);ctx.closePath();
-        const body=ctx.createLinearGradient(0,-head*.5,0,head*.5);
-        body.addColorStop(0,'#F9FBF8');body.addColorStop(.18,'#D4DEE2');body.addColorStop(.46,'#8999A2');
-        body.addColorStop(.52,'#344957');body.addColorStop(.82,'#182B39');body.addColorStop(1,'#07131D');
-        ctx.fillStyle=body;ctx.shadowColor='rgba(0,0,0,.68)';ctx.shadowBlur=13;ctx.shadowOffsetY=5;
-        ctx.fill();ctx.shadowBlur=0;ctx.shadowOffsetY=0;ctx.strokeStyle='rgba(255,255,255,.82)';ctx.lineWidth=1.25;ctx.stroke();
+        // Halbkreis-Winkelmesser mit feiner, unbeschrifteter Teilung.
+        ctx.save();
+        ctx.beginPath();ctx.arc(cx,baselineY,radius,Math.PI,Math.PI*2);
+        ctx.strokeStyle='rgba(4,12,20,.82)';ctx.lineWidth=8;
+        ctx.shadowColor='rgba(0,0,0,.72)';ctx.shadowBlur=9;ctx.stroke();
+        ctx.beginPath();ctx.arc(cx,baselineY,radius,Math.PI,Math.PI*2);
+        ctx.strokeStyle=metal;ctx.lineWidth=4.2;ctx.shadowBlur=0;ctx.stroke();
+        ctx.beginPath();ctx.arc(cx,baselineY,radius-3,Math.PI,Math.PI*2);
+        ctx.strokeStyle='rgba(255,255,255,.58)';ctx.lineWidth=.75;ctx.stroke();
+        for(let i=0;i<=60;i++){
+            const a=Math.PI+(i/60)*Math.PI,major=i%10===0,medium=i%5===0;
+            const tickLength=major?12:(medium?8:4.2);
+            ctx.beginPath();
+            ctx.moveTo(cx+Math.cos(a)*(radius-2),baselineY+Math.sin(a)*(radius-2));
+            ctx.lineTo(cx+Math.cos(a)*(radius-tickLength),baselineY+Math.sin(a)*(radius-tickLength));
+            ctx.strokeStyle=major?'rgba(255,255,255,.96)':(medium?'rgba(229,238,242,.82)':'rgba(210,222,228,.56)');
+            ctx.lineWidth=major?1.45:(medium?1.05:.7);ctx.stroke();
+        }
+        ctx.restore();
 
-        ctx.beginPath();ctx.moveTo(tip,0);ctx.lineTo(tip-head*.50,-head*.50);
-        ctx.lineTo(tip-head*.18,-shaft*.12);ctx.lineTo(0,0);ctx.closePath();
-        const red=ctx.createLinearGradient(tip,0,tip-head*.45,-head*.5);
-        red.addColorStop(0,'#F8E4DC');red.addColorStop(.28,'#D94745');red.addColorStop(.72,'#A51F2B');red.addColorStop(1,'#5C1723');
-        ctx.fillStyle=red;ctx.fill();ctx.strokeStyle='rgba(255,232,222,.78)';ctx.lineWidth=.75;ctx.stroke();
+        // Zwei feste, metallische Schenkel bilden die Grundlinie des Winkelmessers.
+        const drawMetalArm=(x1,y1,x2,y2)=>{
+            ctx.save();ctx.lineCap='round';
+            ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+            ctx.strokeStyle='rgba(0,0,0,.68)';ctx.lineWidth=9;
+            ctx.shadowColor='rgba(0,0,0,.62)';ctx.shadowBlur=7;ctx.stroke();
+            ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+            ctx.strokeStyle=metal;ctx.lineWidth=5.2;ctx.shadowBlur=0;ctx.stroke();
+            ctx.beginPath();ctx.moveTo(x1,y1-1.1);ctx.lineTo(x2,y2-1.1);
+            ctx.strokeStyle='rgba(255,255,255,.72)';ctx.lineWidth=.85;ctx.stroke();
+            ctx.restore();
+        };
+        drawMetalArm(cx-radius,baselineY,cx,baselineY);
+        drawMetalArm(cx,baselineY,cx+radius,baselineY);
+        [-1,1].forEach(side=>{
+            const x=cx+side*radius;
+            ctx.save();ctx.beginPath();ctx.arc(x,baselineY,4.1,0,Math.PI*2);
+            const cap=ctx.createRadialGradient(x-1.3,baselineY-1.5,.5,x,baselineY,4.3);
+            cap.addColorStop(0,'#FFFFFF');cap.addColorStop(.35,'#C6D0D5');cap.addColorStop(1,'#344754');
+            ctx.fillStyle=cap;ctx.fill();ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=.7;ctx.stroke();ctx.restore();
+        });
 
-        ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(tip-head*.18,shaft*.12);
-        ctx.lineTo(tip-head*.50,head*.50);ctx.lineTo(tip,0);ctx.closePath();
+        // Bewegliche, zweifarbige Kompassnadel. Die Wertanzeige ist in den Schaft eingelassen.
+        ctx.save();ctx.translate(cx,baselineY);ctx.rotate(-angle);
+        ctx.beginPath();
+        ctx.moveTo(-2,-shaft*.38);ctx.lineTo(tip-head*.38,-shaft*.48);
+        ctx.lineTo(tip-head*.48,-head*.48);ctx.lineTo(tip,0);
+        ctx.lineTo(tip-head*.48,head*.48);ctx.lineTo(tip-head*.38,shaft*.48);
+        ctx.lineTo(-2,shaft*.38);ctx.closePath();
+        const body=ctx.createLinearGradient(0,-shaft*.5,0,shaft*.5);
+        body.addColorStop(0,'#FAFCFA');body.addColorStop(.17,'#D6E0E4');
+        body.addColorStop(.43,'#8799A3');body.addColorStop(.53,'#344957');
+        body.addColorStop(.82,'#192D3B');body.addColorStop(1,'#07131D');
+        ctx.fillStyle=body;ctx.shadowColor='rgba(0,0,0,.72)';ctx.shadowBlur=12;ctx.shadowOffsetY=4;
+        ctx.fill();ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+        ctx.strokeStyle='rgba(255,255,255,.84)';ctx.lineWidth=1.2;ctx.stroke();
+        ctx.beginPath();ctx.moveTo(tip,0);ctx.lineTo(tip-head*.48,-head*.48);
+        ctx.lineTo(tip-head*.18,-shaft*.10);ctx.lineTo(tip-head*.18,shaft*.10);ctx.closePath();
+        const red=ctx.createLinearGradient(tip,0,tip-head*.5,-head*.5);
+        red.addColorStop(0,'#F9E5DD');red.addColorStop(.28,'#D94745');
+        red.addColorStop(.72,'#A51F2B');red.addColorStop(1,'#5C1723');
+        ctx.fillStyle=red;ctx.fill();ctx.strokeStyle='rgba(255,232,222,.8)';ctx.lineWidth=.75;ctx.stroke();
+        ctx.beginPath();ctx.moveTo(tip-head*.18,-shaft*.10);
+        ctx.lineTo(tip-head*.48,head*.48);ctx.lineTo(tip,0);ctx.closePath();
         const steel=ctx.createLinearGradient(tip,0,tip-head*.5,head*.5);
         steel.addColorStop(0,'#FFFFFF');steel.addColorStop(.36,'#C5D0D5');
         steel.addColorStop(.76,'#667985');steel.addColorStop(1,'#273B48');
-        ctx.fillStyle=steel;ctx.fill();ctx.strokeStyle='rgba(241,247,249,.60)';ctx.lineWidth=.7;ctx.stroke();
+        ctx.fillStyle=steel;ctx.fill();ctx.strokeStyle='rgba(241,247,249,.62)';ctx.lineWidth=.7;ctx.stroke();
 
-        ctx.beginPath();ctx.moveTo(2,0);ctx.lineTo(tip-head*.48,-1);
-        ctx.strokeStyle='rgba(255,255,255,.58)';ctx.lineWidth=.9;ctx.stroke();
-        ctx.beginPath();ctx.moveTo(5,-shaft*.36);ctx.lineTo(tip-head*.25,-shaft*.36);
-        ctx.strokeStyle='rgba(255,255,255,.66)';ctx.lineWidth=1.05;ctx.stroke();
+        const shown=(Number(value)||0)*ease;
+        const valueText=shown>0?Math.round(shown).toLocaleString('de-AT'):'–';
+        const plateW=Math.min(82,needleLength*.57),plateH=shaft*.72;
+        const plateX=needleLength*.27,plateY=-plateH/2;
+        roundedPath(ctx,plateX,plateY,plateW,plateH,Math.min(7,plateH/2));
+        const plate=ctx.createLinearGradient(plateX,plateY,plateX,plateY+plateH);
+        plate.addColorStop(0,'rgba(15,29,40,.97)');plate.addColorStop(.5,'rgba(35,53,65,.98)');
+        plate.addColorStop(1,'rgba(5,14,22,.98)');
+        ctx.fillStyle=plate;ctx.fill();ctx.strokeStyle='rgba(238,246,249,.82)';ctx.lineWidth=.8;ctx.stroke();
+        ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.font=editorFont(Math.max(10,Math.min(13,plateH*.49)),900);
+        ctx.fillStyle='#FFFFFF';ctx.shadowColor='rgba(0,0,0,.8)';ctx.shadowBlur=3;
+        ctx.fillText(valueText,plateX+plateW/2,plateY+plateH*.43,plateW-5);
+        ctx.font=editorFont(Math.max(6,Math.min(7.2,plateH*.25)),850);
+        ctx.fillStyle='#E6DCC8';ctx.shadowBlur=0;
+        ctx.fillText(unit||'hm/km',plateX+plateW/2,plateY+plateH*.79,plateW-5);
+        ctx.restore();
 
-        ctx.beginPath();ctx.arc(0,0,shaft*.93,0,Math.PI*2);
-        const bearing=ctx.createRadialGradient(-shaft*.28,-shaft*.32,1,0,0,shaft);
+        // Zentraler, fein facettierter Lagerpunkt.
+        ctx.save();ctx.beginPath();ctx.arc(cx,baselineY,shaft*.52,0,Math.PI*2);
+        const bearing=ctx.createRadialGradient(cx-shaft*.18,baselineY-shaft*.2,1,cx,baselineY,shaft*.54);
         bearing.addColorStop(0,'#FFFFFF');bearing.addColorStop(.24,palette.secondary);
         bearing.addColorStop(.58,'#586B78');bearing.addColorStop(1,'#07131D');
-        ctx.fillStyle=bearing;ctx.shadowColor=colourWithAlpha(palette.primary,.75);ctx.shadowBlur=9;
-        ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='rgba(255,255,255,.88)';ctx.lineWidth=1.1;ctx.stroke();
-        ctx.beginPath();ctx.arc(0,0,shaft*.30,0,Math.PI*2);ctx.fillStyle='#101D27';ctx.fill();
-        ctx.beginPath();ctx.arc(-shaft*.10,-shaft*.11,shaft*.09,0,Math.PI*2);
-        ctx.fillStyle='rgba(255,255,255,.92)';ctx.fill();ctx.restore();
-
-        const shown=(Number(value)||0)*ease,valueText=shown>0?Math.round(shown).toLocaleString('de-AT'):'–';
-        const plaqueW=Math.min(142,size.width*.42),plaqueH=38,plaqueX=cx-plaqueW/2;
-        const plaqueY=cy+Math.min(62,size.height*.17);
-        ctx.save();roundedPath(ctx,plaqueX,plaqueY,plaqueW,plaqueH,11);
-        const plate=ctx.createLinearGradient(plaqueX,plaqueY,plaqueX+plaqueW,plaqueY+plaqueH);
-        plate.addColorStop(0,'rgba(240,246,247,.88)');plate.addColorStop(.22,colourWithAlpha(palette.secondary,.88));
-        plate.addColorStop(.58,'rgba(16,31,43,.96)');plate.addColorStop(1,'rgba(4,12,20,.98)');
-        ctx.fillStyle=plate;ctx.shadowColor='rgba(0,0,0,.65)';ctx.shadowBlur=10;ctx.fill();
-        ctx.strokeStyle='rgba(255,255,255,.72)';ctx.lineWidth=1;ctx.stroke();
-        ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=editorFont(19,900);ctx.fillStyle='#FFFFFF';
-        ctx.fillText(valueText,cx,plaqueY+17);ctx.font=editorFont(7.8,850);ctx.fillStyle='#E8E0CD';
-        ctx.fillText(unit||'hm/h',cx,plaqueY+30);ctx.restore();
-
-        ctx.font=editorFont(9,800);ctx.fillStyle=palette.text;ctx.textAlign='center';ctx.textBaseline='middle';
-        ctx.fillText(selectedMonth!==null&&selectedMonth>=0?MONTH_NAMES[selectedMonth]:'Jahresdurchschnitt',
-            cx,Math.min(size.height-78,plaqueY+plaqueH+13));
-        drawTrendStrip(ctx,canvas,values,palette,selectedMonth,category||'ascentRate');
-        canvas.__ascentArrowGeometry={cx:pivotX,cy:pivotY,length,angle,pivot:'rear'};
+        ctx.fillStyle=bearing;ctx.shadowColor=colourWithAlpha(palette.primary,.72);ctx.shadowBlur=8;
+        ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=1.05;ctx.stroke();
+        ctx.beginPath();ctx.arc(cx,baselineY,shaft*.17,0,Math.PI*2);
+        ctx.fillStyle='#14232D';ctx.fill();ctx.beginPath();
+        ctx.arc(cx-shaft*.07,baselineY-shaft*.08,shaft*.055,0,Math.PI*2);
+        ctx.fillStyle='rgba(255,255,255,.94)';ctx.fill();ctx.restore();
+        drawTrendStrip(ctx,canvas,values,palette,selectedMonth,category||'gradient');
+        canvas.__ascentArrowGeometry={cx,cy:baselineY,length:needleLength,angle,pivot:'center',scaleRadius:radius};
     }
-
     function drawPerformanceNeedle(ctx, radius, angle, palette) {
         ctx.save();
         ctx.rotate(angle + Math.PI / 2);
