@@ -1787,17 +1787,26 @@
         const metal=ctx.createLinearGradient(cx,cy-armLength,cx+armLength,cy);
         metal.addColorStop(0,'#F8FBFC');metal.addColorStop(.2,'#C9D3D8');
         metal.addColorStop(.48,'#71838E');metal.addColorStop(.74,'#344956');metal.addColorStop(1,'#101E28');
+        const blackArmMetal=ctx.createLinearGradient(cx,cy-armLength,cx+armLength,cy);
+        blackArmMetal.addColorStop(0,'#87939B');
+        blackArmMetal.addColorStop(.16,'#46515B');
+        blackArmMetal.addColorStop(.38,'#202B35');
+        blackArmMetal.addColorStop(.62,'#090F16');
+        blackArmMetal.addColorStop(.82,'#303B45');
+        blackArmMetal.addColorStop(1,'#080D13');
 
-        // Fester 90-Grad-Grundkörper: waagerechter und senkrechter Metallschenkel.
+        // Fester 90-Grad-Grundkörper: waagerechter und senkrechter Schenkel in schwarzer Kompass-Metalloptik.
         const drawMetalArm=(x1,y1,x2,y2)=>{
             ctx.save();ctx.lineCap='round';
             ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
             ctx.strokeStyle='rgba(0,0,0,.72)';ctx.lineWidth=9;
             ctx.shadowColor='rgba(0,0,0,.62)';ctx.shadowBlur=7;ctx.stroke();
             ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
-            ctx.strokeStyle=metal;ctx.lineWidth=5;ctx.shadowBlur=0;ctx.stroke();
+            ctx.strokeStyle=blackArmMetal;ctx.lineWidth=5;ctx.shadowBlur=0;ctx.stroke();
             ctx.beginPath();ctx.moveTo(x1+1,y1-1.05);ctx.lineTo(x2-1,y2-1.05);
-            ctx.strokeStyle='rgba(255,255,255,.76)';ctx.lineWidth=.8;ctx.stroke();
+            ctx.strokeStyle='rgba(226,235,241,.58)';ctx.lineWidth=.72;ctx.stroke();
+            ctx.beginPath();ctx.moveTo(x1+1.2,y1+1.05);ctx.lineTo(x2-1.2,y2+1.05);
+            ctx.strokeStyle='rgba(0,0,0,.62)';ctx.lineWidth=.65;ctx.stroke();
             ctx.restore();
         };
         drawMetalArm(cx,cy,cx,cy-armLength);
@@ -1855,20 +1864,30 @@
         silver.addColorStop(.82,'#667985');silver.addColorStop(1,'#273B48');
         ctx.fillStyle=silver;ctx.fill();ctx.strokeStyle='rgba(241,247,249,.7)';ctx.lineWidth=.6;ctx.stroke();
 
-        // Wert und Einheit liegen direkt auf dem Nadelschaft und drehen mit der Nadel.
+        // Wert und Einheit stehen nebeneinander direkt auf dem Nadelschaft und drehen mit der Nadel.
         const shown=(Number(value)||0)*ease;
         const valueText=shown>0?Math.round(shown).toLocaleString('de-AT'):'–';
-        const labelX=needleLength*.43,labelWidth=Math.min(needleLength*.34,54);
-        ctx.textAlign='center';ctx.textBaseline='middle';
-        ctx.font=editorFont(Math.max(8,Math.min(10.5,armLength*.062)),900);
-        ctx.lineWidth=2.6;ctx.strokeStyle='rgba(5,14,22,.96)';
-        ctx.strokeText(valueText,labelX,0,labelWidth);
+        const unitText=unit||'hm/km';
+        const labelX=needleLength*.43,labelWidth=Math.min(needleLength*.38,62);
+        ctx.textAlign='left';ctx.textBaseline='middle';
+        const valueFont=editorFont(Math.max(7.6,Math.min(9.6,armLength*.056)),900);
+        const unitFont=editorFont(Math.max(5.6,Math.min(6.8,armLength*.039)),850);
+        ctx.font=valueFont;
+        const valueWidth=ctx.measureText(valueText).width;
+        ctx.font=unitFont;
+        const unitWidth=ctx.measureText(unitText).width;
+        const totalWidth=valueWidth+3+unitWidth;
+        const labelStart=labelX-totalWidth/2;
+        ctx.font=valueFont;
+        ctx.lineWidth=2.6;ctx.strokeStyle='rgba(5,14,22,.98)';
+        ctx.strokeText(valueText,labelStart,0,Math.max(1,labelWidth));
         ctx.fillStyle='#FFFFFF';ctx.shadowColor='rgba(0,0,0,.9)';ctx.shadowBlur=3;
-        ctx.fillText(valueText,labelX,0,labelWidth);
-        ctx.font=editorFont(Math.max(5.8,Math.min(7,armLength*.041)),850);
-        ctx.lineWidth=2;ctx.strokeText(unit||'hm/km',labelX,needleWidth*.98,labelWidth);
+        ctx.fillText(valueText,labelStart,0,Math.min(valueWidth,labelWidth));
+        ctx.font=unitFont;
+        const unitX=labelStart+valueWidth+3;
+        ctx.lineWidth=2;ctx.strokeText(unitText,unitX,0,Math.max(1,labelWidth-(unitX-labelStart)));
         ctx.fillStyle='#F0E6D5';ctx.shadowBlur=2;
-        ctx.fillText(unit||'hm/km',labelX,needleWidth*.98,labelWidth);
+        ctx.fillText(unitText,unitX,0,Math.max(1,labelWidth-(unitX-labelStart)));
         ctx.restore();
 
         // Lagerpunkt liegt über der Nadel.
