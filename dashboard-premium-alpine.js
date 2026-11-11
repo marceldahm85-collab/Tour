@@ -14,11 +14,11 @@
     };
     /* Jedes Dashboard-Ziel bekommt ein eigenes Panorama. */
     const BACKDROP_ASSETS = {
-        asc: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg/1280px-Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg',
-        dist: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/20-06-2020_-_Alps_panorama.jpg/1280px-20-06-2020_-_Alps_panorama.jpg',
-        peaks: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Dolomites.jpg/1280px-Dolomites.jpg',
+        asc: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg/1280px-Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg',
+        dist: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/20-06-2020_-_Alps_panorama.jpg/1280px-20-06-2020_-_Alps_panorama.jpg',
+        peaks: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Dolomites.jpg/1280px-Dolomites.jpg',
         steps: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Tyrol_-_hiking_trail.jpg/1280px-Tyrol_-_hiking_trail.jpg',
-        time: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Alpenpanorama_bei_Sonnenuntergang.jpg/1280px-Alpenpanorama_bei_Sonnenuntergang.jpg'
+        time: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Alpenpanorama_bei_Sonnenuntergang.jpg/1280px-Alpenpanorama_bei_Sonnenuntergang.jpg'
     };
 
     /* Dieselben Bildausschnitte wie auf den fünf Dashboard-Meilensteinen. */
@@ -58,15 +58,15 @@
        Views/Modale dieselben Motive nutzen können, ohne Chart- oder Modal-Icons
        global umzubauen. Die Bildquellen sind mindestens 1280 px breit. */
     const DASH_STAT_PHOTOS = Object.freeze({
-        touren: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/Alp18-148_Alpenwanderung.jpg/1280px-Alp18-148_Alpenwanderung.jpg',
-        steps: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/70/Mointain_Boot_with_Crampons.jpg/1280px-Mointain_Boot_with_Crampons.jpg',
-        gipfel: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/57/Grossglockner_-_at_the_top_of_the_hill.jpg/1280px-Grossglockner_-_at_the_top_of_the_hill.jpg',
-        bigTours: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Dolomites.jpg/1280px-Dolomites.jpg',
-        strecke: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/20-06-2020_-_Alps_panorama.jpg/1280px-20-06-2020_-_Alps_panorama.jpg',
-        aufstieg: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/Hiking_signs_in_Austria_3.jpg/1280px-Hiking_signs_in_Austria_3.jpg',
-        gehzeit: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Alpenpanorama_bei_Sonnenuntergang.jpg/1280px-Alpenpanorama_bei_Sonnenuntergang.jpg',
-        speed: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Living_in_wonderland._-_Flickr_-_simon_berger.jpg/1280px-Living_in_wonderland._-_Flickr_-_simon_berger.jpg',
-        steigung: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/Trail_in_Geigenkamm.jpg/1280px-Trail_in_Geigenkamm.jpg',
+        touren: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Alp18-148_Alpenwanderung.jpg/1280px-Alp18-148_Alpenwanderung.jpg',
+        steps: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Mointain_Boot_with_Crampons.jpg/1280px-Mointain_Boot_with_Crampons.jpg',
+        gipfel: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Grossglockner_-_at_the_top_of_the_hill.jpg/1280px-Grossglockner_-_at_the_top_of_the_hill.jpg',
+        bigTours: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Dolomites.jpg/1280px-Dolomites.jpg',
+        strecke: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/20-06-2020_-_Alps_panorama.jpg/1280px-20-06-2020_-_Alps_panorama.jpg',
+        aufstieg: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Hiking_signs_in_Austria_3.jpg/1280px-Hiking_signs_in_Austria_3.jpg',
+        gehzeit: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Alpenpanorama_bei_Sonnenuntergang.jpg/1280px-Alpenpanorama_bei_Sonnenuntergang.jpg',
+        speed: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Living_in_wonderland._-_Flickr_-_simon_berger.jpg/1280px-Living_in_wonderland._-_Flickr_-_simon_berger.jpg',
+        steigung: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Trail_in_Geigenkamm.jpg/1280px-Trail_in_Geigenkamm.jpg',
         anstieg: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Tyrol_-_hiking_trail.jpg/1280px-Tyrol_-_hiking_trail.jpg'
     });
     window.PremiumAlpinePhotoAssets = Object.freeze({
