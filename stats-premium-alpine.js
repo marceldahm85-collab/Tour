@@ -480,22 +480,32 @@
     }
 
     function scrollStatsSectionToTop(root, section) {
-        // Die Statistik-Unterseite selbst ist der Scroll-Container.
-        // Erst nach dem Schließen der übrigen Bereiche messen, damit die
-        // Zielposition bereits dem endgültigen Layout entspricht.
-        requestAnimationFrame(() => {
+        if (!root || !section || window.innerWidth > 768) return;
+
+        // Übernahme des früheren Accordion-Verhaltens aus app-main.js:
+        // relativ zum echten Scroll-Container ausrichten und während der
+        // Öffnungsanimation mehrfach nachjustieren.
+        function getTargetTop() {
+            const containerRect = root.getBoundingClientRect();
+            const sectionRect = section.getBoundingClientRect();
+
+            return root.scrollTop + (sectionRect.top - containerRect.top);
+        }
+
+        function scrollNow() {
             if (!root.isConnected || !section.isConnected) return;
 
-            const rootRect = root.getBoundingClientRect();
-            const sectionRect = section.getBoundingClientRect();
-            const rootStyle = window.getComputedStyle(root);
-            const topPadding = parseFloat(rootStyle.paddingTop) || 0;
-            const offset = sectionRect.top - rootRect.top - root.clientTop - topPadding;
-
             root.scrollTo({
-                top: Math.max(0, root.scrollTop + offset),
+                top: Math.max(0, getTargetTop()),
                 behavior: 'smooth'
             });
+        }
+
+        requestAnimationFrame(() => {
+            scrollNow();
+            window.setTimeout(scrollNow, 180);
+            window.setTimeout(scrollNow, 420);
+            window.setTimeout(scrollNow, 700);
         });
     }
 
