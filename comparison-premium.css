@@ -309,17 +309,3 @@
         transition: none;
     }
 }
-
-
-/* Statistik: Bereichscontainer sind nur Layoutgruppen, keine Glas-Karten.
-   Die Header stehen dadurch frei wie in Suche & Vergleich; innere Kennzahlen-
-   und Ergebnis-Karten behalten ihre eigenen Oberflächen. */
-#chart-view #stats-statistics-page .stats-structure-section,
-#chart-view #stats-statistics-page .stats-analysis-section {
-    background: transparent !important;
-    background-image: none !important;
-    border: 0 !important;
-    box-shadow: none !important;
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
-}
