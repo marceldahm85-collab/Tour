@@ -23351,19 +23351,26 @@ function buildThemeEditorLiveCss() {
         const softRadius = Math.max(0, radius - 4);
         const blur = Math.max(0, Math.min(24, Number(settings.blurIntensity)));
 
+        // Statistik-Panels sind eigenständige Oberflächen. Ohne separaten
+        // Backdrop-Filter vermeiden sie auf Android das Clipping an großen
+        // Editor-Radien; Verlauf, Schatten und Radius bleiben erhalten.
+        const statsPanelSelectors = [
+            '.stats-analysis-section',
+            '.stats-structure-section'
+        ].map(sel => `${prefix} ${sel}`).join(',\\n');
+
         const bigSelectors = THEME_EDITOR_BIG_SELECTORS
+            .filter(sel => sel !== '.stats-analysis-section' && sel !== '.stats-structure-section')
             .map(sel => `${prefix} ${sel}`)
-            .join(',\n');
+            .join(',\\n');
 
         const softSelectors = THEME_EDITOR_SOFT_SELECTORS
             .map(sel => `${prefix} ${sel}`)
-            .join(',\n');
+            .join(',\\n');
 
-        css += `${bigSelectors} { background: ${bigGradient} !important; box-shadow: ${shadow} !important; border-radius: ${radius}px !important; backdrop-filter: blur(${blur}px) !important; -webkit-backdrop-filter: blur(${blur}px) !important; }\n`;
-        css += `${softSelectors} { background: ${softGradient} !important; border-radius: ${softRadius}px !important; }\n`;
-        // Tourbuch und Themeeditor selbst verwenden dieselben Editor-Einstellungen
-        // für Verlauf/Radius; diese Regel ergänzt die eingestellte Textfarbe und App-Schrift.
-        css += `${prefix} #pdf-export-card select, ${prefix} #pdf-export-card .pdf-book-options > summary, ${prefix} #theme-view .theme-editor-card select, ${prefix} #theme-view details[data-theme-editor-accordion] > summary { color: ${settings.textMain} !important; font-family: var(--app-font) !important; }\n`;
+        css += `${bigSelectors} { background: ${bigGradient} !important; box-shadow: ${shadow} !important; border-radius: ${radius}px !important; backdrop-filter: blur(${blur}px) !important; -webkit-backdrop-filter: blur(${blur}px) !important; }\\n`;
+        css += `${statsPanelSelectors} { background: ${bigGradient} !important; box-shadow: ${shadow} !important; border-radius: ${radius}px !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }\\n`;
+        css += `${softSelectors} { background: ${softGradient} !important; border-radius: ${softRadius}px !important; }\\n`;
 
         // Die Diagramm-Tabs nutzen einen gleitenden Akzentmarker. Die Tabs
         // dürfen diesen Marker nicht mit dem weicheren Theme-Flächenverlauf
