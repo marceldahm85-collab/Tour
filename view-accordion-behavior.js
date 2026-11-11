@@ -40,41 +40,45 @@
     function initFilterAccordions() {
         const root = document.querySelector('#filter-view > .filter-simple-inner');
         if (!root || root.dataset.exclusiveAccordionsBound === 'true') return;
-        root.dataset.exclusiveAccordionsBound = 'true';
 
         const panels = Array.from(root.querySelectorAll(':scope > .filter-section-panel'));
         if (!panels.length) return;
 
-        // Den bisher ausgewählten Bereich als einzigen geöffneten Startbereich
-        // übernehmen; die übrigen Bereiche beginnen eindeutig geschlossen.
-        const initiallyOpen = panels.find(panel => panel.classList.contains('filter-panel-active')) || panels[0];
-
+        // Suche & Vergleich startet grundsätzlich vollständig geschlossen.
         panels.forEach(panel => {
             const title = panel.querySelector(':scope > .filter-simple-title');
             if (!title) return;
 
-            setFilterPanelCollapsed(panel, panel !== initiallyOpen);
-
-            // Die Titel sind bewusst keine fokussierbaren Buttons:
-            // so entsteht beim Android-Tap weder ein blauer Fokus- noch Tap-Effekt.
+            setFilterPanelCollapsed(panel, true);
             title.style.webkitTapHighlightColor = 'transparent';
             title.style.tapHighlightColor = 'transparent';
-
-            title.addEventListener('click', () => {
-                const opening = panel.classList.contains('is-collapsed');
-
-                if (opening) {
-                    panels.forEach(other => {
-                        if (other !== panel && !other.classList.contains('is-collapsed')) {
-                            setFilterPanelCollapsed(other, true);
-                        }
-                    });
-                }
-
-                setFilterPanelCollapsed(panel, !opening);
-                if (opening) scrollOpenedSectionToTop(root, panel);
-            });
         });
+
+        // Ein einziger Capture-Listener verarbeitet jeden Header-Tap zuverlässig,
+        // bevor andere View-Handler das Ereignis gegebenenfalls abfangen.
+        root.addEventListener('click', event => {
+            const title = event.target.closest('.filter-section-panel > .filter-simple-title');
+            if (!title || !root.contains(title)) return;
+
+            const panel = title.parentElement;
+            if (!panels.includes(panel)) return;
+
+            event.preventDefault();
+            const opening = panel.classList.contains('is-collapsed');
+
+            if (opening) {
+                panels.forEach(other => {
+                    if (other !== panel && !other.classList.contains('is-collapsed')) {
+                        setFilterPanelCollapsed(other, true);
+                    }
+                });
+            }
+
+            setFilterPanelCollapsed(panel, !opening);
+            if (opening) scrollOpenedSectionToTop(root, panel);
+        }, true);
+
+        root.dataset.exclusiveAccordionsBound = 'true';
     }
 
     function syncDetailsSummary(details) {
