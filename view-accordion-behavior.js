@@ -39,58 +39,44 @@
 
     function initFilterAccordions() {
         const root = document.querySelector('#filter-view > .filter-simple-inner');
-        if (!root || root.dataset.exclusiveAccordionsBound === 'true') return;
+        if (!root) return;
 
         const panels = Array.from(root.querySelectorAll(':scope > .filter-section-panel'));
         if (!panels.length) return;
 
-        // Alle vier Bereiche starten geschlossen.
         panels.forEach(panel => {
             const title = panel.querySelector(':scope > .filter-simple-title');
-            if (!title) return;
+            if (!title || title.dataset.filterAccordionBound === 'true') return;
+
+            title.dataset.filterAccordionBound = 'true';
             title.setAttribute('role', 'button');
             title.setAttribute('tabindex', '0');
             setFilterPanelCollapsed(panel, true);
-        });
 
-        function togglePanelFromEvent(target) {
-            const title = target.closest('.filter-section-panel > .filter-simple-title');
-            if (!title || !root.contains(title)) return;
+            // Direkt am Header binden: kein übergeordneter View-Listener,
+            // der durch andere Ereignis-Handler abgefangen werden kann.
+            function togglePanel() {
+                const opening = panel.classList.contains('is-collapsed');
 
-            const panel = title.parentElement;
-            if (!panels.includes(panel)) return;
+                if (opening) {
+                    panels.forEach(other => {
+                        if (other !== panel && !other.classList.contains('is-collapsed')) {
+                            setFilterPanelCollapsed(other, true);
+                        }
+                    });
+                }
 
-            const opening = panel.classList.contains('is-collapsed');
-
-            // Wie bei Statistik bleibt höchstens ein Bereich gleichzeitig geöffnet.
-            if (opening) {
-                panels.forEach(other => {
-                    if (other !== panel && !other.classList.contains('is-collapsed')) {
-                        setFilterPanelCollapsed(other, true);
-                    }
-                });
+                setFilterPanelCollapsed(panel, !opening);
+                if (opening) scrollOpenedSectionToTop(root, panel);
             }
 
-            setFilterPanelCollapsed(panel, !opening);
-
-            // Nur die bereits bewährte Scroll-Ausrichtung wird zusätzlich ausgeführt.
-            if (opening) scrollOpenedSectionToTop(root, panel);
-        }
-
-        // Normale Bubbling-Listener wie bei den funktionierenden Statistik-Headern.
-        root.addEventListener('click', event => {
-            togglePanelFromEvent(event.target);
+            title.addEventListener('click', togglePanel);
+            title.addEventListener('keydown', event => {
+                if (event.key !== 'Enter' && event.key !== ' ') return;
+                event.preventDefault();
+                togglePanel();
+            });
         });
-
-        root.addEventListener('keydown', event => {
-            if (event.key !== 'Enter' && event.key !== ' ') return;
-            const title = event.target.closest('.filter-section-panel > .filter-simple-title');
-            if (!title || !root.contains(title)) return;
-            event.preventDefault();
-            togglePanelFromEvent(event.target);
-        });
-
-        root.dataset.exclusiveAccordionsBound = 'true';
     }
 
     function syncDetailsSummary(details) {
