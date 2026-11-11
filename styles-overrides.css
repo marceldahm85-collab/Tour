@@ -9615,7 +9615,7 @@ body.summit .ripple-el {
     width: 100%;
     height: auto;
     box-sizing: border-box;
-    padding: 0 6px 5px;
+    padding: 0 0 5px;
 }
 
 #dashboard-view #dash-milestones-section .dash-ms-grid {
