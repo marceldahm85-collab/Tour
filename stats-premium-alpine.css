@@ -1388,15 +1388,23 @@
     margin: 0 !important;
     padding: 12px 14px !important;
     border: 1px solid var(--theme-surface-border, rgba(255,255,255,.18)) !important;
-    border-radius: var(--ui-section-radius, 14px) !important;
+    /* Gleiche eigenständige Panel-Geometrie wie Suche & Vergleich. */
+    border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
     background: linear-gradient(
-        180deg,
-        var(--theme-surface-top, rgba(255,255,255,.12)) 0%,
-        var(--theme-surface-bottom, rgba(255,255,255,.12)) 100%
+        145deg,
+        var(--app-surface-strong, rgba(255,255,255,.10)),
+        var(--app-surface-card, rgba(10,16,23,.82))
     ) !important;
+    background-clip: border-box !important;
     box-shadow: none !important;
-    -webkit-backdrop-filter: blur(10px) !important;
-    backdrop-filter: blur(10px) !important;
+    /* Kein separater Backdrop-/Glas-Compositing-Layer:
+       Dieser Layer kann auf Android bei großen Radien die Kartenkante clippen. */
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-mask: none !important;
+    mask: none !important;
+    clip-path: none !important;
+    overflow: visible !important;
 }
 
 /* Header-Geometrie und Trennlinie entsprechen exakt Suche & Vergleich. */
@@ -1441,42 +1449,3 @@
     border-bottom: 1px solid var(--premium-border, rgba(255,255,255,.12)) !important;
 }
 
-/* FIX: Statistik-Accordion nicht durch die transparente Glasfläche beschneiden.
-   Die Karte behält ihren Editor-Radius; die Fläche darf aber keinen eigenen
-   Clipping-Kontext für Header, Akzentrahmen oder Chevron erzeugen. */
-#chart-view #stats-statistics-page .stats-section-collapsible,
-#chart-view #stats-statistics-page .stats-structure-section,
-#chart-view #stats-statistics-page .stats-analysis-section {
-    overflow: visible !important;
-    clip-path: none !important;
-    -webkit-mask: none !important;
-    mask: none !important;
-    contain: none !important;
-}
-
-#chart-view #stats-statistics-page .stats-section-collapsible > .stats-analysis-title {
-    position: relative !important;
-    z-index: 1 !important;
-    overflow: visible !important;
-    clip-path: none !important;
-    -webkit-mask: none !important;
-    mask: none !important;
-}
-
-/* Die Glasfläche wird innerhalb der Kartenbox gezeichnet, ohne den Inhalt
-   oder den äußeren Akzentrahmen über border-radius/overflow abzuschneiden. */
-#chart-view #stats-statistics-page .stats-structure-section,
-#chart-view #stats-statistics-page .stats-analysis-section {
-    background-clip: padding-box !important;
-}
-
-/* Auch die Statistik-Layoutwrapper dürfen die gerundeten Accordion-Karten
-   nicht als zusätzliche, rechteckige oder abgerundete Clipping-Maske behandeln. */
-#chart-view #stats-statistics-page #stats-box,
-#chart-view #stats-statistics-page #stats-structure-content,
-#chart-view #stats-statistics-page #stats-development-content {
-    overflow: visible !important;
-    clip-path: none !important;
-    -webkit-mask: none !important;
-    mask: none !important;
-}
