@@ -29,6 +29,29 @@
         });
     }
 
+    // Suche & Vergleich: ausschließlich Scroll-Ausrichtung ergänzen.
+    // Das Öffnen/Schließen bleibt vollständig der vorhandenen View-Logik überlassen.
+    function initFilterAccordionScrolling() {
+        const root = document.querySelector('#filter-view > .filter-simple-inner');
+        if (!root || root.dataset.filterAccordionScrollBound === 'true') return;
+        root.dataset.filterAccordionScrollBound = 'true';
+
+        root.addEventListener('click', event => {
+            const header = event.target.closest('.filter-section-panel > .filter-simple-title');
+            if (!header || !root.contains(header)) return;
+
+            const panel = header.parentElement;
+            if (!panel || !panel.classList.contains('filter-section-panel')) return;
+
+            // Erst nach Abschluss aller bestehenden Click-Handler prüfen,
+            // ob der Header tatsächlich geöffnet wurde.
+            requestAnimationFrame(() => {
+                if (!panel.isConnected || panel.classList.contains('is-collapsed')) return;
+                scrollOpenedSectionToTop(root, panel);
+            });
+        }, true);
+    }
+
     function syncDetailsSummary(details) {
         const summary = details.querySelector(':scope > summary');
         if (summary) summary.setAttribute('aria-expanded', details.open ? 'true' : 'false');
@@ -88,6 +111,7 @@
     }
 
     function init() {
+        initFilterAccordionScrolling();
         initEditorAccordions();
     }
 
