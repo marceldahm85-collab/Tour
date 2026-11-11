@@ -204,6 +204,8 @@
     position: relative !important;
     display: flex !important;
     align-items: center !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
     flex-wrap: nowrap !important;
     gap: 8px !important;
     min-height: 18px !important;
@@ -260,9 +262,11 @@
 
 #filter-view .filter-section-panel > .filter-simple-title:focus-visible,
 #chart-view .stats-section-collapsible > .stats-analysis-title:focus-visible {
-    outline: 2px solid var(--theme-palette-accent, var(--accent, #D5A64C));
-    outline-offset: 3px;
-    border-radius: 5px;
+    /* Inset-Fokusring statt außenliegendem Outline:
+       verhindert, dass Android die oberen Ecken am Panelrand abschneidet. */
+    outline: none !important;
+    box-shadow: inset 0 0 0 1.5px var(--theme-palette-accent, var(--accent, #D5A64C)) !important;
+    border-radius: 5px !important;
 }
 
 /* Alle vier Panels stehen gemeinsam in einer scrollbaren Ansicht. */
