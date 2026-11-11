@@ -9331,7 +9331,8 @@ function getStructureTypeComparison(tours) {
             return {
                 label,
                 metricLabels: getStructureComparisonMetricLabels(label),
-                count: items.length,
+                // Durchschnittswerte beruhen auf Etappen; die Tourenzahl bleibt gruppiert.
+                count: countDistinctTours(items),
                 distance: average(distances),
                 ascent: average(ascents),
                 time: average(times),
@@ -13871,6 +13872,8 @@ function drawAverageStepsDiagram() {
 
     const monthStepSums = Array(12).fill(0);
     const monthCounts = Array(12).fill(0);
+    let totalStageSteps = 0;
+    let validStageCount = 0;
 
     data.forEach(entry => {
         if (!entry.date) return;
@@ -13888,6 +13891,8 @@ function drawAverageStepsDiagram() {
 
         monthStepSums[month] += steps;
         monthCounts[month]++;
+        totalStageSteps += steps;
+        validStageCount++;
     });
 
     const monthAverages =
@@ -13897,17 +13902,17 @@ function drawAverageStepsDiagram() {
                 : 0
         );
 
-    const validValues =
-        monthAverages.filter(value => value > 0);
-
-    const totalSteps = getBoundedAverage(validValues) || 0;
+    // Jahresdurchschnitt aus den einzelnen Etappen statt aus Monatsmittelwerten.
+    const averageSteps = validStageCount > 0
+        ? totalStageSteps / validStageCount
+        : 0;
 
     drawChartTitleWithTotal(
         ctx,
         canvas,
         'Ø Schritte pro Tour',
-        totalSteps > 0
-            ? Math.round(totalSteps)
+        averageSteps > 0
+            ? Math.round(averageSteps)
                 .toLocaleString('de-AT')
             : '–'
     );
@@ -16398,6 +16403,7 @@ const allData = getDiagramFilteredTours();
 
 const monthRateSum   = Array(12).fill(0);
 const monthRateCount = Array(12).fill(0);
+const stageRates = [];
 
 allData.forEach(entry => {
     if (!entry.date) return;
@@ -16414,6 +16420,7 @@ allData.forEach(entry => {
         const rate = asc / hoursAdj;  // hm/h
         monthRateSum[m]   += rate;
         monthRateCount[m] += 1;
+        stageRates.push(rate);
     }
 });
 
@@ -16421,8 +16428,9 @@ const values = monthRateSum.map((sum, i) =>
     monthRateCount[i] > 0 ? sum / monthRateCount[i] : 0
 );
 
-const validRates = values.filter(v => v > 0);
-    const avgRate = getBoundedAverage(validRates) || 0;
+const avgRate = stageRates.length
+        ? stageRates.reduce((sum, value) => sum + value, 0) / stageRates.length
+        : 0;
     drawChartTitleWithTotal(ctx, ascentRateCanvas, 'Ø Anstieg (hm/h)', `Ø ${avgRate.toFixed(0)} hm/h`);
     drawBars(ascentRateCanvas, ctx, values, '', 0);
 }
@@ -16436,6 +16444,7 @@ const allData = getDiagramFilteredTours();
 
 const monthlyGradSum = Array(12).fill(0);
 const monthlyGradCount = Array(12).fill(0);
+const stageGradients = [];
 
 allData.forEach(entry => {
     if (!entry.date) return;
@@ -16452,6 +16461,7 @@ if (dist > 0 && asc > 0) {
     const g = asc / dist;
     monthlyGradSum[m]   += g;
     monthlyGradCount[m] += 1;
+    stageGradients.push(g);
 }
     });
 
@@ -16459,8 +16469,9 @@ if (dist > 0 && asc > 0) {
         monthlyGradCount[i] > 0 ? sum / monthlyGradCount[i] : 0
     );
 
-    const validGrads = values.filter(v => v > 0);
-    const avgGrad = getBoundedAverage(validGrads) || 0;
+    const avgGrad = stageGradients.length
+        ? stageGradients.reduce((sum, value) => sum + value, 0) / stageGradients.length
+        : 0;
     drawChartTitleWithTotal(ctx, gradientCanvas, 'Ø Steigung (hm/km)', `Ø ${avgGrad.toFixed(0)} hm/km`);
     drawBars(gradientCanvas, ctx, values, '', 0);
 }
