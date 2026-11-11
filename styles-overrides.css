@@ -507,7 +507,7 @@
     }
 
     /*
-     * Alle fünf Navigationsbuttons gleich breit und kompakt.
+     * Alle vier Navigationsbuttons gleich breit und kompakt.
      */
     #chart-view > .stats-section-switch
         > .stats-section-btn {
@@ -8270,17 +8270,16 @@ body.summit .top-main-nav [aria-current="page"] {
 
 
 /* =========================================================
-   Stats – Unternavigation im Stil von Planen und Bergwelt
-   Einheitliche dunkle Glasflächen, klare Schrift und Akzent
+   Stats – vier gleich breite Buttons über die gesamte verfügbare Breite
    ========================================================= */
 :is(body.dark, body.green, body.summit, body.gold, body:not(.dark):not(.green):not(.summit):not(.gold)) #chart-view > .stats-section-switch {
     display: grid !important;
-    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
     flex-direction: initial !important;
     align-items: stretch !important;
     gap: 5px !important;
     width: 100% !important;
-    max-width: 430px !important;
+    max-width: none !important;
     padding: 0 !important;
     border: 0 !important;
     border-radius: 0 !important;

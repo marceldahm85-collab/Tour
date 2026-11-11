@@ -750,9 +750,8 @@
 }
 
 
-/* Statistik und Entwicklung: große Analyseboxen einzeln aufklappbar.
-   Kleine Kennzahlen innerhalb der geöffneten Boxen bleiben unverändert. */
-#stats-statistics-page .stats-section-collapsible > .stats-analysis-title,
+/* Statistik und Entwicklung verwenden exakt dieselben Header- und Accordion-Regeln.
+   Die Regeln gelten für beide Bereichstypen gleichermaßen. */
 #stats-statistics-page .stats-section-collapsible > .stats-analysis-title,
 #stats-peaks-page .stats-section-collapsible > .stats-analysis-title {
     position: relative;
@@ -763,7 +762,6 @@
     -webkit-user-select: none;
 }
 
-#stats-statistics-page .stats-section-collapsible > .stats-analysis-title::after,
 #stats-statistics-page .stats-section-collapsible > .stats-analysis-title::after,
 #stats-peaks-page .stats-section-collapsible > .stats-analysis-title::after {
     content: "";
@@ -781,13 +779,11 @@
 }
 
 #stats-statistics-page .stats-section-collapsible:not(.is-collapsed) > .stats-analysis-title::after,
-#stats-statistics-page .stats-section-collapsible:not(.is-collapsed) > .stats-analysis-title::after,
 #stats-peaks-page .stats-section-collapsible:not(.is-collapsed) > .stats-analysis-title::after {
     top: calc(50% - 2px);
     transform: rotate(225deg);
 }
 
-#stats-statistics-page .stats-section-collapsible.is-collapsed > .stats-analysis-title,
 #stats-statistics-page .stats-section-collapsible.is-collapsed > .stats-analysis-title,
 #stats-peaks-page .stats-section-collapsible.is-collapsed > .stats-analysis-title {
     margin-bottom: 0 !important;
@@ -796,12 +792,10 @@
 }
 
 #stats-statistics-page .stats-section-collapsible.is-collapsed > :not(.stats-analysis-title),
-#stats-statistics-page .stats-section-collapsible.is-collapsed > :not(.stats-analysis-title),
 #stats-peaks-page .stats-section-collapsible.is-collapsed > :not(.stats-analysis-title) {
     display: none !important;
 }
 
-#stats-statistics-page .stats-section-collapsible > .stats-analysis-title:focus-visible,
 #stats-statistics-page .stats-section-collapsible > .stats-analysis-title:focus-visible,
 #stats-peaks-page .stats-section-collapsible > .stats-analysis-title:focus-visible {
     outline: 2px solid var(--theme-palette-accent, var(--accent, #D5A64C));
@@ -810,7 +804,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    #stats-statistics-page .stats-section-collapsible > .stats-analysis-title::after,
     #stats-statistics-page .stats-section-collapsible > .stats-analysis-title::after,
     #stats-peaks-page .stats-section-collapsible > .stats-analysis-title::after {
         transition: none;
@@ -1362,21 +1355,23 @@
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
 }
 
-/* Entwicklung wird innerhalb der Statistik als eigene, einspaltige Abschnittsfolge geführt. */
-@media (max-width: 768px) and (orientation: portrait) {
-    #stats-statistics-page #stats-development-content {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 7px !important;
-        width: 100% !important;
-        min-width: 0 !important;
-    }
+/* Entwicklung nutzt dieselbe Karten-Geometrie wie die Statistikbereiche.
+   So unterscheiden sich weder Abschnittsabstand noch Innenabstand der Header. */
+#stats-statistics-page #stats-development-content {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin-top: 10px !important;
+    box-sizing: border-box !important;
+}
 
-    #stats-statistics-page #stats-development-content > .stats-analysis-section {
-        width: 100% !important;
-        min-width: 0 !important;
-        margin: 0 0 7px !important;
-        box-sizing: border-box !important;
-    }
+#stats-statistics-page #stats-development-content > .stats-analysis-section {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 11px !important;
+    box-sizing: border-box !important;
 }
