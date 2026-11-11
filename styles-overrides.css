@@ -240,7 +240,9 @@
         overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
         overscroll-behavior-y: contain;
-        padding: 0 2px 10px 0;
+        /* Kleiner Innenabstand zur Scroll-Clipping-Kante: verhindert, dass
+           die obere Rundung des ersten Statistik-Panels abgeschnitten wird. */
+        padding: 3px 2px 10px 0;
         touch-action: pan-y;
     }
 
