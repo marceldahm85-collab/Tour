@@ -1375,3 +1375,38 @@
     padding: 11px !important;
     box-sizing: border-box !important;
 }
+
+
+/* Statistik: identische, feste Header-Geometrie für Struktur und Entwicklung.
+   Die Beschriftung darf innerhalb derselben Höhe umbrechen; die Header selbst
+   verändern dadurch ihre Höhe nicht. */
+#chart-view #stats-statistics-page .stats-section-collapsible > .stats-analysis-title {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    box-sizing: border-box !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+    margin: 0 0 8px !important;
+    padding: 0 28px 0 0 !important;
+    line-height: 1.15 !important;
+}
+
+#chart-view #stats-statistics-page .stats-section-collapsible > .stats-analysis-title > .stats-premium-title-label {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+}
+
+/* Die äußeren Statistik-/Entwicklungsabschnitte bleiben wirklich transparent.
+   Höhere Spezifität verhindert, dass die später geladenen Glas-/Tiefeneffekte
+   wieder Schatten oder Backdrop-Blur hinter den Headern erzeugen. */
+#chart-view #stats-statistics-page .stats-structure-section,
+#chart-view #stats-statistics-page .stats-analysis-section {
+    background: transparent !important;
+    background-image: none !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+}
