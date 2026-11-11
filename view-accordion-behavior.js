@@ -35,47 +35,58 @@
 
         panel.classList.toggle('is-collapsed', collapsed);
         title.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+        title.setAttribute('aria-label',
+            (title.textContent || 'Bereich').trim() + (collapsed ? ' öffnen' : ' schließen'));
+    }
+
+    function toggleFilterCollapsibleFromEvent(root, target) {
+        const title = target.closest('.filter-section-panel > .filter-simple-title');
+        if (!title || !root.contains(title)) return false;
+
+        const panel = title.parentElement;
+        const opening = panel.classList.contains('is-collapsed');
+
+        if (opening) {
+            root.querySelectorAll('.filter-section-panel').forEach(other => {
+                if (other !== panel && !other.classList.contains('is-collapsed')) {
+                    setFilterPanelCollapsed(other, true);
+                }
+            });
+        }
+
+        setFilterPanelCollapsed(panel, !opening);
+        return true;
     }
 
     function initFilterAccordions() {
         const root = document.querySelector('#filter-view > .filter-simple-inner');
-        if (!root) return;
+        if (!root || root.dataset.filterAccordionControlsBound === 'true') return;
 
         const panels = Array.from(root.querySelectorAll(':scope > .filter-section-panel'));
         if (!panels.length) return;
 
+        root.dataset.filterAccordionControlsBound = 'true';
+
         panels.forEach(panel => {
             const title = panel.querySelector(':scope > .filter-simple-title');
-            if (!title || title.dataset.filterAccordionBound === 'true') return;
-
-            title.dataset.filterAccordionBound = 'true';
+            if (!title) return;
             title.setAttribute('role', 'button');
             title.setAttribute('tabindex', '0');
             setFilterPanelCollapsed(panel, true);
+        });
 
-            // Direkt am Header binden: kein übergeordneter View-Listener,
-            // der durch andere Ereignis-Handler abgefangen werden kann.
-            function togglePanel() {
-                const opening = panel.classList.contains('is-collapsed');
+        // Gleiche einfache Ereignisbehandlung wie bei den funktionierenden Stats-Headern.
+        // Suche & Vergleich erhält ausdrücklich keinerlei Scroll-Aufruf.
+        root.addEventListener('click', event => {
+            toggleFilterCollapsibleFromEvent(root, event.target);
+        });
 
-                if (opening) {
-                    panels.forEach(other => {
-                        if (other !== panel && !other.classList.contains('is-collapsed')) {
-                            setFilterPanelCollapsed(other, true);
-                        }
-                    });
-                }
-
-                setFilterPanelCollapsed(panel, !opening);
-                if (opening) scrollOpenedSectionToTop(root, panel);
-            }
-
-            title.addEventListener('click', togglePanel);
-            title.addEventListener('keydown', event => {
-                if (event.key !== 'Enter' && event.key !== ' ') return;
-                event.preventDefault();
-                togglePanel();
-            });
+        root.addEventListener('keydown', event => {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            const title = event.target.closest('.filter-section-panel > .filter-simple-title');
+            if (!title || !root.contains(title)) return;
+            event.preventDefault();
+            toggleFilterCollapsibleFromEvent(root, event.target);
         });
     }
 
