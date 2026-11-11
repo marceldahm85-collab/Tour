@@ -1335,11 +1335,8 @@
 }
 
 
-/* Stats: äußere Analyseflächen zurücknehmen.
-   Die eigentlichen Kennzahlen-, Vergleichs- und Highlight-Kacheln behalten
-   ihre individuellen Hintergründe; auch das Gipfellisten-Panorama bleibt bestehen. */
-#stats-statistics-page .stats-structure-section,
-#stats-statistics-page .stats-analysis-section,
+/* Die bisherigen Panorama-Transparenzen bleiben nur bei Highlights und Gipfel-Panorama bestehen.
+   Statistik und Entwicklung verwenden wieder eigenständige Kartenflächen wie Suche & Vergleich. */
 #stats-highlights-page #highlights-content,
 #stats-peaks-page #stats-peaks-content > .stats-analysis-section:first-child {
     background: transparent !important;
@@ -1377,36 +1374,59 @@
 }
 
 
-/* Statistik: identische, feste Header-Geometrie für Struktur und Entwicklung.
-   Die Beschriftung darf innerhalb derselben Höhe umbrechen; die Header selbst
-   verändern dadurch ihre Höhe nicht. */
+
+
+/* STATISTIK — Suche & Vergleich ist die verbindliche Karten-Vorlage.
+   Gleiche Oberfläche, Innenabstände und kompakte Titelzeile; keine Sonderhöhe. */
+#chart-view #stats-statistics-page .stats-structure-section,
+#chart-view #stats-statistics-page .stats-analysis-section {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 12px 14px !important;
+    border: 1px solid var(--theme-surface-border, rgba(255,255,255,.18)) !important;
+    border-radius: var(--ui-section-radius, 14px) !important;
+    background: linear-gradient(
+        180deg,
+        var(--theme-surface-top, rgba(255,255,255,.12)) 0%,
+        var(--theme-surface-bottom, rgba(255,255,255,.12)) 100%
+    ) !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+/* Struktur und Entwicklung laufen wie die Karten in Suche & Vergleich
+   in einer gemeinsamen, eng gesetzten Ein-Spalten-Anordnung. */
+#chart-view #stats-statistics-page #stats-structure-content,
+#chart-view #stats-statistics-page #stats-development-content {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+}
+
 #chart-view #stats-statistics-page .stats-section-collapsible > .stats-analysis-title {
     display: flex !important;
     align-items: center !important;
-    flex-wrap: nowrap !important;
-    box-sizing: border-box !important;
-    height: 42px !important;
-    min-height: 42px !important;
-    max-height: 42px !important;
-    margin: 0 0 8px !important;
-    padding: 0 28px 0 0 !important;
-    line-height: 1.15 !important;
-}
-
-#chart-view #stats-statistics-page .stats-section-collapsible > .stats-analysis-title > .stats-premium-title-label {
-    flex: 1 1 auto !important;
-    min-width: 0 !important;
-}
-
-/* Die äußeren Statistik-/Entwicklungsabschnitte bleiben wirklich transparent.
-   Höhere Spezifität verhindert, dass die später geladenen Glas-/Tiefeneffekte
-   wieder Schatten oder Backdrop-Blur hinter den Headern erzeugen. */
-#chart-view #stats-statistics-page .stats-structure-section,
-#chart-view #stats-statistics-page .stats-analysis-section {
-    background: transparent !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 0 9px !important;
+    padding: 0 26px 0 0 !important;
+    border: 0 !important;
+    background: none !important;
     background-image: none !important;
-    border-color: transparent !important;
-    box-shadow: none !important;
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    line-height: 1.15 !important;
+    color: var(--text-main) !important;
 }
