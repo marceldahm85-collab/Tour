@@ -311,19 +311,15 @@
 }
 
 
-/* Geschlossene Stats-Karten: dieselbe Gesamthöhe wie die Panels in
-   Suche & Vergleich. Die äußere Kartenpolsterung ist Teil der sichtbaren
-   Headerhöhe und wird deshalb im geschlossenen Zustand angeglichen. */
+/* Geschlossene Statistik-Header: gleiche Außenhöhe wie die Panels
+   in Suche & Vergleich. Die höhere Spezifität überstimmt die vorhandenen
+   Karten-Innenabstände der Statistikansicht gezielt. */
 @media (max-width: 768px), (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
-    #chart-view .stats-section-collapsible.is-collapsed.stats-structure-section,
-    #chart-view .stats-section-collapsible.is-collapsed.stats-analysis-section {
+    #chart-view #stats-statistics-page .stats-section-collapsible.is-collapsed {
         padding: 10px 11px !important;
         box-sizing: border-box !important;
     }
 
-    /* Gipfelstatistik besitzt zusätzlich eine spezifische Innenabstandsregel.
-       Diese gezielte Überschreibung verhindert, dass der alte Titelabstand
-       den geschlossenen Gipfel-Header wieder vergrößert. */
     #chart-view #stats-peaks-page #stats-peaks-content
     > .stats-analysis-section.stats-section-collapsible.is-collapsed {
         padding: 10px 11px !important;
@@ -334,6 +330,8 @@
     > .stats-analysis-section.stats-section-collapsible.is-collapsed
     > .stats-analysis-title {
         margin: 0 !important;
-        padding-bottom: 0 !important;
+        padding: 0 26px 0 0 !important;
+        min-height: 18px !important;
+        line-height: 1.25 !important;
     }
 }
