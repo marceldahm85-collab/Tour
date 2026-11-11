@@ -9591,3 +9591,39 @@ body.green .ripple-el {
 body.summit .ripple-el {
     background: rgba(255,255,255,0.36);
 }
+
+
+/* Dashboard Hochformat: Meilensteine ohne umgebende Glasfläche oder Abschnittstitel.
+   Die fünf Kacheln nutzen dieselbe nutzbare Breite wie die Zeilen unter „Letzte Touren“.
+   Inhalte, Reihenfolge und Funktionen bleiben unverändert. */
+#dashboard-view #dash-milestones-section {
+    width: 100%;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    overflow: visible;
+}
+
+#dashboard-view #dash-milestones-section > .dash-section-title {
+    display: none !important;
+}
+
+#dashboard-view #dash-milestones-section > .dash-section-body {
+    width: 100%;
+    height: auto;
+    box-sizing: border-box;
+    padding: 0 6px 5px;
+}
+
+#dashboard-view #dash-milestones-section .dash-ms-grid {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#dashboard-view #dash-milestones-section .dash-milestone-tile {
+    width: 100%;
+    box-sizing: border-box;
+}
