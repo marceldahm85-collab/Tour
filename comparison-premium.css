@@ -199,10 +199,13 @@
 
 /* Suche & Vergleich: vier Bereiche als eigenständige, aufklappbare Panels.
    Die Header übernehmen Höhe, Typografie, Abstände und Chevron der Stats-Akkordeons. */
-#filter-view .filter-section-panel > .filter-simple-title {
+#filter-view .filter-section-panel > .filter-simple-title,
+#chart-view .stats-section-collapsible > .stats-analysis-title {
     position: relative !important;
     display: flex !important;
     align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
     min-height: 18px !important;
     margin: 0 0 11px !important;
     padding: 0 26px 8px 0 !important;
@@ -221,7 +224,8 @@
     -webkit-user-select: none;
 }
 
-#filter-view .filter-section-panel > .filter-simple-title::after {
+#filter-view .filter-section-panel > .filter-simple-title::after,
+#chart-view .stats-section-collapsible > .stats-analysis-title::after {
     content: "";
     position: absolute;
     right: 5px;
@@ -236,22 +240,26 @@
     opacity: .95;
 }
 
-#filter-view .filter-section-panel:not(.is-collapsed) > .filter-simple-title::after {
+#filter-view .filter-section-panel:not(.is-collapsed) > .filter-simple-title::after,
+#chart-view .stats-section-collapsible:not(.is-collapsed) > .stats-analysis-title::after {
     top: calc(50% - 2px);
     transform: rotate(225deg);
 }
 
-#filter-view .filter-section-panel.is-collapsed > .filter-simple-title {
+#filter-view .filter-section-panel.is-collapsed > .filter-simple-title,
+#chart-view .stats-section-collapsible.is-collapsed > .stats-analysis-title {
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;
     border-bottom-color: transparent !important;
 }
 
-#filter-view .filter-section-panel.is-collapsed > :not(.filter-simple-title) {
+#filter-view .filter-section-panel.is-collapsed > :not(.filter-simple-title),
+#chart-view .stats-section-collapsible.is-collapsed > :not(.stats-analysis-title) {
     display: none !important;
 }
 
-#filter-view .filter-section-panel > .filter-simple-title:focus-visible {
+#filter-view .filter-section-panel > .filter-simple-title:focus-visible,
+#chart-view .stats-section-collapsible > .stats-analysis-title:focus-visible {
     outline: 2px solid var(--theme-palette-accent, var(--accent, #D5A64C));
     outline-offset: 3px;
     border-radius: 5px;
@@ -292,7 +300,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    #filter-view .filter-section-panel > .filter-simple-title::after {
+    #filter-view .filter-section-panel > .filter-simple-title::after,
+    #chart-view .stats-section-collapsible > .stats-analysis-title::after {
         transition: none;
     }
 }
