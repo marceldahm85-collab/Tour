@@ -9610,3 +9610,13 @@ body.summit .ripple-el {
     width: 100%;
     box-sizing: border-box;
 }
+
+/* Stats im Hochformat: 3 px Abstand zur oberen Scroll-Clipping-Kante,
+   damit die Rundung des jeweils ersten Panels vollständig sichtbar bleibt.
+   Ausschließlich Statistik und Gipfel; andere Stats-Seiten bleiben unverändert. */
+@media (max-width: 768px) and (orientation: portrait) and (pointer: coarse) {
+    #stats-statistics-page.active,
+    #stats-peaks-page.active {
+        padding-top: 3px !important;
+    }
+}
