@@ -26,7 +26,7 @@
     --top3-contour-light: rgba(255,210,176,.18);
     --top3-contour-shadow: rgba(231,139,83,.42);
     --top3-contour-opacity: .19;
-    --top3-contour-duration: 8.2s;
+    --top3-contour-duration: 5.0s;
 }
 
 #tour-detail-modal .modal-card.highlight-modal-silver {
@@ -39,7 +39,7 @@
     --top3-contour-light: rgba(245,250,255,.22);
     --top3-contour-shadow: rgba(205,226,246,.48);
     --top3-contour-opacity: .25;
-    --top3-contour-duration: 7.2s;
+    --top3-contour-duration: 4.5s;
 }
 
 #tour-detail-modal .modal-card.highlight-modal-gold {
@@ -52,7 +52,7 @@
     --top3-contour-light: rgba(255,241,174,.30);
     --top3-contour-shadow: rgba(255,205,74,.62);
     --top3-contour-opacity: .34;
-    --top3-contour-duration: 6.4s;
+    --top3-contour-duration: 4.0s;
 }
 
 #tour-detail-modal .modal-card.highlight-modal-bronze::before,
