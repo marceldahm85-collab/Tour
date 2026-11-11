@@ -22,6 +22,11 @@
     --top3-metal-glow: rgba(190,105,57,.17);
     --top3-metal-sheen: rgba(255,223,196,.78);
     --top3-metal-sheen-soft: rgba(255,184,137,.28);
+    --top3-contour-core: rgba(255,190,143,.22);
+    --top3-contour-light: rgba(255,210,176,.18);
+    --top3-contour-shadow: rgba(231,139,83,.42);
+    --top3-contour-opacity: .19;
+    --top3-contour-duration: 8.2s;
 }
 
 #tour-detail-modal .modal-card.highlight-modal-silver {
@@ -30,6 +35,11 @@
     --top3-metal-glow: rgba(179,205,226,.18);
     --top3-metal-sheen: rgba(255,255,255,.88);
     --top3-metal-sheen-soft: rgba(211,230,246,.34);
+    --top3-contour-core: rgba(228,241,255,.25);
+    --top3-contour-light: rgba(245,250,255,.22);
+    --top3-contour-shadow: rgba(205,226,246,.48);
+    --top3-contour-opacity: .25;
+    --top3-contour-duration: 7.2s;
 }
 
 #tour-detail-modal .modal-card.highlight-modal-gold {
@@ -38,6 +48,11 @@
     --top3-metal-glow: rgba(214,158,23,.22);
     --top3-metal-sheen: rgba(255,247,195,.92);
     --top3-metal-sheen-soft: rgba(255,211,75,.40);
+    --top3-contour-core: rgba(255,222,112,.32);
+    --top3-contour-light: rgba(255,241,174,.30);
+    --top3-contour-shadow: rgba(255,205,74,.62);
+    --top3-contour-opacity: .34;
+    --top3-contour-duration: 6.4s;
 }
 
 #tour-detail-modal .modal-card.highlight-modal-bronze::before,
@@ -68,32 +83,36 @@
     mix-blend-mode: screen;
 }
 
+/* Topografisches Metallrelief: ruhige Konturlinien statt wanderndem Lichtstreifen. */
 #tour-detail-modal .modal-card.highlight-modal-bronze::after,
 #tour-detail-modal .modal-card.highlight-modal-silver::after,
 #tour-detail-modal .modal-card.highlight-modal-gold::after {
     content: "";
     position: absolute;
     z-index: 0;
-    top: -34%;
-    bottom: -34%;
-    left: -82%;
-    width: 64%;
-    border-radius: 50%;
+    inset: 0;
+    border-radius: inherit;
     pointer-events: none;
-    background: linear-gradient(
-        105deg,
-        transparent 0%,
-        color-mix(in srgb, var(--top3-metal-sheen) 6%, transparent) 31%,
-        color-mix(in srgb, var(--top3-metal-sheen) 58%, transparent) 48%,
-        color-mix(in srgb, var(--top3-metal-sheen) 20%, transparent) 58%,
-        transparent 76%
-    );
-    filter: blur(3px);
-    opacity: 0;
+    background:
+        radial-gradient(ellipse at 50% 42%,
+            var(--top3-contour-core, rgba(255,255,255,.12)),
+            transparent 68%),
+        linear-gradient(135deg,
+            var(--top3-contour-light, rgba(255,255,255,.12)),
+            transparent 58%);
+    -webkit-mask-image: url("./assets/topography/lienzer-dolomiten-contours-fine.svg");
+    mask-image: url("./assets/topography/lienzer-dolomiten-contours-fine.svg");
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    opacity: var(--top3-contour-opacity, .24);
     mix-blend-mode: screen;
-    transform: translate3d(-140%,0,0) skewX(-17deg);
-    animation: top3MetalSweep 6.2s cubic-bezier(.34,.05,.28,1) infinite;
-    will-change: transform, opacity;
+    filter: drop-shadow(0 0 3px var(--top3-contour-shadow, rgba(255,255,255,.28)));
+    animation: top3ContourPulse var(--top3-contour-duration, 7s) ease-in-out infinite;
+    will-change: opacity, filter;
 }
 
 /* Die Modalinhalte bleiben über beiden Reflexionsschichten. */
@@ -110,31 +129,16 @@
     z-index: 1;
 }
 
-#tour-detail-modal .modal-card.highlight-modal-bronze::after {
-    animation-duration: 6.8s;
-}
-#tour-detail-modal .modal-card.highlight-modal-silver::after {
-    animation-duration: 6.2s;
-}
-#tour-detail-modal .modal-card.highlight-modal-gold::after {
-    animation-duration: 5.6s;
-}
-
-@keyframes top3MetalSweep {
-    0%, 35% {
-        opacity: 0;
-        transform: translate3d(-140%,0,0) skewX(-17deg);
+@keyframes top3ContourPulse {
+    0%, 100% {
+        opacity: calc(var(--top3-contour-opacity, .24) * .72);
+        filter: drop-shadow(0 0 2px var(--top3-contour-shadow, rgba(255,255,255,.28)));
     }
-    44% {
-        opacity: .62;
-    }
-    66% {
-        opacity: .30;
-        transform: translate3d(270%,0,0) skewX(-17deg);
-    }
-    76%, 100% {
-        opacity: 0;
-        transform: translate3d(270%,0,0) skewX(-17deg);
+    50% {
+        opacity: var(--top3-contour-opacity, .24);
+        filter:
+            brightness(1.18)
+            drop-shadow(0 0 6px var(--top3-contour-shadow, rgba(255,255,255,.28)));
     }
 }
 
@@ -150,7 +154,7 @@
     #tour-detail-modal .modal-card.highlight-modal-silver::after,
     #tour-detail-modal .modal-card.highlight-modal-gold::after {
         animation: none !important;
-        opacity: .15;
-        transform: translate3d(0,0,0) skewX(-17deg);
+        opacity: var(--top3-contour-opacity, .24);
+        filter: drop-shadow(0 0 3px var(--top3-contour-shadow, rgba(255,255,255,.28)));
     }
 }
