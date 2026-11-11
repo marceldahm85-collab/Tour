@@ -479,12 +479,49 @@
         }
     }
 
+    function scrollStatsSectionToTop(root, section) {
+        // Die Statistik-Unterseite selbst ist der Scroll-Container.
+        // Erst nach dem Schließen der übrigen Bereiche messen, damit die
+        // Zielposition bereits dem endgültigen Layout entspricht.
+        requestAnimationFrame(() => {
+            if (!root.isConnected || !section.isConnected) return;
+
+            const rootRect = root.getBoundingClientRect();
+            const sectionRect = section.getBoundingClientRect();
+            const rootStyle = window.getComputedStyle(root);
+            const topPadding = parseFloat(rootStyle.paddingTop) || 0;
+            const offset = sectionRect.top - rootRect.top - root.clientTop - topPadding;
+
+            root.scrollTo({
+                top: Math.max(0, root.scrollTop + offset),
+                behavior: 'smooth'
+            });
+        });
+    }
+
     function toggleStatsCollapsibleFromEvent(root, target) {
         const header = target.closest('.stats-section-collapsible > .stats-analysis-title');
         if (!header || !root.contains(header)) return false;
 
         const section = header.parentElement;
-        setStatsSectionCollapsed(section, !section.classList.contains('is-collapsed'), true);
+        const opening = section.classList.contains('is-collapsed');
+
+        // Ausschließlich in der Unterseite „Statistik“ gilt das
+        // Einzelauswahl-Verhalten. Die Gipfelansicht bleibt unverändert.
+        if (opening && root.id === 'stats-statistics-page') {
+            root.querySelectorAll('.stats-section-collapsible').forEach(other => {
+                if (other !== section && !other.classList.contains('is-collapsed')) {
+                    setStatsSectionCollapsed(other, true, true);
+                }
+            });
+        }
+
+        setStatsSectionCollapsed(section, !opening, true);
+
+        if (opening && root.id === 'stats-statistics-page') {
+            scrollStatsSectionToTop(root, section);
+        }
+
         return true;
     }
 
