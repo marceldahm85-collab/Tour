@@ -195,3 +195,104 @@
         transition: none !important;
     }
 }
+
+
+/* Suche & Vergleich: vier Bereiche als eigenständige, aufklappbare Panels.
+   Die Header übernehmen Höhe, Typografie, Abstände und Chevron der Stats-Akkordeons. */
+#filter-view .filter-section-panel > .filter-simple-title {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    min-height: 18px !important;
+    margin: 0 0 11px !important;
+    padding: 0 26px 8px 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--premium-border, rgba(255,255,255,.12)) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--app-text-primary, var(--text-main, inherit)) !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    line-height: 1.25 !important;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#filter-view .filter-section-panel > .filter-simple-title::after {
+    content: "";
+    position: absolute;
+    right: 5px;
+    top: calc(50% - 5px);
+    width: 8px;
+    height: 8px;
+    border-right: 1.8px solid var(--theme-palette-accent, var(--accent, #D5A64C));
+    border-bottom: 1.8px solid var(--theme-palette-accent, var(--accent, #D5A64C));
+    transform: rotate(45deg);
+    transform-origin: center;
+    transition: transform 160ms ease, top 160ms ease;
+    opacity: .95;
+}
+
+#filter-view .filter-section-panel:not(.is-collapsed) > .filter-simple-title::after {
+    top: calc(50% - 2px);
+    transform: rotate(225deg);
+}
+
+#filter-view .filter-section-panel.is-collapsed > .filter-simple-title {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    border-bottom-color: transparent !important;
+}
+
+#filter-view .filter-section-panel.is-collapsed > :not(.filter-simple-title) {
+    display: none !important;
+}
+
+#filter-view .filter-section-panel > .filter-simple-title:focus-visible {
+    outline: 2px solid var(--theme-palette-accent, var(--accent, #D5A64C));
+    outline-offset: 3px;
+    border-radius: 5px;
+}
+
+/* Alle vier Panels stehen gemeinsam in einer scrollbaren Ansicht. */
+#filter-view > .filter-simple-inner {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 0 0 14px !important;
+    box-sizing: border-box !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+#filter-view > .filter-simple-inner::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+#filter-view > .filter-simple-inner > .filter-section-panel {
+    display: block !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    max-height: none !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #filter-view .filter-section-panel > .filter-simple-title::after {
+        transition: none;
+    }
+}

@@ -234,7 +234,7 @@
     /* Die übrigen Stats-Seiten bleiben im verfügbaren Bereich scrollbar. */
     #stats-statistics-page.active,
     #stats-highlights-page.active,
-    #stats-development-page.active,
+    #stats-statistics-page.active,
     #stats-peaks-page.active {
         overflow-y: auto;
         overflow-x: hidden;
@@ -246,7 +246,7 @@
 
     #stats-statistics-page #stats-structure-content,
     #stats-highlights-page #highlights-content,
-    #stats-development-page #stats-development-content,
+    #stats-statistics-page #stats-development-content,
     #stats-peaks-page #stats-peaks-content {
         width: 100%;
         min-width: 0;
@@ -254,7 +254,7 @@
     }
 
     #stats-statistics-page #stats-structure-content,
-    #stats-development-page #stats-development-content,
+    #stats-statistics-page #stats-development-content,
     #stats-peaks-page #stats-peaks-content {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -263,7 +263,7 @@
     }
 
     #stats-statistics-page #stats-structure-content > *,
-    #stats-development-page #stats-development-content > *,
+    #stats-statistics-page #stats-development-content > *,
     #stats-peaks-page #stats-peaks-content > * {
         min-width: 0;
     }
@@ -303,16 +303,16 @@
     grid-column: 1 / -1;
 }
 
-    #stats-development-page .development-sparkline-wrap,
-    #stats-development-page .development-history-chart,
-    #stats-development-page .development-history-summary,
-    #stats-development-page .development-point-popup {
+    #stats-statistics-page .development-sparkline-wrap,
+    #stats-statistics-page .development-history-chart,
+    #stats-statistics-page .development-history-summary,
+    #stats-statistics-page .development-point-popup {
         grid-column: 1 / -1;
     }
 
-    #stats-development-page .development-metric-grid,
-    #stats-development-page .activity-summary-grid,
-    #stats-development-page .peak-summary-grid {
+    #stats-statistics-page .development-metric-grid,
+    #stats-statistics-page .activity-summary-grid,
+    #stats-statistics-page .peak-summary-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -777,7 +777,7 @@
      * ihre eigene Höhe – "Aktivität & Regelmäßigkeit" wartet
      * nicht mehr auf die Höhe der linken Spalte.
      */
-    #stats-development-page
+    #stats-statistics-page
     #stats-development-content {
         display: flex !important;
         flex-direction: row;
@@ -789,7 +789,7 @@
         min-height: 0;
     }
 
-    #stats-development-page
+    #stats-statistics-page
     #stats-development-content
     > .development-col {
         display: flex;
@@ -804,7 +804,7 @@
      * Große Standardabstände der Analyseboxen
      * im Querformat entfernen.
      */
-    #stats-development-page
+    #stats-statistics-page
     .stats-analysis-section {
         margin: 0 !important;
         padding: 8px !important;
@@ -813,7 +813,7 @@
     /*
      * Überschriften kompakter.
      */
-    #stats-development-page
+    #stats-statistics-page
     .stats-analysis-title {
         margin-bottom: 6px !important;
         font-size: 11px;
@@ -822,19 +822,19 @@
     /*
      * Innenabstände der Karten reduzieren.
      */
-    #stats-development-page
+    #stats-statistics-page
     .development-metric-card,
-    #stats-development-page
+    #stats-statistics-page
     .best-form-card,
-    #stats-development-page
+    #stats-statistics-page
     .tour-profile-summary-card,
-    #stats-development-page
+    #stats-statistics-page
     .activity-summary-card,
-    #stats-development-page
+    #stats-statistics-page
     .tour-profile-feature-card,
-    #stats-development-page
+    #stats-statistics-page
     .development-history-summary > div,
-    #stats-development-page
+    #stats-statistics-page
     .activity-detail-stat-grid > div {
         padding-top: 6px !important;
         padding-bottom: 6px !important;
@@ -844,13 +844,13 @@
      * Formtrend-Kacheln und Aktivitätskacheln
      * enger zusammenrücken.
      */
-    #stats-development-page
+    #stats-statistics-page
     .development-metric-grid,
-    #stats-development-page
+    #stats-statistics-page
     .activity-summary-grid,
-    #stats-development-page
+    #stats-statistics-page
     .best-form-grid,
-    #stats-development-page
+    #stats-statistics-page
     .tour-profile-summary-grid {
         gap: 5px !important;
     }
@@ -858,7 +858,7 @@
     /*
      * Abstand innerhalb der Aktivitätsdetails reduzieren.
      */
-    #stats-development-page
+    #stats-statistics-page
     .activity-detail-panel {
         margin-top: 6px;
         padding: 6px;
@@ -867,18 +867,18 @@
     /*
      * Tourprofil kompakter halten.
      */
-    #stats-development-page
+    #stats-statistics-page
     .tour-profile-summary-grid {
         margin-bottom: 4px !important;
     }
 
-    #stats-development-page
+    #stats-statistics-page
     .tour-profile-detail-title {
         margin-top: 6px;
         margin-bottom: 4px;
     }
 
-    #stats-development-page
+    #stats-statistics-page
     .tour-profile-feature-title {
         margin-top: 7px;
         margin-bottom: 4px;
@@ -887,12 +887,12 @@
     /*
      * Langfristige Entwicklung ebenfalls dichter.
      */
-    #stats-development-page
+    #stats-statistics-page
     .development-history-controls {
         margin-bottom: 6px;
     }
 
-    #stats-development-page
+    #stats-statistics-page
     .development-history-summary {
         margin-top: 5px;
     }
@@ -915,14 +915,14 @@
      * Abstand zur Bestform
      * Bestform-Zeitraum
      */
-    #stats-development-page
+    #stats-statistics-page
     .best-form-grid {
         display: grid !important;
         grid-template-columns: minmax(0, 1fr) !important;
         gap: 5px !important;
     }
 
-    #stats-development-page
+    #stats-statistics-page
     .best-form-card {
         width: 100%;
         min-width: 0;
@@ -936,7 +936,7 @@
      * Bester Ø Leistungsindex
      * Leistungsvorsprung
      */
-    #stats-development-page
+    #stats-statistics-page
     .tour-profile-summary-grid {
         display: grid !important;
         grid-template-columns: minmax(0, 1fr) !important;
@@ -947,12 +947,12 @@
      * Die bestehende Regel für die dritte Karte
      * wieder neutralisieren.
      */
-    #stats-development-page
+    #stats-statistics-page
     .tour-profile-summary-card:nth-child(3) {
         grid-column: auto !important;
     }
 
-    #stats-development-page
+    #stats-statistics-page
     .tour-profile-summary-card {
         width: 100%;
         min-width: 0;
@@ -963,16 +963,16 @@
      * Innenabstände nochmals reduzieren,
      * damit die vertikale Darstellung kompakt bleibt.
      */
-    #stats-development-page
+    #stats-statistics-page
     .best-form-label,
-    #stats-development-page
+    #stats-statistics-page
     .tour-profile-summary-label {
         margin-bottom: 2px !important;
     }
 
-    #stats-development-page
+    #stats-statistics-page
     .best-form-meta,
-    #stats-development-page
+    #stats-statistics-page
     .tour-profile-summary-meta {
         margin-top: 2px !important;
     }

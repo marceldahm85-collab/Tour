@@ -265,7 +265,7 @@
             });
         }
 
-        const development = document.getElementById('stats-development-page');
+        const development = document.getElementById('stats-statistics-page');
         if (development) {
             const developmentSelectors = [
                 '.tour-profile-summary-value',
@@ -513,7 +513,7 @@
                 scope: 'statistics'
             },
             {
-                root: document.getElementById('stats-development-page'),
+                root: document.getElementById('stats-statistics-page'),
                 selector: '.stats-analysis-section',
                 scope: 'development'
             },

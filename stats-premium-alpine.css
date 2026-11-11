@@ -237,10 +237,10 @@
 }
 
 /* Entwicklung und Gipfelstatistik: Zahlenwerte erhalten mehr Hierarchie. */
-#stats-development-page .development-metric-value,
-#stats-development-page .best-form-value,
-#stats-development-page .tour-profile-summary-value,
-#stats-development-page .activity-summary-value,
+#stats-statistics-page .development-metric-value,
+#stats-statistics-page .best-form-value,
+#stats-statistics-page .tour-profile-summary-value,
+#stats-statistics-page .activity-summary-value,
 #stats-peaks-page .peak-summary-value {
     color: var(--app-text-primary, var(--text-main, inherit)) !important;
     font-variant-numeric: tabular-nums;
@@ -248,10 +248,10 @@
     letter-spacing: -.025em;
 }
 
-#stats-development-page .development-metric-label,
-#stats-development-page .best-form-label,
-#stats-development-page .tour-profile-summary-label,
-#stats-development-page .activity-summary-label,
+#stats-statistics-page .development-metric-label,
+#stats-statistics-page .best-form-label,
+#stats-statistics-page .tour-profile-summary-label,
+#stats-statistics-page .activity-summary-label,
 #stats-peaks-page .peak-summary-label {
     color: var(--app-text-secondary, var(--text-soft, inherit)) !important;
     opacity: 1;
@@ -306,12 +306,12 @@
     flex-basis: 17px;
 }
 
-#stats-development-page .tour-profile-name .stats-premium-content-icon,
-#stats-development-page .tour-profile-summary-value .stats-premium-content-icon,
-#stats-development-page .tour-profile-summary-meta .stats-premium-content-icon,
-#stats-development-page .tour-profile-detail-name .stats-premium-content-icon,
-#stats-development-page .tour-profile-detail-trait .stats-premium-content-icon,
-#stats-development-page .tour-profile-feature-card strong .stats-premium-content-icon {
+#stats-statistics-page .tour-profile-name .stats-premium-content-icon,
+#stats-statistics-page .tour-profile-summary-value .stats-premium-content-icon,
+#stats-statistics-page .tour-profile-summary-meta .stats-premium-content-icon,
+#stats-statistics-page .tour-profile-detail-name .stats-premium-content-icon,
+#stats-statistics-page .tour-profile-detail-trait .stats-premium-content-icon,
+#stats-statistics-page .tour-profile-feature-card strong .stats-premium-content-icon {
     width: 14px;
     height: 14px;
     flex-basis: 14px;
@@ -753,7 +753,7 @@
 /* Statistik und Entwicklung: große Analyseboxen einzeln aufklappbar.
    Kleine Kennzahlen innerhalb der geöffneten Boxen bleiben unverändert. */
 #stats-statistics-page .stats-section-collapsible > .stats-analysis-title,
-#stats-development-page .stats-section-collapsible > .stats-analysis-title,
+#stats-statistics-page .stats-section-collapsible > .stats-analysis-title,
 #stats-peaks-page .stats-section-collapsible > .stats-analysis-title {
     position: relative;
     padding-right: 26px;
@@ -764,7 +764,7 @@
 }
 
 #stats-statistics-page .stats-section-collapsible > .stats-analysis-title::after,
-#stats-development-page .stats-section-collapsible > .stats-analysis-title::after,
+#stats-statistics-page .stats-section-collapsible > .stats-analysis-title::after,
 #stats-peaks-page .stats-section-collapsible > .stats-analysis-title::after {
     content: "";
     position: absolute;
@@ -781,14 +781,14 @@
 }
 
 #stats-statistics-page .stats-section-collapsible:not(.is-collapsed) > .stats-analysis-title::after,
-#stats-development-page .stats-section-collapsible:not(.is-collapsed) > .stats-analysis-title::after,
+#stats-statistics-page .stats-section-collapsible:not(.is-collapsed) > .stats-analysis-title::after,
 #stats-peaks-page .stats-section-collapsible:not(.is-collapsed) > .stats-analysis-title::after {
     top: calc(50% - 2px);
     transform: rotate(225deg);
 }
 
 #stats-statistics-page .stats-section-collapsible.is-collapsed > .stats-analysis-title,
-#stats-development-page .stats-section-collapsible.is-collapsed > .stats-analysis-title,
+#stats-statistics-page .stats-section-collapsible.is-collapsed > .stats-analysis-title,
 #stats-peaks-page .stats-section-collapsible.is-collapsed > .stats-analysis-title {
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;
@@ -796,13 +796,13 @@
 }
 
 #stats-statistics-page .stats-section-collapsible.is-collapsed > :not(.stats-analysis-title),
-#stats-development-page .stats-section-collapsible.is-collapsed > :not(.stats-analysis-title),
+#stats-statistics-page .stats-section-collapsible.is-collapsed > :not(.stats-analysis-title),
 #stats-peaks-page .stats-section-collapsible.is-collapsed > :not(.stats-analysis-title) {
     display: none !important;
 }
 
 #stats-statistics-page .stats-section-collapsible > .stats-analysis-title:focus-visible,
-#stats-development-page .stats-section-collapsible > .stats-analysis-title:focus-visible,
+#stats-statistics-page .stats-section-collapsible > .stats-analysis-title:focus-visible,
 #stats-peaks-page .stats-section-collapsible > .stats-analysis-title:focus-visible {
     outline: 2px solid var(--theme-palette-accent, var(--accent, #D5A64C));
     outline-offset: 3px;
@@ -811,7 +811,7 @@
 
 @media (prefers-reduced-motion: reduce) {
     #stats-statistics-page .stats-section-collapsible > .stats-analysis-title::after,
-    #stats-development-page .stats-section-collapsible > .stats-analysis-title::after,
+    #stats-statistics-page .stats-section-collapsible > .stats-analysis-title::after,
     #stats-peaks-page .stats-section-collapsible > .stats-analysis-title::after {
         transition: none;
     }
@@ -1299,7 +1299,7 @@
 }
 
 #stats-statistics-page .stats-section-collapsible.is-collapsed > .stats-analysis-title,
-#stats-development-page .stats-section-collapsible.is-collapsed > .stats-analysis-title,
+#stats-statistics-page .stats-section-collapsible.is-collapsed > .stats-analysis-title,
 #stats-peaks-page .stats-section-collapsible.is-collapsed > .stats-analysis-title,
 #theme-view .theme-editor-section-card:not([open]) > summary.stats-analysis-title,
 #theme-view .theme-editor-subgroup:not([open]) > summary.stats-analysis-title {
@@ -1339,4 +1339,44 @@
     opacity: .34 !important;
     cursor: default !important;
     box-shadow: none !important;
+}
+
+
+/* Stats: äußere Analyseflächen zurücknehmen.
+   Die eigentlichen Kennzahlen-, Vergleichs- und Highlight-Kacheln behalten
+   ihre individuellen Hintergründe; auch das Gipfellisten-Panorama bleibt bestehen. */
+#stats-statistics-page .stats-structure-section,
+#stats-statistics-page .stats-analysis-section,
+#stats-highlights-page #highlights-content,
+#stats-peaks-page #stats-peaks-content > .stats-analysis-section:first-child {
+    background: transparent !important;
+    background-image: none !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+}
+
+/* Nach Wegfall von Entwicklung umfasst die Stats-Unternavigation vier Bereiche. */
+#chart-view > .stats-section-switch {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+/* Entwicklung wird innerhalb der Statistik als eigene, einspaltige Abschnittsfolge geführt. */
+@media (max-width: 768px) and (orientation: portrait) {
+    #stats-statistics-page #stats-development-content {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 7px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #stats-statistics-page #stats-development-content > .stats-analysis-section {
+        width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 0 7px !important;
+        box-sizing: border-box !important;
+    }
 }

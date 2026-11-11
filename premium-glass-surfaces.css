@@ -7,9 +7,6 @@
     #dashboard-view .dash-stat-tile,
 
     /* Große Inhaltskarten im Stats-Bereich. */
-    #chart-view .stats-analysis-section,
-    #chart-view .stats-structure-section,
-    #chart-view .stats-chart-block,
 
     /* Panorama-Highlights: der Hintergrund bleibt erkennbar, der Textbereich gewinnt Ruhe. */
     #stats-highlights-page #highlights-content .highlight-group,

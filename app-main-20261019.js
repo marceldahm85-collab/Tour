@@ -77,7 +77,7 @@ loadPlannedTours();
 
     // Neue unabhängige Tourensuche initialisieren
 initTourSearchResults();
-initFilterSectionNav();
+initFilterSectionAccordions();
 initTourCompareFeature();
 initFilterViewPersistence();
 initConsistentDrilldownNavigation();
@@ -3994,7 +3994,7 @@ const compareSeasonYearAll = document.getElementById('compare-season-year-all');
 
 let compareMode = 'years';
 const COMPARE_MODE_KEY = 'compareMode_v1';
-const FILTER_SECTION_KEY = 'activeFilterSection_v1';
+const FILTER_ACCORDION_STORAGE_KEY = 'tour.filter.collapsible-sections.v1';
 const FILTER_UI_STATE_KEY = 'filterUiState_v1';
 
 const COMPARE_MONTH_NAMES = [
@@ -9349,6 +9349,7 @@ function getStructureTypeComparison(tours) {
 
 function renderStructureTypeComparison(tours) {
     const rows = getStructureTypeComparison(tours);
+    const totalTourCount = rows.reduce((sum, row) => sum + row.count, 0);
 
     if (!rows.length) {
         return '<div class="stats-empty-state">Keine Tourarten im gewählten Zeitraum. Wähle ein anderes Jahr oder erweitere den Zeitraum.</div>';
@@ -9360,7 +9361,7 @@ function renderStructureTypeComparison(tours) {
                 <div class="stats-structure-type-card">
                     <div class="stats-structure-type-head">
                         <strong>${getStructureTourTypeIcon(row.label)} ${escapeHtml(row.label)}</strong>
-                        <span>${row.count} ${row.count === 1 ? 'Tour' : 'Touren'}</span>
+                        <span>${row.count} ${row.count === 1 ? 'Tour' : 'Touren'} · ${formatDecimalAT(totalTourCount > 0 ? row.count / totalTourCount * 100 : 0, 1)} %</span>
                     </div>
                     <div class="stats-structure-type-values">
                         <div><span>${escapeHtml(row.metricLabels.distance)}</span><b>${Number.isFinite(row.distance) ? `${formatDecimalAT(row.distance, 1)} km` : '–'}</b></div>
@@ -9385,14 +9386,6 @@ function updateStats() {
     const typicalTours = getStructureTypicalTourEntries(filteredEntries);
 
     container.innerHTML = `
-        <section class="stats-structure-section">
-            <div class="stats-analysis-title">
-                <span>🧩 Aktivitätsmix</span>
-                <span class="stats-structure-scope">${tours.length} ${tours.length === 1 ? 'Tour' : 'Touren'}</span>
-            </div>
-            ${renderStructureMix(tours)}
-        </section>
-
         <section class="stats-structure-section">
             <div class="stats-analysis-title">
                 <span>🎯 Typische Tour</span>
@@ -13946,28 +13939,19 @@ function refreshChartViewData() {
         document.getElementById('stats-highlights-page')
             ?.classList.contains('active');
 
-    const developmentActive =
-        document.getElementById('stats-development-page')
-            ?.classList.contains('active');
-
     const peaksActive =
         document.getElementById('stats-peaks-page')
             ?.classList.contains('active');
 
     if (statisticsActive) {
         updateStats();
+        updateDevelopmentStatsPage();
         markDerivedViewClean('chart');
         return;
     }
 
     if (highlightsActive) {
         updateHighlights();
-        markDerivedViewClean('chart');
-        return;
-    }
-
-    if (developmentActive) {
-        updateDevelopmentStatsPage();
         markDerivedViewClean('chart');
         return;
     }
@@ -15185,11 +15169,6 @@ function initStatsSectionPages() {
             'stats-highlights-page'
         );
 
-    const developmentPage =
-        document.getElementById(
-            'stats-development-page'
-        );
-
     const peaksPage =
         document.getElementById(
             'stats-peaks-page'
@@ -15215,9 +15194,6 @@ function initStatsSectionPages() {
 
         highlights:
             highlightsPage,
-
-        development:
-            developmentPage,
 
         peaks:
             peaksPage
@@ -15297,18 +15273,13 @@ function initStatsSectionPages() {
         ) {
 
             updateStats();
+            updateDevelopmentStatsPage();
 
         } else if (
             section === 'highlights'
         ) {
 
             updateHighlights();
-
-        } else if (
-            section === 'development'
-        ) {
-
-            updateDevelopmentStatsPage();
 
         } else if (
             section === 'peaks'
@@ -15341,9 +15312,10 @@ function initStatsSectionPages() {
             STATS_SECTION_KEY
         ) || 'diagrams';
 
-
+    // Alte Installationen konnten noch die inzwischen integrierte
+    // Entwicklungs-Unterseite gespeichert haben.
     setStatsSection(
-        savedSection,
+        savedSection === 'development' ? 'statistics' : savedSection,
         false
     );
 }
@@ -26955,134 +26927,82 @@ function initTourCompareFeature() {
 }
 
 /* =========================================================
-   Suche & Vergleich – Bereich umschalten
+   Suche & Vergleich – vier unabhängige, persistente Akkordeons
    ========================================================= */
 
-function showFilterSection(section, save = true) {
+function initFilterSectionAccordions() {
+    const root = document.getElementById('filter-view');
+    if (!root) return;
 
-    const validSections = ['search', 'period', 'years', 'tourCompare'];
-    section = validSections.includes(section) ? section : 'search';
-
-    if (save) {
-        appStorage.set(FILTER_SECTION_KEY, section);
+    let savedState = {};
+    try {
+        const raw = localStorage.getItem(FILTER_ACCORDION_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            savedState = parsed;
+        }
+    } catch (error) {
+        console.warn('[Suche & Vergleich] Akkordeonstatus konnte nicht gelesen werden:', error);
     }
 
-    const panels =
-        document.querySelectorAll(
-            '#filter-view [data-filter-panel]'
-        );
+    const panels = Array.from(root.querySelectorAll('.filter-section-panel[data-filter-panel]'));
 
-    const buttons =
-        document.querySelectorAll(
-            '#filter-section-nav [data-filter-section]'
-        );
+    const persistState = () => {
+        const state = {};
+        panels.forEach(panel => {
+            state[panel.dataset.filterPanel] = !panel.classList.contains('is-collapsed');
+        });
+        try {
+            localStorage.setItem(FILTER_ACCORDION_STORAGE_KEY, JSON.stringify(state));
+        } catch (error) {
+            console.warn('[Suche & Vergleich] Akkordeonstatus konnte nicht gespeichert werden:', error);
+        }
+    };
 
+    const setExpanded = (panel, expanded, persist = true) => {
+        const header = panel.querySelector(':scope > .filter-simple-title');
+        if (!header) return;
+
+        panel.classList.toggle('is-collapsed', !expanded);
+        panel.classList.toggle('filter-panel-active', expanded);
+        header.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        const label = header.textContent.trim().replace(/\s+/g, ' ');
+        header.setAttribute('aria-label', label + (expanded ? ' schließen' : ' öffnen'));
+
+        if (persist) persistState();
+
+        if (!expanded) return;
+        if (panel.dataset.filterPanel === 'years' &&
+            typeof redrawInlineYearCompareIfVisible === 'function') {
+            requestAnimationFrame(() => redrawInlineYearCompareIfVisible());
+        }
+        if (panel.dataset.filterPanel === 'tourCompare' &&
+            typeof populateTourCompareFilters === 'function') {
+            populateTourCompareFilters(true);
+        }
+    };
 
     panels.forEach(panel => {
+        const key = panel.dataset.filterPanel;
+        const header = panel.querySelector(':scope > .filter-simple-title');
+        if (!header) return;
 
-        const isActive =
-            panel.dataset.filterPanel ===
-            section;
+        panel.classList.add('filter-section-collapsible');
+        header.setAttribute('role', 'button');
+        header.setAttribute('tabindex', '0');
 
-        panel.classList.toggle(
-            'filter-panel-active',
-            isActive
-        );
+        const hasSavedState = Object.prototype.hasOwnProperty.call(savedState, key);
+        setExpanded(panel, hasSavedState ? savedState[key] === true : key === 'search', false);
 
-    });
-
-
-    buttons.forEach(button => {
-
-        const isActive =
-            button.dataset.filterSection ===
-            section;
-
-        button.classList.toggle(
-            'active',
-            isActive
-        );
-
-        button.setAttribute(
-            'aria-pressed',
-            String(isActive)
-        );
-
-    });
-
-
-    /*
-     * Bereits sichtbares Jahresdiagramm
-     * nach dem Einblenden neu zeichnen.
-     */
-    if (
-        section === 'years' &&
-        typeof redrawInlineYearCompareIfVisible ===
-            'function'
-    ) {
-
-        requestAnimationFrame(() => {
-            redrawInlineYearCompareIfVisible();
+        header.addEventListener('click', () => {
+            setExpanded(panel, panel.classList.contains('is-collapsed'), true);
         });
-
-    }
-
-    if (
-        section === 'tourCompare' &&
-        typeof populateTourCompareFilters === 'function'
-    ) {
-        populateTourCompareFilters(true);
-    }
-
-
-    /*
- * Beim Wechsel immer oben im
- * neu geöffneten Panel beginnen.
- */
-const activePanel =
-    document.querySelector(
-        '#filter-view ' +
-        '.filter-section-panel.' +
-        'filter-panel-active'
-    );
-
-if (activePanel) {
-    activePanel.scrollTop = 0;
-}
-}
-
-function initFilterSectionNav() {
-
-    const buttons =
-        document.querySelectorAll(
-            '#filter-section-nav [data-filter-section]'
-        );
-
-
-    buttons.forEach(button => {
-
-        button.addEventListener(
-            'click',
-            () => {
-
-                showFilterSection(
-                    button.dataset
-                        .filterSection
-                );
-
-            }
-        );
-
+        header.addEventListener('keydown', event => {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            event.preventDefault();
+            setExpanded(panel, panel.classList.contains('is-collapsed'), true);
+        });
     });
-
-
-    const savedSection =
-        appStorage.get(FILTER_SECTION_KEY) || 'search';
-
-    showFilterSection(
-        savedSection,
-        false
-    );
 }
 
 
@@ -34515,7 +34435,6 @@ function updateDevelopmentStatsPage() {
         <section class="stats-analysis-section">
             <div class="stats-analysis-title">
                 <span>📊 Langfristige Entwicklung</span>
-                <span style="font-size:9px; opacity:.7;">Abgeschlossene Monate · alle Touren</span>
             </div>
             ${renderLongTermDevelopment(allDevelopmentData)}
         </section>
