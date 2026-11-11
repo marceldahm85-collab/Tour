@@ -335,3 +335,17 @@
         line-height: 1.25 !important;
     }
 }
+
+
+/* Filter-Accordion: Android-Tap ohne Browser-Farbblitz. */
+#filter-view .filter-section-panel > .filter-simple-title {
+    -webkit-tap-highlight-color: transparent !important;
+    tap-highlight-color: transparent !important;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+#filter-view .filter-section-panel > .filter-simple-title:active {
+    background: transparent !important;
+    box-shadow: none !important;
+}

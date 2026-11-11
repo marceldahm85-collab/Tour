@@ -34,8 +34,6 @@
         panel.classList.toggle('is-collapsed', collapsed);
         if (title) {
             title.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-            title.setAttribute('aria-label',
-                (title.textContent || 'Bereich').trim() + (collapsed ? ' öffnen' : ' schließen'));
         }
     }
 
@@ -45,43 +43,37 @@
         root.dataset.exclusiveAccordionsBound = 'true';
 
         const panels = Array.from(root.querySelectorAll(':scope > .filter-section-panel'));
+        if (!panels.length) return;
+
+        // Den bisher ausgewählten Bereich als einzigen geöffneten Startbereich
+        // übernehmen; die übrigen Bereiche beginnen eindeutig geschlossen.
+        const initiallyOpen = panels.find(panel => panel.classList.contains('filter-panel-active')) || panels[0];
+
         panels.forEach(panel => {
             const title = panel.querySelector(':scope > .filter-simple-title');
             if (!title) return;
-            title.setAttribute('role', 'button');
-            title.setAttribute('tabindex', '0');
-            setFilterPanelCollapsed(panel, panel.classList.contains('is-collapsed'));
-        });
 
-        function activate(title) {
-            const panel = title.parentElement;
-            if (!panel || !panel.classList.contains('filter-section-panel')) return;
-            const opening = panel.classList.contains('is-collapsed');
+            setFilterPanelCollapsed(panel, panel !== initiallyOpen);
 
-            if (opening) {
-                panels.forEach(other => {
-                    if (other !== panel && !other.classList.contains('is-collapsed')) {
-                        setFilterPanelCollapsed(other, true);
-                    }
-                });
-            }
+            // Die Titel sind bewusst keine fokussierbaren Buttons:
+            // so entsteht beim Android-Tap weder ein blauer Fokus- noch Tap-Effekt.
+            title.style.webkitTapHighlightColor = 'transparent';
+            title.style.tapHighlightColor = 'transparent';
 
-            setFilterPanelCollapsed(panel, !opening);
-            if (opening) scrollOpenedSectionToTop(root, panel);
-        }
+            title.addEventListener('click', () => {
+                const opening = panel.classList.contains('is-collapsed');
 
-        root.addEventListener('click', event => {
-            const title = event.target.closest('.filter-section-panel > .filter-simple-title');
-            if (!title || !root.contains(title)) return;
-            activate(title);
-        });
+                if (opening) {
+                    panels.forEach(other => {
+                        if (other !== panel && !other.classList.contains('is-collapsed')) {
+                            setFilterPanelCollapsed(other, true);
+                        }
+                    });
+                }
 
-        root.addEventListener('keydown', event => {
-            if (event.key !== 'Enter' && event.key !== ' ') return;
-            const title = event.target.closest('.filter-section-panel > .filter-simple-title');
-            if (!title || !root.contains(title)) return;
-            event.preventDefault();
-            activate(title);
+                setFilterPanelCollapsed(panel, !opening);
+                if (opening) scrollOpenedSectionToTop(root, panel);
+            });
         });
     }
 
