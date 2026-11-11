@@ -23357,20 +23357,20 @@ function buildThemeEditorLiveCss() {
         const statsPanelSelectors = [
             '.stats-analysis-section',
             '.stats-structure-section'
-        ].map(sel => `${prefix} ${sel}`).join(',\\n');
+        ].map(sel => `${prefix} ${sel}`).join(',\n');
 
         const bigSelectors = THEME_EDITOR_BIG_SELECTORS
             .filter(sel => sel !== '.stats-analysis-section' && sel !== '.stats-structure-section')
             .map(sel => `${prefix} ${sel}`)
-            .join(',\\n');
+            .join(',\n');
 
         const softSelectors = THEME_EDITOR_SOFT_SELECTORS
             .map(sel => `${prefix} ${sel}`)
-            .join(',\\n');
+            .join(',\n');
 
-        css += `${bigSelectors} { background: ${bigGradient} !important; box-shadow: ${shadow} !important; border-radius: ${radius}px !important; backdrop-filter: blur(${blur}px) !important; -webkit-backdrop-filter: blur(${blur}px) !important; }\\n`;
-        css += `${statsPanelSelectors} { background: ${bigGradient} !important; box-shadow: ${shadow} !important; border-radius: ${radius}px !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }\\n`;
-        css += `${softSelectors} { background: ${softGradient} !important; border-radius: ${softRadius}px !important; }\\n`;
+        css += `${bigSelectors} { background: ${bigGradient} !important; box-shadow: ${shadow} !important; border-radius: ${radius}px !important; backdrop-filter: blur(${blur}px) !important; -webkit-backdrop-filter: blur(${blur}px) !important; }\n`;
+        css += `${statsPanelSelectors} { background: ${bigGradient} !important; box-shadow: ${shadow} !important; border-radius: ${radius}px !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }\n`;
+        css += `${softSelectors} { background: ${softGradient} !important; border-radius: ${softRadius}px !important; }\n`;
 
         // Die Diagramm-Tabs nutzen einen gleitenden Akzentmarker. Die Tabs
         // dürfen diesen Marker nicht mit dem weicheren Theme-Flächenverlauf
