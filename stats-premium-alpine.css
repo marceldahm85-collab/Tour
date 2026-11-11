@@ -1342,3 +1342,26 @@
     clip-path: none !important;
     overflow: visible !important;
 }
+
+
+/* GIPFELSTATISTIK — Kartenhintergrund ausdrücklich erhalten.
+   Die globale Stats-Regel in styles-overrides.css nimmt Analyseflächen zurück.
+   Für Gipfel bleiben die bestehenden Kartenflächen jedoch ausdrücklich sichtbar. */
+#chart-view #stats-peaks-page #stats-peaks-content > .stats-analysis-section {
+    background:
+        radial-gradient(
+            ellipse at 98% 0%,
+            color-mix(in srgb, var(--accent, #D5A64C) 7%, transparent),
+            transparent 42%
+        ),
+        linear-gradient(
+            150deg,
+            var(--app-surface-strong, rgba(255,255,255,.055)),
+            var(--app-surface-card, rgba(10,16,23,.8))
+        ) !important;
+    border: 1px solid var(--premium-border, rgba(255,255,255,.13)) !important;
+    border-color: var(--premium-border, rgba(255,255,255,.13)) !important;
+    box-shadow:
+        var(--premium-shadow-card, 0 8px 22px rgba(0,0,0,.18)),
+        inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
