@@ -1352,32 +1352,34 @@
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
 }
 
-/* Entwicklung nutzt dieselbe Karten-Geometrie wie die Statistikbereiche.
-   So unterscheiden sich weder Abschnittsabstand noch Innenabstand der Header. */
-#stats-statistics-page #stats-development-content {
+/* Statistik: dieselbe Kartenanordnung wie Suche & Vergleich.
+   Die beiden Inhaltsgruppen erhalten einen echten Abstand auf Elternebene. */
+#chart-view #stats-statistics-page #stats-box {
     display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
-    gap: 10px !important;
+    gap: 8px !important;
     width: 100% !important;
-    min-width: 0 !important;
-    margin-top: 10px !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
     box-sizing: border-box !important;
 }
 
-#stats-statistics-page #stats-development-content > .stats-analysis-section {
+#chart-view #stats-statistics-page #stats-structure-content,
+#chart-view #stats-statistics-page #stats-development-content {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
     width: 100% !important;
     min-width: 0 !important;
     margin: 0 !important;
-    padding: 11px !important;
+    padding: 0 !important;
     box-sizing: border-box !important;
 }
 
-
-
-
-/* STATISTIK — Suche & Vergleich ist die verbindliche Karten-Vorlage.
-   Gleiche Oberfläche, Innenabstände und kompakte Titelzeile; keine Sonderhöhe. */
+/* Die Statistik-Karten behalten die eigenständige Glasfläche der Vergleichskarten. */
 #chart-view #stats-statistics-page .stats-structure-section,
 #chart-view #stats-statistics-page .stats-analysis-section {
     box-sizing: border-box !important;
@@ -1397,36 +1399,45 @@
     backdrop-filter: blur(10px) !important;
 }
 
-/* Struktur und Entwicklung laufen wie die Karten in Suche & Vergleich
-   in einer gemeinsamen, eng gesetzten Ein-Spalten-Anordnung. */
-#chart-view #stats-statistics-page #stats-structure-content,
-#chart-view #stats-statistics-page #stats-development-content {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 8px !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    box-sizing: border-box !important;
-}
-
+/* Header-Geometrie und Trennlinie entsprechen exakt Suche & Vergleich. */
 #chart-view #stats-statistics-page .stats-section-collapsible > .stats-analysis-title {
+    position: relative !important;
     display: flex !important;
     align-items: center !important;
-    flex-wrap: wrap !important;
-    gap: 8px !important;
-    min-height: 0 !important;
+    flex-wrap: nowrap !important;
+    min-height: 18px !important;
     height: auto !important;
     max-height: none !important;
-    margin: 0 0 9px !important;
-    padding: 0 26px 0 0 !important;
+    margin: 0 0 11px !important;
+    padding: 0 26px 8px 0 !important;
     border: 0 !important;
-    background: none !important;
+    border-bottom: 1px solid var(--premium-border, rgba(255,255,255,.12)) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
     background-image: none !important;
+    box-shadow: none !important;
+    color: var(--app-text-primary, var(--text-main, inherit)) !important;
     font-size: 13px !important;
     font-weight: 800 !important;
-    line-height: 1.15 !important;
-    color: var(--text-main) !important;
+    line-height: 1.25 !important;
+    cursor: pointer !important;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
 }
+
+/* Geschlossene Header: gleiche kompakte 18-px-Zeile wie in Suche & Vergleich. */
+#chart-view #stats-statistics-page .stats-section-collapsible.is-collapsed > .stats-analysis-title {
+    min-height: 18px !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    border-bottom-color: transparent !important;
+}
+
+/* Geöffnete Header zeigen wieder die feine, thematisch akzentuierte Linie. */
+#chart-view #stats-statistics-page .stats-section-collapsible:not(.is-collapsed) > .stats-analysis-title {
+    margin-bottom: 11px !important;
+    padding-bottom: 8px !important;
+    border-bottom: 1px solid var(--premium-border, rgba(255,255,255,.12)) !important;
+}
+
