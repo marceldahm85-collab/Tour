@@ -14824,7 +14824,7 @@ const themeSwipeThresholdPx = 80;
 
 swipeArea.addEventListener('touchstart', (e) => {
     if (window.innerWidth > 900) return;
-    if (e.target.closest('#tour-map, #year-compare-canvas, #image-lightbox, .modal')) return;
+    if (e.target.closest('#tour-map, #year-compare-canvas, #image-lightbox, .modal, input[type="range"]')) return;
 
     const t = e.touches[0];
 
@@ -14845,7 +14845,7 @@ hasVerticalThemeIntent = false;
 
 swipeArea.addEventListener('touchmove', (e) => {
     if (!isDraggingView || window.innerWidth > 900) return;
-    if (e.target.closest('#tour-map, #year-compare-canvas, #image-lightbox, .modal')) return;
+    if (e.target.closest('#tour-map, #year-compare-canvas, #image-lightbox, .modal, input[type="range"]')) return;
 
     const t = e.touches[0];
 
@@ -14934,7 +14934,7 @@ if (hasVerticalIntent) {
 
 swipeArea.addEventListener('touchend', (e) => {
     if (!isDraggingView || window.innerWidth > 900) return;
-    if (e.target.closest('#tour-map, #year-compare-canvas, #image-lightbox, .modal')) return;
+    if (e.target.closest('#tour-map, #year-compare-canvas, #image-lightbox, .modal, input[type="range"]')) return;
 
     const endTouch =
     e.changedTouches?.[0];
