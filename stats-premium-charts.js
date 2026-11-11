@@ -2980,6 +2980,11 @@
 
                 let index;
                 if (category === 'avgSteps') {
+                    // Das neue Schuhabdruck-Raster besitzt eigene Monatszellen.
+                    // Alte, nachgelagerte Verlaufsdiagramm-Handler dürfen denselben
+                    // Klick nicht zusätzlich als horizontale Monatsbalken auswerten.
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
                     const left = 14, right = size.width - 14, top = 48, bottom = size.height - 5;
                     if (x < left || x > right || y < top || y > bottom) return;
                     const col = Math.max(0, Math.min(3, Math.floor((x - left) / ((right - left) / 4))));
