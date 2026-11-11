@@ -28,6 +28,8 @@
 @media (max-width: 600px) {
     @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
         #dashboard-view .dash-stat-tile,
+        #chart-view .stats-analysis-section,
+        #chart-view .stats-structure-section,
         #chart-view .stats-chart-block,
         #stats-highlights-page #highlights-content .highlight-group,
         #app-view .save-form-card {
