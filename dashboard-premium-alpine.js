@@ -53,6 +53,27 @@
     };
 
 
+    /* Hochaufgelöste, fotografische Alpenmotive.
+       Die URLs bleiben als gemeinsamer Asset-Katalog verfügbar, damit spätere
+       Views/Modale dieselben Motive nutzen können, ohne Chart- oder Modal-Icons
+       global umzubauen. Die Bildquellen sind mindestens 1280 px breit. */
+    const DASH_STAT_PHOTOS = Object.freeze({
+        touren: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/Alp18-148_Alpenwanderung.jpg/1280px-Alp18-148_Alpenwanderung.jpg',
+        steps: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/70/Mointain_Boot_with_Crampons.jpg/1280px-Mointain_Boot_with_Crampons.jpg',
+        gipfel: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/57/Grossglockner_-_at_the_top_of_the_hill.jpg/1280px-Grossglockner_-_at_the_top_of_the_hill.jpg',
+        bigTours: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Dolomites.jpg/1280px-Dolomites.jpg',
+        strecke: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/20-06-2020_-_Alps_panorama.jpg/1280px-20-06-2020_-_Alps_panorama.jpg',
+        aufstieg: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/Hiking_signs_in_Austria_3.jpg/1280px-Hiking_signs_in_Austria_3.jpg',
+        gehzeit: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Alpenpanorama_bei_Sonnenuntergang.jpg/1280px-Alpenpanorama_bei_Sonnenuntergang.jpg',
+        speed: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Living_in_wonderland._-_Flickr_-_simon_berger.jpg/1280px-Living_in_wonderland._-_Flickr_-_simon_berger.jpg',
+        steigung: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/Trail_in_Geigenkamm.jpg/1280px-Trail_in_Geigenkamm.jpg',
+        anstieg: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Tyrol_-_hiking_trail.jpg/1280px-Tyrol_-_hiking_trail.jpg'
+    });
+    window.PremiumAlpinePhotoAssets = Object.freeze({
+        dashboardStats: DASH_STAT_PHOTOS,
+        recentTour: DASH_STAT_PHOTOS.touren
+    });
+
     /* Wiederverwendung derselben Premium-Line-Art in den Diagramm-Kacheln.
        Die Meilenstein-Diagramme verwenden bewusst die identischen Rundgrafiken
        wie die fünf Dashboard-Meilensteine. */
@@ -110,10 +131,17 @@
         dashboard.querySelectorAll('.dash-stat-tile[data-tile-type]').forEach(tile => {
             const type = tile.dataset.tileType;
             const icon = tile.querySelector('.dash-stat-icon');
-            const svg = DASH_STAT_MARKS[type];
-            if (!icon || !svg || icon.dataset.premiumAlpineStatIcon === type) return;
+            const imageSrc = DASH_STAT_PHOTOS[type];
+            if (!icon || !imageSrc || icon.dataset.premiumAlpineStatIcon === type) return;
 
-            icon.innerHTML = svg;
+            const image = document.createElement('img');
+            image.className = 'dash-stat-photo';
+            image.src = imageSrc;
+            image.alt = '';
+            image.setAttribute('aria-hidden', 'true');
+            image.setAttribute('decoding', 'async');
+            image.setAttribute('draggable', 'false');
+            icon.replaceChildren(image);
             icon.dataset.premiumAlpineStatIcon = type;
             icon.setAttribute('aria-hidden', 'true');
         });
@@ -283,18 +311,42 @@
         });
     }
 
+    function enhanceRecentTourPhotoMarks(section) {
+        if (!section) return;
+
+        section.querySelectorAll('.dash-recent-item .tour-name').forEach(name => {
+            if (name.querySelector(':scope > .dash-recent-photo-mark')) return;
+
+            const mark = document.createElement('span');
+            mark.className = 'dash-recent-photo-mark';
+            mark.setAttribute('aria-hidden', 'true');
+
+            const image = document.createElement('img');
+            image.src = DASH_STAT_PHOTOS.touren;
+            image.alt = '';
+            image.setAttribute('aria-hidden', 'true');
+            image.setAttribute('decoding', 'async');
+            image.setAttribute('draggable', 'false');
+
+            mark.appendChild(image);
+            name.insertBefore(mark, name.firstChild);
+        });
+    }
+
     function enhanceRecentTours() {
         const section = document.querySelector('#dash-recent-section');
         if (!section) return;
 
         enhanceTitle(section);
         trimRecentTours(section);
+        enhanceRecentTourPhotoMarks(section);
         if (section.dataset.premiumAlpineRecentObserver === 'true') return;
 
         section.dataset.premiumAlpineRecentObserver = 'true';
         const observer = new MutationObserver(() => {
             enhanceTitle(section);
             trimRecentTours(section);
+            enhanceRecentTourPhotoMarks(section);
         });
         observer.observe(section, { childList: true, subtree: true });
     }
