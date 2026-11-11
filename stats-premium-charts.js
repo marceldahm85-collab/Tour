@@ -1203,13 +1203,26 @@
 
 
     function drawGradientDiagram() {
-        const data=getFilteredTours(),sums=Array(12).fill(0),counts=Array(12).fill(0);
-        data.forEach(entry=>{const month=monthOf(entry);if(month===null)return;
-            const ascent=getAdjustedAscent(entry),distance=getAdjustedDistance(entry);
-            if(ascent>0&&distance>0){sums[month]+=ascent/distance;counts[month]++;}});
-        const values=sums.map((sum,index)=>counts[index]?sum/counts[index]:0),valid=values.filter(value=>value>0);
-        const average=typeof getBoundedAverage==='function'?getBoundedAverage(valid)||0:
-            (valid.length?valid.reduce((sum,value)=>sum+value,0)/valid.length:0);
+        const data = getFilteredTours();
+        const sums = Array(12).fill(0), counts = Array(12).fill(0);
+        const stageGradientValues = [];
+        data.forEach(entry => {
+            const month = monthOf(entry);
+            if (month === null) return;
+            const ascent = getAdjustedAscent(entry);
+            const distance = getAdjustedDistance(entry);
+            if (ascent > 0 && distance > 0) {
+                const stageValue = ascent / distance;
+                sums[month] += stageValue;
+                counts[month]++;
+                stageGradientValues.push(stageValue);
+            }
+        });
+        const values = sums.map((sum, index) => counts[index] ? sum / counts[index] : 0);
+        // Jahreswert: Mittelwert aller gültigen Etappen, nicht der Monatsmittelwerte.
+        const average = stageGradientValues.length
+            ? stageGradientValues.reduce((sum, value) => sum + value, 0) / stageGradientValues.length
+            : 0;
         const canvas=canvasById('gradient-canvas');
         if(!canvas||typeof resizeCanvasToDisplaySize!=='function')return;
         const isActive=canvas.classList.contains('active-chart-canvas');
@@ -1234,13 +1247,26 @@
     }
 
     function drawAscentRateDiagram() {
-        const data=getFilteredTours(),sums=Array(12).fill(0),counts=Array(12).fill(0);
-        data.forEach(entry=>{const month=monthOf(entry);if(month===null)return;
-            const ascent=getAdjustedAscent(entry),hours=getAdjustedTimeHours(entry);
-            if(ascent>0&&hours>0){sums[month]+=ascent/hours;counts[month]++;}});
-        const values=sums.map((sum,index)=>counts[index]?sum/counts[index]:0),valid=values.filter(value=>value>0);
-        const average=typeof getBoundedAverage==='function'?getBoundedAverage(valid)||0:
-            (valid.length?valid.reduce((sum,value)=>sum+value,0)/valid.length:0);
+        const data = getFilteredTours();
+        const sums = Array(12).fill(0), counts = Array(12).fill(0);
+        const stageAscentRateValues = [];
+        data.forEach(entry => {
+            const month = monthOf(entry);
+            if (month === null) return;
+            const ascent = getAdjustedAscent(entry);
+            const hours = getAdjustedTimeHours(entry);
+            if (ascent > 0 && hours > 0) {
+                const stageValue = ascent / hours;
+                sums[month] += stageValue;
+                counts[month]++;
+                stageAscentRateValues.push(stageValue);
+            }
+        });
+        const values = sums.map((sum, index) => counts[index] ? sum / counts[index] : 0);
+        // Jahreswert: Mittelwert aller gültigen Etappen, nicht der Monatsmittelwerte.
+        const average = stageAscentRateValues.length
+            ? stageAscentRateValues.reduce((sum, value) => sum + value, 0) / stageAscentRateValues.length
+            : 0;
         const canvas=canvasById('ascent-rate-canvas');
         if(!canvas||typeof resizeCanvasToDisplaySize!=='function')return;
         const isActive=canvas.classList.contains('active-chart-canvas');
