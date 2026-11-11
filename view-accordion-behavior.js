@@ -1,4 +1,4 @@
-/* Exklusives Aufklappen und Scroll-Ausrichtung für Suche & Vergleich sowie Editor. */
+/* Exklusives Aufklappen und Scroll-Ausrichtung für den Editor. */
 (() => {
     'use strict';
 
@@ -26,67 +26,6 @@
             window.setTimeout(scrollNow, 180);
             window.setTimeout(scrollNow, 420);
             window.setTimeout(scrollNow, 700);
-        });
-    }
-
-    function setFilterPanelCollapsed(panel, collapsed) {
-        const title = panel.querySelector(':scope > .filter-simple-title');
-        if (!title) return;
-
-        panel.classList.toggle('is-collapsed', collapsed);
-        title.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-        title.setAttribute('aria-label',
-            (title.textContent || 'Bereich').trim() + (collapsed ? ' öffnen' : ' schließen'));
-    }
-
-    function toggleFilterCollapsibleFromEvent(root, target) {
-        const title = target.closest('.filter-section-panel > .filter-simple-title');
-        if (!title || !root.contains(title)) return false;
-
-        const panel = title.parentElement;
-        const opening = panel.classList.contains('is-collapsed');
-
-        if (opening) {
-            root.querySelectorAll('.filter-section-panel').forEach(other => {
-                if (other !== panel && !other.classList.contains('is-collapsed')) {
-                    setFilterPanelCollapsed(other, true);
-                }
-            });
-        }
-
-        setFilterPanelCollapsed(panel, !opening);
-        return true;
-    }
-
-    function initFilterAccordions() {
-        const root = document.querySelector('#filter-view > .filter-simple-inner');
-        if (!root || root.dataset.filterAccordionControlsBound === 'true') return;
-
-        const panels = Array.from(root.querySelectorAll(':scope > .filter-section-panel'));
-        if (!panels.length) return;
-
-        root.dataset.filterAccordionControlsBound = 'true';
-
-        panels.forEach(panel => {
-            const title = panel.querySelector(':scope > .filter-simple-title');
-            if (!title) return;
-            title.setAttribute('role', 'button');
-            title.setAttribute('tabindex', '0');
-            setFilterPanelCollapsed(panel, true);
-        });
-
-        // Gleiche einfache Ereignisbehandlung wie bei den funktionierenden Stats-Headern.
-        // Suche & Vergleich erhält ausdrücklich keinerlei Scroll-Aufruf.
-        root.addEventListener('click', event => {
-            toggleFilterCollapsibleFromEvent(root, event.target);
-        });
-
-        root.addEventListener('keydown', event => {
-            if (event.key !== 'Enter' && event.key !== ' ') return;
-            const title = event.target.closest('.filter-section-panel > .filter-simple-title');
-            if (!title || !root.contains(title)) return;
-            event.preventDefault();
-            toggleFilterCollapsibleFromEvent(root, event.target);
         });
     }
 
@@ -149,7 +88,6 @@
     }
 
     function init() {
-        initFilterAccordions();
         initEditorAccordions();
     }
 
