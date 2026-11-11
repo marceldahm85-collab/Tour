@@ -38,10 +38,9 @@
     isolation: isolate;
     overflow: hidden;
     padding: 7px 10px;
-    border-color: color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 24%, var(--app-surface-border, rgba(255,255,255,.08)));
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.075),
-        0 4px 12px rgba(0,0,0,.20);
+    /* Exakt dieselbe Rahmenwirkung wie die oberen Dashboard-Statistikkacheln. */
+    border-color: var(--premium-border) !important;
+    box-shadow: inset 3px 0 0 var(--accent), var(--premium-shadow-card) !important;
 }
 
 #dashboard-view #dash-milestones-section .dash-ms-watermark {
