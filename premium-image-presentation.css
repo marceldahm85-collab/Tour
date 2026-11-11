@@ -99,3 +99,10 @@
         transform: none !important;
     }
 }
+
+/* Dashboard-Meilensteine: geschlossener Akzentrahmen im Editor-Radius.
+   Die Tiefenwirkung aus premium-depth-effects.css bleibt unverändert erhalten. */
+#dashboard-view #dash-milestones-section .dash-milestone-tile {
+    border: 1px solid var(--accent, #D5A64C) !important;
+    border-radius: var(--editor-radius, var(--premium-radius-card, 16px)) !important;
+}
