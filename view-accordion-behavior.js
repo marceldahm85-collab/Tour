@@ -31,10 +31,10 @@
 
     function setFilterPanelCollapsed(panel, collapsed) {
         const title = panel.querySelector(':scope > .filter-simple-title');
+        if (!title) return;
+
         panel.classList.toggle('is-collapsed', collapsed);
-        if (title) {
-            title.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-        }
+        title.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
     }
 
     function initFilterAccordions() {
@@ -44,28 +44,25 @@
         const panels = Array.from(root.querySelectorAll(':scope > .filter-section-panel'));
         if (!panels.length) return;
 
-        // Suche & Vergleich startet grundsätzlich vollständig geschlossen.
+        // Alle vier Bereiche starten geschlossen.
         panels.forEach(panel => {
             const title = panel.querySelector(':scope > .filter-simple-title');
             if (!title) return;
-
+            title.setAttribute('role', 'button');
+            title.setAttribute('tabindex', '0');
             setFilterPanelCollapsed(panel, true);
-            title.style.webkitTapHighlightColor = 'transparent';
-            title.style.tapHighlightColor = 'transparent';
         });
 
-        // Ein einziger Capture-Listener verarbeitet jeden Header-Tap zuverlässig,
-        // bevor andere View-Handler das Ereignis gegebenenfalls abfangen.
-        root.addEventListener('click', event => {
-            const title = event.target.closest('.filter-section-panel > .filter-simple-title');
+        function togglePanelFromEvent(target) {
+            const title = target.closest('.filter-section-panel > .filter-simple-title');
             if (!title || !root.contains(title)) return;
 
             const panel = title.parentElement;
             if (!panels.includes(panel)) return;
 
-            event.preventDefault();
             const opening = panel.classList.contains('is-collapsed');
 
+            // Wie bei Statistik bleibt höchstens ein Bereich gleichzeitig geöffnet.
             if (opening) {
                 panels.forEach(other => {
                     if (other !== panel && !other.classList.contains('is-collapsed')) {
@@ -75,8 +72,23 @@
             }
 
             setFilterPanelCollapsed(panel, !opening);
+
+            // Nur die bereits bewährte Scroll-Ausrichtung wird zusätzlich ausgeführt.
             if (opening) scrollOpenedSectionToTop(root, panel);
-        }, true);
+        }
+
+        // Normale Bubbling-Listener wie bei den funktionierenden Statistik-Headern.
+        root.addEventListener('click', event => {
+            togglePanelFromEvent(event.target);
+        });
+
+        root.addEventListener('keydown', event => {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            const title = event.target.closest('.filter-section-panel > .filter-simple-title');
+            if (!title || !root.contains(title)) return;
+            event.preventDefault();
+            togglePanelFromEvent(event.target);
+        });
 
         root.dataset.exclusiveAccordionsBound = 'true';
     }
