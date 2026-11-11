@@ -1469,3 +1469,14 @@
 #chart-view #stats-statistics-page .stats-analysis-section {
     background-clip: padding-box !important;
 }
+
+/* Auch die Statistik-Layoutwrapper dürfen die gerundeten Accordion-Karten
+   nicht als zusätzliche, rechteckige oder abgerundete Clipping-Maske behandeln. */
+#chart-view #stats-statistics-page #stats-box,
+#chart-view #stats-statistics-page #stats-structure-content,
+#chart-view #stats-statistics-page #stats-development-content {
+    overflow: visible !important;
+    clip-path: none !important;
+    -webkit-mask: none !important;
+    mask: none !important;
+}
