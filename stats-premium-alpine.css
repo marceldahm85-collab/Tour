@@ -1230,9 +1230,6 @@
     background-repeat: no-repeat !important;
 }
 
-#stats-statistics-page .stats-section-collapsible.is-collapsed > .stats-analysis-title,
-#stats-statistics-page .stats-section-collapsible.is-collapsed > .stats-analysis-title,
-#stats-peaks-page .stats-section-collapsible.is-collapsed > .stats-analysis-title,
 #theme-view .theme-editor-section-card:not([open]) > summary.stats-analysis-title,
 #theme-view .theme-editor-subgroup:not([open]) > summary.stats-analysis-title {
     background-image: none !important;
