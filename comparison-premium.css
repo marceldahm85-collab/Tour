@@ -336,3 +336,10 @@
     }
 }
 
+
+
+/* Android: den nativen blauen Tap-Flash der neu klickbaren Such-Header unterdrücken. */
+#filter-view .filter-section-panel > .filter-simple-title {
+    -webkit-tap-highlight-color: transparent !important;
+    tap-highlight-color: transparent !important;
+}
