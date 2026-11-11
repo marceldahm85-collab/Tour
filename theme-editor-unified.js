@@ -290,8 +290,8 @@
     }
 
     const BIG_SURFACES = [
-        '.box', '.dash-section', '.filter-simple-card', '.stats-analysis-section',
-        '.stats-structure-section', '.chart-card', '.compare-box', '.compare-period-card',
+        '.box', '.dash-section', '.filter-simple-card',
+        '.chart-card', '.compare-box', '.compare-period-card',
         '.compare-list-card', '.tour-compare-pick-card', '.tour-compare-result',
         '.backup-status-panel', '.backup-info-card', '.backup-file-status', '.mob-sel-sheet',
         '#chart-view .stats-section-switch',

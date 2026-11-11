@@ -156,8 +156,6 @@
 }
 
 /* Inhaltsbereiche: klare Premium-Flächen statt beliebiger heller Einzelrahmen. */
-#chart-view .stats-analysis-section,
-#chart-view .stats-structure-section,
 #chart-view .stats-chart-block,
 #chart-view .chart-card {
     position: relative;
