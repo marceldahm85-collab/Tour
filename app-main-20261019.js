@@ -29109,7 +29109,10 @@ function openDashStatModal(type, tours) {
     dashboardStatOverviewContext = { type, tours };
 
     const MN = ['Jän','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
-    const n  = tours.length;
+    // Dashboard übergibt die gespeicherten Etappen, nicht die gruppierte Sammelanzeige.
+    // Deshalb ist tours.length der korrekte Nenner für Etappen-Durchschnittswerte.
+    const n = tours.length;
+    let validStepsStageCount = 0;
 
     function row(label, value, sub = false, id = '') {
         const cls = sub ? ' class="stats-sub"' : (id ? ' class="highlight-clickable"' : '');
@@ -29176,6 +29179,9 @@ function openDashStatModal(type, tours) {
                     Number(calculateEntrySteps(e)) || 0;
 
                 totalSteps += steps;
+                // Reine Radtouren liefern absichtlich 0 Schritte und gehören
+                // wie im Statsview nicht in den Nenner des Schritte-Durchschnitts.
+                if (steps > 0) validStepsStageCount++;
 
                 if (!e.date) return;
 
@@ -29186,8 +29192,8 @@ function openDashStatModal(type, tours) {
             });
 
             const averageSteps =
-                n > 0
-                    ? totalSteps / n
+                validStepsStageCount > 0
+                    ? totalSteps / validStepsStageCount
                     : 0;
 
             bodyHtml = `
@@ -29369,7 +29375,7 @@ ${p2000 > 0 ? `
             });
             const avgMin = n > 0 ? totalMin / n : 0;
             const fmt = mins =>
-                `${Math.floor(mins / 60)}:${String(Math.round(mins % 60)).padStart(2, '0')} h`;
+                `${formatMinutesToHHMM(mins)} h`;
             bodyHtml = `<ul class="stats-list">
                 ${row('Gehzeit gesamt',   fmt(totalMin), false, 'ds-total-row')}
                 ${row('Ø Gehzeit / Tour', fmt(avgMin), true)}
