@@ -735,3 +735,86 @@ html body #tour-view #plan-form #plan-save-btn {
     }
 }
 
+
+
+/* PREMIUM ALPINE — verbindliche gemeinsame Geometrie und Zustandsdarstellung
+   der fünf Hauptnavigation-Buttons. Home/Stats/Karte sind die Referenz.
+   Speichern und Mehr bleiben funktional unverändert; nur ihre Sonderdarstellung
+   wird auf dieselbe Button-Basis zurückgeführt. */
+html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > button.top-nav-btn,
+html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > .top-nav-more-wrap > button.top-nav-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 4px 2px !important;
+    gap: 3px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: var(--editor-radius, var(--app-radius, 15px)) !important;
+    background: transparent !important;
+    background-image: none !important;
+    border: 1px solid transparent !important;
+    color: var(--theme-palette-text, #f3f7fb) !important;
+    box-shadow: none !important;
+    filter: none !important;
+    transform: none;
+}
+
+html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > .top-nav-more-wrap {
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+}
+
+html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > .top-nav-more-wrap > button.top-nav-btn {
+    align-self: stretch !important;
+    flex: 1 1 auto !important;
+}
+
+html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > button.top-nav-btn .top-nav-label,
+html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > .top-nav-more-wrap > button.top-nav-btn .top-nav-label {
+    font-family: var(--app-font, inherit) !important;
+    line-height: 1 !important;
+    font-weight: 650 !important;
+    letter-spacing: normal !important;
+    opacity: .68 !important;
+}
+
+html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > button.top-nav-btn:is(.view-active, .more-view-active),
+html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > .top-nav-more-wrap > button.top-nav-btn:is(.view-active, .more-view-active) {
+    background: color-mix(
+        in srgb,
+        var(--theme-palette-accent, var(--accent, #ad7d12)) 15%,
+        var(--theme-palette-surface-strong, rgba(25,30,39,.92))
+    ) !important;
+    background-image: none !important;
+    border: 1px solid color-mix(
+        in srgb,
+        var(--theme-palette-accent, var(--accent, #ad7d12)) 38%,
+        transparent
+    ) !important;
+    color: var(--theme-palette-text, #f3f7fb) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.055),
+        0 2px 7px rgba(0,0,0,.12) !important;
+}
+
+html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > button.top-nav-btn:is(.view-active, .more-view-active) .top-nav-label,
+html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > .top-nav-more-wrap > button.top-nav-btn:is(.view-active, .more-view-active) .top-nav-label {
+    opacity: 1 !important;
+    font-weight: 750 !important;
+}
+
+html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > button.top-nav-btn:active,
+html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > .top-nav-more-wrap > button.top-nav-btn:active {
+    transform: scale(.94) !important;
+}
