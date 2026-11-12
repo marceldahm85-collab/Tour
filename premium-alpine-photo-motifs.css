@@ -136,3 +136,29 @@ html body #tour-view :is(#planned-tours-list, #planned-table-box, #planned-peaks
 @media (prefers-reduced-motion: reduce) {
   :is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon, .td-accordion-icon) { transition: none !important; }
 }
+
+/* Bedienelemente und interaktive Flächen ausdrücklich aus der Fotoumstellung ausnehmen. */
+:where(button, a, [role="button"]) :is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon, .td-accordion-icon) {
+  display: inline-flex !important;
+  width: 1.08em !important;
+  height: 1.08em !important;
+  min-width: 0;
+  min-height: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: none !important;
+  box-shadow: none !important;
+}
+:where(button, a, [role="button"]) :is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon, .td-accordion-icon) > svg {
+  display: block !important;
+}
+/* Die beiden Bergwelt-Seitenüberschriften verwenden ebenfalls Fotomotive statt Masken-Glyphen. */
+#wrapped-view.bergwelt-ready .bergwelt-intro > .bergwelt-heading::before,
+#wrapped-view.bergwelt-ready .bergwelt-tourbook-hero-content > h2::before {
+  -webkit-mask: none !important;
+  mask: none !important;
+  background: var(--alpine-photo-peaks) center / cover no-repeat !important;
+  border: 1px solid color-mix(in srgb, var(--bw-accent, #D5A64C) 55%, rgba(255,255,255,.4));
+  border-radius: 50%;
+}
