@@ -8881,7 +8881,8 @@ body.summit .top-main-nav [aria-current="page"] {
     width: 100% !important;
     min-width: 0 !important;
     margin: 0 !important;
-    border-radius: 15px !important;
+    /* Dynamischer Editor-Radius statt des alten festen 15px-Werts. */
+    border-radius: var(--editor-radius, var(--app-radius, 15px)) !important;
     padding: 4px 2px !important;
     gap: 3px !important;
     box-sizing: border-box !important;
