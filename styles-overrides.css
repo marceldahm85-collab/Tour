@@ -9715,3 +9715,22 @@ html body #more-menu.more-menu #theme-toggle:focus-visible {
     }
 }
 
+
+
+/* PREMIUM ALPINE — einheitliche Basisform aller fünf Hauptnavigation-Flächen.
+   Überschreibt auch die älteren, spezifischeren Festwerte für Speichern und Mehr.
+   Die aktive Fläche ist derselbe Button und erhält daher exakt denselben Editor-Radius. */
+html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > button.top-nav-btn,
+html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > .top-nav-more-wrap > button.top-nav-btn {
+    border-radius: var(--editor-radius, var(--app-radius, 15px)) !important;
+}
+
+html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > button.top-nav-btn.top-nav-save,
+html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > .top-nav-more-wrap > button#more-toggle.top-nav-btn {
+    border-radius: var(--editor-radius, var(--app-radius, 15px)) !important;
+}
+
+html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > button.top-nav-btn:is(.view-active, .more-view-active),
+html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > .top-nav-more-wrap > button.top-nav-btn:is(.view-active, .more-view-active) {
+    border-radius: var(--editor-radius, var(--app-radius, 15px)) !important;
+}
