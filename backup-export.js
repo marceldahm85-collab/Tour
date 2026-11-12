@@ -402,8 +402,8 @@ async function saveDataToLinkedFile(silent = false) {
             return false;
         }
 
+        const payload = await buildAppDataPayload();
         const writable = await linkedFileHandle.createWritable();
-        const payload = buildAppDataPayload();
 
         await writable.write(JSON.stringify(payload, null, 2));
         await writable.close();
@@ -457,7 +457,7 @@ async function loadDataFromLinkedFile() {
         const text = await file.text();
         const payload = JSON.parse(text);
 
-        applyAppDataPayload(payload);
+        await applyAppDataPayload(payload);
         updateFileStatus(`Geladen: ${linkedFileHandle.name}`);
     } catch (err) {
         console.error(err);
@@ -614,23 +614,33 @@ function initBackupExportFeature() {
     document.getElementById('file-disconnect-btn')?.addEventListener('click', disconnectDataFile);
     
     // Einfacher Download (funktioniert auf allen Geräten)
-    document.getElementById('simple-download-btn')?.addEventListener('click', () => {
-        const payload = buildAppDataPayload();
-        const json = JSON.stringify(payload, null, 2);
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-    
-        const date = new Date().toISOString().slice(0, 10);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Touren-${date}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        markBackupSavedNow();
-    
-        showToast('Datei heruntergeladen ✓', { type: 'success', duration: 2000 });
+    document.getElementById('simple-download-btn')?.addEventListener('click', async () => {
+        let url = '';
+        try {
+            const payload = await buildAppDataPayload();
+            const json = JSON.stringify(payload, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            url = URL.createObjectURL(blob);
+
+            const date = new Date().toISOString().slice(0, 10);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Touren-${date}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            markBackupSavedNow();
+
+            showToast('Datei heruntergeladen ✓', { type: 'success', duration: 2000 });
+        } catch (err) {
+            console.error('[Sicherung] Export fehlgeschlagen:', err);
+            showToast(err?.message || 'Sicherung konnte nicht vollständig erstellt werden.', {
+                type: 'error',
+                duration: 4500
+            });
+        } finally {
+            if (url) URL.revokeObjectURL(url);
+        }
     });
     
     // Einfacher Import (funktioniert auf allen Geräten)
@@ -645,7 +655,7 @@ function initBackupExportFeature() {
         try {
             const text = await file.text();
             const payload = JSON.parse(text);
-            applyAppDataPayload(payload);
+            await applyAppDataPayload(payload);
             showToast('Daten erfolgreich importiert ✓', { type: 'success', duration: 3000 });
         } catch (err) {
             console.error(err);
