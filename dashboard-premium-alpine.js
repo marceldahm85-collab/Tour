@@ -228,16 +228,29 @@
 
     function enhanceTitle(section) {
         const title = section.querySelector('.dash-section-title');
-        if (!title || title.querySelector('.dash-section-mountain-mark')) return;
-
-        const textNode = Array.from(title.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
-        if (textNode) textNode.nodeValue = textNode.nodeValue.replace(/^\s*(?:🏅|🕐)\s*/, '');
+        if (!title) return;
 
         const isRecentTours = section.id === 'dash-recent-section';
+        const existingMark = title.querySelector('.dash-section-mountain-mark');
+
+        /* Bei "Letzte Touren" darf kein per JavaScript eingefügtes Uhr-/Bergsymbol
+           erscheinen. Das Fotomotiv wird dort ausschließlich über CSS im Titel gezeigt.
+           Auch bereits vorhandene Markierungen aus einem vorherigen Renderlauf entfernen. */
+        if (isRecentTours) {
+            existingMark?.remove();
+            const textNode = Array.from(title.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+            if (textNode) textNode.nodeValue = textNode.nodeValue.replace(/^\s*(?:🏅|🕐)\s*/, '');
+            return;
+        }
+
+        if (existingMark) return;
+        const textNode = Array.from(title.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+        if (textNode) textNode.nodeValue = textNode.nodeValue.replace(/^\s*🏅\s*/, '');
+
         const mark = document.createElement('span');
-        mark.className = 'dash-section-mountain-mark' + (isRecentTours ? ' dash-section-tour-history-mark' : '');
+        mark.className = 'dash-section-mountain-mark';
         mark.setAttribute('aria-hidden', 'true');
-        mark.innerHTML = isRecentTours ? TOUR_HISTORY_MARK : TITLE_MARK;
+        mark.innerHTML = TITLE_MARK;
         title.insertBefore(mark, title.firstChild);
     }
 
