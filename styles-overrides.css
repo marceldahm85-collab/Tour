@@ -9734,3 +9734,17 @@ html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > bu
 html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > .top-nav-more-wrap > button.top-nav-btn:is(.view-active, .more-view-active) {
     border-radius: var(--editor-radius, var(--app-radius, 15px)) !important;
 }
+
+
+/* PREMIUM ALPINE — abschließende Radius-Korrektur der fünf Hauptnavigation-Flächen.
+   Die älteren Theme-Regeln für Speichern und Mehr besitzen höhere !important-
+   Spezifität als die vorherige gemeinsame Regel. Die eindeutigen Button-IDs
+   stellen sicher, dass alle fünf Flächen denselben dynamischen Editor-Radius
+   erhalten — unabhängig davon, welcher View gerade aktiv ist. */
+html body #dashboard-toggle,
+html body #diagram-toggle,
+html body #map-toggle,
+html body #quick-save-tour,
+html body #more-toggle {
+    border-radius: var(--editor-radius, var(--app-radius, 15px)) !important;
+}
