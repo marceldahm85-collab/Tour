@@ -696,3 +696,13 @@
     opacity: .25 !important;
     pointer-events: none !important;
 }
+
+
+/* Letzte Touren: Rahmen exakt wie bei einer einzelnen Dashboard-Statistikkachel.
+   Gleiche Editor-Rundung und dieselbe globale Kartenrahmen-Variable;
+   kein zusätzlicher Akzent- oder Inset-Schatten am Listeneintrag. */
+#dashboard-view #dash-recent-section .dash-tour-list > li {
+    border: 1px solid var(--ui-card-border) !important;
+    border-radius: var(--ui-card-radius) !important;
+    box-shadow: none !important;
+}
