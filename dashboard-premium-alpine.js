@@ -14,11 +14,11 @@
     };
     /* Jedes Dashboard-Ziel bekommt ein eigenes Panorama. */
     const BACKDROP_ASSETS = {
-        asc: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg/1280px-Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg',
-        dist: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/20-06-2020_-_Alps_panorama.jpg/1280px-20-06-2020_-_Alps_panorama.jpg',
-        peaks: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Dolomites.jpg/1280px-Dolomites.jpg',
+        asc: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg/1280px-Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg',
+        dist: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/20-06-2020_-_Alps_panorama.jpg/1280px-20-06-2020_-_Alps_panorama.jpg',
+        peaks: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Dolomites.jpg/1280px-Dolomites.jpg',
         steps: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Tyrol_-_hiking_trail.jpg/1280px-Tyrol_-_hiking_trail.jpg',
-        time: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Alpenpanorama_bei_Sonnenuntergang.jpg/1280px-Alpenpanorama_bei_Sonnenuntergang.jpg'
+        time: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Alpenpanorama_bei_Sonnenuntergang.jpg/1280px-Alpenpanorama_bei_Sonnenuntergang.jpg'
     };
 
     /* Dieselben Bildausschnitte wie auf den fünf Dashboard-Meilensteinen. */
@@ -52,27 +52,6 @@
         timeDistance: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="7.2" cy="7.2" r="4.3"/><path d="M7.2 4.8v2.6l1.7 1"/><path d="M2.5 21h19"/><path d="M3.5 17.8 8 15.7l3.4.8 5.1-5.1 3.7-1.7"/><path d="m17.6 9.3 2.8.2-.1 2.8"/><circle cx="3.5" cy="17.8" r=".7" class="icon-accent-fill"/><circle cx="11.4" cy="16.5" r=".65" class="icon-accent-fill"/><circle cx="16.5" cy="11.4" r=".65" class="icon-accent-fill"/></svg>'
     };
 
-
-    /* Hochaufgelöste, fotografische Alpenmotive.
-       Die URLs bleiben als gemeinsamer Asset-Katalog verfügbar, damit spätere
-       Views/Modale dieselben Motive nutzen können, ohne Chart- oder Modal-Icons
-       global umzubauen. Die Bildquellen sind mindestens 1280 px breit. */
-    const DASH_STAT_PHOTOS = Object.freeze({
-        touren: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Alp18-148_Alpenwanderung.jpg/1280px-Alp18-148_Alpenwanderung.jpg',
-        steps: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Mointain_Boot_with_Crampons.jpg/1280px-Mointain_Boot_with_Crampons.jpg',
-        gipfel: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Grossglockner_-_at_the_top_of_the_hill.jpg/1280px-Grossglockner_-_at_the_top_of_the_hill.jpg',
-        bigTours: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Dolomites.jpg/1280px-Dolomites.jpg',
-        strecke: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/20-06-2020_-_Alps_panorama.jpg/1280px-20-06-2020_-_Alps_panorama.jpg',
-        aufstieg: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Hiking_signs_in_Austria_3.jpg/1280px-Hiking_signs_in_Austria_3.jpg',
-        gehzeit: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Alpenpanorama_bei_Sonnenuntergang.jpg/1280px-Alpenpanorama_bei_Sonnenuntergang.jpg',
-        speed: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Living_in_wonderland._-_Flickr_-_simon_berger.jpg/1280px-Living_in_wonderland._-_Flickr_-_simon_berger.jpg',
-        steigung: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Trail_in_Geigenkamm.jpg/1280px-Trail_in_Geigenkamm.jpg',
-        anstieg: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Tyrol_-_hiking_trail.jpg/1280px-Tyrol_-_hiking_trail.jpg'
-    });
-    window.PremiumAlpinePhotoAssets = Object.freeze({
-        dashboardStats: DASH_STAT_PHOTOS,
-        recentTour: DASH_STAT_PHOTOS.touren
-    });
 
     /* Wiederverwendung derselben Premium-Line-Art in den Diagramm-Kacheln.
        Die Meilenstein-Diagramme verwenden bewusst die identischen Rundgrafiken
@@ -131,17 +110,10 @@
         dashboard.querySelectorAll('.dash-stat-tile[data-tile-type]').forEach(tile => {
             const type = tile.dataset.tileType;
             const icon = tile.querySelector('.dash-stat-icon');
-            const imageSrc = DASH_STAT_PHOTOS[type];
-            if (!icon || !imageSrc || icon.dataset.premiumAlpineStatIcon === type) return;
+            const svg = DASH_STAT_MARKS[type];
+            if (!icon || !svg || icon.dataset.premiumAlpineStatIcon === type) return;
 
-            const image = document.createElement('img');
-            image.className = 'dash-stat-photo';
-            image.src = imageSrc;
-            image.alt = '';
-            image.setAttribute('aria-hidden', 'true');
-            image.setAttribute('decoding', 'async');
-            image.setAttribute('draggable', 'false');
-            icon.replaceChildren(image);
+            icon.innerHTML = svg;
             icon.dataset.premiumAlpineStatIcon = type;
             icon.setAttribute('aria-hidden', 'true');
         });
@@ -311,42 +283,18 @@
         });
     }
 
-    function enhanceRecentTourPhotoMarks(section) {
-        if (!section) return;
-
-        section.querySelectorAll('.dash-recent-item .tour-name').forEach(name => {
-            if (name.querySelector(':scope > .dash-recent-photo-mark')) return;
-
-            const mark = document.createElement('span');
-            mark.className = 'dash-recent-photo-mark';
-            mark.setAttribute('aria-hidden', 'true');
-
-            const image = document.createElement('img');
-            image.src = DASH_STAT_PHOTOS.touren;
-            image.alt = '';
-            image.setAttribute('aria-hidden', 'true');
-            image.setAttribute('decoding', 'async');
-            image.setAttribute('draggable', 'false');
-
-            mark.appendChild(image);
-            name.insertBefore(mark, name.firstChild);
-        });
-    }
-
     function enhanceRecentTours() {
         const section = document.querySelector('#dash-recent-section');
         if (!section) return;
 
         enhanceTitle(section);
         trimRecentTours(section);
-        enhanceRecentTourPhotoMarks(section);
         if (section.dataset.premiumAlpineRecentObserver === 'true') return;
 
         section.dataset.premiumAlpineRecentObserver = 'true';
         const observer = new MutationObserver(() => {
             enhanceTitle(section);
             trimRecentTours(section);
-            enhanceRecentTourPhotoMarks(section);
         });
         observer.observe(section, { childList: true, subtree: true });
     }
