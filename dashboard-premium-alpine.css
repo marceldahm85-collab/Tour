@@ -588,3 +588,70 @@
     background: var(--premium-border, rgba(255,255,255,.14));
     pointer-events: none;
 }
+
+
+/* Fotomotive für die Dashboard-Statistikkacheln.
+   Die Bilder werden rein per CSS dargestellt: keine zusätzlichen DOM-Umbauten,
+   MutationObserver oder Bild-Elemente im Dashboard-JavaScript. */
+#dashboard-view .dash-stat-tile[data-tile-type] .dash-stat-icon {
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--accent, #D5A64C) 72%, rgba(255,255,255,.55));
+    border-radius: 50%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    box-shadow:
+        0 1px 3px rgba(0,0,0,.42),
+        0 0 5px color-mix(in srgb, var(--accent, #D5A64C) 30%, transparent);
+}
+#dashboard-view .dash-stat-tile[data-tile-type] .dash-stat-icon svg {
+    visibility: hidden;
+}
+#dashboard-view .dash-stat-tile[data-tile-type="touren"] .dash-stat-icon {
+    background-image: url("https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/Alp18-148_Alpenwanderung.jpg/1280px-Alp18-148_Alpenwanderung.jpg");
+}
+#dashboard-view .dash-stat-tile[data-tile-type="steps"] .dash-stat-icon {
+    background-image: url("https://thumb.wikimedia.org/wikipedia/commons/thumb/7/70/Mointain_Boot_with_Crampons.jpg/1280px-Mointain_Boot_with_Crampons.jpg");
+}
+#dashboard-view .dash-stat-tile[data-tile-type="gipfel"] .dash-stat-icon {
+    background-image: url("https://thumb.wikimedia.org/wikipedia/commons/thumb/5/57/Grossglockner_-_at_the_top_of_the_hill.jpg/1280px-Grossglockner_-_at_the_top_of_the_hill.jpg");
+}
+#dashboard-view .dash-stat-tile[data-tile-type="bigTours"] .dash-stat-icon {
+    background-image: url("https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Dolomites.jpg/1280px-Dolomites.jpg");
+}
+#dashboard-view .dash-stat-tile[data-tile-type="strecke"] .dash-stat-icon {
+    background-image: url("https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/20-06-2020_-_Alps_panorama.jpg/1280px-20-06-2020_-_Alps_panorama.jpg");
+}
+#dashboard-view .dash-stat-tile[data-tile-type="aufstieg"] .dash-stat-icon {
+    background-image: url("https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/Hiking_signs_in_Austria_3.jpg/1280px-Hiking_signs_in_Austria_3.jpg");
+}
+#dashboard-view .dash-stat-tile[data-tile-type="gehzeit"] .dash-stat-icon {
+    background-image: url("https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Alpenpanorama_bei_Sonnenuntergang.jpg/1280px-Alpenpanorama_bei_Sonnenuntergang.jpg");
+}
+#dashboard-view .dash-stat-tile[data-tile-type="speed"] .dash-stat-icon {
+    background-image: url("https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Living_in_wonderland._-_Flickr_-_simon_berger.jpg/1280px-Living_in_wonderland._-_Flickr_-_simon_berger.jpg");
+}
+#dashboard-view .dash-stat-tile[data-tile-type="steigung"] .dash-stat-icon {
+    background-image: url("https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/Trail_in_Geigenkamm.jpg/1280px-Trail_in_Geigenkamm.jpg");
+}
+#dashboard-view .dash-stat-tile[data-tile-type="anstieg"] .dash-stat-icon {
+    background-image: url("https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/Tyrol_-_hiking_trail.jpg/1280px-Tyrol_-_hiking_trail.jpg");
+}
+
+/* Gleiches Alpenmotiv als dezentes Rundsymbol vor jeder letzten Tour. */
+#dashboard-view #dash-recent-section .dash-tour-list .tour-name::before {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
+    vertical-align: -3px;
+    flex: 0 0 16px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--accent, #D5A64C) 70%, rgba(255,255,255,.5));
+    border-radius: 50%;
+    background-image: url("https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/Alp18-148_Alpenwanderung.jpg/1280px-Alp18-148_Alpenwanderung.jpg");
+    background-position: center;
+    background-size: cover;
+    box-shadow: 0 1px 4px rgba(0,0,0,.42);
+}
