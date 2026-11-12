@@ -321,6 +321,9 @@
     }
 
     async function initialize() {
+        // Ein aktiver Editor-Entwurf ist maßgeblich. Backup/Picker-Aufrufe dürfen
+        // ihn nicht durch ältere persistierte Einstellungen ersetzen.
+        if (editorDraftActive && currentSettings) return getSettingsSnapshot();
         if (initializationPromise) return initializationPromise;
 
         initializationPromise = (async () => {
@@ -746,6 +749,42 @@
         };
     }
 
+    function validateEditorPresetBackup(presets, backgroundBackup) {
+        if (!presets || typeof presets !== 'object' || Array.isArray(presets)) {
+            throw new TypeError('Die gespeicherten Editor-Presets in der Sicherungsdatei sind ungültig.');
+        }
+        const entries = Object.entries(presets);
+        if (entries.length > 100) {
+            throw new RangeError('Die Sicherungsdatei enthält zu viele Editor-Presets.');
+        }
+        const availableImageIds = new Set(
+            Array.isArray(backgroundBackup?.customImages)
+                ? backgroundBackup.customImages.map(image => image?.id)
+                : []
+        );
+        for (const [name, preset] of entries) {
+            if (!name.trim() || name.length > 32 || !preset || typeof preset !== 'object' || Array.isArray(preset)) {
+                throw new TypeError('Ein Editor-Preset in der Sicherungsdatei hat einen ungültigen Namen oder Inhalt.');
+            }
+            for (const key of ['editor', 'background', 'dashboard', 'widget', 'appStart']) {
+                if (preset[key] !== undefined &&
+                    (!preset[key] || typeof preset[key] !== 'object' || Array.isArray(preset[key]))) {
+                    throw new TypeError('Die Einstellungen des Editor-Presets „' + name + '“ sind ungültig.');
+                }
+            }
+            const background = preset.background;
+            if (background?.mode === 'custom') {
+                const id = background.customImageId;
+                if (typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,80}$/.test(id) ||
+                    !availableImageIds.has(id)) {
+                    throw new Error('Das Hintergrundbild des Editor-Presets „' + name +
+                        '“ fehlt in der Sicherungsdatei. Der Import wurde abgebrochen.');
+                }
+            }
+        }
+        return presets;
+    }
+
     function installEditorBackupIntegration() {
         const originalBuild = window.buildAppDataPayload;
         if (typeof originalBuild === 'function' && !originalBuild.__appBackgroundBackup) {
@@ -765,6 +804,13 @@
                     if (unifiedSettings && typeof unifiedSettings === 'object') {
                         meta.themeEditorUnifiedSettings = unifiedSettings;
                     }
+                    const editorPresets = typeof appStorage !== 'undefined' && appStorage
+                        ? appStorage.get('themeEditorPresets_v1')
+                        : null;
+                    meta.themeEditorPresets = editorPresets &&
+                        typeof editorPresets === 'object' && !Array.isArray(editorPresets)
+                        ? editorPresets
+                        : {};
                     meta.appBackground = await createBackupData();
 
                     const startSettings = typeof appStorage !== 'undefined' && appStorage
@@ -773,9 +819,11 @@
                     if (startSettings && typeof startSettings === 'object') {
                         meta.appStartSettings = startSettings;
                     }
-                    const startImage = typeof appStorage !== 'undefined' && appStorage
-                        ? appStorage.get('premiumAppStartImage_v1')
-                        : null;
+                    const startImage = typeof window.getAppStartCustomImageBlob === 'function'
+                        ? await window.getAppStartCustomImageBlob()
+                        : (typeof appStorage !== 'undefined' && appStorage
+                            ? appStorage.get('premiumAppStartImage_v1')
+                            : null);
                     if (startImage instanceof Blob && startImage.type.startsWith('image/') &&
                         startImage.size > 0 && startImage.size <= 5 * 1024 * 1024) {
                         meta.appStartCustomImageDataUrl = await blobToDataUrl(startImage);
@@ -795,11 +843,18 @@
         const originalApply = window.applyAppDataPayload;
         if (typeof originalApply === 'function' && !originalApply.__appBackgroundBackup) {
             const wrappedApply = async function (payload) {
-                const result = await originalApply.apply(this, arguments);
                 const meta = payload && typeof payload === 'object' &&
                     payload.meta && typeof payload.meta === 'object'
                     ? payload.meta
                     : {};
+                const hasEditorPresets = Object.prototype.hasOwnProperty.call(meta, 'themeEditorPresets');
+                const importedEditorPresets = hasEditorPresets
+                    ? validateEditorPresetBackup(meta.themeEditorPresets, meta.appBackground)
+                    : null;
+
+                // Erst nach erfolgreicher Struktur- und Asset-Referenzprüfung
+                // werden Touren, Einstellungen und Bilder verändert.
+                const result = await originalApply.apply(this, arguments);
 
                 if (meta.themeEditorUnifiedSettings &&
                     typeof meta.themeEditorUnifiedSettings === 'object' &&
@@ -874,6 +929,16 @@
                             });
                         }
                         throw error;
+                    }
+                }
+
+                if (hasEditorPresets) {
+                    appStorage.set('themeEditorPresets_v1', importedEditorPresets);
+                    try {
+                        localStorage.setItem('themeEditorPresets_v1', JSON.stringify(importedEditorPresets));
+                    } catch (_) {}
+                    if (typeof window.refreshThemeEditorPresetList === 'function') {
+                        window.refreshThemeEditorPresetList();
                     }
                 }
 
