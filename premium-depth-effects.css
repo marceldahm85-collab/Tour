@@ -445,7 +445,8 @@ html body #tour-view #plan-form > .plan-form-column,
 }
 
 /* Dashboard: kompakte Kennzahlen stehen als eigene Glasplättchen vor dem Bild. */
-#dashboard-view .dash-stat-tile {
+#dashboard-view .dash-stat-tile,
+#dashboard-view #dash-recent-section .dash-tour-list > .dash-recent-item {
     border-top-color: rgba(240,248,255,.38) !important;
     border-bottom-color: rgba(0,0,0,.62) !important;
     background-image:
@@ -472,8 +473,7 @@ html body #tour-view #plan-form > .plan-form-column,
 }
 
 /* Tourzeilen sind eine Stufe tiefer als die übergeordnete Dashboard-Karte. */
-#dashboard-view #dash-recent-section .dash-tour-list > .dash-recent-item,
-#dashboard-view .dash-tour-list > li {
+#dashboard-view .dash-tour-list > li:not(.dash-recent-item) {
     border-top-color: rgba(235,245,255,.24) !important;
     border-bottom-color: rgba(0,0,0,.54) !important;
     box-shadow: var(--depth-v3-control) !important;
