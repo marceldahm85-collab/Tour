@@ -9749,3 +9749,43 @@ html body #quick-save-tour,
 html body #more-toggle {
     border-radius: var(--editor-radius, var(--app-radius, 15px)) !important;
 }
+
+/* PREMIUM ALPINE — destruktive Aktionen klar erkennbar, aber als Glasflächen.
+   Die Warnfarbe bleibt sichtbar; Text und Symbole behalten hohen Kontrast. */
+html body .delete-btn,
+html body #td-delete,
+html body #theme-view .theme-editor-preset-delete,
+html body #theme-view .background-image-danger-button,
+html body #theme-view #te-app-start-image-remove,
+html body .image-remove-btn,
+html body .tour-image-file-remove {
+    background: rgba(142, 35, 43, 0.46) !important;
+    border: 1px solid rgba(255, 132, 139, 0.52) !important;
+    color: #fff2f2 !important;
+    text-shadow: 0 1px 2px rgba(35, 0, 0, 0.72);
+    box-shadow: inset 0 1px 0 rgba(255, 220, 222, 0.10),
+                0 2px 8px rgba(42, 0, 0, 0.16);
+    opacity: 1 !important;
+}
+
+html body .delete-btn:hover,
+html body #td-delete:hover,
+html body #theme-view .theme-editor-preset-delete:hover,
+html body #theme-view .background-image-danger-button:hover,
+html body #theme-view #te-app-start-image-remove:hover,
+html body .image-remove-btn:hover,
+html body .tour-image-file-remove:hover {
+    background: rgba(166, 43, 52, 0.66) !important;
+    border-color: rgba(255, 158, 164, 0.72) !important;
+    color: #ffffff !important;
+}
+
+html body .delete-btn:active,
+html body #td-delete:active,
+html body #theme-view .theme-editor-preset-delete:active,
+html body #theme-view .background-image-danger-button:active,
+html body #theme-view #te-app-start-image-remove:active,
+html body .image-remove-btn:active,
+html body .tour-image-file-remove:active {
+    background: rgba(126, 27, 35, 0.76) !important;
+}
