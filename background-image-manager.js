@@ -749,6 +749,27 @@
         };
     }
 
+    function validateImageDataUrl(encoded, maxBytes, label) {
+        if (typeof encoded !== 'string' || !encoded) {
+            throw new TypeError(label + ' fehlt in der Sicherungsdatei.');
+        }
+        const match = /^data:(image\/[a-z0-9.+-]+);base64,([a-z0-9+/=]+)$/i.exec(encoded);
+        const maxEncodedLength = Math.ceil(maxBytes * 4 / 3) + 128;
+        if (!match || encoded.length > maxEncodedLength) {
+            throw new TypeError(label + ' ist ungültig oder zu groß.');
+        }
+        let binary;
+        try {
+            binary = atob(match[2]);
+        } catch (_) {
+            throw new TypeError(label + ' enthält ungültige Bilddaten.');
+        }
+        if (!binary.length || binary.length > maxBytes) {
+            throw new RangeError(label + ' überschreitet die zulässige Dateigröße.');
+        }
+        return binary.length;
+    }
+
     function validateEditorPresetBackup(presets, backgroundBackup) {
         if (!presets || typeof presets !== 'object' || Array.isArray(presets)) {
             throw new TypeError('Die gespeicherten Editor-Presets in der Sicherungsdatei sind ungültig.');
@@ -757,13 +778,56 @@
         if (entries.length > 100) {
             throw new RangeError('Die Sicherungsdatei enthält zu viele Editor-Presets.');
         }
-        const availableImageIds = new Set(
-            Array.isArray(backgroundBackup?.customImages)
-                ? backgroundBackup.customImages.map(image => image?.id)
-                : []
-        );
+
+        const availableImageIds = new Set();
+        if (backgroundBackup !== undefined) {
+            if (!backgroundBackup || typeof backgroundBackup !== 'object' ||
+                Array.isArray(backgroundBackup) || !backgroundBackup.settings ||
+                typeof backgroundBackup.settings !== 'object') {
+                throw new TypeError('Die Hintergrunddaten in der Sicherungsdatei sind ungültig.');
+            }
+            const images = Array.isArray(backgroundBackup.customImages)
+                ? backgroundBackup.customImages
+                : [];
+            if (images.length > 100) {
+                throw new RangeError('Die Sicherungsdatei enthält zu viele Editor-Hintergrundbilder.');
+            }
+            for (const image of images) {
+                const id = typeof image?.id === 'string' ? image.id : '';
+                if (!/^[a-zA-Z0-9_-]{1,80}$/.test(id) || availableImageIds.has(id)) {
+                    throw new TypeError('Ein Editor-Hintergrundbild in der Sicherungsdatei hat eine ungültige Kennung.');
+                }
+                const actualSize = validateImageDataUrl(
+                    image.dataUrl,
+                    15 * 1024 * 1024,
+                    'Ein Editor-Hintergrundbild'
+                );
+                if (Number.isFinite(Number(image.size)) && Number(image.size) !== actualSize) {
+                    throw new Error('Die Größe eines Editor-Hintergrundbildes stimmt nicht mit den Sicherungsdaten überein.');
+                }
+                availableImageIds.add(id);
+            }
+            if (typeof backgroundBackup.customImageDataUrl === 'string' &&
+                backgroundBackup.customImageDataUrl) {
+                validateImageDataUrl(
+                    backgroundBackup.customImageDataUrl,
+                    15 * 1024 * 1024,
+                    'Das aktive Editor-Hintergrundbild'
+                );
+            }
+            const activeSettings = backgroundBackup.settings;
+            if (activeSettings.mode === 'custom') {
+                const activeId = activeSettings.customImageId;
+                const hasAsset = typeof activeId === 'string' && availableImageIds.has(activeId);
+                if (!hasAsset && !backgroundBackup.customImageDataUrl) {
+                    throw new Error('Das aktive Editor-Hintergrundbild fehlt in der Sicherungsdatei.');
+                }
+            }
+        }
+
         for (const [name, preset] of entries) {
-            if (!name.trim() || name.length > 32 || !preset || typeof preset !== 'object' || Array.isArray(preset)) {
+            if (!name.trim() || name.length > 32 || !preset ||
+                typeof preset !== 'object' || Array.isArray(preset)) {
                 throw new TypeError('Ein Editor-Preset in der Sicherungsdatei hat einen ungültigen Namen oder Inhalt.');
             }
             for (const key of ['editor', 'background', 'dashboard', 'widget', 'appStart']) {
@@ -851,6 +915,14 @@
                 const importedEditorPresets = hasEditorPresets
                     ? validateEditorPresetBackup(meta.themeEditorPresets, meta.appBackground)
                     : null;
+                if (typeof meta.appStartCustomImageDataUrl === 'string' &&
+                    meta.appStartCustomImageDataUrl) {
+                    validateImageDataUrl(
+                        meta.appStartCustomImageDataUrl,
+                        5 * 1024 * 1024,
+                        'Das eigene App-Startbild'
+                    );
+                }
 
                 // Erst nach erfolgreicher Struktur- und Asset-Referenzprüfung
                 // werden Touren, Einstellungen und Bilder verändert.
