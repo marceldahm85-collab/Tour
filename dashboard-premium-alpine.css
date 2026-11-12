@@ -568,38 +568,6 @@
 }
 
 
-/* Dashboard-Abschnittstitel: keine Akzent-Waschung/kein Leuchten im Titelbereich.
-   Die feine Akzentlinie sitzt unter dem Titel – nicht rechts daneben. */
-#dashboard-view #dash-recent-section > .dash-section-title {
-    background: transparent !important;
-    box-shadow: none !important;
-    filter: none !important;
-}
-
-#dashboard-view #dash-recent-section > .dash-section-title::after {
-    content: "" !important;
-    position: absolute !important;
-    display: block !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: auto !important;
-    min-width: 0 !important;
-    height: 1px !important;
-    margin: 0 !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: color-mix(in srgb, var(--accent, #D5A64C) 42%, transparent) !important;
-    opacity: 1 !important;
-    pointer-events: none !important;
-}
-
-/* Nur der Bereichstitel wird von seinem alten Akzent-Verlauf befreit.
-   Die äußere Dashboard-Sektion und ihre übrigen Oberflächen bleiben unverändert. */
-#dashboard-view #dash-recent-section > .dash-section-title {
-    background-image: none !important;
-}
-
 /* Fotomotive für die Dashboard-Statistikkacheln.
    Die Bilder werden rein per CSS dargestellt: keine zusätzlichen DOM-Umbauten,
    MutationObserver oder Bild-Elemente im Dashboard-JavaScript. */
@@ -680,34 +648,6 @@
     opacity: 1 !important;
 }
 
-/* Die Titeltrennlinie erhält dieselbe feine Akzentfarbe wie aktive
-   Header-/Accordion-Rahmen; Position und Stärke bleiben unverändert. */
-#dashboard-view #dash-recent-section .dash-section-title::after {
-    height: 1px !important;
-    background: color-mix(in srgb, var(--accent, #D5A64C) 72%, transparent) !important;
-}
-
-
-/* Letzte Touren: Linienführung wie bei den Gruppentiteln der Statistik.
-   Die Akzentlinie beginnt direkt hinter dem Titel und läuft nur bis zum
-   rechten Rand; sie liegt nicht mehr als Unterstreichung über die ganze Zeile. */
-#dashboard-view #dash-recent-section .dash-section-title::after {
-    content: "" !important;
-    position: static !important;
-    display: block !important;
-    flex: 1 1 auto !important;
-    width: auto !important;
-    min-width: 0 !important;
-    height: 1px !important;
-    margin: 0 0 0 4px !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: var(--accent, #D5A64C) !important;
-    opacity: .25 !important;
-    pointer-events: none !important;
-}
-
-
 /* Letzte Touren: dieselbe vollständige Premium-Kartenoberfläche wie .dash-stat-tile.
    Rahmen, Rundung, Akzent-Inset, Verlauf und Schatten werden 1:1 übernommen;
    ausschließlich die Listen-Geometrie (Padding/Zeilenhöhe/Grid) bleibt separat. */
@@ -732,4 +672,28 @@
         box-shadow: inset 3px 0 0 var(--accent), var(--premium-shadow-hover) !important;
         transform: translateY(-2px);
     }
+}
+
+
+/* Letzte Touren: dieselbe gerade, inset gesetzte 1-px-Trennlinie wie
+   der geöffnete Statistik-Header. Die alte ::after-Flexlinie ist vollständig deaktiviert. */
+#dashboard-view #dash-recent-section > .dash-section-title {
+    border-bottom: 0 !important;
+    border-radius: 0 !important;
+    background-color: transparent !important;
+    background-image: linear-gradient(
+        to bottom,
+        var(--premium-border, rgba(255,255,255,.12)),
+        var(--premium-border, rgba(255,255,255,.12))
+    ) !important;
+    background-size: calc(100% - 24px) 1px !important;
+    background-position: center bottom !important;
+    background-repeat: no-repeat !important;
+    box-shadow: none !important;
+    filter: none !important;
+}
+
+#dashboard-view #dash-recent-section > .dash-section-title::after {
+    content: none !important;
+    display: none !important;
 }
