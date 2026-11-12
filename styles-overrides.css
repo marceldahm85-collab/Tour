@@ -9620,3 +9620,98 @@ body.summit .ripple-el {
         padding-top: 3px !important;
     }
 }
+
+/* =========================================================
+   PREMIUM ALPINE — konsistente Editor-Radien für die Navigation
+   und eigenständige Glasflächen für alle Einträge im Mehr-Menü.
+   Ausschließlich Darstellung; Navigation, Reihenfolge und Funktionen bleiben unverändert.
+   ========================================================= */
+html body .app-wrapper .accordion-header .header-actions > .top-main-nav {
+    border-radius: var(--editor-radius, var(--app-radius, 18px)) !important;
+}
+
+html body .app-wrapper .accordion-header .header-actions > .top-main-nav > .top-nav-btn,
+html body .app-wrapper .accordion-header .header-actions > .top-main-nav .top-nav-more-wrap > .top-nav-btn {
+    border-radius: var(--editor-radius, 15px) !important;
+}
+
+html body #more-menu.more-menu {
+    border-radius: var(--editor-radius, 17px) !important;
+}
+
+html body #more-menu.more-menu .more-menu-item,
+html body #more-menu.more-menu #theme-toggle {
+    box-sizing: border-box !important;
+    border: 1px solid var(--premium-border, var(--app-surface-border, rgba(225,232,242,.14))) !important;
+    border-radius: var(--editor-radius, 12px) !important;
+    background:
+        radial-gradient(
+            ellipse at 12% 0%,
+            color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 9%, transparent),
+            transparent 68%
+        ),
+        linear-gradient(
+            145deg,
+            var(--premium-surface-1, var(--app-surface-strong, rgba(35,45,58,.92))),
+            var(--premium-surface-2, var(--app-surface-card, rgba(12,19,29,.90)))
+        ) !important;
+    color: var(--app-text-primary, var(--theme-palette-text, #f1f5f9)) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.075),
+        0 3px 9px rgba(0,0,0,.20) !important;
+    transition:
+        background var(--premium-motion-fast, 150ms) ease,
+        border-color var(--premium-motion-fast, 150ms) ease,
+        box-shadow var(--premium-motion-fast, 150ms) ease,
+        transform var(--premium-motion-fast, 150ms) ease !important;
+}
+
+html body #more-menu.more-menu .more-menu-item:active,
+html body #more-menu.more-menu #theme-toggle:active {
+    background:
+        linear-gradient(
+            145deg,
+            color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 20%, var(--premium-surface-1, #263342)),
+            var(--premium-surface-2, #0c131d)
+        ) !important;
+    border-color: var(--premium-border-strong, var(--accent)) !important;
+    box-shadow:
+        inset 0 1px 3px rgba(0,0,0,.22),
+        0 1px 3px rgba(0,0,0,.18) !important;
+}
+
+html body #more-menu.more-menu .more-menu-item:focus-visible,
+html body #more-menu.more-menu #theme-toggle:focus-visible {
+    outline: 2px solid var(--theme-palette-accent, var(--accent, #ad7d12)) !important;
+    outline-offset: 2px !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    html body #more-menu.more-menu .more-menu-item:hover,
+    html body #more-menu.more-menu #theme-toggle:hover {
+        background:
+            radial-gradient(
+                ellipse at 12% 0%,
+                color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 17%, transparent),
+                transparent 68%
+            ),
+            linear-gradient(
+                145deg,
+                var(--premium-surface-1, var(--app-surface-strong, rgba(35,45,58,.92))),
+                var(--premium-surface-2, var(--app-surface-card, rgba(12,19,29,.90)))
+            ) !important;
+        border-color: var(--premium-border-strong, var(--accent)) !important;
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.10),
+            0 5px 12px rgba(0,0,0,.24) !important;
+        transform: translateY(-1px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body #more-menu.more-menu .more-menu-item,
+    html body #more-menu.more-menu #theme-toggle {
+        transition: none !important;
+    }
+}
+
