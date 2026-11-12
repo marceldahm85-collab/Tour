@@ -698,11 +698,18 @@
 }
 
 
-/* Letzte Touren: Rahmen exakt wie bei einer einzelnen Dashboard-Statistikkachel.
-   Gleiche Editor-Rundung und dieselbe globale Kartenrahmen-Variable;
-   kein zusätzlicher Akzent- oder Inset-Schatten am Listeneintrag. */
+/* Letzte Touren: Rahmen und Kartenschatten wie bei einer einzelnen
+   Dashboard-Statistikkachel (.dash-stat-tile).
+   Die Listen-Geometrie und die bestehende Glasfläche bleiben unverändert. */
 #dashboard-view #dash-recent-section .dash-tour-list > li {
-    border: 1px solid var(--ui-card-border) !important;
-    border-radius: var(--ui-card-radius) !important;
-    box-shadow: none !important;
+    border: 1px solid var(--premium-border) !important;
+    border-radius: var(--premium-radius-card) !important;
+    box-shadow: inset 3px 0 0 var(--accent), var(--premium-shadow-card) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    body:not(.touch-mode) #dashboard-view #dash-recent-section .dash-tour-list > li:hover {
+        border-color: var(--premium-border-strong) !important;
+        box-shadow: inset 3px 0 0 var(--accent), var(--premium-shadow-hover) !important;
+    }
 }
