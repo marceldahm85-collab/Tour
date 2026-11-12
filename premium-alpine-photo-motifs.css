@@ -1,0 +1,138 @@
+/* PREMIUM ALPINE — fotografische Motive für dekorative UI-Symbole.
+   Funktionale Controls, Status-/Rangkennzeichnungen und Hauptnavigation bleiben unberührt. */
+:root {
+  --alpine-photo-peaks: url("https://thumb.wikimedia.org/wikipedia/commons/thumb/5/57/Grossglockner_-_at_the_top_of_the_hill.jpg/1280px-Grossglockner_-_at_the_top_of_the_hill.jpg");
+  --alpine-photo-trail: url("https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/Alp18-148_Alpenwanderung.jpg/1280px-Alp18-148_Alpenwanderung.jpg");
+  --alpine-photo-distance: url("https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/20-06-2020_-_Alps_panorama.jpg/1280px-20-06-2020_-_Alps_panorama.jpg");
+  --alpine-photo-ascent: url("https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg/1280px-Alpine_meadows_and_mountain_panorama_from_Mount_Rigi%2C_September_2026.jpg");
+  --alpine-photo-sunset: url("https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Alpenpanorama_bei_Sonnenuntergang.jpg/1280px-Alpenpanorama_bei_Sonnenuntergang.jpg");
+  --alpine-photo-dolomites: url("https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Dolomites.jpg/1280px-Dolomites.jpg");
+}
+
+/* Kleine dekorative Zeichen in Überschriften und Statistikbezeichnungen. */
+:is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon, .td-accordion-icon):not(button *) {
+  display: inline-block !important;
+  flex: 0 0 1.2em;
+  width: 1.2em !important;
+  height: 1.2em !important;
+  min-width: 1.2em;
+  min-height: 1.2em;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent, #D5A64C) 58%, rgba(255,255,255,.5));
+  border-radius: 50%;
+  background-color: rgba(8,17,26,.35);
+  background-image: var(--alpine-photo-peaks);
+  background-position: center;
+  background-size: cover;
+  box-shadow: 0 1px 5px rgba(0,0,0,.28), 0 0 0 1px rgba(255,255,255,.08);
+  vertical-align: middle;
+}
+:is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon, .td-accordion-icon):not(button *) > svg {
+  display: none !important;
+}
+
+/* Semantisch passende Bildmotive — die Zuordnung betrifft nur dekorative Icon-Hüllen. */
+:is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon, .td-accordion-icon)[data-icon-key="trail"],
+:is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon)[data-premium-alpine-icon="tour"],
+:is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon)[data-icon-key="hiking"],
+:is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon)[data-icon-key="typical"],
+:is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon)[data-icon-key="profile"] { background-image: var(--alpine-photo-trail); }
+:is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon)[data-icon-key="distance"],
+:is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon)[data-premium-alpine-icon="distance"],
+:is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon)[data-icon-key="compare"],
+:is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon)[data-icon-key="balance"] { background-image: var(--alpine-photo-distance); }
+:is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon)[data-icon-key="ascent"],
+:is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon)[data-icon-key="performance"],
+:is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon)[data-icon-key="grade"],
+:is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon)[data-icon-key="slope"] { background-image: var(--alpine-photo-ascent); }
+:is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon)[data-icon-key="time"],
+:is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon)[data-icon-key="calendar"],
+:is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon)[data-icon-key="frequency"] { background-image: var(--alpine-photo-sunset); }
+:is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon)[data-icon-key="peaks"],
+:is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon)[data-premium-alpine-icon="peaks"],
+:is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon)[data-icon-key="trophy"] { background-image: var(--alpine-photo-dolomites); }
+
+/* Fachliche Status- und Funktionssymbole bleiben als klare Piktogramme erhalten. */
+.premium-alpine-inline-icon:is(
+  [data-premium-alpine-icon="success"], [data-premium-alpine-icon="warning"],
+  [data-premium-alpine-icon="error"], [data-premium-alpine-icon="info"],
+  [data-premium-alpine-icon="lock"], [data-premium-alpine-icon="delete"],
+  [data-premium-alpine-icon="play"], [data-premium-alpine-icon="pause"],
+  [data-premium-alpine-icon="stop"], [data-premium-alpine-icon="chevronLeft"],
+  [data-premium-alpine-icon="chevronRight"]
+) {
+  display: inline-flex !important;
+  width: 1.08em !important;
+  height: 1.08em !important;
+  min-width: 0;
+  min-height: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: none !important;
+  box-shadow: none;
+}
+.premium-alpine-inline-icon:is(
+  [data-premium-alpine-icon="success"], [data-premium-alpine-icon="warning"],
+  [data-premium-alpine-icon="error"], [data-premium-alpine-icon="info"],
+  [data-premium-alpine-icon="lock"], [data-premium-alpine-icon="delete"],
+  [data-premium-alpine-icon="play"], [data-premium-alpine-icon="pause"],
+  [data-premium-alpine-icon="stop"], [data-premium-alpine-icon="chevronLeft"],
+  [data-premium-alpine-icon="chevronRight"]
+) > svg { display: block !important; }
+
+/* Große dekorative Modal-Wasserzeichen werden zu atmosphärischen Alpenpanoramen. */
+:is(.premium-modal-hero-icon, .dashboard-stat-hero-icon) {
+  background-image: var(--alpine-photo-peaks);
+  background-position: center;
+  background-size: cover;
+  border: 1px solid color-mix(in srgb, var(--accent, #D5A64C) 38%, transparent);
+  border-radius: 50%;
+  -webkit-mask-image: radial-gradient(circle, #000 58%, transparent 76%);
+  mask-image: radial-gradient(circle, #000 58%, transparent 76%);
+  opacity: .72 !important;
+}
+:is(.premium-modal-hero-icon, .dashboard-stat-hero-icon) > svg { display: none !important; }
+.premium-modal-hero-icon[data-icon-key="distance"] { background-image: var(--alpine-photo-distance); }
+.premium-modal-hero-icon[data-icon-key="ascent"],
+.premium-modal-hero-icon[data-icon-key="performance"] { background-image: var(--alpine-photo-ascent); }
+.premium-modal-hero-icon[data-icon-key="time"],
+.premium-modal-hero-icon[data-icon-key="calendar"] { background-image: var(--alpine-photo-sunset); }
+.premium-modal-hero-icon[data-icon-key="tour"],
+.premium-modal-hero-icon[data-icon-key="hiking"] { background-image: var(--alpine-photo-trail); }
+
+/* Bergwelt: dekorative Cinematic-Zeichen erhalten ihre vorhandene Geometrie. */
+#wrapped-view.bergwelt-ready :is(.bergwelt-cinematic-icon, .bergwelt-cinematic-highlight-icon, .bergwelt-cinematic-section-mark):not(button *) {
+  color: transparent !important;
+  background-image: var(--alpine-photo-trail);
+  background-position: center;
+  background-size: cover;
+  border: 1px solid color-mix(in srgb, var(--bw-accent, #D5A64C) 48%, rgba(255,255,255,.3));
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,.24);
+}
+#wrapped-view.bergwelt-ready :is(.bergwelt-cinematic-icon, .bergwelt-cinematic-highlight-icon, .bergwelt-cinematic-section-mark):not(button *) > svg { display: none !important; }
+
+/* Form- und Planungsabschnittstitel: kleine fotografische Akzentmotive statt Masken-Piktogramme. */
+html body :is(#app-view, #tour-view) .form-section-title::before {
+  content: "" !important;
+  display: inline-block !important;
+  flex: 0 0 22px;
+  width: 22px !important;
+  height: 22px !important;
+  -webkit-mask: none !important;
+  mask: none !important;
+  background: var(--alpine-photo-ascent) center / cover no-repeat !important;
+  border: 1px solid color-mix(in srgb, var(--accent, #D5A64C) 52%, rgba(255,255,255,.4));
+  border-radius: 50%;
+}
+html body #tour-view :is(#planned-tours-list, #planned-table-box, #planned-peaks-box, #checklist-box) .plan-view-title::before {
+  -webkit-mask: none !important;
+  mask: none !important;
+  background: var(--alpine-photo-peaks) center / cover no-repeat !important;
+  border: 1px solid color-mix(in srgb, var(--accent, #D5A64C) 52%, rgba(255,255,255,.4));
+  border-radius: 50%;
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.premium-alpine-inline-icon, .stats-premium-title-icon, .stats-premium-content-icon, .td-accordion-icon) { transition: none !important; }
+}
