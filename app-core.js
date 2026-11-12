@@ -18425,7 +18425,7 @@ const recent =
             `).join('');
 
         recentSection.innerHTML = `
-            <div class="dash-section-title">🕐 Letzte Touren</div>
+            <div class="dash-section-title">Letzte Touren</div>
             <div class="dash-section-body"><ul class="dash-tour-list">${listHTML}</ul></div>
         `;
         recentSection.querySelectorAll('.dash-recent-item').forEach(li => {

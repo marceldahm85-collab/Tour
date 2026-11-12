@@ -638,16 +638,14 @@
     background-image: url("https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/Tyrol_-_hiking_trail.jpg/1280px-Tyrol_-_hiking_trail.jpg");
 }
 
-/* Gleiches Alpenmotiv als dezentes Rundsymbol vor jeder letzten Tour. */
-#dashboard-view #dash-recent-section .dash-tour-list .tour-name::before {
+/* Alpenmotiv ersetzt das bisherige Symbol ausschließlich im Titel "Letzte Touren". */
+#dashboard-view #dash-recent-section > .dash-section-title::before {
     content: "";
     display: inline-block;
-    width: 16px;
-    height: 16px;
-    margin-right: 5px;
-    vertical-align: -3px;
-    flex: 0 0 16px;
-    overflow: hidden;
+    width: 18px;
+    height: 18px;
+    margin-right: 7px;
+    vertical-align: -4px;
     border: 1px solid color-mix(in srgb, var(--accent, #D5A64C) 70%, rgba(255,255,255,.5));
     border-radius: 50%;
     background-image: url("https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/Alp18-148_Alpenwanderung.jpg/1280px-Alp18-148_Alpenwanderung.jpg");
