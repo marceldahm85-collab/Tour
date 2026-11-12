@@ -676,3 +676,23 @@
     height: 1px !important;
     background: color-mix(in srgb, var(--accent, #D5A64C) 72%, transparent) !important;
 }
+
+
+/* Letzte Touren: Linienführung wie bei den Gruppentiteln der Statistik.
+   Die Akzentlinie beginnt direkt hinter dem Titel und läuft nur bis zum
+   rechten Rand; sie liegt nicht mehr als Unterstreichung über die ganze Zeile. */
+#dashboard-view #dash-recent-section .dash-section-title::after {
+    content: "" !important;
+    position: static !important;
+    display: block !important;
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: 1px !important;
+    margin: 0 0 0 4px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: var(--accent, #D5A64C) !important;
+    opacity: .25 !important;
+    pointer-events: none !important;
+}
