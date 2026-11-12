@@ -734,3 +734,11 @@ html body #tour-view #plan-form #plan-save-btn {
         transition: none !important;
     }
 }
+
+
+/* Letzte Touren: den vollständigen umlaufenden Rahmen der Dashboard-Kennzahlen
+   explizit erhalten. Die darüberliegende Tiefenebene darf Ober- und Unterkante
+   nicht in neutrale Licht-/Schattenfarben umwandeln oder die Akzentkontur unterbrechen. */
+#dashboard-view #dash-recent-section .dash-tour-list > li {
+    border: 1px solid var(--premium-border) !important;
+}
