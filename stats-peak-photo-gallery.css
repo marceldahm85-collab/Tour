@@ -1,0 +1,32 @@
+/* Gipfelfoto-Galerie – Alpine Glass passend zu den Stats-Panels. */
+#stats-peaks-page .summit-gallery-section{overflow:hidden}
+#stats-peaks-page .summit-gallery-section>.stats-analysis-title{cursor:pointer}
+#stats-peaks-page .summit-gallery-section.is-collapsed>.summit-gallery-content{display:none}
+#stats-peaks-page .summit-gallery-content{min-width:0;padding-top:2px}
+#stats-peaks-page .summit-gallery-management{margin:0 0 11px}
+.summit-gallery-folder-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border:1px solid color-mix(in srgb,var(--accent,#c7a66a) 28%,transparent);border-radius:var(--editor-radius,13px);background:var(--theme-palette-surface-subtle,rgba(128,128,128,.09))}
+.summit-gallery-folder-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
+.summit-gallery-folder-copy strong{font-size:13px;font-weight:850}
+.summit-gallery-folder-copy span{color:var(--theme-palette-text-muted,currentColor);font-size:10px;line-height:1.35;overflow-wrap:anywhere}
+.summit-gallery-folder-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}
+.summit-gallery-action{min-height:32px;padding:6px 9px;border:1px solid color-mix(in srgb,currentColor 20%,transparent);border-radius:9px;background:var(--theme-palette-control-bg,rgba(128,128,128,.12));color:inherit;font:inherit;font-size:10px;font-weight:800}
+.summit-gallery-action-primary{border-color:transparent;background:var(--accent-gradient,linear-gradient(135deg,#c7a66a,#8d6a38));color:var(--accent-text-color,#17130b)}
+.summit-gallery-action:disabled{opacity:.5}
+.summit-gallery-empty{padding:13px 10px;border:1px dashed color-mix(in srgb,currentColor 22%,transparent);border-radius:11px;color:var(--theme-palette-text-muted,currentColor);font-size:11px;line-height:1.45;text-align:center}
+.summit-gallery-empty[data-kind=error]{border-color:color-mix(in srgb,#d85b5b 55%,transparent)}
+.summit-gallery-year-group+.summit-gallery-year-group{margin-top:13px}
+.summit-gallery-year-label{margin:0 0 7px 2px;color:var(--accent,#c7a66a);font-size:12px;font-weight:900;letter-spacing:.04em}
+.summit-gallery-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.summit-gallery-photo{position:relative;display:block;min-width:0;padding:0;aspect-ratio:1;border:1px solid color-mix(in srgb,currentColor 15%,transparent);border-radius:var(--editor-radius,11px);background:var(--theme-palette-surface-subtle,rgba(128,128,128,.1));overflow:hidden}
+.summit-gallery-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .18s ease}
+.summit-gallery-photo.has-image img{opacity:1}
+.summit-gallery-photo-placeholder{position:absolute;inset:0;display:grid;place-items:center}
+.summit-gallery-photo-placeholder:before{content:"";width:23px;height:18px;border:1.5px solid color-mix(in srgb,currentColor 48%,transparent);border-radius:4px;opacity:.55}
+.summit-gallery-viewer[hidden]{display:none!important}
+.summit-gallery-viewer{position:fixed;inset:0;z-index:10050;display:flex;align-items:center;justify-content:center;background:rgba(4,7,11,.97);color:#fff;padding:max(18px,env(safe-area-inset-top)) 12px max(18px,env(safe-area-inset-bottom));touch-action:pan-y;overscroll-behavior:contain}
+.summit-gallery-viewer-stage{display:grid;place-items:center;width:100%;height:100%;min-height:0}
+.summit-gallery-viewer-stage img{display:block;max-width:100%;max-height:100%;object-fit:contain}
+.summit-gallery-viewer-close{position:absolute;top:max(14px,env(safe-area-inset-top));right:14px;z-index:2;width:42px;height:42px;border:1px solid rgba(255,255,255,.3);border-radius:50%;background:rgba(20,25,31,.72);color:#fff;font-size:27px;line-height:1}
+.summit-gallery-viewer-count{position:absolute;top:max(24px,calc(env(safe-area-inset-top) + 9px));left:50%;transform:translateX(-50%);max-width:calc(100% - 110px);color:rgba(255,255,255,.88);font-size:11px;font-weight:800;white-space:nowrap}
+body.summit-gallery-viewer-open{overflow:hidden!important}
+@media(max-width:380px){.summit-gallery-folder-row{align-items:flex-start;flex-direction:column}.summit-gallery-folder-actions{justify-content:flex-start}}

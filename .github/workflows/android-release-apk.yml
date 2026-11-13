@@ -12,6 +12,8 @@ on:
       - "app-start-editor.js"
       - "dashboard-premium-alpine.js"
       - "stats-premium-alpine.js"
+      - "stats-peak-photo-gallery.js"
+      - "stats-peak-photo-gallery.css"
       - "premium-alpine-photo-motifs.css"
       - "premium-depth-effects.css"
 
@@ -85,6 +87,7 @@ jobs:
           node --check pdf-magazine.js
           node --check android-backup-bridge.js
           node --check android-gallery-photos.js
+          node --check stats-peak-photo-gallery.js
           node --check background-image-manager.js
           node --check theme-editor-unified.js
           node --check theme-editor-workflow.js

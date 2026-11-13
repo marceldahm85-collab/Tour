@@ -79,6 +79,7 @@ public final class MainActivity extends Activity {
     private static final int GALLERY_PERMISSION_REQUEST_CODE = 4203;
     private static final int BACKUP_SAVE_REQUEST_CODE = 4304;
     private static final int BACKUP_OPEN_REQUEST_CODE = 4305;
+    private static final int SUMMIT_FOLDER_PICK_REQUEST_CODE = 4406;
     private static final int MAX_BACKUP_BYTES = 48 * 1024 * 1024;
     private static final int MAX_PDF_BYTES = 64 * 1024 * 1024;
     private static final int MAX_BACKUP_CHUNKS = 2048;
@@ -136,6 +137,9 @@ public final class MainActivity extends Activity {
     private int pendingBackupNextChunk;
     private JavaScriptReplyProxy pendingBackupFinishReply;
     private String pendingBackupFinishRequestId;
+    private JavaScriptReplyProxy pendingSummitFolderReply;
+    private String pendingSummitFolderRequestId;
+    private int pendingSummitFolderYear;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -842,6 +846,8 @@ public final class MainActivity extends Activity {
                                 features.put("gallery.thumbnail.v2");
                                 features.put("gallery.image.full.v1");
                                 features.put("gallery.video.player.v1");
+                                features.put("gallery.summit.folder.v1");
+                                features.put("gallery.summit.image.v1");
                                 features.put("widget.yearStats.v1");
                                 features.put("widget.yearStats.v2");
                                 features.put("widget.yearStats.config.v1");
@@ -858,6 +864,18 @@ public final class MainActivity extends Activity {
                                 response.put("features", features);
                                 replyToBridge(replyProxy, response);
                                 Log.i(TAG, "Sichere JavaScript-Bridge ist erreichbar (Request-ID bestätigt).");
+                            } else if ("gallery.summit.folder.pick".equals(type)) {
+                                openSummitFolderPicker(replyProxy, requestId, request.optInt("year", 0));
+                            } else if ("gallery.summit.folder.list".equals(type)) {
+                                querySummitFolderImages(request.optString("uri", ""), replyProxy, requestId);
+                            } else if ("gallery.summit.folder.thumbnail".equals(type)) {
+                                loadSummitFolderImage(request.optString("uri", ""), false, replyProxy, requestId);
+                            } else if ("gallery.summit.folder.full".equals(type)) {
+                                loadSummitFolderImage(request.optString("uri", ""), true, replyProxy, requestId);
+                            } else if ("gallery.summit.folder.release".equals(type)) {
+                                boolean released=GalleryTreePhotos.release(MainActivity.this,request.optString("uri",""));
+                                JSONObject response=createGalleryResponse("gallery.summit.folder.released",requestId);
+                                response.put("status",released?"ok":"unavailable");replyToBridge(replyProxy,response);
                             } else if ("gallery.permission.get".equals(type)) {
                                 replyGalleryPermissionState(replyProxy, requestId);
                             } else if ("gallery.permission.request".equals(type)) {
@@ -2319,6 +2337,50 @@ public final class MainActivity extends Activity {
         return path.endsWith("/") ? path : path + "/";
     }
 
+
+    private void openSummitFolderPicker(JavaScriptReplyProxy reply, String requestId, int year) {
+        runOnUiThread(() -> {
+            if (pendingSummitFolderReply != null) {
+                JSONObject response=createGalleryResponse("gallery.summit.folder.selected",requestId);
+                try{response.put("status","error");response.put("error","Eine Ordnerauswahl ist bereits geöffnet.");}catch(JSONException ignored){}
+                replyToBridge(reply,response);return;
+            }
+            pendingSummitFolderReply=reply;pendingSummitFolderRequestId=requestId;pendingSummitFolderYear=year;
+            try{
+                Intent intent=new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION|Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
+                startActivityForResult(intent,SUMMIT_FOLDER_PICK_REQUEST_CODE);
+            }catch(RuntimeException error){replySummitFolderPicker("error",null,"Der Android-Ordnerdialog konnte nicht geöffnet werden.");}
+        });
+    }
+
+    private void replySummitFolderPicker(String status,Uri tree,String error){
+        JavaScriptReplyProxy reply=pendingSummitFolderReply;String requestId=pendingSummitFolderRequestId;int year=pendingSummitFolderYear;
+        pendingSummitFolderReply=null;pendingSummitFolderRequestId=null;if(reply==null||requestId==null)return;
+        JSONObject response=createGalleryResponse("gallery.summit.folder.selected",requestId);
+        try{response.put("status",status);response.put("year",year);if(tree!=null){response.put("uri",tree.toString());response.put("name",GalleryTreePhotos.getFolderName(this,tree));}if(error!=null)response.put("error",error);}
+        catch(JSONException e){Log.e(TAG,"SAF-Ordnerantwort fehlgeschlagen.",e);}
+        replyToBridge(reply,response);
+    }
+
+    private void querySummitFolderImages(String uri,JavaScriptReplyProxy reply,String requestId){
+        galleryExecutor.execute(()->{
+            JSONObject response=createGalleryResponse("gallery.summit.folder.list",requestId);
+            try{JSONObject data=GalleryTreePhotos.queryImages(this,uri);response.put("status",data.optString("status","error"));response.put("images",data.optJSONArray("images")!=null?data.optJSONArray("images"):new JSONArray());response.put("count",data.optInt("count",0));response.put("truncated",data.optBoolean("truncated",false));}
+            catch(Exception e){Log.w(TAG,"Gipfelfoto-Ordner konnte nicht gelesen werden.",e);try{response.put("status","error");response.put("error","Der ausgewählte Ordner konnte nicht gelesen werden.");}catch(JSONException ignored){}}
+            JSONObject result=response;mainHandler.post(()->replyToBridge(reply,result));
+        });
+    }
+
+    private void loadSummitFolderImage(String uri,boolean full,JavaScriptReplyProxy reply,String requestId){
+        galleryExecutor.execute(()->{
+            JSONObject response=createGalleryResponse(full?"gallery.summit.folder.full":"gallery.summit.folder.thumbnail",requestId);
+            try{JSONObject data=GalleryTreePhotos.loadImage(this,uri,full);response.put("status",data.optString("status","unavailable"));if(data.has("data"))response.put("data",data.getString("data"));if(data.has("mimeType"))response.put("mimeType",data.getString("mimeType"));}
+            catch(Exception e){Log.w(TAG,"Gipfelfoto konnte nicht geladen werden.",e);try{response.put("status","unavailable");}catch(JSONException ignored){}}
+            JSONObject result=response;mainHandler.post(()->replyToBridge(reply,result));
+        });
+    }
+
     private void openExternalUri(Uri uri) {
         if (uri == null) {
             return;
@@ -2341,6 +2403,14 @@ public final class MainActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        if (requestCode == SUMMIT_FOLDER_PICK_REQUEST_CODE) {
+            if(resultCode!=RESULT_OK||data==null||data.getData()==null){replySummitFolderPicker("cancelled",null,null);return;}
+            Uri tree=data.getData();int flags=data.getFlags()&Intent.FLAG_GRANT_READ_URI_PERMISSION;
+            if(flags==0||!android.provider.DocumentsContract.isTreeUri(tree)){replySummitFolderPicker("error",null,"Android hat keinen dauerhaften Lesezugriff erteilt.");return;}
+            try{getContentResolver().takePersistableUriPermission(tree,flags);replySummitFolderPicker("ok",tree,null);}
+            catch(SecurityException error){Log.w(TAG,"Dauerhafter Gipfelfoto-Ordnerzugriff fehlgeschlagen.",error);replySummitFolderPicker("error",null,"Der Ordnerzugriff konnte nicht dauerhaft gespeichert werden.");}
+            return;
+        }
         if (requestCode == BACKUP_SAVE_REQUEST_CODE) {
             handleBackupSaveResult(resultCode, data);
             return;
