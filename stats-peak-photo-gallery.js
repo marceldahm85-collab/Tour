@@ -15,7 +15,7 @@ function ensureSection(){
  if(!section){section=document.createElement('section');section.className='stats-analysis-section stats-section-collapsible summit-gallery-section';section.dataset.statsCollapseKey='peaks:gipfelfotos';
  section.innerHTML='<div class="stats-analysis-title" role="button" tabindex="0" aria-expanded="false" aria-label="Gipfelfotos öffnen"><span>Gipfelfotos</span></div><div class="summit-gallery-content"><div class="summit-gallery-management"></div><div class="summit-gallery-images"></div></div>';
  const state=collapseState(),on=Object.prototype.hasOwnProperty.call(state,'peaks:gipfelfotos')&&state['peaks:gipfelfotos']===true;section.classList.toggle('is-collapsed',!on);section.querySelector('.stats-analysis-title').setAttribute('aria-expanded',on?'true':'false');root.appendChild(section);}
- if(section.dataset.bound!=='1'){section.dataset.bound='1';const h=section.querySelector('.stats-analysis-title'),toggle=()=>setExpanded(section,section.classList.contains('is-collapsed'));h.addEventListener('click',toggle);h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});}
+
  return section;
 }
 async function checkNative(){if(!nativeReady)nativeReady=request('bridge.ping',{},9000).then(r=>{const f=new Set(r.features||[]);if(!f.has('gallery.summit.folder.v1')||!f.has('gallery.summit.image.v1'))throw new Error('Bitte installiere die aktuelle Android-App-Version.');return true;});return nativeReady;}
