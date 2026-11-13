@@ -34432,7 +34432,6 @@ function updateDevelopmentStatsPage() {
         <section class="stats-analysis-section">
             <div class="stats-analysis-title">
                 <span>🏆 Persönliche Bestform</span>
-                <span style="font-size:9px; opacity:.7;">${escapeHtml(developmentScopeLabel)}</span>
             </div>
             ${renderPersonalBestForm(data)}
         </section>
@@ -34447,21 +34446,10 @@ function updateDevelopmentStatsPage() {
         </section>
     `;
 
-    const sectionProfile = `
-        <section class="stats-analysis-section">
-            <div class="stats-analysis-title">
-                <span>🧭 Tourprofil</span>
-                <span style="font-size:9px; opacity:.7;">${escapeHtml(developmentScopeLabel)}</span>
-            </div>
-            ${renderTourProfileAnalysis(data)}
-        </section>
-    `;
-
     const sectionActivity = `
         <section class="stats-analysis-section">
             <div class="stats-analysis-title">
                 <span>🗓️ Aktivität & Regelmäßigkeit</span>
-                <span style="font-size:9px; opacity:.7;">${calendarYear}${calendarScopeHint}</span>
             </div>
 
             <div class="activity-summary-grid">
@@ -34498,46 +34486,16 @@ function updateDevelopmentStatsPage() {
         </section>
     `;
 
-    /*
-     * Querformat: zwei unabhängige Spalten statt einer
-     * einfachen Abfolge. Dadurch bestimmt die rechte Spalte
-     * (Tourprofil → Aktivität) ausschließlich ihre eigene
-     * Höhe und wartet nicht auf die linke Spalte.
-     *
-     * Hochformat: komplett unverändert – dieselbe Reihenfolge
-     * wie bisher, ohne zusätzliche Spalten-Wrapper.
-     */
-    const isLandscapeMobileLayout =
-        window.matchMedia(
-            '(max-width: 1024px) and (orientation: landscape) and (pointer: coarse)'
-        ).matches;
-
-    if (isLandscapeMobileLayout) {
-        container.innerHTML = `
-            <div class="development-col development-col-left">
-                ${sectionTrend}
-                ${sectionBest}
-                ${sectionHistory}
-            </div>
-            <div class="development-col development-col-right">
-                ${sectionProfile}
-                ${sectionActivity}
-            </div>
-        `;
-    } else {
-        container.innerHTML = `
-            ${sectionTrend}
-            ${sectionBest}
-            ${sectionHistory}
-            ${sectionProfile}
-            ${sectionActivity}
-        `;
-    }
+    container.innerHTML = `
+        ${sectionTrend}
+        ${sectionBest}
+        ${sectionHistory}
+        ${sectionActivity}
+    `;
 
     initDevelopmentHistoryControls(container);
     initDevelopmentTrendControls(container);
     initDevelopmentSparklineInteractions(container);
-    initTourProfileControls(container);
     initActivityControls(container, data);
 }
 
