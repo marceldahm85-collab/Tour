@@ -10,6 +10,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.DocumentsContract;
 import android.util.Base64;
+import androidx.exifinterface.media.ExifInterface;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -75,6 +79,30 @@ final class GalleryTreePhotos {
         for(JSONObject item:found)images.put(item);
         out.put("status","ok");out.put("count",images.length());out.put("truncated",!queue.isEmpty()||found.size()>=MAX_IMAGES);
         out.put("folderName",getFolderName(context,tree));return out;
+    }
+
+    static JSONObject readDateTaken(Context context,String value)throws JSONException {
+        JSONObject out=new JSONObject();
+        Uri uri=parseDocument(value);
+        if(uri==null||!hasDocumentPermission(context,uri)){out.put("status","permission_changed");return out;}
+        try(InputStream in=context.getContentResolver().openInputStream(uri)) {
+            if(in==null){out.put("status","unavailable");return out;}
+            ExifInterface exif=new ExifInterface(in);
+            String raw=exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL);
+            if(raw==null||raw.trim().isEmpty()) raw=exif.getAttribute(ExifInterface.TAG_DATETIME);
+            if(raw==null||raw.trim().isEmpty()){out.put("status","no_date");return out;}
+            SimpleDateFormat source=new SimpleDateFormat("yyyy:MM:dd HH:mm:ss",Locale.US);
+            source.setLenient(false);
+            Date parsed=source.parse(raw.trim());
+            if(parsed==null){out.put("status","no_date");return out;}
+            SimpleDateFormat day=new SimpleDateFormat("yyyy-MM-dd",Locale.US);
+            out.put("status","ok");out.put("dateTaken",day.format(parsed));out.put("source","exif");return out;
+        } catch(SecurityException e) {
+            out.put("status","permission_changed");return out;
+        } catch(Exception e) {
+            android.util.Log.w("BergtourenAndroid","EXIF-Aufnahmedatum konnte nicht gelesen werden.",e);
+            out.put("status","no_date");return out;
+        }
     }
 
     static JSONObject loadImage(Context context,String value,boolean full)throws JSONException {

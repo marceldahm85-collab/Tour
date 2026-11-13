@@ -2188,6 +2188,7 @@ async function buildAppDataPayload() {
         updatedAt: new Date().toISOString(),
         touren,
         plannedTours: appStorage.get('plannedTours') || [],
+        summitPhotoAssignments: appStorage.get('summitPhotoAssignments.v1') || {},
         meta: {
             theme: document.body.classList.contains('dark')
                 ? 'dark'
@@ -2226,6 +2227,7 @@ function applyAppDataPayload(payload) {
 
     appStorage.set('touren', importedTours);
     appStorage.set('plannedTours', importedPlannedTours);
+    appStorage.set('summitPhotoAssignments.v1', payload.summitPhotoAssignments && typeof payload.summitPhotoAssignments === 'object' ? payload.summitPhotoAssignments : {});
 
     if (payload.meta?.themeEditorSettings) {
         appStorage.set(THEME_EDITOR_KEY, payload.meta.themeEditorSettings);

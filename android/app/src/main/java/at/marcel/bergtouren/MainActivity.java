@@ -848,6 +848,7 @@ public final class MainActivity extends Activity {
                                 features.put("gallery.video.player.v1");
                                 features.put("gallery.summit.folder.v1");
                                 features.put("gallery.summit.image.v1");
+                                features.put("gallery.summit.exif-date.v1");
                                 features.put("widget.yearStats.v1");
                                 features.put("widget.yearStats.v2");
                                 features.put("widget.yearStats.config.v1");
@@ -872,6 +873,8 @@ public final class MainActivity extends Activity {
                                 loadSummitFolderImage(request.optString("uri", ""), false, replyProxy, requestId);
                             } else if ("gallery.summit.folder.full".equals(type)) {
                                 loadSummitFolderImage(request.optString("uri", ""), true, replyProxy, requestId);
+                            } else if ("gallery.summit.folder.date".equals(type)) {
+                                readSummitPhotoDate(request.optString("uri", ""), replyProxy, requestId);
                             } else if ("gallery.summit.folder.release".equals(type)) {
                                 boolean released=GalleryTreePhotos.release(MainActivity.this,request.optString("uri",""));
                                 JSONObject response=createGalleryResponse("gallery.summit.folder.released",requestId);
@@ -2368,6 +2371,22 @@ public final class MainActivity extends Activity {
             JSONObject response=createGalleryResponse("gallery.summit.folder.list",requestId);
             try{JSONObject data=GalleryTreePhotos.queryImages(this,uri);response.put("status",data.optString("status","error"));response.put("images",data.optJSONArray("images")!=null?data.optJSONArray("images"):new JSONArray());response.put("count",data.optInt("count",0));response.put("truncated",data.optBoolean("truncated",false));}
             catch(Exception e){Log.w(TAG,"Gipfelfoto-Ordner konnte nicht gelesen werden.",e);try{response.put("status","error");response.put("error","Der ausgewählte Ordner konnte nicht gelesen werden.");}catch(JSONException ignored){}}
+            JSONObject result=response;mainHandler.post(()->replyToBridge(reply,result));
+        });
+    }
+
+    private void readSummitPhotoDate(String uri,JavaScriptReplyProxy reply,String requestId){
+        galleryExecutor.execute(()->{
+            JSONObject response=createGalleryResponse("gallery.summit.folder.date",requestId);
+            try{
+                JSONObject data=GalleryTreePhotos.readDateTaken(this,uri);
+                response.put("status",data.optString("status","no_date"));
+                if(data.has("dateTaken"))response.put("dateTaken",data.getString("dateTaken"));
+                if(data.has("source"))response.put("source",data.getString("source"));
+            }catch(Exception e){
+                Log.w(TAG,"EXIF-Aufnahmedatum konnte nicht gelesen werden.",e);
+                try{response.put("status","no_date");}catch(JSONException ignored){}
+            }
             JSONObject result=response;mainHandler.post(()->replyToBridge(reply,result));
         });
     }

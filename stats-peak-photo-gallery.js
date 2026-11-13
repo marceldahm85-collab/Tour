@@ -8,6 +8,53 @@ const folders=()=>{try{const x=JSON.parse(localStorage.getItem(KEY)||'{}');retur
 const collapseState=()=>{try{return JSON.parse(localStorage.getItem(COLLAPSE)||'{}')||{};}catch(_){return {};}};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const filterYear=()=>document.getElementById('stats-year-select')?.value||String(new Date().getFullYear());
+const ASSIGNMENTS_KEY='summitPhotoAssignments.v1';
+function getAssignments(){try{return typeof appStorage!=='undefined'?(appStorage.get(ASSIGNMENTS_KEY)||{}):{};}catch(_){return {};}}
+function saveAssignments(value){try{if(typeof appStorage!=='undefined')appStorage.set(ASSIGNMENTS_KEY,value);else localStorage.setItem(ASSIGNMENTS_KEY,JSON.stringify(value));}catch(e){console.warn('Gipfelfoto-Zuordnung konnte nicht gespeichert werden.',e);}}
+function getTours(){try{return typeof appStorage!=='undefined'?(appStorage.get('touren')||[]):[];}catch(_){return [];}}
+function normalizeTourDate(value){
+ const raw=String(value||'').trim();let m=raw.match(/^(\\d{4})-(\\d{2})-(\\d{2})/);
+ if(m)return m[1]+'-'+m[2]+'-'+m[3];
+ m=raw.match(/^(\\d{1,2})[.\\/]([0-9]{1,2})[.\\/](\\d{4})$/);
+ if(m)return m[3]+'-'+String(m[2]).padStart(2,'0')+'-'+String(m[1]).padStart(2,'0');
+ return '';
+}
+function toursForDate(date){return getTours().filter(t=>normalizeTourDate(t?.date)===date);}
+function assignmentFor(uri){return getAssignments()[uri]||null;}
+function renderAssignmentPanel(item,context){
+ const panel=viewer?.querySelector('.summit-gallery-assignment');if(!panel)return;
+ const saved=assignmentFor(item.uri);
+ if(context?.status==='loading'){panel.innerHTML='<div class="summit-gallery-assignment-note">Aufnahmedatum wird geprüft …</div>';return;}
+ if(context?.status!=='ok'){panel.innerHTML='<div class="summit-gallery-assignment-note">Kein EXIF-Aufnahmedatum vorhanden. Eine automatische Tourzuordnung ist deshalb nicht möglich.</div>';return;}
+ const matches=toursForDate(context.dateTaken);
+ if(matches.length===0){panel.innerHTML='<div class="summit-gallery-assignment-note">Aufnahmedatum '+esc(context.dateTaken)+' · Keine passende Tour gefunden.</div>';return;}
+ if(matches.length!==1){panel.innerHTML='<div class="summit-gallery-assignment-note">Für '+esc(context.dateTaken)+' wurden mehrere Touren gefunden. Eine eindeutige Zuordnung ist nicht möglich.</div>';return;}
+ const tour=matches[0],peaks=Array.isArray(tour.gipfelDetails)?tour.gipfelDetails:[];
+ if(!peaks.length){panel.innerHTML='<div class="summit-gallery-assignment-note">'+esc(tour.tourname||'Tour')+' · Keine Gipfel in dieser Tour hinterlegt.</div>';return;}
+ const selected=saved&&String(saved.tourId||'')===String(tour.id||'')?Number(saved.peakIndex):-1;
+ const options=['<option value="">Keinem Gipfel zuordnen</option>'].concat(peaks.map((peak,index)=>{
+  const name=String(peak?.name||'Gipfel '+(index+1)),height=Number(String(peak?.hoehe||'').replace(/[^0-9]/g,''))||0;
+  return '<option value="'+index+'"'+(selected===index?' selected':'')+'>'+esc(name)+(height?' · '+height.toLocaleString('de-AT')+' m':'')+'</option>';
+ })).join('');
+ panel.innerHTML='<div class="summit-gallery-assignment-meta"><strong>'+esc(tour.tourname||'Tour')+'</strong><span>'+esc(context.dateTaken)+' · Gipfel auswählen</span></div><select class="summit-gallery-peak-select" data-peak-select>'+options+'</select>';
+ panel.querySelector('[data-peak-select]')?.addEventListener('change',event=>{
+  const all=getAssignments();
+  if(event.target.value===''){delete all[item.uri];saveAssignments(all);return;}
+  const index=Number(event.target.value),peak=peaks[index];if(!peak)return;
+  all[item.uri]={tourId:String(tour.id||''),tourDate:context.dateTaken,peakIndex:index,peakName:String(peak.name||''),peakHeight:Number(String(peak.hoehe||'').replace(/[^0-9]/g,''))||0};
+  saveAssignments(all);
+ });
+}
+async function getPhotoContext(item){
+ if(item._photoContext)return item._photoContext;
+ item._photoContext={status:'loading'};
+ try{
+  const result=await request('gallery.summit.folder.date',{uri:item.uri},30000);
+  item._photoContext=result.status==='ok'&&/^\\d{4}-\\d{2}-\\d{2}$/.test(result.dateTaken||'')?{status:'ok',dateTaken:result.dateTaken}:{status:result.status||'no_date'};
+ }catch(_){item._photoContext={status:'no_date'};}
+ return item._photoContext;
+}
+
 function setExpanded(section,on){const state=collapseState();state['peaks:gipfelfotos']=on;try{localStorage.setItem(COLLAPSE,JSON.stringify(state));}catch(_){}section.classList.toggle('is-collapsed',!on);section.querySelector(':scope > .stats-analysis-title')?.setAttribute('aria-expanded',on?'true':'false');}
 function ensureSection(){
  if(!root)root=document.getElementById('stats-peaks-content');if(!root)return null;
@@ -18,7 +65,7 @@ function ensureSection(){
 
  return section;
 }
-async function checkNative(){if(!nativeReady)nativeReady=request('bridge.ping',{},9000).then(r=>{const f=new Set(r.features||[]);if(!f.has('gallery.summit.folder.v1')||!f.has('gallery.summit.image.v1'))throw new Error('Bitte installiere die aktuelle Android-App-Version.');return true;});return nativeReady;}
+async function checkNative(){if(!nativeReady)nativeReady=request('bridge.ping',{},9000).then(r=>{const f=new Set(r.features||[]);if(!f.has('gallery.summit.folder.v1')||!f.has('gallery.summit.image.v1')||!f.has('gallery.summit.exif-date.v1'))throw new Error('Bitte installiere die aktuelle Android-App-Version.');return true;});return nativeReady;}
 function setMessage(el,msg,error){el.innerHTML='<div class="summit-gallery-empty"'+(error?' data-kind="error"':'')+'>'+esc(msg)+'</div>';}
 function manageHtml(year,folder){if(!/^\d{4}$/.test(year))return '';if(!folder)return '<div class="summit-gallery-folder-row"><div class="summit-gallery-folder-copy"><strong>'+year+'</strong><span>Noch kein Gipfelfoto-Ordner für dieses Jahr verknüpft.</span></div><button type="button" class="summit-gallery-action summit-gallery-action-primary" data-pick="'+year+'">Ordner auswählen</button></div>';return '<div class="summit-gallery-folder-row"><div class="summit-gallery-folder-copy"><strong>'+year+'</strong><span>'+esc(folder.name||'Ausgewählter Ordner')+'</span></div><div class="summit-gallery-folder-actions"><button type="button" class="summit-gallery-action summit-gallery-action-primary" data-pick="'+year+'">Ordner ändern</button><button type="button" class="summit-gallery-action" data-remove="'+year+'">Entfernen</button></div></div>';}
 async function pick(year,button){button.disabled=true;const old=folders()[year]?.uri;try{await checkNative();const r=await request('gallery.summit.folder.pick',{year:Number(year)},180000);if(r.status==='cancelled')return;if(r.status!=='ok'||!r.uri)throw new Error(r.error||'Ordnerauswahl fehlgeschlagen.');const f=folders();f[year]={uri:r.uri,name:r.name||'Ausgewählter Ordner'};localStorage.setItem(KEY,JSON.stringify(f));if(old&&old!==r.uri&&!Object.values(f).some(x=>x?.uri===old))request('gallery.summit.folder.release',{uri:old},10000).catch(()=>{});}catch(e){const s=ensureSection();setMessage(s.querySelector('.summit-gallery-images'),e.message||'Ordnerauswahl fehlgeschlagen.',true);}finally{if(button.isConnected)button.disabled=false;render();}}
@@ -40,8 +87,8 @@ async function render(){
 }
 function watchThumbs(el){if(thumbs)thumbs.disconnect();thumbs=new IntersectionObserver(entries=>entries.forEach(e=>{if(!e.isIntersecting)return;thumbs.unobserve(e.target);loadThumb(e.target);}),{rootMargin:'180px 0px'});el.querySelectorAll('[data-thumb]').forEach(img=>thumbs.observe(img));}
 async function loadThumb(img){if(img.dataset.loading==='1'||img.dataset.loaded==='1')return;img.dataset.loading='1';try{const r=await request('gallery.summit.folder.thumbnail',{uri:img.dataset.thumb},30000);if(!img.isConnected)return;if(r.status==='ok'&&r.data){img.src='data:'+(r.mimeType||'image/jpeg')+';base64,'+r.data;img.dataset.loaded='1';img.closest('.summit-gallery-photo')?.classList.add('has-image');}else img.closest('.summit-gallery-photo')?.classList.add('is-unavailable');}catch(_){if(img.isConnected)img.closest('.summit-gallery-photo')?.classList.add('is-unavailable');}finally{img.dataset.loading='0';}}
-function ensureViewer(){if(viewer)return viewer;viewer=document.createElement('div');viewer.className='summit-gallery-viewer';viewer.hidden=true;viewer.innerHTML='<button type="button" class="summit-gallery-viewer-close" aria-label="Schließen">×</button><div class="summit-gallery-viewer-count"></div><div class="summit-gallery-viewer-stage"><img alt=""></div>';document.body.appendChild(viewer);viewer.querySelector('button').addEventListener('click',closeViewer);const stage=viewer.querySelector('.summit-gallery-viewer-stage');let x=0,y=0;stage.addEventListener('touchstart',e=>{const t=e.changedTouches?.[0];if(t){x=t.clientX;y=t.clientY;}},{passive:true});stage.addEventListener('touchend',e=>{const t=e.changedTouches?.[0];if(!t)return;const dx=t.clientX-x,dy=t.clientY-y;if(Math.abs(dx)>58&&Math.abs(dx)>Math.abs(dy)*1.25)showImage(viewerIndex+(dx<0?1:-1));else if(dy>85&&Math.abs(dy)>Math.abs(dx)*1.25)closeViewer();},{passive:true});return viewer;}
-async function showImage(n){if(!images.length)return;viewerIndex=(n+images.length)%images.length;const v=ensureViewer(),img=v.querySelector('img'),count=v.querySelector('.summit-gallery-viewer-count'),item=images[viewerIndex],id=++viewerToken;img.removeAttribute('src');count.textContent=(viewerIndex+1)+' / '+images.length+' · '+item.year;try{const r=await request('gallery.summit.folder.full',{uri:item.uri},45000);if(id!==viewerToken||v.hidden)return;if(r.status!=='ok'||!r.data)throw new Error('Foto kann nicht geöffnet werden.');img.src='data:'+(r.mimeType||'image/jpeg')+';base64,'+r.data;}catch(e){if(id===viewerToken)count.textContent=e.message||'Foto nicht verfügbar';}}
+function ensureViewer(){if(viewer)return viewer;viewer=document.createElement('div');viewer.className='summit-gallery-viewer';viewer.hidden=true;viewer.innerHTML='<button type="button" class="summit-gallery-viewer-close" aria-label="Schließen">×</button><div class="summit-gallery-viewer-count"></div><div class="summit-gallery-viewer-stage"><img alt=""></div><div class="summit-gallery-assignment"></div>';document.body.appendChild(viewer);viewer.querySelector('button').addEventListener('click',closeViewer);const stage=viewer.querySelector('.summit-gallery-viewer-stage');let x=0,y=0;stage.addEventListener('touchstart',e=>{const t=e.changedTouches?.[0];if(t){x=t.clientX;y=t.clientY;}},{passive:true});stage.addEventListener('touchend',e=>{const t=e.changedTouches?.[0];if(!t)return;const dx=t.clientX-x,dy=t.clientY-y;if(Math.abs(dx)>58&&Math.abs(dx)>Math.abs(dy)*1.25)showImage(viewerIndex+(dx<0?1:-1));else if(dy>85&&Math.abs(dy)>Math.abs(dx)*1.25)closeViewer();},{passive:true});return viewer;}
+async function showImage(n){if(!images.length)return;viewerIndex=(n+images.length)%images.length;const v=ensureViewer(),img=v.querySelector('img'),count=v.querySelector('.summit-gallery-viewer-count'),item=images[viewerIndex],id=++viewerToken;img.removeAttribute('src');count.textContent=(viewerIndex+1)+' / '+images.length+' · '+item.year;renderAssignmentPanel(item,{status:'loading'});getPhotoContext(item).then(context=>{if(id===viewerToken&&!v.hidden)renderAssignmentPanel(item,context);});try{const r=await request('gallery.summit.folder.full',{uri:item.uri},45000);if(id!==viewerToken||v.hidden)return;if(r.status!=='ok'||!r.data)throw new Error('Foto kann nicht geöffnet werden.');img.src='data:'+(r.mimeType||'image/jpeg')+';base64,'+r.data;}catch(e){if(id===viewerToken)count.textContent=e.message||'Foto nicht verfügbar';}}
 function openViewer(n){if(!images.length)return;const v=ensureViewer();v.hidden=false;document.body.classList.add('summit-gallery-viewer-open');if(!viewerHistory){viewerHistory=true;history.pushState({summitPhotoViewer:true},'');}showImage(n);}
 function closeViewer(){if(!viewer||viewer.hidden)return;const back=viewerHistory;viewerHistory=false;viewerToken++;viewer.hidden=true;document.body.classList.remove('summit-gallery-viewer-open');if(back)history.back();}
 window.addEventListener('popstate',()=>{if(viewer&&!viewer.hidden){viewerHistory=false;viewerToken++;viewer.hidden=true;document.body.classList.remove('summit-gallery-viewer-open');}});

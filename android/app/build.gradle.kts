@@ -13,8 +13,8 @@ android {
         applicationId = "at.marcel.bergtouren"
         minSdk = 26
         targetSdk = 35
-        versionCode = 16
-        versionName = "0.7.1"
+        versionCode = 17
+        versionName = "0.7.2"
         buildConfigField(
             "String",
             "WEB_APP_URL",
@@ -55,4 +55,5 @@ android {
 dependencies {
     implementation("androidx.webkit:webkit:1.18.0")
     implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation("androidx.exifinterface:exifinterface:1.4.1")
 }
