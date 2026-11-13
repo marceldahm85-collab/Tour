@@ -4880,17 +4880,23 @@ if (mainTimeField) {
     if (distanceLabel) {
         distanceLabel.textContent = isBikeAndHike
             ? 'Hike-Strecke (km):'
-            : 'Strecke (km):';
+            : isHikeAndClimb
+                ? 'Gesamt-Strecke (km):'
+                : 'Strecke (km):';
     }
 
     if (ascentLabel) {
         ascentLabel.textContent = isBikeAndHike
             ? 'Hike-Aufstieg (Hm):'
-            : 'Aufstieg (Hm):';
+            : isHikeAndClimb
+                ? 'Gesamt-Aufstieg (Hm):'
+                : 'Aufstieg (Hm):';
     }
 
     if (timeLabel) {
-        timeLabel.textContent = 'Gehzeit (hh:mm):';
+        timeLabel.textContent = isHikeAndClimb
+            ? 'Gesamt-Gehzeit (hh:mm):'
+            : 'Gehzeit (hh:mm):';
     }
 
     const saveBox = form?.closest('.box');
@@ -5174,12 +5180,31 @@ if (planMainTimeField) {
     const planAscentLabel =
         document.querySelector('label[for="plan-aufstieg"]');
 
+    const planTimeLabel =
+        document.querySelector('label[for="plan-zeit"]');
+
     if (planDistanceLabel) {
-        planDistanceLabel.textContent = 'Strecke (km):';
+        planDistanceLabel.textContent = isBikeAndHike
+            ? 'Hike-Strecke (km):'
+            : isHikeAndClimb
+                ? 'Gesamt-Strecke (km):'
+                : 'Strecke (km):';
     }
 
     if (planAscentLabel) {
-        planAscentLabel.textContent = 'Aufstieg (Hm):';
+        planAscentLabel.textContent = isBikeAndHike
+            ? 'Hike-Aufstieg (Hm):'
+            : isHikeAndClimb
+                ? 'Gesamt-Aufstieg (Hm):'
+                : 'Aufstieg (Hm):';
+    }
+
+    if (planTimeLabel) {
+        planTimeLabel.textContent = isHikeAndClimb
+            ? 'Gesamt-Gehzeit (hh:mm):'
+            : isBikeAndHike
+                ? 'Gehzeit (hh:mm):'
+                : 'Geschätzte Gehzeit:';
     }
 
     updatePlannedEstimatedWalkingTime();
