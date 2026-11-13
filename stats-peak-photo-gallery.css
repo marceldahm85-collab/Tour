@@ -30,22 +30,25 @@
 .summit-gallery-viewer-count{position:absolute;top:max(24px,calc(env(safe-area-inset-top) + 9px));left:50%;transform:translateX(-50%);max-width:calc(100% - 110px);color:rgba(255,255,255,.88);font-size:11px;font-weight:800;white-space:nowrap}
 body.summit-gallery-viewer-open{overflow:hidden!important}
 @media(max-width:380px){.summit-gallery-folder-row{align-items:flex-start;flex-direction:column}.summit-gallery-folder-actions{justify-content:flex-start}}
-.summit-gallery-assignment{position:absolute;left:12px;right:12px;bottom:max(14px,env(safe-area-inset-bottom));z-index:3;padding:11px 12px;border:1px solid rgba(255,255,255,.2);border-radius:var(--editor-radius,13px);background:rgba(10,16,23,.84);backdrop-filter:blur(14px);color:#fff;display:flex;flex-direction:column;gap:7px}
-.summit-gallery-assignment-meta{display:flex;flex-direction:column;gap:2px;min-width:0}
-.summit-gallery-assignment-meta strong{font-size:12px;font-weight:850}
-.summit-gallery-assignment-meta span,.summit-gallery-assignment-note{font-size:10px;line-height:1.35;color:rgba(255,255,255,.78)}
-.summit-gallery-peak-select{width:100%;min-height:38px;padding:7px 10px;border:1px solid rgba(255,255,255,.25);border-radius:9px;background:rgba(255,255,255,.12);color:#fff;font:inherit;font-size:12px}
-.summit-gallery-peak-select option{background:#17212c;color:#fff}
-.summit-gallery-viewer-stage{padding-bottom:116px}
-@media(max-height:520px){.summit-gallery-assignment{left:8px;right:8px;bottom:8px;padding:7px 9px}.summit-gallery-viewer-stage{padding-bottom:92px}}
-
-.summit-gallery-assigned-title{font-size:13px;font-weight:900;letter-spacing:.01em;color:#fff;text-shadow:0 1px 5px rgba(0,0,0,.65)}
-
-/* Eigene Gipfelauswahl im Android-Vollbild: unabhängig vom nativen WebView-Select. */
-.summit-gallery-peak-trigger{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:42px;padding:9px 12px;border:1px solid rgba(255,255,255,.34);border-radius:10px;background:rgba(255,255,255,.16);color:#fff;font:inherit;font-size:12px;font-weight:800;text-align:left;touch-action:manipulation;-webkit-tap-highlight-color:transparent;pointer-events:auto}
-.summit-gallery-peak-trigger span{font-size:18px;line-height:1;flex:0 0 auto}
-.summit-gallery-peak-options{position:absolute;left:0;right:0;bottom:calc(100% + 7px);z-index:8;display:flex;flex-direction:column;gap:3px;max-height:min(42vh,300px);overflow-y:auto;padding:6px;border:1px solid rgba(255,255,255,.24);border-radius:12px;background:rgba(10,16,23,.98);box-shadow:0 8px 28px rgba(0,0,0,.5);overscroll-behavior:contain;pointer-events:auto}
+.summit-gallery-assignment{position:absolute;left:50%;transform:translateX(-50%);bottom:max(10px,env(safe-area-inset-bottom));z-index:3;width:min(390px,calc(100% - 24px));padding:7px 9px;border:1px solid color-mix(in srgb,var(--accent,#c7a66a) 22%,transparent);border-radius:var(--editor-radius,13px);background:rgba(10,16,23,.48);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;display:flex;flex-direction:column;gap:5px;pointer-events:auto;box-shadow:0 5px 20px rgba(0,0,0,.16)}
+.summit-gallery-assignment-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;opacity:.76}
+.summit-gallery-assignment-meta strong{font-size:10px;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.summit-gallery-assignment-meta span,.summit-gallery-assignment-note{font-size:9px;line-height:1.3;color:rgba(255,255,255,.76)}
+.summit-gallery-assignment-note{text-align:center}
+.summit-gallery-viewer-stage{position:relative;padding-bottom:116px}
+.summit-gallery-viewer-stage img{position:relative;z-index:0}
+.summit-gallery-photo-caption{position:absolute;left:50%;bottom:123px;transform:translateX(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:2px;max-width:calc(100% - 34px);padding:8px 16px 9px;border:1px solid color-mix(in srgb,var(--accent,#c7a66a) 78%,rgba(255,255,255,.35));border-radius:var(--editor-radius,13px);background:linear-gradient(180deg,rgba(8,13,18,.22),rgba(8,13,18,.66));backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);box-shadow:0 4px 20px rgba(0,0,0,.22),inset 0 0 0 1px rgba(255,255,255,.06);text-align:center;pointer-events:none;animation:summit-caption-enter .48s cubic-bezier(.2,.75,.25,1) both}
+.summit-gallery-photo-caption[hidden]{display:none!important}
+.summit-gallery-photo-caption-name{color:var(--accent,#c7a66a);font-family:inherit;font-size:clamp(16px,4.7vw,23px);font-weight:850;line-height:1.12;letter-spacing:.015em;text-shadow:0 2px 8px rgba(0,0,0,.88),0 0 16px rgba(0,0,0,.45);overflow-wrap:anywhere}
+.summit-gallery-photo-caption-height{color:#fff;font-family:inherit;font-size:clamp(11px,3vw,14px);font-weight:750;letter-spacing:.09em;text-shadow:0 1px 6px rgba(0,0,0,.9)}
+@keyframes summit-caption-enter{from{opacity:0;transform:translate(-50%,9px) scale(.975)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+.summit-gallery-peak-trigger{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:34px;padding:6px 9px;border:1px solid color-mix(in srgb,var(--accent,#c7a66a) 32%,rgba(255,255,255,.18));border-radius:9px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.92);font:inherit;font-size:11px;font-weight:700;text-align:left;touch-action:manipulation;-webkit-tap-highlight-color:transparent;pointer-events:auto}
+.summit-gallery-peak-trigger>span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.summit-gallery-peak-chevron{font-size:16px;line-height:1;flex:0 0 auto;opacity:.7;transition:transform .2s ease}
+.summit-gallery-peak-trigger[aria-expanded=true] .summit-gallery-peak-chevron{transform:rotate(180deg)}
+.summit-gallery-peak-options{position:absolute;left:0;right:0;bottom:calc(100% + 6px);z-index:8;display:flex;flex-direction:column;gap:2px;max-height:min(38vh,270px);overflow-y:auto;padding:5px;border:1px solid color-mix(in srgb,var(--accent,#c7a66a) 36%,rgba(255,255,255,.2));border-radius:11px;background:rgba(10,16,23,.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 8px 28px rgba(0,0,0,.42);overscroll-behavior:contain;pointer-events:auto}
 .summit-gallery-peak-options[hidden]{display:none!important}
-.summit-gallery-peak-option{display:block;width:100%;min-height:40px;padding:9px 10px;border:0;border-radius:8px;background:transparent;color:#fff;font:inherit;font-size:12px;font-weight:700;text-align:left;white-space:normal;touch-action:manipulation;-webkit-tap-highlight-color:transparent;pointer-events:auto}
-.summit-gallery-peak-option.is-selected{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.25)}
-.summit-gallery-assignment{pointer-events:auto}
+.summit-gallery-peak-option{display:block;width:100%;min-height:37px;padding:8px 10px;border:0;border-radius:7px;background:transparent;color:rgba(255,255,255,.94);font:inherit;font-size:11px;font-weight:650;text-align:left;white-space:normal;touch-action:manipulation;-webkit-tap-highlight-color:transparent;pointer-events:auto}
+.summit-gallery-peak-option.is-selected{background:color-mix(in srgb,var(--accent,#c7a66a) 18%,transparent);color:var(--accent,#c7a66a);border:1px solid color-mix(in srgb,var(--accent,#c7a66a) 42%,transparent)}
+@media(max-height:520px){.summit-gallery-assignment{bottom:7px;padding:5px 7px}.summit-gallery-viewer-stage{padding-bottom:88px}.summit-gallery-photo-caption{bottom:94px;padding:6px 12px}}
+@media(max-width:380px){.summit-gallery-assignment{width:calc(100% - 18px)}.summit-gallery-photo-caption{max-width:calc(100% - 24px);padding:7px 12px}}
