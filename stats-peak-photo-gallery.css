@@ -38,3 +38,5 @@ body.summit-gallery-viewer-open{overflow:hidden!important}
 .summit-gallery-peak-select option{background:#17212c;color:#fff}
 .summit-gallery-viewer-stage{padding-bottom:116px}
 @media(max-height:520px){.summit-gallery-assignment{left:8px;right:8px;bottom:8px;padding:7px 9px}.summit-gallery-viewer-stage{padding-bottom:92px}}
+
+.summit-gallery-assigned-title{font-size:13px;font-weight:900;letter-spacing:.01em;color:#fff;text-shadow:0 1px 5px rgba(0,0,0,.65)}

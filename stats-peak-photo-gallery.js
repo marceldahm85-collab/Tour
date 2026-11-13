@@ -32,11 +32,15 @@ function renderAssignmentPanel(item,context){
  const tour=matches[0],peaks=Array.isArray(tour.gipfelDetails)?tour.gipfelDetails:[];
  if(!peaks.length){panel.innerHTML='<div class="summit-gallery-assignment-note">'+esc(tour.tourname||'Tour')+' · Keine Gipfel in dieser Tour hinterlegt.</div>';return;}
  const selected=saved&&String(saved.tourId||'')===String(tour.id||'')?Number(saved.peakIndex):-1;
+ const selectedPeak=selected>=0?peaks[selected]:null;
+ const selectedName=selectedPeak?String(selectedPeak.name||'Gipfel '+(selected+1)):'';
+ const selectedHeight=selectedPeak?(Number(String(selectedPeak.hoehe||'').replace(/[^0-9]/g,''))||0):0;
+ const assignedLabel=selectedPeak?'<div class="summit-gallery-assigned-title">'+esc(selectedName)+(selectedHeight?' · '+selectedHeight.toLocaleString('de-AT')+' m':'')+'</div>':'';
  const options=['<option value="">Keinem Gipfel zuordnen</option>'].concat(peaks.map((peak,index)=>{
   const name=String(peak?.name||'Gipfel '+(index+1)),height=Number(String(peak?.hoehe||'').replace(/[^0-9]/g,''))||0;
   return '<option value="'+index+'"'+(selected===index?' selected':'')+'>'+esc(name)+(height?' · '+height.toLocaleString('de-AT')+' m':'')+'</option>';
  })).join('');
- panel.innerHTML='<div class="summit-gallery-assignment-meta"><strong>'+esc(tour.tourname||'Tour')+'</strong><span>'+esc(context.dateTaken)+' · Gipfel auswählen</span></div><select class="summit-gallery-peak-select" data-peak-select>'+options+'</select>';
+ panel.innerHTML='<div class="summit-gallery-assignment-meta"><strong>'+esc(tour.tourname||'Tour')+'</strong><span>'+esc(context.dateTaken)+' · Gipfel auswählen</span></div>'+assignedLabel+'<select class="summit-gallery-peak-select" data-peak-select>'+options+'</select>';
  panel.querySelector('[data-peak-select]')?.addEventListener('change',event=>{
   const all=getAssignments();
   if(event.target.value===''){delete all[item.uri];saveAssignments(all);return;}
