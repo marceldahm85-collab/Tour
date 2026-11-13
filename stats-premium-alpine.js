@@ -56,6 +56,7 @@
     });
 
     const TITLE_RULES = [
+        [/^statistik(?:\\b|$)/i, 'distance'],
         [/aktivitätsmix/i, 'trail'],
         [/typische tour/i, 'typical'],
         [/belastungsverteilung/i, 'balance'],
@@ -118,6 +119,26 @@
         return match ? match[1] : 'peaks';
     }
 
+    const TITLE_PHOTO_ASSETS = {
+        trail: './assets/milestones/milestone-steps.svg',
+        typical: './assets/milestones/milestone-steps.svg',
+        profile: './assets/milestones/milestone-steps.svg',
+        distance: './assets/milestones/milestone-dist.svg',
+        balance: './assets/milestones/milestone-dist.svg',
+        compare: './assets/milestones/milestone-dist.svg',
+        performance: './assets/milestones/milestone-asc.svg',
+        trend: './assets/milestones/milestone-asc.svg',
+        calendarTrend: './assets/milestones/milestone-time.svg',
+        calendarCheck: './assets/milestones/milestone-time.svg',
+        frequency: './assets/milestones/milestone-time.svg',
+        time: './assets/milestones/milestone-time.svg',
+        speed: './assets/milestones/milestone-time.svg',
+        grade: './assets/milestones/milestone-asc.svg',
+        peaks: './assets/milestones/milestone-peaks.svg',
+        peakList: './assets/milestones/milestone-peaks.svg',
+        trophy: './assets/milestones/milestone-peaks.svg'
+    };
+
     function enhanceTitle(heading) {
         const label = getLabel(heading);
         if (!label) return;
@@ -126,10 +147,13 @@
         if (!cleanText) return;
 
         const iconKey = iconKeyFor(cleanText);
+        const useDashboardMotif = Boolean(heading.closest('#stats-statistics-page, #stats-peaks-page'));
         stripEmoji(label);
 
         const current = label.querySelector(':scope > .stats-premium-title-icon');
-        if (current && current.dataset.iconKey === iconKey) {
+        const currentHasMotif = Boolean(current?.querySelector('.stats-premium-title-art'));
+        if (current && current.dataset.iconKey === iconKey &&
+            (!useDashboardMotif || currentHasMotif)) {
             heading.dataset.statsPremiumTitleIcon = iconKey;
             label.classList.add('stats-premium-title-label');
             return;
@@ -140,7 +164,18 @@
         icon.className = 'stats-premium-title-icon';
         icon.dataset.iconKey = iconKey;
         icon.setAttribute('aria-hidden', 'true');
-        icon.innerHTML = ICONS[iconKey] || ICONS.peaks;
+
+        if (useDashboardMotif) {
+            const image = document.createElement('img');
+            image.className = 'stats-premium-title-art';
+            image.src = TITLE_PHOTO_ASSETS[iconKey] || TITLE_PHOTO_ASSETS.peaks;
+            image.alt = '';
+            image.decoding = 'async';
+            image.draggable = false;
+            icon.appendChild(image);
+        } else {
+            icon.innerHTML = ICONS[iconKey] || ICONS.peaks;
+        }
 
         label.insertBefore(icon, label.firstChild);
         label.classList.add('stats-premium-title-label');
