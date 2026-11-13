@@ -127,7 +127,7 @@ jobs:
             echo "## Bergtouren Android — Release APK"
             echo
             echo "- Package: at.marcel.bergtouren"
-            echo "- Version: 0.7.3 (18)"
+            echo "- Version: 0.7.4 (19)"
             echo "- Build type: signed, non-debuggable Release"
             echo "- Artifact: bergtouren-release.apk"
             echo
