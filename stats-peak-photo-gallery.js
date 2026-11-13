@@ -43,20 +43,24 @@ function renderAssignmentPanel(item,context){
  panel.innerHTML='<div class="summit-gallery-assignment-meta"><strong>'+esc(tour.tourname||'Tour')+'</strong><span>'+esc(context.dateTaken)+' · Gipfel auswählen</span></div>'+assignedLabel+'<select class="summit-gallery-peak-select" data-peak-select>'+options+'</select>';
  panel.querySelector('[data-peak-select]')?.addEventListener('change',event=>{
   const all=getAssignments();
-  if(event.target.value===''){delete all[item.uri];saveAssignments(all);return;}
+  if(event.target.value===''){delete all[item.uri];saveAssignments(all);renderAssignmentPanel(item,context);return;}
   const index=Number(event.target.value),peak=peaks[index];if(!peak)return;
   all[item.uri]={tourId:String(tour.id||''),tourDate:context.dateTaken,peakIndex:index,peakName:String(peak.name||''),peakHeight:Number(String(peak.hoehe||'').replace(/[^0-9]/g,''))||0};
-  saveAssignments(all);
+  saveAssignments(all);renderAssignmentPanel(item,context);
  });
 }
 async function getPhotoContext(item){
- if(item._photoContext)return item._photoContext;
+ if(item._photoContext&&item._photoContext.status!=='loading')return item._photoContext;
+ if(item._photoContextPromise)return item._photoContextPromise;
  item._photoContext={status:'loading'};
- try{
-  const result=await request('gallery.summit.folder.date',{uri:item.uri},30000);
-  item._photoContext=result.status==='ok'&&/^\d{4}-\d{2}-\d{2}$/.test(result.dateTaken||'')?{status:'ok',dateTaken:result.dateTaken}:{status:result.status||'no_date'};
- }catch(_){item._photoContext={status:'no_date'};}
- return item._photoContext;
+ item._photoContextPromise=(async()=>{
+  try{
+   const result=await request('gallery.summit.folder.date',{uri:item.uri},30000);
+   item._photoContext=result.status==='ok'&&/^\d{4}-\d{2}-\d{2}$/.test(result.dateTaken||'')?{status:'ok',dateTaken:result.dateTaken}:{status:result.status||'no_date'};
+  }catch(_){item._photoContext={status:'no_date'};}
+  return item._photoContext;
+ })();
+ return item._photoContextPromise;
 }
 
 function setExpanded(section,on){const state=collapseState();state['peaks:gipfelfotos']=on;try{localStorage.setItem(COLLAPSE,JSON.stringify(state));}catch(_){}section.classList.toggle('is-collapsed',!on);section.querySelector(':scope > .stats-analysis-title')?.setAttribute('aria-expanded',on?'true':'false');}
