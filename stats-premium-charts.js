@@ -2580,71 +2580,105 @@
         ctx.translate(x, y);
         ctx.globalAlpha = achieved ? 1 : .48;
         const accent = palette.primary;
-        const metal = ctx.createLinearGradient(-14, -14, 14, 14);
-        metal.addColorStop(0, '#FFF8E8');
-        metal.addColorStop(.28, palette.secondary);
-        metal.addColorStop(.62, palette.primary);
-        metal.addColorStop(1, '#35434D');
-        ctx.fillStyle = metal;
-        ctx.strokeStyle = achieved ? 'rgba(255,255,255,.88)' : 'rgba(225,236,245,.42)';
-        ctx.lineWidth = 1;
-        ctx.shadowColor = achieved ? 'rgba(0,0,0,.48)' : 'transparent';
+        const ink = '#101923';
+        const outline = achieved ? 'rgba(255,255,255,.82)' : 'rgba(225,236,245,.38)';
+        const addStops = (gradient, stops) => stops.forEach(([p, c]) => gradient.addColorStop(p, c));
+        const linear = (x1, y1, x2, y2, stops) => {
+            const g = ctx.createLinearGradient(x1, y1, x2, y2);
+            addStops(g, stops);
+            return g;
+        };
+        ctx.lineWidth = 1.15;
+        ctx.strokeStyle = outline;
+        ctx.shadowColor = achieved ? 'rgba(0,0,0,.5)' : 'transparent';
         ctx.shadowBlur = achieved ? 5 : 0;
 
-        // Die Meilenstein-Embleme sitzen zentriert auf dem tatsächlichen Kurvenpunkt.
+        // Größere, materialbetonte Embleme; die Zahl sitzt jeweils innerhalb des Symbols.
         if (type === 'dist') {
-            // Kompakter Bergschuh.
+            // Robuster brauner Leder-Bergschuh mit Gummisohle, Nähten und hellen Schnürsenkeln.
             ctx.beginPath();
-            ctx.moveTo(-11, -10); ctx.lineTo(-5, -11); ctx.lineTo(-3, -3);
-            ctx.lineTo(1, 1); ctx.lineTo(10, 3); ctx.quadraticCurveTo(14, 5, 13, 10);
-            ctx.lineTo(-12, 10); ctx.quadraticCurveTo(-14, 7, -11, 3);
-            ctx.closePath(); ctx.fill(); ctx.stroke();
-            ctx.shadowBlur = 0;
-            ctx.beginPath(); ctx.moveTo(-12, 7); ctx.lineTo(13, 7);
-            ctx.strokeStyle = 'rgba(20,29,36,.72)'; ctx.lineWidth = 1.6; ctx.stroke();
-        } else if (type === 'asc') {
-            // Markanter Berggipfel mit zwei Graten.
-            ctx.beginPath();
-            ctx.moveTo(-14, 10); ctx.lineTo(-5, -7); ctx.lineTo(-1, 1);
-            ctx.lineTo(5, -12); ctx.lineTo(14, 10); ctx.closePath();
+            ctx.moveTo(-14, -11); ctx.lineTo(-7, -13); ctx.lineTo(-4, -4);
+            ctx.lineTo(1, 1); ctx.lineTo(12, 3); ctx.quadraticCurveTo(17, 5, 16, 12);
+            ctx.lineTo(-15, 12); ctx.quadraticCurveTo(-17, 8, -14, 3); ctx.closePath();
+            ctx.fillStyle = linear(-12, -12, 12, 12, [[0, '#D9A66B'], [.35, '#956039'], [.72, '#59351F'], [1, '#302017']]);
             ctx.fill(); ctx.stroke();
             ctx.shadowBlur = 0;
-            ctx.beginPath(); ctx.moveTo(-5, -7); ctx.lineTo(-2, -1);
-            ctx.moveTo(5, -12); ctx.lineTo(9, -4);
-            ctx.strokeStyle = 'rgba(255,255,255,.76)'; ctx.lineWidth = 1; ctx.stroke();
-        } else if (type === 'time') {
-            // Kleine Stoppuhr.
-            roundedPath(ctx, -3, -14, 6, 4, 1.5); ctx.fill(); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(-7, -10); ctx.lineTo(-10, -13);
-            ctx.moveTo(7, -10); ctx.lineTo(10, -13); ctx.stroke();
-            ctx.beginPath(); ctx.arc(0, 1, 11, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-            ctx.shadowBlur = 0;
-            ctx.beginPath(); ctx.moveTo(0, 1); ctx.lineTo(0, -6);
-            ctx.moveTo(0, 1); ctx.lineTo(5, 4);
-            ctx.strokeStyle = 'rgba(255,255,255,.66)'; ctx.lineWidth = 1; ctx.stroke();
-        } else {
-            // Ausschließlich ein Akzent-Gipfelkreuz; der Wert liegt in der Querstrebe.
-            ctx.shadowBlur = 0;
-            ctx.strokeStyle = accent;
-            ctx.lineWidth = 2.2;
-            ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(-15, 8); ctx.lineTo(16, 8);
+            ctx.lineWidth = 3.2; ctx.strokeStyle = linear(0, 8, 0, 12, [[0, '#555B5D'], [.45, '#20272B'], [1, '#090D10']]); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-7, -8); ctx.lineTo(-2, -2); ctx.lineTo(3, 1);
+            ctx.moveTo(-5, -10); ctx.lineTo(1, -3); ctx.lineTo(7, 0);
+            ctx.strokeStyle = '#E9D5B5'; ctx.lineWidth = 1.35; ctx.lineCap = 'round'; ctx.stroke();
+            ctx.beginPath(); ctx.arc(-7, -8, 1.25, 0, Math.PI * 2); ctx.arc(-5, -10, 1.25, 0, Math.PI * 2);
+            ctx.fillStyle = '#C5CDD0'; ctx.fill();
+        } else if (type === 'asc') {
+            // Felsiger Hochgebirgsgipfel mit schattierten Flanken und Schneekappe.
             ctx.beginPath();
-            ctx.moveTo(0, -14); ctx.lineTo(0, 13);
-            ctx.moveTo(-15, -5); ctx.lineTo(15, -5);
-            ctx.stroke();
+            ctx.moveTo(-17, 13); ctx.lineTo(-9, -2); ctx.lineTo(-5, 3);
+            ctx.lineTo(3, -15); ctx.lineTo(8, -5); ctx.lineTo(12, 1);
+            ctx.lineTo(17, 13); ctx.closePath();
+            ctx.fillStyle = linear(-12, -14, 13, 13, [[0, '#DCE5E8'], [.2, '#84949B'], [.48, '#59666D'], [.78, '#343E45'], [1, '#20282E']]);
+            ctx.fill(); ctx.stroke();
+            ctx.shadowBlur = 0;
+            ctx.beginPath();
+            ctx.moveTo(3, -15); ctx.lineTo(-1, -5); ctx.lineTo(3, -7);
+            ctx.lineTo(6, -3); ctx.lineTo(8, -5); ctx.lineTo(12, 1);
+            ctx.lineTo(8, -1); ctx.lineTo(5, -3); ctx.closePath();
+            ctx.fillStyle = linear(0, -15, 8, 1, [[0, '#FFFFFF'], [.55, '#DDE8EC'], [1, '#9FB4BD']]); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(-9, -2); ctx.lineTo(-5, 3); ctx.lineTo(-8, 8);
+            ctx.moveTo(3, -4); ctx.lineTo(-1, 8); ctx.lineTo(4, 5);
+            ctx.moveTo(8, 1); ctx.lineTo(12, 9);
+            ctx.strokeStyle = 'rgba(24,34,41,.72)'; ctx.lineWidth = 1.25; ctx.stroke();
+        } else if (type === 'time') {
+            // Edelstahl-Stoppuhr mit Messingkrone und dunklem Zifferblatt.
+            roundedPath(ctx, -4, -17, 8, 5, 1.5);
+            ctx.fillStyle = linear(-4, -17, 4, -12, [[0, '#F5D99B'], [.5, '#A87935'], [1, '#65451F']]); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-8, -11); ctx.lineTo(-11, -14); ctx.moveTo(8, -11); ctx.lineTo(11, -14);
+            ctx.strokeStyle = '#B8C2C7'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.beginPath(); ctx.arc(0, 1, 14, 0, Math.PI * 2);
+            ctx.fillStyle = linear(-10, -12, 11, 14, [[0, '#F4F6F5'], [.28, '#9FAEB5'], [.58, '#53616A'], [1, '#202A31']]);
+            ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.arc(0, 1, 10.5, 0, Math.PI * 2);
+            ctx.fillStyle = linear(-7, -9, 7, 11, [[0, '#39464D'], [.5, '#18232B'], [1, '#0B1117']]); ctx.fill();
+            ctx.strokeStyle = '#D8C18F'; ctx.lineWidth = .9; ctx.stroke();
+            ctx.shadowBlur = 0;
+            ctx.beginPath(); ctx.moveTo(0, 1); ctx.lineTo(0, -6); ctx.moveTo(0, 1); ctx.lineTo(5, 4);
+            ctx.strokeStyle = '#F4E6C6'; ctx.lineWidth = 1.25; ctx.lineCap = 'round'; ctx.stroke();
+            ctx.beginPath(); ctx.arc(0, 1, 1.35, 0, Math.PI * 2); ctx.fillStyle = '#E6C77F'; ctx.fill();
+        } else {
+            // Klassisches schmales Gipfelkreuz aus verwittertem, warmbraunem Holz.
+            ctx.shadowBlur = 0;
+            const wood = linear(-7, -17, 7, 15, [[0, '#E1BD83'], [.22, '#A97943'], [.5, '#80532F'], [.78, '#603B24'], [1, '#39251A']]);
+            // Vertikaler Balken
+            roundedPath(ctx, -2.45, -17, 4.9, 33, 1.1);
+            ctx.fillStyle = wood; ctx.fill();
+            ctx.strokeStyle = '#382419'; ctx.lineWidth = .85; ctx.stroke();
+            // Kurze, kräftige Querstrebe – bewusst deutlich schmaler als zuvor.
+            roundedPath(ctx, -10.2, -7.1, 20.4, 5.4, 1.0);
+            ctx.fillStyle = linear(-10, -7, 10, -2, [[0, '#D9B47C'], [.35, '#A87843'], [.7, '#80532F'], [1, '#4C301E']]);
+            ctx.fill(); ctx.stroke();
+            // Dezente Holzmaserung und helle Lichtkante.
+            ctx.beginPath();
+            ctx.moveTo(-1.1, -15); ctx.lineTo(-1.1, 14);
+            ctx.moveTo(-8.5, -5.8); ctx.lineTo(8.5, -5.8);
+            ctx.strokeStyle = 'rgba(244,211,158,.52)'; ctx.lineWidth = .65; ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(1.0, -13); ctx.lineTo(1.0, 12);
+            ctx.moveTo(-7.5, -3.3); ctx.lineTo(7.5, -3.3);
+            ctx.strokeStyle = 'rgba(48,29,17,.48)'; ctx.lineWidth = .55; ctx.stroke();
         }
 
         ctx.shadowBlur = 0;
-        ctx.font = editorFont(label.length > 5 ? 6.0 : 6.8, 900);
+        const isCross = type === 'peaks';
+        ctx.font = editorFont(isCross ? (label.length > 5 ? 5.2 : 5.8) : (label.length > 5 ? 7.0 : 7.8), 900);
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        const labelY = type === 'peaks' ? -5 : (type === 'time' ? 2 : 1);
+        const labelY = isCross ? -4.4 : (type === 'time' ? 2 : (type === 'asc' ? 5 : 4));
         ctx.lineJoin = 'round';
-        ctx.lineWidth = 1.25;
+        ctx.lineWidth = isCross ? 1.15 : 1.35;
         ctx.strokeStyle = accent;
-        ctx.strokeText(label, 0, labelY, type === 'peaks' ? 27 : 25);
-        ctx.fillStyle = '#101923';
-        ctx.fillText(label, 0, labelY, type === 'peaks' ? 27 : 25);
+        ctx.strokeText(label, 0, labelY, isCross ? 17.5 : 28);
+        ctx.fillStyle = ink;
+        ctx.fillText(label, 0, labelY, isCross ? 17.5 : 28);
         ctx.restore();
     }
 
