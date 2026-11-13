@@ -56,7 +56,7 @@
     });
 
     const TITLE_RULES = [
-        [/^statistik(?:\\b|$)/i, 'distance'],
+        [/^statistik(?:\b|$)/i, 'distance'],
         [/aktivitätsmix/i, 'trail'],
         [/typische tour/i, 'typical'],
         [/belastungsverteilung/i, 'balance'],
