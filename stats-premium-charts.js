@@ -2576,75 +2576,75 @@
     }
 
     function drawMilestoneEmblem(ctx, type, x, y, label, palette, achieved) {
-        const w = 42, h = 32;
         ctx.save();
         ctx.translate(x, y);
         ctx.globalAlpha = achieved ? 1 : .48;
-        const metal = ctx.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2);
+        const accent = palette.primary;
+        const metal = ctx.createLinearGradient(-14, -14, 14, 14);
         metal.addColorStop(0, '#FFF8E8');
         metal.addColorStop(.28, palette.secondary);
         metal.addColorStop(.62, palette.primary);
         metal.addColorStop(1, '#35434D');
         ctx.fillStyle = metal;
         ctx.strokeStyle = achieved ? 'rgba(255,255,255,.88)' : 'rgba(225,236,245,.42)';
-        ctx.lineWidth = 1.1;
+        ctx.lineWidth = 1;
         ctx.shadowColor = achieved ? 'rgba(0,0,0,.48)' : 'transparent';
-        ctx.shadowBlur = achieved ? 6 : 0;
+        ctx.shadowBlur = achieved ? 5 : 0;
 
-        // Vier eigenständige, kompakte Embleme – der Meilensteinwert sitzt im Symbol.
+        // Die Meilenstein-Embleme sitzen zentriert auf dem tatsächlichen Kurvenpunkt.
         if (type === 'dist') {
-            // Bergschuh: hoher Schaft, gerundete Schuhspitze und kräftige Sohle.
+            // Kompakter Bergschuh.
             ctx.beginPath();
-            ctx.moveTo(-17, -11); ctx.lineTo(-9, -13); ctx.lineTo(-6, -3);
-            ctx.lineTo(0, 1); ctx.lineTo(13, 4); ctx.quadraticCurveTo(19, 6, 19, 11);
-            ctx.lineTo(-18, 11); ctx.quadraticCurveTo(-21, 8, -17, 4);
+            ctx.moveTo(-11, -10); ctx.lineTo(-5, -11); ctx.lineTo(-3, -3);
+            ctx.lineTo(1, 1); ctx.lineTo(10, 3); ctx.quadraticCurveTo(14, 5, 13, 10);
+            ctx.lineTo(-12, 10); ctx.quadraticCurveTo(-14, 7, -11, 3);
             ctx.closePath(); ctx.fill(); ctx.stroke();
             ctx.shadowBlur = 0;
-            ctx.beginPath(); ctx.moveTo(-18, 7); ctx.lineTo(18, 7);
-            ctx.strokeStyle = 'rgba(20,29,36,.72)'; ctx.lineWidth = 2; ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(-7, -8); ctx.lineTo(-2, -1); ctx.lineTo(4, 1);
-            ctx.strokeStyle = 'rgba(255,255,255,.62)'; ctx.lineWidth = 1; ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-12, 7); ctx.lineTo(13, 7);
+            ctx.strokeStyle = 'rgba(20,29,36,.72)'; ctx.lineWidth = 1.6; ctx.stroke();
         } else if (type === 'asc') {
-            // Bergsilhouette mit markantem Hauptgipfel und zweitem Grat.
+            // Markanter Berggipfel mit zwei Graten.
             ctx.beginPath();
-            ctx.moveTo(-20, 12); ctx.lineTo(-7, -7); ctx.lineTo(-1, 1);
-            ctx.lineTo(7, -14); ctx.lineTo(21, 12); ctx.closePath();
+            ctx.moveTo(-14, 10); ctx.lineTo(-5, -7); ctx.lineTo(-1, 1);
+            ctx.lineTo(5, -12); ctx.lineTo(14, 10); ctx.closePath();
             ctx.fill(); ctx.stroke();
             ctx.shadowBlur = 0;
-            ctx.beginPath(); ctx.moveTo(-7, -7); ctx.lineTo(-2, -1); ctx.lineTo(2, -4);
-            ctx.moveTo(7, -14); ctx.lineTo(11, -5); ctx.lineTo(14, -7);
-            ctx.strokeStyle = 'rgba(255,255,255,.76)'; ctx.lineWidth = 1.15; ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-5, -7); ctx.lineTo(-2, -1);
+            ctx.moveTo(5, -12); ctx.lineTo(9, -4);
+            ctx.strokeStyle = 'rgba(255,255,255,.76)'; ctx.lineWidth = 1; ctx.stroke();
         } else if (type === 'time') {
-            // Stoppuhr mit Krone und seitlichen Bedienknöpfen.
-            roundedPath(ctx, -4, -16, 8, 5, 2); ctx.fill(); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(-9, -12); ctx.lineTo(-13, -16);
-            ctx.moveTo(9, -12); ctx.lineTo(13, -16); ctx.stroke();
-            ctx.beginPath(); ctx.arc(0, 1, 14, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            // Kleine Stoppuhr.
+            roundedPath(ctx, -3, -14, 6, 4, 1.5); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-7, -10); ctx.lineTo(-10, -13);
+            ctx.moveTo(7, -10); ctx.lineTo(10, -13); ctx.stroke();
+            ctx.beginPath(); ctx.arc(0, 1, 11, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
             ctx.shadowBlur = 0;
-            ctx.beginPath(); ctx.moveTo(0, 1); ctx.lineTo(0, -8);
-            ctx.moveTo(0, 1); ctx.lineTo(7, 5);
-            ctx.strokeStyle = 'rgba(255,255,255,.66)'; ctx.lineWidth = 1.15; ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, 1); ctx.lineTo(0, -6);
+            ctx.moveTo(0, 1); ctx.lineTo(5, 4);
+            ctx.strokeStyle = 'rgba(255,255,255,.66)'; ctx.lineWidth = 1; ctx.stroke();
         } else {
-            // Gipfelkreuz über einem scharf gezeichneten Berggrat.
-            ctx.beginPath();
-            ctx.moveTo(-20, 12); ctx.lineTo(-7, -3); ctx.lineTo(-1, 3);
-            ctx.lineTo(7, -8); ctx.lineTo(20, 12); ctx.closePath();
-            ctx.fill(); ctx.stroke();
+            // Ausschließlich ein Akzent-Gipfelkreuz; der Wert liegt in der Querstrebe.
             ctx.shadowBlur = 0;
-            ctx.beginPath(); ctx.moveTo(7, -20); ctx.lineTo(7, -7);
-            ctx.moveTo(2, -16); ctx.lineTo(12, -16);
-            ctx.strokeStyle = '#FFF8E8'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.stroke();
+            ctx.strokeStyle = accent;
+            ctx.lineWidth = 2.2;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(0, -14); ctx.lineTo(0, 13);
+            ctx.moveTo(-15, -5); ctx.lineTo(15, -5);
+            ctx.stroke();
         }
 
         ctx.shadowBlur = 0;
-        ctx.fillStyle = '#101923';
-        ctx.strokeStyle = 'rgba(255,255,255,.78)';
-        ctx.lineWidth = .55;
-        ctx.font = editorFont(label.length > 5 ? 6.1 : 7, 900);
+        ctx.font = editorFont(label.length > 5 ? 6.0 : 6.8, 900);
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.strokeText(label, 0, type === 'time' ? 2 : 4, 34);
-        ctx.fillText(label, 0, type === 'time' ? 2 : 4, 34);
+        const labelY = type === 'peaks' ? -5 : (type === 'time' ? 2 : 1);
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = 1.25;
+        ctx.strokeStyle = accent;
+        ctx.strokeText(label, 0, labelY, type === 'peaks' ? 27 : 25);
+        ctx.fillStyle = '#101923';
+        ctx.fillText(label, 0, labelY, type === 'peaks' ? 27 : 25);
         ctx.restore();
     }
 
@@ -2892,18 +2892,9 @@
                 const entry = milestoneTour ? milestoneTour.entry : null;
                 msDotHitTargets[type].push({ x: crossing, y, entry, milestone: target, year });
 
-                // Raised metal plaque anchors each threshold directly to the cumulative line.
+                // Das Symbol ersetzt den separaten Kreismarker und liegt direkt auf der Kurve.
                 if (crossing > plot.left + plot.width * animationProgress) return;
-                const plaqueOffset = y - 22 < plot.top + 4 ? 22 : -22;
-                const plaqueY = y + plaqueOffset;
-                ctx.beginPath();
-                ctx.moveTo(crossing, y + (plaqueOffset > 0 ? 7 : -7));
-                ctx.lineTo(crossing, plaqueY + (plaqueOffset > 0 ? -9 : 9));
-                ctx.strokeStyle = colourWithAlpha(palette.secondary, .78);
-                ctx.lineWidth = 1;
-                ctx.stroke();
-                drawMilestoneEmblem(ctx, type, crossing, plaqueY, formatMilestoneNumber(type, target), palette, true);
-                drawMetalMarker(ctx, crossing, y, palette, 4.2);
+                drawMilestoneEmblem(ctx, type, crossing, y, formatMilestoneNumber(type, target), palette, true);
             });
             ctx.restore();
         });
