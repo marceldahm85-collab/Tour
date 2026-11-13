@@ -40,3 +40,12 @@ body.summit-gallery-viewer-open{overflow:hidden!important}
 @media(max-height:520px){.summit-gallery-assignment{left:8px;right:8px;bottom:8px;padding:7px 9px}.summit-gallery-viewer-stage{padding-bottom:92px}}
 
 .summit-gallery-assigned-title{font-size:13px;font-weight:900;letter-spacing:.01em;color:#fff;text-shadow:0 1px 5px rgba(0,0,0,.65)}
+
+/* Eigene Gipfelauswahl im Android-Vollbild: unabhängig vom nativen WebView-Select. */
+.summit-gallery-peak-trigger{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:42px;padding:9px 12px;border:1px solid rgba(255,255,255,.34);border-radius:10px;background:rgba(255,255,255,.16);color:#fff;font:inherit;font-size:12px;font-weight:800;text-align:left;touch-action:manipulation;-webkit-tap-highlight-color:transparent;pointer-events:auto}
+.summit-gallery-peak-trigger span{font-size:18px;line-height:1;flex:0 0 auto}
+.summit-gallery-peak-options{position:absolute;left:0;right:0;bottom:calc(100% + 7px);z-index:8;display:flex;flex-direction:column;gap:3px;max-height:min(42vh,300px);overflow-y:auto;padding:6px;border:1px solid rgba(255,255,255,.24);border-radius:12px;background:rgba(10,16,23,.98);box-shadow:0 8px 28px rgba(0,0,0,.5);overscroll-behavior:contain;pointer-events:auto}
+.summit-gallery-peak-options[hidden]{display:none!important}
+.summit-gallery-peak-option{display:block;width:100%;min-height:40px;padding:9px 10px;border:0;border-radius:8px;background:transparent;color:#fff;font:inherit;font-size:12px;font-weight:700;text-align:left;white-space:normal;touch-action:manipulation;-webkit-tap-highlight-color:transparent;pointer-events:auto}
+.summit-gallery-peak-option.is-selected{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.summit-gallery-assignment{pointer-events:auto}
