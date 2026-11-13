@@ -2616,7 +2616,7 @@
             ctx.strokeStyle = 'rgba(255,255,255,.76)'; ctx.lineWidth = 1.15; ctx.stroke();
         } else if (type === 'time') {
             // Stoppuhr mit Krone und seitlichen Bedienknöpfen.
-            ctx.beginPath(); ctx.roundRect(-4, -16, 8, 5, 2); ctx.fill(); ctx.stroke();
+            roundedPath(ctx, -4, -16, 8, 5, 2); ctx.fill(); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(-9, -12); ctx.lineTo(-13, -16);
             ctx.moveTo(9, -12); ctx.lineTo(13, -16); ctx.stroke();
             ctx.beginPath(); ctx.arc(0, 1, 14, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
