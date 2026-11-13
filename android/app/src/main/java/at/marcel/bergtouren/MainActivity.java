@@ -181,6 +181,12 @@ public final class MainActivity extends Activity {
         SharedPreferences splashPreferences = getSharedPreferences(APP_START_PREFERENCES, MODE_PRIVATE);
         String splashBackground = splashPreferences.getString("background", "standard");
         String splashAnimation = splashPreferences.getString("animation", "premium");
+        int emblemScalePercent = splashPreferences.getInt("emblemScalePercent", 100);
+        int titleSizeSp = splashPreferences.getInt("titleSizeSp", 20);
+        int subtitleSizeSp = splashPreferences.getInt("subtitleSizeSp", 10);
+        String subtitleText = splashPreferences.getString(
+                "subtitleText", "TOUREN  ·  GIPFEL  ·  ERLEBNISSE"
+        );
 
         FrameLayout overlay = new FrameLayout(this);
         overlay.setClickable(true);
@@ -246,7 +252,8 @@ public final class MainActivity extends Activity {
         GradientDrawable emblemGlow = new GradientDrawable();
         emblemGlow.setShape(GradientDrawable.OVAL);
         emblemGlow.setGradientType(GradientDrawable.RADIAL_GRADIENT);
-        emblemGlow.setGradientRadius(dp(96));
+        float emblemScale = emblemScalePercent / 100f;
+        emblemGlow.setGradientRadius(dp(Math.round(96f * emblemScale)));
         emblemGlow.setGradientCenter(0.5f, 0.5f);
         emblemGlow.setColors(new int[] { 0x55E4BC75, 0x18C69A54, 0x00000000 });
         View glow = new View(this);
@@ -279,14 +286,17 @@ public final class MainActivity extends Activity {
         innerMetal.setStroke(dp(1), 0xFFBFA06A);
         innerPlate.setBackground(innerMetal);
         FrameLayout.LayoutParams innerParams = new FrameLayout.LayoutParams(
-                dp(132), dp(132), Gravity.CENTER
+                dp(Math.round(132f * emblemScale)), dp(Math.round(132f * emblemScale)), Gravity.CENTER
         );
         emblem.addView(innerPlate, innerParams);
 
         ImageView emblemIcon = new ImageView(this);
         emblemIcon.setImageResource(R.drawable.ic_launcher_pwa);
         emblemIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        emblemIcon.setPadding(dp(8), dp(8), dp(8), dp(8));
+        emblemIcon.setPadding(
+                dp(Math.round(8f * emblemScale)), dp(Math.round(8f * emblemScale)),
+                dp(Math.round(8f * emblemScale)), dp(Math.round(8f * emblemScale))
+        );
         innerPlate.addView(emblemIcon, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
@@ -305,20 +315,21 @@ public final class MainActivity extends Activity {
         ));
         sheen.setRotation(22f);
         FrameLayout.LayoutParams sheenParams = new FrameLayout.LayoutParams(
-                dp(42), dp(184), Gravity.CENTER
+                dp(Math.round(42f * emblemScale)), dp(Math.round(184f * emblemScale)), Gravity.CENTER
         );
         emblem.addView(sheen, sheenParams);
 
         FrameLayout.LayoutParams emblemParams = new FrameLayout.LayoutParams(
-                dp(148), dp(148), Gravity.CENTER
+                dp(Math.round(148f * emblemScale)), dp(Math.round(148f * emblemScale)), Gravity.CENTER
         );
         emblemStage.addView(emblem, emblemParams);
-        content.addView(emblemStage, new LinearLayout.LayoutParams(dp(190), dp(190)));
+        int emblemStageSize = dp(Math.round(190f * emblemScale));
+        content.addView(emblemStage, new LinearLayout.LayoutParams(emblemStageSize, emblemStageSize));
 
         TextView title = new TextView(this);
         title.setText("BERGTOUREN");
         title.setTextColor(0xFFFFF8EC);
-        title.setTextSize(20);
+        title.setTextSize(titleSizeSp);
         title.setTypeface(Typeface.create("sans-serif", Typeface.BOLD));
         title.setLetterSpacing(0.22f);
         title.setGravity(Gravity.CENTER);
@@ -343,17 +354,20 @@ public final class MainActivity extends Activity {
         content.addView(divider, dividerParams);
 
         TextView subtitle = new TextView(this);
-        subtitle.setText("TOUREN  ·  GIPFEL  ·  ERLEBNISSE");
+        subtitle.setText(subtitleText);
         subtitle.setTextColor(0xE8E8DCC8);
-        subtitle.setTextSize(10);
+        subtitle.setTextSize(subtitleSizeSp);
+        subtitle.setMaxLines(2);
         subtitle.setLetterSpacing(0.16f);
         subtitle.setGravity(Gravity.CENTER);
         subtitle.setIncludeFontPadding(false);
         LinearLayout.LayoutParams subtitleParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
         );
         subtitleParams.topMargin = dp(10);
+        subtitleParams.leftMargin = dp(4);
+        subtitleParams.rightMargin = dp(4);
         content.addView(subtitle, subtitleParams);
 
         overlay.addView(content, new FrameLayout.LayoutParams(
@@ -838,6 +852,7 @@ public final class MainActivity extends Activity {
                                 features.put("haptics.adaptive.v1");
                                 features.put("splash.hybrid.v1");
                                 features.put("splash.settings.v1");
+                                features.put("splash.settings.v2");
                                 features.put("splash.image.v1");
                                 features.put("splash.image.remote.v1");
                                 response.put("features", features);
@@ -1018,6 +1033,12 @@ public final class MainActivity extends Activity {
         String background = request.optString("background", "standard");
         String animation = request.optString("animation", "premium");
         int durationMs = request.optInt("durationMs", 0);
+        int emblemScalePercent = request.optInt("emblemScalePercent", 100);
+        int titleSizeSp = request.optInt("titleSizeSp", 20);
+        int subtitleSizeSp = request.optInt("subtitleSizeSp", 10);
+        String subtitleText = request.optString(
+                "subtitleText", "TOUREN  ·  GIPFEL  ·  ERLEBNISSE"
+        ).trim();
         boolean validBackground = "standard".equals(background)
                 || "editor".equals(background)
                 || "custom".equals(background);
@@ -1026,11 +1047,17 @@ public final class MainActivity extends Activity {
                 || "premium".equals(animation);
         boolean validDuration = durationMs == 0 || durationMs == 1500
                 || durationMs == 2000 || durationMs == 2500;
+        boolean validEmblemScale = emblemScalePercent >= 70 && emblemScalePercent <= 130;
+        boolean validTitleSize = titleSizeSp >= 14 && titleSizeSp <= 30;
+        boolean validSubtitleSize = subtitleSizeSp >= 8 && subtitleSizeSp <= 18;
+        boolean validSubtitleText = subtitleText.length() <= 80
+                && !subtitleText.contains("\n") && !subtitleText.contains("\r");
         File image = new File(getFilesDir(), APP_START_IMAGE_FILE);
         boolean validImage = "standard".equals(background)
                 || (image.isFile() && image.length() > 0 && image.length() <= MAX_APP_START_IMAGE_BYTES);
 
-        if (!validBackground || !validAnimation || !validDuration || !validImage) {
+        if (!validBackground || !validAnimation || !validDuration || !validImage
+                || !validEmblemScale || !validTitleSize || !validSubtitleSize || !validSubtitleText) {
             JSONObject response = createAppStartResponse(
                     "splash.settings.result", requestId, false,
                     !validImage
@@ -1046,6 +1073,10 @@ public final class MainActivity extends Activity {
                 .putString("background", background)
                 .putString("animation", animation)
                 .putInt("durationMs", durationMs)
+                .putInt("emblemScalePercent", emblemScalePercent)
+                .putInt("titleSizeSp", titleSizeSp)
+                .putInt("subtitleSizeSp", subtitleSizeSp)
+                .putString("subtitleText", subtitleText)
                 .commit();
 
         JSONObject response = createAppStartResponse(

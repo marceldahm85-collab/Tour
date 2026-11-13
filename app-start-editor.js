@@ -11,7 +11,11 @@
         animation: 'premium',
         cropX: 50,
         cropY: 50,
-        cropZoom: 1
+        cropZoom: 1,
+        emblemScalePercent: 100,
+        titleSizeSp: 20,
+        subtitleSizeSp: 10,
+        subtitleText: 'TOUREN  ·  GIPFEL  ·  ERLEBNISSE'
     });
 
     let draft = null;
@@ -80,7 +84,13 @@
                 ? source.animation : DEFAULTS.animation,
             cropX: clamp(source.cropX, 0, 100, DEFAULTS.cropX),
             cropY: clamp(source.cropY, 0, 100, DEFAULTS.cropY),
-            cropZoom: clamp(source.cropZoom, 0.8, 1.8, DEFAULTS.cropZoom)
+            cropZoom: clamp(source.cropZoom, 0.8, 1.8, DEFAULTS.cropZoom),
+            emblemScalePercent: Math.round(clamp(source.emblemScalePercent, 70, 130, DEFAULTS.emblemScalePercent)),
+            titleSizeSp: Math.round(clamp(source.titleSizeSp, 14, 30, DEFAULTS.titleSizeSp)),
+            subtitleSizeSp: Math.round(clamp(source.subtitleSizeSp, 8, 18, DEFAULTS.subtitleSizeSp)),
+            subtitleText: typeof source.subtitleText === 'string'
+                ? source.subtitleText.replace(/[\r\n]+/g, ' ').trim().slice(0, 80)
+                : DEFAULTS.subtitleText
         };
     }
 
@@ -146,13 +156,35 @@
             animation: byId('te-app-start-animation')?.value,
             cropX: byId('te-app-start-crop-x')?.value,
             cropY: byId('te-app-start-crop-y')?.value,
-            cropZoom: Number(byId('te-app-start-crop-zoom')?.value || 100) / 100
+            cropZoom: Number(byId('te-app-start-crop-zoom')?.value || 100) / 100,
+            emblemScalePercent: byId('te-app-start-emblem-scale')?.value,
+            titleSizeSp: byId('te-app-start-title-size')?.value,
+            subtitleSizeSp: byId('te-app-start-subtitle-size')?.value,
+            subtitleText: byId('te-app-start-subtitle-text')?.value
         });
         draft = value;
         const panel = byId('te-app-start-custom-panel');
         if (panel) panel.hidden = value.background !== 'custom';
         fillCropControls(value);
+        fillDisplayControls(value);
         return { ...value };
+    }
+
+    function fillDisplayControls(settings) {
+        const value = normalize(settings);
+        const controls = [
+            ['te-app-start-emblem-scale', 'te-app-start-emblem-scale-value', value.emblemScalePercent, '%'],
+            ['te-app-start-title-size', 'te-app-start-title-size-value', value.titleSizeSp, ' sp'],
+            ['te-app-start-subtitle-size', 'te-app-start-subtitle-size-value', value.subtitleSizeSp, ' sp']
+        ];
+        controls.forEach(([inputId, outputId, number, suffix]) => {
+            const input = byId(inputId);
+            const output = byId(outputId);
+            if (input) input.value = String(number);
+            if (output) output.textContent = String(number) + suffix;
+        });
+        const subtitle = byId('te-app-start-subtitle-text');
+        if (subtitle) subtitle.value = value.subtitleText;
     }
 
     function cropParameters(settings) {
@@ -305,6 +337,7 @@
         if (background) background.value = value.background;
         if (duration) duration.value = value.duration;
         if (animation) animation.value = value.animation;
+        fillDisplayControls(value);
         const panel = byId('te-app-start-custom-panel');
         if (panel) panel.hidden = value.background !== 'custom';
         fillCropControls(value);
@@ -485,7 +518,7 @@
             ? { kind: 'blob', type: source.blob.type, size: source.blob.size }
             : { kind: 'url', url: new URL(source.url, window.location.href).href };
         return JSON.stringify({
-            version: 2,
+            version: 3,
             settings: normalize(settings),
             image
         });
@@ -513,8 +546,8 @@
 
         const ping = await nativeRequest('bridge.ping', {}, 10000);
         const features = Array.isArray(ping?.features) ? ping.features : [];
-        if (!features.includes('splash.settings.v1') || !features.includes('splash.image.v1')) {
-            throw new Error('Diese APK unterstützt die neuen App-Start-Einstellungen noch nicht.');
+        if (!features.includes('splash.settings.v2') || !features.includes('splash.image.v1')) {
+            throw new Error('Diese APK unterstützt die neuen Größen- und Untertitel-Einstellungen noch nicht. Bitte installiere die aktuelle Release-APK.');
         }
 
         const source = preparedSource &&
@@ -548,7 +581,11 @@
         const response = await nativeRequest('splash.settings.save', {
             background: 'custom',
             durationMs: settings.duration === 'auto' ? 0 : Number(settings.duration),
-            animation: settings.animation
+            animation: settings.animation,
+            emblemScalePercent: settings.emblemScalePercent,
+            titleSizeSp: settings.titleSizeSp,
+            subtitleSizeSp: settings.subtitleSizeSp,
+            subtitleText: settings.subtitleText
         }, 20000);
         if (!response || response.type !== 'splash.settings.result' || response.ok !== true) {
             throw new Error(response?.error || 'Android hat die App-Start-Einstellungen nicht bestätigt.');
@@ -593,7 +630,7 @@
         bound = true;
 
         root.addEventListener('change', event => {
-            if (event.target?.matches?.('#te-app-start-background,#te-app-start-duration,#te-app-start-animation')) {
+            if (event.target?.matches?.('#te-app-start-background,#te-app-start-duration,#te-app-start-animation,#te-app-start-emblem-scale,#te-app-start-title-size,#te-app-start-subtitle-size,#te-app-start-subtitle-text')) {
                 const settings = readControls();
                 setStatus('', false);
                 if (event.target.matches('#te-app-start-background')) {
@@ -606,6 +643,9 @@
             if (event.target?.matches?.('#te-app-start-crop-x,#te-app-start-crop-y,#te-app-start-crop-zoom')) {
                 const settings = readControls();
                 drawCurrentCropPreview();
+                setStatus('', false);
+            } else if (event.target?.matches?.('#te-app-start-emblem-scale,#te-app-start-title-size,#te-app-start-subtitle-size,#te-app-start-subtitle-text')) {
+                readControls();
                 setStatus('', false);
             }
         });

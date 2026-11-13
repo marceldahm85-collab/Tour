@@ -2486,6 +2486,34 @@
             </div>
         </div>
 
+        <div class="background-image-position-control">
+            <div class="background-image-position-label">
+                <label for="te-app-start-emblem-scale">Komplettes Emblem – Größe</label>
+                <span id="te-app-start-emblem-scale-value">100 %</span>
+            </div>
+            <input type="range" id="te-app-start-emblem-scale" min="70" max="130" step="1" value="100">
+            <small>Außenring, Lichtaura und App-Symbol werden gemeinsam skaliert.</small>
+        </div>
+
+        <div class="background-image-position-control">
+            <div class="background-image-position-label">
+                <label for="te-app-start-title-size">Schriftzug „BERGTOUREN“ – Größe</label>
+                <span id="te-app-start-title-size-value">20 sp</span>
+            </div>
+            <input type="range" id="te-app-start-title-size" min="14" max="30" step="1" value="20">
+        </div>
+
+        <div class="background-image-position-control">
+            <div class="background-image-position-label">
+                <label for="te-app-start-subtitle-size">Untertitel – Schriftgröße</label>
+                <span id="te-app-start-subtitle-size-value">10 sp</span>
+            </div>
+            <input type="range" id="te-app-start-subtitle-size" min="8" max="18" step="1" value="10">
+        </div>
+
+        <label for="te-app-start-subtitle-text">Untertitel – eigener Text</label>
+        <input type="text" id="te-app-start-subtitle-text" maxlength="80" value="TOUREN  ·  GIPFEL  ·  ERLEBNISSE" placeholder="Eigener Untertitel">
+
         <label for="te-app-start-duration">Präsentationsdauer</label>
         <select id="te-app-start-duration">
             <option value="auto">Automatisch – sobald die App bereit ist</option>
@@ -2571,7 +2599,7 @@
 <script src="./background-image-picker.js?v=8" defer></script>
 <script src="./dashboard-premium-alpine.js?v=38" defer></script>
 <script src="./theme-editor-workflow.js?v=9" defer></script>
-<script src="./app-start-editor.js?v=7" defer></script>
+<script src="./app-start-editor.js?v=8" defer></script>
 <script src="./app-navigation-history.js?v=1" defer></script>
 <script src="./android-gallery-photos.js?v=9" defer></script>
 <script src="./premium-alpine-icons.js?v=3" defer></script>
