@@ -2675,9 +2675,7 @@
             animationProgress = 1;
         }
         animationProgress = Math.max(0, Math.min(1, Number(animationProgress) || 0));
-        const ids = { dist: 'ms-dist-canvas', asc: 'ms-asc-canvas', time: 'ms-time-canvas', peaks: 'ms-peaks-canvas' };
-        const canvas = canvasById(ids[type]);
-        if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
+        if (typeof resizeCanvasToDisplaySize !== 'function') return;
         const ctx = resizeCanvasToDisplaySize(canvas);
         if (!ctx) return;
         const width = logicalSize(canvas).width, height = logicalSize(canvas).height;
