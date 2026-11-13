@@ -34486,12 +34486,36 @@ function updateDevelopmentStatsPage() {
         </section>
     `;
 
-    container.innerHTML = `
-        ${sectionTrend}
-        ${sectionBest}
-        ${sectionHistory}
-        ${sectionActivity}
-    `;
+    /*
+     * Querformat: zwei unabhängige Spalten bleiben erhalten.
+     * Die rechte Spalte enthält nach Entfernung des Tourprofils
+     * ausschließlich den Aktivitätsbereich.
+     * Hochformat: bisherige lineare Reihenfolge.
+     */
+    const isLandscapeMobileLayout =
+        window.matchMedia(
+            '(max-width: 1024px) and (orientation: landscape) and (pointer: coarse)'
+        ).matches;
+
+    if (isLandscapeMobileLayout) {
+        container.innerHTML = `
+            <div class="development-col development-col-left">
+                ${sectionTrend}
+                ${sectionBest}
+                ${sectionHistory}
+            </div>
+            <div class="development-col development-col-right">
+                ${sectionActivity}
+            </div>
+        `;
+    } else {
+        container.innerHTML = `
+            ${sectionTrend}
+            ${sectionBest}
+            ${sectionHistory}
+            ${sectionActivity}
+        `;
+    }
 
     initDevelopmentHistoryControls(container);
     initDevelopmentTrendControls(container);
