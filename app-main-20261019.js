@@ -784,8 +784,8 @@ function getPerformanceValues(entry) {
      * bereits die Gesamtleistung der Tour.
      *
      * Bei Bike & Hike enthalten diese Werte
-     * ebenfalls die Gesamtwerte der Tour; die separaten
-     * bike...-Felder beschreiben nur den darin enthaltenen Radanteil.
+     * ausschließlich den Hike-Anteil; die separaten
+     * bike...-Felder beschreiben die zusätzliche Radaktivität.
      */
     let distance =
         numberValue(entry.strecke);
@@ -4867,7 +4867,7 @@ if (mainTimeField) {
         isBikeTour ? 'none' : '';
 }
 
-    // Hauptfelder sind bei gemischten Touren immer die Gesamtwerte
+    // Bei Bike & Hike sind Hauptfelder und Radfelder getrennte Aktivitäten.
     const distanceLabel =
         document.querySelector('label[for="strecke"]');
 
@@ -4878,11 +4878,15 @@ if (mainTimeField) {
         document.querySelector('label[for="zeit"]');
 
     if (distanceLabel) {
-        distanceLabel.textContent = 'Strecke (km):';
+        distanceLabel.textContent = isBikeAndHike
+            ? 'Hike-Strecke (km):'
+            : 'Strecke (km):';
     }
 
     if (ascentLabel) {
-        ascentLabel.textContent = 'Aufstieg (Hm):';
+        ascentLabel.textContent = isBikeAndHike
+            ? 'Hike-Aufstieg (Hm):'
+            : 'Aufstieg (Hm):';
     }
 
     if (timeLabel) {
@@ -8916,9 +8920,12 @@ function getStructureActivityComponents(entries) {
         if (type === 'bike & hike') {
             const bike = getBikeValues(entry);
 
-            totals.hiking.distance += Math.max(0, mainDistance - (bike.distance || 0));
-            totals.hiking.ascent += Math.max(0, mainAscent - (bike.ascent || 0));
-            totals.hiking.minutes += Math.max(0, mainMinutes - (bike.minutes || 0));
+            // Bike & Hike speichert Hike und Bike als zwei getrennte Aktivitäten.
+            // Die Hauptfelder enthalten ausschließlich den Hike-Anteil;
+            // die separaten bike...-Felder kommen zusätzlich hinzu.
+            totals.hiking.distance += mainDistance;
+            totals.hiking.ascent += mainAscent;
+            totals.hiking.minutes += mainMinutes;
 
             totals.cycling.distance += Math.max(0, bike.distance || 0);
             totals.cycling.ascent += Math.max(0, bike.ascent || 0);
@@ -9219,8 +9226,8 @@ function getBoundedAverage(values) {
  * die im Tourdetail als Absolutwert angezeigt wird.
  *
  * - Radtour: Radstrecke / Radaufstieg / Fahrzeit
- * - Bike & Hike / Hike & Climb: normale Haupt-/Gesamtwerte;
- *   separat gespeicherte Bike-/Climb-Anteile werden NICHT addiert
+ * - Bike & Hike: Hike-Hauptwerte; Bike-Werte bleiben separat
+ * - Hike & Climb: Hauptwerte plus separat ausgewiesener Kletteranteil
  * - alle übrigen Tourarten: normale Hauptwerte
  *
  * Dadurch wird kein Zusatzanteil ein zweites Mal auf einen sichtbaren
