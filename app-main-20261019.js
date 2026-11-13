@@ -9087,6 +9087,7 @@ function renderStructureTypicalTour(tours) {
     ];
 
     return `
+        <div class="stats-structure-typical-method">Median · Min–Max</div>
         <div class="stats-structure-typical-grid">
             ${cards.map(card => `
                 <div class="stats-structure-typical-card">
@@ -9389,7 +9390,6 @@ function updateStats() {
         <section class="stats-structure-section">
             <div class="stats-analysis-title">
                 <span>🎯 Typische Tour</span>
-                <span class="stats-structure-scope">Median · Min–Max</span>
             </div>
             ${renderStructureTypicalTour(typicalTours)}
         </section>
