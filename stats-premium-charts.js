@@ -4,6 +4,8 @@
 (() => {
     'use strict';
 
+    const milestoneIntroFrames = {};
+
     const MONTHS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
     const MONTH_NAMES = ['Jänner', 'Februar', 'März', 'April', 'Mai', 'Juni',
         'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
@@ -287,10 +289,11 @@
             ctx.fillText(unitText, x + valueWidth + gap, 24, Math.max(40, width - 22 - (x + valueWidth + gap)));
 
         } else {
-            ctx.textAlign = 'right';
+            const alignLeft = config.totalAlign === 'left';
+            ctx.textAlign = alignLeft ? 'left' : 'right';
             ctx.fillStyle = palette.primary;
             ctx.font = editorFont(12, 800);
-            ctx.fillText(total || '–', width - 22, 25, Math.max(75, width * .30));
+            ctx.fillText(total || '–', alignLeft ? 22 : width - 22, 25, Math.max(75, width * .30));
         }
 
         if (config.subtitle) {
@@ -2572,30 +2575,106 @@
         return Math.round(value).toLocaleString('de-AT');
     }
 
-    function drawMetalPlaque(ctx, x, y, label, palette, achieved) {
-        const w = Math.max(19, Math.min(32, label.length * 5.2 + 10)), h = 17;
-        ctx.save(); ctx.translate(x, y);
-        ctx.beginPath();
-        ctx.moveTo(-w / 2 + 3, -h / 2); ctx.lineTo(w / 2 - 3, -h / 2);
-        ctx.lineTo(w / 2, -h / 2 + 4); ctx.lineTo(w / 2, h / 2 - 4);
-        ctx.lineTo(w / 2 - 3, h / 2); ctx.lineTo(-w / 2 + 3, h / 2);
-        ctx.lineTo(-w / 2, h / 2 - 4); ctx.lineTo(-w / 2, -h / 2 + 4); ctx.closePath();
+    function drawMilestoneEmblem(ctx, type, x, y, label, palette, achieved) {
+        const w = 42, h = 32;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.globalAlpha = achieved ? 1 : .48;
         const metal = ctx.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2);
-        metal.addColorStop(0, achieved ? '#FFF8E8' : 'rgba(226,236,244,.38)');
-        metal.addColorStop(.24, achieved ? palette.secondary : 'rgba(120,137,151,.32)');
-        metal.addColorStop(.56, achieved ? palette.primary : 'rgba(40,53,66,.5)');
-        metal.addColorStop(1, achieved ? '#596775' : 'rgba(14,24,34,.7)');
-        ctx.fillStyle = metal; ctx.shadowColor = achieved ? 'rgba(0,0,0,.5)' : 'transparent';
-        ctx.shadowBlur = achieved ? 6 : 0; ctx.fill(); ctx.shadowBlur = 0;
-        ctx.strokeStyle = achieved ? 'rgba(255,255,255,.72)' : 'rgba(225,236,245,.25)';
-        ctx.lineWidth = 1; ctx.stroke();
-        ctx.fillStyle = achieved ? '#101923' : 'rgba(230,238,245,.72)';
-        ctx.font = editorFont(6.5, 850); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(label, 0, .5, w - 3);
+        metal.addColorStop(0, '#FFF8E8');
+        metal.addColorStop(.28, palette.secondary);
+        metal.addColorStop(.62, palette.primary);
+        metal.addColorStop(1, '#35434D');
+        ctx.fillStyle = metal;
+        ctx.strokeStyle = achieved ? 'rgba(255,255,255,.88)' : 'rgba(225,236,245,.42)';
+        ctx.lineWidth = 1.1;
+        ctx.shadowColor = achieved ? 'rgba(0,0,0,.48)' : 'transparent';
+        ctx.shadowBlur = achieved ? 6 : 0;
+
+        // Vier eigenständige, kompakte Embleme – der Meilensteinwert sitzt im Symbol.
+        if (type === 'dist') {
+            // Bergschuh: hoher Schaft, gerundete Schuhspitze und kräftige Sohle.
+            ctx.beginPath();
+            ctx.moveTo(-17, -11); ctx.lineTo(-9, -13); ctx.lineTo(-6, -3);
+            ctx.lineTo(0, 1); ctx.lineTo(13, 4); ctx.quadraticCurveTo(19, 6, 19, 11);
+            ctx.lineTo(-18, 11); ctx.quadraticCurveTo(-21, 8, -17, 4);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.shadowBlur = 0;
+            ctx.beginPath(); ctx.moveTo(-18, 7); ctx.lineTo(18, 7);
+            ctx.strokeStyle = 'rgba(20,29,36,.72)'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-7, -8); ctx.lineTo(-2, -1); ctx.lineTo(4, 1);
+            ctx.strokeStyle = 'rgba(255,255,255,.62)'; ctx.lineWidth = 1; ctx.stroke();
+        } else if (type === 'asc') {
+            // Bergsilhouette mit markantem Hauptgipfel und zweitem Grat.
+            ctx.beginPath();
+            ctx.moveTo(-20, 12); ctx.lineTo(-7, -7); ctx.lineTo(-1, 1);
+            ctx.lineTo(7, -14); ctx.lineTo(21, 12); ctx.closePath();
+            ctx.fill(); ctx.stroke();
+            ctx.shadowBlur = 0;
+            ctx.beginPath(); ctx.moveTo(-7, -7); ctx.lineTo(-2, -1); ctx.lineTo(2, -4);
+            ctx.moveTo(7, -14); ctx.lineTo(11, -5); ctx.lineTo(14, -7);
+            ctx.strokeStyle = 'rgba(255,255,255,.76)'; ctx.lineWidth = 1.15; ctx.stroke();
+        } else if (type === 'time') {
+            // Stoppuhr mit Krone und seitlichen Bedienknöpfen.
+            ctx.beginPath(); ctx.roundRect(-4, -16, 8, 5, 2); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-9, -12); ctx.lineTo(-13, -16);
+            ctx.moveTo(9, -12); ctx.lineTo(13, -16); ctx.stroke();
+            ctx.beginPath(); ctx.arc(0, 1, 14, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.shadowBlur = 0;
+            ctx.beginPath(); ctx.moveTo(0, 1); ctx.lineTo(0, -8);
+            ctx.moveTo(0, 1); ctx.lineTo(7, 5);
+            ctx.strokeStyle = 'rgba(255,255,255,.66)'; ctx.lineWidth = 1.15; ctx.stroke();
+        } else {
+            // Gipfelkreuz über einem scharf gezeichneten Berggrat.
+            ctx.beginPath();
+            ctx.moveTo(-20, 12); ctx.lineTo(-7, -3); ctx.lineTo(-1, 3);
+            ctx.lineTo(7, -8); ctx.lineTo(20, 12); ctx.closePath();
+            ctx.fill(); ctx.stroke();
+            ctx.shadowBlur = 0;
+            ctx.beginPath(); ctx.moveTo(7, -20); ctx.lineTo(7, -7);
+            ctx.moveTo(2, -16); ctx.lineTo(12, -16);
+            ctx.strokeStyle = '#FFF8E8'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.stroke();
+        }
+
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#101923';
+        ctx.strokeStyle = 'rgba(255,255,255,.78)';
+        ctx.lineWidth = .55;
+        ctx.font = editorFont(label.length > 5 ? 6.1 : 7, 900);
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.strokeText(label, 0, type === 'time' ? 2 : 4, 34);
+        ctx.fillText(label, 0, type === 'time' ? 2 : 4, 34);
         ctx.restore();
     }
 
-    function drawMilestoneChartPremium(type) {
+    function drawMilestoneChartPremium(type, animationProgress) {
+        const ids = { dist: 'ms-dist-canvas', asc: 'ms-asc-canvas', time: 'ms-time-canvas', peaks: 'ms-peaks-canvas' };
+        const canvas = canvasById(ids[type]);
+        if (!canvas) return;
+        if (animationProgress === undefined) {
+            let reducedMotion = false;
+            try { reducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (_) {}
+            if (!reducedMotion && window.requestAnimationFrame) {
+                if (milestoneIntroFrames[type]) window.cancelAnimationFrame(milestoneIntroFrames[type]);
+                const started = performance.now();
+                let lastFrame = 0;
+                const step = now => {
+                    const progress = Math.min(1, (now - started) / 1050);
+                    if (now - lastFrame >= 30 || progress >= 1) {
+                        lastFrame = now;
+                        drawMilestoneChartPremium(type, progress);
+                    }
+                    if (progress < 1) milestoneIntroFrames[type] = window.requestAnimationFrame(step);
+                    else milestoneIntroFrames[type] = null;
+                };
+                drawMilestoneChartPremium(type, 0);
+                milestoneIntroFrames[type] = window.requestAnimationFrame(step);
+                return;
+            }
+            animationProgress = 1;
+        }
+        animationProgress = Math.max(0, Math.min(1, Number(animationProgress) || 0));
         const ids = { dist: 'ms-dist-canvas', asc: 'ms-asc-canvas', time: 'ms-time-canvas', peaks: 'ms-peaks-canvas' };
         const canvas = canvasById(ids[type]);
         if (!canvas || typeof resizeCanvasToDisplaySize !== 'function') return;
@@ -2623,7 +2702,7 @@
         const years = aggregate ? [keyAll] : timelineYears.slice();
         const bucketCount = aggregate ? timelineYears.length : 12;
         const labels = aggregate ? timelineYears.map(year => timelineYears.length > 6 ? String(year).slice(-2) : String(year)) :
-            ['Jän', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+            ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
 
         const empty = () => {
             ctx.fillStyle = palette.muted; ctx.font = editorFont(11, 650);
@@ -2631,7 +2710,7 @@
             ctx.fillText('Keine Daten · Jahr oder Filter ändern', width / 2, height / 2);
         };
         if (!milestones.length || !years.length || !allData.length || !bucketCount) {
-            drawHeader(ctx, canvas, 'Meilensteine · ' + names[type], '–'); empty(); return;
+            drawHeader(ctx, canvas, 'Meilensteine · ' + names[type], '–', { hideTitle: true, totalAlign: 'left' }); empty(); return;
         }
 
         const getValue = entry => {
@@ -2690,7 +2769,7 @@
         plot.width = Math.max(40, plot.right - plot.left);
         plot.height = Math.max(40, plot.bottom - plot.top);
         drawHeader(ctx, canvas, 'Meilensteine · ' + names[type],
-            formatMilestoneNumber(type, actualMax) + ' ' + units[type]);
+            formatMilestoneNumber(type, actualMax) + ' ' + units[type], { hideTitle: true, totalAlign: 'left' });
 
         // A shared line system, with a distinct material cue per milestone category.
         drawTopographicRelief(ctx, plot, palette, type === 'asc' ? 1 : type === 'peaks' ? .48 : .20);
@@ -2735,7 +2814,7 @@
             ctx.stroke(); ctx.setLineDash([]);
         });
         if (next !== undefined) {
-            drawMetalPlaque(ctx, plot.right - 20, yFor(next) - 10,
+            drawMilestoneEmblem(ctx, type, plot.right - 22, yFor(next) - 12,
                 formatMilestoneNumber(type, next), palette, false);
         }
 
@@ -2763,6 +2842,12 @@
             for (let index = 0; index <= last; index++) {
                 curvePoints.push({ x: xFor(index), y: yFor(values[index]) });
             }
+
+            // Kurve, Fläche und bereits erreichte Embleme werden gemeinsam von links nach rechts freigelegt.
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(plot.left, plot.top, Math.max(0, plot.width * animationProgress), plot.height);
+            ctx.clip();
 
             // Weicher, plastischer Progressionsverlauf statt kantiger Monatssegmente.
             ctx.beginPath();
@@ -2810,7 +2895,8 @@
                 msDotHitTargets[type].push({ x: crossing, y, entry, milestone: target, year });
 
                 // Raised metal plaque anchors each threshold directly to the cumulative line.
-                const plaqueOffset = y - 14 < plot.top + 2 ? 14 : -14;
+                if (crossing > plot.left + plot.width * animationProgress) return;
+                const plaqueOffset = y - 22 < plot.top + 4 ? 22 : -22;
                 const plaqueY = y + plaqueOffset;
                 ctx.beginPath();
                 ctx.moveTo(crossing, y + (plaqueOffset > 0 ? 7 : -7));
@@ -2818,9 +2904,10 @@
                 ctx.strokeStyle = colourWithAlpha(palette.secondary, .78);
                 ctx.lineWidth = 1;
                 ctx.stroke();
-                drawMetalPlaque(ctx, crossing, plaqueY, formatMilestoneNumber(type, target), palette, true);
+                drawMilestoneEmblem(ctx, type, crossing, plaqueY, formatMilestoneNumber(type, target), palette, true);
                 drawMetalMarker(ctx, crossing, y, palette, 4.2);
             });
+            ctx.restore();
         });
 
         // Years in the all-years view stay horizontal and compact rather than rotated.
