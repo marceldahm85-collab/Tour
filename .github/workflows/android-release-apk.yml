@@ -12,6 +12,7 @@ on:
       - "dashboard-premium-alpine.js"
       - "stats-premium-alpine.js"
       - "premium-alpine-photo-motifs.css"
+      - "premium-depth-effects.css"
 
 permissions:
   contents: read
