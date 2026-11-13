@@ -56,19 +56,18 @@
     /* Wiederverwendung derselben Premium-Line-Art in den Diagramm-Kacheln.
        Die Meilenstein-Diagramme verwenden bewusst die identischen Rundgrafiken
        wie die fünf Dashboard-Meilensteine. */
+    /* Die acht regulären Diagrammkacheln verwenden exakt die fünf
+       fotografischen Dashboard-Meilensteinmotive. Die vier MS-Kacheln
+       bleiben separat und unverändert an CHART_TAB_MILESTONE_ICONS gebunden. */
     const CHART_TAB_STAT_MARKS = {
-        bigTours: 'bigTours',
-        steps: 'steps',
-        peaks: 'gipfel',
-        performanceIndex: 'anstieg',
-        speed: 'speed',
-        gradient: 'steigung',
-        ascentRate: 'aufstieg',
-        avgSteps: 'steps',
-        scatterDistanceAscent: 'strecke',
-        scatterTimeAscent: 'timeAscent',
-        scatterTimeDistance: 'timeDistance',
-        regions: 'touren'
+        bigTours: ICON_ASSETS.peaks,
+        steps: ICON_ASSETS.steps,
+        peaks: ICON_ASSETS.peaks,
+        performanceIndex: ICON_ASSETS.asc,
+        speed: ICON_ASSETS.time,
+        gradient: ICON_ASSETS.asc,
+        ascentRate: ICON_ASSETS.asc,
+        avgSteps: ICON_ASSETS.steps
     };
     const CHART_TAB_MILESTONE_ICONS = {
         msDistance: ICON_ASSETS.dist,
@@ -91,10 +90,10 @@
                 icon.innerHTML = '<img class="chart-tab-ms-art" src="' + milestoneSrc +
                     '" alt="" aria-hidden="true" decoding="async" draggable="false">';
             } else {
-                const markKey = CHART_TAB_STAT_MARKS[type];
-                const svg = DASH_STAT_MARKS[markKey];
-                if (!svg) return;
-                icon.innerHTML = svg;
+                const motifSrc = CHART_TAB_STAT_MARKS[type];
+                if (!motifSrc) return;
+                icon.innerHTML = '<img class="chart-tab-alpine-art" src="' + motifSrc +
+                    '" alt="" aria-hidden="true" decoding="async" draggable="false">';
             }
 
             icon.dataset.premiumAlpineChartIcon = type;
