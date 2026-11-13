@@ -13,9 +13,9 @@ function getAssignments(){try{return typeof appStorage!=='undefined'?(appStorage
 function saveAssignments(value){try{if(typeof appStorage!=='undefined')appStorage.set(ASSIGNMENTS_KEY,value);else localStorage.setItem(ASSIGNMENTS_KEY,JSON.stringify(value));}catch(e){console.warn('Gipfelfoto-Zuordnung konnte nicht gespeichert werden.',e);}}
 function getTours(){try{return typeof appStorage!=='undefined'?(appStorage.get('touren')||[]):[];}catch(_){return [];}}
 function normalizeTourDate(value){
- const raw=String(value||'').trim();let m=raw.match(/^(\\d{4})-(\\d{2})-(\\d{2})/);
+ const raw=String(value||'').trim();let m=raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
  if(m)return m[1]+'-'+m[2]+'-'+m[3];
- m=raw.match(/^(\\d{1,2})[.\\/]([0-9]{1,2})[.\\/](\\d{4})$/);
+ m=raw.match(/^(\d{1,2})[.\/]([0-9]{1,2})[.\/](\d{4})$/);
  if(m)return m[3]+'-'+String(m[2]).padStart(2,'0')+'-'+String(m[1]).padStart(2,'0');
  return '';
 }
@@ -50,7 +50,7 @@ async function getPhotoContext(item){
  item._photoContext={status:'loading'};
  try{
   const result=await request('gallery.summit.folder.date',{uri:item.uri},30000);
-  item._photoContext=result.status==='ok'&&/^\\d{4}-\\d{2}-\\d{2}$/.test(result.dateTaken||'')?{status:'ok',dateTaken:result.dateTaken}:{status:result.status||'no_date'};
+  item._photoContext=result.status==='ok'&&/^\d{4}-\d{2}-\d{2}$/.test(result.dateTaken||'')?{status:'ok',dateTaken:result.dateTaken}:{status:result.status||'no_date'};
  }catch(_){item._photoContext={status:'no_date'};}
  return item._photoContext;
 }
