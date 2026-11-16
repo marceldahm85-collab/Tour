@@ -551,9 +551,8 @@
         const section = header.parentElement;
         const opening = section.classList.contains('is-collapsed');
 
-        // Ausschließlich in der Unterseite „Statistik“ gilt das
-        // Einzelauswahl-Verhalten. Die Gipfelansicht bleibt unverändert.
-        if (opening && root.id === 'stats-statistics-page') {
+        // Statistik und Gipfel verwenden jeweils eine exklusive Accordion-Gruppe.
+        if (opening && (root.id === 'stats-statistics-page' || root.id === 'stats-peaks-page')) {
             root.querySelectorAll('.stats-section-collapsible').forEach(other => {
                 if (other !== section && !other.classList.contains('is-collapsed')) {
                     setStatsSectionCollapsed(other, true, true);
@@ -563,7 +562,7 @@
 
         setStatsSectionCollapsed(section, !opening, true);
 
-        if (opening && root.id === 'stats-statistics-page') {
+        if (opening && (root.id === 'stats-statistics-page' || root.id === 'stats-peaks-page')) {
             scrollStatsSectionToTop(root, section);
         }
 
@@ -601,7 +600,7 @@
             },
             {
                 root: document.getElementById('stats-peaks-page'),
-                selector: '#stats-peaks-content > .stats-analysis-section:first-child',
+                selector: '#stats-peaks-content > .stats-analysis-section',
                 scope: 'peaks'
             }
         ];
@@ -629,11 +628,9 @@
                 heading.header.setAttribute('role', 'button');
                 heading.header.setAttribute('tabindex', '0');
 
-                // Die Gipfelstatistik bleibt initial geöffnet; andere neue Bereiche starten wie bisher geschlossen.
+                // Neue Bereiche starten geschlossen; vorhandene Zustände bleiben erhalten.
                 const hasSavedState = Object.prototype.hasOwnProperty.call(state, stateKey);
-                const expanded = hasSavedState
-                    ? state[stateKey] === true
-                    : scope === 'peaks';
+                const expanded = hasSavedState && state[stateKey] === true;
                 setStatsSectionCollapsed(section, !expanded, false);
             });
         });
