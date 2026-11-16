@@ -24,6 +24,7 @@ function assignmentFor(uri){return getAssignments()[uri]||null;}
 function renderAssignmentPanel(item,context){
  const panel=viewer?.querySelector('.summit-gallery-assignment');if(!panel)return;
  const trigger=viewer?.querySelector('[data-peak-trigger]');
+ panel.hidden=true;if(trigger)trigger.setAttribute('aria-expanded','false');
  const caption=viewer?.querySelector('.summit-gallery-photo-caption');
  const setCaption=(name,height)=>{if(!caption)return;if(!name){caption.hidden=true;caption.innerHTML='';return;}caption.innerHTML='<span class="summit-gallery-photo-caption-name">'+esc(name)+'</span>'+(height?'<span class="summit-gallery-photo-caption-height">'+Number(height).toLocaleString('de-AT')+' m</span>':'');caption.hidden=false;};
  const showNote=message=>{setCaption('');panel.innerHTML='<div class="summit-gallery-assignment-note">'+message+'</div>';if(trigger){trigger.classList.remove('has-selection');trigger.setAttribute('aria-label','Gipfel zuordnen');}};
