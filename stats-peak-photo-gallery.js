@@ -23,39 +23,36 @@ function toursForDate(date){return getTours().filter(t=>normalizeTourDate(t?.dat
 function assignmentFor(uri){return getAssignments()[uri]||null;}
 function renderAssignmentPanel(item,context){
  const panel=viewer?.querySelector('.summit-gallery-assignment');if(!panel)return;
+ const trigger=viewer?.querySelector('[data-peak-trigger]');
  const caption=viewer?.querySelector('.summit-gallery-photo-caption');
  const setCaption=(name,height)=>{if(!caption)return;if(!name){caption.hidden=true;caption.innerHTML='';return;}caption.innerHTML='<span class="summit-gallery-photo-caption-name">'+esc(name)+'</span>'+(height?'<span class="summit-gallery-photo-caption-height">'+Number(height).toLocaleString('de-AT')+' m</span>':'');caption.hidden=false;};
+ const showNote=message=>{setCaption('');panel.innerHTML='<div class="summit-gallery-assignment-note">'+message+'</div>';if(trigger){trigger.classList.remove('has-selection');trigger.setAttribute('aria-label','Gipfel zuordnen');}};
  const saved=assignmentFor(item.uri);
- if(context?.status==='loading'){setCaption('');panel.innerHTML='<div class="summit-gallery-assignment-note">Aufnahmedatum wird geprüft …</div>';return;}
- if(context?.status!=='ok'){setCaption('');panel.innerHTML='<div class="summit-gallery-assignment-note">Kein EXIF-Aufnahmedatum vorhanden. Eine automatische Tourzuordnung ist deshalb nicht möglich.</div>';return;}
+ if(context?.status==='loading'){showNote('Aufnahmedatum wird geprüft …');return;}
+ if(context?.status!=='ok'){showNote('Kein EXIF-Aufnahmedatum vorhanden. Eine automatische Tourzuordnung ist deshalb nicht möglich.');return;}
  const matches=toursForDate(context.dateTaken);
- if(matches.length===0){setCaption('');panel.innerHTML='<div class="summit-gallery-assignment-note">Aufnahmedatum '+esc(context.dateTaken)+' · Keine passende Tour gefunden.</div>';return;}
- if(matches.length!==1){setCaption('');panel.innerHTML='<div class="summit-gallery-assignment-note">Für '+esc(context.dateTaken)+' wurden mehrere Touren gefunden. Eine eindeutige Zuordnung ist nicht möglich.</div>';return;}
+ if(matches.length===0){showNote('Keine passende Tour zum Aufnahmedatum gefunden.');return;}
+ if(matches.length!==1){showNote('Für dieses Aufnahmedatum wurden mehrere Touren gefunden. Eine eindeutige Zuordnung ist nicht möglich.');return;}
  const tour=matches[0],peaks=Array.isArray(tour.gipfelDetails)?tour.gipfelDetails:[];
- if(!peaks.length){setCaption('');panel.innerHTML='<div class="summit-gallery-assignment-note">'+esc(tour.tourname||'Tour')+' · Keine Gipfel in dieser Tour hinterlegt.</div>';return;}
+ if(!peaks.length){showNote('Für diese Tour sind keine Gipfel hinterlegt.');return;}
  const selected=saved&&String(saved.tourId||'')===String(tour.id||'')?Number(saved.peakIndex):-1;
  const selectedPeak=selected>=0?peaks[selected]:null;
  const selectedName=selectedPeak?String(selectedPeak.name||'Gipfel '+(selected+1)):'';
  const selectedHeight=selectedPeak?(Number(String(selectedPeak.hoehe||'').replace(/[^0-9]/g,''))||0):0;
  setCaption(selectedPeak?selectedName:'',selectedHeight);
+ if(trigger){trigger.classList.toggle('has-selection',!!selectedPeak);trigger.setAttribute('aria-label',selectedPeak?'Gipfel zugeordnet: '+selectedName+'. Zuordnung ändern':'Gipfel zuordnen');}
  const peakLabel=peak=>{const name=String(peak?.name||'Gipfel'),height=Number(String(peak?.hoehe||'').replace(/[^0-9]/g,''))||0;return name+(height?' · '+height.toLocaleString('de-AT')+' m':'');};
- const currentLabel=selectedPeak?peakLabel(selectedPeak):'Keinem Gipfel zuordnen';
  const options=['<button type="button" class="summit-gallery-peak-option'+(selected<0?' is-selected':'')+'" data-peak-option="">Keinem Gipfel zuordnen</button>'].concat(peaks.map((peak,index)=>
   '<button type="button" class="summit-gallery-peak-option'+(selected===index?' is-selected':'')+'" data-peak-option="'+index+'">'+esc(peakLabel(peak))+'</button>'
  )).join('');
- panel.innerHTML='<div class="summit-gallery-assignment-meta"><strong>'+esc(tour.tourname||'Tour')+'</strong><span>'+esc(context.dateTaken)+'</span></div><button type="button" class="summit-gallery-peak-trigger" data-peak-trigger aria-expanded="false"><span>'+esc(currentLabel)+'</span><span class="summit-gallery-peak-chevron" aria-hidden="true">⌄</span></button><div class="summit-gallery-peak-options" data-peak-options hidden>'+options+'</div>';
+ panel.innerHTML=options;
  const all=getAssignments();
- panel.querySelector('[data-peak-trigger]')?.addEventListener('click',event=>{
-  const list=panel.querySelector('[data-peak-options]'),open=list?.hidden===true;
-  if(list)list.hidden=!open;
-  event.currentTarget.setAttribute('aria-expanded',open?'true':'false');
- });
  panel.querySelectorAll('[data-peak-option]').forEach(button=>button.addEventListener('click',()=>{
   const value=button.dataset.peakOption;
-  if(value===''){delete all[item.uri];saveAssignments(all);renderAssignmentPanel(item,context);return;}
+  if(value===''){delete all[item.uri];saveAssignments(all);panel.hidden=true;trigger?.setAttribute('aria-expanded','false');renderAssignmentPanel(item,context);return;}
   const index=Number(value),peak=peaks[index];if(!peak)return;
   all[item.uri]={tourId:String(tour.id||''),tourDate:context.dateTaken,peakIndex:index,peakName:String(peak.name||''),peakHeight:Number(String(peak.hoehe||'').replace(/[^0-9]/g,''))||0};
-  saveAssignments(all);renderAssignmentPanel(item,context);
+  saveAssignments(all);panel.hidden=true;trigger?.setAttribute('aria-expanded','false');renderAssignmentPanel(item,context);
  }));
 }
 async function getPhotoContext(item){
@@ -104,7 +101,7 @@ async function render(){
 }
 function watchThumbs(el){if(thumbs)thumbs.disconnect();thumbs=new IntersectionObserver(entries=>entries.forEach(e=>{if(!e.isIntersecting)return;thumbs.unobserve(e.target);loadThumb(e.target);}),{rootMargin:'180px 0px'});el.querySelectorAll('[data-thumb]').forEach(img=>thumbs.observe(img));}
 async function loadThumb(img){if(img.dataset.loading==='1'||img.dataset.loaded==='1')return;img.dataset.loading='1';try{const r=await request('gallery.summit.folder.thumbnail',{uri:img.dataset.thumb},30000);if(!img.isConnected)return;if(r.status==='ok'&&r.data){img.src='data:'+(r.mimeType||'image/jpeg')+';base64,'+r.data;img.dataset.loaded='1';img.closest('.summit-gallery-photo')?.classList.add('has-image');}else img.closest('.summit-gallery-photo')?.classList.add('is-unavailable');}catch(_){if(img.isConnected)img.closest('.summit-gallery-photo')?.classList.add('is-unavailable');}finally{img.dataset.loading='0';}}
-function ensureViewer(){if(viewer)return viewer;viewer=document.createElement('div');viewer.className='summit-gallery-viewer';viewer.hidden=true;viewer.innerHTML='<button type="button" class="summit-gallery-viewer-close" aria-label="Schließen">×</button><div class="summit-gallery-viewer-count"></div><div class="summit-gallery-viewer-stage"><img alt=""><div class="summit-gallery-photo-caption" hidden></div></div><div class="summit-gallery-assignment"></div>';document.body.appendChild(viewer);viewer.querySelector('button').addEventListener('click',closeViewer);const stage=viewer.querySelector('.summit-gallery-viewer-stage');let x=0,y=0;stage.addEventListener('touchstart',e=>{const t=e.changedTouches?.[0];if(t){x=t.clientX;y=t.clientY;}},{passive:true});stage.addEventListener('touchend',e=>{const t=e.changedTouches?.[0];if(!t)return;const dx=t.clientX-x,dy=t.clientY-y;if(Math.abs(dx)>58&&Math.abs(dx)>Math.abs(dy)*1.25)showImage(viewerIndex+(dx<0?1:-1));else if(dy>85&&Math.abs(dy)>Math.abs(dx)*1.25)closeViewer();},{passive:true});return viewer;}
+function ensureViewer(){if(viewer)return viewer;viewer=document.createElement('div');viewer.className='summit-gallery-viewer';viewer.hidden=true;viewer.innerHTML='<div class="summit-gallery-viewer-count"></div><div class="summit-gallery-viewer-stage"><img alt=""><div class="summit-gallery-photo-caption" hidden></div></div><div class="summit-gallery-assignment" data-peak-menu hidden></div><button type="button" class="summit-gallery-peak-trigger" data-peak-trigger aria-label="Gipfel zuordnen" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 19 9.2 7.5l3.1 5.1 2.2-3.3L21 19H3Z"/><path d="m8 19 3.1-5.1 2.5 3.2 1.5-2.1L18 19"/></svg></button><button type="button" class="summit-gallery-viewer-close" aria-label="Schließen">×</button>';document.body.appendChild(viewer);viewer.querySelector('.summit-gallery-viewer-close').addEventListener('click',closeViewer);viewer.querySelector('[data-peak-trigger]').addEventListener('click',event=>{const menu=viewer.querySelector('[data-peak-menu]'),open=menu.hidden;menu.hidden=!open;event.currentTarget.setAttribute('aria-expanded',open?'true':'false');});viewer.addEventListener('click',event=>{const menu=viewer.querySelector('[data-peak-menu]'),trigger=viewer.querySelector('[data-peak-trigger]');if(!menu.hidden&&!event.target.closest('[data-peak-menu]')&&!event.target.closest('[data-peak-trigger]')){menu.hidden=true;trigger.setAttribute('aria-expanded','false');}});const stage=viewer.querySelector('.summit-gallery-viewer-stage');let x=0,y=0;stage.addEventListener('touchstart',e=>{const t=e.changedTouches?.[0];if(t){x=t.clientX;y=t.clientY;}},{passive:true});stage.addEventListener('touchend',e=>{const t=e.changedTouches?.[0];if(!t)return;const dx=t.clientX-x,dy=t.clientY-y;if(Math.abs(dx)>58&&Math.abs(dx)>Math.abs(dy)*1.25)showImage(viewerIndex+(dx<0?1:-1));else if(dy>85&&Math.abs(dy)>Math.abs(dx)*1.25)closeViewer();},{passive:true});return viewer;}
 async function showImage(n){if(!images.length)return;viewerIndex=(n+images.length)%images.length;const v=ensureViewer(),img=v.querySelector('img'),count=v.querySelector('.summit-gallery-viewer-count'),item=images[viewerIndex],id=++viewerToken;img.removeAttribute('src');count.textContent=(viewerIndex+1)+' / '+images.length+' · '+item.year;renderAssignmentPanel(item,{status:'loading'});getPhotoContext(item).then(context=>{if(id===viewerToken&&!v.hidden)renderAssignmentPanel(item,context);});try{const r=await request('gallery.summit.folder.full',{uri:item.uri},45000);if(id!==viewerToken||v.hidden)return;if(r.status!=='ok'||!r.data)throw new Error('Foto kann nicht geöffnet werden.');img.src='data:'+(r.mimeType||'image/jpeg')+';base64,'+r.data;}catch(e){if(id===viewerToken)count.textContent=e.message||'Foto nicht verfügbar';}}
 function openViewer(n){if(!images.length)return;const v=ensureViewer();v.hidden=false;document.body.classList.add('summit-gallery-viewer-open');if(!viewerHistory){viewerHistory=true;history.pushState({summitPhotoViewer:true},'');}showImage(n);}
 function closeViewer(){if(!viewer||viewer.hidden)return;const back=viewerHistory;viewerHistory=false;viewerToken++;viewer.hidden=true;document.body.classList.remove('summit-gallery-viewer-open');if(back)history.back();}
