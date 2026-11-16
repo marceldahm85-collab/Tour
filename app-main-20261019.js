@@ -34923,7 +34923,7 @@ function updatePeakStatsPage() {
                 </div>
                 <div class="peak-summary-card">
                     <span class="peak-summary-label">Ø Gipfel / Tour</span>
-                    <span class="peak-summary-value">${formatDecimalAT(peaksPerTour, 1)}</span>
+                    <span class="peak-summary-value">${formatDecimalAT(peaksPerTour, 2)}</span>
                 </div>
                 <div class="peak-summary-card">
                     <span class="peak-summary-label">Ø Gipfelhöhe</span>
@@ -34939,7 +34939,6 @@ function updatePeakStatsPage() {
         <section class="stats-analysis-section">
             <div class="stats-analysis-title">
                 <span>⛰️ Gipfelliste</span>
-                <span style="font-size:9px; opacity:.7;">${statsPeakRowsCache.length}</span>
             </div>
 
             ${paginationHtml}
