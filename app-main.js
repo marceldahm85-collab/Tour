@@ -11480,142 +11480,6 @@ function openRegionRankingModal(data) {
 
 
 
-
-function buildHighlightCompanionRanking(data) {
-    const tourUnits = new Map();
-
-    (Array.isArray(data) ? data : []).forEach((entry, index) => {
-        if (!entry) return;
-
-        const groupName = String(entry.tourGroup || '').trim();
-        const key = groupName
-            ? `group:${groupName}`
-            : (entry.id
-                ? `id:${String(entry.id)}`
-                : tourIdentity(entry, index));
-
-        if (!tourUnits.has(key)) {
-            tourUnits.set(key, {
-                key,
-                groupName,
-                entry,
-                stages: [],
-                companions: new Set()
-            });
-        }
-
-        const unit = tourUnits.get(key);
-        unit.stages.push(entry);
-
-        // Ein Buddy zählt innerhalb einer Tourgruppe nur einmal,
-        // auch wenn sein Name in mehreren Etappen-Notizen vorkommt.
-        extractWrappedTourCompanions(entry.notes).forEach(name => {
-            unit.companions.add(name);
-        });
-    });
-
-    const counts = new Map();
-    const toursByCompanion = new Map();
-
-    tourUnits.forEach(unit => {
-        const tourEntry = unit.groupName
-            ? buildMultidaySummaryEntry(unit.groupName, unit.stages)
-            : unit.entry;
-
-        unit.companions.forEach(name => {
-            counts.set(name, (counts.get(name) || 0) + 1);
-
-            if (!toursByCompanion.has(name)) {
-                toursByCompanion.set(name, []);
-            }
-
-            toursByCompanion.get(name).push(tourEntry);
-        });
-    });
-
-    const ranked = Array.from(counts.entries())
-        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'de'));
-
-    return { ranked, toursByCompanion };
-}
-
-function openCompanionRankingModal(data) {
-    const tlTitle = document.getElementById('tl-title');
-    const tlBody = document.getElementById('tl-body');
-    if (!tlTitle || !tlBody) return;
-
-    const ranking = buildHighlightCompanionRanking(data);
-
-    function renderTopLevel() {
-        tlTitle.textContent = '🤝 Wanderbuddys';
-        tlBody.innerHTML = ranking.ranked.length === 0
-            ? '<ul class="stats-list"><li><span class="stats-label">Keine Wanderbuddys in den Tournotizen gefunden</span></li></ul>'
-            : `<ul class="stats-list">${ranking.ranked.map(([name, count], index) => `
-                <li class="highlight-clickable" data-companion-idx="${index}">
-                    <span class="stats-label">${escapeHtml(name)}</span>
-                    <span class="stats-value">${count}${count === 1 ? ' Tour' : ' Touren'}</span>
-                </li>`).join('')}</ul>`;
-
-        tlBody.querySelectorAll('[data-companion-idx]').forEach(el => {
-            const item = ranking.ranked[Number(el.dataset.companionIdx)];
-            if (!item) return;
-            el.addEventListener('click', () => renderCompanionTours(item[0]));
-        });
-    }
-
-    function renderCompanionTours(name) {
-        const tours = [...(ranking.toursByCompanion.get(name) || [])]
-            .sort((a, b) =>
-                (parseStatsCalendarDate(b.date)?.getTime() || 0) -
-                (parseStatsCalendarDate(a.date)?.getTime() || 0)
-            );
-
-        tlTitle.textContent = `🤝 ${name}`;
-        tlBody.innerHTML = `
-            <button class="save-btn" id="tl-back-companions"
-                style="margin-bottom:12px;padding:5px 14px;font-size:13px;">← Zurück</button>
-            <ul class="stats-list">
-                ${tours.length === 0
-                    ? '<li><span class="stats-label">Keine Touren</span></li>'
-                    : tours.map((entry, index) => `
-                        <li class="highlight-clickable" data-companion-tour-idx="${index}">
-                            <span class="stats-label">${escapeHtml(entry.date || '–')} · ${escapeHtml(entry.tourname || 'Unbekannt')}${entry._isMultidaySummary ? ` · ${entry._stageCount} Etappen` : ''}</span>
-                            <span class="stats-value">${entry.strecke ? formatDecimalAT(entry.strecke) + ' km' : '–'}</span>
-                        </li>`).join('')}
-            </ul>`;
-
-        document.getElementById('tl-back-companions')?.addEventListener('click', renderTopLevel);
-
-        tlBody.querySelectorAll('[data-companion-tour-idx]').forEach(el => {
-            const entry = tours[Number(el.dataset.companionTourIdx)];
-            if (!entry) return;
-
-            el.addEventListener('click', () => {
-                closeTourListModal();
-
-                if (entry._isMultidaySummary) {
-                    openTourGroupModal(entry._tourGroupName, 'saved', 'strecke', {
-                        returnModalId: 'tour-list-modal'
-                    });
-                } else {
-                    openTourDetail(entry, {
-                        returnModalId: 'tour-list-modal'
-                    });
-                }
-            });
-        });
-    }
-
-    renderTopLevel();
-
-    const tourListModal = document.getElementById('tour-list-modal');
-    if (tourListModal) {
-        attachModalSwipeDown(tourListModal, closeTourListModal);
-        tourListModal.classList.remove('hidden');
-        document.body.classList.add('modal-open');
-    }
-}
-
 function openDifficultyRankingModal(data) {
     const tlTitle = document.getElementById('tl-title');
     const tlBody  = document.getElementById('tl-body');
@@ -12518,8 +12382,6 @@ if (
         ? multidayGroupList.reduce((max, g) => (g.totalDist > max.totalDist ? g : max))
         : null;
 
-    const companionRanking = buildHighlightCompanionRanking(data);
-
     const highlights = [
         {
             label: 'Längste Strecke',
@@ -12681,16 +12543,6 @@ if (
             } : null
         },
         {
-            label: 'Häufigster Wanderbuddy',
-            value: companionRanking.ranked.length > 0
-                ? `${companionRanking.ranked[0][0]} · ${companionRanking.ranked[0][1]} ${companionRanking.ranked[0][1] === 1 ? 'Tour' : 'Touren'}`
-                : '–',
-            entry: null,
-            onClick: companionRanking.ranked.length > 0
-                ? () => openCompanionRankingModal(data)
-                : null
-        },
-        {
             label: 'Häufigste Art der Tour',
             value: Object.keys(difficultyCount).length > 0
                 ? Object.entries(difficultyCount).sort((a, b) => b[1] - a[1])[0][0]
@@ -12778,11 +12630,6 @@ const highlightPresentation = {
     'Häufigste Art der Tour': {
         group: 'haeufigkeiten',
         icon: '🎯'
-    },
-
-    'Häufigster Wanderbuddy': {
-        group: 'haeufigkeiten',
-        icon: '🤝'
     }
 };
 
