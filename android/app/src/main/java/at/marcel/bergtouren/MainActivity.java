@@ -164,7 +164,7 @@ public final class MainActivity extends Activity {
         }
     }
 
-    private int activeSystemBarColor = Color.rgb(13, 17, 24);
+    private int activeSystemBarColor = Color.rgb(24, 18, 8);
 
     private void configureSystemBars() {
         applyNativeSystemBars("light");
