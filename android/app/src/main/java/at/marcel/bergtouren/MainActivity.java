@@ -164,19 +164,66 @@ public final class MainActivity extends Activity {
         }
     }
 
-    @SuppressWarnings("deprecation")
-    private void configureSystemBars() {
-        Window window = getWindow();
+    private int activeSystemBarColor = Color.rgb(13, 17, 24);
 
+    private void configureSystemBars() {
+        applyNativeSystemBars("light");
+    }
+
+    /**
+     * Hält beide Android-Systemleisten an das aktive App-Theme gekoppelt.
+     * Die Flächen bleiben dunkel, damit die hellen System-Icons in allen
+     * Themes zuverlässig lesbar sind. Unter Android 11+ sind die Leisten
+     * transparent; der Root-Hintergrund liefert die passende Theme-Farbe.
+     */
+    @SuppressWarnings("deprecation")
+    private void applyNativeSystemBars(String theme) {
+        switch (theme) {
+            case "dark":
+                activeSystemBarColor = Color.rgb(27, 10, 16);
+                break;
+            case "green":
+                activeSystemBarColor = Color.rgb(6, 21, 13);
+                break;
+            case "summit":
+                activeSystemBarColor = Color.rgb(9, 24, 39);
+                break;
+            case "light":
+            default:
+                // Gold ist das helle Theme der Oberfläche, verwendet aber
+                // bewusst eine dunkle alpine Systemleistenbasis.
+                activeSystemBarColor = Color.rgb(13, 17, 24);
+                break;
+        }
+
+        Window window = getWindow();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // Android 15+ erzwingt Edge-to-Edge für Apps mit targetSdk 35+.
-            // Die sicheren Inhaltsabstände werden am Root-Container gesetzt.
+            // Das App-Layout bleibt edge-to-edge. Die WebView selbst erhält
+            // weiterhin Insets über appContent und überdeckt keine Bedienelemente.
             window.setDecorFitsSystemWindows(false);
             window.setStatusBarColor(Color.TRANSPARENT);
             window.setNavigationBarColor(Color.TRANSPARENT);
         } else {
-            window.setStatusBarColor(Color.rgb(11, 15, 20));
-            window.setNavigationBarColor(Color.rgb(11, 15, 20));
+            window.setStatusBarColor(activeSystemBarColor);
+            window.setNavigationBarColor(activeSystemBarColor);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Keine vom System erzwungenen hellen Scrims über den dynamischen Farben.
+            window.setStatusBarContrastEnforced(false);
+            window.setNavigationBarContrastEnforced(false);
+        }
+
+        // Alle Theme-Systemleisten sind dunkel; deshalb bleiben die Android-
+        // Symbole einschließlich Navigationsleisten-Icons hell.
+        View decor = window.getDecorView();
+        int visibility = decor.getSystemUiVisibility();
+        visibility &= ~(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        decor.setSystemUiVisibility(visibility);
+
+        if (root != null) {
+            root.setBackgroundColor(activeSystemBarColor);
         }
     }
 
@@ -539,7 +586,7 @@ public final class MainActivity extends Activity {
 
     private void createWebViewLayout() {
         root = new FrameLayout(this);
-        root.setBackgroundColor(Color.rgb(7, 12, 18));
+        root.setBackgroundColor(activeSystemBarColor);
 
         // Nur der eigentliche App-Inhalt erhält Systemleisten-/Cutout-Insets.
         // Der Splash liegt als separates Root-Overlay darüber und bleibt dadurch
@@ -831,6 +878,9 @@ public final class MainActivity extends Activity {
                                 finishAppStartImageTransfer(replyProxy, requestId);
                             } else if ("splash.image.abort".equals(type)) {
                                 abortAppStartImageTransfer(request, replyProxy, requestId);
+                            } else if ("systemBars.update".equals(type)) {
+                                String activeTheme = request.optString("theme", "light");
+                                runOnUiThread(() -> applyNativeSystemBars(activeTheme));
                             } else if ("haptics.trigger".equals(type)) {
                                 triggerAdaptiveHaptic(request.optString("pattern", ""));
                             } else if ("bridge.ping".equals(type)) {
@@ -857,6 +907,7 @@ public final class MainActivity extends Activity {
                                 features.put("pdf.export.v1");
                                 features.put("backup.file.link.v1");
                                 features.put("haptics.adaptive.v1");
+                                features.put("systemBars.theme.v1");
                                 features.put("splash.hybrid.v1");
                                 features.put("splash.settings.v1");
                                 features.put("splash.settings.v2");
