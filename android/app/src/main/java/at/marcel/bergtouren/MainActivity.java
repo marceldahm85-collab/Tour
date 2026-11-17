@@ -190,9 +190,8 @@ public final class MainActivity extends Activity {
                 break;
             case "light":
             default:
-                // Gold ist das helle Theme der Oberfläche, verwendet aber
-                // bewusst eine dunkle alpine Systemleistenbasis.
-                activeSystemBarColor = Color.rgb(13, 17, 24);
+                // Gold erhält eine warme, dunkle Gold-/Braunbasis.
+                activeSystemBarColor = Color.rgb(24, 18, 8);
                 break;
         }
 
