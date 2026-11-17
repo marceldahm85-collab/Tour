@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#604a1d">
+<meta name="theme-color" content="#ad7d12">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Bergtouren Tracker</title>
@@ -154,31 +154,23 @@
 
 <script>
 /* Sofortige Theme-Wiederherstellung für mobile/PWA-Reloads.
-   Das zuletzt gewählte Theme wird vor DOMContentLoaded wiederhergestellt. */
+   Dieser Code läuft noch vor DOMContentLoaded und vor IndexedDB. */
 (function () {
-    const supportedThemes = ['gold', 'dark', 'green', 'summit'];
-    let savedTheme = 'gold';
-    try {
-        const storedTheme = localStorage.getItem('tourtracker-theme');
-        if (supportedThemes.includes(storedTheme)) savedTheme = storedTheme;
-    } catch (error) {
-        console.warn('[Theme Bootstrap] Gespeichertes Theme konnte nicht gelesen werden:', error);
-    }
-
+    // Ein gemeinsamer dunkler Editor-Modus; alte Theme-Klassen dürfen keine Alt-CSS-Regeln aktivieren.
     document.body.classList.remove('gold', 'dark', 'green', 'summit');
-    document.body.classList.add(savedTheme);
+    document.body.classList.add('gold');
 
+    // Die Android-WebView erhält die Statusleisten-Safe-Area bereits nativ.
+    // Die Android-spezifische CSS-Regel verhindert einen doppelten oberen Abstand.
     if (/Android/i.test(navigator.userAgent || '') && /;\s*wv\)/i.test(navigator.userAgent || '')) {
         document.documentElement.classList.add('android-native-shell');
     }
 
+    // Die App verwendet nur noch den gemeinsamen Editor-Modus.
     try {
-        const storedTheme = localStorage.getItem('tourtracker-theme');
-        if (!supportedThemes.includes(storedTheme)) {
-            localStorage.setItem('tourtracker-theme', savedTheme);
-        }
+        localStorage.setItem('tourtracker-theme', 'gold');
     } catch (error) {
-        console.warn('[Theme Bootstrap] Theme-Initialisierung konnte nicht gespeichert werden:', error);
+        console.warn('[Theme Bootstrap] Vereinheitlichter Modus konnte nicht gespeichert werden:', error);
     }
 })();</script>
 
@@ -2594,16 +2586,16 @@
 </div>
 
 <script src="./android-backup-bridge.js?v=5" defer></script>
-<script src="./app-main-20261019.js?v=114" defer></script>
+<script src="./app-main-20261019.js?v=115" defer></script>
 <script src="./touch-ripple-feedback.js?v=1" defer></script>
 <script src="./stats-premium-charts.js?v=56" defer></script>
 <script src="./native-app-ready.js?v=3" defer></script>
-<script src="./native-system-bars.js?v=3" defer></script>
+<script src="./native-system-bars.js?v=4" defer></script>
 <script src="./more-menu-navigation-fix.js?v=1" defer></script>
 <script src="./osttirol-slide-background.js?v=1" defer></script>
 <script src="./pdf-magazine.js?v=3" defer></script>
 <script src="./stats-premium-alpine.js?v=15" defer></script>
-<script src="./theme-editor-unified.js?v=34" defer></script>
+<script src="./theme-editor-unified.js?v=35" defer></script>
 <script src="./background-image-manager.js?v=15" defer></script>
 <script src="./background-image-picker.js?v=8" defer></script>
 <script src="./dashboard-premium-alpine.js?v=38" defer></script>

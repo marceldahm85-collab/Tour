@@ -1,77 +1,85 @@
-/* Native Android-Systemleisten mit dem tatsächlich aktiven App-Theme synchronisieren. */
+/* Synchronisiert die Android-Systemleisten mit der ersten Akzentfarbe des Editors. */
 (() => {
     'use strict';
-    let lastTheme = '';
-    let pendingTheme = null;
-    let retries = 0;
+    const DEFAULT_ACCENT = '#ad7d12';
+    let lastColor = '';
+    let pendingColor = '';
+    let retryCount = 0;
     let retryScheduled = false;
 
-    function normalizeTheme(theme) {
-        return ['dark', 'green', 'summit'].includes(theme) ? theme : 'light';
+    function normalizeColor(value) {
+        return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value.trim())
+            ? value.trim().toLowerCase()
+            : null;
     }
-    function getActiveTheme() {
-        const body = document.body;
-        const root = document.documentElement;
-        const has = name => !!((body && body.classList.contains(name)) || (root && root.classList.contains(name)));
-        if (has('dark')) return 'dark';
-        if (has('green')) return 'green';
-        if (has('summit')) return 'summit';
-        return 'light';
+    function readActiveAccent() {
+        try {
+            const body = document.body;
+            if (body) {
+                const cssAccent = normalizeColor(getComputedStyle(body).getPropertyValue('--theme-palette-accent').trim());
+                if (cssAccent) return cssAccent;
+            }
+        } catch (_) {}
+        try {
+            const saved = JSON.parse(localStorage.getItem('themeEditorUnifiedSettings_v1') || 'null');
+            const savedAccent = normalizeColor(saved && saved.accent);
+            if (savedAccent) return savedAccent;
+        } catch (_) {}
+        return DEFAULT_ACCENT;
     }
-    function scheduleRetry() {
-        if (retryScheduled || retries >= 40) return;
+    function updateBrowserThemeColor(color) {
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta && meta.getAttribute('content') !== color) meta.setAttribute('content', color);
+    }
+    function scheduleBridgeRetry() {
+        if (retryScheduled || retryCount >= 40) return;
         retryScheduled = true;
-        retries += 1;
+        retryCount += 1;
         window.setTimeout(() => {
             retryScheduled = false;
-            sendTheme(pendingTheme || getActiveTheme());
+            sendColor(pendingColor || readActiveAccent());
         }, 250);
     }
-    function sendTheme(theme) {
-        const normalized = normalizeTheme(theme);
-        pendingTheme = normalized;
+    function sendColor(value) {
+        const color = normalizeColor(value) || DEFAULT_ACCENT;
+        pendingColor = color;
+        updateBrowserThemeColor(color);
         const bridge = window.TourNative;
         if (!bridge || typeof bridge.postMessage !== 'function') {
-            scheduleRetry();
+            scheduleBridgeRetry();
             return false;
         }
-        if (normalized === lastTheme) {
-            pendingTheme = null;
+        if (color === lastColor) {
+            pendingColor = '';
             return true;
         }
         try {
-            bridge.postMessage(JSON.stringify({ type: 'systemBars.update', theme: normalized }));
-            lastTheme = normalized;
-            pendingTheme = null;
-            retries = 0;
+            bridge.postMessage(JSON.stringify({ type: 'systemBars.update', color }));
+            lastColor = color;
+            pendingColor = '';
+            retryCount = 0;
             return true;
         } catch (error) {
-            lastTheme = '';
-            console.warn('[Android] Theme der Systemleisten konnte nicht übertragen werden.', error);
-            scheduleRetry();
+            lastColor = '';
+            console.warn('[Android] Akzentfarbe der Systemleisten konnte nicht übertragen werden.', error);
+            scheduleBridgeRetry();
             return false;
         }
     }
-
-    // Direkter Aufruf aus der zentralen Theme-Funktion; Observer bleibt Fallback.
-    window.syncNativeSystemBarsTheme = sendTheme;
-
-    function syncSystemBars() { sendTheme(getActiveTheme()); }
-    function observeTheme() {
+    window.syncNativeSystemBarsColor = sendColor;
+    function syncSystemBars() { sendColor(readActiveAccent()); }
+    function observeAccent() {
         if (!document.body) return;
-        if (document.body.dataset.nativeSystemBarsObserved !== 'true') {
-            document.body.dataset.nativeSystemBarsObserved = 'true';
+        if (document.body.dataset.nativeSystemBarsAccentObserved !== 'true') {
+            document.body.dataset.nativeSystemBarsAccentObserved = 'true';
             const observer = new MutationObserver(syncSystemBars);
-            observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-            if (document.documentElement) {
-                observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-            }
+            observer.observe(document.body, { attributes: true, attributeFilter: ['style'] });
         }
         syncSystemBars();
         window.addEventListener('load', syncSystemBars);
         window.addEventListener('pageshow', syncSystemBars);
         document.addEventListener('visibilitychange', () => { if (!document.hidden) syncSystemBars(); });
     }
-    if (document.body) observeTheme();
-    else document.addEventListener('DOMContentLoaded', observeTheme, { once: true });
+    if (document.body) observeAccent();
+    else document.addEventListener('DOMContentLoaded', observeAccent, { once: true });
 })();

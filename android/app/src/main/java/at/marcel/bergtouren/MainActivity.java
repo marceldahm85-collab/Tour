@@ -164,76 +164,72 @@ public final class MainActivity extends Activity {
         }
     }
 
-    private int activeSystemBarColor = Color.rgb(96, 74, 29);
-    private String activeSystemBarTheme = "light";
-    // Edge-to-edge ist ausschließlich während des nativen Splashscreens aktiv.
-    // Im normalen Betrieb färbt Android beide Leisten direkt und zuverlässig.
+    private static final String DEFAULT_SYSTEM_BAR_COLOR = "#ad7d12";
+    private int activeSystemBarColor = Color.parseColor(DEFAULT_SYSTEM_BAR_COLOR);
+    private String activeSystemBarColorHex = DEFAULT_SYSTEM_BAR_COLOR;
     private boolean systemBarsEdgeToEdge = true;
 
     private void configureSystemBars() {
-        applyNativeSystemBars("light");
+        applyNativeSystemBars(DEFAULT_SYSTEM_BAR_COLOR);
     }
 
-    /**
-     * Setzt die Theme-Farben nativ und als Root-Hintergrund. Android 15 kann
-     * Edge-to-Edge für targetSdk 35 erzwingen; der Root-Hintergrund füllt dann
-     * die Systemleistenbereiche, während die WebView per Insets geschützt bleibt.
-     */
+    /** Übernimmt die erste Akzentfarbe des App-Editors für beide Systemleisten. */
     @SuppressWarnings("deprecation")
-    private void applyNativeSystemBars(String theme) {
-        activeSystemBarTheme = theme;
-        switch (theme) {
-            case "dark":
-                activeSystemBarColor = Color.rgb(59, 27, 38); // dunkles Rubinrot
-                break;
-            case "green":
-                activeSystemBarColor = Color.rgb(25, 59, 43); // dunkles Waldgrün
-                break;
-            case "summit":
-                activeSystemBarColor = Color.rgb(27, 54, 80); // dunkles Gipfelblau
-                break;
-            case "light":
-            default:
-                activeSystemBarColor = Color.rgb(96, 74, 29); // warmes Goldbraun
-                break;
+    private void applyNativeSystemBars(String colorHex) {
+        String normalizedColor = colorHex == null ? "" : colorHex.trim();
+        if (!normalizedColor.matches("(?i)^#[0-9a-f]{6}$")) {
+            Log.w(TAG, "Ungültige Akzentfarbe für Systemleisten ignoriert: " + colorHex);
+            return;
         }
+        activeSystemBarColorHex = normalizedColor.toLowerCase(java.util.Locale.US);
+        activeSystemBarColor = Color.parseColor(activeSystemBarColorHex);
+        boolean useDarkIcons = shouldUseDarkSystemBarIcons(activeSystemBarColor);
 
         Window window = getWindow();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // Für targetSdk 35 bleibt Edge-to-Edge aktiv. Auf Android-Versionen,
-            // die explizite Leistenfarben noch darstellen, setzen wir zusätzlich
-            // den nativen Farbwert; bei erzwungener Transparenz übernimmt root.
             window.setDecorFitsSystemWindows(false);
             int barColor = systemBarsEdgeToEdge ? Color.TRANSPARENT : activeSystemBarColor;
             window.setStatusBarColor(barColor);
             window.setNavigationBarColor(barColor);
         } else {
-            // Vor Android 11 bleibt die native Systemleistenfläche ebenfalls
-            // explizit eingefärbt; der Splash bleibt dort systemseitig begrenzt.
             window.setStatusBarColor(activeSystemBarColor);
             window.setNavigationBarColor(activeSystemBarColor);
         }
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.setStatusBarContrastEnforced(false);
             window.setNavigationBarContrastEnforced(false);
         }
 
-        // Die gewählten Flächen sind dunkel: Status- und Navigationssymbole
-        // bleiben deshalb unabhängig vom Android-Systemtheme hell.
         View decor = window.getDecorView();
-        int visibility = decor.getSystemUiVisibility();
-        visibility &= ~(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-        decor.setSystemUiVisibility(visibility);
-
-        if (root != null) {
-            root.setBackgroundColor(activeSystemBarColor);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            android.view.WindowInsetsController controller = window.getInsetsController();
+            if (controller != null) {
+                int lightAppearance = android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                        | android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+                controller.setSystemBarsAppearance(useDarkIcons ? lightAppearance : 0, lightAppearance);
+            }
+        } else {
+            int visibility = decor.getSystemUiVisibility();
+            visibility &= ~(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+            if (useDarkIcons) visibility |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+            decor.setSystemUiVisibility(visibility);
         }
+
+        if (root != null) root.setBackgroundColor(activeSystemBarColor);
         configureAppContentInsets();
-        Log.i(TAG, "Systemleisten angewendet: theme=" + activeSystemBarTheme
-                + ", edgeToEdge=" + systemBarsEdgeToEdge
-                + ", color=#" + String.format(java.util.Locale.US, "%06X", 0xFFFFFF & activeSystemBarColor));
+        Log.i(TAG, "Systemleisten an Editor-Akzentfarbe angepasst: color="
+                + activeSystemBarColorHex + ", darkIcons=" + useDarkIcons
+                + ", edgeToEdge=" + systemBarsEdgeToEdge);
+    }
+
+    private boolean shouldUseDarkSystemBarIcons(int color) {
+        double red = Color.red(color) / 255.0;
+        double green = Color.green(color) / 255.0;
+        double blue = Color.blue(color) / 255.0;
+        red = red <= 0.04045 ? red / 12.92 : Math.pow((red + 0.055) / 1.055, 2.4);
+        green = green <= 0.04045 ? green / 12.92 : Math.pow((green + 0.055) / 1.055, 2.4);
+        blue = blue <= 0.04045 ? blue / 12.92 : Math.pow((blue + 0.055) / 1.055, 2.4);
+        return 0.2126 * red + 0.7152 * green + 0.0722 * blue > 0.179;
     }
 
     private void configureAppContentInsets() {
@@ -260,7 +256,7 @@ public final class MainActivity extends Activity {
     private void restoreNormalSystemBarsAfterSplash() {
         if (!systemBarsEdgeToEdge) return;
         systemBarsEdgeToEdge = false;
-        applyNativeSystemBars(activeSystemBarTheme);
+        applyNativeSystemBars(activeSystemBarColorHex);
     }
 
     private void createPremiumSplashOverlay() {
@@ -678,7 +674,7 @@ public final class MainActivity extends Activity {
         createPremiumSplashOverlay();
         // Erst nachdem das Splash-Overlay existiert, wird der transparente
         // Edge-to-Edge-Modus für das Alpenmotiv nochmals eindeutig aktiviert.
-        applyNativeSystemBars(activeSystemBarTheme);
+        applyNativeSystemBars(activeSystemBarColorHex);
 
         setContentView(root);
     }
@@ -916,8 +912,8 @@ public final class MainActivity extends Activity {
                             } else if ("splash.image.abort".equals(type)) {
                                 abortAppStartImageTransfer(request, replyProxy, requestId);
                             } else if ("systemBars.update".equals(type)) {
-                                String activeTheme = request.optString("theme", "light");
-                                runOnUiThread(() -> applyNativeSystemBars(activeTheme));
+                                String accentColor = request.optString("color", DEFAULT_SYSTEM_BAR_COLOR);
+                                runOnUiThread(() -> applyNativeSystemBars(accentColor));
                             } else if ("haptics.trigger".equals(type)) {
                                 triggerAdaptiveHaptic(request.optString("pattern", ""));
                             } else if ("bridge.ping".equals(type)) {

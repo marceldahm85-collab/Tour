@@ -480,6 +480,14 @@
         setImportant(body, '--accent-gradient', accentGradient);
         setImportant(body, '--accent-text-color', accentText);
 
+        // Android-Systemleisten folgen ausschließlich der ersten Editor-Akzentfarbe.
+        // Die zweite Akzentfarbe bleibt Teil der App-Verläufe, nicht der nativen Leisten.
+        const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+        if (themeColorMeta) themeColorMeta.setAttribute('content', accent);
+        if (typeof window.syncNativeSystemBarsColor === 'function') {
+            window.syncNativeSystemBarsColor(accent);
+        }
+
         // Beide Akzentfarben sind global einstellbar; Richtung und Übergangspunkt
         // steuern den Verlauf konsistent auf Flächen und Hauptnavigation.
         const style = document.getElementById('theme-editor-live-style') ||
