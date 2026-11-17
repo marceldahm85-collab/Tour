@@ -175,10 +175,9 @@ public final class MainActivity extends Activity {
     }
 
     /**
-     * Setzt die Systemleisten im normalen Betrieb als echte, opake Android-
-     * Flächen. Transparenz wird nur für das vollflächige native Splashmotiv
-     * verwendet. Damit sind die Farben nicht mehr vom Root-Hintergrund oder
-     * von OEM-spezifischem Edge-to-Edge-Compositing abhängig.
+     * Setzt die Theme-Farben nativ und als Root-Hintergrund. Android 15 kann
+     * Edge-to-Edge für targetSdk 35 erzwingen; der Root-Hintergrund füllt dann
+     * die Systemleistenbereiche, während die WebView per Insets geschützt bleibt.
      */
     @SuppressWarnings("deprecation")
     private void applyNativeSystemBars(String theme) {
@@ -201,7 +200,10 @@ public final class MainActivity extends Activity {
 
         Window window = getWindow();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // Für targetSdk 35 bleibt Edge-to-Edge aktiv. Auf Android-Versionen,\n            // die explizite Leistenfarben noch darstellen, setzen wir zusätzlich\n            // den nativen Farbwert; bei erzwungener Transparenz übernimmt root.\n            window.setDecorFitsSystemWindows(false);
+            // Für targetSdk 35 bleibt Edge-to-Edge aktiv. Auf Android-Versionen,
+            // die explizite Leistenfarben noch darstellen, setzen wir zusätzlich
+            // den nativen Farbwert; bei erzwungener Transparenz übernimmt root.
+            window.setDecorFitsSystemWindows(false);
             int barColor = systemBarsEdgeToEdge ? Color.TRANSPARENT : activeSystemBarColor;
             window.setStatusBarColor(barColor);
             window.setNavigationBarColor(barColor);
