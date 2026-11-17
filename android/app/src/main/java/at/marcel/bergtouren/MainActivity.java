@@ -164,57 +164,61 @@ public final class MainActivity extends Activity {
         }
     }
 
-    private int activeSystemBarColor = Color.rgb(24, 18, 8);
+    private int activeSystemBarColor = Color.rgb(58, 45, 24);
+    private String activeSystemBarTheme = "light";
+    // Edge-to-edge ist ausschließlich während des nativen Splashscreens aktiv.
+    // Im normalen Betrieb färbt Android beide Leisten direkt und zuverlässig.
+    private boolean systemBarsEdgeToEdge = true;
 
     private void configureSystemBars() {
         applyNativeSystemBars("light");
     }
 
     /**
-     * Hält beide Android-Systemleisten an das aktive App-Theme gekoppelt.
-     * Die Flächen bleiben dunkel, damit die hellen System-Icons in allen
-     * Themes zuverlässig lesbar sind. Unter Android 11+ sind die Leisten
-     * transparent; der Root-Hintergrund liefert die passende Theme-Farbe.
+     * Setzt die Systemleisten im normalen Betrieb als echte, opake Android-
+     * Flächen. Transparenz wird nur für das vollflächige native Splashmotiv
+     * verwendet. Damit sind die Farben nicht mehr vom Root-Hintergrund oder
+     * von OEM-spezifischem Edge-to-Edge-Compositing abhängig.
      */
     @SuppressWarnings("deprecation")
     private void applyNativeSystemBars(String theme) {
+        activeSystemBarTheme = theme;
         switch (theme) {
             case "dark":
-                activeSystemBarColor = Color.rgb(27, 10, 16);
+                activeSystemBarColor = Color.rgb(59, 27, 38); // dunkles Rubinrot
                 break;
             case "green":
-                activeSystemBarColor = Color.rgb(6, 21, 13);
+                activeSystemBarColor = Color.rgb(25, 59, 43); // dunkles Waldgrün
                 break;
             case "summit":
-                activeSystemBarColor = Color.rgb(9, 24, 39);
+                activeSystemBarColor = Color.rgb(27, 54, 80); // dunkles Gipfelblau
                 break;
             case "light":
             default:
-                // Gold erhält eine warme, dunkle Gold-/Braunbasis.
-                activeSystemBarColor = Color.rgb(24, 18, 8);
+                activeSystemBarColor = Color.rgb(58, 45, 24); // warmes Goldbraun
                 break;
         }
 
         Window window = getWindow();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // Das App-Layout bleibt edge-to-edge. Die WebView selbst erhält
-            // weiterhin Insets über appContent und überdeckt keine Bedienelemente.
-            window.setDecorFitsSystemWindows(false);
-            window.setStatusBarColor(Color.TRANSPARENT);
-            window.setNavigationBarColor(Color.TRANSPARENT);
+            window.setDecorFitsSystemWindows(!systemBarsEdgeToEdge);
+            int barColor = systemBarsEdgeToEdge ? Color.TRANSPARENT : activeSystemBarColor;
+            window.setStatusBarColor(barColor);
+            window.setNavigationBarColor(barColor);
         } else {
+            // Vor Android 11 bleibt die native Systemleistenfläche ebenfalls
+            // explizit eingefärbt; der Splash bleibt dort systemseitig begrenzt.
             window.setStatusBarColor(activeSystemBarColor);
             window.setNavigationBarColor(activeSystemBarColor);
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // Keine vom System erzwungenen hellen Scrims über den dynamischen Farben.
             window.setStatusBarContrastEnforced(false);
             window.setNavigationBarContrastEnforced(false);
         }
 
-        // Alle Theme-Systemleisten sind dunkel; deshalb bleiben die Android-
-        // Symbole einschließlich Navigationsleisten-Icons hell.
+        // Die gewählten Flächen sind dunkel: Status- und Navigationssymbole
+        // bleiben deshalb unabhängig vom Android-Systemtheme hell.
         View decor = window.getDecorView();
         int visibility = decor.getSystemUiVisibility();
         visibility &= ~(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
@@ -224,6 +228,42 @@ public final class MainActivity extends Activity {
         if (root != null) {
             root.setBackgroundColor(activeSystemBarColor);
         }
+        configureAppContentInsets();
+        Log.i(TAG, "Systemleisten angewendet: theme=" + activeSystemBarTheme
+                + ", edgeToEdge=" + systemBarsEdgeToEdge
+                + ", color=#" + String.format(java.util.Locale.US, "%06X", 0xFFFFFF & activeSystemBarColor));
+    }
+
+    private void configureAppContentInsets() {
+        if (appContent == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return;
+
+        if (systemBarsEdgeToEdge) {
+            appContent.setOnApplyWindowInsetsListener((view, insets) -> {
+                Insets systemBars = insets.getInsets(
+                        WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout()
+                );
+                view.setPadding(
+                        systemBars.left,
+                        systemBars.top,
+                        systemBars.right,
+                        systemBars.bottom
+                );
+                return insets;
+            });
+            appContent.requestApplyInsets();
+        } else {
+            // Bei decorFitsSystemWindows=true übernimmt der Android-Decor die
+            // Safe-Area. Eine zusätzliche WebView-Padding-Regel würde doppeln.
+            appContent.setOnApplyWindowInsetsListener(null);
+            appContent.setPadding(0, 0, 0, 0);
+            appContent.requestApplyInsets();
+        }
+    }
+
+    private void restoreNormalSystemBarsAfterSplash() {
+        if (!systemBarsEdgeToEdge) return;
+        systemBarsEdgeToEdge = false;
+        applyNativeSystemBars(activeSystemBarTheme);
     }
 
     private void createPremiumSplashOverlay() {
@@ -525,6 +565,7 @@ public final class MainActivity extends Activity {
             overlay.setAlpha(0f);
             if (root != null) root.removeView(overlay);
             if (premiumSplashOverlay == overlay) premiumSplashOverlay = null;
+            restoreNormalSystemBarsAfterSplash();
             return;
         }
 
@@ -535,6 +576,7 @@ public final class MainActivity extends Activity {
                 .withEndAction(() -> {
                     if (root != null) root.removeView(overlay);
                     if (premiumSplashOverlay == overlay) premiumSplashOverlay = null;
+                    restoreNormalSystemBarsAfterSplash();
                 })
                 .start();
     }
@@ -596,21 +638,6 @@ public final class MainActivity extends Activity {
                 ViewGroup.LayoutParams.MATCH_PARENT
         ));
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            appContent.setOnApplyWindowInsetsListener((view, insets) -> {
-                Insets systemBars = insets.getInsets(
-                        WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout()
-                );
-                view.setPadding(
-                        systemBars.left,
-                        systemBars.top,
-                        systemBars.right,
-                        systemBars.bottom
-                );
-                return insets;
-            });
-        }
-
         webView = new WebView(this);
         webView.setLayoutParams(new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -641,6 +668,9 @@ public final class MainActivity extends Activity {
         // Das native Splash-Overlay wird zuletzt angelegt und verdeckt den noch
         // ladenden WebView-Inhalt bis app.ready oder zum Sicherheits-Fallback.
         createPremiumSplashOverlay();
+        // Erst nachdem das Splash-Overlay existiert, wird der transparente
+        // Edge-to-Edge-Modus für das Alpenmotiv nochmals eindeutig aktiviert.
+        applyNativeSystemBars(activeSystemBarTheme);
 
         setContentView(root);
     }
