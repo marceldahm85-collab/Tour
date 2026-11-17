@@ -94,6 +94,7 @@ jobs:
           node --check theme-editor-workflow.js
           node --check app-start-editor.js
           node --check native-system-bars.js
+          node --check native-app-ready.js
 
       - name: Assemble signed release APK
         run: ./android/gradlew --no-daemon --stacktrace -p android :app:assembleRelease
@@ -129,7 +130,7 @@ jobs:
             echo "## Bergtouren Android — Release APK"
             echo
             echo "- Package: at.marcel.bergtouren"
-            echo "- Version: 0.8.3 (28)"
+            echo "- Version: 0.8.4 (29)"
             echo "- Build type: signed, non-debuggable Release"
             echo "- Artifact: bergtouren-release.apk"
             echo

@@ -472,6 +472,17 @@ public final class MainActivity extends Activity {
         ));
         premiumSplashOverlay = overlay;
 
+        // Sicherheits-Fallback: Auch wenn die WebView-Bridge oder die App-
+        // Initialisierung ausnahmsweise ausfällt, dürfen Splash und transparente
+        // Systemleisten nicht dauerhaft sichtbar bleiben. Die konfigurierte
+        // Mindestdauer wird in hidePremiumSplashOverlay() weiterhin respektiert.
+        mainHandler.postDelayed(() -> {
+            if (premiumSplashOverlay == overlay && !premiumSplashHiding) {
+                Log.w(TAG, "Native Splash-Sicherheitsfallback aktiviert.");
+                hidePremiumSplashOverlay();
+            }
+        }, 15000L);
+
         // Animationseinstellungen aus dem Editor bleiben vollständig nativ.
         if (ValueAnimator.areAnimatorsEnabled() && !"off".equals(splashAnimation)) {
             overlay.setAlpha(0f);

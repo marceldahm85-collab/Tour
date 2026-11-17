@@ -56,15 +56,25 @@
         const elapsed = performance.now() - BOOT_STARTED_AT;
         await delay(Math.max(0, introMinimum - elapsed));
 
-        try {
-            const bridge = window.TourNative;
-            if (bridge && typeof bridge.postMessage === 'function' &&
-                !window.__nativeAppReadySent) {
-                bridge.postMessage(JSON.stringify({ type: 'app.ready' }));
-                window.__nativeAppReadySent = true;
+        // Die Bridge kann bei einzelnen WebView-Versionen etwas später
+        // verfügbar sein. Mehrfach versuchen statt den Splash dauerhaft stehen
+        // zu lassen; zusätzlich existiert ein nativer 15-Sekunden-Fallback.
+        for (let attempt = 0; attempt < 20 && !window.__nativeAppReadySent; attempt += 1) {
+            try {
+                const bridge = window.TourNative;
+                if (bridge && typeof bridge.postMessage === 'function') {
+                    bridge.postMessage(JSON.stringify({ type: 'app.ready' }));
+                    window.__nativeAppReadySent = true;
+                    break;
+                }
+            } catch (error) {
+                console.warn('[Android] App-Bereitschaft konnte noch nicht gemeldet werden.', error);
             }
-        } catch (error) {
-            console.warn('[Android] App-Bereitschaft konnte nicht gemeldet werden.', error);
+            await delay(250);
+        }
+
+        if (!window.__nativeAppReadySent) {
+            console.warn('[Android] Native Bridge blieb beim Start nicht erreichbar; der native Sicherheitsfallback übernimmt.');
         }
     }
 
@@ -77,11 +87,11 @@
         const initialization = originalInitStorage.apply(this, args);
 
         return Promise.resolve(initialization).then(result => {
-            const bridge = window.TourNative;
-            if (bridge && typeof bridge.postMessage === 'function' && !readyScheduled) {
+            if (!readyScheduled) {
                 readyScheduled = true;
                 // Do not await this task here: the main app's own
                 // "await initStorage()" continuation must finish first.
+                // finishNativeStartup retries the bridge if necessary.
                 window.setTimeout(() => {
                     finishNativeStartup().catch(error => {
                         console.warn('[Android] Startsequenz konnte nicht abgeschlossen werden.', error);
