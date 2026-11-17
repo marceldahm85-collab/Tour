@@ -201,7 +201,7 @@ public final class MainActivity extends Activity {
 
         Window window = getWindow();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.setDecorFitsSystemWindows(!systemBarsEdgeToEdge);
+            // Für targetSdk 35 bleibt Edge-to-Edge aktiv. Auf Android-Versionen,\n            // die explizite Leistenfarben noch darstellen, setzen wir zusätzlich\n            // den nativen Farbwert; bei erzwungener Transparenz übernimmt root.\n            window.setDecorFitsSystemWindows(false);
             int barColor = systemBarsEdgeToEdge ? Color.TRANSPARENT : activeSystemBarColor;
             window.setStatusBarColor(barColor);
             window.setNavigationBarColor(barColor);
@@ -237,27 +237,22 @@ public final class MainActivity extends Activity {
     private void configureAppContentInsets() {
         if (appContent == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return;
 
-        if (systemBarsEdgeToEdge) {
-            appContent.setOnApplyWindowInsetsListener((view, insets) -> {
-                Insets systemBars = insets.getInsets(
-                        WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout()
-                );
-                view.setPadding(
-                        systemBars.left,
-                        systemBars.top,
-                        systemBars.right,
-                        systemBars.bottom
-                );
-                return insets;
-            });
-            appContent.requestApplyInsets();
-        } else {
-            // Bei decorFitsSystemWindows=true übernimmt der Android-Decor die
-            // Safe-Area. Eine zusätzliche WebView-Padding-Regel würde doppeln.
-            appContent.setOnApplyWindowInsetsListener(null);
-            appContent.setPadding(0, 0, 0, 0);
-            appContent.requestApplyInsets();
-        }
+        // Android 15 erzwingt Edge-to-Edge für targetSdk 35. Deshalb bleibt
+        // die Insets-Behandlung auch nach dem Splash aktiv: Der Root-Hintergrund
+        // füllt die Systemleistenbereiche, die WebView bleibt sicher eingerückt.
+        appContent.setOnApplyWindowInsetsListener((view, insets) -> {
+            Insets systemBars = insets.getInsets(
+                    WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout()
+            );
+            view.setPadding(
+                    systemBars.left,
+                    systemBars.top,
+                    systemBars.right,
+                    systemBars.bottom
+            );
+            return insets;
+        });
+        appContent.requestApplyInsets();
     }
 
     private void restoreNormalSystemBarsAfterSplash() {
