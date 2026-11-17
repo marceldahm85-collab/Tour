@@ -164,7 +164,7 @@ public final class MainActivity extends Activity {
         }
     }
 
-    private int activeSystemBarColor = Color.rgb(58, 45, 24);
+    private int activeSystemBarColor = Color.rgb(96, 74, 29);
     private String activeSystemBarTheme = "light";
     // Edge-to-edge ist ausschließlich während des nativen Splashscreens aktiv.
     // Im normalen Betrieb färbt Android beide Leisten direkt und zuverlässig.
@@ -194,7 +194,7 @@ public final class MainActivity extends Activity {
                 break;
             case "light":
             default:
-                activeSystemBarColor = Color.rgb(58, 45, 24); // warmes Goldbraun
+                activeSystemBarColor = Color.rgb(96, 74, 29); // warmes Goldbraun
                 break;
         }
 

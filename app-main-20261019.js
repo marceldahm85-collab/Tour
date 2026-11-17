@@ -3145,8 +3145,8 @@ async function restoreLinkedFileHandleOnStartup() {
                 }
 
                 const importedTheme = payload?.meta?.theme;
-                const fileTheme = 'gold';
-                const validThemes = ['gold'];
+                const validThemes = ['gold', 'dark', 'green', 'summit'];
+                const fileTheme = validThemes.includes(importedTheme) ? importedTheme : 'gold';
 
                 if (payload?.meta?.themeEditorSettings) {
                     appStorage.set(THEME_EDITOR_KEY, payload.meta.themeEditorSettings);
@@ -24546,7 +24546,7 @@ function initTheme() {
         document.querySelectorAll('[data-theme-choice]')
     );
 
-    const THEMES = ['gold'];
+    const THEMES = ['gold', 'dark', 'green', 'summit'];
 
     const ICONS = {
         gold: '🟡',
@@ -24639,6 +24639,11 @@ if (
 
         if (typeof applyThemeEditorSettingsToDom === 'function') {
             applyThemeEditorSettingsToDom();
+        }
+
+        // Den Theme-Wechsel sofort an Android melden; der Observer bleibt Fallback.
+        if (typeof window.syncNativeSystemBarsTheme === 'function') {
+            window.syncNativeSystemBarsTheme(theme);
         }
     }
 

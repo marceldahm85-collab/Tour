@@ -1,95 +1,77 @@
-/* Robuste Synchronisierung des App-Themes mit den nativen Android-Systemleisten. */
+/* Native Android-Systemleisten mit dem tatsächlich aktiven App-Theme synchronisieren. */
 (() => {
     'use strict';
-
     let lastTheme = '';
-    let bridgeRetryCount = 0;
+    let pendingTheme = null;
+    let retries = 0;
     let retryScheduled = false;
 
+    function normalizeTheme(theme) {
+        return ['dark', 'green', 'summit'].includes(theme) ? theme : 'light';
+    }
     function getActiveTheme() {
         const body = document.body;
         const root = document.documentElement;
-        const has = name => !!(
-            (body && body.classList.contains(name)) ||
-            (root && root.classList.contains(name))
-        );
-
+        const has = name => !!((body && body.classList.contains(name)) || (root && root.classList.contains(name)));
         if (has('dark')) return 'dark';
         if (has('green')) return 'green';
         if (has('summit')) return 'summit';
-        // Die aktuelle einheitliche Oberfläche verwendet Gold als Basis.
         return 'light';
     }
-
-    function scheduleBridgeRetry() {
-        if (retryScheduled || bridgeRetryCount >= 20) return;
+    function scheduleRetry() {
+        if (retryScheduled || retries >= 40) return;
         retryScheduled = true;
-        bridgeRetryCount += 1;
+        retries += 1;
         window.setTimeout(() => {
             retryScheduled = false;
-            syncSystemBars();
+            sendTheme(pendingTheme || getActiveTheme());
         }, 250);
     }
-
-    function syncSystemBars() {
-        // Die Bridge bewusst bei jedem Aufruf neu lesen. So führt ein später
-        // verfügbarer WebMessageListener nicht zu einem dauerhaft toten Sync.
+    function sendTheme(theme) {
+        const normalized = normalizeTheme(theme);
+        pendingTheme = normalized;
         const bridge = window.TourNative;
         if (!bridge || typeof bridge.postMessage !== 'function') {
-            scheduleBridgeRetry();
-            return;
+            scheduleRetry();
+            return false;
         }
-
-        const theme = getActiveTheme();
-        if (theme === lastTheme) return;
-
+        if (normalized === lastTheme) {
+            pendingTheme = null;
+            return true;
+        }
         try {
-            bridge.postMessage(JSON.stringify({
-                type: 'systemBars.update',
-                theme
-            }));
-            lastTheme = theme;
-            bridgeRetryCount = 0;
+            bridge.postMessage(JSON.stringify({ type: 'systemBars.update', theme: normalized }));
+            lastTheme = normalized;
+            pendingTheme = null;
+            retries = 0;
+            return true;
         } catch (error) {
             lastTheme = '';
             console.warn('[Android] Theme der Systemleisten konnte nicht übertragen werden.', error);
-            scheduleBridgeRetry();
+            scheduleRetry();
+            return false;
         }
     }
 
-    function observeTheme() {
-        if (!document.body) {
-            scheduleBridgeRetry();
-            return;
-        }
+    // Direkter Aufruf aus der zentralen Theme-Funktion; Observer bleibt Fallback.
+    window.syncNativeSystemBarsTheme = sendTheme;
 
+    function syncSystemBars() { sendTheme(getActiveTheme()); }
+    function observeTheme() {
+        if (!document.body) return;
         if (document.body.dataset.nativeSystemBarsObserved !== 'true') {
             document.body.dataset.nativeSystemBarsObserved = 'true';
             const observer = new MutationObserver(syncSystemBars);
-            observer.observe(document.body, {
-                attributes: true,
-                attributeFilter: ['class']
-            });
-
+            observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
             if (document.documentElement) {
-                observer.observe(document.documentElement, {
-                    attributes: true,
-                    attributeFilter: ['class']
-                });
+                observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
             }
         }
-
         syncSystemBars();
         window.addEventListener('load', syncSystemBars);
         window.addEventListener('pageshow', syncSystemBars);
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) syncSystemBars();
-        });
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) syncSystemBars(); });
     }
-
-    if (document.body) {
-        observeTheme();
-    } else {
-        document.addEventListener('DOMContentLoaded', observeTheme, { once: true });
-    }
+    if (document.body) observeTheme();
+    else document.addEventListener('DOMContentLoaded', observeTheme, { once: true });
 })();
