@@ -29691,8 +29691,9 @@ bodyEl.querySelectorAll('[data-peak-min]').forEach(el => {
                 showDashAscentStory(ascentTotal, tours, title);
             } else if (type === 'gehzeit') {
                 const timeTotalMinutes = tours.reduce((sum, entry) => {
-                    if (!entry?.date || !/^\\d{1,4}:[0-5]\\d$/.test(String(entry.zeit || '').trim())) return sum;
-                    const [hours, minutes] = String(entry.zeit).trim().split(':').map(Number);
+                    if (!entry?.date || !entry.zeit || !String(entry.zeit).includes(':')) return sum;
+                    const [hours, minutes] = String(entry.zeit).split(':').map(Number);
+                    if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return sum;
                     return sum + hours * 60 + minutes;
                 }, 0);
                 showDashTimeStory(timeTotalMinutes, tours, title);
