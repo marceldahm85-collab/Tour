@@ -392,3 +392,20 @@
 #dash-stat-modal[data-dashboard-stat-type="aufstieg"] #dashboard-ascent-grossglockner-value,
 #dash-stat-modal[data-dashboard-stat-type="aufstieg"] #dashboard-ascent-everest-value { font-variant-numeric:tabular-nums; }
 #dash-stat-modal[data-dashboard-stat-type="aufstieg"] .dashboard-ascent-personal { margin:0; padding:2px 4px 4px; color:rgba(255,255,255,.92); font-size:13px; line-height:1.55; text-align:center; }
+
+/* Gesamtstrecke: Jahreswert oberhalb der Osttirol-Umrundung. */
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-distance-story { display:flex; flex-direction:column; gap:12px; min-width:0; }
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-distance-total {
+    padding:16px 12px 17px; border:1px solid color-mix(in srgb,var(--theme-palette-accent,#d5a64c) 42%,rgba(255,255,255,.28));
+    border-radius:var(--editor-radius,var(--app-radius,14px)) !important; background:linear-gradient(145deg,rgba(255,255,255,.15),rgba(8,17,26,.30));
+    -webkit-backdrop-filter:blur(13px) saturate(128%); backdrop-filter:blur(13px) saturate(128%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 5px 13px rgba(0,0,0,.13); text-align:center;
+}
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-distance-total-title { color:rgba(255,255,255,.94); font-size:13px; font-weight:800; letter-spacing:.045em; text-transform:uppercase; }
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-distance-total-value {
+    display:flex; align-items:baseline; justify-content:center; gap:7px; margin-top:7px; color:#fff;
+    font-size:clamp(36px,9.5vw,49px); font-weight:900; line-height:1.05; letter-spacing:-.035em;
+    text-shadow:0 3px 14px rgba(0,0,0,.35); font-variant-numeric:tabular-nums;
+}
+#dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-distance-total-unit { color:var(--theme-palette-accent,#d5a64c); font-size:17px; font-weight:800; letter-spacing:0; }
+#dash-stat-modal[data-dashboard-stat-type="strecke"] #dashboard-distance-total-value { font-variant-numeric:tabular-nums; }
