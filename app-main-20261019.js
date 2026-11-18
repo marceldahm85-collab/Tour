@@ -29733,6 +29733,13 @@ function showDashDistanceStory(distance, allTours, backTitle) {
             ← Zurück
         </button>
         <div class="dashboard-distance-story">
+            <section class="dashboard-distance-total" aria-label="Jahresgesamtstrecke">
+                <div class="dashboard-distance-total-title">Deine Gesamtstrecke</div>
+                <div class="dashboard-distance-total-value">
+                    <span id="dashboard-distance-total-value" data-target="${safeDistance.toFixed(1)}">0,0</span>
+                    <span class="dashboard-distance-total-unit">km</span>
+                </div>
+            </section>
             <section class="dashboard-distance-loop" aria-label="Umrundung Osttirols">
                 <div class="dashboard-distance-loop-title">Einmal rund um Osttirol</div>
                 <svg class="dashboard-distance-map"
@@ -29862,10 +29869,13 @@ function startDashboardDistanceStoryAnimations() {
     const marker = document.getElementById('dashboard-distance-trace-marker');
     const lapsValue = document.getElementById('dashboard-distance-laps');
     const comparisonValue = document.getElementById('dashboard-distance-comparison-value');
-    if (!trace || !marker || !lapsValue || !comparisonValue) return;
+    const totalValue = document.getElementById('dashboard-distance-total-value');
+    if (!trace || !marker || !lapsValue || !comparisonValue || !totalValue) return;
 
+    const totalTarget = Math.max(0, Number(totalValue.dataset.target) || 0);
     const lapsTarget = Math.max(0, Number(lapsValue.dataset.target) || 0);
     const comparisonTarget = Math.max(0, Number(comparisonValue.dataset.target) || 0);
+    const formatTotal = value => value.toLocaleString('de-AT', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
     const mapDuration = 5200;
     const numberDuration = 2200;
     let pathLength = 0;
@@ -29875,6 +29885,7 @@ function startDashboardDistanceStoryAnimations() {
         trace.style.strokeDasharray = 'none';
         trace.style.strokeDashoffset = '0';
         marker.setAttribute('opacity', '0');
+        totalValue.textContent = formatTotal(totalTarget);
         lapsValue.textContent = lapsTarget.toFixed(2).replace('.', ',');
         comparisonValue.textContent = comparisonTarget.toFixed(2).replace('.', ',');
         return;
@@ -29890,13 +29901,14 @@ function startDashboardDistanceStoryAnimations() {
     const startTime = performance.now();
     const easeOut = value => 1 - Math.pow(1 - value, 3);
     const tick = now => {
-        if (!trace.isConnected || !lapsValue.isConnected || !comparisonValue.isConnected) return;
+        if (!trace.isConnected || !totalValue.isConnected || !lapsValue.isConnected || !comparisonValue.isConnected) return;
         const elapsed = Math.max(0, now - startTime);
         const mapProgress = Math.min(1, elapsed / mapDuration);
         const numberProgress = Math.min(1, elapsed / numberDuration);
         const easedMap = easeOut(mapProgress);
         const easedNumbers = easeOut(numberProgress);
 
+        totalValue.textContent = formatTotal(totalTarget * easedNumbers);
         trace.style.strokeDashoffset = String(pathLength * (1 - easedMap));
         const point = trace.getPointAtLength(pathLength * easedMap);
         marker.setAttribute('cx', point.x.toFixed(2));
@@ -29910,6 +29922,7 @@ function startDashboardDistanceStoryAnimations() {
         } else {
             trace.style.strokeDashoffset = '0';
             marker.setAttribute('opacity', '0');
+            totalValue.textContent = formatTotal(totalTarget);
             lapsValue.textContent = lapsTarget.toFixed(2).replace('.', ',');
             comparisonValue.textContent = comparisonTarget.toFixed(2).replace('.', ',');
         }
