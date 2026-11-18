@@ -29891,13 +29891,6 @@ function showDashTimeStory(totalMinutes, allTours, backTitle) {
 
     const safeMinutes = Math.max(0, Math.round(Number(totalMinutes) || 0));
     const totalDays = safeMinutes / (24 * 60);
-    const formatDuration = minutes => {
-        const wholeMinutes = Math.max(0, Math.round(minutes));
-        const hours = Math.floor(wholeMinutes / 60);
-        const remainder = wholeMinutes % 60;
-        return hours.toLocaleString('de-AT') + ':' + String(remainder).padStart(2, '0');
-    };
-
     titleEl.textContent = backTitle + ' · Gehzeit';
     bodyEl.innerHTML = `
         <button class="save-btn" id="ds-back" style="margin-bottom:12px;padding:5px 14px;font-size:13px;">← Zurück</button>
