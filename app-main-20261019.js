@@ -29213,6 +29213,12 @@ window.__bergTourenHandleDashStatHistoryPop = function (state) {
                 savedView.tours,
                 savedView.backTitle
             );
+        } else if (savedView?.kind === 'time-story') {
+            showDashTimeStory(
+                savedView.totalMinutes,
+                savedView.tours,
+                savedView.backTitle
+            );
         } else if (dashboardStatOverviewContext) {
             openDashStatModal(
                 dashboardStatOverviewContext.type,
@@ -29683,6 +29689,13 @@ bodyEl.querySelectorAll('[data-peak-min]').forEach(el => {
                     return sum + (value > 0 && entry.date ? value : 0);
                 }, 0);
                 showDashAscentStory(ascentTotal, tours, title);
+            } else if (type === 'gehzeit') {
+                const timeTotalMinutes = tours.reduce((sum, entry) => {
+                    if (!entry?.date || !/^\\d{1,4}:[0-5]\\d$/.test(String(entry.zeit || '').trim())) return sum;
+                    const [hours, minutes] = String(entry.zeit).trim().split(':').map(Number);
+                    return sum + hours * 60 + minutes;
+                }, 0);
+                showDashTimeStory(timeTotalMinutes, tours, title);
             } else {
                 showDashAllSorted(type, tours, title);
             }
@@ -29858,6 +29871,96 @@ function startDashboardAscentStoryAnimations() {
         totalValue.textContent = Math.round(totalTarget * eased).toLocaleString('de-AT');
         grossglocknerValue.textContent = formatFactor(grossglocknerTarget * eased);
         everestValue.textContent = formatFactor(everestTarget * eased);
+        if (progress < 1) requestAnimationFrame(tick);
+        else setFinalValues();
+    };
+    requestAnimationFrame(tick);
+}
+
+function showDashTimeStory(totalMinutes, allTours, backTitle) {
+    const titleEl = document.getElementById('ds-title');
+    const bodyEl = document.getElementById('ds-body');
+    if (!titleEl || !bodyEl) return;
+
+    pushDashboardStatSubviewHistory('time-story', {
+        totalMinutes,
+        tours: allTours,
+        backTitle
+    });
+
+    const safeMinutes = Math.max(0, Math.round(Number(totalMinutes) || 0));
+    const totalDays = safeMinutes / (24 * 60);
+    const formatDuration = minutes => {
+        const wholeMinutes = Math.max(0, Math.round(minutes));
+        const hours = Math.floor(wholeMinutes / 60);
+        const remainder = wholeMinutes % 60;
+        return hours.toLocaleString('de-AT') + ':' + String(remainder).padStart(2, '0');
+    };
+
+    titleEl.textContent = backTitle + ' · Gehzeit';
+    bodyEl.innerHTML = `
+        <button class="save-btn" id="ds-back" style="margin-bottom:12px;padding:5px 14px;font-size:13px;">← Zurück</button>
+        <div class="dashboard-time-story">
+            <section class="dashboard-time-total" aria-label="Jahresgesamtgehzeit">
+                <div class="dashboard-time-total-title">Deine gesamte Gehzeit</div>
+                <div class="dashboard-time-total-value">
+                    <span id="dashboard-time-total-value" data-target-minutes="${safeMinutes}">00:00</span>
+                    <span class="dashboard-time-total-unit">h</span>
+                </div>
+            </section>
+            <section class="dashboard-time-days" aria-label="Zeit am Berg in Tagen">
+                <div class="dashboard-time-days-title">So viel Zeit am Berg</div>
+                <div class="dashboard-time-days-value">
+                    <span id="dashboard-time-days-value" data-target="${totalDays.toFixed(3)}">0,0</span>
+                    <span class="dashboard-time-days-unit">Tage</span>
+                </div>
+                <div class="dashboard-time-days-caption">24 Stunden Gehzeit entsprechen einem Tag am Berg</div>
+            </section>
+            <p class="dashboard-time-personal">Stunden fernab vom Alltag, mitten in der Natur. Zeit zum Durchatmen, Weitergehen und Genießen.</p>
+        </div>
+    `;
+
+    bodyEl.querySelector('#ds-back')?.addEventListener('click', () => {
+        backDashboardStatSubview('gehzeit', allTours);
+    });
+    startDashboardTimeStoryAnimations();
+}
+
+function startDashboardTimeStoryAnimations() {
+    const totalValue = document.getElementById('dashboard-time-total-value');
+    const daysValue = document.getElementById('dashboard-time-days-value');
+    if (!totalValue || !daysValue) return;
+
+    const totalMinutes = Math.max(0, Number(totalValue.dataset.targetMinutes) || 0);
+    const daysTarget = Math.max(0, Number(daysValue.dataset.target) || 0);
+    const duration = 2200;
+    const formatDays = value => value.toLocaleString('de-AT', {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1
+    });
+    const setFinalValues = () => {
+        totalValue.textContent = formatDuration(totalMinutes);
+        daysValue.textContent = formatDays(daysTarget);
+    };
+    const formatDuration = minutes => {
+        const wholeMinutes = Math.max(0, Math.round(minutes));
+        return Math.floor(wholeMinutes / 60).toLocaleString('de-AT') + ':' +
+            String(wholeMinutes % 60).padStart(2, '0');
+    };
+
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+        setFinalValues();
+        return;
+    }
+
+    const startTime = performance.now();
+    const easeOut = value => 1 - Math.pow(1 - value, 3);
+    const tick = now => {
+        if (!totalValue.isConnected || !daysValue.isConnected) return;
+        const progress = Math.min(1, Math.max(0, (now - startTime) / duration));
+        const eased = easeOut(progress);
+        totalValue.textContent = formatDuration(totalMinutes * eased);
+        daysValue.textContent = formatDays(daysTarget * eased);
         if (progress < 1) requestAnimationFrame(tick);
         else setFinalValues();
     };
