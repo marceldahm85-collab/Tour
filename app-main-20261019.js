@@ -29692,6 +29692,8 @@ bodyEl.querySelectorAll('[data-peak-min]').forEach(el => {
             } else if (type === 'gehzeit') {
                 const timeTotalMinutes = tours.reduce((sum, entry) => {
                     if (!entry?.date || !entry.zeit || !String(entry.zeit).includes(':')) return sum;
+                    const date = new Date(entry.date);
+                    if (isNaN(date.getTime())) return sum;
                     const [hours, minutes] = String(entry.zeit).split(':').map(Number);
                     if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return sum;
                     return sum + hours * 60 + minutes;
