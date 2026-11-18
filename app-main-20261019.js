@@ -29702,7 +29702,7 @@ function showDashDistanceStory(distance, allTours, backTitle) {
     const safeDistance = Math.max(0, Number(distance) || 0);
     const laps = safeDistance / WRAPPED_OSTTIROL_BORDER_KM;
     const lapsText = laps.toFixed(2).replace('.', ',');
-    const comparison = escapeHtml(getWrappedDistanceComparison(safeDistance));
+    const comparisonFactor = (safeDistance / 860).toFixed(2).replace('.', ',');
     const layout = getWrappedOsttirolMapLayout(720, 640);
     const points = layout.points;
     const path = points.map((point, index) =>
@@ -29736,19 +29736,25 @@ function showDashDistanceStory(distance, allTours, backTitle) {
                         stroke="rgba(231,189,97,.28)" stroke-width="13" stroke-linejoin="round" stroke-linecap="round"></path>
                     <path d="${path}" fill="none" stroke="#e7bd61"
                         stroke-width="4" stroke-linejoin="round" stroke-linecap="round"></path>
+                    <path id="dashboard-distance-trace" d="${path}" fill="none"
+                        stroke="#fff0c2" stroke-width="4.5" stroke-linejoin="round"
+                        stroke-linecap="round"></path>
+                    <circle id="dashboard-distance-trace-marker" cx="${points[0].x.toFixed(2)}"
+                        cy="${points[0].y.toFixed(2)}" r="6.5" opacity="0"
+                        fill="#fff8df" stroke="#e7bd61" stroke-width="2.5"></circle>
                     <path d="${path}" fill="none" stroke="rgba(255,248,225,.78)"
-                        stroke-width="1.2" stroke-linejoin="round"></path>
+                        stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"></path>
                     <circle cx="${lienz.x.toFixed(2)}" cy="${lienz.y.toFixed(2)}" r="7"
                         fill="#fff4cf" stroke="#e7bd61" stroke-width="2"></circle>
                     <text x="${(lienz.x - 14).toFixed(2)}" y="${(lienz.y + 5).toFixed(2)}"
                         text-anchor="end">LIENZ</text>
                 </svg>
-                <div class="dashboard-distance-loop-value">${lapsText}×</div>
+                <div class="dashboard-distance-loop-value"><span id="dashboard-distance-laps" data-target="${laps.toFixed(2)}">0,00</span>×</div>
                 <div class="dashboard-distance-loop-caption">Osttirol umrundet</div>
             </section>
             <section class="dashboard-distance-comparison">
                 <div class="dashboard-distance-section-title">Lienz → Düsseldorf</div>
-                <p>${comparison}</p>
+                <p>Das ist wie <span id="dashboard-distance-comparison-value" data-target="${(safeDistance / 860).toFixed(2)}">0,00</span>× Lienz → Düsseldorf!</p>
             </section>
             <p class="dashboard-distance-personal">
                 Jeder Kilometer war ein Teil deines Weges – durch Täler, über Höhen und immer ein Stück weiter.
@@ -29759,6 +29765,68 @@ function showDashDistanceStory(distance, allTours, backTitle) {
     bodyEl.querySelector('#ds-back')?.addEventListener('click', () => {
         backDashboardStatSubview('strecke', allTours);
     });
+
+    startDashboardDistanceStoryAnimations();
+}
+
+function startDashboardDistanceStoryAnimations() {
+    const trace = document.getElementById('dashboard-distance-trace');
+    const marker = document.getElementById('dashboard-distance-trace-marker');
+    const lapsValue = document.getElementById('dashboard-distance-laps');
+    const comparisonValue = document.getElementById('dashboard-distance-comparison-value');
+    if (!trace || !marker || !lapsValue || !comparisonValue) return;
+
+    const lapsTarget = Math.max(0, Number(lapsValue.dataset.target) || 0);
+    const comparisonTarget = Math.max(0, Number(comparisonValue.dataset.target) || 0);
+    const mapDuration = 5200;
+    const numberDuration = 2200;
+    let pathLength = 0;
+    try { pathLength = trace.getTotalLength(); } catch (_) { pathLength = 0; }
+
+    if (!pathLength || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+        trace.style.strokeDasharray = 'none';
+        trace.style.strokeDashoffset = '0';
+        marker.setAttribute('opacity', '0');
+        lapsValue.textContent = lapsTarget.toFixed(2).replace('.', ',');
+        comparisonValue.textContent = comparisonTarget.toFixed(2).replace('.', ',');
+        return;
+    }
+
+    trace.style.strokeDasharray = String(pathLength);
+    trace.style.strokeDashoffset = String(pathLength);
+    marker.setAttribute('opacity', '1');
+    const firstPoint = trace.getPointAtLength(0);
+    marker.setAttribute('cx', firstPoint.x.toFixed(2));
+    marker.setAttribute('cy', firstPoint.y.toFixed(2));
+
+    const startTime = performance.now();
+    const easeOut = value => 1 - Math.pow(1 - value, 3);
+    const tick = now => {
+        if (!trace.isConnected || !lapsValue.isConnected || !comparisonValue.isConnected) return;
+        const elapsed = Math.max(0, now - startTime);
+        const mapProgress = Math.min(1, elapsed / mapDuration);
+        const numberProgress = Math.min(1, elapsed / numberDuration);
+        const easedMap = easeOut(mapProgress);
+        const easedNumbers = easeOut(numberProgress);
+
+        trace.style.strokeDashoffset = String(pathLength * (1 - easedMap));
+        const point = trace.getPointAtLength(pathLength * easedMap);
+        marker.setAttribute('cx', point.x.toFixed(2));
+        marker.setAttribute('cy', point.y.toFixed(2));
+        marker.setAttribute('opacity', mapProgress >= 1 ? '0' : '1');
+        lapsValue.textContent = (lapsTarget * easedNumbers).toFixed(2).replace('.', ',');
+        comparisonValue.textContent = (comparisonTarget * easedNumbers).toFixed(2).replace('.', ',');
+
+        if (mapProgress < 1 || numberProgress < 1) {
+            requestAnimationFrame(tick);
+        } else {
+            trace.style.strokeDashoffset = '0';
+            marker.setAttribute('opacity', '0');
+            lapsValue.textContent = lapsTarget.toFixed(2).replace('.', ',');
+            comparisonValue.textContent = comparisonTarget.toFixed(2).replace('.', ',');
+        }
+    };
+    requestAnimationFrame(tick);
 }
 
 function showDashPeakTier(

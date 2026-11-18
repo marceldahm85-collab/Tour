@@ -345,3 +345,17 @@
     line-height: 1.55;
     text-align: center;
 }
+
+/* Leuchtpfad und Zählwerte der kombinierten Streckenansicht. */
+#dash-stat-modal[data-dashboard-stat-type="strecke"] #dashboard-distance-trace {
+    filter: drop-shadow(0 0 4px rgba(255,238,192,.9))
+            drop-shadow(0 0 9px rgba(255,196,91,.72));
+}
+#dash-stat-modal[data-dashboard-stat-type="strecke"] #dashboard-distance-trace-marker {
+    filter: drop-shadow(0 0 5px rgba(255,230,160,.95))
+            drop-shadow(0 0 11px rgba(255,196,91,.85));
+}
+#dash-stat-modal[data-dashboard-stat-type="strecke"] #dashboard-distance-laps,
+#dash-stat-modal[data-dashboard-stat-type="strecke"] #dashboard-distance-comparison-value {
+    font-variant-numeric: tabular-nums;
+}
