@@ -24368,14 +24368,12 @@ function getWrappedSeasonTitle(totals) {
 function buildWrappedSlideData(year) {
     const entries = getWrappedDataForYear(year);
     const totals = getWrappedTotals(entries);
-    const monthlyTours = getWrappedMonthlyToursCount(entries);
     const bestTour = getWrappedBestTour(entries);
     const highestPeak = getWrappedHighestPeak(entries);
     const topRegion = getWrappedTopRegion(entries);
     const highlights = getWrappedHighlights(entries);
     const top3 = getWrappedTop3(entries);
     const topCompanion = getWrappedTopCompanion(entries);
-    const activeMonthIndex = monthlyTours.indexOf(Math.max(...monthlyTours));
 
     // Nach "Wanderbuddy" folgen Fotoseiten mit vier unterschiedlichen Touren.
     // Mehrtagestouren werden anhand derselben Identität wie in der App gruppiert.
@@ -24497,8 +24495,6 @@ function buildWrappedSlideData(year) {
           data: { peaks: totals.peaks } },
         { key: 'time', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.default,
           data: { minutes: totals.minutes } },
-        { key: 'activeMonth', type: 'heavy', duration: WRAPPED_SLIDE_DURATIONS.activeMonth,
-          data: { monthlyTours, activeMonthIndex } },
         highestPeak ? { key: 'highestPeak', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.detail,
           data: { peak: highestPeak } } : null,
         topRegion ? { key: 'topRegion', type: 'default', duration: WRAPPED_SLIDE_DURATIONS.detail,
@@ -29301,7 +29297,8 @@ function openDashStatModal(type, tours) {
                         e => (e.tourGroup ? (isFirstEtappeInList(e, tours) ? 1 : 0) : 1),
                         v => v + (v === 1 ? ' Tour' : ' Touren')
                     )}
-                </ul>`;
+                </ul>
+                <p class="dash-tour-month-note">Jeder Ausflug brachte neue Wege, Eindrücke und Gipfelmomente.</p>`;
             break;
         }
 

@@ -481,3 +481,13 @@
 #dash-stat-modal #dashboard-time-days-value {
     font-variant-numeric: tabular-nums;
 }
+
+/* Kurzer Abschlusstext unter der Monatsübersicht im Dashboard-Touren-Modal. */
+#dash-stat-modal .dash-tour-month-note {
+    margin: 12px 4px 2px;
+    padding: 2px 4px 4px;
+    color: rgba(255,255,255,.92);
+    font-size: 13px;
+    line-height: 1.55;
+    text-align: center;
+}
