@@ -29201,6 +29201,12 @@ window.__bergTourenHandleDashStatHistoryPop = function (state) {
                 savedView.tierTitle,
                 savedView.backTitle
             );
+        } else if (savedView?.kind === 'distance-story') {
+            showDashDistanceStory(
+                savedView.distance,
+                savedView.tours,
+                savedView.backTitle
+            );
         } else if (dashboardStatOverviewContext) {
             openDashStatModal(
                 dashboardStatOverviewContext.type,
@@ -29266,6 +29272,7 @@ function openDashStatModal(type, tours) {
     let title = '';
     let bodyHtml = '';
     let specialEntries = [];   // für data-sentry click handler
+    let distanceTotal = null;
 
     switch (type) {
 
@@ -29450,6 +29457,7 @@ ${p2000 > 0 ? `
                 }
             });
             const avg = n > 0 ? total / n : 0;
+            distanceTotal = total;
             bodyHtml = `<ul class="stats-list">
                 ${row('Gesamtstrecke',    total.toFixed(1).replace('.', ',') + ' km', false, 'ds-total-row')}
                 ${row('Ø Strecke / Tour', formatDecimalAT(avg) + ' km', true)}
@@ -29660,7 +29668,13 @@ bodyEl.querySelectorAll('[data-peak-min]').forEach(el => {
     const totalRowEl = bodyEl.querySelector('#ds-total-row');
     if (totalRowEl) {
         totalRowEl.style.cursor = 'pointer';
-        totalRowEl.addEventListener('click', () => showDashAllSorted(type, tours, title));
+        totalRowEl.addEventListener('click', () => {
+            if (type === 'strecke') {
+                showDashDistanceStory(distanceTotal, tours, title);
+            } else {
+                showDashAllSorted(type, tours, title);
+            }
+        });
     }
 
     const card     = modal.querySelector('.modal-card');
@@ -29671,6 +29685,80 @@ bodyEl.querySelectorAll('[data-peak-min]').forEach(el => {
     attachModalSwipeDown(modal, closeDashStatModal);
     modal.classList.remove('hidden');
     document.body.classList.add('modal-open');
+}
+
+
+function showDashDistanceStory(distance, allTours, backTitle) {
+    const titleEl = document.getElementById('ds-title');
+    const bodyEl = document.getElementById('ds-body');
+    if (!titleEl || !bodyEl) return;
+
+    pushDashboardStatSubviewHistory('distance-story', {
+        distance,
+        tours: allTours,
+        backTitle
+    });
+
+    const safeDistance = Math.max(0, Number(distance) || 0);
+    const laps = safeDistance / WRAPPED_OSTTIROL_BORDER_KM;
+    const lapsText = laps.toFixed(2).replace('.', ',');
+    const comparison = escapeHtml(getWrappedDistanceComparison(safeDistance));
+    const layout = getWrappedOsttirolMapLayout(720, 640);
+    const points = layout.points;
+    const path = points.map((point, index) =>
+        (index === 0 ? 'M' : 'L') + point.x.toFixed(2) + ' ' + point.y.toFixed(2)
+    ).join(' ') + ' Z';
+    const padding = 28;
+    const viewX = layout.bounds.left - padding;
+    const viewY = layout.bounds.top - padding;
+    const viewWidth = layout.bounds.width + padding * 2;
+    const viewHeight = layout.bounds.height + padding * 2;
+    const lienz = layout.project([12.76, 46.83]);
+
+    titleEl.textContent = backTitle + ' · Gesamtstrecke';
+    bodyEl.innerHTML = `
+        <button class="save-btn" id="ds-back" style="margin-bottom:12px;padding:5px 14px;font-size:13px;">
+            ← Zurück
+        </button>
+        <div class="dashboard-distance-story">
+            <section class="dashboard-distance-loop" aria-label="Umrundung Osttirols">
+                <div class="dashboard-distance-loop-title">Einmal rund um Osttirol</div>
+                <svg class="dashboard-distance-map"
+                    viewBox="${viewX.toFixed(2)} ${viewY.toFixed(2)} ${viewWidth.toFixed(2)} ${viewHeight.toFixed(2)}"
+                    role="img" aria-label="Kontur des Bezirks Lienz mit Markierung von Lienz">
+                    <defs>
+                        <linearGradient id="dashboard-distance-map-fill" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#365e64" stop-opacity=".82"></stop>
+                            <stop offset="100%" stop-color="#102a32" stop-opacity=".88"></stop>
+                        </linearGradient>
+                    </defs>
+                    <path d="${path}" fill="url(#dashboard-distance-map-fill)"
+                        stroke="rgba(231,189,97,.28)" stroke-width="13" stroke-linejoin="round" stroke-linecap="round"></path>
+                    <path d="${path}" fill="none" stroke="#e7bd61"
+                        stroke-width="4" stroke-linejoin="round" stroke-linecap="round"></path>
+                    <path d="${path}" fill="none" stroke="rgba(255,248,225,.78)"
+                        stroke-width="1.2" stroke-linejoin="round"></path>
+                    <circle cx="${lienz.x.toFixed(2)}" cy="${lienz.y.toFixed(2)}" r="7"
+                        fill="#fff4cf" stroke="#e7bd61" stroke-width="2"></circle>
+                    <text x="${(lienz.x - 14).toFixed(2)}" y="${(lienz.y + 5).toFixed(2)}"
+                        text-anchor="end">LIENZ</text>
+                </svg>
+                <div class="dashboard-distance-loop-value">${lapsText}×</div>
+                <div class="dashboard-distance-loop-caption">Osttirol umrundet</div>
+            </section>
+            <section class="dashboard-distance-comparison">
+                <div class="dashboard-distance-section-title">Lienz → Düsseldorf</div>
+                <p>${comparison}</p>
+            </section>
+            <p class="dashboard-distance-personal">
+                Jeder Kilometer war ein Teil deines Weges – durch Täler, über Höhen und immer ein Stück weiter.
+            </p>
+        </div>
+    `;
+
+    bodyEl.querySelector('#ds-back')?.addEventListener('click', () => {
+        backDashboardStatSubview('strecke', allTours);
+    });
 }
 
 function showDashPeakTier(
