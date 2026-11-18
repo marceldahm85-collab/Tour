@@ -29207,6 +29207,12 @@ window.__bergTourenHandleDashStatHistoryPop = function (state) {
                 savedView.tours,
                 savedView.backTitle
             );
+        } else if (savedView?.kind === 'ascent-story') {
+            showDashAscentStory(
+                savedView.ascent,
+                savedView.tours,
+                savedView.backTitle
+            );
         } else if (dashboardStatOverviewContext) {
             openDashStatModal(
                 dashboardStatOverviewContext.type,
@@ -29671,6 +29677,12 @@ bodyEl.querySelectorAll('[data-peak-min]').forEach(el => {
         totalRowEl.addEventListener('click', () => {
             if (type === 'strecke') {
                 showDashDistanceStory(distanceTotal, tours, title);
+            } else if (type === 'aufstieg') {
+                const ascentTotal = tours.reduce((sum, entry) => {
+                    const value = parseFloat(String(entry.aufstieg || '').replace(',', '.')) || 0;
+                    return sum + (value > 0 && entry.date ? value : 0);
+                }, 0);
+                showDashAscentStory(ascentTotal, tours, title);
             } else {
                 showDashAllSorted(type, tours, title);
             }
@@ -29767,6 +29779,82 @@ function showDashDistanceStory(distance, allTours, backTitle) {
     });
 
     startDashboardDistanceStoryAnimations();
+}
+
+
+function showDashAscentStory(ascent, allTours, backTitle) {
+    const titleEl = document.getElementById('ds-title');
+    const bodyEl = document.getElementById('ds-body');
+    if (!titleEl || !bodyEl) return;
+
+    pushDashboardStatSubviewHistory('ascent-story', { ascent, tours: allTours, backTitle });
+
+    const safeAscent = Math.max(0, Number(ascent) || 0);
+    const grossglocknerFactor = safeAscent / 3798;
+    const everestFactor = safeAscent / 8848;
+
+    titleEl.textContent = backTitle + ' · Gesamtaufstieg';
+    bodyEl.innerHTML = `
+        <button class="save-btn" id="ds-back" style="margin-bottom:12px;padding:5px 14px;font-size:13px;">← Zurück</button>
+        <div class="dashboard-ascent-story">
+            <section class="dashboard-ascent-total" aria-label="Jahresgesamtaufstieg">
+                <div class="dashboard-ascent-total-title">Dein Gesamtaufstieg</div>
+                <div class="dashboard-ascent-total-value">
+                    <span id="dashboard-ascent-total-value" data-target="${Math.round(safeAscent)}">0</span>
+                    <span class="dashboard-ascent-unit">hm</span>
+                </div>
+            </section>
+            <section class="dashboard-ascent-comparison dashboard-ascent-grossglockner">
+                <p>Das ist <strong><span id="dashboard-ascent-grossglockner-value" data-target="${grossglocknerFactor.toFixed(2)}">0,00</span>x</strong> soviel, wie der Großglockner hoch ist!</p>
+            </section>
+            <section class="dashboard-ascent-comparison dashboard-ascent-everest">
+                <p>oder <strong><span id="dashboard-ascent-everest-value" data-target="${everestFactor.toFixed(2)}">0,00</span>x</strong> der Mount Everest!</p>
+            </section>
+            <p class="dashboard-ascent-personal">Meter für Meter dem Himmel entgegen – und mit jedem Aufstieg ein Stück näher an neuen Perspektiven und unvergesslichen Ausblicken.</p>
+        </div>
+    `;
+
+    bodyEl.querySelector('#ds-back')?.addEventListener('click', () => {
+        backDashboardStatSubview('aufstieg', allTours);
+    });
+    startDashboardAscentStoryAnimations();
+}
+
+function startDashboardAscentStoryAnimations() {
+    const totalValue = document.getElementById('dashboard-ascent-total-value');
+    const grossglocknerValue = document.getElementById('dashboard-ascent-grossglockner-value');
+    const everestValue = document.getElementById('dashboard-ascent-everest-value');
+    if (!totalValue || !grossglocknerValue || !everestValue) return;
+
+    const totalTarget = Math.max(0, Number(totalValue.dataset.target) || 0);
+    const grossglocknerTarget = Math.max(0, Number(grossglocknerValue.dataset.target) || 0);
+    const everestTarget = Math.max(0, Number(everestValue.dataset.target) || 0);
+    const duration = 2200;
+    const formatFactor = value => value.toFixed(2).replace('.', ',');
+    const setFinalValues = () => {
+        totalValue.textContent = Math.round(totalTarget).toLocaleString('de-AT');
+        grossglocknerValue.textContent = formatFactor(grossglocknerTarget);
+        everestValue.textContent = formatFactor(everestTarget);
+    };
+
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+        setFinalValues();
+        return;
+    }
+
+    const startTime = performance.now();
+    const easeOut = value => 1 - Math.pow(1 - value, 3);
+    const tick = now => {
+        if (!totalValue.isConnected || !grossglocknerValue.isConnected || !everestValue.isConnected) return;
+        const progress = Math.min(1, Math.max(0, (now - startTime) / duration));
+        const eased = easeOut(progress);
+        totalValue.textContent = Math.round(totalTarget * eased).toLocaleString('de-AT');
+        grossglocknerValue.textContent = formatFactor(grossglocknerTarget * eased);
+        everestValue.textContent = formatFactor(everestTarget * eased);
+        if (progress < 1) requestAnimationFrame(tick);
+        else setFinalValues();
+    };
+    requestAnimationFrame(tick);
 }
 
 function startDashboardDistanceStoryAnimations() {
