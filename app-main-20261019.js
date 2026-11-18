@@ -29891,7 +29891,7 @@ function showDashTimeStory(totalMinutes, allTours, backTitle) {
 
     const safeMinutes = Math.max(0, Math.round(Number(totalMinutes) || 0));
     const totalDays = safeMinutes / (24 * 60);
-    titleEl.textContent = backTitle + ' · Gehzeit';
+    titleEl.textContent = backTitle + ' · Gesamtgehzeit';
     bodyEl.innerHTML = `
         <button class="save-btn" id="ds-back" style="margin-bottom:12px;padding:5px 14px;font-size:13px;">← Zurück</button>
         <div class="dashboard-time-story">
