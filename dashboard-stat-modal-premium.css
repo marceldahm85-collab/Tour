@@ -516,3 +516,376 @@
     font-weight: 500;
     line-height: 1.6;
 }
+
+
+/* Dashboard-Storys: sechs ergänzende Kennzahlenansichten in derselben Premium-Vorlage. */
+#dash-stat-modal .dashboard-story-back {
+    margin: 0 0 12px;
+    padding: 5px 14px;
+    min-height: 32px;
+    font-size: 13px;
+}
+#dash-stat-modal .dashboard-extra-story {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+}
+#dash-stat-modal .dashboard-extra-total,
+#dash-stat-modal .dashboard-extra-panel {
+    min-width: 0;
+    padding: 15px 12px;
+    border: 1px solid color-mix(in srgb, var(--theme-palette-accent, #d5a64c) 42%, rgba(255,255,255,.28));
+    border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
+    background: linear-gradient(145deg, rgba(255,255,255,.15), rgba(8,17,26,.30));
+    -webkit-backdrop-filter: blur(13px) saturate(128%);
+    backdrop-filter: blur(13px) saturate(128%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 5px 13px rgba(0,0,0,.13);
+}
+#dash-stat-modal .dashboard-extra-total { text-align: center; }
+#dash-stat-modal .dashboard-extra-total-title,
+#dash-stat-modal .dashboard-extra-panel-title {
+    color: rgba(255,255,255,.94);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: .045em;
+    text-transform: uppercase;
+    text-align: center;
+}
+#dash-stat-modal .dashboard-extra-total-value {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 7px;
+    color: #fff;
+    font-size: clamp(35px, 9vw, 48px);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -.035em;
+    text-shadow: 0 3px 14px rgba(0,0,0,.35);
+    font-variant-numeric: tabular-nums;
+}
+#dash-stat-modal .dashboard-extra-unit {
+    color: var(--theme-palette-accent, #d5a64c);
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0;
+}
+#dash-stat-modal .dashboard-extra-caption {
+    margin-top: 9px;
+    color: rgba(255,255,255,.76);
+    font-size: 11px;
+    line-height: 1.45;
+    text-align: center;
+}
+#dash-stat-modal .dashboard-extra-personal {
+    margin: 0;
+    padding: 2px 4px 4px;
+    color: rgba(255,255,255,.92);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.6;
+    text-align: center !important;
+}
+
+/* Schritte: vollständige 10.000-Schritte-Tage als kompakte Einheiten. */
+#dash-stat-modal .dashboard-steps-comparison {
+    border-color: color-mix(in srgb, var(--theme-palette-accent, #d5a64c) 58%, rgba(255,255,255,.34));
+    background: linear-gradient(145deg, rgba(213,166,76,.19), rgba(7,16,26,.32));
+}
+#dash-stat-modal .dashboard-steps-days-value,
+#dash-stat-modal .dashboard-peaks-comparison-value,
+#dash-stat-modal .dashboard-ascent-floors-value {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin: 8px 0 10px;
+    color: #fff;
+    font-size: clamp(29px, 7.5vw, 39px);
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+#dash-stat-modal .dashboard-steps-day-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 4px;
+    justify-items: stretch;
+    margin-top: 10px;
+}
+#dash-stat-modal .dashboard-steps-day {
+    aspect-ratio: 1;
+    border: 1px solid color-mix(in srgb, var(--theme-palette-accent, #d5a64c) 65%, rgba(255,255,255,.3));
+    border-radius: 3px;
+    background: linear-gradient(145deg, var(--theme-palette-accent, #d5a64c), rgba(255,255,255,.24));
+    box-shadow: 0 0 7px color-mix(in srgb, var(--theme-palette-accent, #d5a64c) 38%, transparent);
+    animation: dashboardStoryUnitIn .42s both;
+}
+#dash-stat-modal .dashboard-steps-extra {
+    grid-column: 1 / -1;
+    color: var(--theme-palette-accent, #d5a64c);
+    font-size: 12px;
+    font-weight: 800;
+    text-align: center;
+}
+@keyframes dashboardStoryUnitIn {
+    from { opacity: 0; transform: scale(.55); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Gipfel: 52 Wochen als Jahresraster, davon so viele wie Gipfel markiert. */
+#dash-stat-modal .dashboard-peaks-comparison {
+    border-color: color-mix(in srgb, var(--theme-palette-accent, #d5a64c) 58%, rgba(255,255,255,.34));
+    background: linear-gradient(145deg, rgba(213,166,76,.19), rgba(7,16,26,.32));
+}
+#dash-stat-modal .dashboard-peaks-week-grid {
+    display: grid;
+    grid-template-columns: repeat(13, minmax(0, 1fr));
+    gap: 5px;
+    margin-top: 10px;
+}
+#dash-stat-modal .dashboard-peaks-week {
+    aspect-ratio: 1.25;
+    border: 1px solid rgba(255,255,255,.19);
+    border-radius: 4px;
+    background: rgba(255,255,255,.08);
+}
+#dash-stat-modal .dashboard-peaks-week.is-active {
+    border-color: color-mix(in srgb, var(--theme-palette-accent, #d5a64c) 75%, white);
+    background: linear-gradient(145deg, var(--theme-palette-accent, #d5a64c), color-mix(in srgb, var(--theme-palette-accent, #d5a64c) 35%, #fff));
+    box-shadow: 0 0 8px color-mix(in srgb, var(--theme-palette-accent, #d5a64c) 42%, transparent);
+    animation: dashboardStoryUnitIn .42s both;
+}
+
+/* Big Tours: eine echte Referenztour statt eines künstlichen Arbeitsvergleichs. */
+#dash-stat-modal .dashboard-big-tours-reference {
+    padding: 10px;
+    overflow: hidden;
+}
+#dash-stat-modal .dashboard-big-tours-image,
+#dash-stat-modal .dashboard-grade-image {
+    display: block;
+    width: 100%;
+    max-height: 205px;
+    margin: 10px 0 0;
+    object-fit: cover;
+    border-radius: calc(var(--editor-radius, var(--app-radius, 14px)) * .72);
+    border: 1px solid rgba(255,255,255,.22);
+}
+#dash-stat-modal .dashboard-big-tours-route-name,
+#dash-stat-modal .dashboard-grade-image-caption {
+    margin-top: 9px;
+    color: var(--theme-palette-accent, #d5a64c);
+    font-size: 14px;
+    font-weight: 850;
+    text-align: center;
+}
+#dash-stat-modal .dashboard-big-tours-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+}
+#dash-stat-modal .dashboard-big-tours-metrics > span {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 9px 6px;
+    border: 1px solid rgba(255,255,255,.17);
+    border-radius: var(--editor-radius, var(--app-radius, 14px));
+    background: rgba(7,16,26,.25);
+    text-align: center;
+}
+#dash-stat-modal .dashboard-big-tours-metrics strong {
+    color: #fff;
+    font-size: 19px;
+    font-weight: 900;
+}
+#dash-stat-modal .dashboard-big-tours-metrics small {
+    color: rgba(255,255,255,.72);
+    font-size: 10px;
+    font-weight: 750;
+    text-transform: uppercase;
+}
+#dash-stat-modal .dashboard-extra-source {
+    display: block;
+    margin-top: 8px;
+    color: rgba(255,255,255,.67);
+    font-size: 9px;
+    line-height: 1.4;
+    text-align: center;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* ØSpeed: fünf Gangarten auf einer gemeinsamen Geschwindigkeitsskala. */
+#dash-stat-modal .dashboard-speed-comparison { overflow: hidden; }
+#dash-stat-modal .dashboard-speed-scale {
+    position: relative;
+    height: 42px;
+    margin: 16px 8px 4px;
+}
+#dash-stat-modal .dashboard-speed-track {
+    position: absolute;
+    top: 21px;
+    left: 0;
+    right: 0;
+    height: 5px;
+    border-radius: 99px;
+    background: linear-gradient(90deg, rgba(255,255,255,.28), var(--theme-palette-accent, #d5a64c));
+}
+#dash-stat-modal .dashboard-speed-marker {
+    position: absolute;
+    top: 0;
+    z-index: 1;
+    transform: translateX(-50%);
+    transition: left 1.7s cubic-bezier(.2,.75,.25,1);
+}
+#dash-stat-modal .dashboard-speed-marker::after {
+    content: "";
+    display: block;
+    width: 3px;
+    height: 26px;
+    margin: 0 auto;
+    border-radius: 3px;
+    background: #fff;
+    box-shadow: 0 0 8px var(--theme-palette-accent, #d5a64c);
+}
+#dash-stat-modal .dashboard-speed-marker > span {
+    display: block;
+    width: max-content;
+    padding: 3px 6px;
+    border-radius: 6px;
+    color: #101820;
+    background: var(--theme-palette-accent, #d5a64c);
+    font-size: 10px;
+    font-weight: 900;
+    transform: translateX(-50%);
+    white-space: nowrap;
+}
+#dash-stat-modal .dashboard-speed-gaits {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+    margin-top: 5px;
+}
+#dash-stat-modal .dashboard-speed-gait {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    min-width: 0;
+    text-align: center;
+}
+#dash-stat-modal .dashboard-speed-gait-dot {
+    width: 7px;
+    height: 7px;
+    margin-bottom: 3px;
+    border-radius: 50%;
+    background: var(--theme-palette-accent, #d5a64c);
+    box-shadow: 0 0 6px color-mix(in srgb, var(--theme-palette-accent, #d5a64c) 45%, transparent);
+}
+#dash-stat-modal .dashboard-speed-gait strong {
+    color: rgba(255,255,255,.92);
+    font-size: 9px;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+#dash-stat-modal .dashboard-speed-gait small {
+    color: var(--theme-palette-accent, #d5a64c);
+    font-size: 9px;
+    font-weight: 850;
+}
+
+/* ØSteigung: Foto und direkte Prozent-Gegenüberstellung zur Lombard Street. */
+#dash-stat-modal .dashboard-grade-percent-value {
+    margin-top: 5px;
+    color: var(--theme-palette-accent, #d5a64c);
+    font-size: 24px;
+    font-weight: 900;
+    text-align: center;
+}
+#dash-stat-modal .dashboard-grade-comparison { padding: 10px; }
+#dash-stat-modal .dashboard-grade-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 13px;
+}
+#dash-stat-modal .dashboard-grade-bar-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 5px 8px;
+    color: rgba(255,255,255,.9);
+    font-size: 11px;
+    font-weight: 750;
+}
+#dash-stat-modal .dashboard-grade-bar-row strong {
+    color: var(--theme-palette-accent, #d5a64c);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+#dash-stat-modal .dashboard-grade-bar {
+    grid-column: 1 / -1;
+    height: 9px;
+    overflow: hidden;
+    border-radius: 99px;
+    background: rgba(255,255,255,.13);
+}
+#dash-stat-modal .dashboard-grade-bar-fill {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    transition: width 1.6s cubic-bezier(.2,.75,.25,1);
+}
+#dash-stat-modal .dashboard-grade-bar-fill.is-user {
+    background: linear-gradient(90deg, var(--theme-palette-accent, #d5a64c), #fff0c2);
+}
+#dash-stat-modal .dashboard-grade-bar-fill.is-reference {
+    background: linear-gradient(90deg, rgba(255,255,255,.65), rgba(255,255,255,.95));
+}
+
+/* ØAnstieg: Stockwerksleistung als vertikale Gebäudeskala. */
+#dash-stat-modal .dashboard-ascent-floors-panel {
+    border-color: color-mix(in srgb, var(--theme-palette-accent, #d5a64c) 58%, rgba(255,255,255,.34));
+    background: linear-gradient(145deg, rgba(213,166,76,.19), rgba(7,16,26,.32));
+}
+#dash-stat-modal .dashboard-ascent-building {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 3px;
+    width: min(100%, 132px);
+    margin: 13px auto 8px;
+    padding: 8px 13px;
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 8px 8px 3px 3px;
+    background: linear-gradient(145deg, rgba(255,255,255,.13), rgba(7,16,26,.34));
+    box-shadow: 0 5px 16px rgba(0,0,0,.2);
+}
+#dash-stat-modal .dashboard-ascent-floor {
+    display: block;
+    height: 8px;
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 2px;
+    background: rgba(255,255,255,.08);
+}
+#dash-stat-modal .dashboard-ascent-floor.is-lit {
+    border-color: color-mix(in srgb, var(--theme-palette-accent, #d5a64c) 70%, white);
+    background: linear-gradient(90deg, var(--theme-palette-accent, #d5a64c), rgba(255,255,255,.62));
+    box-shadow: 0 0 7px color-mix(in srgb, var(--theme-palette-accent, #d5a64c) 38%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+    #dash-stat-modal .dashboard-steps-day,
+    #dash-stat-modal .dashboard-peaks-week.is-active {
+        animation: none !important;
+    }
+    #dash-stat-modal .dashboard-speed-marker,
+    #dash-stat-modal .dashboard-grade-bar-fill {
+        transition: none !important;
+    }
+}
