@@ -29761,7 +29761,7 @@ function showDashDistanceStory(distance, allTours, backTitle) {
                 </div>
             </section>
             <section class="dashboard-distance-loop" aria-label="Umrundung Osttirols">
-                <div class="dashboard-distance-loop-title">Einmal rund um Osttirol</div>
+                
                 <svg class="dashboard-distance-map"
                     viewBox="${viewX.toFixed(2)} ${viewY.toFixed(2)} ${viewWidth.toFixed(2)} ${viewHeight.toFixed(2)}"
                     role="img" aria-label="Kontur des Bezirks Lienz mit Markierung von Lienz">
@@ -29792,7 +29792,7 @@ function showDashDistanceStory(distance, allTours, backTitle) {
                 <div class="dashboard-distance-loop-caption">Osttirol umrundet</div>
             </section>
             <section class="dashboard-distance-comparison">
-                <div class="dashboard-distance-section-title">Lienz → Düsseldorf</div>
+                
                 <p>Das ist wie <span id="dashboard-distance-comparison-value" data-target="${(safeDistance / 860).toFixed(2)}">0,00</span>× Lienz → Düsseldorf!</p>
             </section>
             <p class="dashboard-distance-personal">
