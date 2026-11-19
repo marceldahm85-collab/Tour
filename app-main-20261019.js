@@ -10423,6 +10423,7 @@ function openBigTourTopListModal(items) {
             return `${escapeHtml(entry.tourname || 'Unbekannt')}${stage}${group} · ${escapeHtml(entry.date || '–')}`;
         },
         valueFn: item => `Index ${Math.round(item.value)}`,
+        description: 'Manche Tage bleiben besonders lebendig. Wegen der Landschaft, der gemeinsamen Augenblicke oder einfach wegen des Gefühls, genau am richtigen Ort zu sein.',
         onOpen: item => {
             if (!item?.entry) return;
             closeTourListModal();
@@ -12370,7 +12371,9 @@ function openCompanionRankingModal(data) {
         tlTitle.textContent = '🤝 Wanderbuddys';
         tlBody.innerHTML = ranking.ranked.length === 0
             ? '<ul class="stats-list"><li><span class="stats-label">Keine Daten</span></li></ul>'
-            : `<ul class="stats-list">${ranking.ranked.map(([name, count], index) => `
+            : `
+                <p class="ranking-modal-companion">Die schönsten Gipfelmomente sind oft die, die man nicht allein erlebt. Gemeinsame Wege, gegenseitige Motivation und unvergessliche Augenblicke machen aus einzelnen Touren gemeinsame Geschichten. Denn manche Erinnerungen entstehen erst, wenn man sie miteinander teilt.</p>
+                <ul class="stats-list">${ranking.ranked.map(([name, count], index) => `
                 <li class="highlight-clickable" data-companion-idx="${index}">
                     <span class="stats-label">${escapeHtml(name)}</span>
                     <span class="stats-value">${count}${count === 1 ? ' Tour' : ' Touren'}</span>
