@@ -35294,6 +35294,7 @@ function updatePeakStatsPage() {
                     <span class="peak-summary-value">${formatDecimalAT(peakTourShare, 1)} %</span>
                 </div>
             </div>
+            <p class="peak-summary-info">Jeder Gipfel ein eigenes Ziel. Jeder Aufstieg ein neuer Blick auf die Berge.</p>
         </section>
 
         <section class="stats-analysis-section">
