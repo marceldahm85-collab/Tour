@@ -889,3 +889,83 @@
         transition: none !important;
     }
 }
+
+
+/* Feinschliff der sechs Dashboard-Storys: Kalender, Kennzahlen und flackerfreie Animationen. */
+#dash-stat-modal .dashboard-peaks-week-grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+    padding: 2px;
+}
+#dash-stat-modal .dashboard-peaks-week {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-width: 0;
+    min-height: 31px;
+    aspect-ratio: 1.35;
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 5px;
+    background: linear-gradient(145deg, rgba(255,255,255,.12), rgba(5,14,24,.36));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+    color: rgba(255,255,255,.66);
+    font-size: 10px;
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+}
+#dash-stat-modal .dashboard-peaks-week-number {
+    line-height: 1;
+}
+#dash-stat-modal .dashboard-peaks-week.is-active {
+    color: #101820;
+    border-color: color-mix(in srgb, var(--theme-palette-accent, #d5a64c) 78%, white);
+    background: linear-gradient(145deg, var(--theme-palette-accent, #d5a64c), color-mix(in srgb, var(--theme-palette-accent, #d5a64c) 35%, #fff));
+    box-shadow: 0 2px 7px color-mix(in srgb, var(--theme-palette-accent, #d5a64c) 34%, transparent);
+    animation: dashboardStoryUnitIn .42s both;
+}
+#dash-stat-modal .dashboard-ascent-comparison-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 2px;
+    border-bottom: 1px solid rgba(255,255,255,.14);
+    color: rgba(255,255,255,.88);
+    font-size: 13px;
+    font-weight: 700;
+}
+#dash-stat-modal .dashboard-ascent-comparison-row:last-child {
+    border-bottom: 0;
+}
+#dash-stat-modal .dashboard-ascent-comparison-row strong {
+    flex: 0 0 auto;
+    color: var(--theme-palette-accent, #d5a64c);
+    font-size: clamp(19px, 5vw, 24px);
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+#dash-stat-modal .dashboard-ascent-comparison-row small {
+    font-size: 11px;
+    font-weight: 750;
+}
+
+/* Die animierten Zahlen/Balken dürfen die darunterliegende Glasfläche nicht neu compositen. */
+#dash-stat-modal .dashboard-steps-story,
+#dash-stat-modal .dashboard-grade-story {
+    isolation: isolate;
+    contain: paint;
+    transform: translateZ(0);
+}
+#dash-stat-modal .dashboard-steps-story .dashboard-extra-total,
+#dash-stat-modal .dashboard-grade-story .dashboard-extra-total,
+#dash-stat-modal .dashboard-grade-story .dashboard-extra-panel {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background-color: rgba(8,17,26,.62);
+}
+@media (prefers-reduced-motion: reduce) {
+    #dash-stat-modal .dashboard-peaks-week.is-active {
+        animation: none !important;
+    }
+}
