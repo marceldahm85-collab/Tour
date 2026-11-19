@@ -12447,12 +12447,14 @@ function openRegionRankingModal(data) {
         tlTitle.textContent = '📍 Regionen';
         tlBody.innerHTML = ranked.length === 0
             ? '<ul class="stats-list"><li><span class="stats-label">Keine Daten</span></li></ul>'
-            : `<ul class="stats-list">${ranked.map(([name, count], index) => `
-                <li class="highlight-clickable" data-region-group-idx="${index}">
-                    <span class="stats-label">${escapeHtml(name)}</span>
-                    <span class="stats-value">${count}${count === 1 ? ' Tour' : ' Touren'}</span>
-                </li>
-            `).join('')}</ul>`;
+            : `
+                <p class="ranking-modal-companion">Zwischen bekannten Pfaden und neuen Gipfelzielen: Hier hat es dich in diesem Jahr besonders oft hingezogen.</p>
+                <ul class="stats-list">${ranked.map(([name, count], index) => `
+                    <li class="highlight-clickable" data-region-group-idx="${index}">
+                        <span class="stats-label">${escapeHtml(name)}</span>
+                        <span class="stats-value">${count}${count === 1 ? ' Tour' : ' Touren'}</span>
+                    </li>
+                `).join('')}</ul>`;
 
         tlBody.querySelectorAll('[data-region-group-idx]').forEach(el => {
             const item = ranked[Number(el.dataset.regionGroupIdx)];
