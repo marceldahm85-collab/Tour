@@ -13605,7 +13605,8 @@ if (
                 performanceList,
                 v =>
                     `${Math.round(v)} / 100`,
-                defaultLabel
+                defaultLabel,
+                'Nicht jede besondere Tour lässt sich in Zahlen fassen. Manchmal sind es die Weite der Berge, der Blick vom Gipfel und das Gefühl dieses einen Tages, die in Erinnerung bleiben.'
             )
             : null
 },
