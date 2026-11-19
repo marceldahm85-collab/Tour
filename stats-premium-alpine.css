@@ -989,6 +989,14 @@
     white-space: nowrap;
 }
 
+#stats-peaks-page .peak-summary-info {
+    margin: 8px 0 0 !important;
+    color: var(--app-text-primary, var(--text-main, inherit)) !important;
+    font-size: 13px !important;
+    line-height: 1.3;
+    font-weight: 600;
+}
+
 /* Gipfelliste: das bereits in den Highlights verwendete Dolomitenpanorama.
    Gedämpfte Überlagerung bewahrt Lesbarkeit und die bestehenden Metallstufen. */
 #stats-peaks-page #stats-peaks-content > .stats-analysis-section:nth-child(2) {
