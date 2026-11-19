@@ -10456,6 +10456,7 @@ function openMultidayTopListModal(groups) {
         comparator,
         labelFn: group => `${escapeHtml(group.name)} · ${group.stageCount} Etappen`,
         valueFn: group => `${formatDecimalAT(group.totalDist)} km`,
+        description: 'Mehrere Tage unterwegs, immer neue Wege und wechselnde Berglandschaften. Aus jeder Etappe wird ein Teil einer größeren Reise – und aus vielen einzelnen Momenten ein Erlebnis, das lange in Erinnerung bleibt.',
         onOpen: group => {
             closeTourListModal();
             openTourGroupModal(
@@ -12621,7 +12622,9 @@ data.forEach(e => {
         tlTitle.textContent = '🥾 Tourarten';
         tlBody.innerHTML = ranked.length === 0
             ? '<ul class="stats-list"><li><span class="stats-label">Keine Daten</span></li></ul>'
-            : `<ul class="stats-list">${ranked.map(([name], i) => `
+            : `
+                <p class="ranking-modal-companion">Jeder Weg hat seinen eigenen Charakter. Ob gemütlicher Anstieg, anspruchsvolle Bergtour oder langer Gipfeltag – manche Arten des Unterwegsseins ziehen einen immer wieder hinaus in die Berge.</p>
+                <ul class="stats-list">${ranked.map(([name], i) => `
                 <li class="highlight-clickable" data-rank-idx="${i}">
                     <span class="stats-label">${escapeHtml(name)}</span>
                     <span class="stats-value">${ranked[i][1]}${ranked[i][1] === 1 ? ' Tour' : ' Touren'}</span>
@@ -13561,7 +13564,8 @@ if (
                 '💨 Top 10 – Schnellste Touren',
                 speedList,
                 v => `${formatDecimalAT(v)} km/h`,
-                defaultLabel
+                defaultLabel,
+                'Manchmal trägt dich der eigene Rhythmus fast mühelos über die Wege. Schritt für Schritt wächst aus Ausdauer und Entschlossenheit ein Tempo, das selbst lange Strecken leicht erscheinen lässt.'
             ) : null
         },
         {
