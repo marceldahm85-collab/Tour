@@ -29235,6 +29235,18 @@ window.__bergTourenHandleDashStatHistoryPop = function (state) {
                 savedView.tours,
                 savedView.backTitle
             );
+        } else if (savedView?.kind === 'steps-story') {
+            showDashStepsStory(savedView.totalSteps, savedView.tours, savedView.backTitle);
+        } else if (savedView?.kind === 'peaks-story') {
+            showDashPeaksStory(savedView.totalPeaks, savedView.tours, savedView.backTitle);
+        } else if (savedView?.kind === 'big-tours-story') {
+            showDashBigToursStory(savedView.totalBigTours, savedView.tours, savedView.backTitle);
+        } else if (savedView?.kind === 'speed-story') {
+            showDashSpeedStory(savedView.averageSpeed, savedView.tours, savedView.backTitle);
+        } else if (savedView?.kind === 'grade-story') {
+            showDashGradeStory(savedView.averageGrade, savedView.tours, savedView.backTitle);
+        } else if (savedView?.kind === 'ascent-rate-story') {
+            showDashAscentRateStory(savedView.averageRate, savedView.tours, savedView.backTitle);
         } else if (dashboardStatOverviewContext) {
             openDashStatModal(
                 dashboardStatOverviewContext.type,
@@ -29301,6 +29313,7 @@ function openDashStatModal(type, tours) {
     let bodyHtml = '';
     let specialEntries = [];   // für data-sentry click handler
     let distanceTotal = null;
+    let storyMetric = null;
 
     switch (type) {
 
@@ -29350,6 +29363,7 @@ function openDashStatModal(type, tours) {
                 validStepsStageCount > 0
                     ? totalSteps / validStepsStageCount
                     : 0;
+            storyMetric = totalSteps;
 
             bodyHtml = `
                 <ul class="stats-list">
@@ -29407,6 +29421,7 @@ function openDashStatModal(type, tours) {
                 seen.add(k); return true;
             });
             const totalPeaks = tours.reduce((s, e) => s + (parseInt(e.gipfel) || 0), 0);
+            storyMetric = totalPeaks;
             specialEntries = uniquePeaks.map(p => p.entry);
             bodyHtml = `
                 <ul class="stats-list">
@@ -29461,6 +29476,7 @@ ${p2000 > 0 ? `
                 .filter(e => isBigTourCountable(e, tours))
                 .sort((a, b) => new Date(b.date) - new Date(a.date));
             specialEntries = big;
+            storyMetric = big.length;
             bodyHtml = `
                 <ul class="stats-list">${row('Anzahl Big Tours', big.length, false, 'ds-total-row')}</ul>
                 ${sectionTitle('NACH MONAT')}
@@ -29544,6 +29560,7 @@ ${p2000 > 0 ? `
         case 'speed': {
             title = '💨 Ø Geschwindigkeit';
             const mDist = Array(12).fill(0), mMin = Array(12).fill(0);
+            let totalSpeedDistance = 0, totalSpeedMinutes = 0;
             let fast = null, slow = null;
             tours.forEach(e => {
                 const d = parseFloat(String(e.strecke || '').replace(',', '.')) || 0;
@@ -29554,13 +29571,21 @@ ${p2000 > 0 ? `
                 if (timeH <= 0) return;
                 const speed = d / timeH;
                 const mi = new Date(e.date).getMonth();
-                if (!isNaN(mi)) { mDist[mi] += d; mMin[mi] += h * 60 + m; }
+                if (!isNaN(mi)) {
+                    mDist[mi] += d;
+                    mMin[mi] += h * 60 + m;
+                    totalSpeedDistance += d;
+                    totalSpeedMinutes += h * 60 + m;
+                }
                 if (!fast || speed > fast.v) fast = { v: speed, entry: e };
                 if (!slow || speed < slow.v) slow = { v: speed, entry: e };
             });
             const mSpeeds = mDist.map((d, i) => mMin[i] > 0 ? d / (mMin[i] / 60) : 0);
+            const overallSpeed = totalSpeedMinutes > 0 ? totalSpeedDistance / (totalSpeedMinutes / 60) : 0;
+            storyMetric = overallSpeed;
             specialEntries = [fast?.entry || null, slow?.entry || null];
             bodyHtml = `<ul class="stats-list">
+                ${row('Gesamtdurchschnitt', formatDecimalAT(overallSpeed) + ' km/h', false, 'ds-total-row')}
                 ${fast ? `<li class="highlight-clickable" data-sentry="0">
                     <span class="stats-label">🏆 Schnellste · ${escapeHtml(fast.entry.tourname||'–')}</span>
                     <span class="stats-value">${formatDecimalAT(fast.v)} km/h</span></li>` : ''}
@@ -29568,14 +29593,8 @@ ${p2000 > 0 ? `
                     <span class="stats-label">🐢 Langsamste · ${escapeHtml(slow.entry.tourname||'–')}</span>
                     <span class="stats-value">${formatDecimalAT(slow.v)} km/h</span></li>` : ''}
                 ${mSpeeds.map((v, i) =>
-    v > 0
-        ? monthRow(
-            MN[i],
-            formatDecimalAT(v) + ' km/h',
-            i
-        )
-        : ''
-).join('')}
+                    v > 0 ? monthRow(MN[i], formatDecimalAT(v) + ' km/h', i) : ''
+                ).join('')}
             </ul>`;
             break;
         }
@@ -29584,6 +29603,7 @@ ${p2000 > 0 ? `
         case 'steigung': {
             title = '📐 Ø Steigung';
             const mGS = Array(12).fill(0), mGC = Array(12).fill(0);
+            let overallGradeSum = 0, overallGradeCount = 0;
             let steep = null, flat = null;
             tours.forEach(e => {
                 const asc  = getAdjustedAscent(e);
@@ -29591,12 +29611,20 @@ ${p2000 > 0 ? `
                 if (asc <= 0 || dist <= 0 || !e.date) return;
                 const g = asc / dist;
                 const mi = new Date(e.date).getMonth();
-                if (!isNaN(mi)) { mGS[mi] += g; mGC[mi]++; }
+                if (!isNaN(mi)) {
+                    mGS[mi] += g;
+                    mGC[mi]++;
+                    overallGradeSum += g;
+                    overallGradeCount++;
+                }
                 if (!steep || g > steep.v) steep = { v: g, entry: e };
                 if (!flat  || g < flat.v)  flat  = { v: g, entry: e };
             });
+            const overallGrade = overallGradeCount > 0 ? overallGradeSum / overallGradeCount : 0;
+            storyMetric = overallGrade;
             specialEntries = [steep?.entry || null, flat?.entry || null];
             bodyHtml = `<ul class="stats-list">
+                ${row('Gesamtdurchschnitt', Math.round(overallGrade) + ' hm/km', false, 'ds-total-row')}
                 ${steep ? `<li class="highlight-clickable" data-sentry="0">
                     <span class="stats-label">🏔️ Steilste · ${escapeHtml(steep.entry.tourname||'–')}</span>
                     <span class="stats-value">${Math.round(steep.v)} hm/km</span></li>` : ''}
@@ -29615,6 +29643,7 @@ ${p2000 > 0 ? `
         case 'anstieg': {
             title = '⬆️ Ø Anstieg';
             const mRS = Array(12).fill(0), mRC = Array(12).fill(0);
+            let overallRateSum = 0, overallRateCount = 0;
             let fast = null, slow = null;
             tours.forEach(e => {
                 const asc  = getAdjustedAscent(e);
@@ -29622,12 +29651,20 @@ ${p2000 > 0 ? `
                 if (asc <= 0 || time <= 0 || !e.date) return;
                 const rate = asc / time;
                 const mi   = new Date(e.date).getMonth();
-                if (!isNaN(mi)) { mRS[mi] += rate; mRC[mi]++; }
+                if (!isNaN(mi)) {
+                    mRS[mi] += rate;
+                    mRC[mi]++;
+                    overallRateSum += rate;
+                    overallRateCount++;
+                }
                 if (!fast || rate > fast.v) fast = { v: rate, entry: e };
                 if (!slow || rate < slow.v) slow = { v: rate, entry: e };
             });
+            const overallRate = overallRateCount > 0 ? overallRateSum / overallRateCount : 0;
+            storyMetric = overallRate;
             specialEntries = [fast?.entry || null, slow?.entry || null];
             bodyHtml = `<ul class="stats-list">
+                ${row('Gesamtdurchschnitt', Math.round(overallRate) + ' hm/h', false, 'ds-total-row')}
                 ${fast ? `<li class="highlight-clickable" data-sentry="0">
                     <span class="stats-label">⚡ Schnellster · ${escapeHtml(fast.entry.tourname||'–')}</span>
                     <span class="stats-value">${Math.round(fast.v)} hm/h</span></li>` : ''}
@@ -29723,6 +29760,18 @@ bodyEl.querySelectorAll('[data-peak-min]').forEach(el => {
                     return sum + hours * 60 + minutes;
                 }, 0);
                 showDashTimeStory(timeTotalMinutes, tours, title);
+            } else if (type === 'steps') {
+                showDashStepsStory(storyMetric, tours, title);
+            } else if (type === 'gipfel') {
+                showDashPeaksStory(storyMetric, tours, title);
+            } else if (type === 'bigTours') {
+                showDashBigToursStory(storyMetric, tours, title);
+            } else if (type === 'speed') {
+                showDashSpeedStory(storyMetric, tours, title);
+            } else if (type === 'steigung') {
+                showDashGradeStory(storyMetric, tours, title);
+            } else if (type === 'anstieg') {
+                showDashAscentRateStory(storyMetric, tours, title);
             } else {
                 showDashAllSorted(type, tours, title);
             }
@@ -29984,6 +30033,281 @@ function startDashboardTimeStoryAnimations() {
         else setFinalValues();
     };
     requestAnimationFrame(tick);
+}
+
+
+function formatDashboardStoryValue(value, digits = 1) {
+    return Number(value || 0).toLocaleString('de-AT', {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits
+    });
+}
+
+function animateDashboardStoryNumber(elementId, target, formatter, duration = 2100) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    const finalValue = Math.max(0, Number(target) || 0);
+    const setFinal = () => { element.textContent = formatter(finalValue); };
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+        setFinal();
+        return;
+    }
+    const start = performance.now();
+    const ease = value => 1 - Math.pow(1 - value, 3);
+    const tick = now => {
+        if (!element.isConnected) return;
+        const progress = Math.min(1, Math.max(0, (now - start) / duration));
+        element.textContent = formatter(finalValue * ease(progress));
+        if (progress < 1) requestAnimationFrame(tick);
+        else setFinal();
+    };
+    requestAnimationFrame(tick);
+}
+
+function dashboardStoryBackButton() {
+    return '<button class="save-btn dashboard-story-back" id="ds-back" type="button">← Zurück</button>';
+}
+
+function showDashStepsStory(totalSteps, allTours, backTitle) {
+    const titleEl = document.getElementById('ds-title');
+    const bodyEl = document.getElementById('ds-body');
+    if (!titleEl || !bodyEl) return;
+    pushDashboardStatSubviewHistory('steps-story', { totalSteps, tours: allTours, backTitle });
+
+    const safeSteps = Math.max(0, Number(totalSteps) || 0);
+    const completeDays = Math.floor(safeSteps / 10000);
+    const visibleDays = Math.min(180, completeDays);
+    const units = Array.from({ length: visibleDays }, () =>
+        '<span class="dashboard-steps-day" aria-hidden="true"></span>'
+    ).join('');
+    const extra = completeDays > visibleDays
+        ? '<span class="dashboard-steps-extra">+' + (completeDays - visibleDays).toLocaleString('de-AT') + ' weitere</span>'
+        : '';
+
+    titleEl.textContent = '';
+    bodyEl.innerHTML = dashboardStoryBackButton() +
+        '<div class="dashboard-extra-story dashboard-steps-story">' +
+            '<section class="dashboard-extra-total">' +
+                '<div class="dashboard-extra-total-title">Deine gesamten Schritte</div>' +
+                '<div class="dashboard-extra-total-value"><span id="dashboard-steps-total-value">0</span><span class="dashboard-extra-unit">Schritte</span></div>' +
+            '</section>' +
+            '<section class="dashboard-extra-panel dashboard-steps-comparison">' +
+                '<div class="dashboard-extra-panel-title">10.000 Schritte am Tag</div>' +
+                '<div class="dashboard-steps-days-value"><span id="dashboard-steps-days-value">0</span><span class="dashboard-extra-unit">Tage</span></div>' +
+                '<div class="dashboard-steps-day-grid">' + units + extra + '</div>' +
+                '<div class="dashboard-extra-caption">Jede Einheit steht für einen vollständigen Tag mit 10.000 Schritten.</div>' +
+            '</section>' +
+            '<p class="dashboard-extra-personal">Aus unzähligen einzelnen Schritten ist eine beeindruckende Reise geworden. Jeder davon hat dich ein Stück weiter hinaus in die Berge getragen.</p>' +
+        '</div>';
+
+    bodyEl.querySelector('#ds-back')?.addEventListener('click', () => backDashboardStatSubview('steps', allTours));
+    animateDashboardStoryNumber('dashboard-steps-total-value', safeSteps, value => Math.round(value).toLocaleString('de-AT'));
+    animateDashboardStoryNumber('dashboard-steps-days-value', safeSteps / 10000, value => formatDashboardStoryValue(value, 1));
+}
+
+function showDashPeaksStory(totalPeaks, allTours, backTitle) {
+    const titleEl = document.getElementById('ds-title');
+    const bodyEl = document.getElementById('ds-body');
+    if (!titleEl || !bodyEl) return;
+    pushDashboardStatSubviewHistory('peaks-story', { totalPeaks, tours: allTours, backTitle });
+
+    const safePeaks = Math.max(0, Math.round(Number(totalPeaks) || 0));
+    const activeWeeks = Math.min(52, safePeaks);
+    const weekCells = Array.from({ length: 52 }, (_, index) =>
+        '<span class="dashboard-peaks-week' + (index < activeWeeks ? ' is-active' : '') + '" aria-hidden="true"></span>'
+    ).join('');
+    const comparison = safePeaks <= 52
+        ? safePeaks.toLocaleString('de-AT') + ' von 52 Wochen'
+        : formatDashboardStoryValue(safePeaks / 52, 2) + ' Jahresumfänge';
+
+    titleEl.textContent = '';
+    bodyEl.innerHTML = dashboardStoryBackButton() +
+        '<div class="dashboard-extra-story dashboard-peaks-story">' +
+            '<section class="dashboard-extra-total">' +
+                '<div class="dashboard-extra-total-title">Deine Gipfel</div>' +
+                '<div class="dashboard-extra-total-value"><span id="dashboard-peaks-total-value">0</span><span class="dashboard-extra-unit">Gipfel</span></div>' +
+            '</section>' +
+            '<section class="dashboard-extra-panel dashboard-peaks-comparison">' +
+                '<div class="dashboard-extra-panel-title">Ein Jahr hat 52 Wochen</div>' +
+                '<div class="dashboard-peaks-comparison-value">' + comparison + '</div>' +
+                '<div class="dashboard-peaks-week-grid">' + weekCells + '</div>' +
+                '<div class="dashboard-extra-caption">Ein Gipfel pro Woche – als rechnerischer Größenvergleich, nicht als tatsächliche Verteilung deiner Touren.</div>' +
+            '</section>' +
+            '<p class="dashboard-extra-personal">Jeder Gipfel war ein eigenes Ziel. Manche Wege waren vertraut, andere führten dich an Orte, die du zuvor nur aus der Ferne gesehen hast. Zusammen ergeben sie deine ganz persönliche Gipfelgeschichte.</p>' +
+        '</div>';
+
+    bodyEl.querySelector('#ds-back')?.addEventListener('click', () => backDashboardStatSubview('gipfel', allTours));
+    animateDashboardStoryNumber('dashboard-peaks-total-value', safePeaks, value => Math.round(value).toLocaleString('de-AT'));
+}
+
+function showDashBigToursStory(totalBigTours, allTours, backTitle) {
+    const titleEl = document.getElementById('ds-title');
+    const bodyEl = document.getElementById('ds-body');
+    if (!titleEl || !bodyEl) return;
+    pushDashboardStatSubviewHistory('big-tours-story', { totalBigTours, tours: allTours, backTitle });
+
+    const safeCount = Math.max(0, Math.round(Number(totalBigTours) || 0));
+    const imageUrl = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6b/Galleria_52_-_Strada_delle_52_Gallerie%2C_Valli_del_Pasubio%2C_Vicenza%2C_Italy_-_June_13%2C_2021.jpg/1280px-Galleria_52_-_Strada_delle_52_Gallerie%2C_Valli_del_Pasubio%2C_Vicenza%2C_Italy_-_June_13%2C_2021.jpg';
+    const sourceUrl = 'https://commons.wikimedia.org/wiki/File:Galleria_52_-_Strada_delle_52_Gallerie,_Valli_del_Pasubio,_Vicenza,_Italy_-_June_13,_2021.jpg';
+
+    titleEl.textContent = '';
+    bodyEl.innerHTML = dashboardStoryBackButton() +
+        '<div class="dashboard-extra-story dashboard-big-tours-story">' +
+            '<section class="dashboard-extra-total">' +
+                '<div class="dashboard-extra-total-title">Deine Big Tours</div>' +
+                '<div class="dashboard-extra-total-value"><span id="dashboard-big-tours-total-value">0</span><span class="dashboard-extra-unit">Touren</span></div>' +
+            '</section>' +
+            '<section class="dashboard-extra-panel dashboard-big-tours-reference">' +
+                '<div class="dashboard-extra-panel-title">Eine außergewöhnliche Tour als Referenz</div>' +
+                '<img class="dashboard-big-tours-image" src="' + imageUrl + '" alt="Historischer Tunnelweg der Strada delle 52 Gallerie am Pasubio" loading="lazy">' +
+                '<div class="dashboard-big-tours-route-name">Strada delle 52 Gallerie · Pasubio</div>' +
+                '<div class="dashboard-big-tours-metrics"><span><strong>14,9 km</strong><small>Strecke</small></span><span><strong>+1.065 hm</strong><small>Aufstieg</small></span></div>' +
+                '<div class="dashboard-extra-caption">Eine reale Referenztour, die mit Strecke und Höhenmetern über den Mindestwerten deiner Big-Tour-Kategorie liegt. Deine Touren werden weiterhin ausschließlich nach den App-Kriterien gezählt.</div>' +
+                '<a class="dashboard-extra-source" href="' + sourceUrl + '" target="_blank" rel="noopener noreferrer">Foto: Giorgio Galeotti · CC BY 4.0 · Wikimedia Commons</a>' +
+            '</section>' +
+            '<p class="dashboard-extra-personal">Das waren keine gewöhnlichen Bergtage. Lange Wege, kräftige Anstiege und besondere Herausforderungen haben diese Touren zu echten Erlebnissen gemacht.</p>' +
+        '</div>';
+
+    bodyEl.querySelector('#ds-back')?.addEventListener('click', () => backDashboardStatSubview('bigTours', allTours));
+    animateDashboardStoryNumber('dashboard-big-tours-total-value', safeCount, value => Math.round(value).toLocaleString('de-AT'));
+}
+
+function showDashSpeedStory(averageSpeed, allTours, backTitle) {
+    const titleEl = document.getElementById('ds-title');
+    const bodyEl = document.getElementById('ds-body');
+    if (!titleEl || !bodyEl) return;
+    pushDashboardStatSubviewHistory('speed-story', { averageSpeed, tours: allTours, backTitle });
+
+    const safeSpeed = Math.max(0, Number(averageSpeed) || 0);
+    const markerPosition = Math.max(0, Math.min(100, safeSpeed / 10 * 100));
+    const markerLabelPosition = Math.max(3, Math.min(97, markerPosition));
+    const gaitItems = [
+        { label: 'Schlendern', speed: 2 },
+        { label: 'Gemütlich', speed: 3 },
+        { label: 'Normal', speed: 4 },
+        { label: 'Zügig', speed: 5 },
+        { label: 'Leichtes Joggen', speed: 8 }
+    ];
+    const gaitMarks = gaitItems.map(item =>
+        '<div class="dashboard-speed-gait"><span class="dashboard-speed-gait-dot"></span><strong>' + item.label + '</strong><small>' + item.speed + ' km/h</small></div>'
+    ).join('');
+
+    titleEl.textContent = '';
+    bodyEl.innerHTML = dashboardStoryBackButton() +
+        '<div class="dashboard-extra-story dashboard-speed-story">' +
+            '<section class="dashboard-extra-total">' +
+                '<div class="dashboard-extra-total-title">Deine Durchschnittsgeschwindigkeit</div>' +
+                '<div class="dashboard-extra-total-value"><span id="dashboard-speed-total-value">0,0</span><span class="dashboard-extra-unit">km/h</span></div>' +
+            '</section>' +
+            '<section class="dashboard-extra-panel dashboard-speed-comparison">' +
+                '<div class="dashboard-extra-panel-title">Zum Vergleich: alltägliche Gangarten</div>' +
+                '<div class="dashboard-speed-scale">' +
+                    '<div class="dashboard-speed-track"></div>' +
+                    '<div class="dashboard-speed-marker" id="dashboard-speed-marker" style="left:0%"><span id="dashboard-speed-marker-label">0,0 km/h</span></div>' +
+                '</div>' +
+                '<div class="dashboard-speed-gaits">' + gaitMarks + '</div>' +
+                '<div class="dashboard-extra-caption">Ungefähre Orientierungswerte. Auf Bergwegen beeinflussen Steigung, Untergrund und Wegbeschaffenheit das Tempo erheblich.</div>' +
+            '</section>' +
+            '<p class="dashboard-extra-personal">Du hast deinen eigenen Rhythmus gefunden. Mal führt der Weg gemütlich durch Täler, mal geht es zügig weiter – doch jeder Kilometer bringt dich deinen Bergzielen näher.</p>' +
+        '</div>';
+
+    bodyEl.querySelector('#ds-back')?.addEventListener('click', () => backDashboardStatSubview('speed', allTours));
+    animateDashboardStoryNumber('dashboard-speed-total-value', safeSpeed, value => formatDashboardStoryValue(value, 1));
+    const marker = bodyEl.querySelector('#dashboard-speed-marker');
+    const markerLabel = bodyEl.querySelector('#dashboard-speed-marker-label');
+    if (marker && markerLabel) {
+        const finalLabel = formatDashboardStoryValue(safeSpeed, 1) + ' km/h';
+        if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+            marker.style.left = markerPosition + '%';
+            markerLabel.textContent = finalLabel;
+        } else {
+            requestAnimationFrame(() => {
+                marker.style.left = markerPosition + '%';
+                markerLabel.textContent = finalLabel;
+            });
+        }
+    }
+}
+
+function showDashGradeStory(averageGrade, allTours, backTitle) {
+    const titleEl = document.getElementById('ds-title');
+    const bodyEl = document.getElementById('ds-body');
+    if (!titleEl || !bodyEl) return;
+    pushDashboardStatSubviewHistory('grade-story', { averageGrade, tours: allTours, backTitle });
+
+    const safeGrade = Math.max(0, Number(averageGrade) || 0);
+    const gradePercent = safeGrade / 10;
+    const referencePercent = 14;
+    const scaleMax = Math.max(referencePercent, gradePercent, 1) * 1.08;
+    const userWidth = Math.min(100, gradePercent / scaleMax * 100);
+    const referenceWidth = Math.min(100, referencePercent / scaleMax * 100);
+    const imageUrl = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/94/Lombard_street_in_San_Francisco.jpg/1280px-Lombard_street_in_San_Francisco.jpg';
+    const sourceUrl = 'https://commons.wikimedia.org/wiki/File:Lombard_street_in_San_Francisco.jpg';
+
+    titleEl.textContent = '';
+    bodyEl.innerHTML = dashboardStoryBackButton() +
+        '<div class="dashboard-extra-story dashboard-grade-story">' +
+            '<section class="dashboard-extra-total">' +
+                '<div class="dashboard-extra-total-title">Deine durchschnittliche Steigung</div>' +
+                '<div class="dashboard-extra-total-value"><span id="dashboard-grade-hm-value">0</span><span class="dashboard-extra-unit">hm/km</span></div>' +
+                '<div class="dashboard-grade-percent-value"><span id="dashboard-grade-percent-value">0,0</span> %</div>' +
+            '</section>' +
+            '<section class="dashboard-extra-panel dashboard-grade-comparison">' +
+                '<img class="dashboard-grade-image" src="' + imageUrl + '" alt="Die kurvenreiche Lombard Street in San Francisco" loading="lazy">' +
+                '<div class="dashboard-grade-image-caption">Lombard Street · San Francisco</div>' +
+                '<div class="dashboard-grade-bars">' +
+                    '<div class="dashboard-grade-bar-row"><span>Dein Durchschnitt</span><strong>' + formatDashboardStoryValue(gradePercent, 1) + ' %</strong><div class="dashboard-grade-bar"><span class="dashboard-grade-bar-fill is-user" data-width="' + userWidth.toFixed(2) + '"></span></div></div>' +
+                    '<div class="dashboard-grade-bar-row"><span>Lombard Street</span><strong>14 %</strong><div class="dashboard-grade-bar"><span class="dashboard-grade-bar-fill is-reference" data-width="' + referenceWidth.toFixed(2) + '"></span></div></div>' +
+                '</div>' +
+                '<div class="dashboard-extra-caption">Die 14 % dienen als Vergleichswert für die Lombard Street. Die Darstellung setzt deine durchschnittliche Steigung ins Verhältnis zu diesem Referenzwert.</div>' +
+                '<a class="dashboard-extra-source" href="' + sourceUrl + '" target="_blank" rel="noopener noreferrer">Foto: Mattias Hill · CC BY 3.0 · Wikimedia Commons</a>' +
+            '</section>' +
+            '<p class="dashboard-extra-personal">Nicht jeder Kilometer führt einfach geradeaus. Viele deiner Wege haben dich ordentlich gefordert – bergauf, über steile Pfade und hinein in die Höhen der Alpen.</p>' +
+        '</div>';
+
+    bodyEl.querySelector('#ds-back')?.addEventListener('click', () => backDashboardStatSubview('steigung', allTours));
+    animateDashboardStoryNumber('dashboard-grade-hm-value', safeGrade, value => Math.round(value).toLocaleString('de-AT'));
+    animateDashboardStoryNumber('dashboard-grade-percent-value', gradePercent, value => formatDashboardStoryValue(value, 1));
+    const fills = bodyEl.querySelectorAll('.dashboard-grade-bar-fill');
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    fills.forEach(fill => {
+        const width = fill.dataset.width || '0';
+        if (reduced) fill.style.width = width + '%';
+        else requestAnimationFrame(() => { fill.style.width = width + '%'; });
+    });
+}
+
+function showDashAscentRateStory(averageRate, allTours, backTitle) {
+    const titleEl = document.getElementById('ds-title');
+    const bodyEl = document.getElementById('ds-body');
+    if (!titleEl || !bodyEl) return;
+    pushDashboardStatSubviewHistory('ascent-rate-story', { averageRate, tours: allTours, backTitle });
+
+    const safeRate = Math.max(0, Number(averageRate) || 0);
+    const floors = safeRate / 3;
+    const floorBlocks = Array.from({ length: 12 }, (_, index) =>
+        '<span class="dashboard-ascent-floor' + (index < Math.min(12, Math.ceil(floors / 10)) ? ' is-lit' : '') + '"></span>'
+    ).join('');
+
+    titleEl.textContent = '';
+    bodyEl.innerHTML = dashboardStoryBackButton() +
+        '<div class="dashboard-extra-story dashboard-ascent-rate-story">' +
+            '<section class="dashboard-extra-total">' +
+                '<div class="dashboard-extra-total-title">Dein durchschnittlicher Anstieg</div>' +
+                '<div class="dashboard-extra-total-value"><span id="dashboard-ascent-rate-value">0</span><span class="dashboard-extra-unit">hm/h</span></div>' +
+            '</section>' +
+            '<section class="dashboard-extra-panel dashboard-ascent-floors-panel">' +
+                '<div class="dashboard-extra-panel-title">Das entspricht ungefähr</div>' +
+                '<div class="dashboard-ascent-building">' + floorBlocks + '</div>' +
+                '<div class="dashboard-ascent-floors-value"><span id="dashboard-ascent-floors-value">0</span><span class="dashboard-extra-unit">Stockwerken pro Stunde</span></div>' +
+                '<div class="dashboard-extra-caption">Berechnet mit einer angenommenen Höhe von 3 Metern pro Stockwerk.</div>' +
+            '</section>' +
+            '<p class="dashboard-extra-personal">Meter für Meter gewinnst du an Höhe. Aus Kraft, Ausdauer und vielen überwundenen Höhenmetern entsteht eine Leistung, die dich immer weiter hinaufbringt.</p>' +
+        '</div>';
+
+    bodyEl.querySelector('#ds-back')?.addEventListener('click', () => backDashboardStatSubview('anstieg', allTours));
+    animateDashboardStoryNumber('dashboard-ascent-rate-value', safeRate, value => Math.round(value).toLocaleString('de-AT'));
+    animateDashboardStoryNumber('dashboard-ascent-floors-value', floors, value => formatDashboardStoryValue(value, 1));
 }
 
 function startDashboardDistanceStoryAnimations() {
