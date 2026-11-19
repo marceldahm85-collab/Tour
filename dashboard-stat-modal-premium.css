@@ -491,3 +491,27 @@
     line-height: 1.55;
     text-align: center;
 }
+
+
+/* Gehzeit-Modal: kompakte Satzdarstellung der Tagesumrechnung und stärkerer Begleittext. */
+#dash-stat-modal .dashboard-time-days-value {
+    flex-wrap: wrap;
+    column-gap: 6px;
+    row-gap: 4px;
+    font-size: clamp(28px, 7.4vw, 39px);
+    letter-spacing: -.025em;
+}
+#dash-stat-modal .dashboard-time-days-prefix {
+    color: rgba(255,255,255,.92);
+    font-size: 14px;
+    font-weight: 750;
+    letter-spacing: 0;
+}
+#dash-stat-modal .dashboard-time-days-unit {
+    font-size: 15px;
+}
+#dash-stat-modal .dashboard-time-personal {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.6;
+}

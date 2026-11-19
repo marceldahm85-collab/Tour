@@ -29908,13 +29908,12 @@ function showDashTimeStory(totalMinutes, allTours, backTitle) {
                     <span class="dashboard-time-total-unit">h</span>
                 </div>
             </section>
-            <section class="dashboard-time-days" aria-label="Zeit am Berg in Tagen">
-                <div class="dashboard-time-days-title">So viel Zeit am Berg</div>
+            <section class="dashboard-time-days" aria-label="Umrechnung der Gehzeit in Tage am Berg">
                 <div class="dashboard-time-days-value">
-                    <span id="dashboard-time-days-value" data-target="${totalDays.toFixed(3)}">0,0</span>
-                    <span class="dashboard-time-days-unit">Tage</span>
+                    <span class="dashboard-time-days-prefix">Das entspricht</span>
+                    <span id="dashboard-time-days-value" data-target="${totalDays.toFixed(3)}">0,00</span>
+                    <span class="dashboard-time-days-unit">Tagen am Berg</span>
                 </div>
-                <div class="dashboard-time-days-caption">24 Stunden Gehzeit entsprechen einem Tag am Berg</div>
             </section>
             <p class="dashboard-time-personal">Stunden fernab vom Alltag, mitten in der Natur. Zeit zum Durchatmen, Weitergehen und Genießen.</p>
         </div>
@@ -29935,8 +29934,8 @@ function startDashboardTimeStoryAnimations() {
     const daysTarget = Math.max(0, Number(daysValue.dataset.target) || 0);
     const duration = 2200;
     const formatDays = value => value.toLocaleString('de-AT', {
-        minimumFractionDigits: 1,
-        maximumFractionDigits: 1
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
     });
     const setFinalValues = () => {
         totalValue.textContent = formatDuration(totalMinutes);

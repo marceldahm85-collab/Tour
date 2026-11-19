@@ -10,6 +10,7 @@ on:
       - ".github/workflows/android-release-apk.yml"
       - "index.html"
       - "app-main-20261019.js"
+      - "dashboard-stat-modal-premium.css"
       - "app-start-editor.js"
       - "dashboard-premium-alpine.js"
       - "stats-premium-alpine.js"
@@ -130,7 +131,7 @@ jobs:
             echo "## Bergtouren Android — Release APK"
             echo
             echo "- Package: at.marcel.bergtouren"
-            echo "- Version: 0.8.17 (42)"
+            echo "- Version: 0.8.18 (43)"
             echo "- Build type: signed, non-debuggable Release"
             echo "- Artifact: bergtouren-release.apk"
             echo
