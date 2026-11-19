@@ -10326,7 +10326,8 @@ function openProgressiveRankingModal({
     comparator = compareHighlightRankingItems,
     labelFn,
     valueFn,
-    onOpen
+    onOpen,
+    description = ''
 }) {
     const tlTitle = document.getElementById('tl-title');
     const tlBody = document.getElementById('tl-body');
@@ -10342,6 +10343,7 @@ function openProgressiveRankingModal({
         tlBody.innerHTML = ranked.length === 0
             ? '<ul class="stats-list"><li><span class="stats-label">Keine Daten</span></li></ul>'
             : `
+                ${description ? `<p class="ranking-modal-companion">${escapeHtml(description)}</p>` : ''}
                 <ul class="stats-list">
                     ${visible.map((item, index) => `
                         <li
@@ -10389,11 +10391,12 @@ function openProgressiveRankingModal({
     }
 }
 
-function openTopListModal(title, items, formatFn, labelFn) {
+function openTopListModal(title, items, formatFn, labelFn, description = '') {
     openProgressiveRankingModal({
         title,
         items,
         labelFn,
+        description,
         valueFn: item => formatFn(item.value),
         onOpen: item => {
             if (!item?.entry) return;
@@ -13535,7 +13538,8 @@ if (
                 '🏔️ Top 10 – Höchste Gipfel',
                 peakList,
                 v => `${Math.round(v)} m`,
-                (it) => `${escapeHtml(it.name)}`
+                (it) => `${escapeHtml(it.name)}`,
+                'Jeder Gipfel hat seine eigene Geschichte. Dieser markiert den höchsten Punkt deines Bergjahres – erreicht mit Ausdauer und Entschlossenheit. Hier oben werden Anstrengung und die Schönheit der Berge zu einem besonderen Moment und einem Ausblick, der in Erinnerung bleibt.'
             ) : null
         },
         {

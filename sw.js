@@ -1,6 +1,6 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Der PDF-Magazin-Renderer wird direkt über index.html geladen.
-const CACHE_NAME = 'bergtouren-cache-premium-alpine-v461';
+const CACHE_NAME = 'bergtouren-cache-premium-alpine-v462';
 
 const APP_SHELL = [
   './',
@@ -11,7 +11,7 @@ const APP_SHELL = [
   './fonts/nunito-sans-latin-wght-normal.woff2',
   './fonts/righteous-latin-400-normal.woff2',
   './android-backup-bridge.js?v=5',
-  './app-main-20261019.js?v=130',
+  './app-main-20261019.js?v=131',
   './touch-ripple-feedback.js?v=1',
   './native-app-ready.js?v=3',
   './native-system-bars.js?v=4',
@@ -45,7 +45,7 @@ const APP_SHELL = [
   './styles.css?v=22',
   './styles-overrides.css?v=112',
   './dashboard-premium-alpine.css?v=36',
-  './dashboard-stat-modal-premium.css?v=15',
+  './dashboard-stat-modal-premium.css?v=16',
   './premium-modal-surface.css?v=3',
   './premium-modal-header.css?v=2',
   './comparison-premium.css?v=9',
@@ -56,7 +56,7 @@ const APP_SHELL = [
   './premium-image-presentation.css?v=1',
   './premium-image-presentation.js?v=1',
   './premium-experience.js?v=1',
-  './stats-premium-alpine.css?v=41',
+  './stats-premium-alpine.css?v=42',
   './map-premium-alpine.css?v=20',
   './appview-premium-alpine.css?v=22',
   './assets/topography/lienzer-dolomiten-contours-fine.svg',

@@ -995,6 +995,7 @@
     font-size: 13px !important;
     line-height: 1.3;
     font-weight: 600;
+    text-align: center !important;
 }
 
 /* Gipfelliste: das bereits in den Highlights verwendete Dolomitenpanorama.
@@ -1384,4 +1385,16 @@
     box-shadow:
         var(--premium-shadow-card, 0 8px 22px rgba(0,0,0,.18)),
         inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+
+
+/* Begleittext im Gipfel-Highlight: zwischen Modal-Titel und dynamischer Rangliste. */
+#tour-list-modal #tl-body .ranking-modal-companion {
+    margin: 0 0 10px !important;
+    padding: 0 4px;
+    color: var(--app-text-primary, var(--text-main, inherit));
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+    text-align: center !important;
 }

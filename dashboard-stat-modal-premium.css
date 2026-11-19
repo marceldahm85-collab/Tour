@@ -344,7 +344,7 @@
     font-size: 16px;
     font-weight: 500;
     line-height: 1.6;
-    text-align: center;
+    text-align: center !important;
 }
 
 /* Leuchtpfad und Zählwerte der kombinierten Streckenansicht. */
@@ -392,7 +392,7 @@
 #dash-stat-modal[data-dashboard-stat-type="aufstieg"] #dashboard-ascent-total-value,
 #dash-stat-modal[data-dashboard-stat-type="aufstieg"] #dashboard-ascent-grossglockner-value,
 #dash-stat-modal[data-dashboard-stat-type="aufstieg"] #dashboard-ascent-everest-value { font-variant-numeric:tabular-nums; }
-#dash-stat-modal[data-dashboard-stat-type="aufstieg"] .dashboard-ascent-personal { margin:0; padding:2px 4px 4px; color:rgba(255,255,255,.92); font-size:16px; font-weight:500; line-height:1.6; text-align:center; }
+#dash-stat-modal[data-dashboard-stat-type="aufstieg"] .dashboard-ascent-personal { margin:0; padding:2px 4px 4px; color:rgba(255,255,255,.92); font-size:16px; font-weight:500; line-height:1.6; text-align:center !important; }
 
 /* Gesamtstrecke: Jahreswert oberhalb der Osttirol-Umrundung. */
 #dash-stat-modal[data-dashboard-stat-type="strecke"] .dashboard-distance-story { display:flex; flex-direction:column; gap:12px; min-width:0; }
@@ -476,7 +476,7 @@
     color: rgba(255,255,255,.92);
     font-size: 13px;
     line-height: 1.55;
-    text-align: center;
+    text-align: center !important;
 }
 #dash-stat-modal #dashboard-time-total-value,
 #dash-stat-modal #dashboard-time-days-value {
