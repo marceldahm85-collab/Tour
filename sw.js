@@ -1,6 +1,6 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Der PDF-Magazin-Renderer wird direkt über index.html geladen.
-const CACHE_NAME = 'bergtouren-cache-premium-alpine-v460';
+const CACHE_NAME = 'bergtouren-cache-premium-alpine-v461';
 
 const APP_SHELL = [
   './',
@@ -11,7 +11,7 @@ const APP_SHELL = [
   './fonts/nunito-sans-latin-wght-normal.woff2',
   './fonts/righteous-latin-400-normal.woff2',
   './android-backup-bridge.js?v=5',
-  './app-main-20261019.js?v=129',
+  './app-main-20261019.js?v=130',
   './touch-ripple-feedback.js?v=1',
   './native-app-ready.js?v=3',
   './native-system-bars.js?v=4',
@@ -56,7 +56,7 @@ const APP_SHELL = [
   './premium-image-presentation.css?v=1',
   './premium-image-presentation.js?v=1',
   './premium-experience.js?v=1',
-  './stats-premium-alpine.css?v=39',
+  './stats-premium-alpine.css?v=41',
   './map-premium-alpine.css?v=20',
   './appview-premium-alpine.css?v=22',
   './assets/topography/lienzer-dolomiten-contours-fine.svg',
