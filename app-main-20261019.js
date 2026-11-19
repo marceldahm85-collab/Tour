@@ -29747,7 +29747,7 @@ function showDashDistanceStory(distance, allTours, backTitle) {
         </button>
         <div class="dashboard-distance-story">
             <section class="dashboard-distance-total" aria-label="Jahresgesamtstrecke">
-                
+                <div class="dashboard-distance-total-title">Deine Gesamtstrecke</div>
                 <div class="dashboard-distance-total-value">
                     <span id="dashboard-distance-total-value" data-target="${safeDistance.toFixed(1)}">0,0</span>
                     <span class="dashboard-distance-total-unit">km</span>
@@ -29818,7 +29818,7 @@ function showDashAscentStory(ascent, allTours, backTitle) {
         <button class="save-btn" id="ds-back" style="margin-bottom:12px;padding:5px 14px;font-size:13px;">← Zurück</button>
         <div class="dashboard-ascent-story">
             <section class="dashboard-ascent-total" aria-label="Jahresgesamtaufstieg">
-                
+                <div class="dashboard-ascent-total-title">Dein Gesamtaufstieg</div>
                 <div class="dashboard-ascent-total-value">
                     <span id="dashboard-ascent-total-value" data-target="${Math.round(safeAscent)}">0</span>
                     <span class="dashboard-ascent-unit">hm</span>
@@ -29895,7 +29895,7 @@ function showDashTimeStory(totalMinutes, allTours, backTitle) {
         <button class="save-btn" id="ds-back" style="margin-bottom:12px;padding:5px 14px;font-size:13px;">← Zurück</button>
         <div class="dashboard-time-story">
             <section class="dashboard-time-total" aria-label="Jahresgesamtgehzeit">
-                
+                <div class="dashboard-time-total-title">Deine gesamte Gehzeit</div>
                 <div class="dashboard-time-total-value">
                     <span id="dashboard-time-total-value" data-target-minutes="${safeMinutes}">00:00</span>
                     <span class="dashboard-time-total-unit">h</span>
