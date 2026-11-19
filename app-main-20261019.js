@@ -29626,13 +29626,11 @@ ${p2000 > 0 ? `
     titleEl.textContent = title;
     bodyEl.innerHTML    = bodyHtml;
 
-    // Der Begleittext wird nach dem Aufbau des Touren-Modals gezielt ergänzt.
-    // So bleibt er unabhängig von der Monatslisten-Template-Zusammensetzung sichtbar.
-    if (type === 'touren') {
-        const note = document.createElement('p');
-        note.className = 'dash-tour-month-note';
-        note.textContent = 'Jeder Ausflug brachte neue Wege, Eindrücke und Gipfelmomente.';
-        bodyEl.appendChild(note);
+    // Der Begleittext liegt bewusst außerhalb von #ds-body.
+    // Dadurch kann kein späteres innerHTML-Update des Modal-Inhalts ihn entfernen.
+    const tourNote = document.getElementById('ds-tour-month-note');
+    if (tourNote) {
+        tourNote.style.display = type === 'touren' ? 'block' : 'none';
     }
 
     // Gipfel-Höhenklassen anklickbar
