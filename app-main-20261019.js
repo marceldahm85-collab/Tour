@@ -29298,7 +29298,7 @@ function openDashStatModal(type, tours) {
                         v => v + (v === 1 ? ' Tour' : ' Touren')
                     )}
                 </ul>
-                <p class="dash-tour-month-note">Jeder Ausflug brachte neue Wege, Eindrücke und Gipfelmomente.</p>`;
+                `;
             break;
         }
 
@@ -29625,6 +29625,15 @@ ${p2000 > 0 ? `
 
     titleEl.textContent = title;
     bodyEl.innerHTML    = bodyHtml;
+
+    // Der Begleittext wird nach dem Aufbau des Touren-Modals gezielt ergänzt.
+    // So bleibt er unabhängig von der Monatslisten-Template-Zusammensetzung sichtbar.
+    if (type === 'touren') {
+        const note = document.createElement('p');
+        note.className = 'dash-tour-month-note';
+        note.textContent = 'Jeder Ausflug brachte neue Wege, Eindrücke und Gipfelmomente.';
+        bodyEl.appendChild(note);
+    }
 
     // Gipfel-Höhenklassen anklickbar
 bodyEl.querySelectorAll('[data-peak-min]').forEach(el => {
