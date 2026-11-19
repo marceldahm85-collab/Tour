@@ -13469,7 +13469,8 @@ if (
                 '📏 Top 10 – Längste Strecke',
                 distList,
                 v => `${formatDecimalAT(v)} km`,
-                defaultLabel
+                defaultLabel,
+                'Weite Wege, beeindruckende Bergkulissen und das Gefühl, ganz bei sich zu sein. Es sind die Augenblicke zwischen Gipfeln, Tälern und weitem Himmel, die für immer bleiben.'
             ) : null
         },
         {
@@ -13482,7 +13483,8 @@ if (
                 '⛰️ Top 10 – Größter Aufstieg',
                 ascList,
                 v => `${Math.round(v)} Hm`,
-                defaultLabel
+                defaultLabel,
+                'Weite Wege, beeindruckende Bergkulissen und das Gefühl, ganz bei sich zu sein. Es sind die Augenblicke zwischen Gipfeln, Tälern und weitem Himmel, die für immer bleiben.'
             ) : null
         },
         {
@@ -13495,7 +13497,8 @@ if (
                 '⏱️ Top 10 – Längste Gehzeit',
                 timeList,
                 formatMinutes,
-                defaultLabel
+                defaultLabel,
+                'Manchmal vergeht die Zeit Schritt für Schritt, während der Alltag weit zurückbleibt. Zwischen Waldpfaden, Fels und Gipfelblicken entstehen stille Stunden, die sich besonders tief ins Gedächtnis schreiben.'
             ) : null
         },
         {
@@ -13508,7 +13511,8 @@ if (
                 '👣 Top 10 – Meiste Schritte',
                 stepsList,
                 v => `${Math.round(v).toLocaleString('de-AT')} Schritte`,
-                defaultLabel
+                defaultLabel,
+                'Manchmal vergeht die Zeit Schritt für Schritt, während der Alltag weit zurückbleibt. Zwischen Waldpfaden, Fels und Gipfelblicken entstehen stille Stunden, die sich besonders tief ins Gedächtnis schreiben.'
             ) : null
         },
         {
@@ -13565,7 +13569,8 @@ if (
                 '📐 Top 10 – Steilste Touren',
                 steepList,
                 v => `${v.toFixed(0)} Hm/km`,
-                defaultLabel
+                defaultLabel,
+                'Auf schmalen Steigen windet sich der Weg zwischen schroffen Felsen bergauf, bis sich die Landschaft weit vor dir öffnet. Oben bleibt mehr als ein Ausblick – ein Gefühl, das lange nachklingt.'
             ) : null
         },
         {
@@ -13578,7 +13583,8 @@ if (
                 '⬆️ Top 10 – Schnellster Anstieg',
                 ascentRateList,
                 v => `${v.toFixed(0)} Hm/h`,
-                defaultLabel
+                defaultLabel,
+                'Auf schmalen Steigen windet sich der Weg zwischen schroffen Felsen bergauf, bis sich die Landschaft weit vor dir öffnet. Oben bleibt mehr als ein Ausblick – ein Gefühl, das lange nachklingt.'
             ) : null
         },
         {
