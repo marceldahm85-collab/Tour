@@ -30075,34 +30075,21 @@ function showDashStepsStory(totalSteps, allTours, backTitle) {
     pushDashboardStatSubviewHistory('steps-story', { totalSteps, tours: allTours, backTitle });
 
     const safeSteps = Math.max(0, Number(totalSteps) || 0);
-    const completeDays = Math.floor(safeSteps / 10000);
-    const visibleDays = Math.min(180, completeDays);
-    const units = Array.from({ length: visibleDays }, () =>
-        '<span class="dashboard-steps-day" aria-hidden="true"></span>'
-    ).join('');
-    const extra = completeDays > visibleDays
-        ? '<span class="dashboard-steps-extra">+' + (completeDays - visibleDays).toLocaleString('de-AT') + ' weitere</span>'
-        : '';
+    const movementDays = safeSteps / 10000;
+    const movementDaysLabel = movementDays.toLocaleString('de-AT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     titleEl.textContent = '';
     bodyEl.innerHTML = dashboardStoryBackButton() +
         '<div class="dashboard-extra-story dashboard-steps-story">' +
             '<section class="dashboard-extra-total">' +
-                '<div class="dashboard-extra-total-title">Deine gesamten Schritte</div>' +
+                '<div class="dashboard-extra-total-title">Bei Ø 10.000 Schritten / Tag entspricht das ' + movementDaysLabel + ' Tagen guter Bewegung.</div>' +
                 '<div class="dashboard-extra-total-value"><span id="dashboard-steps-total-value">0</span><span class="dashboard-extra-unit">Schritte</span></div>' +
-            '</section>' +
-            '<section class="dashboard-extra-panel dashboard-steps-comparison">' +
-                '<div class="dashboard-extra-panel-title">10.000 Schritte am Tag</div>' +
-                '<div class="dashboard-steps-days-value"><span id="dashboard-steps-days-value">0</span><span class="dashboard-extra-unit">Tage</span></div>' +
-                '<div class="dashboard-steps-day-grid">' + units + extra + '</div>' +
-                '<div class="dashboard-extra-caption">Jede Einheit steht für einen vollständigen Tag mit 10.000 Schritten.</div>' +
             '</section>' +
             '<p class="dashboard-extra-personal">Aus unzähligen einzelnen Schritten ist eine beeindruckende Reise geworden. Jeder davon hat dich ein Stück weiter hinaus in die Berge getragen.</p>' +
         '</div>';
 
     bodyEl.querySelector('#ds-back')?.addEventListener('click', () => backDashboardStatSubview('steps', allTours));
     animateDashboardStoryNumber('dashboard-steps-total-value', safeSteps, value => Math.round(value).toLocaleString('de-AT'));
-    animateDashboardStoryNumber('dashboard-steps-days-value', safeSteps / 10000, value => formatDashboardStoryValue(value, 1));
 }
 
 function showDashPeaksStory(totalPeaks, allTours, backTitle) {
@@ -30113,9 +30100,15 @@ function showDashPeaksStory(totalPeaks, allTours, backTitle) {
 
     const safePeaks = Math.max(0, Math.round(Number(totalPeaks) || 0));
     const activeWeeks = Math.min(52, safePeaks);
-    const weekCells = Array.from({ length: 52 }, (_, index) =>
-        '<span class="dashboard-peaks-week' + (index < activeWeeks ? ' is-active' : '') + '" aria-hidden="true"></span>'
-    ).join('');
+    const weekCells = Array.from({ length: 52 }, (_, index) => {
+        const weekNumber = index + 1;
+        const isActive = index < activeWeeks;
+        const delay = isActive ? (index * 42) : 0;
+        return '<span class="dashboard-peaks-week' + (isActive ? ' is-active' : '') + '" data-week="' + weekNumber + '"' +
+            (isActive ? ' style="animation-delay:' + delay + 'ms"' : '') +
+            ' aria-label="Kalenderwoche ' + weekNumber + '">' +
+            '<span class="dashboard-peaks-week-number">' + weekNumber + '</span></span>';
+    }).join('');
     const comparison = safePeaks <= 52
         ? safePeaks.toLocaleString('de-AT') + ' von 52 Wochen'
         : formatDashboardStoryValue(safePeaks / 52, 2) + ' Jahresumfänge';
@@ -30128,10 +30121,8 @@ function showDashPeaksStory(totalPeaks, allTours, backTitle) {
                 '<div class="dashboard-extra-total-value"><span id="dashboard-peaks-total-value">0</span><span class="dashboard-extra-unit">Gipfel</span></div>' +
             '</section>' +
             '<section class="dashboard-extra-panel dashboard-peaks-comparison">' +
-                '<div class="dashboard-extra-panel-title">Ein Jahr hat 52 Wochen</div>' +
                 '<div class="dashboard-peaks-comparison-value">' + comparison + '</div>' +
-                '<div class="dashboard-peaks-week-grid">' + weekCells + '</div>' +
-                '<div class="dashboard-extra-caption">Ein Gipfel pro Woche – als rechnerischer Größenvergleich, nicht als tatsächliche Verteilung deiner Touren.</div>' +
+                '<div class="dashboard-peaks-week-grid" aria-label="Jahreskalender mit 52 nummerierten Wochen">' + weekCells + '</div>' +
             '</section>' +
             '<p class="dashboard-extra-personal">Jeder Gipfel war ein eigenes Ziel. Manche Wege waren vertraut, andere führten dich an Orte, die du zuvor nur aus der Ferne gesehen hast. Zusammen ergeben sie deine ganz persönliche Gipfelgeschichte.</p>' +
         '</div>';
@@ -30148,8 +30139,6 @@ function showDashBigToursStory(totalBigTours, allTours, backTitle) {
 
     const safeCount = Math.max(0, Math.round(Number(totalBigTours) || 0));
     const imageUrl = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6b/Galleria_52_-_Strada_delle_52_Gallerie%2C_Valli_del_Pasubio%2C_Vicenza%2C_Italy_-_June_13%2C_2021.jpg/1280px-Galleria_52_-_Strada_delle_52_Gallerie%2C_Valli_del_Pasubio%2C_Vicenza%2C_Italy_-_June_13%2C_2021.jpg';
-    const sourceUrl = 'https://commons.wikimedia.org/wiki/File:Galleria_52_-_Strada_delle_52_Gallerie,_Valli_del_Pasubio,_Vicenza,_Italy_-_June_13,_2021.jpg';
-
     titleEl.textContent = '';
     bodyEl.innerHTML = dashboardStoryBackButton() +
         '<div class="dashboard-extra-story dashboard-big-tours-story">' +
@@ -30162,8 +30151,7 @@ function showDashBigToursStory(totalBigTours, allTours, backTitle) {
                 '<img class="dashboard-big-tours-image" src="' + imageUrl + '" alt="Historischer Tunnelweg der Strada delle 52 Gallerie am Pasubio" loading="lazy">' +
                 '<div class="dashboard-big-tours-route-name">Strada delle 52 Gallerie · Pasubio</div>' +
                 '<div class="dashboard-big-tours-metrics"><span><strong>14,9 km</strong><small>Strecke</small></span><span><strong>+1.065 hm</strong><small>Aufstieg</small></span></div>' +
-                '<div class="dashboard-extra-caption">Eine reale Referenztour, die mit Strecke und Höhenmetern über den Mindestwerten deiner Big-Tour-Kategorie liegt. Deine Touren werden weiterhin ausschließlich nach den App-Kriterien gezählt.</div>' +
-                '<a class="dashboard-extra-source" href="' + sourceUrl + '" target="_blank" rel="noopener noreferrer">Foto: Giorgio Galeotti · CC BY 4.0 · Wikimedia Commons</a>' +
+
             '</section>' +
             '<p class="dashboard-extra-personal">Das waren keine gewöhnlichen Bergtage. Lange Wege, kräftige Anstiege und besondere Herausforderungen haben diese Touren zu echten Erlebnissen gemacht.</p>' +
         '</div>';
@@ -30196,17 +30184,15 @@ function showDashSpeedStory(averageSpeed, allTours, backTitle) {
     bodyEl.innerHTML = dashboardStoryBackButton() +
         '<div class="dashboard-extra-story dashboard-speed-story">' +
             '<section class="dashboard-extra-total">' +
-                '<div class="dashboard-extra-total-title">Deine Durchschnittsgeschwindigkeit</div>' +
+                '<div class="dashboard-extra-total-title">Ø Speed</div>' +
                 '<div class="dashboard-extra-total-value"><span id="dashboard-speed-total-value">0,0</span><span class="dashboard-extra-unit">km/h</span></div>' +
             '</section>' +
             '<section class="dashboard-extra-panel dashboard-speed-comparison">' +
-                '<div class="dashboard-extra-panel-title">Zum Vergleich: alltägliche Gangarten</div>' +
                 '<div class="dashboard-speed-scale">' +
                     '<div class="dashboard-speed-track"></div>' +
                     '<div class="dashboard-speed-marker" id="dashboard-speed-marker" style="left:0%"><span id="dashboard-speed-marker-label">0,0 km/h</span></div>' +
                 '</div>' +
                 '<div class="dashboard-speed-gaits">' + gaitMarks + '</div>' +
-                '<div class="dashboard-extra-caption">Ungefähre Orientierungswerte. Auf Bergwegen beeinflussen Steigung, Untergrund und Wegbeschaffenheit das Tempo erheblich.</div>' +
             '</section>' +
             '<p class="dashboard-extra-personal">Du hast deinen eigenen Rhythmus gefunden. Mal führt der Weg gemütlich durch Täler, mal geht es zügig weiter – doch jeder Kilometer bringt dich deinen Bergzielen näher.</p>' +
         '</div>';
@@ -30242,7 +30228,6 @@ function showDashGradeStory(averageGrade, allTours, backTitle) {
     const userWidth = Math.min(100, gradePercent / scaleMax * 100);
     const referenceWidth = Math.min(100, referencePercent / scaleMax * 100);
     const imageUrl = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/94/Lombard_street_in_San_Francisco.jpg/1280px-Lombard_street_in_San_Francisco.jpg';
-    const sourceUrl = 'https://commons.wikimedia.org/wiki/File:Lombard_street_in_San_Francisco.jpg';
 
     titleEl.textContent = '';
     bodyEl.innerHTML = dashboardStoryBackButton() +
@@ -30259,8 +30244,7 @@ function showDashGradeStory(averageGrade, allTours, backTitle) {
                     '<div class="dashboard-grade-bar-row"><span>Dein Durchschnitt</span><strong>' + formatDashboardStoryValue(gradePercent, 1) + ' %</strong><div class="dashboard-grade-bar"><span class="dashboard-grade-bar-fill is-user" data-width="' + userWidth.toFixed(2) + '"></span></div></div>' +
                     '<div class="dashboard-grade-bar-row"><span>Lombard Street</span><strong>14 %</strong><div class="dashboard-grade-bar"><span class="dashboard-grade-bar-fill is-reference" data-width="' + referenceWidth.toFixed(2) + '"></span></div></div>' +
                 '</div>' +
-                '<div class="dashboard-extra-caption">Die 14 % dienen als Vergleichswert für die Lombard Street. Die Darstellung setzt deine durchschnittliche Steigung ins Verhältnis zu diesem Referenzwert.</div>' +
-                '<a class="dashboard-extra-source" href="' + sourceUrl + '" target="_blank" rel="noopener noreferrer">Foto: Mattias Hill · CC BY 3.0 · Wikimedia Commons</a>' +
+
             '</section>' +
             '<p class="dashboard-extra-personal">Nicht jeder Kilometer führt einfach geradeaus. Viele deiner Wege haben dich ordentlich gefordert – bergauf, über steile Pfade und hinein in die Höhen der Alpen.</p>' +
         '</div>';
@@ -30284,10 +30268,11 @@ function showDashAscentRateStory(averageRate, allTours, backTitle) {
     pushDashboardStatSubviewHistory('ascent-rate-story', { averageRate, tours: allTours, backTitle });
 
     const safeRate = Math.max(0, Number(averageRate) || 0);
-    const floors = safeRate / 3;
-    const floorBlocks = Array.from({ length: 12 }, (_, index) =>
-        '<span class="dashboard-ascent-floor' + (index < Math.min(12, Math.ceil(floors / 10)) ? ' is-lit' : '') + '"></span>'
-    ).join('');
+    const floorHeightMeters = 3;
+    const stairHeightMeters = 0.175;
+    const floorsPerHour = safeRate / floorHeightMeters;
+    const stepsPerHour = safeRate / stairHeightMeters;
+    const secondsPerStep = safeRate > 0 ? 3600 / stepsPerHour : 0;
 
     titleEl.textContent = '';
     bodyEl.innerHTML = dashboardStoryBackButton() +
@@ -30297,17 +30282,27 @@ function showDashAscentRateStory(averageRate, allTours, backTitle) {
                 '<div class="dashboard-extra-total-value"><span id="dashboard-ascent-rate-value">0</span><span class="dashboard-extra-unit">hm/h</span></div>' +
             '</section>' +
             '<section class="dashboard-extra-panel dashboard-ascent-floors-panel">' +
-                '<div class="dashboard-extra-panel-title">Das entspricht ungefähr</div>' +
-                '<div class="dashboard-ascent-building">' + floorBlocks + '</div>' +
-                '<div class="dashboard-ascent-floors-value"><span id="dashboard-ascent-floors-value">0</span><span class="dashboard-extra-unit">Stockwerken pro Stunde</span></div>' +
-                '<div class="dashboard-extra-caption">Berechnet mit einer angenommenen Höhe von 3 Metern pro Stockwerk.</div>' +
+                '<div class="dashboard-ascent-comparison-row">' +
+                    '<span>Stockwerke pro Stunde</span>' +
+                    '<strong><span id="dashboard-ascent-floors-value">0</span></strong>' +
+                '</div>' +
+                '<div class="dashboard-ascent-comparison-row">' +
+                    '<span>Stufen pro Stunde</span>' +
+                    '<strong><span id="dashboard-ascent-steps-value">0</span></strong>' +
+                '</div>' +
+                '<div class="dashboard-ascent-comparison-row">' +
+                    '<span>Zeit pro Stufe</span>' +
+                    '<strong><span id="dashboard-ascent-seconds-value">0,00</span><small> Sekunden</small></strong>' +
+                '</div>' +
             '</section>' +
             '<p class="dashboard-extra-personal">Meter für Meter gewinnst du an Höhe. Aus Kraft, Ausdauer und vielen überwundenen Höhenmetern entsteht eine Leistung, die dich immer weiter hinaufbringt.</p>' +
         '</div>';
 
     bodyEl.querySelector('#ds-back')?.addEventListener('click', () => backDashboardStatSubview('anstieg', allTours));
     animateDashboardStoryNumber('dashboard-ascent-rate-value', safeRate, value => Math.round(value).toLocaleString('de-AT'));
-    animateDashboardStoryNumber('dashboard-ascent-floors-value', floors, value => formatDashboardStoryValue(value, 1));
+    animateDashboardStoryNumber('dashboard-ascent-floors-value', floorsPerHour, value => formatDashboardStoryValue(value, 1));
+    animateDashboardStoryNumber('dashboard-ascent-steps-value', stepsPerHour, value => Math.round(value).toLocaleString('de-AT'));
+    animateDashboardStoryNumber('dashboard-ascent-seconds-value', secondsPerStep, value => value.toLocaleString('de-AT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
 }
 
 function startDashboardDistanceStoryAnimations() {
