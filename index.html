@@ -125,7 +125,7 @@
 <link rel="stylesheet" href="./styles.css?v=22">
 <link rel="stylesheet" href="./styles-overrides.css?v=113">
 <link rel="stylesheet" href="./background-image-picker.css?v=3">
-<link rel="stylesheet" href="./theme-editor-workflow.css?v=10">
+<link rel="stylesheet" href="./theme-editor-workflow.css?v=11">
 <link rel="stylesheet" href="./app-start-editor.css?v=3">
 <link rel="stylesheet" href="./android-gallery-photos.css?v=5">
 <link rel="stylesheet" href="./dashboard-premium-alpine.css?v=36">
@@ -1994,13 +1994,11 @@
 
     <div class="backup-view-inner">
 
-        <section
+        <details
             id="data-file-box"
-            class="filter-simple-card backup-card">
+            class="filter-simple-card backup-card theme-editor-section-card backup-accordion-card">
 
-            <div class="filter-simple-title">
-                💾 Datensicherung
-            </div>
+            <summary class="theme-editor-panel-title stats-analysis-title"><span class="theme-editor-title-text stats-premium-title-label"><span class="theme-editor-title-icon stats-premium-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v8.5"/></svg></span>Datensicherung</span></summary>
 
             <div class="backup-status-panel" aria-label="Sicherungsstatus">
                 <div class="backup-status-head">
@@ -2128,15 +2126,13 @@
                 accept=".json"
                 hidden>
 
-        </section>
+        </details>
 
-    <section
+    <details
             id="pdf-export-card"
-            class="filter-simple-card backup-card">
+            class="filter-simple-card backup-card theme-editor-section-card backup-accordion-card">
 
-            <div class="filter-simple-title">
-                📖 Tourenbuch exportieren
-            </div>
+            <summary class="theme-editor-panel-title stats-analysis-title"><span class="theme-editor-title-text stats-premium-title-label"><span class="theme-editor-title-icon stats-premium-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 3.5h10l4 4V20H5z"/><path d="M15 3.5V8h4M8 12h8M8 15h8M8 18h5"/></svg></span>Tourenbuch exportieren</span></summary>
 
             <div
                 class="compare-mode-toggle"
@@ -2245,7 +2241,7 @@
 
             </button>
 
-        </section>
+        </details>
 
     </div>
 
@@ -2541,7 +2537,7 @@
 <script src="./premium-modal-surface.js?v=2" defer></script>
 <script src="./premium-image-presentation.js?v=1" defer></script>
 <script src="./premium-experience.js?v=1" defer></script>
-<script src="./view-accordion-behavior.js?v=8" defer></script>
+<script src="./view-accordion-behavior.js?v=9" defer></script>
 
 
 
