@@ -1065,3 +1065,47 @@
         animation: none !important;
     }
 }
+
+
+/* Korrekturen 0.8.30: Big-Tours-Bild, maßstabsgetreue Gangarten und stabile Anstiegszähler. */
+#dash-stat-modal .dashboard-big-tours-route-name {
+    display: block;
+    width: 100%;
+    margin-inline: auto;
+    text-align: center;
+}
+#dash-stat-modal .dashboard-speed-gaits {
+    position: relative;
+    display: block;
+    min-height: 48px;
+    margin: 8px 0 0;
+}
+#dash-stat-modal .dashboard-speed-gait {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: max-content;
+    max-width: 25%;
+    transform: translateX(-50%);
+}
+#dash-stat-modal .dashboard-speed-gait strong {
+    white-space: normal;
+}
+#dash-stat-modal .dashboard-ascent-rate-story .dashboard-ascent-animated-value {
+    display: inline-block;
+    flex: 0 0 auto;
+    overflow: hidden;
+    white-space: nowrap;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    contain: layout paint;
+    vertical-align: baseline;
+}
+#dash-stat-modal .dashboard-ascent-rate-story .dashboard-ascent-comparison-row strong {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    min-width: 0;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
