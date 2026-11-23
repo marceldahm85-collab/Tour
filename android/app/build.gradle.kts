@@ -13,8 +13,8 @@ android {
         applicationId = "at.marcel.bergtouren"
         minSdk = 26
         targetSdk = 35
-        versionCode = 55
-        versionName = "0.8.30"
+        versionCode = 56
+        versionName = "0.8.31"
         buildConfigField(
             "String",
             "WEB_APP_URL",
