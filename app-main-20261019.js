@@ -30177,13 +30177,11 @@ function showDashBigToursStory(totalBigTours, allTours, backTitle) {
                 '<div class="dashboard-extra-total-value"><span id="dashboard-big-tours-total-value">0</span><span class="dashboard-extra-unit">Touren</span></div>' +
             '</section>' +
             '<section class="dashboard-extra-panel dashboard-big-tours-reference">' +
-                '<div class="dashboard-extra-panel-title">Eine außergewöhnliche Tour als Referenz</div>' +
                 '<img class="dashboard-big-tours-image" src="' + imageUrl + '" alt="Historischer Tunnelweg der Strada delle 52 Gallerie am Pasubio" loading="lazy">' +
                 '<div class="dashboard-big-tours-route-name">Strada delle 52 Gallerie · Pasubio</div>' +
                 '<div class="dashboard-big-tours-metrics"><span><strong>14,9 km</strong><small>Strecke</small></span><span><strong>+1.065 hm</strong><small>Aufstieg</small></span></div>' +
             '</section>' +
             '<section class="dashboard-extra-panel dashboard-big-tours-reference dashboard-big-tours-austria">' +
-                '<div class="dashboard-extra-panel-title">Österreichische Referenztour</div>' +
                 '<img class="dashboard-big-tours-image" src="https://images.unsplash.com/photo-1617298352465-85a0cb27a81d?auto=format&fit=crop&fm=jpg&q=85&w=1280" alt="Gipfelkreuz auf der Sommeralm in Österreich" loading="lazy">' +
                 '<a class="dashboard-big-tours-route-name" href="https://www.osttirol.com/region-orte/alle-orte/lienz/wandern/detail/boeses-weibl" target="_blank" rel="noopener noreferrer">Böses Weibl · Osttirol</a>' +
                 '<div class="dashboard-big-tours-metrics"><span><strong>14,1 km</strong><small>Strecke</small></span><span><strong>+1.193 hm</strong><small>Aufstieg</small></span></div>' +
@@ -30214,8 +30212,8 @@ function showDashSpeedStory(averageSpeed, allTours, backTitle) {
     const gaitTicks = gaitItems.map(item =>
         '<span class="dashboard-speed-tick" style="left:' + (item.speed / speedScaleMax * 100).toFixed(2) + '%"></span>'
     ).join('');
-    const gaitMarks = gaitItems.map(item =>
-        '<div class="dashboard-speed-gait" style="left:' + (item.speed / speedScaleMax * 100).toFixed(2) + '%"><span class="dashboard-speed-gait-dot"></span><strong>' + item.label + '</strong><small>' + item.speed + ' km/h</small></div>'
+    const gaitMarks = gaitItems.map((item, index) =>
+        '<div class="dashboard-speed-gait' + (index % 2 ? ' is-lower' : '') + (index === gaitItems.length - 1 ? ' is-edge' : '') + '" style="left:' + (item.speed / speedScaleMax * 100).toFixed(2) + '%"><span class="dashboard-speed-gait-dot"></span><strong>' + item.label + '</strong><small>' + item.speed + ' km/h</small></div>'
     ).join('');
 
     titleEl.textContent = '';
@@ -30336,17 +30334,9 @@ function showDashAscentRateStory(averageRate, allTours, backTitle) {
         '</div>';
 
     bodyEl.querySelector('#ds-back')?.addEventListener('click', () => backDashboardStatSubview('anstieg', allTours));
-    const setStableCounterWidth = (id, target, formatter) => {
-        const element = bodyEl.querySelector('#' + id);
-        if (!element) return;
-        const width = Math.max(formatter(0).length, formatter(target).length);
-        element.classList.add('dashboard-ascent-animated-value');
-        element.style.width = width + 'ch';
-    };
-    setStableCounterWidth('dashboard-ascent-rate-value', safeRate, value => Math.round(value).toLocaleString('de-AT'));
-    setStableCounterWidth('dashboard-ascent-floors-value', floorsPerHour, value => value.toLocaleString('de-AT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-    setStableCounterWidth('dashboard-ascent-steps-value', stepsPerHour, value => Math.round(value).toLocaleString('de-AT'));
-    setStableCounterWidth('dashboard-ascent-seconds-value', secondsPerStep, value => value.toLocaleString('de-AT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    bodyEl.querySelectorAll('.dashboard-ascent-comparison-row strong').forEach(value => {
+        value.style.fontVariantNumeric = 'tabular-nums';
+    });
     animateDashboardStoryNumber('dashboard-ascent-rate-value', safeRate, value => Math.round(value).toLocaleString('de-AT'));
     animateDashboardStoryNumber('dashboard-ascent-floors-value', floorsPerHour, value => value.toLocaleString('de-AT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
     animateDashboardStoryNumber('dashboard-ascent-steps-value', stepsPerHour, value => Math.round(value).toLocaleString('de-AT'));
