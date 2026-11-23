@@ -971,7 +971,9 @@
 
         var years=[];
         for(var year=from;year<=to;year++){
-            var es=Array.isArray(photographedEntries) ? photographedEntries.filter(function(entry) {\n                var key = monthKey(entry); return key && Number(key.slice(0,4)) === year;\n            }) : (typeof window.getToursInYearRange==='function'?window.getToursInYearRange(year,year):[]);
+            var es=Array.isArray(photographedEntries) ? photographedEntries.filter(function(entry) {
+                var key = monthKey(entry); return key && Number(key.slice(0,4)) === year;
+            }) : (typeof window.getToursInYearRange==='function'?window.getToursInYearRange(year,year):[]);
             if(es.length) years.push({year:year,entries:es,stats:window.computeStatsSummary(es)});
         }
 
