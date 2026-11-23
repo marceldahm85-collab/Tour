@@ -16,7 +16,6 @@ const APP_SHELL = [
   './native-app-ready.js?v=3',
   './native-system-bars.js?v=4',
   './more-menu-navigation-fix.js?v=1',
-  './assets/osttirol-lienz-background.webp',
   './android/app/src/main/res/drawable-nodpi/splash_alpine_panorama.webp',
   './stats-premium-alpine.js?v=15',
   './view-accordion-behavior.js?v=8',
