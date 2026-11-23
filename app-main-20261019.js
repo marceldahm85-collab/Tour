@@ -30209,9 +30209,11 @@ function showDashSpeedStory(averageSpeed, allTours, backTitle) {
         { label: 'Zügig', speed: 5 },
         { label: 'Leichtes Joggen', speed: 8 }
     ];
-    const gaitTicks = gaitItems.map(item =>
-        '<span class="dashboard-speed-tick" style="left:' + (item.speed / speedScaleMax * 100).toFixed(2) + '%"></span>'
-    ).join('');
+    const scaleTicks = Array.from({ length: speedScaleMax * 2 + 1 }, (_, index) => {
+        const speed = index / 2;
+        const isMajor = Number.isInteger(speed);
+        return '<span class="dashboard-speed-tick' + (isMajor ? ' is-major' : ' is-minor') + '" style="left:' + (speed / speedScaleMax * 100).toFixed(2) + '%"></span>';
+    }).join('');
     const gaitMarks = gaitItems.map((item, index) =>
         '<div class="dashboard-speed-gait' + (index % 2 ? ' is-lower' : '') + (index === gaitItems.length - 1 ? ' is-edge' : '') + '" style="left:' + (item.speed / speedScaleMax * 100).toFixed(2) + '%"><span class="dashboard-speed-gait-dot"></span><strong>' + item.label + '</strong><small>' + item.speed + ' km/h</small></div>'
     ).join('');
@@ -30225,7 +30227,7 @@ function showDashSpeedStory(averageSpeed, allTours, backTitle) {
             '</section>' +
             '<section class="dashboard-extra-panel dashboard-speed-comparison">' +
                 '<div class="dashboard-speed-scale">' +
-                    '<div class="dashboard-speed-track">' + gaitTicks + '</div>' +
+                    '<div class="dashboard-speed-track">' + scaleTicks + '</div>' +
                     '<div class="dashboard-speed-axis"><span>0 km/h</span><span>' + speedScaleMax + ' km/h</span></div>' +
                     '<div class="dashboard-speed-marker" id="dashboard-speed-marker" style="left:0%"><span id="dashboard-speed-marker-label">0,00 km/h</span></div>' +
                 '</div>' +
