@@ -30184,10 +30184,9 @@ function showDashBigToursStory(totalBigTours, allTours, backTitle) {
             '</section>' +
             '<section class="dashboard-extra-panel dashboard-big-tours-reference dashboard-big-tours-austria">' +
                 '<div class="dashboard-extra-panel-title">Österreichische Referenztour</div>' +
-                '<img class="dashboard-big-tours-image" src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/B%C3%B6ses_Weibl_summit_cross.jpg/1280px-B%C3%B6ses_Weibl_summit_cross.jpg" alt="Gipfelkreuz am Bösen Weibl in Osttirol mit Blick zum Großglockner" loading="lazy">' +
+                '<img class="dashboard-big-tours-image" src="https://images.unsplash.com/photo-1617298352465-85a0cb27a81d?auto=format&fit=crop&fm=jpg&q=85&w=1280" alt="Gipfelkreuz am Bösen Weibl in Osttirol mit Blick zum Großglockner" loading="lazy">' +
                 '<a class="dashboard-big-tours-route-name" href="https://www.osttirol.com/region-orte/alle-orte/lienz/wandern/detail/boeses-weibl" target="_blank" rel="noopener noreferrer">Böses Weibl · Osttirol</a>' +
                 '<div class="dashboard-big-tours-metrics"><span><strong>14,1 km</strong><small>Strecke</small></span><span><strong>+1.193 hm</strong><small>Aufstieg</small></span></div>' +
-                '<a class="dashboard-big-tours-photo-credit" href="https://commons.wikimedia.org/wiki/File:B%C3%B6ses_Weibl_summit_cross.jpg" target="_blank" rel="noopener noreferrer">Foto: H. Raab · CC BY-SA 4.0</a>' +
             '</section>' +
             '<p class="dashboard-extra-personal">Das waren keine gewöhnlichen Bergtage. Lange Wege, kräftige Anstiege und besondere Herausforderungen haben diese Touren zu echten Erlebnissen gemacht.</p>' +
         '</div>';
@@ -30203,7 +30202,7 @@ function showDashSpeedStory(averageSpeed, allTours, backTitle) {
     pushDashboardStatSubviewHistory('speed-story', { averageSpeed, tours: allTours, backTitle });
 
     const safeSpeed = Math.max(0, Number(averageSpeed) || 0);
-    const speedScaleMax = Math.max(10, Math.ceil(safeSpeed / 2) * 2);
+    const speedScaleMax = 8;
     const markerPosition = Math.max(0, Math.min(100, safeSpeed / speedScaleMax * 100));
     const gaitItems = [
         { label: 'Schlendern', speed: 2 },
@@ -30216,7 +30215,7 @@ function showDashSpeedStory(averageSpeed, allTours, backTitle) {
         '<span class="dashboard-speed-tick" style="left:' + (item.speed / speedScaleMax * 100).toFixed(2) + '%"></span>'
     ).join('');
     const gaitMarks = gaitItems.map(item =>
-        '<div class="dashboard-speed-gait"><span class="dashboard-speed-gait-dot"></span><strong>' + item.label + '</strong><small>' + item.speed + ' km/h</small></div>'
+        '<div class="dashboard-speed-gait" style="left:' + (item.speed / speedScaleMax * 100).toFixed(2) + '%"><span class="dashboard-speed-gait-dot"></span><strong>' + item.label + '</strong><small>' + item.speed + ' km/h</small></div>'
     ).join('');
 
     titleEl.textContent = '';
@@ -30329,14 +30328,25 @@ function showDashAscentRateStory(averageRate, allTours, backTitle) {
                     '<strong><span id="dashboard-ascent-steps-value">0</span></strong>' +
                 '</div>' +
                 '<div class="dashboard-ascent-comparison-row">' +
-                    '<span>Zeit pro Stufe</span>' +
-                    '<strong><span id="dashboard-ascent-seconds-value">0,00</span><small> Sekunden</small></strong>' +
+                    '<span>Sekunden pro Stufe</span>' +
+                    '<strong><span id="dashboard-ascent-seconds-value">0,00</span></strong>' +
                 '</div>' +
             '</section>' +
             '<p class="dashboard-extra-personal">Meter für Meter gewinnst du an Höhe. Aus Kraft, Ausdauer und vielen überwundenen Höhenmetern entsteht eine Leistung, die dich immer weiter hinaufbringt.</p>' +
         '</div>';
 
     bodyEl.querySelector('#ds-back')?.addEventListener('click', () => backDashboardStatSubview('anstieg', allTours));
+    const setStableCounterWidth = (id, target, formatter) => {
+        const element = bodyEl.querySelector('#' + id);
+        if (!element) return;
+        const width = Math.max(formatter(0).length, formatter(target).length);
+        element.classList.add('dashboard-ascent-animated-value');
+        element.style.width = width + 'ch';
+    };
+    setStableCounterWidth('dashboard-ascent-rate-value', safeRate, value => Math.round(value).toLocaleString('de-AT'));
+    setStableCounterWidth('dashboard-ascent-floors-value', floorsPerHour, value => value.toLocaleString('de-AT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    setStableCounterWidth('dashboard-ascent-steps-value', stepsPerHour, value => Math.round(value).toLocaleString('de-AT'));
+    setStableCounterWidth('dashboard-ascent-seconds-value', secondsPerStep, value => value.toLocaleString('de-AT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
     animateDashboardStoryNumber('dashboard-ascent-rate-value', safeRate, value => Math.round(value).toLocaleString('de-AT'));
     animateDashboardStoryNumber('dashboard-ascent-floors-value', floorsPerHour, value => value.toLocaleString('de-AT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
     animateDashboardStoryNumber('dashboard-ascent-steps-value', stepsPerHour, value => Math.round(value).toLocaleString('de-AT'));
