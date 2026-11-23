@@ -2182,55 +2182,68 @@
             </div>
 
             <details id="pdf-book-options" class="pdf-book-options">
-                <summary>⚙️ Tourbuch individualisieren</summary>
+                <summary>Fotobuch konfigurieren</summary>
                 <div class="pdf-book-options-body">
                     <fieldset class="pdf-book-option-group">
-                        <legend>Tourkarten</legend>
+                        <legend>Buchstil</legend>
+                        <div class="pdf-book-design-field">
+                            <label for="pdf-book-opt-profile">Schwerpunkt</label>
+                            <select id="pdf-book-opt-profile" data-pdf-book-option="profile">
+                                <option value="premium" selected>Premium-Fotobuch – große Fotos und redaktionelle Seiten</option>
+                                <option value="chronicle">Tourchronik – ausgewogene Foto- und Datenseiten</option>
+                                <option value="documentation">Vollständige Dokumentation – breite Detailseiten</option>
+                            </select>
+                        </div>
+                        <div class="pdf-book-design-grid">
+                            <div class="pdf-book-design-field">
+                                <label for="pdf-book-opt-format">Seitenformat</label>
+                                <select id="pdf-book-opt-format" data-pdf-book-option="format">
+                                    <option value="landscape" selected>Querformat</option>
+                                    <option value="portrait">Hochformat</option>
+                                    <option value="square">Quadratisch</option>
+                                </select>
+                            </div>
+                            <div class="pdf-book-design-field">
+                                <label for="pdf-book-opt-style">Farbgestaltung</label>
+                                <select id="pdf-book-opt-style" data-pdf-book-option="style">
+                                    <option value="alpine" selected>Premium Alpine – Waldgrün &amp; Sand</option>
+                                    <option value="theme">App-Theme – aktuelle Themefarben</option>
+                                    <option value="mono">Monochrom – Graustufen</option>
+                                </select>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset class="pdf-book-option-group">
+                        <legend>Fotos</legend>
                         <div class="pdf-book-option-grid">
-                            <label><input type="checkbox" id="pdf-book-opt-photos" data-pdf-book-option="photos" checked> Tourfotos auf den Tourkarten</label>
-                            <label><input type="checkbox" id="pdf-book-opt-peaks" data-pdf-book-option="peaks" checked> Gipfellisten auf Tourkarten</label>
+                            <label><input type="checkbox" id="pdf-book-opt-photos" data-pdf-book-option="photos" checked> Hauptfoto der Tour</label>
+                            <label><input type="checkbox" id="pdf-book-opt-gallery-photos" data-pdf-book-option="gallery-photos" checked> Zusätzliche Android-Galeriefotos</label>
+                            <label><input type="checkbox" id="pdf-book-opt-summit-photos" data-pdf-book-option="summit-photos" checked> Zugeordnete Gipfelfotos</label>
+                            <label><input type="checkbox" id="pdf-book-opt-cover-photo" data-pdf-book-option="cover-photo" checked> Foto auf dem Titelblatt</label>
+                        </div>
+                    </fieldset>
+                    <fieldset class="pdf-book-option-group">
+                        <legend>Tourdaten und Details</legend>
+                        <div class="pdf-book-option-grid">
+                            <label><input type="checkbox" id="pdf-book-opt-peaks" data-pdf-book-option="peaks" checked> Gipfellisten</label>
                             <label><input type="checkbox" id="pdf-book-opt-performance" data-pdf-book-option="performance" checked> Leistungsindex</label>
-                            <label><input type="checkbox" id="pdf-book-opt-secondary" data-pdf-book-option="secondary" checked> Zusatzkennzahlen (Speed, Steigung, Anstieg/h)</label>
+                            <label><input type="checkbox" id="pdf-book-opt-secondary" data-pdf-book-option="secondary" checked> Speed, Steigung und Anstieg/h</label>
                             <label><input type="checkbox" id="pdf-book-opt-start-profile" data-pdf-book-option="start-profile" checked> Ausgangspunkt und Tourprofil</label>
                             <label><input type="checkbox" id="pdf-book-opt-notes" data-pdf-book-option="notes" checked> Persönliche Notizen</label>
                             <label><input type="checkbox" id="pdf-book-opt-extras" data-pdf-book-option="extras" checked> Klettersteig, Rad und Begleitung</label>
                         </div>
                     </fieldset>
                     <fieldset class="pdf-book-option-group">
-                        <legend>Layout &amp; Gestaltung</legend>
-                        <div class="pdf-book-option-grid pdf-book-cover-toggle">
-                            <label><input type="checkbox" id="pdf-book-opt-cover-photo" data-pdf-book-option="cover-photo" checked> Foto auf dem Titelblatt</label>
-                        </div>
-                    </fieldset>
-                    <fieldset class="pdf-book-option-group">
-                        <legend>Saisonbilanz</legend>
+                        <legend>Jahresbilanz und Zusatzseiten</legend>
                         <div class="pdf-book-option-grid">
-                            <label><input type="checkbox" id="pdf-book-opt-milestones" data-pdf-book-option="milestones" checked> Meilensteinübersicht mit Fortschrittsbalken</label>
+                            <label><input type="checkbox" id="pdf-book-opt-milestones" data-pdf-book-option="milestones" checked> Meilensteinübersicht</label>
+                            <label><input type="checkbox" id="pdf-book-opt-monthly" data-pdf-book-option="monthly"> Monatsübersicht</label>
+                            <label><input type="checkbox" id="pdf-book-opt-peak-overview" data-pdf-book-option="peak-overview"> Gipfelübersicht</label>
+                            <label><input type="checkbox" id="pdf-book-opt-closing" data-pdf-book-option="closing" checked> Abschlussseite mit Foto</label>
                         </div>
                     </fieldset>
                 </div>
             </details>
-
-            <div class="pdf-book-export-controls" aria-label="PDF-Ausgabeoptionen">
-                <div class="pdf-book-design-grid">
-                    <div class="pdf-book-design-field">
-                        <label for="pdf-book-opt-layout">Seitenlayout</label>
-                        <select id="pdf-book-opt-layout" data-pdf-book-option="layout">
-                            <option value="magazine">Magazin (Standard)</option>
-                            <option value="compact">Kompakt (mehr Touren pro Seite)</option>
-                            <option value="detail">Detail (eine Tourenkarte pro Zeile)</option>
-                        </select>
-                    </div>
-                    <div class="pdf-book-design-field">
-                        <label for="pdf-book-opt-style">Farbgestaltung</label>
-                        <select id="pdf-book-opt-style" data-pdf-book-option="style">
-                            <option value="theme">App-Theme (aktuelle Themefarben)</option>
-                            <option value="alpine">Alpine Natur (Waldgrün &amp; Sand)</option>
-                            <option value="mono">Monochrom (Graustufen)</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
 
             <button
                 type="button"
@@ -2520,7 +2533,7 @@
 <script src="./native-app-ready.js?v=3" defer></script>
 <script src="./native-system-bars.js?v=4" defer></script>
 <script src="./more-menu-navigation-fix.js?v=1" defer></script>
-<script src="./pdf-magazine.js?v=3" defer></script>
+<script src="./pdf-magazine.js?v=4" defer></script>
 <script src="./stats-premium-alpine.js?v=15" defer></script>
 <script src="./theme-editor-unified.js?v=35" defer></script>
 <script src="./background-image-manager.js?v=15" defer></script>
