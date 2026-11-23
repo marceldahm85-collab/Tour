@@ -1,5 +1,59 @@
 
 
+// Bezirksgrenze Lienz (Osttirol), aus der vereinfachten Bezirksgeometrie
+// GeoJSON-TopoJSON-Austria, 2021/simplified-99.9/bezirke_999_geo.json
+const OSTTIROL_BORDER_KM = 195;
+const OSTTIROL_BOUNDARY = [
+    [12.708906,46.736370],[12.687815,46.657688],[12.628216,46.662106],
+    [12.548422,46.659475],[12.424215,46.699807],[12.374798,46.723019],
+    [12.354608,46.775685],[12.306142,46.785706],[12.289025,46.865910],
+    [12.271071,46.884938],[12.215310,46.874468],[12.165534,46.939001],
+    [12.135445,46.957186],[12.118352,47.006780],[12.144590,47.025616],
+    [12.202046,47.027692],[12.237925,47.069884],[12.280957,47.093265],
+    [12.342796,47.109985],[12.360455,47.142099],[12.396702,47.153516],
+    [12.462737,47.145068],[12.480700,47.158560],[12.563556,47.136739],
+    [12.589417,47.125587],[12.654016,47.100231],[12.707698,47.049148],
+    [12.752065,47.025576],[12.738266,46.969703],[12.756753,46.957326],
+    [12.783590,46.940277],[12.790856,46.927196],[12.805634,46.923314],
+    [12.819010,46.917532],[12.838341,46.861694],[12.892781,46.826521],
+    [12.902647,46.823345],[12.904298,46.823388],[12.960671,46.799363],
+    [12.928610,46.764757],[12.896567,46.777562],[12.854022,46.760884],
+    [12.838408,46.750051],[12.807098,46.756998],[12.793001,46.756056],
+    [12.745381,46.748165],[12.708906,46.736370]
+];
+
+function getOsttirolMapLayout(w, h) {
+    const longitudes = OSTTIROL_BOUNDARY.map(point => point[0]);
+    const latitudes = OSTTIROL_BOUNDARY.map(point => point[1]);
+    const minLon = Math.min(...longitudes);
+    const maxLon = Math.max(...longitudes);
+    const minLat = Math.min(...latitudes);
+    const maxLat = Math.max(...latitudes);
+    const centerLat = (minLat + maxLat) / 2;
+    const longitudeScale = Math.cos(centerLat * Math.PI / 180);
+    const left = w * 0.14;
+    const top = h * 0.185;
+    const boxWidth = w * 0.72;
+    const boxHeight = h * 0.39;
+    const geographicWidth = (maxLon - minLon) * longitudeScale;
+    const geographicHeight = maxLat - minLat;
+    const scale = Math.min(boxWidth / geographicWidth, boxHeight / geographicHeight);
+    const drawWidth = geographicWidth * scale;
+    const drawHeight = geographicHeight * scale;
+    const offsetX = left + (boxWidth - drawWidth) / 2;
+    const offsetY = top + (boxHeight - drawHeight) / 2;
+    const project = ([lon, lat]) => ({
+        x: offsetX + (lon - minLon) * longitudeScale * scale,
+        y: offsetY + (maxLat - lat) * scale
+    });
+    return {
+        points: OSTTIROL_BOUNDARY.map(project),
+        project,
+        bounds: { left: offsetX, top: offsetY, width: drawWidth, height: drawHeight }
+    };
+}
+
+
 const slopeToggleBtn = document.getElementById('slope-toggle');
 let useFullDistanceForGradient = false;
 
@@ -14688,7 +14742,6 @@ function goToView(targetView, animate = true) {
         initThemeEditor();
     }
 
-    const previousView = currentView;
     const isViewChange = targetView !== currentView;
 
     if (isViewChange) {
@@ -14748,52 +14801,6 @@ function goToView(targetView, animate = true) {
     if (targetView === 'backup') {
         updateBackupStatusSummary();
     }
-
-          if (
-    targetView === 'wrapped' &&
-    (!wrappedCurrentYear || !wrappedSlides.length)
-) {
-    const years =
-        getWrappedAvailableYears();
-
-    if (years.length) {
-        wrappedCurrentYear = years[0];
-        wrappedSlides =
-            buildWrappedSlideData(
-                wrappedCurrentYear
-            );
-        preloadWrappedBackgroundImages();
-
-        wrappedSlideIndex = 0;
-        wrappedPaused = true;
-        wrappedInitialRevealPending = true;
-
-        clearWrappedAutoAdvance();
-        wrappedPendingAutoAdvanceIndex = null;
-        populateWrappedYearSelect();
-        renderWrappedProgressBar();
-        updateWrappedProgressSegments();
-        renderWrappedSlide(0);
-        updateWrappedPauseButtonLabel();
-
-        attachWrappedPhotos(
-            wrappedSlides,
-            wrappedCurrentYear
-        ).then(() => {
-            if (wrappedSlideIndex === 0) {
-                renderWrappedSlide(0, { type: 'fade', duration: 360 });
-            } else {
-                renderWrappedSlide(wrappedSlideIndex);
-            }
-        });
-    }
-}
-
-if (previousView === 'wrapped' && targetView !== 'wrapped') {
-    stopWrappedPhotoMotion();
-    clearWrappedAutoAdvance();
-    exitWrappedFullscreenIfActive();
-}
 
     if (isViewChange && animate) {
         // Neue View startet leicht geblurrt und blendet dann scharf ein
@@ -21932,14 +21939,6 @@ originalSizes.forEach(({ element, originalSize }) => {
         );
     }
 
-    if (
-        typeof wrappedSlides !== 'undefined' &&
-        wrappedSlides.length &&
-        typeof renderWrappedSlide === 'function'
-    ) {
-        renderWrappedSlide(wrappedSlideIndex);
-    }
-
 }
 
 /*
@@ -22374,7 +22373,6 @@ function buildThemeEditorLiveCss() {
         css += `${prefix} #chart-tabs .chart-tab:not(.active) { background: ${softGradient} !important; }\n`;
         css += `${prefix} #chart-tabs .chart-tab.active { background: transparent !important; }\n`;
         css += `${prefix} #chart-tabs .tab-sliding-highlight { background: var(--accent-gradient) !important; border-radius: ${softRadius}px !important; }\n`;
-        css += `${prefix} #wrapped-view .bergwelt-tab.is-active { background: var(--accent-gradient) !important; color: var(--accent-text-color, var(--text-main)) !important; border-color: var(--accent) !important; }\n`;
 
         const navGradient = themeEditorBuildGradient({
             ...settings,
@@ -28006,10 +28004,10 @@ function showDashDistanceStory(distance, allTours, backTitle) {
     });
 
     const safeDistance = Math.max(0, Number(distance) || 0);
-    const laps = safeDistance / WRAPPED_OSTTIROL_BORDER_KM;
+    const laps = safeDistance / OSTTIROL_BORDER_KM;
     const lapsText = laps.toFixed(2).replace('.', ',');
     const comparisonFactor = (safeDistance / 860).toFixed(2).replace('.', ',');
-    const layout = getWrappedOsttirolMapLayout(720, 640);
+    const layout = getOsttirolMapLayout(720, 640);
     const points = layout.points;
     const path = points.map((point, index) =>
         (index === 0 ? 'M' : 'L') + point.x.toFixed(2) + ' ' + point.y.toFixed(2)
