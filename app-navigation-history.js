@@ -144,9 +144,6 @@
             'image-lightbox': () => {
                 if (typeof closeImageLightbox === 'function') closeImageLightbox();
             },
-            'achievement-category-modal': () => {
-                if (typeof closeAchievementCategoryModal === 'function') closeAchievementCategoryModal();
-            },
             'compare-modal': () => {
                 if (typeof closeCompareModal === 'function') closeCompareModal();
             },
