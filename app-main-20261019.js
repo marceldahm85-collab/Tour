@@ -4262,33 +4262,12 @@ const CELEBRATION_ART_ASSETS = {
     time: './assets/milestones/milestone-time.svg?v=5'
 };
 
-const ACHIEVEMENT_CELEBRATION_ART = {
-    tourCount: 'dist',
-    bigTours: 'peaks',
-    uniquePeaks: 'peaks',
-    peakHeight: 'peaks',
-    regions: 'dist',
-    tourTypes: 'steps',
-    consistency: 'time',
-    performance: 'asc',
-    ascent: 'asc',
-    peaks: 'peaks',
-    time: 'time',
-    steepness: 'steps',
-    variety: 'dist'
-};
-
 const celebrationDispatcher = {
     pending: [],
     queue: [],
     flushTimer: null,
     isShowing: false
 };
-
-function getAchievementCelebrationAsset(categoryId) {
-    const artKey = ACHIEVEMENT_CELEBRATION_ART[categoryId] || 'peaks';
-    return CELEBRATION_ART_ASSETS[artKey] || CELEBRATION_ART_ASSETS.peaks;
-}
 
 function createCelebrationNode(tagName, className, textContent) {
     const node = document.createElement(tagName);
@@ -4320,7 +4299,6 @@ function flushCelebrationGroups() {
     const groups = celebrationDispatcher.pending.splice(0);
     const batch = {
         milestones: [],
-        achievements: [],
         records: [],
         notices: []
     };
@@ -4342,13 +4320,11 @@ function flushCelebrationGroups() {
     };
 
     batch.milestones = uniqueBy(batch.milestones, item => item.type + ':' + item.milestone);
-    batch.achievements = uniqueBy(batch.achievements, item => `${item.id || item.name}:${item.achievementYear || 'all'}`);
     batch.records = uniqueBy(batch.records, item => item.name);
     batch.notices = uniqueBy(batch.notices, item => item.message);
 
     if (
         !batch.milestones.length &&
-        !batch.achievements.length &&
         !batch.records.length &&
         !batch.notices.length
     ) return;
@@ -4516,190 +4492,6 @@ function showMilestoneCelebrationToast(batch, onFinish) {
     hapticFeedback(batch.milestones.length > 1 ? [18, 42, 18] : 22);
 }
 
-function showAchievementUnlockCelebration(batch, onFinish) {
-    const overlay = createCelebrationNode('div', 'achievement-unlock-overlay');
-    overlay.setAttribute('role', 'presentation');
-
-    const backdrop = createCelebrationNode('button', 'achievement-unlock-backdrop');
-    backdrop.type = 'button';
-    backdrop.setAttribute('aria-label', 'Auszeichnung schließen');
-
-    const card = createCelebrationNode('section', 'achievement-unlock-card');
-    card.setAttribute('role', 'dialog');
-    card.setAttribute('aria-modal', 'true');
-    card.setAttribute('aria-labelledby', 'achievement-unlock-title');
-
-    const closeButton = createCelebrationNode('button', 'achievement-unlock-close', '×');
-    closeButton.type = 'button';
-    closeButton.setAttribute('aria-label', 'Auszeichnung schließen');
-
-    const kicker = createCelebrationNode('span', 'achievement-unlock-kicker', 'NEUE AUSZEICHNUNG');
-    const mainAchievement = batch.achievements[0];
-    const mainTierKey = getAchievementTierKey(mainAchievement?.tierLabel);
-    if (mainTierKey) card.classList.add(`achievement-tier-${mainTierKey}`);
-    const artStage = createCelebrationNode('div', 'achievement-unlock-art-stage');
-    const art = createCelebrationNode('img', 'achievement-unlock-art');
-    art.src = mainAchievement.image || getAchievementCelebrationAsset(mainAchievement.categoryId);
-    art.alt = '';
-    art.setAttribute('aria-hidden', 'true');
-    art.setAttribute('draggable', 'false');
-    artStage.appendChild(art);
-
-    const title = createCelebrationNode(
-        'h2',
-        'achievement-unlock-title',
-        batch.achievements.length === 1 ? mainAchievement.name : batch.achievements.length + ' Auszeichnungen freigeschaltet'
-    );
-    title.id = 'achievement-unlock-title';
-
-    const category = createCelebrationNode(
-        'div',
-        'achievement-unlock-category',
-        batch.achievements.length === 1
-            ? (mainAchievement.categoryLabel || 'Deine Tourenleistung')
-            : 'Deine Tourenleistung wird belohnt'
-    );
-
-    const description = createCelebrationNode(
-        'p',
-        'achievement-unlock-description',
-        mainAchievement.description || (batch.achievements.length === 1
-            ? 'Du hast dir diese Auszeichnung mit deinen gespeicherten Touren verdient.'
-            : 'Mehrere neue Erfolge wurden bei deiner letzten Tour erreicht.')
-    );
-
-    card.append(closeButton, kicker, artStage, title, category, description);
-
-    if (batch.achievements.length > 1) {
-        const list = createCelebrationNode('div', 'achievement-unlock-extra-list');
-        batch.achievements.slice(1, 4).forEach(item => {
-            const row = createCelebrationNode('div', 'achievement-unlock-extra-row');
-            const miniArt = createCelebrationNode('img', 'achievement-unlock-extra-art');
-            miniArt.src = item.image || getAchievementCelebrationAsset(item.categoryId);
-            miniArt.alt = '';
-            miniArt.setAttribute('aria-hidden', 'true');
-            row.append(
-                miniArt,
-                createCelebrationNode('span', '', item.name),
-                createCelebrationNode('small', '', item.categoryLabel || '')
-            );
-            list.appendChild(row);
-        });
-        if (batch.achievements.length > 4) {
-            list.appendChild(createCelebrationNode('small', 'achievement-unlock-more', '+' + (batch.achievements.length - 4) + ' weitere Auszeichnungen'));
-        }
-        card.appendChild(list);
-    }
-
-    if (batch.milestones.length) {
-        card.appendChild(createCelebrationNode(
-            'p',
-            'achievement-unlock-extra-note',
-            'Zusätzlich ' + batch.milestones.length + (batch.milestones.length === 1 ? ' Meilenstein' : ' Meilensteine') + ' erreicht.'
-        ));
-    }
-    if (batch.records.length) {
-        card.appendChild(createCelebrationNode(
-            'p',
-            'achievement-unlock-extra-note',
-            'Außerdem: ' + batch.records.map(item => item.name).join(' · ')
-        ));
-    }
-
-    const actionButton = createCelebrationNode('button', 'achievement-unlock-action', 'ACHIEVEMENTS ANSEHEN');
-    actionButton.type = 'button';
-    card.appendChild(actionButton);
-
-    overlay.append(backdrop, card);
-    document.body.appendChild(overlay);
-    document.body.classList.add('achievement-celebration-open');
-
-    const previousFocus = document.activeElement;
-    const duration = 7200;
-    let closed = false;
-    let timer = null;
-
-    const close = (openTarget = false) => {
-        if (closed) return;
-        closed = true;
-        if (timer) clearTimeout(timer);
-        window.removeEventListener('keydown', onKeyDown);
-        overlay.classList.add('is-closing');
-        setTimeout(() => {
-            overlay.remove();
-            document.body.classList.remove('achievement-celebration-open');
-            if (previousFocus instanceof HTMLElement && previousFocus.isConnected) {
-                previousFocus.focus({ preventScroll: true });
-            }
-            onFinish?.();
-            if (openTarget) openCelebrationDestination(batch);
-        }, 300);
-    };
-
-    const onKeyDown = event => {
-        if (event.key === 'Escape') {
-            event.preventDefault();
-            close(false);
-        }
-    };
-
-    backdrop.addEventListener('click', () => close(false));
-    closeButton.addEventListener('click', () => close(false));
-    actionButton.addEventListener('click', () => close(true));
-    window.addEventListener('keydown', onKeyDown);
-
-    timer = setTimeout(() => close(false), duration);
-    hapticFeedback([24, 58, 26]);
-}
-
-function showNewMilestoneNotifications(lifetimeEvents = [], yearEvents = [], dashboardEvents = []) {
-    const mergedByKey = new Map();
-
-    [...lifetimeEvents, ...yearEvents, ...dashboardEvents].forEach(event => {
-        const key = event.type + ':' + event.milestone;
-        let merged = mergedByKey.get(key);
-
-        if (!merged) {
-            merged = {
-                type: event.type,
-                milestone: event.milestone,
-                scopes: new Set(),
-                years: new Set(),
-                dashboardFilters: new Set()
-            };
-            mergedByKey.set(key, merged);
-        }
-
-        merged.scopes.add(event.scope);
-        if (event.scope === 'year' && event.year !== null && event.year !== undefined) {
-            merged.years.add(Number(event.year));
-        }
-        if (event.scope === 'dashboard' && event.filterLabel) {
-            merged.dashboardFilters.add(event.filterLabel);
-        }
-    });
-
-    // Neue Dashboard-Schwellen vormerken, auch wenn die Tour aus einer anderen
-    // Ansicht gespeichert wurde. Die Kachel feiert beim nächsten Dashboard-Rendern.
-    dashboardEvents.forEach(event => pendingMilestoneTileCelebrations.add(event.type));
-
-    const items = [...mergedByKey.values()].map(event => {
-        const contexts = [];
-        if (event.scopes.has('lifetime')) contexts.push('Gesamt');
-        [...event.years].sort((a, b) => a - b).forEach(year => contexts.push('Jahr ' + year));
-        [...event.dashboardFilters].forEach(label => contexts.push(label));
-
-        return {
-            type: event.type,
-            milestone: event.milestone,
-            contexts: [...new Set(contexts)]
-        };
-    });
-
-    if (items.length) enqueueCelebrationGroup('milestones', items);
-    return items.length;
-}
-
 function showDashboardMilestoneCelebrationToast(event) {
     if (!event) return;
     enqueueCelebrationGroup('milestones', [{
@@ -4743,35 +4535,6 @@ function queueRecordCelebration(records, scope = 'lifetime', year = null, delay 
             enqueueCelebrationGroup('records', items);
         }, 650);
     }, Math.max(0, Number(delay) || 0));
-}
-
-function triggerAchievementUnlockCelebration(badges) {
-    const list = (Array.isArray(badges) ? badges : [badges]).filter(Boolean);
-    if (!list.length) return;
-
-    const items = list.map(badge => {
-        const definition = badge.achievementYear
-            ? badge
-            : (ACHIEVEMENT_CATEGORIES[badge.categoryId]?.badges.find(item => item.id === badge.id) || badge);
-        const category = ACHIEVEMENT_CATEGORIES[definition.categoryId] || {};
-        const baseName = definition.nameFn
-            ? definition.nameFn(definition.threshold)
-            : (definition.id || 'Achievement');
-        const name = definition.tierLabel ? `${definition.tierLabel} · ${baseName}` : baseName;
-
-        return {
-            id: definition.id,
-            categoryId: definition.categoryId,
-            categoryLabel: category.label || 'Achievement',
-            achievementYear: definition.achievementYear || null,
-            tierLabel: definition.tierLabel || null,
-            name,
-            icon: definition.icon || category.icon || '🏅',
-            image: getAchievementCelebrationAsset(definition.categoryId)
-        };
-    });
-
-    enqueueCelebrationGroup('achievements', items);
 }
 
 tourImagePickBtn?.addEventListener('click', () => {
