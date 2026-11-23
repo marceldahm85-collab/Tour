@@ -929,6 +929,31 @@
                 text(doc,[40,40,37]); doc.setFont(undefined,'bold'); doc.setFontSize(6.5); doc.text(st(item[1]),x,y+5);
             });
         }
+
+        if (options.milestones && typeof window.computeMilestones === 'function') {
+            var ms = window.computeMilestones(entries);
+            var defs = [['Strecke','dist'],['Aufstieg','asc'],['Gehzeit','time'],['Gipfel','peaks'],['Schritte','steps']];
+            var milestoneGap = 3, milestoneW = (CW - milestoneGap * 4) / 5;
+            text(doc, colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(6.8);
+            doc.text('MEILENSTEINE', M, 181);
+            defs.forEach(function(def, i) {
+                var data = ms && ms[def[1]];
+                if (!data) return;
+                var x = M + i * (milestoneW + milestoneGap);
+                text(doc,[95,95,90]); doc.setFont(undefined,'normal'); doc.setFontSize(5.2);
+                doc.text(def[0],x,186);
+                text(doc,[38,38,35]); doc.setFont(undefined,'bold'); doc.setFontSize(5.8);
+                doc.text(formatMilestoneTotal(def[1],data.total),x,191);
+                var reached = Array.isArray(data.reached) ? data.reached.length : 0;
+                var progress = 1;
+                if (data.next !== null && Number.isFinite(Number(data.next))) {
+                    var previous = reached ? Number(data.reached[reached-1].milestone) : 0;
+                    progress = Math.max(0,Math.min(1,(n(data.total)-previous)/Math.max(1,n(data.next)-previous)));
+                }
+                fill(doc,[231,231,227]); doc.roundedRect(x,194,milestoneW,1.5,0.75,0.75,'F');
+                fill(doc,colors.accent); doc.roundedRect(x,194,Math.max(1,milestoneW*progress),1.5,0.75,0.75,'F');
+            });
+        }
     }
 
     function summary(doc, entries, stats, label, colors, options) {
@@ -936,7 +961,7 @@
         // gemeinsam genau eine Seite belegen.
     }
 
-    function yearsPage(doc, from, to, colors, options) {
+    function yearsPage(doc, from, to, colors, options, photographedEntries) {
         options = options || getExportOptions();
         var label=from+'–'+to;
         addHeader(doc,label,colors);
@@ -946,7 +971,7 @@
 
         var years=[];
         for(var year=from;year<=to;year++){
-            var es=typeof window.getToursInYearRange==='function'?window.getToursInYearRange(year,year):[];
+            var es=Array.isArray(photographedEntries) ? photographedEntries.filter(function(entry) {\n                var key = monthKey(entry); return key && Number(key.slice(0,4)) === year;\n            }) : (typeof window.getToursInYearRange==='function'?window.getToursInYearRange(year,year):[]);
             if(es.length) years.push({year:year,entries:es,stats:window.computeStatsSummary(es)});
         }
 
@@ -1237,7 +1262,7 @@
         var stats=window.computeStatsSummary(entries), rep=options.coverPhoto ? (typeof window.getPdfRepresentativePhoto==='function'?window.getPdfRepresentativePhoto(entries):entries.find(function(e){return e.imageData;})||null) : null;
         await cover(doc,entries,stats,label,colors,rep,options);
         yearOpeningPage(doc,entries,stats,label,colors,options);
-        if(from!==to){ doc.addPage(); yearsPage(doc,from,to,colors,options); }
+        if(from!==to){ doc.addPage(); yearsPage(doc,from,to,colors,options,entries); }
         if(options.monthly) monthlyPage(doc,entries,label,colors);
         await renderTours(doc,entries,from,to,colors,options);
         // Die Gipfelliste und die zugeordneten Gipfelfotos bilden den Abschluss nach allen Tourseiten.
