@@ -54,6 +54,29 @@ function getOsttirolMapLayout(w, h) {
 }
 
 
+function extractTourCompanions(notes) {
+    if (!notes) return [];
+
+    // Erfasst "Mit Name" oder ", mit Name" sowie mehrere Namen,
+    // getrennt durch Komma und/oder "und" (z.B. "Mit Rene, Ingo und Christian").
+    // Die Erkennung endet automatisch beim ersten klein geschriebenen Wort.
+    const regex = /\bmit\s+([A-ZÄÖÜ][\wäöüß]*(?:\s*(?:,|und)\s*[A-ZÄÖÜ][\wäöüß]*)*)/gi;
+
+    const names = [];
+    let match;
+
+    while ((match = regex.exec(notes)) !== null) {
+        match[1]
+            .split(/\s*(?:,|und)\s*/i)
+            .map(name => name.trim())
+            .filter(Boolean)
+            .forEach(name => names.push(name));
+    }
+
+    return names;
+}
+
+
 const slopeToggleBtn = document.getElementById('slope-toggle');
 let useFullDistanceForGradient = false;
 
@@ -12123,7 +12146,7 @@ function buildHighlightCompanionRanking(data) {
 
         // Alle Etappen einer Mehrtagestour bilden eine Zähleinheit.
         // Ein Buddy wird über die gesamte Gruppe hinweg nur einmal gezählt.
-        extractWrappedTourCompanions(entry.notes).forEach(name => {
+        extractTourCompanions(entry.notes).forEach(name => {
             unit.companions.add(name);
         });
     });
