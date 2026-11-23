@@ -6168,9 +6168,7 @@ body.green #theme-view .theme-editor-contrast-row {
     #achievements-view .achievement-puzzle-tile { transition: none !important; }
 }
 
-/* Das Tourenbuch gehört zur Bergwelt, nicht in die Sicherungsansicht. */
-#backup-view #pdf-export-card { display: none !important; }
-
+/* Das Tourenbuch ist Bestandteil der Sicherungsansicht. */
 
 /* Achievement-Kacheln: Inhalt je Ausrichtung ausrichten, ohne Puzzle-Geometrie
    oder Abstände zwischen den Kacheln anzutasten. */
