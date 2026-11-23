@@ -1207,7 +1207,6 @@
             doc.addPage(); addHeader(doc,from===to?String(from):from+'–'+to,colors);
             colY=detail?[28]:[28,28];
         }
-        if (bookProfile !== 'premium') page();
         for(var i=0;i<ds.length;i++){
             var d=ds[i];
             var assets=await loadEntryPhotoAssets(d.e,options);
@@ -1223,7 +1222,12 @@
                 continue;
             }
             var extraAssets=assets.slice(d.photo ? 1 : 0);
-            if (extraAssets.length) await drawPhotoStory(doc,d,extraAssets,colors);
+            if (extraAssets.length) {
+                await drawPhotoStory(doc,d,extraAssets,colors);
+                page();
+            } else if (i === 0) {
+                page();
+            }
             var actual=detail?'feature':kindFor(d);
             var h=measure(getMeasureDoc(),d,colW,actual);
             var col=detail?0:(colY[0]<=colY[1]?0:1);
