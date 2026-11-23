@@ -68,11 +68,12 @@
         return pdfLibrariesPromise;
     }
 
-    var A4 = { w: 210, h: 297 };
+    var A4 = { w: 297, h: 210 };
     var M = 12;
-    var CW = 186;
-    var SAFE_BOTTOM = 282;
-    var GAP = 2;
+    var CW = A4.w - M * 2;
+    var SAFE_BOTTOM = A4.h - 15;
+    var GAP = 3;
+    var photoPageIndexes = new Set();
 
     function st(v) {
         if (typeof window.sanitizePdfText === 'function') return window.sanitizePdfText(v);
@@ -121,6 +122,31 @@
             img.src = url;
         });
     }
+    async function cropFullBleed(url, w, h, q) {
+        return new Promise(function(resolve, reject) {
+            var img = new Image();
+            img.onload = function() {
+                var canvas = document.createElement('canvas');
+                canvas.width = w; canvas.height = h;
+                var ctx = canvas.getContext('2d');
+                if (!ctx) { reject(new Error('Canvas-Kontext nicht verfügbar')); return; }
+                var scale = Math.max(w / img.width, h / img.height);
+                var sw = w / scale, sh = h / scale;
+                var sx = Math.max(0, (img.width - sw) / 2);
+                var sy = Math.max(0, (img.height - sh) / 2);
+                ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+                var gradient = ctx.createLinearGradient(0, h * 0.48, 0, h);
+                gradient.addColorStop(0, 'rgba(0,0,0,0)');
+                gradient.addColorStop(0.48, 'rgba(0,0,0,0.28)');
+                gradient.addColorStop(1, 'rgba(0,0,0,0.78)');
+                ctx.fillStyle = gradient; ctx.fillRect(0, 0, w, h);
+                resolve(canvas.toDataURL('image/jpeg', q || 0.9));
+            };
+            img.onerror = reject;
+            img.src = url;
+        });
+    }
+
     function fill(doc, c) { doc.setFillColor(c[0], c[1], c[2]); }
     function draw(doc, c) { doc.setDrawColor(c[0], c[1], c[2]); }
     function text(doc, c) { doc.setTextColor(c[0], c[1], c[2]); }
@@ -173,15 +199,15 @@
             var el = document.getElementById('pdf-book-opt-' + name);
             return el ? !!el.checked : fallback;
         }
-        var layoutEl = document.getElementById('pdf-book-opt-layout');
-        var styleEl = document.getElementById('pdf-book-opt-style');
-        var allowedLayouts = ['magazine', 'compact', 'detail'];
-        var allowedStyles = ['theme', 'alpine', 'mono'];
-        var layout = layoutEl && allowedLayouts.indexOf(layoutEl.value) >= 0 ? layoutEl.value : 'magazine';
-        var style = styleEl && allowedStyles.indexOf(styleEl.value) >= 0 ? styleEl.value : 'theme';
+        function selected(name, allowed, fallback) {
+            var el = document.getElementById('pdf-book-opt-' + name);
+            return el && allowed.indexOf(el.value) >= 0 ? el.value : fallback;
+        }
         return {
             photos: checked('photos', true),
             coverPhoto: checked('cover-photo', true),
+            galleryPhotos: checked('gallery-photos', true),
+            summitPhotos: checked('summit-photos', true),
             peaks: checked('peaks', true),
             performance: checked('performance', true),
             secondary: checked('secondary', true),
@@ -189,9 +215,24 @@
             notes: checked('notes', true),
             extras: checked('extras', true),
             milestones: checked('milestones', true),
-            layout: layout,
-            style: style
+            monthly: checked('monthly', false),
+            peakOverview: checked('peak-overview', false),
+            closing: checked('closing', true),
+            profile: selected('profile', ['premium', 'chronicle', 'documentation'], 'premium'),
+            format: selected('format', ['landscape', 'portrait', 'square'], 'landscape'),
+            layout: selected('profile', ['premium', 'chronicle', 'documentation'], 'premium'),
+            style: selected('style', ['theme', 'alpine', 'mono'], 'alpine')
         };
+    }
+
+    function configurePage(format) {
+        if (format === 'portrait') A4 = { w: 210, h: 297 };
+        else if (format === 'square') A4 = { w: 210, h: 210 };
+        else A4 = { w: 297, h: 210 };
+        CW = A4.w - M * 2;
+        SAFE_BOTTOM = A4.h - 15;
+        measureDoc = null;
+        photoPageIndexes = new Set();
     }
 
     function colorsForExport(base, style) {
@@ -395,7 +436,7 @@
             if (!window.jspdf || !window.jspdf.jsPDF) {
                 throw new Error('PDF-Bibliothek ist noch nicht geladen.');
             }
-            measureDoc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
+            measureDoc = new window.jspdf.jsPDF({ unit: 'mm', format: [A4.w, A4.h] });
         }
         return measureDoc;
     }
@@ -629,9 +670,9 @@
                 ? window.createPdfGradientImage(colors.topHex, colors.bottomHex, 1200, 60, 'horizontal')
                 : null;
         } catch (_) { grad = null; }
-        if (grad) doc.addImage(grad, 'PNG', 0, 0, 210, 9, undefined, 'FAST');
+        if (grad) doc.addImage(grad, 'PNG', 0, 0, A4.w, 9, undefined, 'FAST');
         text(doc, [105,105,101]); doc.setFont(undefined, 'bold'); doc.setFontSize(6.7); doc.text('BERGTOUREN TRACKER', M, 19);
-        doc.setFont(undefined, 'normal'); doc.text(st('TOURENBUCH ' + label), 198, 19, {align:'right'});
+        doc.setFont(undefined, 'normal'); doc.text(st('TOURENBUCH ' + label), A4.w - M, 19, {align:'right'});
         rule(doc, M, 22, CW, colors.accent, 0.65);
     }
 
@@ -639,30 +680,39 @@
         var total = doc.getNumberOfPages();
         for (var i = 1; i <= total; i++) {
             doc.setPage(i); text(doc, [145,145,140]); doc.setFont(undefined, 'normal'); doc.setFontSize(6.5);
-            doc.text('Persönliches Bergtourenbuch', M, 288);
-            doc.text(st('Tourenbuch ' + label), 105, 288, {align:'center'});
-            doc.text(st('Seite ' + i + ' / ' + total), 198, 288, {align:'right'});
+            var footerY = A4.h - 8;
+            var footerColor = photoPageIndexes.has(i) ? [255,255,255] : [145,145,140];
+            text(doc, footerColor);
+            doc.text('Persönliches Bergtourenbuch', M, footerY);
+            doc.text(st('Tourenbuch ' + label), A4.w / 2, footerY, {align:'center'});
+            doc.text(st('Seite ' + i + ' / ' + total), A4.w - M, footerY, {align:'right'});
         }
     }
 
     async function cover(doc, entries, stats, label, colors, rep, options) {
-        fill(doc, [255,255,253]); doc.rect(0,0,210,297,'F');
-        if (rep) {
+        fill(doc, [255,255,253]); doc.rect(0,0,A4.w,A4.h,'F');
+        if (rep && rep.imageData) {
             try {
-                doc.addImage(await crop(rep.imageData, 1400, 860, 0.86), 'JPEG', M, 28, CW, 112, undefined, 'FAST');
-                fill(doc, [255,255,253]); doc.roundedRect(M + 8, 118, CW - 16, 39, 4, 4, 'F');
-                text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(7); doc.text('PERSÖNLICHES BERGTOURENBUCH', M + 15, 128);
-                text(doc, [34,34,32]); doc.setFontSize(23); doc.text(st('Tourenbuch ' + label), M + 15, 141);
-                text(doc, [118,118,112]); doc.setFont(undefined, 'normal'); doc.setFontSize(7.1);
-                doc.text(st(entries.length + ' gespeicherte Touren · erstellt am ' + new Date().toLocaleDateString('de-AT')), M + 15, 149);
-                coverStats(doc, stats, 164, colors, entries, options);
+                var bg = await cropFullBleed(rep.imageData, 1600, Math.round(1600 * A4.h / A4.w), 0.9);
+                doc.addImage(bg, 'JPEG', 0, 0, A4.w, A4.h, undefined, 'FAST');
+                photoPageIndexes.add(doc.getNumberOfPages());
+                text(doc, [255,255,255]); doc.setFont(undefined, 'bold');
+                doc.setFontSize(A4.w < 230 ? 19 : 25);
+                doc.text(st('Mein Bergjahr ' + label), M, A4.h * 0.57);
+                doc.setFont(undefined, 'normal'); doc.setFontSize(8.5);
+                doc.text(st(entries.length + ' gespeicherte Touren · Persönliches alpines Fotobuch'), M, A4.h * 0.57 + 8);
+                coverStats(doc, stats, Math.max(118, A4.h * 0.62), colors, entries, options);
                 return;
-            } catch (_) {}
+            } catch (error) {
+                console.warn('Titelbild konnte nicht verarbeitet werden:', error);
+            }
         }
         rule(doc, M, 30, 7, colors.accent, 55);
-        text(doc, [35,35,32]); doc.setFont(undefined, 'bold'); doc.setFontSize(25); doc.text(st('Tourenbuch ' + label), M + 13, 53);
-        text(doc, [120,120,114]); doc.setFont(undefined, 'normal'); doc.setFontSize(9); doc.text('Persönliche Bergstatistik und Tourenchronik', M + 13, 62);
-        coverStats(doc, stats, 82, colors, entries, options);
+        text(doc, [35,35,32]); doc.setFont(undefined, 'bold'); doc.setFontSize(25);
+        doc.text(st('Mein Bergjahr ' + label), M + 13, 53);
+        text(doc, [120,120,114]); doc.setFont(undefined, 'normal'); doc.setFontSize(9);
+        doc.text('Persönliches alpines Fotobuch und Tourenchronik', M + 13, 62);
+        coverStats(doc, stats, A4.h < 230 ? 112 : 82, colors, entries, options);
     }
 
     function buildCoverHighlights(entries, options) {
@@ -950,6 +1000,171 @@
     }
 
 
+    function readSummitAssignmentsForTour(entry, options) {
+        if (!options.summitPhotos || !entry || !entry.id) return [];
+        try {
+            var all = typeof appStorage !== 'undefined' ? (appStorage.get('summitPhotoAssignments.v1') || {}) : {};
+            return Object.keys(all).map(function(uri) {
+                var item = all[uri];
+                if (!item || String(item.tourId || '') !== String(entry.id)) return null;
+                var peaks = Array.isArray(entry.gipfelDetails) ? entry.gipfelDetails : [];
+                var peak = null;
+                if (item.peakName) peak = peaks.find(function(p) {
+                    return String(p.name || '').trim().toLowerCase() === String(item.peakName).trim().toLowerCase();
+                });
+                if (!peak && Number.isInteger(Number(item.peakIndex))) peak = peaks[Number(item.peakIndex)];
+                if (item.peakName && peak && String(peak.name || '').trim().toLowerCase() !== String(item.peakName).trim().toLowerCase()) {
+                    peak = null;
+                }
+                return { uri: uri, peakName: item.peakName || (peak && peak.name) || 'Gipfel', peakHeight: item.peakHeight || (peak && peak.hoehe) || 0 };
+            }).filter(Boolean);
+        } catch (error) {
+            console.warn('Gipfelfoto-Zuordnungen konnten nicht gelesen werden.', error);
+            return [];
+        }
+    }
+
+    async function loadEntryPhotoAssets(entry, options) {
+        var assets = [];
+        if (options.photos && entry.imageData) assets.push({ src: entry.imageData, label: 'Hauptfoto' });
+
+        if (options.galleryPhotos && Array.isArray(entry.galleryPhotos) &&
+            typeof window.__tourGalleryLoadPhotoFull === 'function') {
+            var gallery = entry.galleryPhotos.filter(function(item) {
+                return item && item.mediaType === 'photo' && item.uri;
+            });
+            for (var i = 0; i < gallery.length; i++) {
+                try {
+                    var src = await window.__tourGalleryLoadPhotoFull(gallery[i]);
+                    if (src) assets.push({ src: src, label: 'Tourfoto ' + (i + 1) });
+                } catch (_) {}
+            }
+        }
+
+        if (options.summitPhotos && typeof window.__androidNativeRequest === 'function') {
+            var summit = readSummitAssignmentsForTour(entry, options);
+            for (var j = 0; j < summit.length; j++) {
+                try {
+                    var result = await window.__androidNativeRequest('gallery.summit.folder.full', { uri: summit[j].uri }, 45000);
+                    if (result && result.status === 'ok' && result.data) {
+                        assets.push({
+                            src: 'data:' + (result.mimeType || 'image/jpeg') + ';base64,' + result.data,
+                            label: summit[j].peakName + (summit[j].peakHeight ? ' · ' + fi(summit[j].peakHeight) + ' m' : '')
+                        });
+                    }
+                } catch (error) {
+                    console.warn('Zugeordnetes Gipfelfoto konnte nicht geladen werden.', error);
+                }
+            }
+        }
+        return assets;
+    }
+
+    async function drawPhotoStory(doc, d, assets, colors) {
+        if (!assets.length) return;
+        var hero = assets[0];
+        doc.addPage();
+        try {
+            var heroData = await cropFullBleed(hero.src, 1800, Math.round(1800 * A4.h / A4.w), 0.91);
+            doc.addImage(heroData, 'JPEG', 0, 0, A4.w, A4.h, undefined, 'FAST');
+            photoPageIndexes.add(doc.getNumberOfPages());
+            text(doc, [255,255,255]); doc.setFont(undefined, 'bold');
+            doc.setFontSize(A4.w < 230 ? 21 : 29);
+            var titleLines = wrap(doc, d.title, A4.w - M * 2, A4.w < 230 ? 21 : 29, 'bold').slice(0,2);
+            doc.text(titleLines, M, A4.h - 42);
+            doc.setFont(undefined, 'normal'); doc.setFontSize(8);
+            doc.text(st(d.date + ' · ' + d.difficulty + ' · ' + d.region), M, A4.h - 29);
+            var statLine = d.e.strecke ? f1(d.e.strecke) + ' km' : '';
+            if (d.e.aufstieg) statLine += (statLine ? '  ·  ' : '') + fi(d.e.aufstieg) + ' hm';
+            if (d.e.zeit) statLine += (statLine ? '  ·  ' : '') + st(d.e.zeit) + ' h';
+            doc.setFont(undefined, 'bold'); doc.setFontSize(10);
+            if (statLine) doc.text(st(statLine), M, A4.h - 18);
+        } catch (error) {
+            console.warn('Fotoseite konnte nicht gezeichnet werden:', error);
+        }
+
+        for (var start = 1; start < assets.length; start += 3) {
+            var group = assets.slice(start, start + 3);
+            doc.addPage();
+            var heroW = A4.w * 0.62, sideW = A4.w - heroW;
+            var tiles = [
+                { x: 0, y: 0, w: heroW - 1.2, h: A4.h },
+                { x: heroW, y: 0, w: sideW, h: group.length > 1 ? A4.h * 0.495 : A4.h }
+            ];
+            if (group.length > 2) tiles.push({ x: heroW, y: A4.h * 0.505, w: sideW, h: A4.h * 0.495 });
+            for (var k = 0; k < group.length; k++) {
+                try {
+                    var tile = tiles[k];
+                    var tileData = await cropFullBleed(group[k].src, 1200, Math.max(1, Math.round(1200 * tile.h / tile.w)), 0.9);
+                    doc.addImage(tileData, 'JPEG', tile.x, tile.y, tile.w, tile.h, undefined, 'FAST');
+                    text(doc, [255,255,255]); doc.setFont(undefined, 'bold'); doc.setFontSize(7.5);
+                    doc.text(st(group[k].label || 'Tourfoto'), tile.x + 4, tile.y + tile.h - 5);
+                } catch (error) {
+                    console.warn('Fotocollage-Bild konnte nicht gezeichnet werden:', error);
+                }
+            }
+            photoPageIndexes.add(doc.getNumberOfPages());
+        }
+    }
+
+    function monthKey(entry) {
+        var raw = String(entry && entry.date || '');
+        var match = raw.match(/^(\\d{4})-(\\d{2})/);
+        if (match) return match[1] + '-' + match[2];
+        match = raw.match(/^(\\d{1,2})[.\\/]([0-9]{1,2})[.\\/](\\d{4})$/);
+        return match ? match[3] + '-' + String(match[2]).padStart(2,'0') : '';
+    }
+
+    function monthlyPage(doc, entries, label, colors) {
+        doc.addPage(); addHeader(doc, label, colors);
+        text(doc, [35,35,32]); doc.setFont(undefined,'bold'); doc.setFontSize(19);
+        doc.text('Das Bergjahr im Monatsverlauf', M, 36);
+        var names = ['Jänner','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+        var rows = {};
+        entries.forEach(function(entry) {
+            var key = monthKey(entry); if (!key) return;
+            var month = Number(key.slice(5,7)); if (!month) return;
+            if (!rows[month]) rows[month] = { tours:0, distance:0, ascent:0 };
+            rows[month].tours++;
+            rows[month].distance += n(entry.strecke);
+            rows[month].ascent += n(entry.aufstieg);
+        });
+        var colW = (CW - 12) / 3;
+        for (var i=1;i<=12;i++) {
+            var item = rows[i] || {tours:0,distance:0,ascent:0};
+            var col=(i-1)%3, row=Math.floor((i-1)/3), x=M+col*(colW+6), y=49+row*34;
+            fill(doc,[248,248,244]); doc.roundedRect(x,y,colW,29,2.5,2.5,'F');
+            text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(8); doc.text(names[i-1],x+4,y+7);
+            text(doc,[42,42,39]); doc.setFontSize(10); doc.text(String(item.tours)+' Touren',x+4,y+16);
+            text(doc,[115,115,110]); doc.setFont(undefined,'normal'); doc.setFontSize(6.5);
+            doc.text(f1(item.distance)+' km  ·  '+fi(item.ascent)+' hm',x+4,y+23);
+        }
+    }
+
+    function peakOverviewPage(doc, entries, label, colors) {
+        var peaks = new Map();
+        entries.forEach(function(entry) {
+            (Array.isArray(entry.gipfelDetails) ? entry.gipfelDetails : []).forEach(function(peak) {
+                var name=st(peak && peak.name); if (!name) return;
+                var height=n(String(peak.hoehe || '').replace(/[^0-9,.]/g,'').replace(',','.'));
+                var key=name.toLowerCase();
+                if (!peaks.has(key) || height>peaks.get(key).height) peaks.set(key,{name:name,height:height});
+            });
+        });
+        var list=Array.from(peaks.values()).sort(function(a,b){return b.height-a.height;});
+        doc.addPage(); addHeader(doc,label,colors);
+        text(doc,[35,35,32]); doc.setFont(undefined,'bold'); doc.setFontSize(19); doc.text('Meine Gipfel',M,36);
+        text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(8); doc.text(list.length+' unterschiedliche Gipfel',M,43);
+        var columns=2, colW=(CW-8)/2, rowH=8, y=52;
+        list.forEach(function(peak,i) {
+            var col=i%columns,row=Math.floor(i/columns),x=M+col*(colW+8),py=y+row*rowH;
+            if (py > SAFE_BOTTOM) return;
+            text(doc,[55,55,51]); doc.setFont(undefined,'normal'); doc.setFontSize(7.2);
+            doc.text(st(peak.name),x,py);
+            text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.text(peak.height?fi(peak.height)+' m':'–',x+colW,py,{align:'right'});
+        });
+    }
+
     function kindFor(d){
         // Magazin und Kompakt behalten zwei Spalten; Detail zeigt eine breite Karte je Zeile.
         return d.photo ? 'split' : 'compact';
@@ -959,28 +1174,41 @@
         options = options || getExportOptions();
         var profile=typeof window.buildTourProfileAnalysis==='function'?window.buildTourProfileAnalysis(entries):null;
         var ds=entries.map(function(e){return dataFor(e,profile,options);});
-        var detail=options.layout === 'detail';
+        var bookProfile=options.profile || 'premium';
+        var detail=bookProfile !== 'chronicle';
         var colGap=detail?0:5,colW=detail?CW:(CW-colGap)/2,colY=detail?[28]:[28,28];
-        doc.addPage(); addHeader(doc,from===to?String(from):from+'–'+to,colors);
         function page(){
-            doc.addPage(); addHeader(doc,from===to?String(from):from+'–'+to,colors); colY=detail?[28]:[28,28];
+            doc.addPage(); addHeader(doc,from===to?String(from):from+'–'+to,colors);
+            colY=detail?[28]:[28,28];
         }
+        if (bookProfile !== 'premium') page();
         for(var i=0;i<ds.length;i++){
-            var d=ds[i], actual=detail?'feature':kindFor(d);
+            var d=ds[i];
+            if (bookProfile === 'premium') {
+                var assets=await loadEntryPhotoAssets(d.e,options);
+                if (assets.length) await drawPhotoStory(doc,d,assets,colors);
+                page();
+                d.photo=false;
+                var featureHeight=measure(getMeasureDoc(),d,CW,'feature');
+                if (featureHeight > SAFE_BOTTOM - 28) {
+                    console.warn('Umfangreiche Tourdetails benötigen möglicherweise Zusatzseiten:',d.title);
+                }
+                await drawTour(doc,d,M,28,CW,'feature',colors);
+                continue;
+            }
+            var actual=detail?'feature':kindFor(d);
             var h=measure(getMeasureDoc(),d,colW,actual);
             var col=detail?0:(colY[0]<=colY[1]?0:1);
             if(colY[col]+h>SAFE_BOTTOM){
-                if(detail){
-                    page();
-                    col=0;
-                } else {
+                if(detail){ page(); col=0; }
+                else {
                     var other=1-col;
                     if(colY[other]+h<=SAFE_BOTTOM) col=other;
                     else { page(); col=0; }
                 }
             }
             var x=M+col*(colW+colGap), y=colY[col];
-            var drawnH = await drawTour(doc,d,x,y,colW,actual,colors);
+            var drawnH=await drawTour(doc,d,x,y,colW,actual,colors);
             colY[col]=y+drawnH+GAP;
         }
     }
@@ -989,7 +1217,8 @@
         if(typeof window.showToast==='function')window.showToast('PDF-Export wird vorbereitet…',{type:'info',duration:2500});
         await ensurePdfLibraries();
         var options = getExportOptions();
-        var js=window.jspdf.jsPDF, doc=new js({unit:'mm',format:'a4'}), colors=colorsForExport(tc(), options.style);
+        configurePage(options.format);
+        var js=window.jspdf.jsPDF, doc=new js({unit:'mm',format:[A4.w,A4.h]}), colors=colorsForExport(tc(), options.style);
         // Die Reihenfolge aus der App-Datenquelle bleibt unverändert im PDF erhalten.
         var entries=window.getToursInYearRange(from,to), label=from===to?String(from):from+'–'+to;
         if ((options.photos || options.coverPhoto) && typeof window.loadTourImagesForEntries === 'function') {
@@ -1004,7 +1233,29 @@
         await cover(doc,entries,stats,label,colors,rep,options);
         doc.addPage(); summary(doc,entries,stats,label,colors,options);
         if(from!==to){ doc.addPage(); yearsPage(doc,from,to,colors,options); }
+        if(options.monthly) monthlyPage(doc,entries,label,colors);
+        if(options.peakOverview) peakOverviewPage(doc,entries,label,colors);
         await renderTours(doc,entries,from,to,colors,options);
+        if(options.closing){
+            var finalPhoto=null;
+            for(var fiIndex=entries.length-1;fiIndex>=0&&!finalPhoto;fiIndex--){
+                var finalEntry=entries[fiIndex];
+                if(finalEntry.imageData) finalPhoto=finalEntry.imageData;
+                else if(options.galleryPhotos&&Array.isArray(finalEntry.galleryPhotos)&&finalEntry.galleryPhotos.length&&typeof window.__tourGalleryLoadPhotoFull==='function'){
+                    finalPhoto=await window.__tourGalleryLoadPhotoFull(finalEntry.galleryPhotos[0]);
+                }
+            }
+            if(finalPhoto){
+                doc.addPage();
+                var closingBg=await cropFullBleed(finalPhoto,1600,Math.round(1600*A4.h/A4.w),0.9);
+                doc.addImage(closingBg,'JPEG',0,0,A4.w,A4.h,undefined,'FAST');
+                photoPageIndexes.add(doc.getNumberOfPages());
+                text(doc,[255,255,255]);doc.setFont(undefined,'bold');doc.setFontSize(25);
+                doc.text('Bis zum nächsten Gipfel.',M,A4.h*0.78);
+                doc.setFont(undefined,'normal');doc.setFontSize(8);
+                doc.text(st(fi(stats.totalTours)+' Touren · '+f1(stats.totalDistance)+' km · '+fi(stats.totalAscent)+' hm'),M,A4.h*0.78+9);
+            }
+        }
         footer(doc,label); await save(doc,from,to);
     }
 
