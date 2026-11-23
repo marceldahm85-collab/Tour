@@ -1109,3 +1109,114 @@
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
 }
+
+
+/* Korrekturen Big Tours / Ø Speed / Ø Anstieg – 0.8.31. */
+/* Beide Big-Tours-Bilder erhalten dieselbe feste Bildfläche. Die Tourbezeichnung
+   steht ausschließlich unter dem Bild; Kennzahl und Kategorie bleiben in einer Zeile. */
+#dash-stat-modal .dashboard-big-tours-image {
+    width: 100%;
+    height: 176px;
+    max-height: none;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+#dash-stat-modal .dashboard-big-tours-route-name {
+    display: block;
+    margin: 9px 0 0;
+    text-align: center;
+}
+#dash-stat-modal .dashboard-big-tours-metrics > span {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 5px;
+}
+#dash-stat-modal .dashboard-big-tours-metrics strong {
+    white-space: nowrap;
+}
+#dash-stat-modal .dashboard-big-tours-metrics small {
+    white-space: nowrap;
+}
+
+/* Gangarten sitzen exakt auf den Skalen-x-Positionen. Die Punkte sind unabhängig
+   von den versetzten Textzeilen absolut auf der jeweiligen Markierung verankert. */
+#dash-stat-modal .dashboard-speed-gaits {
+    min-height: 76px;
+    margin: 8px 8px 0;
+}
+#dash-stat-modal .dashboard-speed-gait {
+    top: 0;
+    width: 25%;
+    max-width: 25%;
+    min-height: 72px;
+    transform: translateX(-50%);
+    align-items: center;
+    gap: 2px;
+}
+#dash-stat-modal .dashboard-speed-gait-dot {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 7px;
+    height: 7px;
+    margin: 0;
+    transform: translateX(-50%);
+}
+#dash-stat-modal .dashboard-speed-gait strong {
+    display: block;
+    width: 100%;
+    margin-top: 14px;
+    text-align: center;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+#dash-stat-modal .dashboard-speed-gait small {
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+#dash-stat-modal .dashboard-speed-gait.is-lower strong {
+    margin-top: 34px;
+}
+#dash-stat-modal .dashboard-speed-gait.is-edge {
+    right: 0;
+    left: auto !important;
+    align-items: flex-end;
+    transform: none;
+}
+#dash-stat-modal .dashboard-speed-gait.is-edge .dashboard-speed-gait-dot {
+    right: 0;
+    left: auto;
+    transform: none;
+}
+#dash-stat-modal .dashboard-speed-gait.is-edge strong,
+#dash-stat-modal .dashboard-speed-gait.is-edge small {
+    text-align: right;
+}
+
+/* Ø Anstieg: wie die bereits flüssigen Schritte-/Steigungs-Storys rendern.
+   Insbesondere kein Backdrop-Filter unter den bei jedem Frame wechselnden Ziffern. */
+#dash-stat-modal .dashboard-ascent-rate-story {
+    isolation: isolate;
+    contain: paint;
+    transform: translateZ(0);
+}
+#dash-stat-modal .dashboard-ascent-rate-story .dashboard-extra-total,
+#dash-stat-modal .dashboard-ascent-rate-story .dashboard-extra-panel {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background-color: rgba(8,17,26,.62);
+}
+#dash-stat-modal .dashboard-ascent-rate-story .dashboard-ascent-animated-value {
+    width: auto !important;
+    overflow: visible;
+    contain: none;
+}
+#dash-stat-modal .dashboard-ascent-rate-story .dashboard-ascent-comparison-row strong {
+    display: block;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
