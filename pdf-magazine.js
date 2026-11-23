@@ -1114,8 +1114,8 @@
         text(doc, [220,225,218]); doc.setFont(undefined, 'normal'); doc.setFontSize(6.8);
         doc.text(st(d.date + ' · ' + d.difficulty + ' · ' + d.region), M, photoH + 18);
         var statLine = d.stats.map(function(item) { return item[0]; }).join('  ·  ');
-        text(doc, [255,255,255]); doc.setFont(undefined, 'bold'); doc.setFontSize(8);
-        if (statLine) doc.text(st(statLine), M, photoH + 27);
+        text(doc, [255,255,255]); doc.setFont(undefined, 'bold'); doc.setFontSize(7.2);
+        if (statLine) doc.text(wrap(doc, statLine, A4.w - M * 2, 7.2, 'bold').slice(0,1), M, photoH + 27);
         if (d.secondary.length) {
             text(doc, [205,215,205]); doc.setFont(undefined, 'normal'); doc.setFontSize(6.2);
             doc.text(wrap(doc, d.secondary.join(' · '), A4.w - M * 2, 6.2, 'normal').slice(0,1), M, photoH + 35);
