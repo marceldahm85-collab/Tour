@@ -969,3 +969,99 @@
         animation: none !important;
     }
 }
+
+
+/* Korrekturen der Dashboard-Storys 0.8.29 */
+#dash-stat-modal .dashboard-steps-comparison {
+    margin-top: 12px;
+}
+#dash-stat-modal .dashboard-steps-days-value {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 9px;
+    color: #fff;
+    font-size: clamp(28px, 7vw, 38px);
+    font-weight: 900;
+    line-height: 1.12;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+#dash-stat-modal .dashboard-steps-days-value .dashboard-extra-unit {
+    font-size: 14px;
+    line-height: 1.35;
+}
+#dash-stat-modal .dashboard-peaks-week {
+    padding: 0;
+    font-family: inherit;
+    cursor: default;
+    appearance: none;
+    -webkit-appearance: none;
+}
+#dash-stat-modal .dashboard-peaks-week.is-clickable {
+    cursor: pointer;
+}
+#dash-stat-modal .dashboard-peaks-week.is-clickable:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+#dash-stat-modal .dashboard-peaks-week:disabled {
+    opacity: .72;
+}
+#dash-stat-modal .dashboard-speed-scale {
+    height: 58px;
+}
+#dash-stat-modal .dashboard-speed-track {
+    top: 29px;
+}
+#dash-stat-modal .dashboard-speed-tick {
+    position: absolute;
+    top: -4px;
+    width: 2px;
+    height: 13px;
+    border-radius: 2px;
+    background: rgba(255,255,255,.92);
+    transform: translateX(-50%);
+    box-shadow: 0 0 4px rgba(0,0,0,.3);
+}
+#dash-stat-modal .dashboard-speed-axis {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    justify-content: space-between;
+    color: rgba(255,255,255,.68);
+    font-size: 9px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+#dash-stat-modal .dashboard-speed-gaits {
+    margin: 8px 0 0;
+}
+#dash-stat-modal .dashboard-big-tours-austria {
+    margin-top: 12px;
+}
+#dash-stat-modal .dashboard-big-tours-photo-credit {
+    display: block;
+    margin-top: 7px;
+    color: rgba(255,255,255,.58);
+    font-size: 9px;
+    line-height: 1.25;
+    text-align: right;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+#dash-stat-modal .dashboard-grade-bar-row strong {
+    font-variant-numeric: tabular-nums;
+}
+#dash-stat-modal .dashboard-ascent-comparison-row strong {
+    font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: reduce) {
+    #dash-stat-modal .dashboard-peaks-week.is-active {
+        animation: none !important;
+    }
+}
