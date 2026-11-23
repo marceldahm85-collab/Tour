@@ -25827,22 +25827,11 @@ function buildPdfYearOverviewRows(fromYear, toYear) {
 
 
 function getPdfRepresentativePhoto(entries) {
-    const withPhotos = entries.filter(e => e.imageData);
-    if (!withPhotos.length) return null;
-
-    let best = withPhotos[0];
-    let bestScore = -Infinity;
-
-    withPhotos.forEach(entry => {
-        const perf = calculatePerformanceIndex(entry);
-        const score = perf && Number.isFinite(perf.score) ? perf.score : -1;
-        if (score > bestScore) {
-            bestScore = score;
-            best = entry;
-        }
-    });
-
-    return best;
+    // Das Titelbild folgt der App-Tourreihenfolge (neueste Tour zuerst).
+    // Der Leistungsindex ist kein verlässliches Kriterium für die Bildwirkung.
+    return (Array.isArray(entries) ? entries : []).find(entry =>
+        entry && typeof entry.imageData === 'string' && entry.imageData
+    ) || null;
 }
 
 function formatDelta(a, b, decimals = 0, suffix = '') {
