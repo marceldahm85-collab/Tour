@@ -1022,8 +1022,9 @@
                 });
                 if (!peak && item.peakIndex !== null && item.peakIndex !== undefined &&
                     Number.isInteger(Number(item.peakIndex))) peak = peaks[Number(item.peakIndex)];
+                if (item.peakName && !peak) return null;
                 if (item.peakName && peak && String(peak.name || '').trim().toLowerCase() !== String(item.peakName).trim().toLowerCase()) {
-                    peak = null;
+                    return null;
                 }
                 return { uri: uri, peakName: item.peakName || (peak && peak.name) || 'Gipfel', peakHeight: item.peakHeight || (peak && peak.hoehe) || 0 };
             }).filter(Boolean);
@@ -1209,8 +1210,8 @@
         if (bookProfile !== 'premium') page();
         for(var i=0;i<ds.length;i++){
             var d=ds[i];
+            var assets=await loadEntryPhotoAssets(d.e,options);
             if (bookProfile === 'premium') {
-                var assets=await loadEntryPhotoAssets(d.e,options);
                 if (assets.length) await drawPhotoStory(doc,d,assets,colors);
                 page();
                 d.photo=false;
@@ -1221,6 +1222,8 @@
                 await drawTour(doc,d,M,28,CW,'feature',colors);
                 continue;
             }
+            var extraAssets=assets.slice(d.photo ? 1 : 0);
+            if (extraAssets.length) await drawPhotoStory(doc,d,extraAssets,colors);
             var actual=detail?'feature':kindFor(d);
             var h=measure(getMeasureDoc(),d,colW,actual);
             var col=detail?0:(colY[0]<=colY[1]?0:1);
