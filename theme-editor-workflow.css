@@ -601,3 +601,77 @@ body[data-app-density="comfortable"] #theme-view .theme-editor-settings-grid {
   color: var(--app-text-primary, #f3f7fb);
   box-sizing: border-box;
 }
+
+
+/* Sicherung: dieselbe Accordion-Oberfläche und Größenlogik wie im Editor. */
+#backup-view > .backup-view-inner {
+  display: block !important;
+}
+#backup-view > .backup-view-inner > details.backup-accordion-card {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 0 0 12px !important;
+  padding: 10px 12px 12px !important;
+  border: 1px solid var(--premium-border, rgba(255,255,255,.13)) !important;
+  border-radius: var(--editor-radius, var(--premium-radius-card, 16px)) !important;
+  background:
+    radial-gradient(ellipse at 98% 0%, color-mix(in srgb, var(--accent, #D5A64C) 7%, transparent), transparent 42%),
+    linear-gradient(150deg, var(--app-surface-strong, rgba(255,255,255,.055)), var(--app-surface-card, rgba(10,16,23,.8))) !important;
+  box-shadow: var(--premium-shadow-card, 0 8px 22px rgba(0,0,0,.18)), inset 0 1px 0 rgba(255,255,255,.035) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+#backup-view > .backup-view-inner > details.backup-accordion-card:last-child {
+  margin-bottom: 0 !important;
+}
+#backup-view > .backup-view-inner > details.backup-accordion-card[open] {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  align-self: stretch !important;
+  flex: 0 0 auto !important;
+}
+#backup-view .backup-accordion-card > summary.stats-analysis-title {
+  position: relative !important;
+  width: 100% !important;
+  padding-top: 0 !important;
+  padding-right: 26px !important;
+  padding-left: 0 !important;
+  text-align: left !important;
+  list-style: none !important;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+#backup-view .backup-accordion-card > summary::-webkit-details-marker {
+  display: none;
+}
+#backup-view .backup-accordion-card > summary.stats-analysis-title::after {
+  content: "" !important;
+  position: absolute !important;
+  right: 5px !important;
+  top: calc(50% - 5px) !important;
+  flex: 0 0 8px !important;
+  width: 8px !important;
+  height: 8px !important;
+  border: 0 !important;
+  border-right: 1.8px solid var(--theme-palette-accent, var(--accent, #D5A64C)) !important;
+  border-bottom: 1.8px solid var(--theme-palette-accent, var(--accent, #D5A64C)) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: rotate(45deg) !important;
+  transform-origin: center;
+  transition: transform 160ms ease, top 160ms ease;
+  opacity: .95;
+}
+#backup-view .backup-accordion-card[open] > summary.stats-analysis-title::after {
+  top: calc(50% - 2px) !important;
+  transform: rotate(225deg) !important;
+}
