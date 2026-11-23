@@ -4133,7 +4133,7 @@ function removeToast(toast) {
     setTimeout(() => toast.remove(), 280);
 }
 
-// ─── Achievement-Toast bei neu erreichten Meilensteinen ─────────────────────
+// ─── Datumsparser für Meilenstein- und Rekordauswertungen ───────────────────
 
 function parseTourDateValue(dateStr) {
     const raw = String(dateStr ?? '').trim();
@@ -4499,10 +4499,6 @@ function showDashboardMilestoneCelebrationToast(event) {
         milestone: event.milestone,
         contexts: Array.isArray(event.contexts) ? event.contexts : []
     }]);
-}
-
-function showAchievementToast(message) {
-    enqueueCelebrationGroup('notices', [{ message: String(message || 'Erfolg erreicht') }]);
 }
 
 let pendingRecordCelebrations = new Map();
@@ -6616,7 +6612,7 @@ function attachModalSwipeDown(modal, closeFn) {
     card.addEventListener('touchcancel', resetState, { passive: true });
 }
 
-// Public bridge for lazily loaded modules (e.g. Bergwelt Level dialogs).
+// Public bridge for optional detail modules that need the shared modal swipe behavior.
 window.__tourAttachModalSwipeDown = attachModalSwipeDown;
 
 function initModalSwipeDown() {
@@ -6626,7 +6622,6 @@ function initModalSwipeDown() {
 
 function initAllModalSwipes() {
     const modalConfig = [
-    { id: 'achievement-category-modal', closeFn: closeAchievementCategoryModal },
     { id: 'tour-detail-modal',  closeFn: closeTourDetail       },
     { id: 'compare-modal',      closeFn: closeCompareModal      },
     { id: 'month-stats-modal',  closeFn: closeMonthStatsModal   },
@@ -7676,7 +7671,7 @@ function countDistinctTours(entries) {
     return seen.size;
 }
 
-// Öffentliche, read-only Datenregeln für lazy geladene Module wie Bergwelt.
+// Öffentliche, read-only Datenregeln für gemeinsam genutzte Auswertungsmodule.
 window.__tourDataRules = Object.freeze({
     readMetric: readTourMetricNumber,
     parseMinutes: readTourMetricMinutes,
@@ -29661,7 +29656,7 @@ const appStorage = {
         if (key === 'touren' && Array.isArray(snapshot)) {
             // Daten bleiben im synchronen Speicher-Cache wie bisher verfügbar.
             // Persistiert werden jedoch nur Tourmetadaten; Bilder werden separat
-            // abgelegt und bei Bedarf für Details, Wrapped, PDF oder Sicherung geladen.
+            // abgelegt und bei Bedarf für Tourdetails, PDF oder Sicherung geladen.
             const prepared = prepareTourStorageEntries(snapshot);
             queueStorageWrite(
                 () => _idbWritePreparedTourStorage(prepared)
