@@ -30184,7 +30184,7 @@ function showDashBigToursStory(totalBigTours, allTours, backTitle) {
             '</section>' +
             '<section class="dashboard-extra-panel dashboard-big-tours-reference dashboard-big-tours-austria">' +
                 '<div class="dashboard-extra-panel-title">Österreichische Referenztour</div>' +
-                '<img class="dashboard-big-tours-image" src="https://images.unsplash.com/photo-1617298352465-85a0cb27a81d?auto=format&fit=crop&fm=jpg&q=85&w=1280" alt="Gipfelkreuz am Bösen Weibl in Osttirol mit Blick zum Großglockner" loading="lazy">' +
+                '<img class="dashboard-big-tours-image" src="https://images.unsplash.com/photo-1617298352465-85a0cb27a81d?auto=format&fit=crop&fm=jpg&q=85&w=1280" alt="Gipfelkreuz auf der Sommeralm in Österreich" loading="lazy">' +
                 '<a class="dashboard-big-tours-route-name" href="https://www.osttirol.com/region-orte/alle-orte/lienz/wandern/detail/boeses-weibl" target="_blank" rel="noopener noreferrer">Böses Weibl · Osttirol</a>' +
                 '<div class="dashboard-big-tours-metrics"><span><strong>14,1 km</strong><small>Strecke</small></span><span><strong>+1.193 hm</strong><small>Aufstieg</small></span></div>' +
             '</section>' +
