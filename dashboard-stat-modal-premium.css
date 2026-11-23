@@ -1220,3 +1220,54 @@
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
 }
+
+
+/* Feinschliff Big Tours und Ø-Speed-Skala – 0.8.32. */
+/* Flachere Bildformate reduzieren die Modalhöhe und vermeiden unnötiges Scrollen. */
+#dash-stat-modal .dashboard-big-tours-image {
+    height: 108px;
+    max-height: 108px;
+    aspect-ratio: 3.2 / 1;
+    margin: 4px 0 0;
+    object-fit: cover;
+}
+#dash-stat-modal .dashboard-big-tours-reference {
+    padding: 7px 9px;
+}
+#dash-stat-modal .dashboard-big-tours-route-name {
+    margin-top: 6px;
+    font-size: 13px;
+}
+#dash-stat-modal .dashboard-big-tours-metrics {
+    gap: 6px;
+    margin-top: 6px;
+}
+#dash-stat-modal .dashboard-big-tours-metrics > span {
+    padding: 5px 4px;
+    gap: 4px;
+}
+#dash-stat-modal .dashboard-big-tours-metrics strong {
+    font-size: 16px;
+}
+
+/* 0,5-km/h-Teilstriche ergänzen die vollen km/h-Markierungen. */
+#dash-stat-modal .dashboard-speed-tick.is-major {
+    width: 2px;
+    height: 13px;
+    top: -4px;
+    background: rgba(255,255,255,.95);
+}
+#dash-stat-modal .dashboard-speed-tick.is-minor {
+    width: 1px;
+    height: 7px;
+    top: -1px;
+    background: rgba(255,255,255,.48);
+    box-shadow: none;
+}
+#dash-stat-modal .dashboard-speed-marker {
+    top: -1px;
+    z-index: 2;
+}
+#dash-stat-modal .dashboard-speed-marker::after {
+    height: 25px;
+}
