@@ -30075,21 +30075,26 @@ function showDashStepsStory(totalSteps, allTours, backTitle) {
     pushDashboardStatSubviewHistory('steps-story', { totalSteps, tours: allTours, backTitle });
 
     const safeSteps = Math.max(0, Number(totalSteps) || 0);
-    const movementDays = safeSteps / 10000;
+    const movementDays = safeSteps / 8000;
     const movementDaysLabel = movementDays.toLocaleString('de-AT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     titleEl.textContent = '';
     bodyEl.innerHTML = dashboardStoryBackButton() +
         '<div class="dashboard-extra-story dashboard-steps-story">' +
             '<section class="dashboard-extra-total">' +
-                '<div class="dashboard-extra-total-title">Bei Ø 10.000 Schritten / Tag entspricht das ' + movementDaysLabel + ' Tagen guter Bewegung.</div>' +
+                '<div class="dashboard-extra-total-title">Deine Schritte</div>' +
                 '<div class="dashboard-extra-total-value"><span id="dashboard-steps-total-value">0</span><span class="dashboard-extra-unit">Schritte</span></div>' +
+            '</section>' +
+            '<section class="dashboard-extra-panel dashboard-steps-comparison">' +
+                '<div class="dashboard-extra-panel-title">Bei Ø 8.000 Schritten / Tag entspricht das</div>' +
+                '<div class="dashboard-steps-days-value"><span id="dashboard-steps-days-value">0,00</span><span class="dashboard-extra-unit">Tage mit guter Bewegung</span></div>' +
             '</section>' +
             '<p class="dashboard-extra-personal">Aus unzähligen einzelnen Schritten ist eine beeindruckende Reise geworden. Jeder davon hat dich ein Stück weiter hinaus in die Berge getragen.</p>' +
         '</div>';
 
     bodyEl.querySelector('#ds-back')?.addEventListener('click', () => backDashboardStatSubview('steps', allTours));
     animateDashboardStoryNumber('dashboard-steps-total-value', safeSteps, value => Math.round(value).toLocaleString('de-AT'));
+    animateDashboardStoryNumber('dashboard-steps-days-value', movementDays, value => value.toLocaleString('de-AT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
 }
 
 function showDashPeaksStory(totalPeaks, allTours, backTitle) {
@@ -30100,14 +30105,31 @@ function showDashPeaksStory(totalPeaks, allTours, backTitle) {
 
     const safePeaks = Math.max(0, Math.round(Number(totalPeaks) || 0));
     const activeWeeks = Math.min(52, safePeaks);
+    const peakTourEntries = [...(allTours || [])]
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .flatMap(entry => {
+            const count = Math.max(0, parseInt(entry?.gipfel, 10) || 0);
+            const details = Array.isArray(entry?.gipfelDetails) ? entry.gipfelDetails : [];
+            return Array.from({ length: count }, (_, peakIndex) => ({
+                entry,
+                detail: details[peakIndex] || null
+            }));
+        });
     const weekCells = Array.from({ length: 52 }, (_, index) => {
         const weekNumber = index + 1;
         const isActive = index < activeWeeks;
+        const peakRecord = peakTourEntries[index] || null;
+        const peakName = String(peakRecord?.detail?.name || ('Gipfel ' + weekNumber));
+        const tourName = String(peakRecord?.entry?.tourname || 'Tour');
         const delay = isActive ? (index * 42) : 0;
-        return '<span class="dashboard-peaks-week' + (isActive ? ' is-active' : '') + '" data-week="' + weekNumber + '"' +
+        const clickAttrs = peakRecord
+            ? ' data-peak-entry-index="' + index + '" title="' + escapeHtmlAttribute(peakName + ' · ' + tourName) + '"'
+            : ' disabled';
+        return '<button type="button" class="dashboard-peaks-week' + (isActive ? ' is-active' : '') + (peakRecord ? ' is-clickable' : '') +
+            '" data-week="' + weekNumber + '"' + clickAttrs +
             (isActive ? ' style="animation-delay:' + delay + 'ms"' : '') +
-            ' aria-label="Kalenderwoche ' + weekNumber + '">' +
-            '<span class="dashboard-peaks-week-number">' + weekNumber + '</span></span>';
+            ' aria-label="Gipfel ' + weekNumber + ': ' + escapeHtmlAttribute(peakName) + ', Tour ' + escapeHtmlAttribute(tourName) + '">' +
+            '<span class="dashboard-peaks-week-number">' + weekNumber + '</span></button>';
     }).join('');
     const comparison = safePeaks <= 52
         ? safePeaks.toLocaleString('de-AT') + ' von 52 Wochen'
@@ -30128,6 +30150,14 @@ function showDashPeaksStory(totalPeaks, allTours, backTitle) {
         '</div>';
 
     bodyEl.querySelector('#ds-back')?.addEventListener('click', () => backDashboardStatSubview('gipfel', allTours));
+    bodyEl.querySelectorAll('[data-peak-entry-index]').forEach(cell => {
+        const peakRecord = peakTourEntries[Number(cell.dataset.peakEntryIndex)];
+        if (!peakRecord?.entry) return;
+        cell.addEventListener('click', () => {
+            closeDashStatModal();
+            openTourDetail(peakRecord.entry, { returnModalId: 'dash-stat-modal' });
+        });
+    });
     animateDashboardStoryNumber('dashboard-peaks-total-value', safePeaks, value => Math.round(value).toLocaleString('de-AT'));
 }
 
@@ -30151,7 +30181,13 @@ function showDashBigToursStory(totalBigTours, allTours, backTitle) {
                 '<img class="dashboard-big-tours-image" src="' + imageUrl + '" alt="Historischer Tunnelweg der Strada delle 52 Gallerie am Pasubio" loading="lazy">' +
                 '<div class="dashboard-big-tours-route-name">Strada delle 52 Gallerie · Pasubio</div>' +
                 '<div class="dashboard-big-tours-metrics"><span><strong>14,9 km</strong><small>Strecke</small></span><span><strong>+1.065 hm</strong><small>Aufstieg</small></span></div>' +
-
+            '</section>' +
+            '<section class="dashboard-extra-panel dashboard-big-tours-reference dashboard-big-tours-austria">' +
+                '<div class="dashboard-extra-panel-title">Österreichische Referenztour</div>' +
+                '<img class="dashboard-big-tours-image" src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/B%C3%B6ses_Weibl_summit_cross.jpg/1280px-B%C3%B6ses_Weibl_summit_cross.jpg" alt="Gipfelkreuz am Bösen Weibl in Osttirol mit Blick zum Großglockner" loading="lazy">' +
+                '<a class="dashboard-big-tours-route-name" href="https://www.osttirol.com/region-orte/alle-orte/lienz/wandern/detail/boeses-weibl" target="_blank" rel="noopener noreferrer">Böses Weibl · Osttirol</a>' +
+                '<div class="dashboard-big-tours-metrics"><span><strong>14,1 km</strong><small>Strecke</small></span><span><strong>+1.193 hm</strong><small>Aufstieg</small></span></div>' +
+                '<a class="dashboard-big-tours-photo-credit" href="https://commons.wikimedia.org/wiki/File:B%C3%B6ses_Weibl_summit_cross.jpg" target="_blank" rel="noopener noreferrer">Foto: H. Raab · CC BY-SA 4.0</a>' +
             '</section>' +
             '<p class="dashboard-extra-personal">Das waren keine gewöhnlichen Bergtage. Lange Wege, kräftige Anstiege und besondere Herausforderungen haben diese Touren zu echten Erlebnissen gemacht.</p>' +
         '</div>';
@@ -30167,8 +30203,8 @@ function showDashSpeedStory(averageSpeed, allTours, backTitle) {
     pushDashboardStatSubviewHistory('speed-story', { averageSpeed, tours: allTours, backTitle });
 
     const safeSpeed = Math.max(0, Number(averageSpeed) || 0);
-    const markerPosition = Math.max(0, Math.min(100, safeSpeed / 10 * 100));
-    const markerLabelPosition = Math.max(3, Math.min(97, markerPosition));
+    const speedScaleMax = Math.max(10, Math.ceil(safeSpeed / 2) * 2);
+    const markerPosition = Math.max(0, Math.min(100, safeSpeed / speedScaleMax * 100));
     const gaitItems = [
         { label: 'Schlendern', speed: 2 },
         { label: 'Gemütlich', speed: 3 },
@@ -30176,6 +30212,9 @@ function showDashSpeedStory(averageSpeed, allTours, backTitle) {
         { label: 'Zügig', speed: 5 },
         { label: 'Leichtes Joggen', speed: 8 }
     ];
+    const gaitTicks = gaitItems.map(item =>
+        '<span class="dashboard-speed-tick" style="left:' + (item.speed / speedScaleMax * 100).toFixed(2) + '%"></span>'
+    ).join('');
     const gaitMarks = gaitItems.map(item =>
         '<div class="dashboard-speed-gait"><span class="dashboard-speed-gait-dot"></span><strong>' + item.label + '</strong><small>' + item.speed + ' km/h</small></div>'
     ).join('');
@@ -30184,13 +30223,14 @@ function showDashSpeedStory(averageSpeed, allTours, backTitle) {
     bodyEl.innerHTML = dashboardStoryBackButton() +
         '<div class="dashboard-extra-story dashboard-speed-story">' +
             '<section class="dashboard-extra-total">' +
-                '<div class="dashboard-extra-total-title">Ø Speed</div>' +
-                '<div class="dashboard-extra-total-value"><span id="dashboard-speed-total-value">0,0</span><span class="dashboard-extra-unit">km/h</span></div>' +
+                '<div class="dashboard-extra-total-title">Dein Ø Speed</div>' +
+                '<div class="dashboard-extra-total-value"><span id="dashboard-speed-total-value">0,00</span><span class="dashboard-extra-unit">km/h</span></div>' +
             '</section>' +
             '<section class="dashboard-extra-panel dashboard-speed-comparison">' +
                 '<div class="dashboard-speed-scale">' +
-                    '<div class="dashboard-speed-track"></div>' +
-                    '<div class="dashboard-speed-marker" id="dashboard-speed-marker" style="left:0%"><span id="dashboard-speed-marker-label">0,0 km/h</span></div>' +
+                    '<div class="dashboard-speed-track">' + gaitTicks + '</div>' +
+                    '<div class="dashboard-speed-axis"><span>0 km/h</span><span>' + speedScaleMax + ' km/h</span></div>' +
+                    '<div class="dashboard-speed-marker" id="dashboard-speed-marker" style="left:0%"><span id="dashboard-speed-marker-label">0,00 km/h</span></div>' +
                 '</div>' +
                 '<div class="dashboard-speed-gaits">' + gaitMarks + '</div>' +
             '</section>' +
@@ -30198,11 +30238,11 @@ function showDashSpeedStory(averageSpeed, allTours, backTitle) {
         '</div>';
 
     bodyEl.querySelector('#ds-back')?.addEventListener('click', () => backDashboardStatSubview('speed', allTours));
-    animateDashboardStoryNumber('dashboard-speed-total-value', safeSpeed, value => formatDashboardStoryValue(value, 1));
+    animateDashboardStoryNumber('dashboard-speed-total-value', safeSpeed, value => value.toLocaleString('de-AT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
     const marker = bodyEl.querySelector('#dashboard-speed-marker');
     const markerLabel = bodyEl.querySelector('#dashboard-speed-marker-label');
     if (marker && markerLabel) {
-        const finalLabel = formatDashboardStoryValue(safeSpeed, 1) + ' km/h';
+        const finalLabel = safeSpeed.toLocaleString('de-AT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' km/h';
         if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
             marker.style.left = markerPosition + '%';
             markerLabel.textContent = finalLabel;
@@ -30233,15 +30273,14 @@ function showDashGradeStory(averageGrade, allTours, backTitle) {
     bodyEl.innerHTML = dashboardStoryBackButton() +
         '<div class="dashboard-extra-story dashboard-grade-story">' +
             '<section class="dashboard-extra-total">' +
-                '<div class="dashboard-extra-total-title">Deine durchschnittliche Steigung</div>' +
-                '<div class="dashboard-extra-total-value"><span id="dashboard-grade-hm-value">0</span><span class="dashboard-extra-unit">hm/km</span></div>' +
-                '<div class="dashboard-grade-percent-value"><span id="dashboard-grade-percent-value">0,0</span> %</div>' +
+                '<div class="dashboard-extra-total-title">Deine Ø Steigung</div>' +
+                '<div class="dashboard-extra-total-value"><span id="dashboard-grade-hm-value">0,00</span><span class="dashboard-extra-unit">hm/km</span></div>' +
             '</section>' +
             '<section class="dashboard-extra-panel dashboard-grade-comparison">' +
                 '<img class="dashboard-grade-image" src="' + imageUrl + '" alt="Die kurvenreiche Lombard Street in San Francisco" loading="lazy">' +
                 '<div class="dashboard-grade-image-caption">Lombard Street · San Francisco</div>' +
                 '<div class="dashboard-grade-bars">' +
-                    '<div class="dashboard-grade-bar-row"><span>Dein Durchschnitt</span><strong>' + formatDashboardStoryValue(gradePercent, 1) + ' %</strong><div class="dashboard-grade-bar"><span class="dashboard-grade-bar-fill is-user" data-width="' + userWidth.toFixed(2) + '"></span></div></div>' +
+                    '<div class="dashboard-grade-bar-row"><span>Dein Durchschnitt</span><strong>' + formatDashboardStoryValue(gradePercent, 2) + ' %</strong><div class="dashboard-grade-bar"><span class="dashboard-grade-bar-fill is-user" data-width="' + userWidth.toFixed(2) + '"></span></div></div>' +
                     '<div class="dashboard-grade-bar-row"><span>Lombard Street</span><strong>14 %</strong><div class="dashboard-grade-bar"><span class="dashboard-grade-bar-fill is-reference" data-width="' + referenceWidth.toFixed(2) + '"></span></div></div>' +
                 '</div>' +
 
@@ -30250,8 +30289,7 @@ function showDashGradeStory(averageGrade, allTours, backTitle) {
         '</div>';
 
     bodyEl.querySelector('#ds-back')?.addEventListener('click', () => backDashboardStatSubview('steigung', allTours));
-    animateDashboardStoryNumber('dashboard-grade-hm-value', safeGrade, value => Math.round(value).toLocaleString('de-AT'));
-    animateDashboardStoryNumber('dashboard-grade-percent-value', gradePercent, value => formatDashboardStoryValue(value, 1));
+    animateDashboardStoryNumber('dashboard-grade-hm-value', safeGrade, value => value.toLocaleString('de-AT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
     const fills = bodyEl.querySelectorAll('.dashboard-grade-bar-fill');
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     fills.forEach(fill => {
@@ -30278,7 +30316,7 @@ function showDashAscentRateStory(averageRate, allTours, backTitle) {
     bodyEl.innerHTML = dashboardStoryBackButton() +
         '<div class="dashboard-extra-story dashboard-ascent-rate-story">' +
             '<section class="dashboard-extra-total">' +
-                '<div class="dashboard-extra-total-title">Dein durchschnittlicher Anstieg</div>' +
+                '<div class="dashboard-extra-total-title">Dein Ø Anstieg</div>' +
                 '<div class="dashboard-extra-total-value"><span id="dashboard-ascent-rate-value">0</span><span class="dashboard-extra-unit">hm/h</span></div>' +
             '</section>' +
             '<section class="dashboard-extra-panel dashboard-ascent-floors-panel">' +
@@ -30300,7 +30338,7 @@ function showDashAscentRateStory(averageRate, allTours, backTitle) {
 
     bodyEl.querySelector('#ds-back')?.addEventListener('click', () => backDashboardStatSubview('anstieg', allTours));
     animateDashboardStoryNumber('dashboard-ascent-rate-value', safeRate, value => Math.round(value).toLocaleString('de-AT'));
-    animateDashboardStoryNumber('dashboard-ascent-floors-value', floorsPerHour, value => formatDashboardStoryValue(value, 1));
+    animateDashboardStoryNumber('dashboard-ascent-floors-value', floorsPerHour, value => value.toLocaleString('de-AT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
     animateDashboardStoryNumber('dashboard-ascent-steps-value', stepsPerHour, value => Math.round(value).toLocaleString('de-AT'));
     animateDashboardStoryNumber('dashboard-ascent-seconds-value', secondsPerStep, value => value.toLocaleString('de-AT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
 }
