@@ -74,6 +74,7 @@
     var SAFE_BOTTOM = A4.h - 15;
     var GAP = 3;
     var photoPageIndexes = new Set();
+    var photoAssetsByTour = new WeakMap();
 
     function st(v) {
         if (typeof window.sanitizePdfText === 'function') return window.sanitizePdfText(v);
@@ -864,38 +865,46 @@
     }
 
     function yearOpeningPage(doc, entries, stats, label, colors, options) {
+        options = options || getExportOptions();
         doc.addPage();
         addHeader(doc, label, colors);
-        text(doc, [35,35,32]); doc.setFont(undefined,'bold'); doc.setFontSize(20);
-        doc.text('Das Bergjahr in Zahlen', M, 38);
-        text(doc, [120,120,114]); doc.setFont(undefined,'normal'); doc.setFontSize(7.5);
-        doc.text(st(entries.length + ' Touren · ' + label + ' · Persönliche Highlights'), M, 45);
-        coverStats(doc, stats, 55, colors, entries, options);
-    }
+        text(doc, [35,35,32]); doc.setFont(undefined,'bold'); doc.setFontSize(17);
+        doc.text('Bergjahr in Zahlen & Saisonbilanz', M, 34);
+        text(doc, [120,120,114]); doc.setFont(undefined,'normal'); doc.setFontSize(6.8);
+        doc.text(st(entries.length + ' Fototouren · ' + label), M, 40);
 
-    function summary(doc, entries, stats, label, colors, options) {
-        options = options || getExportOptions();
-        addHeader(doc, label, colors);
-        text(doc,[35,35,32]); doc.setFont(undefined,'bold'); doc.setFontSize(19); doc.text('Saisonbilanz',M,36);
-        text(doc,colors.accent); doc.setFontSize(8); doc.text(st(fi(stats.totalTours)+' Touren · '+f1(stats.totalDistance)+' km · '+fi(stats.totalAscent)+' hm'),M,43);
+        var topItems = [
+            ['Touren', fi(stats.totalTours)],
+            ['Strecke', f1(stats.totalDistance) + ' km'],
+            ['Aufstieg', fi(stats.totalAscent) + ' hm'],
+            ['Gipfel', fi(stats.totalPeaks)]
+        ];
+        var gap = 3, topW = (CW - gap * 3) / 4;
+        topItems.forEach(function(it, i) {
+            var x = M + i * (topW + gap);
+            fill(doc, [248,248,244]); doc.roundedRect(x, 44, topW, 19, 2.2, 2.2, 'F');
+            text(doc, colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(11.5); doc.text(st(it[1]), x+3, 53);
+            text(doc, [125,125,120]); doc.setFont(undefined,'normal'); doc.setFontSize(6); doc.text(it[0], x+3, 59);
+        });
 
-        var items = [
-            ['Gehzeit', stats.totalTimeText ? stats.totalTimeText+' h' : '–'],
+        text(doc, colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(8);
+        doc.text('SAISONBILANZ', M, 71);
+        var seasonItems = [
+            ['Gehzeit', stats.totalTimeText ? stats.totalTimeText + ' h' : '–'],
             ['Schritte', stats.totalSteps > 0 ? fi(stats.totalSteps) : '–'],
             ['Big Tours', fi(stats.bigTours)],
             ['Ø Speed', stats.avgSpeed > 0 ? f1(stats.avgSpeed)+' km/h' : '–'],
             ['Ø Steigung', stats.avgGradient > 0 ? fi(stats.avgGradient)+' hm/km' : '–'],
             ['Ø Anstieg/h', stats.avgAscentPerHour > 0 ? fi(stats.avgAscentPerHour)+' hm/h' : '–']
         ].filter(function(item) {
-            return options.secondary || ['Ø Speed', 'Ø Steigung', 'Ø Anstieg/h'].indexOf(item[0]) === -1;
+            return options.secondary || ['Ø Speed','Ø Steigung','Ø Anstieg/h'].indexOf(item[0]) === -1;
         });
-
-        var gap=5,w=(CW-gap*2)/3;
-        items.forEach(function(it,i){
-            var x=M+(i%3)*(w+gap), y=51+Math.floor(i/3)*29;
-            fill(doc,[248,248,244]); doc.roundedRect(x,y,w,24,2.6,2.6,'F');
-            text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(15); doc.text(st(it[1]),x+5,y+11);
-            text(doc,[122,122,116]); doc.setFont(undefined,'normal'); doc.setFontSize(6.7); doc.text(it[0],x+5,y+18);
+        var seasonW = (CW - gap * 2) / 3;
+        seasonItems.forEach(function(it, i) {
+            var x = M + (i % 3) * (seasonW + gap), y = 76 + Math.floor(i / 3) * 19;
+            fill(doc, [248,248,244]); doc.roundedRect(x,y,seasonW,16,2,2,'F');
+            text(doc, colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(10.2); doc.text(st(it[1]),x+3,y+7);
+            text(doc,[122,122,116]); doc.setFont(undefined,'normal'); doc.setFontSize(5.8); doc.text(it[0],x+3,y+12.5);
         });
 
         var extra = [
@@ -903,64 +912,56 @@
             ['Gipfel 2500–2999 m',fi(stats.peaks2500)],
             ['Gipfel ab 3000 m',fi(stats.peaks3000)],
             ['Ø Leistungsindex',Number.isFinite(Number(stats.avgPerformanceIndex)) ? fi(stats.avgPerformanceIndex)+' / 100' : '–']
-        ].filter(function(row) {
-            return options.performance || row[0] !== 'Ø Leistungsindex';
+        ].filter(function(row) { return options.performance || row[0] !== 'Ø Leistungsindex'; });
+        text(doc, colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(7.2); doc.text('WEITERE KENNZAHLEN',M,119);
+        extra.forEach(function(row,i) {
+            var col=i%2, r=Math.floor(i/2), x=M+col*(CW/2), y=126+r*8;
+            text(doc,[90,90,86]); doc.setFont(undefined,'normal'); doc.setFontSize(6.2); doc.text(row[0],x,y);
+            text(doc,[38,38,35]); doc.setFont(undefined,'bold'); doc.text(row[1],x+CW/2-8,y,{align:'right'});
         });
-        var y=117;
-        text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(8.4); doc.text('WEITERE KENNZAHLEN',M,y); y+=6;
-        extra.forEach(function(row,i){
-            var x=M+(i%2)*92, yy=y+Math.floor(i/2)*12;
-            text(doc,[90,90,86]); doc.setFont(undefined,'normal'); doc.setFontSize(7.6); doc.text(row[0],x,yy);
-            text(doc,[38,38,35]); doc.setFont(undefined,'bold'); doc.text(row[1],x+66,yy,{align:'right'});
-        });
+
+        var highlights = buildCoverHighlights(entries, options);
+        if (highlights.length) {
+            text(doc, colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(7.2); doc.text('PERSÖNLICHE HIGHLIGHTS',M,148);
+            highlights.slice(0,6).forEach(function(item,i) {
+                var col=i%3, row=Math.floor(i/3), x=M+col*(CW/3), y=155+row*12;
+                text(doc,[105,105,100]); doc.setFont(undefined,'normal'); doc.setFontSize(5.5); doc.text(st(item[0].toUpperCase()),x,y);
+                text(doc,[40,40,37]); doc.setFont(undefined,'bold'); doc.setFontSize(6.5); doc.text(st(item[1]),x,y+5);
+            });
+        }
 
         if (options.milestones && typeof window.computeMilestones === 'function') {
-            var ms=window.computeMilestones(entries);
-            var defs=[
-                ['Strecke','dist'],
-                ['Aufstieg','asc'],
-                ['Gehzeit','time'],
-                ['Gipfel','peaks'],
-                ['Schritte','steps']
-            ];
-
-            y+=31;
-            text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(8.4); doc.text('MEILENSTEINE',M,y); y+=7;
-
-            defs.forEach(function(d,i){
-                var x=M+(i%2)*92, yy=y+Math.floor(i/2)*22, data=ms[d[1]];
-                if(!data) return;
-
-                var reached=Array.isArray(data.reached)?data.reached.length:0;
-                var progress=1;
-                if(data.next!==null && Number.isFinite(Number(data.next))){
-                    var prev=reached ? Number(data.reached[reached-1].milestone) : 0;
-                    progress=Math.max(0,Math.min(1,
-                        (n(data.total)-prev) / Math.max(1,n(data.next)-prev)
-                    ));
+            var ms = window.computeMilestones(entries);
+            var defs = [['Strecke','dist'],['Aufstieg','asc'],['Gehzeit','time'],['Gipfel','peaks'],['Schritte','steps']];
+            var milestoneGap = 3, milestoneW = (CW - milestoneGap * 4) / 5;
+            text(doc, colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(6.8);
+            doc.text('MEILENSTEINE', M, 181);
+            defs.forEach(function(def, i) {
+                var data = ms && ms[def[1]];
+                if (!data) return;
+                var x = M + i * (milestoneW + milestoneGap);
+                text(doc,[95,95,90]); doc.setFont(undefined,'normal'); doc.setFontSize(5.2);
+                doc.text(def[0],x,186);
+                text(doc,[38,38,35]); doc.setFont(undefined,'bold'); doc.setFontSize(5.8);
+                doc.text(formatMilestoneTotal(def[1],data.total),x,191);
+                var reached = Array.isArray(data.reached) ? data.reached.length : 0;
+                var progress = 1;
+                if (data.next !== null && Number.isFinite(Number(data.next))) {
+                    var previous = reached ? Number(data.reached[reached-1].milestone) : 0;
+                    progress = Math.max(0,Math.min(1,(n(data.total)-previous)/Math.max(1,n(data.next)-previous)));
                 }
-
-                text(doc,[65,65,60]); doc.setFont(undefined,'bold'); doc.setFontSize(7.1); doc.text(d[0],x,yy);
-                text(doc,[38,38,35]); doc.setFont(undefined,'bold'); doc.setFontSize(10.5);
-                doc.text(formatMilestoneTotal(d[1],data.total),x,yy+6.5);
-
-                text(doc,[135,135,130]); doc.setFont(undefined,'normal'); doc.setFontSize(6.1);
-                var sub = reached + ' Meilensteine';
-                if(data.next!==null && Number.isFinite(Number(data.next))){
-                    sub += ' · noch ' + formatMilestoneTarget(Math.max(0,n(data.next)-n(data.total)), d[1]);
-                    sub += ' bis ' + formatMilestoneTarget(data.next, d[1]);
-                } else {
-                    sub += ' · alle Stufen erreicht';
-                }
-                doc.text(st(sub),x,yy+10.5);
-
-                fill(doc,[231,231,227]); doc.roundedRect(x,yy+13.5,84,2.2,1.1,1.1,'F');
-                fill(doc,colors.accent); doc.roundedRect(x,yy+13.5,Math.max(2,84*progress),2.2,1.1,1.1,'F');
+                fill(doc,[231,231,227]); doc.roundedRect(x,194,milestoneW,1.5,0.75,0.75,'F');
+                fill(doc,colors.accent); doc.roundedRect(x,194,Math.max(1,milestoneW*progress),1.5,0.75,0.75,'F');
             });
         }
     }
 
-    function yearsPage(doc, from, to, colors, options) {
+    function summary(doc, entries, stats, label, colors, options) {
+        // Die Saisonbilanz ist in yearOpeningPage integriert, damit beide Bereiche
+        // gemeinsam genau eine Seite belegen.
+    }
+
+    function yearsPage(doc, from, to, colors, options, photographedEntries) {
         options = options || getExportOptions();
         var label=from+'–'+to;
         addHeader(doc,label,colors);
@@ -970,7 +971,9 @@
 
         var years=[];
         for(var year=from;year<=to;year++){
-            var es=typeof window.getToursInYearRange==='function'?window.getToursInYearRange(year,year):[];
+            var es=Array.isArray(photographedEntries) ? photographedEntries.filter(function(entry) {
+                var key = monthKey(entry); return key && Number(key.slice(0,4)) === year;
+            }) : (typeof window.getToursInYearRange==='function'?window.getToursInYearRange(year,year):[]);
             if(es.length) years.push({year:year,entries:es,stats:window.computeStatsSummary(es)});
         }
 
@@ -1035,6 +1038,7 @@
     }
 
     async function loadEntryPhotoAssets(entry, options) {
+        if (photoAssetsByTour.has(entry)) return photoAssetsByTour.get(entry);
         var assets = [];
         if (options.photos && entry.imageData) assets.push({ src: entry.imageData, label: 'Hauptfoto' });
 
@@ -1050,16 +1054,22 @@
                 } catch (_) {}
             }
         }
+        photoAssetsByTour.set(entry, assets);
+        return assets;
+    }
 
-        if (options.summitPhotos && typeof window.__androidNativeRequest === 'function') {
-            var summit = readSummitAssignmentsForTour(entry, options);
-            for (var j = 0; j < summit.length; j++) {
+    async function loadSummitPhotoAssets(entries, options) {
+        var assets = [];
+        if (!options.summitPhotos || typeof window.__androidNativeRequest !== 'function') return assets;
+        for (var i = 0; i < entries.length; i++) {
+            var entry = entries[i], assignments = readSummitAssignmentsForTour(entry, options);
+            for (var j = 0; j < assignments.length; j++) {
                 try {
-                    var result = await window.__androidNativeRequest('gallery.summit.folder.full', { uri: summit[j].uri }, 45000);
+                    var result = await window.__androidNativeRequest('gallery.summit.folder.full', { uri: assignments[j].uri }, 45000);
                     if (result && result.status === 'ok' && result.data) {
                         assets.push({
                             src: 'data:' + (result.mimeType || 'image/jpeg') + ';base64,' + result.data,
-                            label: summit[j].peakName + (summit[j].peakHeight ? ' · ' + fi(summit[j].peakHeight) + ' m' : '')
+                            label: assignments[j].peakName + (assignments[j].peakHeight ? ' · ' + fi(assignments[j].peakHeight) + ' m' : '')
                         });
                     }
                 } catch (error) {
@@ -1072,64 +1082,79 @@
 
     async function drawPhotoStory(doc, d, assets, colors) {
         if (!assets.length) return;
-        var hero = assets[0];
+        var photoH = A4.h - 49;
+        doc.addPage();
+        photoPageIndexes.add(doc.getNumberOfPages());
+        var heroW = assets.length > 1 ? A4.w * 0.64 : A4.w;
         try {
-            var heroData = await cropFullBleed(hero.src, 1800, Math.round(1800 * A4.h / A4.w), 0.91);
-            doc.addPage();
-            doc.addImage(heroData, 'JPEG', 0, 0, A4.w, A4.h, undefined, 'FAST');
-            photoPageIndexes.add(doc.getNumberOfPages());
-            text(doc, [255,255,255]); doc.setFont(undefined, 'bold');
-            doc.setFontSize(A4.w < 230 ? 21 : 29);
-            var titleLines = wrap(doc, d.title, A4.w - M * 2, A4.w < 230 ? 21 : 29, 'bold').slice(0,2);
-            doc.text(titleLines, M, A4.h - 42);
-            doc.setFont(undefined, 'normal'); doc.setFontSize(8);
-            doc.text(st(d.date + ' · ' + d.difficulty + ' · ' + d.region), M, A4.h - 29);
-            var statLine = d.e.strecke ? f1(d.e.strecke) + ' km' : '';
-            if (d.e.aufstieg) statLine += (statLine ? '  ·  ' : '') + fi(d.e.aufstieg) + ' hm';
-            if (d.e.zeit) statLine += (statLine ? '  ·  ' : '') + st(d.e.zeit) + ' h';
-            doc.setFont(undefined, 'bold'); doc.setFontSize(10);
-            if (statLine) doc.text(st(statLine), M, A4.h - 18);
+            var heroData = await cropFullBleed(assets[0].src, 1800, Math.max(1, Math.round(1800 * photoH / heroW)), 0.91);
+            doc.addImage(heroData, 'JPEG', 0, 0, heroW, photoH, undefined, 'FAST');
         } catch (error) {
-            console.warn('Fotoseite konnte nicht gezeichnet werden:', error);
+            console.warn('Tour-Hauptfoto konnte nicht verarbeitet werden:', error);
         }
 
-        for (var start = 1; start < assets.length; start += 3) {
-            var group = assets.slice(start, start + 3);
-            var heroW = A4.w * 0.62, sideW = A4.w - heroW;
-            var tiles = [
-                { x: 0, y: 0, w: heroW - 1.2, h: A4.h },
-                { x: heroW, y: 0, w: sideW, h: group.length > 1 ? A4.h * 0.495 : A4.h }
-            ];
-            if (group.length > 2) tiles.push({ x: heroW, y: A4.h * 0.505, w: sideW, h: A4.h * 0.495 });
-            var tileImages = [];
-            for (var loadIndex = 0; loadIndex < group.length; loadIndex++) {
+        if (assets.length > 1) {
+            var sideX = heroW + 1.2, sideW = A4.w - sideX;
+            var sideH = photoH / (assets.length - 1);
+            for (var i = 1; i < assets.length; i++) {
+                var y = (i - 1) * sideH;
                 try {
-                    var loadTile = tiles[loadIndex];
-                    tileImages[loadIndex] = await cropFullBleed(group[loadIndex].src, 1200, Math.max(1, Math.round(1200 * loadTile.h / loadTile.w)), 0.9);
-                } catch (_) { tileImages[loadIndex] = null; }
-            }
-            if (!tileImages.some(Boolean)) continue;
-            doc.addPage();
-            for (var k = 0; k < group.length; k++) {
-                try {
-                    var tile = tiles[k];
-                    if (!tileImages[k]) continue;
-                    doc.addImage(tileImages[k], 'JPEG', tile.x, tile.y, tile.w, tile.h, undefined, 'FAST');
-                    text(doc, [255,255,255]); doc.setFont(undefined, 'bold'); doc.setFontSize(7.5);
-                    doc.text(st(group[k].label || 'Tourfoto'), tile.x + 4, tile.y + tile.h - 5);
+                    var tile = await cropFullBleed(assets[i].src, 900, Math.max(1, Math.round(900 * sideH / sideW)), 0.88);
+                    doc.addImage(tile, 'JPEG', sideX, y, sideW, Math.max(1, sideH - 1.2), undefined, 'FAST');
                 } catch (error) {
-                    console.warn('Fotocollage-Bild konnte nicht gezeichnet werden:', error);
+                    console.warn('Zusatzfoto konnte nicht verarbeitet werden:', error);
                 }
             }
-            photoPageIndexes.add(doc.getNumberOfPages());
+        }
+
+        fill(doc, [25,35,30]); doc.rect(0, photoH, A4.w, A4.h - photoH, 'F');
+        text(doc, [255,255,255]); doc.setFont(undefined, 'bold');
+        var titleSize = A4.w < 230 ? 15 : 18;
+        doc.setFontSize(titleSize);
+        var titleLines = wrap(doc, d.title, A4.w - M * 2, titleSize, 'bold').slice(0,1);
+        doc.text(titleLines, M, photoH + 10);
+        text(doc, [220,225,218]); doc.setFont(undefined, 'normal'); doc.setFontSize(6.8);
+        doc.text(st(d.date + ' · ' + d.difficulty + ' · ' + d.region), M, photoH + 18);
+        var statLine = d.stats.map(function(item) { return item[0]; }).join('  ·  ');
+        text(doc, [255,255,255]); doc.setFont(undefined, 'bold'); doc.setFontSize(7.2);
+        if (statLine) doc.text(wrap(doc, statLine, A4.w - M * 2, 7.2, 'bold').slice(0,1), M, photoH + 27);
+        if (d.secondary.length) {
+            text(doc, [205,215,205]); doc.setFont(undefined, 'normal'); doc.setFontSize(6.2);
+            doc.text(wrap(doc, d.secondary.join(' · '), A4.w - M * 2, 6.2, 'normal').slice(0,1), M, photoH + 35);
+        }
+    }
+
+    async function drawSummitPhotoCollage(doc, assets, label, colors) {
+        if (!assets || !assets.length) return;
+        var perPage = 6, cols = 3, gap = 3, top = 34;
+        var cellW = (CW - gap * (cols - 1)) / cols;
+        var cellH = (A4.h - top - 18 - gap) / 2;
+        for (var start = 0; start < assets.length; start += perPage) {
+            doc.addPage(); addHeader(doc, label, colors);
+            text(doc, [35,35,32]); doc.setFont(undefined,'bold'); doc.setFontSize(18);
+            doc.text('Gipfelfotos', M, 31);
+            var subset = assets.slice(start, start + perPage);
+            for (var i = 0; i < subset.length; i++) {
+                var col = i % cols, row = Math.floor(i / cols);
+                var x = M + col * (cellW + gap), y = top + row * (cellH + gap);
+                try {
+                    var data = await cropFullBleed(subset[i].src, 900, Math.max(1, Math.round(900 * (cellH - 7) / cellW)), 0.9);
+                    doc.addImage(data, 'JPEG', x, y, cellW, cellH - 7, undefined, 'FAST');
+                    fill(doc, [30,40,34]); doc.rect(x, y + cellH - 7, cellW, 7, 'F');
+                    text(doc, [255,255,255]); doc.setFont(undefined,'bold'); doc.setFontSize(6.2);
+                    doc.text(wrap(doc, subset[i].label || 'Gipfelfoto', cellW - 4, 6.2, 'bold').slice(0,1), x + 2, y + cellH - 2.2);
+                } catch (error) {
+                    console.warn('Gipfelfoto-Collage konnte nicht gezeichnet werden:', error);
+                }
+            }
         }
     }
 
     function monthKey(entry) {
         var raw = String(entry && entry.date || '');
-        var match = raw.match(/^(\\d{4})-(\\d{2})/);
+        var match = raw.match(/^(\d{4})-(\d{2})/);
         if (match) return match[1] + '-' + match[2];
-        match = raw.match(/^(\\d{1,2})[.\\/]([0-9]{1,2})[.\\/](\\d{4})$/);
+        match = raw.match(/^(\d{1,2})[.\/]([0-9]{1,2})[.\/](\d{4})$/);
         return match ? match[3] + '-' + String(match[2]).padStart(2,'0') : '';
     }
 
@@ -1198,50 +1223,13 @@
 
     async function renderTours(doc, entries, from, to, colors, options) {
         options = options || getExportOptions();
-        var profile=typeof window.buildTourProfileAnalysis==='function'?window.buildTourProfileAnalysis(entries):null;
-        var ds=entries.map(function(e){return dataFor(e,profile,options);});
-        var bookProfile=options.profile || 'premium';
-        var detail=bookProfile !== 'chronicle';
-        var colGap=detail?0:5,colW=detail?CW:(CW-colGap)/2,colY=detail?[28]:[28,28];
-        function page(){
-            doc.addPage(); addHeader(doc,from===to?String(from):from+'–'+to,colors);
-            colY=detail?[28]:[28,28];
-        }
-        for(var i=0;i<ds.length;i++){
-            var d=ds[i];
-            var assets=await loadEntryPhotoAssets(d.e,options);
-            if (bookProfile === 'premium') {
-                if (assets.length) await drawPhotoStory(doc,d,assets,colors);
-                page();
-                d.photo=false;
-                var featureHeight=measure(getMeasureDoc(),d,CW,'feature');
-                if (featureHeight > SAFE_BOTTOM - 28) {
-                    console.warn('Umfangreiche Tourdetails benötigen möglicherweise Zusatzseiten:',d.title);
-                }
-                await drawTour(doc,d,M,28,CW,'feature',colors);
-                continue;
-            }
-            var extraAssets=assets.slice(d.photo ? 1 : 0);
-            if (extraAssets.length) {
-                await drawPhotoStory(doc,d,extraAssets,colors);
-                page();
-            } else if (i === 0) {
-                page();
-            }
-            var actual=detail?'feature':kindFor(d);
-            var h=measure(getMeasureDoc(),d,colW,actual);
-            var col=detail?0:(colY[0]<=colY[1]?0:1);
-            if(colY[col]+h>SAFE_BOTTOM){
-                if(detail){ page(); col=0; }
-                else {
-                    var other=1-col;
-                    if(colY[other]+h<=SAFE_BOTTOM) col=other;
-                    else { page(); col=0; }
-                }
-            }
-            var x=M+col*(colW+colGap), y=colY[col];
-            var drawnH=await drawTour(doc,d,x,y,colW,actual,colors);
-            colY[col]=y+drawnH+GAP;
+        var profile = typeof window.buildTourProfileAnalysis === 'function' ? window.buildTourProfileAnalysis(entries) : null;
+        var ds = entries.map(function(e) { return dataFor(e, profile, options); });
+        for (var i = 0; i < ds.length; i++) {
+            var d = ds[i];
+            var assets = await loadEntryPhotoAssets(d.e, options);
+            if (!assets.length) continue;
+            await drawPhotoStory(doc, d, assets, colors);
         }
     }
 
@@ -1250,13 +1238,20 @@
         await ensurePdfLibraries();
         var options = getExportOptions();
         configurePage(options.format);
+        photoAssetsByTour = new WeakMap();
         var js=window.jspdf.jsPDF, doc=new js({unit:'mm',format:[A4.w,A4.h]}), colors=colorsForExport(tc(), options.style);
-        // Die Reihenfolge aus der App-Datenquelle bleibt unverändert im PDF erhalten.
         var entries=window.getToursInYearRange(from,to), label=from===to?String(from):from+'–'+to;
-        if ((options.photos || options.coverPhoto) && typeof window.loadTourImagesForEntries === 'function') {
+        if ((options.photos || options.galleryPhotos || options.coverPhoto) && typeof window.loadTourImagesForEntries === 'function') {
             await window.loadTourImagesForEntries(entries);
         }
-        if(typeof window.showToast==='function') window.showToast('Magazin-Tourenbuch wird erstellt…',{type:'info',duration:2500});
+        // A Fotobuch enthält ausschließlich Touren mit einem tatsächlich ladbaren Tourfoto.
+        var photographedEntries = [];
+        for (var i = 0; i < entries.length; i++) {
+            var assets = await loadEntryPhotoAssets(entries[i], options);
+            if (assets.length) photographedEntries.push(entries[i]);
+        }
+        entries = photographedEntries;
+        if(typeof window.showToast==='function') window.showToast('Fotobuch wird erstellt…',{type:'info',duration:2500});
         if(!entries.length){
             await cover(doc,[],{totalTours:0,totalDistance:0,totalAscent:0,totalPeaks:0,totalSteps:0,totalTimeText:'0:00',bigTours:0},label,colors,null,options);
             footer(doc,label); await save(doc,from,to); return;
@@ -1264,11 +1259,13 @@
         var stats=window.computeStatsSummary(entries), rep=options.coverPhoto ? (typeof window.getPdfRepresentativePhoto==='function'?window.getPdfRepresentativePhoto(entries):entries.find(function(e){return e.imageData;})||null) : null;
         await cover(doc,entries,stats,label,colors,rep,options);
         yearOpeningPage(doc,entries,stats,label,colors,options);
-        doc.addPage(); summary(doc,entries,stats,label,colors,options);
-        if(from!==to){ doc.addPage(); yearsPage(doc,from,to,colors,options); }
+        if(from!==to){ doc.addPage(); yearsPage(doc,from,to,colors,options,entries); }
         if(options.monthly) monthlyPage(doc,entries,label,colors);
-        if(options.peakOverview) peakOverviewPage(doc,entries,label,colors);
         await renderTours(doc,entries,from,to,colors,options);
+        // Die Gipfelliste und die zugeordneten Gipfelfotos bilden den Abschluss nach allen Tourseiten.
+        if(options.peakOverview) peakOverviewPage(doc,entries,label,colors);
+        var summitAssets = await loadSummitPhotoAssets(entries, options);
+        await drawSummitPhotoCollage(doc,summitAssets,label,colors);
         if(options.closing){
             var finalPhoto=null;
             for(var fiIndex=entries.length-1;fiIndex>=0&&!finalPhoto;fiIndex--){
