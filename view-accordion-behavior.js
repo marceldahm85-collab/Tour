@@ -110,9 +110,53 @@
         }, true);
     }
 
+    function initBackupAccordions() {
+        const view = document.getElementById('backup-view');
+        const scrollRoot = view?.querySelector(':scope > .backup-view-inner');
+        if (!view || !scrollRoot || view.dataset.exclusiveAccordionsBound === 'true') return;
+        view.dataset.exclusiveAccordionsBound = 'true';
+
+        view.querySelectorAll('details.backup-accordion-card').forEach(syncDetailsSummary);
+
+        view.addEventListener('click', event => {
+            const summary = event.target.closest('details.backup-accordion-card > summary');
+            if (!summary || !view.contains(summary)) return;
+
+            const details = summary.parentElement;
+            if (!details || details.tagName !== 'DETAILS') return;
+
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+
+            const opening = !details.open;
+            if (opening) {
+                Array.from(details.parentElement.querySelectorAll(':scope > details.backup-accordion-card')).forEach(other => {
+                    if (other !== details && other.open) {
+                        other.open = false;
+                        syncDetailsSummary(other);
+                    }
+                });
+            }
+
+            details.open = opening;
+            syncDetailsSummary(details);
+
+            if (opening) scrollOpenedSectionToTop(scrollRoot, details);
+        }, true);
+
+        view.addEventListener('toggle', event => {
+            const details = event.target;
+            if (details instanceof HTMLDetailsElement && details.classList.contains('backup-accordion-card')) {
+                syncDetailsSummary(details);
+            }
+        }, true);
+    }
+
     function init() {
         initFilterAccordionScrolling();
         initEditorAccordions();
+        initBackupAccordions();
     }
 
     if (document.readyState === 'loading') {
