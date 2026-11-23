@@ -1109,7 +1109,7 @@
         text(doc, [255,255,255]); doc.setFont(undefined, 'bold');
         var titleSize = A4.w < 230 ? 15 : 18;
         doc.setFontSize(titleSize);
-        var titleLines = wrap(doc, d.title, A4.w - M * 2, titleSize, 'bold').slice(0,2);
+        var titleLines = wrap(doc, d.title, A4.w - M * 2, titleSize, 'bold').slice(0,1);
         doc.text(titleLines, M, photoH + 10);
         text(doc, [220,225,218]); doc.setFont(undefined, 'normal'); doc.setFontSize(6.8);
         doc.text(st(d.date + ' · ' + d.difficulty + ' · ' + d.region), M, photoH + 18);
@@ -1118,12 +1118,7 @@
         if (statLine) doc.text(st(statLine), M, photoH + 27);
         if (d.secondary.length) {
             text(doc, [205,215,205]); doc.setFont(undefined, 'normal'); doc.setFontSize(6.2);
-            doc.text(wrap(doc, d.secondary.join(' · '), A4.w - M * 2, 6.2, 'normal').slice(0,1), M, photoH + 34);
-        }
-        if (d.startingPoint || d.profile) {
-            text(doc, [190,200,190]); doc.setFont(undefined, 'normal'); doc.setFontSize(5.8);
-            var details = [d.startingPoint, d.profile].filter(Boolean).join(' · ');
-            doc.text(wrap(doc, details, A4.w - M * 2, 5.8, 'normal').slice(0,1), M, photoH + 41);
+            doc.text(wrap(doc, d.secondary.join(' · '), A4.w - M * 2, 6.2, 'normal').slice(0,1), M, photoH + 35);
         }
     }
 
