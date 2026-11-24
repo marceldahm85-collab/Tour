@@ -830,3 +830,43 @@ html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > .t
         inset 0 1px 0 rgba(244,249,255,.18),
         inset 0 -1px 0 rgba(0,0,0,.16) !important;
 }
+
+
+/* =========================================================
+   TOURBUCH / SICHERUNG — flacher Kartenabschluss
+   Headerkompaktheit angleichen und die zusätzliche dunkle
+   Tiefenebene hinter den beiden Accordion-Karten entfernen.
+   ========================================================= */
+#backup-view > .backup-view-inner {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+#backup-view > .backup-view-inner > details.backup-accordion-card,
+#backup-view > .backup-view-inner > details#pdf-export-card {
+    box-shadow: none !important;
+}
+
+/* Der Tourbuch-Export darf keinen zusätzlichen Flex-Abstand
+   zwischen seinem Header und dem folgenden Inhalt erzeugen. */
+#backup-view > .backup-view-inner > details#pdf-export-card {
+    gap: 0 !important;
+}
+
+/* Geschlossener Tourbuch-Header: dieselbe kompakte Geometrie
+   wie der bereits korrigierte Datensicherungs-Header. */
+#backup-view > .backup-view-inner > details#pdf-export-card:not([open]) > summary.stats-analysis-title {
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 26px 0 0 !important;
+    line-height: 1.25 !important;
+}
+
+#backup-view > .backup-view-inner > details#pdf-export-card > summary.stats-analysis-title .theme-editor-title-text {
+    height: auto !important;
+    min-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    line-height: 1.25 !important;
+}
