@@ -1126,7 +1126,7 @@
     function peakOverviewPage(doc, entries, label, colors) {
         var peaks=new Map();
         entries.forEach(function(e){
-            var raw=String(e.date||''),keyDate=monthKey(e)+'-'+String((raw.match(/^(\d{1,2})[.\/]/)||[])[1]||'01').padStart(2,'0');
+            var raw=String(e.date||''),iso=raw.match(/^(\d{4})-(\d{2})-(\d{2})/),local=raw.match(/^(\d{1,2})[.\/](\d{1,2})[.\/](\d{4})$/),keyDate=iso?iso[1]+'-'+iso[2]+'-'+iso[3]:local?local[3]+'-'+String(local[2]).padStart(2,'0')+'-'+String(local[1]).padStart(2,'0'):monthKey(e)+'-01';
             (Array.isArray(e.gipfelDetails)?e.gipfelDetails:[]).forEach(function(p){
                 var name=st(p&&p.name);if(!name)return;var height=n(String(p.hoehe||'').replace(/[^0-9,.]/g,'').replace(',','.')),key=name.toLocaleLowerCase('de'),old=peaks.get(key);
                 if(!old)peaks.set(key,{name:name,height:height,firstDate:keyDate});
