@@ -26851,6 +26851,8 @@ function initPdfBookOptions() {
             } else if (control.tagName === 'SELECT' && typeof saved[key] === 'string') {
                 const allowed = new Set([...control.options].map(option => option.value));
                 if (allowed.has(saved[key])) control.value = saved[key];
+            } else if (control.type === 'text' && typeof saved[key] === 'string') {
+                control.value = saved[key];
             }
         }
 
