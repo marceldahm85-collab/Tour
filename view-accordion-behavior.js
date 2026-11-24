@@ -112,7 +112,7 @@
 
     function initBackupAccordions() {
         const view = document.getElementById('backup-view');
-        const scrollRoot = view?.querySelector(':scope > .backup-view-inner');
+        const scrollRoot = view;
         if (!view || !scrollRoot || view.dataset.exclusiveAccordionsBound === 'true') return;
         view.dataset.exclusiveAccordionsBound = 'true';
 
@@ -152,8 +152,8 @@
             }
         }, true);
 
-        // Verschachtelte Tourbuch-Editor-Header erhalten dieselbe Scroll-Ausrichtung
-        // wie die Haupt-Akkordeons und die Header im Theme-Editor.
+        // Verschachtelte Tourbuch-Editor-Header werden im tatsächlich scrollenden
+        // View-Container ausgerichtet. .backup-view-inner ist nur ein Inhaltswrapper.
         view.addEventListener('click', event => {
             const summary = event.target.closest(
                 '#pdf-book-options > summary, #pdf-export-card .pdf-book-option-group > summary'
