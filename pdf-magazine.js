@@ -1158,13 +1158,27 @@
             var col = index % statColumns, row = Math.floor(index / statColumns);
             var centerX = textX + col * statCellW + statCellW / 2;
             var y = statStartY - (Math.ceil(statItems.length / statColumns) - 1 - row) * 10;
-            drawOutlinedAccentText(doc, item, centerX, y, A4.w < 230 ? 10 : 10.5, colors, 'center');
+            var statFontSize = A4.w < 230 ? 10 : 10.5;
+            doc.setFont(undefined, 'bold');
+            while (statFontSize > 8.5) {
+                doc.setFontSize(statFontSize);
+                if (doc.getTextWidth(item) <= statCellW - 5) break;
+                statFontSize -= 0.4;
+            }
+            drawOutlinedAccentText(doc, item, centerX, y, statFontSize, colors, 'center');
         });
         if (secondaryItems.length) {
             var secondaryCellW = textW / secondaryItems.length;
             secondaryItems.forEach(function(item, index) {
                 var centerX = textX + index * secondaryCellW + secondaryCellW / 2;
-                drawOutlinedAccentText(doc, item, centerX, A4.h - 7.5, A4.w < 230 ? 8.5 : 9, colors, 'center');
+                var secondaryFontSize = A4.w < 230 ? 8.5 : 9;
+                doc.setFont(undefined, 'bold');
+                while (secondaryFontSize > 7.2) {
+                    doc.setFontSize(secondaryFontSize);
+                    if (doc.getTextWidth(item) <= secondaryCellW - 3) break;
+                    secondaryFontSize -= 0.3;
+                }
+                drawOutlinedAccentText(doc, item, centerX, A4.h - 7.5, secondaryFontSize, colors, 'center');
             });
         }
     }
