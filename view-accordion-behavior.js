@@ -151,6 +151,23 @@
                 syncDetailsSummary(details);
             }
         }, true);
+
+        // Verschachtelte Tourbuch-Editor-Header erhalten dieselbe Scroll-Ausrichtung
+        // wie die Haupt-Akkordeons und die Header im Theme-Editor.
+        view.addEventListener('click', event => {
+            const summary = event.target.closest(
+                '#pdf-book-options > summary, #pdf-export-card .pdf-book-option-group > summary'
+            );
+            if (!summary || !view.contains(summary)) return;
+
+            const details = summary.parentElement;
+            if (!(details instanceof HTMLDetailsElement)) return;
+
+            requestAnimationFrame(() => {
+                if (!details.isConnected || !details.open) return;
+                scrollOpenedSectionToTop(scrollRoot, details);
+            });
+        }, true);
     }
 
     function init() {
