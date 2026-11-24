@@ -16,7 +16,7 @@ const APP_SHELL = [
   './fonts/cinzel-variable.ttf',
   './fonts/urbanist-variable.ttf',
   './android-backup-bridge.js?v=5',
-  './app-main-20261019.js?v=145',
+  './app-main-20261019.js?v=146',
   './touch-ripple-feedback.js?v=1',
   './native-app-ready.js?v=3',
   './native-system-bars.js?v=4',

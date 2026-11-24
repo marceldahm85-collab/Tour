@@ -703,5 +703,5 @@
    Die globale Editor-Skalierung wird weiterhin durch die zentrale Font-Scale
    auf diese Basisgröße angewendet. Werte und Meilenstein-Kacheln bleiben unverändert. */
 #dashboard-view .dash-stat-tile .dash-stat-label {
-    font-size: clamp(7px, 2.1vw, 9px);
+    font-size: clamp(8px, 2.45vw, 9.5px);
 }

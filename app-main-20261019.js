@@ -21402,6 +21402,25 @@ function getThemeEditorAdjustedFontSize(size, percent = getThemeEditorFontSizeSc
     ) / 100;
 }
 
+/*
+ * Die Dashboard-Kachelbezeichnungen sind bewusst kompakter als der übrige
+ * Fließtext. Sie folgen weiterhin vollständig der Editor-Skalierung und dem
+ * gewählten Font-Profil, umgehen aber dessen allgemeine Mindestgröße von 11 px.
+ */
+function getThemeEditorElementFontSize(element, originalSize, percent) {
+    if (element?.matches?.('#dashboard-view .dash-stat-tile .dash-stat-label')) {
+        const numericPercent = Number(percent);
+        const safePercent = Number.isFinite(numericPercent)
+            ? Math.max(80, Math.min(130, numericPercent))
+            : THEME_EDITOR_DEFAULT_FONT_SIZE;
+        const profile = getThemeEditorFontProfile();
+        return Math.round(
+            Number(originalSize) * profile.scale * (safePercent / 100) * 100
+        ) / 100;
+    }
+    return getThemeEditorAdjustedFontSize(originalSize, percent);
+}
+
 const THEME_EDITOR_KEY = 'themeEditorSettings_v1';
 
 const defaultThemeEditorSettings = {
@@ -21613,7 +21632,7 @@ function applyThemeEditorFontSizeToSubtree(root, value) {
         // die vom Editor vorgegebene globale Schriftgröße nicht aushebeln.
         element.style.setProperty(
             'font-size',
-            `${getThemeEditorAdjustedFontSize(originalSize, percent)}px`,
+            `${getThemeEditorElementFontSize(element, originalSize, percent)}px`,
             'important'
         );
     });
@@ -21684,7 +21703,7 @@ elements.forEach(element => {
 });
 
 originalSizes.forEach(({ element, originalSize }) => {
-    const scaledSize = getThemeEditorAdjustedFontSize(originalSize, percent);
+    const scaledSize = getThemeEditorElementFontSize(element, originalSize, percent);
 
     // Auch bestehende CSS-!important-Regeln müssen der Editor-Skalierung folgen.
     element.style.setProperty(
