@@ -1149,7 +1149,12 @@
                         var name = asset.peakName || asset.label || 'Gipfel';
                         var height = asset.peakHeight ? fi(asset.peakHeight) + ' m' : '';
                         var nameSize = A4.w < 230 ? 9 : 8.2;
-                        drawOutlinedAccentText(doc, name, x + cellW / 2, y + rowH - (height ? 10 : 5), nameSize, colors, 'center');
+                        var nameLines = wrap(doc, name, cellW - 8, nameSize, 'bold').slice(0, 2);
+                        var nameBaseY = y + rowH - (height ? 10 : 5);
+                        if (nameLines.length > 1) {
+                            drawOutlinedAccentText(doc, nameLines[0], x + cellW / 2, nameBaseY - 6, nameSize, colors, 'center');
+                        }
+                        drawOutlinedAccentText(doc, nameLines[nameLines.length - 1], x + cellW / 2, nameBaseY, nameSize, colors, 'center');
                         if (height) drawOutlinedAccentText(doc, height, x + cellW / 2, y + rowH - 3.5, nameSize - 0.5, colors, 'center');
                     } catch (error) {
                         console.warn('Gipfelfoto-Collage konnte nicht gezeichnet werden:', error);
@@ -1194,9 +1199,9 @@
             doc.roundedRect(x, y, cellW, cellH, 2.2, 2.2, 'FD');
             rule(doc, x, y, cellW, colors.accent, 0.9);
 
-            text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(11.5);
+            text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(13);
             doc.text(monthNames[month - 1], x + cellW / 2, y + 8, {align:'center'});
-            text(doc, [40,40,37]); doc.setFont(undefined, 'bold'); doc.setFontSize(9.2);
+            text(doc, [40,40,37]); doc.setFont(undefined, 'bold'); doc.setFontSize(10.2);
             doc.text(fi(summary.totalTours) + ' Touren', x + cellW / 2, y + 15, {align:'center'});
 
             var metrics = [
@@ -1211,9 +1216,9 @@
                 var left = right ? x + cellW / 2 + 2 : x + 3.5;
                 var valueX = right ? x + cellW - 3.5 : x + cellW / 2 - 2;
                 var lineY = y + 22 + Math.floor(index / 2) * 6.1;
-                text(doc, [105,105,100]); doc.setFont(undefined, 'normal'); doc.setFontSize(6.4);
+                text(doc, [105,105,100]); doc.setFont(undefined, 'normal'); doc.setFontSize(7);
                 doc.text(item[0], left, lineY);
-                text(doc, [40,40,37]); doc.setFont(undefined, 'bold'); doc.setFontSize(8.2);
+                text(doc, [40,40,37]); doc.setFont(undefined, 'bold'); doc.setFontSize(9.1);
                 doc.text(item[1], valueX, lineY, {align:'right'});
             });
         }
