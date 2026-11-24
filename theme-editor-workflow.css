@@ -675,3 +675,170 @@ body[data-app-density="comfortable"] #theme-view .theme-editor-settings-grid {
   top: calc(50% - 2px) !important;
   transform: rotate(225deg) !important;
 }
+
+
+/* Fotobuch-Editor: gleiche Karten-, Header- und Eingaberegeln wie im Theme-Editor. */
+#backup-view #pdf-export-card {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 0 12px !important;
+  padding: 10px 12px 12px !important;
+  border: 1px solid var(--premium-border, rgba(255,255,255,.13)) !important;
+  border-radius: var(--editor-radius, var(--premium-radius-card, 16px)) !important;
+  background:
+    radial-gradient(ellipse at 98% 0%, color-mix(in srgb, var(--accent, #D5A64C) 7%, transparent), transparent 42%),
+    linear-gradient(150deg, var(--app-surface-strong, rgba(255,255,255,.055)), var(--app-surface-card, rgba(10,16,23,.8))) !important;
+  box-shadow: var(--premium-shadow-card, 0 8px 22px rgba(0,0,0,.18)), inset 0 1px 0 rgba(255,255,255,.035) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+#backup-view #pdf-export-card > summary.stats-analysis-title {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  min-height: 38px !important;
+  margin: 0 0 4px !important;
+  padding: 0 28px 0 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--app-text-primary, #f3f7fb) !important;
+  font-weight: 800 !important;
+  list-style: none !important;
+}
+#backup-view #pdf-export-card > summary::-webkit-details-marker { display: none; }
+#backup-view #pdf-export-card > summary::after {
+  content: "";
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid var(--accent, #ad7d12);
+  border-bottom: 2px solid var(--accent, #ad7d12);
+  transform: translateY(-70%) rotate(45deg);
+  transition: transform .18s ease;
+}
+#backup-view #pdf-export-card[open] > summary::after { transform: translateY(-25%) rotate(225deg); }
+#backup-view #pdf-export-card .compare-mode-toggle { gap: 7px; margin: 0 0 10px; }
+#backup-view #pdf-export-card .compare-mode-btn {
+  min-height: 38px;
+  border-radius: var(--app-radius, 14px);
+  border: 1px solid var(--app-surface-border, rgba(225,232,242,.14));
+  background: var(--app-surface-card, rgba(17,26,37,.74));
+  color: var(--app-text-primary, #f3f7fb);
+  font-family: var(--app-font);
+  font-size: 11px;
+  font-weight: 750;
+}
+#backup-view #pdf-export-card .compare-mode-btn.active {
+  border-color: color-mix(in srgb, var(--accent, #ad7d12) 72%, white 0%) !important;
+  background: var(--accent-soft, rgba(173,125,18,.18)) !important;
+  color: var(--app-text-primary, #f3f7fb) !important;
+}
+#backup-view #pdf-export-card .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 0 10px;
+}
+#backup-view #pdf-export-card .form-group > label,
+#backup-view #pdf-export-card .pdf-book-design-field > label {
+  color: var(--app-text-primary, #f3f7fb) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+}
+#backup-view #pdf-export-card select,
+#backup-view #pdf-export-card input[type="text"] {
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid var(--app-surface-border, rgba(225,232,242,.14)) !important;
+  border-radius: var(--app-radius, 14px) !important;
+  background: var(--app-surface-strong, rgba(25,30,39,.82)) !important;
+  color: var(--app-text-primary, #f3f7fb) !important;
+  font-family: var(--app-font);
+  font-size: 12px;
+  box-sizing: border-box;
+}
+#backup-view #pdf-export-card .pdf-book-options {
+  margin: 2px 0 4px;
+  padding: 0;
+  border: 1px solid var(--app-surface-border, rgba(225,232,242,.14));
+  border-radius: var(--app-radius, 14px);
+  background: var(--app-surface-subtle, rgba(13,21,31,.48));
+  overflow: hidden;
+}
+#backup-view #pdf-export-card .pdf-book-options > summary {
+  min-height: 42px;
+  height: auto;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 0;
+  background: var(--app-surface-card, rgba(17,26,37,.74));
+  color: var(--app-text-primary, #f3f7fb);
+  font-size: 12.5px;
+  font-weight: 800;
+}
+#backup-view #pdf-export-card .pdf-book-options-body { padding: 0 10px 12px; }
+#backup-view #pdf-export-card .pdf-book-option-group {
+  margin: 10px 0 0;
+  padding: 10px;
+  border: 1px solid var(--app-surface-border, rgba(225,232,242,.14));
+  border-radius: var(--app-radius, 14px);
+  background: linear-gradient(180deg, var(--app-surface-card, rgba(17,26,37,.74)), var(--app-surface-subtle, rgba(13,21,31,.62)));
+}
+#backup-view #pdf-export-card .pdf-book-option-group legend {
+  padding: 0 5px;
+  color: var(--accent, #ad7d12);
+  font-size: 11px;
+  font-weight: 850;
+}
+#backup-view #pdf-export-card .pdf-book-design-field,
+#backup-view #pdf-export-card .pdf-book-option-grid label {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--app-surface-border, rgba(225,232,242,.14));
+  border-radius: var(--app-radius, 14px);
+  background: linear-gradient(180deg, var(--app-surface-card, rgba(17,26,37,.74)), var(--app-surface-subtle, rgba(13,21,31,.62)));
+  box-sizing: border-box;
+}
+#backup-view #pdf-export-card .pdf-book-design-field small {
+  color: var(--app-text-muted, #cbd5df);
+  font-size: 10px;
+  line-height: 1.4;
+}
+#backup-view #pdf-export-card .pdf-book-option-grid {
+  gap: 8px;
+}
+#backup-view #pdf-export-card .pdf-book-option-grid label {
+  display: flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 8px 9px;
+  color: var(--app-text-primary, #f3f7fb);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+#backup-view #pdf-export-card .pdf-book-option-grid input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  min-height: 16px;
+  accent-color: var(--accent, #ad7d12);
+}
+#backup-view #pdf-export-card :focus-visible {
+  outline: 2px solid var(--accent, #ad7d12);
+  outline-offset: 2px;
+}
+@media (max-width: 520px) {
+  #backup-view #pdf-export-card { padding: 9px !important; }
+  #backup-view #pdf-export-card .pdf-book-option-group { padding: 8px; }
+  #backup-view #pdf-export-card .pdf-book-option-grid { grid-template-columns: minmax(0,1fr); gap: 7px; }
+  #backup-view #pdf-export-card .pdf-book-design-grid { grid-template-columns: minmax(0,1fr); }
+}
