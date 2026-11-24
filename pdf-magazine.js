@@ -1119,7 +1119,7 @@
             text(doc,colors.accent);doc.setFont(undefined,'bold');doc.setFontSize(9.2);doc.text(names[i-1],x+3.5,y+7);
             text(doc,[40,40,37]);doc.setFontSize(10.5);doc.text(fi(stt.totalTours)+' Touren',x+3.5,y+15);
             var metrics=[['Strecke',f1(stt.totalDistance)+' km'],['Aufstieg',fi(stt.totalAscent)+' hm'],['Gehzeit',stt.totalTimeText?stt.totalTimeText+' h':'–'],['Schritte',stt.totalSteps>0?fi(stt.totalSteps):'0'],['Gipfel',fi(stt.totalPeaks)]];
-            metrics.forEach(function(it,j){var xx=j%2===0?x+3.5:x+cw/2+1,yy=y+22+Math.floor(j/2)*7;text(doc,[115,115,110]);doc.setFont(undefined,'normal');doc.setFontSize(5.8);doc.text(it[0],xx,yy);text(doc,[45,45,42]);doc.setFont(undefined,'bold');doc.setFontSize(6.8);doc.text(it[1],xx,yy+3.4);});
+            metrics.forEach(function(it,j){var right=j%2===1,xx=right?x+cw/2+1:x+3.5,yy=y+22+Math.floor(j/2)*5.1;text(doc,[115,115,110]);doc.setFont(undefined,'normal');doc.setFontSize(5.2);doc.text(it[0],xx,yy);text(doc,[45,45,42]);doc.setFont(undefined,'bold');doc.setFontSize(6.1);doc.text(it[1],right?x+cw-3.5:x+3.5,yy+3,{align:right?'right':'left'});});
         }
     }
 
