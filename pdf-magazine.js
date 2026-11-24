@@ -883,6 +883,9 @@
             ['Ø Speed',stats.avgSpeed>0?f1(stats.avgSpeed)+' km/h':'–'],['Ø Steigung',stats.avgGradient>0?fi(stats.avgGradient)+' hm/km':'–'],['Ø Anstieg/h',stats.avgAscentPerHour>0?fi(stats.avgAscentPerHour)+' hm/h':'–'],
             ['Gipfel 2000–2499 m',fi(stats.peaks2000)],['Gipfel 2500–2999 m',fi(stats.peaks2500)],['Gipfel ab 3000 m',fi(stats.peaks3000)],['Verschiedene Gipfel',fi(names.size)]
         ].filter(function(it){return options.secondary||['Ø Speed','Ø Steigung','Ø Anstieg/h'].indexOf(it[0])===-1;});
+        buildCoverHighlights(entries, options).slice(0, 6).forEach(function(item) {
+            tiles.push([item[0], item[1]]);
+        });
         var gap=2.5,cols=4,w=(CW-gap*3)/4,h=13.5,top=40;
         tiles.forEach(function(it,index){
             var x=M+(index%cols)*(w+gap),y=top+Math.floor(index/cols)*(h+1.8);
