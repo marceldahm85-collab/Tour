@@ -68,6 +68,70 @@
         return pdfLibrariesPromise;
     }
 
+    // Tourbuch-PDF: exakt die im Theme-Editor aktive Schriftfamilie einbetten.
+    // jsPDF benötigt TrueType-Dateien; die App-Webfonts bleiben davon unabhängig.
+    var pdfFontBinaryCache = Object.create(null);
+    var PDF_FONT_DEFINITIONS = {
+        inter: { file: 'inter-variable.ttf', family: 'BergtourenInter' },
+        'space-grotesk': { file: 'space-grotesk-variable.ttf', family: 'BergtourenSpaceGrotesk' },
+        oswald: { file: 'oswald-variable.ttf', family: 'BergtourenOswald' },
+        'playfair-display': { file: 'playfair-display-variable.ttf', family: 'BergtourenPlayfairDisplay' },
+        caveat: { file: 'caveat-variable.ttf', family: 'BergtourenCaveat' },
+        pacifico: { file: 'pacifico-regular.ttf', family: 'BergtourenPacifico' },
+        cinzel: { file: 'cinzel-variable.ttf', family: 'BergtourenCinzel' },
+        urbanist: { file: 'urbanist-variable.ttf', family: 'BergtourenUrbanist' }
+    };
+
+    function getSelectedPdfFontKey() {
+        var selected = '';
+        try {
+            if (typeof window.getThemeEditorFontName === 'function') {
+                selected = window.getThemeEditorFontName();
+            }
+        } catch (_) {}
+        if (!selected && document.body) selected = document.body.dataset.font || '';
+        return Object.prototype.hasOwnProperty.call(PDF_FONT_DEFINITIONS, selected)
+            ? selected
+            : 'inter';
+    }
+
+    async function loadPdfFontBinary(fileName) {
+        if (pdfFontBinaryCache[fileName]) return pdfFontBinaryCache[fileName];
+
+        var response = await fetch('./fonts/' + fileName, { cache: 'force-cache' });
+        if (!response.ok) {
+            throw new Error('Die Schriftdatei für das Tourbuch-PDF konnte nicht geladen werden: ' + fileName);
+        }
+
+        var bytes = new Uint8Array(await response.arrayBuffer());
+        var binary = '';
+        var chunkSize = 0x8000;
+        for (var offset = 0; offset < bytes.length; offset += chunkSize) {
+            binary += String.fromCharCode.apply(null, bytes.subarray(offset, offset + chunkSize));
+        }
+        if (!binary.length) throw new Error('Die Schriftdatei ist leer: ' + fileName);
+
+        pdfFontBinaryCache[fileName] = binary;
+        return binary;
+    }
+
+    async function applySelectedPdfFont(doc, fontKey) {
+        var definition = PDF_FONT_DEFINITIONS[fontKey] || PDF_FONT_DEFINITIONS.inter;
+        var fileName = definition.file;
+        var family = definition.family;
+        var binary = await loadPdfFontBinary(fileName);
+        var vfsName = 'Bergtouren-' + fileName;
+
+        doc.addFileToVFS(vfsName, binary);
+        // jsPDF schaltet bei Überschriften/Betonungen zwischen normal, bold
+        // und italic um. Alle Varianten bleiben in derselben gewählten Familie.
+        ['normal', 'bold', 'italic', 'bolditalic'].forEach(function(style) {
+            doc.addFont(vfsName, family, style);
+        });
+        doc.setFont(family, 'normal');
+        return family;
+    }
+
     var A4 = { w: 297, h: 210 };
     var M = 12;
     var CW = A4.w - M * 2;
@@ -1386,6 +1450,14 @@
         configurePage(options.format);
         photoAssetsByTour = new WeakMap();
         var js=window.jspdf.jsPDF, doc=new js({unit:'mm',format:[A4.w,A4.h]}), colors=colorsForExport(tc(), options.style);
+        var selectedFontKey = getSelectedPdfFontKey();
+        // Auch das Messdokument erhält dieselbe Schrift, damit Zeilenumbrüche
+        // und Kartenhöhen mit der später tatsächlich gedruckten Schrift übereinstimmen.
+        var measureFontDoc = getMeasureDoc();
+        await Promise.all([
+            applySelectedPdfFont(doc, selectedFontKey),
+            applySelectedPdfFont(measureFontDoc, selectedFontKey)
+        ]);
         var allEntries = window.getToursInYearRange(from,to), label=from===to?String(from):from+'–'+to;
         if ((options.photos || options.galleryPhotos || options.coverPhoto || options.closing || options.coverPhotoChoice !== 'auto' || options.closingPhotoChoice !== 'auto') && typeof window.loadTourImagesForEntries === 'function') {
             await window.loadTourImagesForEntries(allEntries);
