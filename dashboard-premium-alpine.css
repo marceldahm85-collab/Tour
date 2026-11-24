@@ -697,3 +697,11 @@
     content: none !important;
     display: none !important;
 }
+
+
+/* Dashboard: etwas kleinere Bezeichnungen in den Statistik-Kacheln.
+   Die globale Editor-Skalierung wird weiterhin durch die zentrale Font-Scale
+   auf diese Basisgröße angewendet. Werte und Meilenstein-Kacheln bleiben unverändert. */
+#dashboard-view .dash-stat-tile .dash-stat-label {
+    font-size: clamp(8px, 2.45vw, 9.5px);
+}

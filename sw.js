@@ -1,12 +1,13 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Der PDF-Magazin-Renderer wird direkt über index.html geladen.
-const CACHE_NAME = 'bergtouren-cache-premium-alpine-v489';
+const CACHE_NAME = 'bergtouren-cache-premium-alpine-v490';
 
 const APP_SHELL = [
   './',
   './index.html',
   './fonts.css?v=2',
   './fonts/inter-latin-wght-normal.woff2',
+  './fonts/inter-variable.ttf',
   './fonts/space-grotesk-variable.ttf',
   './fonts/oswald-variable.ttf',
   './fonts/playfair-display-variable.ttf',
@@ -15,7 +16,7 @@ const APP_SHELL = [
   './fonts/cinzel-variable.ttf',
   './fonts/urbanist-variable.ttf',
   './android-backup-bridge.js?v=5',
-  './app-main-20261019.js?v=145',
+  './app-main-20261019.js?v=146',
   './touch-ripple-feedback.js?v=1',
   './native-app-ready.js?v=3',
   './native-system-bars.js?v=4',
@@ -43,7 +44,7 @@ const APP_SHELL = [
   './android-gallery-photos.css?v=5',
   './styles.css?v=22',
   './styles-overrides.css?v=113',
-  './dashboard-premium-alpine.css?v=36',
+  './dashboard-premium-alpine.css?v=37',
   './dashboard-stat-modal-premium.css?v=22',
   './premium-modal-surface.css?v=3',
   './premium-modal-header.css?v=2',
@@ -90,7 +91,7 @@ const APP_SHELL = [
   './assets/milestones/milestone-steps.svg?v=5',
   './assets/milestones/milestone-time.svg?v=5',
   './manifest.json',
-  './pdf-magazine.js?v=10',
+  './pdf-magazine.js?v=11',
   './icons/icon-192.png',
   './icons/icon-512_neu.png',
   './libs/jspdf.umd.min.js',
