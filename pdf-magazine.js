@@ -871,7 +871,7 @@
         text(doc, [35,35,32]); doc.setFont(undefined,'bold'); doc.setFontSize(17);
         doc.text('Bergjahr in Zahlen & Saisonbilanz', M, 34);
         text(doc, [120,120,114]); doc.setFont(undefined,'normal'); doc.setFontSize(6.8);
-        doc.text(st(entries.length + ' Fototouren · ' + label), M, 40);
+        doc.text(st(entries.length + ' Touren · ' + label), M, 40);
 
         var topItems = [
             ['Touren', fi(stats.totalTours)],
