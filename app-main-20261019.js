@@ -21354,15 +21354,14 @@ const THEME_EDITOR_FONT_SIZE_KEY = 'themeEditorFontSize_v1';
 const THEME_EDITOR_DEFAULT_FONT_SIZE = 100;
 
 const THEME_EDITOR_FONT_PRESETS = {
-    // Generische Android-Systemfamilie: berücksichtigt auch die vom Nutzer
-    // in Samsung One UI installierte FlipFont, sofern WebView sie bereitstellt.
-    system: 'sans-serif',
     inter: '"Tour Inter", sans-serif',
-    'roboto-condensed': '"Tour Roboto Condensed", sans-serif',
-    'nunito-sans': '"Tour Nunito Sans", sans-serif',
-    righteous: '"Tour Righteous", sans-serif',
-    mono: '"Roboto Mono", "Noto Sans Mono", "Courier New", monospace',
-    cursive: 'cursive'
+    'space-grotesk': '"Tour Space Grotesk", sans-serif',
+    oswald: '"Tour Oswald", sans-serif',
+    'playfair-display': '"Tour Playfair Display", serif',
+    caveat: '"Tour Caveat", cursive',
+    pacifico: '"Tour Pacifico", cursive',
+    cinzel: '"Tour Cinzel", serif',
+    urbanist: '"Tour Urbanist", sans-serif'
 };
 
 /*
@@ -21373,17 +21372,18 @@ const THEME_EDITOR_FONT_PRESETS = {
  * Die Werte gelten sowohl für DOM-Text als auch für Canvas-/Diagrammtexte.
  */
 const THEME_EDITOR_FONT_PROFILES = Object.freeze({
-    system:            { scale: 1.00, minSize: 11.0 },
     inter:              { scale: 1.02, minSize: 11.0 },
-    'roboto-condensed': { scale: 1.06, minSize: 11.0 },
-    'nunito-sans':      { scale: 1.02, minSize: 11.0 },
-    righteous:          { scale: 1.08, minSize: 11.5 },
-    mono:               { scale: 1.02, minSize: 11.0 },
-    cursive:            { scale: 1.06, minSize: 11.5 }
+    'space-grotesk':    { scale: 1.03, minSize: 11.0 },
+    oswald:             { scale: 1.08, minSize: 11.0 },
+    'playfair-display': { scale: 1.04, minSize: 11.5 },
+    caveat:             { scale: 1.12, minSize: 12.0 },
+    pacifico:           { scale: 1.08, minSize: 12.0 },
+    cinzel:             { scale: 1.05, minSize: 11.5 },
+    urbanist:           { scale: 1.02, minSize: 11.0 }
 });
 
 function getThemeEditorFontProfile(fontName = getThemeEditorFontName()) {
-    return THEME_EDITOR_FONT_PROFILES[fontName] || THEME_EDITOR_FONT_PROFILES.system;
+    return THEME_EDITOR_FONT_PROFILES[fontName] || THEME_EDITOR_FONT_PROFILES.inter;
 }
 
 function getThemeEditorAdjustedFontSize(size, percent = getThemeEditorFontSizeScale()) {
@@ -21413,9 +21413,9 @@ const defaultThemeEditorSettings = {
 };
 
 function normalizeThemeEditorFontName(fontName) {
-    const aliases = { android: 'system', rounded: 'nunito-sans', serif: 'inter', slab: 'inter', fantasy: 'righteous' };
+    const aliases = { android: 'inter', system: 'inter', rounded: 'urbanist', serif: 'playfair-display', slab: 'inter', fantasy: 'cinzel', 'roboto-condensed': 'inter', 'nunito-sans': 'urbanist', righteous: 'cinzel', mono: 'inter', cursive: 'caveat' };
     const resolved = aliases[fontName] || fontName;
-    return Object.prototype.hasOwnProperty.call(THEME_EDITOR_FONT_PRESETS, resolved) ? resolved : 'system';
+    return Object.prototype.hasOwnProperty.call(THEME_EDITOR_FONT_PRESETS, resolved) ? resolved : 'inter';
 }
 function getThemeEditorFontName() {
     return normalizeThemeEditorFontName(appStorage.get(THEME_EDITOR_FONT_KEY));
