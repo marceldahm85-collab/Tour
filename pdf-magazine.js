@@ -1361,7 +1361,7 @@
         photoAssetsByTour = new WeakMap();
         var js=window.jspdf.jsPDF, doc=new js({unit:'mm',format:[A4.w,A4.h]}), colors=colorsForExport(tc(), options.style);
         var allEntries = window.getToursInYearRange(from,to), label=from===to?String(from):from+'–'+to;
-        if ((options.photos || options.galleryPhotos || options.coverPhoto || options.coverPhotoChoice !== 'auto' || options.closingPhotoChoice !== 'auto') && typeof window.loadTourImagesForEntries === 'function') {
+        if ((options.photos || options.galleryPhotos || options.coverPhoto || options.closing || options.coverPhotoChoice !== 'auto' || options.closingPhotoChoice !== 'auto') && typeof window.loadTourImagesForEntries === 'function') {
             await window.loadTourImagesForEntries(allEntries);
         }
         // Jahreswerte und Übersichten beziehen sich immer auf sämtliche Touren des Jahres.
