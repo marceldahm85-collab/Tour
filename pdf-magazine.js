@@ -961,7 +961,7 @@
         // gemeinsam genau eine Seite belegen.
     }
 
-    function yearsPage(doc, from, to, colors, options, photographedEntries) {
+    function yearsPage(doc, from, to, colors, options, allEntries) {
         options = options || getExportOptions();
         var label=from+'–'+to;
         addHeader(doc,label,colors);
@@ -971,7 +971,7 @@
 
         var years=[];
         for(var year=from;year<=to;year++){
-            var es=Array.isArray(photographedEntries) ? photographedEntries.filter(function(entry) {
+            var es=Array.isArray(allEntries) ? allEntries.filter(function(entry) {
                 var key = monthKey(entry); return key && Number(key.slice(0,4)) === year;
             }) : (typeof window.getToursInYearRange==='function'?window.getToursInYearRange(year,year):[]);
             if(es.length) years.push({year:year,entries:es,stats:window.computeStatsSummary(es)});
