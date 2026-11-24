@@ -222,6 +222,8 @@
             closing: checked('closing', true),
             coverTitle: (document.getElementById('pdf-book-opt-cover-title') || {}).value || 'Mein Bergjahr {year}',
             closingTitle: (document.getElementById('pdf-book-opt-closing-title') || {}).value || 'Bis zum nächsten Gipfel.',
+            coverPhotoChoice: (document.getElementById('pdf-book-opt-cover-photo-choice') || {}).value || 'auto',
+            closingPhotoChoice: (document.getElementById('pdf-book-opt-closing-photo-choice') || {}).value || 'auto',
             profile: selected('profile', ['premium', 'chronicle', 'documentation'], 'premium'),
             format: selected('format', ['landscape', 'portrait', 'square'], 'landscape'),
             layout: selected('profile', ['premium', 'chronicle', 'documentation'], 'premium'),
@@ -691,6 +693,33 @@
         text(doc, colors.accent); doc.text(label, x, y, {align: align || 'center'});
     }
 
+    function mixRgb(base, tint, amount) {
+        return base.map(function(value, index) {
+            return Math.round(value * (1 - amount) + (tint[index] || 0) * amount);
+        });
+    }
+
+    function drawAccentTile(doc, x, y, w, h, colors, amount) {
+        var neutral = [248,248,244], first = mixRgb(neutral, colors.accent, amount || 0.10);
+        var second = mixRgb(neutral, colors.accent2 || colors.accent, (amount || 0.10) * 0.72);
+        fill(doc, neutral);
+        doc.roundedRect(x, y, w, h, 2.2, 2.2, 'F');
+        var inset = 0.65, innerX = x + inset, innerY = y + inset;
+        var innerW = Math.max(0, w - inset * 2), innerH = Math.max(0, h - inset * 2);
+        var segments = 14;
+        for (var i = 0; i < segments; i++) {
+            var t = i / (segments - 1);
+            var tint = first.map(function(value, index) {
+                return Math.round(value * (1 - t) + second[index] * t);
+            });
+            fill(doc, tint);
+            var segmentW = innerW / segments;
+            doc.rect(innerX + i * segmentW, innerY, segmentW + 0.08, innerH, 'F');
+        }
+        draw(doc, [218,218,211]); doc.setLineWidth(0.25);
+        doc.roundedRect(x, y, w, h, 2.2, 2.2, 'S');
+    }
+
     function footer(doc, label) {
         var total = doc.getNumberOfPages();
         for (var i = 1; i <= total; i++) {
@@ -915,24 +944,28 @@
         var top = 40, bottom = A4.h - 12;
         var milestoneHeadingH = hasMilestones ? 10 : 0;
         var availableH = bottom - top - milestoneHeadingH - (hasMilestones ? 5 : 0);
-        var gridH = hasMilestones ? availableH * 0.61 : availableH;
+        var gridH = hasMilestones ? availableH * 0.56 : availableH;
         var tileH = (gridH - tileGapY * (tileRows - 1)) / tileRows;
 
         tiles.forEach(function(item, index) {
             var col = index % cols, row = Math.floor(index / cols);
             var x = M + col * (tileW + tileGapX), y = top + row * (tileH + tileGapY);
-            fill(doc, [248,248,244]); draw(doc, [225,225,220]); doc.setLineWidth(0.25);
-            doc.roundedRect(x, y, tileW, tileH, 1.8, 1.8, 'FD');
-            text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(11);
-            doc.text(st(item[1]), x + 3, y + tileH * 0.57);
-            text(doc, [105,105,100]); doc.setFont(undefined, 'normal'); doc.setFontSize(7.1);
-            doc.text(st(item[0]), x + 3, y + tileH * 0.82);
+            drawAccentTile(doc, x, y, tileW, tileH, colors, 0.12);
+            var valueSize = tileH < 14 ? 10.2 : 11.6;
+            var valueLines = wrap(doc, item[1], tileW - 5, valueSize, 'bold').slice(0, 2);
+            text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(valueSize);
+            var valueStartY = y + tileH * (valueLines.length > 1 ? 0.40 : 0.49);
+            valueLines.forEach(function(line, lineIndex) {
+                doc.text(line, x + tileW / 2, valueStartY + lineIndex * (valueSize * 0.42), {align:'center'});
+            });
+            text(doc, [75,78,72]); doc.setFont(undefined, 'bold'); doc.setFontSize(tileH < 14 ? 7.8 : 8.4);
+            doc.text(st(item[0]), x + tileW / 2, y + tileH * 0.84, {align:'center'});
         });
 
         if (hasMilestones) {
             var ms = window.computeMilestones(entries);
             var headingY = top + gridH + 8;
-            text(doc, [35,35,32]); doc.setFont(undefined, 'bold'); doc.setFontSize(11);
+            text(doc, [35,35,32]); doc.setFont(undefined, 'bold'); doc.setFontSize(12.5);
             doc.text('Meilensteine', M, headingY);
             var msTop = headingY + 5;
             var rowGap = 2;
@@ -941,20 +974,19 @@
                 var data = ms && ms[def[1]];
                 if (!data) return;
                 var y = msTop + index * (rowH + rowGap);
-                fill(doc, [248,248,244]); draw(doc, [225,225,220]); doc.setLineWidth(0.25);
-                doc.roundedRect(M, y, CW, rowH, 1.8, 1.8, 'FD');
-                text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(7.7);
-                doc.text(def[0], M + 3, y + rowH * 0.43);
-                text(doc, [45,45,42]); doc.setFont(undefined, 'bold'); doc.setFontSize(7.7);
-                doc.text(formatMilestoneTotal(def[1], data.total), M + CW - 3, y + rowH * 0.43, {align:'right'});
+                drawAccentTile(doc, M, y, CW, rowH, colors, 0.10);
+                text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(9);
+                doc.text(def[0], M + 4, y + rowH * 0.43);
+                text(doc, [42,45,40]); doc.setFont(undefined, 'bold'); doc.setFontSize(9);
+                doc.text(formatMilestoneTotal(def[1], data.total), M + CW - 4, y + rowH * 0.43, {align:'right'});
                 var reached = Array.isArray(data.reached) ? data.reached.length : 0, progress = 1;
                 if (data.next !== null && Number.isFinite(Number(data.next))) {
                     var previous = reached ? Number(data.reached[reached - 1].milestone) : 0;
                     progress = Math.max(0, Math.min(1, (n(data.total) - previous) / Math.max(1, n(data.next) - previous)));
                 }
-                var barW = CW - 6, barY = y + rowH - 3;
-                fill(doc, [231,231,227]); doc.roundedRect(M + 3, barY, barW, 1.25, 0.6, 0.6, 'F');
-                fill(doc, colors.accent); doc.roundedRect(M + 3, barY, Math.max(1, barW * progress), 1.25, 0.6, 0.6, 'F');
+                var barW = CW - 8, barY = y + rowH - 3.2;
+                fill(doc, [229,229,222]); doc.roundedRect(M + 4, barY, barW, 1.5, 0.7, 0.7, 'F');
+                fill(doc, colors.accent); doc.roundedRect(M + 4, barY, Math.max(1, barW * progress), 1.5, 0.7, 0.7, 'F');
             });
         }
     }
@@ -1109,26 +1141,46 @@
         }
 
         var textX = 6, textW = heroW - 12;
-        var titleSize = A4.w < 230 ? 15 : 14;
+        var titleSize = A4.w < 230 ? 17 : 18;
         doc.setFont(undefined, 'bold'); doc.setFontSize(titleSize);
         var titleLines = wrap(doc, d.title || 'Bergtour', textW, titleSize, 'bold').slice(0, 2);
         titleLines.forEach(function(line, index) {
             drawOutlinedAccentText(doc, line, textX, 11 + index * (titleSize * 0.48), titleSize, colors, 'left');
         });
         var dateLine = [d.date, d.difficulty, d.region].filter(Boolean).join(' · ');
-        if (dateLine) drawOutlinedAccentText(doc, dateLine, textX, 11 + titleLines.length * (titleSize * 0.48) + 3, A4.w < 230 ? 8.2 : 7.6, colors, 'left');
+        if (dateLine) drawOutlinedAccentText(doc, dateLine, textX, 11 + titleLines.length * (titleSize * 0.48) + 4, A4.w < 230 ? 10 : 10.5, colors, 'left');
 
         var statItems = (d.stats || []).map(function(item) { return item[1] + ': ' + item[0]; });
-        var secondaryItems = d.secondary || [];
-        var statStartY = A4.h - (secondaryItems.length ? 31 : 12);
+        var secondaryItems = (d.secondary || []).slice(0, 3);
+        var statColumns = 2, statCellW = textW / statColumns;
+        var statStartY = A4.h - (secondaryItems.length ? 34 : 10);
         statItems.forEach(function(item, index) {
-            var col = index % 2, row = Math.floor(index / 2);
-            var x = textX + (col ? textW * 0.52 : 0);
-            drawOutlinedAccentText(doc, item, x, statStartY - (Math.ceil(statItems.length / 2) - 1 - row) * 7.2, A4.w < 230 ? 8.1 : 7.6, colors, 'left');
+            var col = index % statColumns, row = Math.floor(index / statColumns);
+            var centerX = textX + col * statCellW + statCellW / 2;
+            var y = statStartY - (Math.ceil(statItems.length / statColumns) - 1 - row) * 10;
+            var statFontSize = A4.w < 230 ? 10 : 10.5;
+            doc.setFont(undefined, 'bold');
+            while (statFontSize > 8.5) {
+                doc.setFontSize(statFontSize);
+                if (doc.getTextWidth(item) <= statCellW - 5) break;
+                statFontSize -= 0.4;
+            }
+            drawOutlinedAccentText(doc, item, centerX, y, statFontSize, colors, 'center');
         });
-        secondaryItems.forEach(function(item, index) {
-            drawOutlinedAccentText(doc, item, textX, A4.h - 8 - (secondaryItems.length - 1 - index) * 6.2, A4.w < 230 ? 7.5 : 7, colors, 'left');
-        });
+        if (secondaryItems.length) {
+            var secondaryCellW = textW / secondaryItems.length;
+            secondaryItems.forEach(function(item, index) {
+                var centerX = textX + index * secondaryCellW + secondaryCellW / 2;
+                var secondaryFontSize = A4.w < 230 ? 8.5 : 9;
+                doc.setFont(undefined, 'bold');
+                while (secondaryFontSize > 7.2) {
+                    doc.setFontSize(secondaryFontSize);
+                    if (doc.getTextWidth(item) <= secondaryCellW - 3) break;
+                    secondaryFontSize -= 0.3;
+                }
+                drawOutlinedAccentText(doc, item, centerX, A4.h - 7.5, secondaryFontSize, colors, 'center');
+            });
+        }
     }
     async function drawSummitPhotoCollage(doc, assets, label, colors) {
         if (!assets || !assets.length) return;
@@ -1195,13 +1247,12 @@
                 : { totalTours: monthEntries.length, totalDistance: 0, totalAscent: 0, totalTimeText: '0', totalSteps: 0, totalPeaks: 0 };
             var col = (month - 1) % 3, row = Math.floor((month - 1) / 3);
             var x = M + col * (cellW + gapX), y = top + row * (cellH + gapY);
-            fill(doc, [248,248,244]); draw(doc, [225,225,220]); doc.setLineWidth(0.3);
-            doc.roundedRect(x, y, cellW, cellH, 2.2, 2.2, 'FD');
-            rule(doc, x, y, cellW, colors.accent, 0.9);
+            drawAccentTile(doc, x, y, cellW, cellH, colors, 0.12);
+            rule(doc, x + 1, y + 0.4, cellW - 2, colors.accent, 0.9);
 
-            text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(13);
+            text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(13.5);
             doc.text(monthNames[month - 1], x + cellW / 2, y + 8, {align:'center'});
-            text(doc, [40,40,37]); doc.setFont(undefined, 'bold'); doc.setFontSize(10.2);
+            text(doc, [40,40,37]); doc.setFont(undefined, 'bold'); doc.setFontSize(10.8);
             doc.text(fi(summary.totalTours) + ' Touren', x + cellW / 2, y + 15, {align:'center'});
 
             var metrics = [
@@ -1212,14 +1263,13 @@
                 ['Gipfel', fi(summary.totalPeaks)]
             ];
             metrics.forEach(function(item, index) {
-                var right = index % 2 === 1;
-                var left = right ? x + cellW / 2 + 2 : x + 3.5;
-                var valueX = right ? x + cellW - 3.5 : x + cellW / 2 - 2;
-                var lineY = y + 22 + Math.floor(index / 2) * 6.1;
-                text(doc, [105,105,100]); doc.setFont(undefined, 'normal'); doc.setFontSize(7);
-                doc.text(item[0], left, lineY);
-                text(doc, [40,40,37]); doc.setFont(undefined, 'bold'); doc.setFontSize(9.1);
-                doc.text(item[1], valueX, lineY, {align:'right'});
+                var row = Math.floor(index / 2), col = index % 2;
+                var centerX = index === 4 ? x + cellW / 2 : x + (col + 0.5) * (cellW / 2);
+                var lineY = y + 19.5 + row * 6.3;
+                text(doc, [75,78,72]); doc.setFont(undefined, 'bold'); doc.setFontSize(6.8);
+                doc.text(item[0], centerX, lineY, {align:'center'});
+                text(doc, [35,38,34]); doc.setFont(undefined, 'bold'); doc.setFontSize(8.8);
+                doc.text(item[1], centerX, lineY + 3.5, {align:'center'});
             });
         }
     }
@@ -1294,6 +1344,29 @@
         }
     }
 
+    async function resolvePhotoChoice(entries, choice, fallback, galleryEnabled) {
+        if (!choice || choice === 'auto') return fallback;
+        var parts = String(choice).split(':');
+        var entryIndex = Number(parts[0]), entry = entries[entryIndex];
+        if (!entry || !Number.isInteger(entryIndex)) return fallback;
+        if (parts[1] === 'main') return entry.imageData || fallback;
+        if (parts[1] === 'gallery' && galleryEnabled && typeof window.__tourGalleryLoadPhotoFull === 'function') {
+            var gallery = Array.isArray(entry.galleryPhotos) ? entry.galleryPhotos.filter(function(item) {
+                return item && item.mediaType === 'photo' && item.uri;
+            }) : [];
+            var galleryIndex = Number(parts[2]), item = gallery[galleryIndex];
+            if (item) {
+                try {
+                    var loaded = await window.__tourGalleryLoadPhotoFull(item);
+                    if (loaded) return loaded;
+                } catch (error) {
+                    console.warn('Ausgewähltes Fotobuchbild konnte nicht geladen werden:', error);
+                }
+            }
+        }
+        return fallback;
+    }
+
     async function generate(from,to){
         if(typeof window.showToast==='function')window.showToast('PDF-Export wird vorbereitet…',{type:'info',duration:2500});
         await ensurePdfLibraries();
@@ -1302,7 +1375,7 @@
         photoAssetsByTour = new WeakMap();
         var js=window.jspdf.jsPDF, doc=new js({unit:'mm',format:[A4.w,A4.h]}), colors=colorsForExport(tc(), options.style);
         var allEntries = window.getToursInYearRange(from,to), label=from===to?String(from):from+'–'+to;
-        if ((options.photos || options.galleryPhotos || options.coverPhoto) && typeof window.loadTourImagesForEntries === 'function') {
+        if ((options.photos || options.galleryPhotos || options.coverPhoto || options.closing || options.coverPhotoChoice !== 'auto' || options.closingPhotoChoice !== 'auto') && typeof window.loadTourImagesForEntries === 'function') {
             await window.loadTourImagesForEntries(allEntries);
         }
         // Jahreswerte und Übersichten beziehen sich immer auf sämtliche Touren des Jahres.
@@ -1317,6 +1390,10 @@
         var rep = options.coverPhoto ? (typeof window.getPdfRepresentativePhoto==='function'
             ? window.getPdfRepresentativePhoto(allEntries)
             : allEntries.find(function(e){return !!e.imageData;}) || null) : null;
+        if (options.coverPhoto) {
+            var selectedCoverPhoto = await resolvePhotoChoice(allEntries, options.coverPhotoChoice, rep && rep.imageData, options.galleryPhotos);
+            rep = selectedCoverPhoto ? {imageData:selectedCoverPhoto} : null;
+        }
         await cover(doc,allEntries,stats,label,colors,rep,options);
         yearOpeningPage(doc,allEntries,stats,label,colors,options);
         if(from!==to){ doc.addPage(); yearsPage(doc,from,to,colors,options,allEntries); }
@@ -1335,6 +1412,7 @@
                     finalPhoto=await window.__tourGalleryLoadPhotoFull(finalEntry.galleryPhotos[0]);
                 }
             }
+            finalPhoto = await resolvePhotoChoice(allEntries, options.closingPhotoChoice, finalPhoto, options.galleryPhotos);
             if(finalPhoto){
                 doc.addPage();
                 footerExcludedPageIndexes.add(doc.getNumberOfPages());
@@ -1386,10 +1464,65 @@
 
     window.generateTourbookPdf=generate;
 
+    var photoChoiceRefreshSequence = 0;
+    async function refreshPhotoChoiceSelectors(from, to) {
+        var coverSelect = document.getElementById('pdf-book-opt-cover-photo-choice');
+        var closingSelect = document.getElementById('pdf-book-opt-closing-photo-choice');
+        if (!coverSelect || !closingSelect || !from || !to || typeof window.getToursInYearRange !== 'function') return;
+        var sequence = ++photoChoiceRefreshSequence;
+        var previousCover = coverSelect.value || 'auto';
+        var previousClosing = closingSelect.value || 'auto';
+        var entries = window.getToursInYearRange(from, to);
+        if (typeof window.loadTourImagesForEntries === 'function') {
+            try { await window.loadTourImagesForEntries(entries); }
+            catch (error) { console.warn('Fotobuch-Bildauswahl konnte Tourbilder nicht laden:', error); }
+        }
+        if (sequence !== photoChoiceRefreshSequence) return;
+        var choices = [];
+        var galleryEnabled = !!(document.getElementById('pdf-book-opt-gallery-photos') || {}).checked;
+        entries.forEach(function(entry, entryIndex) {
+            var tour = st(entry.tourname || 'Unbenannte Tour');
+            var date = st(typeof window.pdfExportFormatDate === 'function' ? window.pdfExportFormatDate(entry.date) : entry.date || '');
+            var prefix = [tour, date].filter(Boolean).join(' · ');
+            if (entry.imageData) choices.push({value:entryIndex + ':main', label:prefix + ' – Hauptfoto'});
+            if (galleryEnabled && Array.isArray(entry.galleryPhotos)) {
+                var gallery = entry.galleryPhotos.filter(function(item) {
+                    return item && item.mediaType === 'photo' && item.uri;
+                });
+                gallery.forEach(function(item, galleryIndex) {
+                    var display = item.displayName || item.name || item.fileName || ('Galeriefoto ' + (galleryIndex + 1));
+                    choices.push({value:entryIndex + ':gallery:' + galleryIndex, label:prefix + ' – ' + st(display)});
+                });
+            }
+        });
+        function fillSelect(select, previous, caption) {
+            select.innerHTML = '';
+            select.add(new Option('Automatisch auswählen', 'auto'));
+            choices.forEach(function(choice) { select.add(new Option(choice.label, choice.value)); });
+            select.value = choices.some(function(choice) { return choice.value === previous; }) ? previous : 'auto';
+            select.disabled = choices.length === 0;
+            select.setAttribute('aria-label', caption);
+        }
+        fillSelect(coverSelect, previousCover, 'Bild für das Titelblatt');
+        fillSelect(closingSelect, previousClosing, 'Bild für die Abschlussseite');
+    }
+
+    function refreshPhotoChoicesForCurrentRange() {
+        var rangePanel = document.getElementById('pdf-export-range-panel');
+        var isRange = rangePanel && !rangePanel.classList.contains('is-hidden');
+        var from = Number(document.getElementById(isRange ? 'pdf-export-year-from' : 'pdf-export-year')?.value);
+        var to = isRange ? Number(document.getElementById('pdf-export-year-to')?.value) : from;
+        if (from && to) refreshPhotoChoiceSelectors(from, to);
+    }
+
     function bind(){
         var b=document.getElementById('pdf-export-run-btn');
         if(!b||b.dataset.magazineBound==='1')return;
         b.dataset.magazineBound='1';
+        ['pdf-export-year','pdf-export-year-from','pdf-export-year-to','pdf-book-opt-gallery-photos'].forEach(function(id) {
+            var field = document.getElementById(id);
+            if (field) field.addEventListener('change', refreshPhotoChoicesForCurrentRange);
+        });
         b.addEventListener('click',function(e){
             e.preventDefault();e.stopImmediatePropagation();
             var range=document.getElementById('pdf-export-range-panel'), isRange=range&&!range.classList.contains('is-hidden'), from,to;
@@ -1402,7 +1535,9 @@
                 from=Number(document.getElementById('pdf-export-year')&&document.getElementById('pdf-export-year').value);to=from;
                 if(!from){if(typeof window.showToast==='function')window.showToast('Bitte ein Jahr auswählen.',{type:'error',duration:2600});return;}
             }
-            generate(from,to).catch(function(err){
+            refreshPhotoChoiceSelectors(from,to).then(function() {
+                return generate(from,to);
+            }).catch(function(err){
                 console.error('PDF-Magazin:',err);
                 var detail = err && err.message ? String(err.message) : '';
                 if(typeof window.showToast==='function')window.showToast(

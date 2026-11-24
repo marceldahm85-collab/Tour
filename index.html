@@ -125,7 +125,7 @@
 <link rel="stylesheet" href="./styles.css?v=22">
 <link rel="stylesheet" href="./styles-overrides.css?v=113">
 <link rel="stylesheet" href="./background-image-picker.css?v=3">
-<link rel="stylesheet" href="./theme-editor-workflow.css?v=12">
+<link rel="stylesheet" href="./theme-editor-workflow.css?v=13">
 <link rel="stylesheet" href="./app-start-editor.css?v=3">
 <link rel="stylesheet" href="./android-gallery-photos.css?v=5">
 <link rel="stylesheet" href="./dashboard-premium-alpine.css?v=36">
@@ -2184,8 +2184,8 @@
             <details id="pdf-book-options" class="pdf-book-options">
                 <summary>Fotobuch konfigurieren</summary>
                 <div class="pdf-book-options-body">
-                    <fieldset class="pdf-book-option-group">
-                        <legend>Buchstil</legend>
+                    <details class="pdf-book-option-group">
+                        <summary>Buchstil</summary>
                         <div class="pdf-book-design-field">
                             <label for="pdf-book-opt-profile">Schwerpunkt</label>
                             <select id="pdf-book-opt-profile" data-pdf-book-option="profile">
@@ -2221,18 +2221,28 @@
                                 </select>
                             </div>
                         </div>
-                    </fieldset>
-                    <fieldset class="pdf-book-option-group">
-                        <legend>Fotos</legend>
+                    </details>
+                    <details class="pdf-book-option-group">
+                        <summary>Fotos</summary>
                         <div class="pdf-book-option-grid">
                             <label><input type="checkbox" id="pdf-book-opt-photos" data-pdf-book-option="photos" checked> Hauptfoto der Tour</label>
                             <label><input type="checkbox" id="pdf-book-opt-gallery-photos" data-pdf-book-option="gallery-photos" checked> Zusätzliche Android-Galeriefotos</label>
                             <label><input type="checkbox" id="pdf-book-opt-summit-photos" data-pdf-book-option="summit-photos" checked> Zugeordnete Gipfelfotos</label>
                             <label><input type="checkbox" id="pdf-book-opt-cover-photo" data-pdf-book-option="cover-photo" checked> Foto auf dem Titelblatt</label>
                         </div>
-                    </fieldset>
-                    <fieldset class="pdf-book-option-group">
-                        <legend>Tourdaten und Details</legend>
+                        <div class="pdf-book-design-grid pdf-book-photo-choice-grid">
+                            <div class="pdf-book-design-field">
+                                <label for="pdf-book-opt-cover-photo-choice">Bild für das Titelblatt</label>
+                                <select id="pdf-book-opt-cover-photo-choice" data-pdf-book-option="cover-photo-choice"><option value="auto">Automatisch auswählen</option></select>
+                            </div>
+                            <div class="pdf-book-design-field">
+                                <label for="pdf-book-opt-closing-photo-choice">Bild für die Abschlussseite</label>
+                                <select id="pdf-book-opt-closing-photo-choice" data-pdf-book-option="closing-photo-choice"><option value="auto">Automatisch auswählen</option></select>
+                            </div>
+                        </div>
+                    </details>
+                    <details class="pdf-book-option-group">
+                        <summary>Tourdaten und Details</summary>
                         <div class="pdf-book-option-grid">
                             <label><input type="checkbox" id="pdf-book-opt-peaks" data-pdf-book-option="peaks" checked> Gipfellisten</label>
                             <label><input type="checkbox" id="pdf-book-opt-performance" data-pdf-book-option="performance" checked> Leistungsindex</label>
@@ -2241,16 +2251,16 @@
                             <label><input type="checkbox" id="pdf-book-opt-notes" data-pdf-book-option="notes" checked> Persönliche Notizen</label>
                             <label><input type="checkbox" id="pdf-book-opt-extras" data-pdf-book-option="extras" checked> Klettersteig, Rad und Begleitung</label>
                         </div>
-                    </fieldset>
-                    <fieldset class="pdf-book-option-group">
-                        <legend>Jahresbilanz und Zusatzseiten</legend>
+                    </details>
+                    <details class="pdf-book-option-group">
+                        <summary>Jahresbilanz und Zusatzseiten</summary>
                         <div class="pdf-book-option-grid">
                             <label><input type="checkbox" id="pdf-book-opt-milestones" data-pdf-book-option="milestones" checked> Meilensteinübersicht</label>
                             <label><input type="checkbox" id="pdf-book-opt-monthly" data-pdf-book-option="monthly"> Monatsübersicht</label>
                             <label><input type="checkbox" id="pdf-book-opt-peak-overview" data-pdf-book-option="peak-overview"> Gipfelübersicht</label>
                             <label><input type="checkbox" id="pdf-book-opt-closing" data-pdf-book-option="closing" checked> Abschlussseite mit Foto</label>
                         </div>
-                    </fieldset>
+                    </details>
                 </div>
             </details>
 
@@ -2542,7 +2552,7 @@
 <script src="./native-app-ready.js?v=3" defer></script>
 <script src="./native-system-bars.js?v=4" defer></script>
 <script src="./more-menu-navigation-fix.js?v=1" defer></script>
-<script src="./pdf-magazine.js?v=8" defer></script>
+<script src="./pdf-magazine.js?v=9" defer></script>
 <script src="./stats-premium-alpine.js?v=15" defer></script>
 <script src="./theme-editor-unified.js?v=35" defer></script>
 <script src="./background-image-manager.js?v=15" defer></script>
