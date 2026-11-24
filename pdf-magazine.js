@@ -1188,31 +1188,42 @@
         var peaks = new Map();
         entries.forEach(function(entry) {
             (Array.isArray(entry.gipfelDetails) ? entry.gipfelDetails : []).forEach(function(peak) {
-                var name=st(peak && peak.name); if (!name) return;
-                var height=n(String(peak.hoehe || '').replace(/[^0-9,.]/g,'').replace(',','.'));
-                var key=name.toLowerCase();
-                if (!peaks.has(key) || height>peaks.get(key).height) peaks.set(key,{name:name,height:height});
+                var name = st(peak && peak.name); if (!name) return;
+                var height = n(String(peak.hoehe || '').replace(/[^0-9,.]/g, '').replace(',', '.'));
+                var key = name.toLowerCase();
+                if (!peaks.has(key) || height > peaks.get(key).height) peaks.set(key, { name: name, height: height });
             });
         });
-        var list=Array.from(peaks.values()).sort(function(a,b){return b.height-a.height;});
-        var perColumn=Math.max(1,Math.floor((SAFE_BOTTOM-54)/8));
-        var perPage=perColumn*2;
-        var pageCount=Math.max(1,Math.ceil(list.length/perPage));
-        for(var pageIndex=0;pageIndex<pageCount;pageIndex++){
-            doc.addPage(); addHeader(doc,label,colors);
-            text(doc,[35,35,32]); doc.setFont(undefined,'bold'); doc.setFontSize(19);
-            doc.text('Meine Gipfel',M,36);
-            text(doc,colors.accent); doc.setFont(undefined,'bold'); doc.setFontSize(8);
-            doc.text(list.length+' unterschiedliche Gipfel',M,43);
-            var start=pageIndex*perPage, subset=list.slice(start,start+perPage);
-            subset.forEach(function(peak,i) {
-                var col=Math.floor(i/perColumn), row=i%perColumn;
-                var colW=(CW-8)/2, x=M+col*(colW+8), py=52+row*8;
-                text(doc,[55,55,51]); doc.setFont(undefined,'normal'); doc.setFontSize(7.2);
-                doc.text(st(peak.name),x,py);
-                text(doc,colors.accent); doc.setFont(undefined,'bold');
-                doc.text(peak.height?fi(peak.height)+' m':'–',x+colW,py,{align:'right'});
-            });
+        var list = Array.from(peaks.values()).sort(function(a, b) { return b.height - a.height; });
+        var rowGap = 8.1, firstY = 53;
+        var perColumn = Math.max(1, Math.floor((SAFE_BOTTOM - firstY - 2) / rowGap));
+        var perPage = perColumn * 2;
+        var pageCount = Math.max(1, Math.ceil(list.length / perPage));
+
+        for (var pageIndex = 0; pageIndex < pageCount; pageIndex++) {
+            doc.addPage(); addHeader(doc, label, colors);
+            text(doc, [35,35,32]); doc.setFont(undefined, 'bold'); doc.setFontSize(19);
+            doc.text('Meine Gipfel', M, 36);
+            text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(8.5);
+            doc.text(list.length + ' unterschiedliche Gipfel', M, 43);
+
+            var subset = list.slice(pageIndex * perPage, (pageIndex + 1) * perPage);
+            var leftCount = Math.ceil(subset.length / 2);
+            var colGap = 9, colW = (CW - colGap) / 2;
+            for (var col = 0; col < 2; col++) {
+                var start = col === 0 ? 0 : leftCount;
+                var end = col === 0 ? leftCount : subset.length;
+                for (var index = start; index < end; index++) {
+                    var row = index - start, peak = subset[index];
+                    var x = M + col * (colW + colGap), py = firstY + row * rowGap;
+                    text(doc, [55,55,51]); doc.setFont(undefined, 'normal'); doc.setFontSize(8.8);
+                    var nameWidth = colW - 17;
+                    var peakName = wrap(doc, peak.name, nameWidth, 8.8, 'normal').slice(0, 1);
+                    doc.text(peakName, x, py);
+                    text(doc, colors.accent); doc.setFont(undefined, 'bold'); doc.setFontSize(8.5);
+                    doc.text(peak.height ? fi(peak.height) + ' m' : '–', x + colW, py, { align: 'right' });
+                }
+            }
         }
     }
 
@@ -1240,36 +1251,35 @@
         configurePage(options.format);
         photoAssetsByTour = new WeakMap();
         var js=window.jspdf.jsPDF, doc=new js({unit:'mm',format:[A4.w,A4.h]}), colors=colorsForExport(tc(), options.style);
-        var entries=window.getToursInYearRange(from,to), label=from===to?String(from):from+'–'+to;
+        var allEntries = window.getToursInYearRange(from,to), label=from===to?String(from):from+'–'+to;
         if ((options.photos || options.galleryPhotos || options.coverPhoto) && typeof window.loadTourImagesForEntries === 'function') {
-            await window.loadTourImagesForEntries(entries);
+            await window.loadTourImagesForEntries(allEntries);
         }
-        // A Fotobuch enthält ausschließlich Touren mit einem tatsächlich ladbaren Tourfoto.
+        // Jahreswerte und Übersichten beziehen sich immer auf sämtliche Touren des Jahres.
+        // Nur die Einzeltour-Seiten werden auf Touren mit tatsächlich ladbaren Fotos begrenzt.
         var photographedEntries = [];
-        for (var i = 0; i < entries.length; i++) {
-            var assets = await loadEntryPhotoAssets(entries[i], options);
-            if (assets.length) photographedEntries.push(entries[i]);
+        for (var i = 0; i < allEntries.length; i++) {
+            var assets = await loadEntryPhotoAssets(allEntries[i], options);
+            if (assets.length) photographedEntries.push(allEntries[i]);
         }
-        entries = photographedEntries;
         if(typeof window.showToast==='function') window.showToast('Fotobuch wird erstellt…',{type:'info',duration:2500});
-        if(!entries.length){
-            await cover(doc,[],{totalTours:0,totalDistance:0,totalAscent:0,totalPeaks:0,totalSteps:0,totalTimeText:'0:00',bigTours:0},label,colors,null,options);
-            footer(doc,label); await save(doc,from,to); return;
-        }
-        var stats=window.computeStatsSummary(entries), rep=options.coverPhoto ? (typeof window.getPdfRepresentativePhoto==='function'?window.getPdfRepresentativePhoto(entries):entries.find(function(e){return e.imageData;})||null) : null;
-        await cover(doc,entries,stats,label,colors,rep,options);
-        yearOpeningPage(doc,entries,stats,label,colors,options);
-        if(from!==to){ doc.addPage(); yearsPage(doc,from,to,colors,options,entries); }
-        if(options.monthly) monthlyPage(doc,entries,label,colors);
-        await renderTours(doc,entries,from,to,colors,options);
+        var stats = window.computeStatsSummary(allEntries);
+        var rep = options.coverPhoto ? (typeof window.getPdfRepresentativePhoto==='function'
+            ? window.getPdfRepresentativePhoto(allEntries)
+            : allEntries.find(function(e){return !!e.imageData;}) || null) : null;
+        await cover(doc,allEntries,stats,label,colors,rep,options);
+        yearOpeningPage(doc,allEntries,stats,label,colors,options);
+        if(from!==to){ doc.addPage(); yearsPage(doc,from,to,colors,options,allEntries); }
+        if(options.monthly) monthlyPage(doc,allEntries,label,colors);
+        await renderTours(doc,photographedEntries,from,to,colors,options);
         // Die Gipfelliste und die zugeordneten Gipfelfotos bilden den Abschluss nach allen Tourseiten.
-        if(options.peakOverview) peakOverviewPage(doc,entries,label,colors);
-        var summitAssets = await loadSummitPhotoAssets(entries, options);
+        if(options.peakOverview) peakOverviewPage(doc,allEntries,label,colors);
+        var summitAssets = await loadSummitPhotoAssets(allEntries, options);
         await drawSummitPhotoCollage(doc,summitAssets,label,colors);
         if(options.closing){
             var finalPhoto=null;
-            for(var fiIndex=entries.length-1;fiIndex>=0&&!finalPhoto;fiIndex--){
-                var finalEntry=entries[fiIndex];
+            for(var fiIndex=allEntries.length-1;fiIndex>=0&&!finalPhoto;fiIndex--){
+                var finalEntry=allEntries[fiIndex];
                 if(finalEntry.imageData) finalPhoto=finalEntry.imageData;
                 else if(options.galleryPhotos&&Array.isArray(finalEntry.galleryPhotos)&&finalEntry.galleryPhotos.length&&typeof window.__tourGalleryLoadPhotoFull==='function'){
                     finalPhoto=await window.__tourGalleryLoadPhotoFull(finalEntry.galleryPhotos[0]);
