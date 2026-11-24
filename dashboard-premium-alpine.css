@@ -406,7 +406,8 @@
 
     #dashboard-view #dash-recent-section .dash-tour-list > .dash-recent-item {
         display: grid !important;
-        grid-template-columns: max-content minmax(0, 1fr);
+        /* Einheitliche Datumsbreite für das längste Format YYYY-MM-DD. */
+        grid-template-columns: 54px minmax(0, 1fr);
         align-items: center;
         align-content: center;
         width: 100%;
