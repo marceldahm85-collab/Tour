@@ -2196,6 +2196,15 @@
                         </div>
                         <div class="pdf-book-design-grid">
                             <div class="pdf-book-design-field">
+                                <label for="pdf-book-opt-cover-title">Titel der Startseite</label>
+                                <input type="text" id="pdf-book-opt-cover-title" data-pdf-book-option="cover-title" value="Mein Bergjahr {year}" maxlength="80">
+                                <small>{year} wird automatisch durch das gewählte Jahr ersetzt.</small>
+                            </div>
+                            <div class="pdf-book-design-field">
+                                <label for="pdf-book-opt-closing-title">Titel der letzten Seite</label>
+                                <input type="text" id="pdf-book-opt-closing-title" data-pdf-book-option="closing-title" value="Bis zum nächsten Gipfel." maxlength="80">
+                            </div>
+                            <div class="pdf-book-design-field">
                                 <label for="pdf-book-opt-format">Seitenformat</label>
                                 <select id="pdf-book-opt-format" data-pdf-book-option="format">
                                     <option value="landscape" selected>Querformat</option>
@@ -2533,7 +2542,7 @@
 <script src="./native-app-ready.js?v=3" defer></script>
 <script src="./native-system-bars.js?v=4" defer></script>
 <script src="./more-menu-navigation-fix.js?v=1" defer></script>
-<script src="./pdf-magazine.js?v=6" defer></script>
+<script src="./pdf-magazine.js?v=7" defer></script>
 <script src="./stats-premium-alpine.js?v=15" defer></script>
 <script src="./theme-editor-unified.js?v=35" defer></script>
 <script src="./background-image-manager.js?v=15" defer></script>
