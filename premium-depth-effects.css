@@ -870,3 +870,23 @@ html body .app-wrapper .accordion-header .header-actions > nav.top-main-nav > .t
     padding-bottom: 0 !important;
     line-height: 1.25 !important;
 }
+
+
+/* =========================================================
+   SICHERUNG / TOURBUCH — Headerabstände und kompakte Editorgruppen
+   ========================================================= */
+
+/* Hauptmotive und Titel erhalten in beiden Karten denselben klaren Abstand. */
+#backup-view > .backup-view-inner > details.backup-accordion-card > summary .theme-editor-title-text {
+    column-gap: 8px !important;
+    gap: 8px !important;
+}
+
+/* Die vier Gruppen im Fotobuch-Editor kompakt halten, ohne Schrift
+   oder Pfeilgrafik zu verkleinern. */
+#backup-view #pdf-export-card .pdf-book-option-group > summary {
+    box-sizing: border-box !important;
+    min-height: 34px !important;
+    padding: 7px 32px 7px 12px !important;
+    line-height: 1.2 !important;
+}
