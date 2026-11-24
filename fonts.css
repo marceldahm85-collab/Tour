@@ -1,5 +1,9 @@
-/* Local WOFF2 fonts for PWA and Android WebView. */
+/* Locally bundled SIL Open Font License fonts for PWA and Android WebView. */
 @font-face{font-family:"Tour Inter";font-style:normal;font-display:swap;font-weight:100 900;src:url("./fonts/inter-latin-wght-normal.woff2") format("woff2");}
-@font-face{font-family:"Tour Roboto Condensed";font-style:normal;font-display:swap;font-weight:100 900;src:url("./fonts/roboto-condensed-latin-wght-normal.woff2") format("woff2");}
-@font-face{font-family:"Tour Nunito Sans";font-style:normal;font-display:swap;font-weight:200 1000;src:url("./fonts/nunito-sans-latin-wght-normal.woff2") format("woff2");}
-@font-face{font-family:"Tour Righteous";font-style:normal;font-display:swap;font-weight:400;src:url("./fonts/righteous-latin-400-normal.woff2") format("woff2");}
+@font-face{font-family:"Tour Space Grotesk";font-style:normal;font-display:swap;font-weight:300 700;src:url("./fonts/space-grotesk-variable.ttf") format("truetype");}
+@font-face{font-family:"Tour Oswald";font-style:normal;font-display:swap;font-weight:200 700;src:url("./fonts/oswald-variable.ttf") format("truetype");}
+@font-face{font-family:"Tour Playfair Display";font-style:normal;font-display:swap;font-weight:400 900;src:url("./fonts/playfair-display-variable.ttf") format("truetype");}
+@font-face{font-family:"Tour Caveat";font-style:normal;font-display:swap;font-weight:400 700;src:url("./fonts/caveat-variable.ttf") format("truetype");}
+@font-face{font-family:"Tour Pacifico";font-style:normal;font-display:swap;font-weight:400;src:url("./fonts/pacifico-regular.ttf") format("truetype");}
+@font-face{font-family:"Tour Cinzel";font-style:normal;font-display:swap;font-weight:400 900;src:url("./fonts/cinzel-variable.ttf") format("truetype");}
+@font-face{font-family:"Tour Urbanist";font-style:normal;font-display:swap;font-weight:100 900;src:url("./fonts/urbanist-variable.ttf") format("truetype");}
