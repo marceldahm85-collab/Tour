@@ -5131,7 +5131,7 @@ body.dark .dash-section-body .stats-list li {
 
 .dash-tour-list li {
     display: grid;
-    grid-template-columns: 6.8em minmax(0, 1fr);
+    /* Die Datumsspalte wird zentral in styles-overrides.css festgelegt. */
     align-items: center;
     column-gap: 8px;
     padding: 7px 4px;
@@ -5926,7 +5926,7 @@ body.green .dash-year-arrow-btn {
 
     /* Zuletzt: Tournamen kleiner */
     .dash-tour-list li {
-        grid-template-columns: 5.8em minmax(0, 1fr);
+        /* Die Datumsspalte wird zentral in styles-overrides.css festgelegt. */
         column-gap: 6px;
         padding: 5px 4px;
         margin-bottom: 4px;
@@ -18717,7 +18717,7 @@ body .dash-year-filter-wrap .dash-year-arrow-btn:not(:disabled):active {
     }
 
     #dashboard-view .dash-tour-list li {
-        grid-template-columns: 5.5em minmax(0, 1fr);
+        /* Die Datumsspalte wird zentral in styles-overrides.css festgelegt. */
         column-gap: 5px;
         padding: 4px 3px;
         margin-bottom: 3px;
