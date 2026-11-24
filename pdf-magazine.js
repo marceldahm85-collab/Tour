@@ -127,6 +127,7 @@
     async function cropFullBleed(url, w, h, q) {
         return new Promise(function(resolve, reject) {
             var img = new Image();
+            img.crossOrigin = 'anonymous';
             img.onload = function() {
                 var canvas = document.createElement('canvas');
                 canvas.width = w; canvas.height = h;
@@ -1346,7 +1347,18 @@
 
     async function resolvePhotoChoice(entries, choice, fallback, galleryEnabled) {
         if (!choice || choice === 'auto') return fallback;
-        var parts = String(choice).split(':');
+        var value = String(choice);
+        if (value.indexOf('preset:') === 0) {
+            var presetId = value.slice(7);
+            var catalog = typeof window.getAppBackgroundPresetCatalog === 'function'
+                ? window.getAppBackgroundPresetCatalog()
+                : [];
+            var preset = Array.isArray(catalog) ? catalog.find(function(item) {
+                return item && item.id === presetId;
+            }) : null;
+            return preset && (preset.src || preset.preview) ? (preset.src || preset.preview) : fallback;
+        }
+        var parts = value.split(':');
         var entryIndex = Number(parts[0]), entry = entries[entryIndex];
         if (!entry || !Number.isInteger(entryIndex)) return fallback;
         if (parts[1] === 'main') return entry.imageData || fallback;
@@ -1479,6 +1491,19 @@
         }
         if (sequence !== photoChoiceRefreshSequence) return;
         var choices = [];
+        var presetCatalog = typeof window.getAppBackgroundPresetCatalog === 'function'
+            ? window.getAppBackgroundPresetCatalog()
+            : [];
+        if (Array.isArray(presetCatalog)) {
+            presetCatalog.forEach(function(preset) {
+                if (preset && preset.id && (preset.src || preset.preview)) {
+                    choices.push({
+                        value: 'preset:' + preset.id,
+                        label: 'Alpenmotiv – ' + st(preset.name || preset.id)
+                    });
+                }
+            });
+        }
         var galleryEnabled = !!(document.getElementById('pdf-book-opt-gallery-photos') || {}).checked;
         entries.forEach(function(entry, entryIndex) {
             var tour = st(entry.tourname || 'Unbenannte Tour');
@@ -1500,7 +1525,7 @@
             select.add(new Option('Automatisch auswählen', 'auto'));
             choices.forEach(function(choice) { select.add(new Option(choice.label, choice.value)); });
             select.value = choices.some(function(choice) { return choice.value === previous; }) ? previous : 'auto';
-            select.disabled = choices.length === 0;
+            select.disabled = false;
             select.setAttribute('aria-label', caption);
         }
         fillSelect(coverSelect, previousCover, 'Bild für das Titelblatt');
@@ -1522,6 +1547,12 @@
         ['pdf-export-year','pdf-export-year-from','pdf-export-year-to','pdf-book-opt-gallery-photos'].forEach(function(id) {
             var field = document.getElementById(id);
             if (field) field.addEventListener('change', refreshPhotoChoicesForCurrentRange);
+        });
+        ['pdf-export-card','pdf-book-options'].forEach(function(id) {
+            var panel = document.getElementById(id);
+            if (panel) panel.addEventListener('toggle', function() {
+                if (panel.open) refreshPhotoChoicesForCurrentRange();
+            });
         });
         b.addEventListener('click',function(e){
             e.preventDefault();e.stopImmediatePropagation();
