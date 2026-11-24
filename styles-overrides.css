@@ -4554,7 +4554,7 @@ body.summit .plan-live-preview {
 
 .dash-tour-list li,
 #dashboard-view .dash-tour-list li {
-    grid-template-columns: max-content minmax(0, 1fr) !important;
+    grid-template-columns: 10ch minmax(0, 1fr) !important;
     min-width: 0;
     width: 100%;
 }

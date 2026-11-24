@@ -9,6 +9,10 @@ on:
       - "android/**"
       - ".github/workflows/android-release-apk.yml"
       - "index.html"
+      - "styles.css"
+      - "styles-overrides.css"
+      - "dashboard-premium-alpine.css"
+      - "sw.js"
       - "app-main-20261019.js"
       - "dashboard-stat-modal-premium.css"
       - "stats-premium-alpine.css"
@@ -132,7 +136,9 @@ jobs:
             echo "## Bergtouren Android — Release APK"
             echo
             echo "- Package: at.marcel.bergtouren"
-            echo "- Version: 0.8.27 (52)"
+            VERSION_NAME=$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' android/app/build.gradle.kts)
+            VERSION_CODE=$(sed -n 's/.*versionCode = \([0-9][0-9]*\).*/\1/p' android/app/build.gradle.kts)
+            echo "- Version: ${VERSION_NAME} (${VERSION_CODE})"
             echo "- Build type: signed, non-debuggable Release"
             echo "- Artifact: bergtouren-release.apk"
             echo
