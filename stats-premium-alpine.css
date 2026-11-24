@@ -1398,3 +1398,118 @@
     line-height: 1.45;
     text-align: center !important;
 }
+
+
+/* =========================================================
+   BACKUP / TOURBUCH: identische Header-Geometrie wie Editor
+   Diese Regeln stehen bewusst in stats-premium-alpine.css,
+   das nach theme-editor-workflow.css geladen wird. Sie
+   überschreiben damit auch ältere Fotobuch-Sonderregeln.
+   ========================================================= */
+#backup-view > .backup-view-inner > details.backup-accordion-card,
+#backup-view > .backup-view-inner > details#pdf-export-card {
+    padding: 12px !important;
+    box-sizing: border-box !important;
+}
+
+#backup-view .backup-accordion-card > summary.stats-analysis-title {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 0 11px !important;
+    padding: 0 26px 8px 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--premium-border, rgba(255,255,255,.12)) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--app-text-primary, var(--text-main, inherit)) !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.25 !important;
+    text-align: left !important;
+    list-style: none !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+#backup-view .backup-accordion-card > summary.stats-analysis-title::-webkit-details-marker {
+    display: none !important;
+}
+#backup-view .backup-accordion-card > summary.stats-analysis-title::after {
+    content: "" !important;
+    position: absolute !important;
+    display: block !important;
+    right: 5px !important;
+    top: calc(50% - 5px) !important;
+    width: 8px !important;
+    height: 8px !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-right: 1.8px solid var(--theme-palette-accent, var(--accent, #D5A64C)) !important;
+    border-bottom: 1.8px solid var(--theme-palette-accent, var(--accent, #D5A64C)) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transform: rotate(45deg) !important;
+    transform-origin: center !important;
+    transition: transform 160ms ease, top 160ms ease !important;
+    opacity: .95 !important;
+}
+#backup-view .backup-accordion-card[open] > summary.stats-analysis-title::after {
+    top: calc(50% - 2px) !important;
+    transform: rotate(225deg) !important;
+}
+
+/* Der geschlossene Zustand ist der entscheidende Unterschied:
+   dieselben drei Komprimierungen wie beim Theme-Editor. */
+#backup-view .backup-accordion-card:not([open]) > summary.stats-analysis-title {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    border-bottom-color: transparent !important;
+    background-image: none !important;
+}
+#backup-view .backup-accordion-card > summary.stats-analysis-title .theme-editor-title-text {
+    min-height: 0 !important;
+    height: auto !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    line-height: 1.25 !important;
+}
+
+/* Editor und Sicherung verwenden dieselbe kompakte Mobil-Geometrie. */
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+    #backup-view .backup-accordion-card > summary.stats-analysis-title {
+        margin-bottom: 6px !important;
+        font-size: 11px !important;
+    }
+}
+@media (max-width: 380px) {
+    #backup-view .backup-accordion-card > summary.stats-analysis-title {
+        gap: 6px !important;
+        padding-bottom: 7px !important;
+        margin-bottom: 9px !important;
+    }
+    #backup-view .backup-accordion-card:not([open]) > summary.stats-analysis-title {
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }
+    #backup-view .backup-accordion-card > summary.stats-analysis-title .stats-premium-title-icon {
+        flex-basis: 16px !important;
+        width: 16px !important;
+        height: 16px !important;
+    }
+    #backup-view .backup-accordion-card > summary.stats-analysis-title .stats-premium-title-label {
+        gap: 6px !important;
+    }
+}
