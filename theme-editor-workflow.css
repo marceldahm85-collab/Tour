@@ -891,3 +891,52 @@ body[data-app-density="comfortable"] #theme-view .theme-editor-settings-grid {
   #backup-view #pdf-export-card .pdf-book-option-grid { grid-template-columns: minmax(0,1fr); gap: 7px; }
   #backup-view #pdf-export-card .pdf-book-design-grid { grid-template-columns: minmax(0,1fr); }
 }
+
+
+/* =========================================================
+   Gemeinsame Header-Geometrie: Editor und Sicherung/Tourbuch
+   Beide Bereiche verwenden dieselbe stats-analysis-title-
+   Zusammenfassung. Insbesondere darf Tourbuch keine eigene
+   feste 48px-Headerhöhe erzwingen.
+   ========================================================= */
+#theme-view .theme-editor-section-card > summary.stats-analysis-title,
+#backup-view .backup-accordion-card > summary.stats-analysis-title {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  margin: 0 0 11px !important;
+  padding: 0 26px 8px 0 !important;
+  box-sizing: border-box !important;
+  text-align: left !important;
+  list-style: none !important;
+  cursor: pointer !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+#backup-view .backup-accordion-card > summary.stats-analysis-title::after {
+  top: calc(50% - 5px) !important;
+}
+#backup-view .backup-accordion-card[open] > summary.stats-analysis-title::after {
+  top: calc(50% - 2px) !important;
+}
+@media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+  #theme-view .theme-editor-section-card > summary.stats-analysis-title,
+  #backup-view .backup-accordion-card > summary.stats-analysis-title {
+    margin-bottom: 6px !important;
+    font-size: 11px !important;
+  }
+}
+@media (max-width: 380px) {
+  #theme-view .theme-editor-section-card > summary.stats-analysis-title,
+  #backup-view .backup-accordion-card > summary.stats-analysis-title {
+    gap: 6px !important;
+    padding-bottom: 7px !important;
+    margin-bottom: 9px !important;
+  }
+}
