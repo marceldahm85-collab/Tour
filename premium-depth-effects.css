@@ -398,10 +398,10 @@ html body #tour-view #plan-form #plan-save-btn {
    Der gleiche Stil gilt in beiden Zuständen; nur das Chevron wechselt. */
 #filter-view .filter-section-panel > .filter-simple-title,
 #theme-view .theme-editor-section-card > summary.stats-analysis-title,
-#theme-view .theme-editor-subgroup > summary,
+#theme-view .theme-editor-subgroup > summary.stats-analysis-title,
+#theme-view .theme-editor-subgroup > summary:not(.stats-analysis-title),
 #backup-view .backup-accordion-card > summary.stats-analysis-title {
-    border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
-    background-image:
+    --premium-accordion-header-background:
         radial-gradient(
             ellipse at 12% 0%,
             color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 10%, transparent),
@@ -411,7 +411,9 @@ html body #tour-view #plan-form #plan-save-btn {
             150deg,
             var(--app-surface-strong, rgba(255,255,255,.075)),
             var(--app-surface-card, rgba(10,16,23,.82))
-        ) !important;
+        );
+    border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
+    background-image: var(--premium-accordion-header-background) !important;
     box-shadow: var(--premium-depth-control) !important;
     -webkit-backdrop-filter: blur(8px) saturate(128%);
     backdrop-filter: blur(8px) saturate(128%);
@@ -420,16 +422,20 @@ html body #tour-view #plan-form #plan-save-btn {
 /* Die geschlossenen Header behalten ihre kompakte Höhe und Abstände. */
 #filter-view .filter-section-panel.is-collapsed > .filter-simple-title,
 #theme-view .theme-editor-section-card:not([open]) > summary.stats-analysis-title,
-#theme-view .theme-editor-subgroup:not([open]) > summary,
+#theme-view .theme-editor-subgroup:not([open]) > summary.stats-analysis-title,
+#theme-view .theme-editor-subgroup:not([open]) > summary:not(.stats-analysis-title),
 #backup-view .backup-accordion-card:not([open]) > summary.stats-analysis-title {
+    background-image: var(--premium-accordion-header-background) !important;
     box-shadow: var(--premium-depth-control) !important;
 }
 
 /* Die offenen Header erhalten exakt dieselbe Tiefe wie die geschlossenen. */
 #filter-view .filter-section-panel:not(.is-collapsed) > .filter-simple-title,
 #theme-view .theme-editor-section-card[open] > summary.stats-analysis-title,
-#theme-view .theme-editor-subgroup[open] > summary,
+#theme-view .theme-editor-subgroup[open] > summary.stats-analysis-title,
+#theme-view .theme-editor-subgroup[open] > summary:not(.stats-analysis-title),
 #backup-view .backup-accordion-card[open] > summary.stats-analysis-title {
+    background-image: var(--premium-accordion-header-background) !important;
     box-shadow: var(--premium-depth-control) !important;
 }
 
