@@ -12,7 +12,7 @@
     const LEGACY_HAPTIC_KEY = 'bergTourenHaptics';
     const THEME_KEYS = ['light', 'dark', 'green', 'summit'];
     const DIRECTIONS = ['180deg', '90deg', '135deg', '45deg', 'radial'];
-    const FONTS = ['inter', 'space-grotesk', 'oswald', 'playfair-display', 'caveat', 'pacifico', 'cinzel', 'urbanist'];
+    const FONTS = ['inter', 'space-grotesk', 'oswald', 'playfair-display-sc-bold', 'cinzel', 'urbanist', 'marcellus-sc', 'castoro-titling'];
     const DEFAULT_ACCENT = '#ad7d12';
     const DEFAULT_ACCENT_2 = '#000000';
     const DEFAULTS = {
@@ -153,7 +153,7 @@
             : fallback;
     }
 
-    const FONT_ALIASES = { android: 'inter', system: 'inter', rounded: 'urbanist', serif: 'playfair-display', slab: 'inter', fantasy: 'cinzel', 'roboto-condensed': 'inter', 'nunito-sans': 'urbanist', righteous: 'cinzel', mono: 'inter', cursive: 'caveat' };
+    const FONT_ALIASES = { android: 'inter', system: 'inter', rounded: 'urbanist', serif: 'playfair-display-sc-bold', 'playfair-display': 'playfair-display-sc-bold', slab: 'inter', fantasy: 'cinzel', 'roboto-condensed': 'inter', 'nunito-sans': 'urbanist', righteous: 'cinzel', mono: 'inter' };
     function normalizeFontFamily(value) { return FONTS.includes(value) ? value : (FONT_ALIASES[value] || DEFAULTS.fontFamily); }
     function normalizeSettings(value) {
         const settings = value && typeof value === 'object' ? value : {};

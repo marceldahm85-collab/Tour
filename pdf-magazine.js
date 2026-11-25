@@ -75,11 +75,11 @@
         inter: { file: 'inter-variable.ttf', family: 'BergtourenInter' },
         'space-grotesk': { file: 'space-grotesk-variable.ttf', family: 'BergtourenSpaceGrotesk' },
         oswald: { file: 'oswald-variable.ttf', family: 'BergtourenOswald' },
-        'playfair-display': { file: 'playfair-display-variable.ttf', family: 'BergtourenPlayfairDisplay' },
-        caveat: { file: 'caveat-variable.ttf', family: 'BergtourenCaveat' },
-        pacifico: { file: 'pacifico-regular.ttf', family: 'BergtourenPacifico' },
+        'playfair-display-sc-bold': { file: 'playfair-display-sc-bold.ttf', family: 'BergtourenPlayfairDisplaySCBold' },
         cinzel: { file: 'cinzel-variable.ttf', family: 'BergtourenCinzel' },
-        urbanist: { file: 'urbanist-variable.ttf', family: 'BergtourenUrbanist' }
+        urbanist: { file: 'urbanist-variable.ttf', family: 'BergtourenUrbanist' },
+        'marcellus-sc': { file: 'marcellus-sc.ttf', family: 'BergtourenMarcellusSC' },
+        'castoro-titling': { file: 'castoro-titling.ttf', family: 'BergtourenCastoroTitling' }
     };
 
     function getSelectedPdfFontKey() {
