@@ -2677,7 +2677,7 @@ async function applyAppDataPayload(payload) {
     if (Number.isFinite(importedFontSize)) {
         appStorage.set(
             THEME_EDITOR_FONT_SIZE_KEY,
-            Math.max(80, Math.min(130, importedFontSize))
+            Math.max(80, Math.min(150, importedFontSize))
         );
         if (typeof applyThemeEditorFontSize === 'function') {
             applyThemeEditorFontSize(importedFontSize, false);
@@ -3146,7 +3146,7 @@ async function restoreLinkedFileHandleOnStartup() {
                 if (Number.isFinite(fileFontSize)) {
                     appStorage.set(
                         THEME_EDITOR_FONT_SIZE_KEY,
-                        Math.max(80, Math.min(130, fileFontSize))
+                        Math.max(80, Math.min(150, fileFontSize))
                     );
                     if (typeof applyThemeEditorFontSize === 'function') {
                         applyThemeEditorFontSize(fileFontSize, false);
@@ -3243,7 +3243,7 @@ async function restoreLinkedFileHandleOnStartup() {
                 if (Number.isFinite(fileFontSize)) {
                     appStorage.set(
                         THEME_EDITOR_FONT_SIZE_KEY,
-                        Math.max(80, Math.min(130, fileFontSize))
+                        Math.max(80, Math.min(150, fileFontSize))
                     );
                     if (typeof applyThemeEditorFontSize === 'function') {
                         applyThemeEditorFontSize(fileFontSize, false);
@@ -21414,7 +21414,7 @@ function getThemeEditorAdjustedFontSize(size, percent = getThemeEditorFontSizeSc
 
     const numericPercent = Number(percent);
     const safePercent = Number.isFinite(numericPercent)
-        ? Math.max(80, Math.min(130, numericPercent))
+        ? Math.max(80, Math.min(150, numericPercent))
         : THEME_EDITOR_DEFAULT_FONT_SIZE;
     const profile = getThemeEditorFontProfile();
     const readableBaseSize = Math.max(numericSize, profile.minSize);
@@ -21433,7 +21433,7 @@ function getThemeEditorElementFontSize(element, originalSize, percent) {
     if (element?.matches?.('#dashboard-view .dash-stat-tile .dash-stat-label')) {
         const numericPercent = Number(percent);
         const safePercent = Number.isFinite(numericPercent)
-            ? Math.max(80, Math.min(130, numericPercent))
+            ? Math.max(80, Math.min(150, numericPercent))
             : THEME_EDITOR_DEFAULT_FONT_SIZE;
         const profile = getThemeEditorFontProfile();
         return Math.round(
@@ -21547,7 +21547,7 @@ function getThemeEditorFontSizeScale() {
         return THEME_EDITOR_DEFAULT_FONT_SIZE;
     }
 
-    return Math.max(80, Math.min(130, savedValue));
+    return Math.max(80, Math.min(150, savedValue));
 }
 
 function getThemeEditorCanvasFont(size, weight = '400', style = 'normal') {
@@ -21593,7 +21593,7 @@ function applyThemeEditorFontSizeToSubtree(root, value) {
 
     const numericValue = Number(value);
     const percent = Number.isFinite(numericValue)
-        ? Math.max(80, Math.min(130, numericValue))
+        ? Math.max(80, Math.min(150, numericValue))
         : THEME_EDITOR_DEFAULT_FONT_SIZE;
 
     /*
@@ -21673,7 +21673,7 @@ function applyThemeEditorFontSize(value, save = true) {
     const numericValue = Number(value);
 
     const percent = Number.isFinite(numericValue)
-        ? Math.max(80, Math.min(130, numericValue))
+        ? Math.max(80, Math.min(150, numericValue))
         : THEME_EDITOR_DEFAULT_FONT_SIZE;
 
     /*
