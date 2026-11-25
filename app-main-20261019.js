@@ -21369,7 +21369,10 @@ const THEME_EDITOR_FONT_PRESETS = {
     'germania-one': '"Tour Germania One", serif',
     'uncial-antiqua': '"Tour Uncial Antiqua", serif',
     'metal-mania': '"Tour Metal Mania", serif',
-    audiowide: '"Tour Audiowide", sans-serif'
+    audiowide: '"Tour Audiowide", sans-serif',
+    rye: '"Tour Rye", serif',
+    sancreek: '"Tour Sancreek", serif',
+    smokum: '"Tour Smokum", serif'
 };
 
 /*
@@ -21395,7 +21398,10 @@ const THEME_EDITOR_FONT_PROFILES = Object.freeze({
     'germania-one':     { scale: 1.02, minSize: 11.5 },
     'uncial-antiqua':   { scale: 1.02, minSize: 12.0 },
     'metal-mania':      { scale: 1.00, minSize: 12.0 },
-    audiowide:          { scale: 1.02, minSize: 11.5 }
+    audiowide:          { scale: 1.02, minSize: 11.5 },
+    rye:                { scale: 1.00, minSize: 12.0 },
+    sancreek:           { scale: 1.00, minSize: 12.0 },
+    smokum:             { scale: 1.00, minSize: 12.0 }
 });
 
 function getThemeEditorFontProfile(fontName = getThemeEditorFontName()) {
