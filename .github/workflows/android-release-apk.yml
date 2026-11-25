@@ -7,6 +7,10 @@ on:
       - main
     paths:
       - "android/**"
+      - "fonts/**"
+      - "fonts.css"
+      - "theme-editor-unified.js"
+      - "app-main-20261019.js"
       - ".github/workflows/android-release-apk.yml"
       - "index.html"
       - "styles.css"
