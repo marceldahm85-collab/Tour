@@ -1,6 +1,6 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Der PDF-Magazin-Renderer wird direkt über index.html geladen.
-const CACHE_NAME = 'bergtouren-cache-premium-alpine-v492';
+const CACHE_NAME = 'bergtouren-cache-premium-alpine-v493';
 
 const APP_SHELL = [
   './',
@@ -24,8 +24,10 @@ const APP_SHELL = [
   './android/app/src/main/res/drawable-nodpi/splash_alpine_panorama.webp',
   './stats-premium-alpine.js?v=15',
   './view-accordion-behavior.js?v=11',
-  './stats-premium-charts.js?v=55',
+  './stats-premium-charts.js?v=56',
   './stats-premium-charts.css?v=9',
+  './stats-peak-photo-gallery.css?v=5',
+  './stats-peak-photo-gallery.js?v=5',
   './theme-editor-unified.js?v=36',
   './background-image-manager.js?v=15',
   './background-image-picker.js?v=8',
@@ -33,7 +35,7 @@ const APP_SHELL = [
   './theme-editor-workflow.css?v=14',
   './theme-editor-workflow.js?v=9',
   './app-start-editor.css?v=3',
-  './app-start-editor.js?v=7',
+  './app-start-editor.js?v=8',
   './dashboard-premium-alpine.js?v=38',
   './dashboard-stat-modal-premium.js?v=6',
   './premium-modal-surface.js?v=2',
@@ -53,7 +55,8 @@ const APP_SHELL = [
   './premium-motion-feedback.css?v=3',
   './premium-depth-effects.css?v=10',
   './premium-top3-metal.css?v=2',
-  './premium-image-presentation.css?v=1',
+  './premium-image-presentation.css?v=2',
+  './premium-alpine-photo-motifs.css?v=3',
   './premium-image-presentation.js?v=1',
   './premium-experience.js?v=1',
   './stats-premium-alpine.css?v=43',
@@ -61,7 +64,7 @@ const APP_SHELL = [
   './appview-premium-alpine.css?v=22',
   './assets/topography/lienzer-dolomiten-contours-fine.svg',
   './assets/topography/lienzer-dolomiten-contours-index.svg',
-  './plan-premium-alpine.css?v=6',
+  './plan-premium-alpine.css?v=16',
   './typography-profiles.css?v=1',
   'https://images.unsplash.com/photo-1694968537484-d4e1733301b5?auto=format&fit=crop&w=1400&q=85',
   'https://images.unsplash.com/photo-1632665099926-094c0d6b92bb?fit=crop&crop=entropy&fm=jpg&q=82&w=1440&h=2560',
