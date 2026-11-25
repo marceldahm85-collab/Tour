@@ -21361,7 +21361,12 @@ const THEME_EDITOR_FONT_PRESETS = {
     cinzel: '"Tour Cinzel", serif',
     urbanist: '"Tour Urbanist", sans-serif',
     'marcellus-sc': '"Tour Marcellus SC", serif',
-    'castoro-titling': '"Tour Castoro Titling", serif'
+    'castoro-titling': '"Tour Castoro Titling", serif',
+    'unifraktur-maguntia': '"Tour UnifrakturMaguntia", serif',
+    'pirata-one': '"Tour Pirata One", serif',
+    'grenze-gotisch': '"Tour Grenze Gotisch", serif',
+    texturina: '"Tour Texturina", serif',
+    'germania-one': '"Tour Germania One", serif'
 };
 
 /*
@@ -21379,7 +21384,12 @@ const THEME_EDITOR_FONT_PROFILES = Object.freeze({
     cinzel:             { scale: 1.05, minSize: 11.5 },
     urbanist:           { scale: 1.02, minSize: 11.0 },
     'marcellus-sc':     { scale: 1.04, minSize: 11.5 },
-    'castoro-titling':  { scale: 1.05, minSize: 11.5 }
+    'castoro-titling':  { scale: 1.05, minSize: 11.5 },
+    'unifraktur-maguntia': { scale: 1.02, minSize: 12.0 },
+    'pirata-one':       { scale: 1.02, minSize: 11.5 },
+    'grenze-gotisch':   { scale: 1.02, minSize: 11.5 },
+    texturina:          { scale: 1.02, minSize: 11.0 },
+    'germania-one':     { scale: 1.02, minSize: 11.5 }
 });
 
 function getThemeEditorFontProfile(fontName = getThemeEditorFontName()) {

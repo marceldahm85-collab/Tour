@@ -1,11 +1,11 @@
 // sw.js — Service Worker für Bergtouren Tracker
 // Der PDF-Magazin-Renderer wird direkt über index.html geladen.
-const CACHE_NAME = 'bergtouren-cache-premium-alpine-v494';
+const CACHE_NAME = 'bergtouren-cache-premium-alpine-v495';
 
 const APP_SHELL = [
   './',
   './index.html',
-  './fonts.css?v=3',
+  './fonts.css?v=4',
   './fonts/inter-latin-wght-normal.woff2',
   './fonts/inter-variable.ttf',
   './fonts/space-grotesk-variable.ttf',
@@ -13,10 +13,15 @@ const APP_SHELL = [
   './fonts/playfair-display-sc-bold.ttf',
   './fonts/marcellus-sc.ttf',
   './fonts/castoro-titling.ttf',
+  './fonts/unifrakturmaguntia.ttf',
+  './fonts/pirata-one.ttf',
+  './fonts/grenze-gotisch-variable.ttf',
+  './fonts/texturina-variable.ttf',
+  './fonts/germania-one.ttf',
   './fonts/cinzel-variable.ttf',
   './fonts/urbanist-variable.ttf',
   './android-backup-bridge.js?v=5',
-  './app-main-20261019.js?v=147',
+  './app-main-20261019.js?v=148',
   './touch-ripple-feedback.js?v=1',
   './native-app-ready.js?v=3',
   './native-system-bars.js?v=4',
@@ -28,7 +33,7 @@ const APP_SHELL = [
   './stats-premium-charts.css?v=9',
   './stats-peak-photo-gallery.css?v=5',
   './stats-peak-photo-gallery.js?v=5',
-  './theme-editor-unified.js?v=37',
+  './theme-editor-unified.js?v=38',
   './background-image-manager.js?v=15',
   './background-image-picker.js?v=8',
   './background-image-picker.css?v=3',
