@@ -4860,7 +4860,7 @@ function updatePlannedLivePreview() {
     ) {
         content.classList.add('is-empty');
         content.innerHTML = `
-            <span class="plan-live-preview-empty">Strecke und Aufstieg eingeben, um Steigung, Anstieg und Tourprofil live zu sehen.</span>
+
         `;
         return;
     }
