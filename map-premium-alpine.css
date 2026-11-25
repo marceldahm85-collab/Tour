@@ -710,3 +710,21 @@
     line-height: 1 !important;
     text-align: center;
 }
+
+
+/* Quellenhinweis bleibt sichtbar und lesbar; nur der Leaflet-Schriftzug entfällt. */
+#map-view .leaflet-control-attribution {
+    padding: 2px 5px !important;
+    border: 0 !important;
+    border-radius: 5px 0 0 0 !important;
+    background: rgba(8, 13, 19, .62) !important;
+    color: rgba(255, 255, 255, .78) !important;
+    font-size: 8px !important;
+    line-height: 1.35 !important;
+    opacity: .82 !important;
+    box-shadow: none !important;
+}
+
+#map-view .leaflet-control-attribution a {
+    color: var(--map-premium-accent) !important;
+}

@@ -306,6 +306,11 @@ function initTourMap() {
     closePopupOnClick: false
 });
 
+    // Nur die Kartenanbieter nennen; den Leaflet-Bibliothekshinweis ausblenden.
+    if (tourMap.attributionControl) {
+        tourMap.attributionControl.setPrefix(false);
+    }
+
     // OpenTopoMap — kostenlos, perfekt für Wanderungen
     L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
         maxZoom: 17,
