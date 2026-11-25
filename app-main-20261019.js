@@ -21357,11 +21357,11 @@ const THEME_EDITOR_FONT_PRESETS = {
     inter: '"Tour Inter", sans-serif',
     'space-grotesk': '"Tour Space Grotesk", sans-serif',
     oswald: '"Tour Oswald", sans-serif',
-    'playfair-display': '"Tour Playfair Display", serif',
-    caveat: '"Tour Caveat", cursive',
-    pacifico: '"Tour Pacifico", cursive',
+    'playfair-display-sc-bold': '"Tour Playfair Display SC Bold", serif',
     cinzel: '"Tour Cinzel", serif',
-    urbanist: '"Tour Urbanist", sans-serif'
+    urbanist: '"Tour Urbanist", sans-serif',
+    'marcellus-sc': '"Tour Marcellus SC", serif',
+    'castoro-titling': '"Tour Castoro Titling", serif'
 };
 
 /*
@@ -21375,11 +21375,11 @@ const THEME_EDITOR_FONT_PROFILES = Object.freeze({
     inter:              { scale: 1.02, minSize: 11.0 },
     'space-grotesk':    { scale: 1.03, minSize: 11.0 },
     oswald:             { scale: 1.08, minSize: 11.0 },
-    'playfair-display': { scale: 1.04, minSize: 11.5 },
-    caveat:             { scale: 1.12, minSize: 12.0 },
-    pacifico:           { scale: 1.08, minSize: 12.0 },
+    'playfair-display-sc-bold': { scale: 1.04, minSize: 11.5 },
     cinzel:             { scale: 1.05, minSize: 11.5 },
-    urbanist:           { scale: 1.02, minSize: 11.0 }
+    urbanist:           { scale: 1.02, minSize: 11.0 },
+    'marcellus-sc':     { scale: 1.04, minSize: 11.5 },
+    'castoro-titling':  { scale: 1.05, minSize: 11.5 }
 });
 
 function getThemeEditorFontProfile(fontName = getThemeEditorFontName()) {
@@ -21432,7 +21432,7 @@ const defaultThemeEditorSettings = {
 };
 
 function normalizeThemeEditorFontName(fontName) {
-    const aliases = { android: 'inter', system: 'inter', rounded: 'urbanist', serif: 'playfair-display', slab: 'inter', fantasy: 'cinzel', 'roboto-condensed': 'inter', 'nunito-sans': 'urbanist', righteous: 'cinzel', mono: 'inter', cursive: 'caveat' };
+    const aliases = { android: 'inter', system: 'inter', rounded: 'urbanist', serif: 'playfair-display-sc-bold', 'playfair-display': 'playfair-display-sc-bold', slab: 'inter', fantasy: 'cinzel', 'roboto-condensed': 'inter', 'nunito-sans': 'urbanist', righteous: 'cinzel', mono: 'inter', caveat: 'inter', pacifico: 'inter', cursive: 'inter' };
     const resolved = aliases[fontName] || fontName;
     return Object.prototype.hasOwnProperty.call(THEME_EDITOR_FONT_PRESETS, resolved) ? resolved : 'inter';
 }

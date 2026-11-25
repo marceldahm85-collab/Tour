@@ -2,8 +2,9 @@
 @font-face{font-family:"Tour Inter";font-style:normal;font-display:swap;font-weight:100 900;src:url("./fonts/inter-latin-wght-normal.woff2") format("woff2");}
 @font-face{font-family:"Tour Space Grotesk";font-style:normal;font-display:swap;font-weight:300 700;src:url("./fonts/space-grotesk-variable.ttf") format("truetype");}
 @font-face{font-family:"Tour Oswald";font-style:normal;font-display:swap;font-weight:200 700;src:url("./fonts/oswald-variable.ttf") format("truetype");}
-@font-face{font-family:"Tour Playfair Display";font-style:normal;font-display:swap;font-weight:400 900;src:url("./fonts/playfair-display-variable.ttf") format("truetype");}
-@font-face{font-family:"Tour Caveat";font-style:normal;font-display:swap;font-weight:400 700;src:url("./fonts/caveat-variable.ttf") format("truetype");}
-@font-face{font-family:"Tour Pacifico";font-style:normal;font-display:swap;font-weight:400;src:url("./fonts/pacifico-regular.ttf") format("truetype");}
+@font-face{font-family:"Tour Playfair Display SC Bold";font-style:normal;font-display:swap;font-weight:700;src:url("./fonts/playfair-display-sc-bold.ttf") format("truetype");}
 @font-face{font-family:"Tour Cinzel";font-style:normal;font-display:swap;font-weight:400 900;src:url("./fonts/cinzel-variable.ttf") format("truetype");}
 @font-face{font-family:"Tour Urbanist";font-style:normal;font-display:swap;font-weight:100 900;src:url("./fonts/urbanist-variable.ttf") format("truetype");}
+
+@font-face{font-family:"Tour Marcellus SC";font-style:normal;font-display:swap;font-weight:400;src:url("./fonts/marcellus-sc.ttf") format("truetype");}
+@font-face{font-family:"Tour Castoro Titling";font-style:normal;font-display:swap;font-weight:400;src:url("./fonts/castoro-titling.ttf") format("truetype");}
