@@ -11389,6 +11389,11 @@ function initTourMap() {
     closePopupOnClick: false
 });
 
+// Leaflet-Bibliothekshinweis ausblenden; Kartenquellen bleiben sichtbar.
+if (tourMap.attributionControl) {
+    tourMap.attributionControl.setPrefix(false);
+}
+
     // OpenTopoMap — kostenlos, perfekt für Wanderungen
     L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
         maxZoom: 17,
