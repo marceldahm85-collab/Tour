@@ -359,9 +359,30 @@ html body #tour-view #plan-form #plan-save-btn {
         0 34px 54px rgba(0,0,0,.28) !important;
 }
 
-/* Nebenbereiche — gleiche sichtbare Materialkante ohne zusätzliche Layoutboxen. */
-#theme-view details.theme-editor-panel,
-#theme-view details.theme-editor-subgroup,
+/* =========================================================
+   SUCHE & VERGLEICH / EDITOR / SICHERUNG
+   Die echten Accordion-Container und ihre Header bekommen
+   getrennte, sichtbare Tiefenstufen. Öffnungs- und Scroll-
+   Logik sowie Header-Geometrie bleiben unverändert.
+   ========================================================= */
+
+/* Hauptflächen: Filterpanels, Editor-Hauptgruppen und Sicherungskarten. */
+#filter-view .filter-section-panel,
+#theme-view > .theme-editor-inner > details.theme-editor-section-card,
+#backup-view > .backup-view-inner > details.backup-accordion-card {
+    border-top-color: rgba(238,247,255,.34) !important;
+    border-bottom-color: rgba(0,0,0,.62) !important;
+    box-shadow: var(--premium-depth-panel) !important;
+}
+
+/* Editor-Untergruppen sind eine Stufe kleiner als die Hauptgruppen. */
+#theme-view .theme-editor-subgroup {
+    border-top-color: rgba(238,247,255,.30) !important;
+    border-bottom-color: rgba(0,0,0,.60) !important;
+    box-shadow: var(--premium-depth-card) !important;
+}
+
+/* Die Status- und Ergebnisflächen behalten die eigenständige Kartenstufe. */
 #backup-view .backup-status-panel,
 #backup-view .backup-info-card,
 #backup-view .backup-file-status,
@@ -372,6 +393,46 @@ html body #tour-view #plan-form #plan-save-btn {
     border-bottom-color: rgba(0,0,0,.60) !important;
     box-shadow: var(--premium-depth-card) !important;
 }
+
+/* Alle drei Views: Header selbst als leicht erhabene Glasfläche.
+   Der gleiche Stil gilt in beiden Zuständen; nur das Chevron wechselt. */
+#filter-view .filter-section-panel > .filter-simple-title,
+#theme-view .theme-editor-section-card > summary.stats-analysis-title,
+#theme-view .theme-editor-subgroup > summary,
+#backup-view .backup-accordion-card > summary.stats-analysis-title {
+    border-radius: var(--editor-radius, var(--app-radius, 14px)) !important;
+    background-image:
+        radial-gradient(
+            ellipse at 12% 0%,
+            color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 10%, transparent),
+            transparent 62%
+        ),
+        linear-gradient(
+            150deg,
+            var(--app-surface-strong, rgba(255,255,255,.075)),
+            var(--app-surface-card, rgba(10,16,23,.82))
+        ) !important;
+    box-shadow: var(--premium-depth-control) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(128%);
+    backdrop-filter: blur(8px) saturate(128%);
+}
+
+/* Die geschlossenen Header behalten ihre kompakte Höhe und Abstände. */
+#filter-view .filter-section-panel.is-collapsed > .filter-simple-title,
+#theme-view .theme-editor-section-card:not([open]) > summary.stats-analysis-title,
+#theme-view .theme-editor-subgroup:not([open]) > summary,
+#backup-view .backup-accordion-card:not([open]) > summary.stats-analysis-title {
+    box-shadow: var(--premium-depth-control) !important;
+}
+
+/* Die offenen Header erhalten exakt dieselbe Tiefe wie die geschlossenen. */
+#filter-view .filter-section-panel:not(.is-collapsed) > .filter-simple-title,
+#theme-view .theme-editor-section-card[open] > summary.stats-analysis-title,
+#theme-view .theme-editor-subgroup[open] > summary,
+#backup-view .backup-accordion-card[open] > summary.stats-analysis-title {
+    box-shadow: var(--premium-depth-control) !important;
+}
+
 #theme-view .theme-editor-option,
 #theme-view .theme-editor-widget-choice,
 #filter-view .compare-chip {
