@@ -12,7 +12,7 @@
     const LEGACY_HAPTIC_KEY = 'bergTourenHaptics';
     const THEME_KEYS = ['light', 'dark', 'green', 'summit'];
     const DIRECTIONS = ['180deg', '90deg', '135deg', '45deg', 'radial'];
-    const FONTS = ['inter', 'space-grotesk', 'oswald', 'playfair-display-sc-bold', 'cinzel', 'urbanist', 'marcellus-sc', 'castoro-titling', 'unifraktur-maguntia', 'pirata-one', 'grenze-gotisch', 'texturina', 'germania-one'];
+    const FONTS = ['inter', 'space-grotesk', 'oswald', 'playfair-display-sc-bold', 'cinzel', 'urbanist', 'marcellus-sc', 'castoro-titling', 'unifraktur-maguntia', 'pirata-one', 'grenze-gotisch', 'texturina', 'germania-one', 'uncial-antiqua', 'metal-mania', 'audiowide'];
     const DEFAULT_ACCENT = '#ad7d12';
     const DEFAULT_ACCENT_2 = '#000000';
     const DEFAULTS = {
