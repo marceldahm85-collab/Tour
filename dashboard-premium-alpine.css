@@ -160,6 +160,12 @@
     text-shadow: 0 1px 2px rgba(0,0,0,.72);
 }
 
+/* Fortschrittstext oben rechts bündig mit der Meilenstein-Bezeichnung halten. */
+#dashboard-view #dash-milestones-section .dash-ms-progress-text {
+    align-self: flex-start;
+    margin-top: 0;
+}
+
 #dashboard-view #dash-milestones-section .dash-ms-progress-wrap {
     border: 1px solid color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 13%, transparent);
     background: color-mix(in srgb, var(--theme-palette-accent, var(--accent, #ad7d12)) 7%, transparent);
