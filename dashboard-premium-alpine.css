@@ -160,10 +160,20 @@
     text-shadow: 0 1px 2px rgba(0,0,0,.72);
 }
 
-/* Fortschrittstext oben rechts bündig mit der Meilenstein-Bezeichnung halten. */
+/* Fortschrittstext liegt oben rechts und belegt keinen Platz in der Wert-Zeile. */
 #dashboard-view #dash-milestones-section .dash-ms-progress-text {
+    position: absolute;
+    top: 0;
+    right: 18px;
     align-self: flex-start;
     margin-top: 0;
+    white-space: nowrap;
+}
+
+/* Der aktuelle Messwert bleibt immer einzeilig und nutzt die freigewordene Breite. */
+#dashboard-view #dash-milestones-section .dash-ms-current {
+    white-space: nowrap;
+    max-width: none;
 }
 
 #dashboard-view #dash-milestones-section .dash-ms-progress-wrap {
