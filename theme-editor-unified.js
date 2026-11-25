@@ -162,7 +162,7 @@
             accent2: validHex(settings.accent2) ? settings.accent2 : DEFAULT_ACCENT_2,
             radius: clamp(settings.radius, 0, 28, DEFAULTS.radius),
             fontFamily: normalizeFontFamily(settings.fontFamily),
-            fontSize: clamp(settings.fontSize, 80, 130, DEFAULTS.fontSize),
+            fontSize: clamp(settings.fontSize, 80, 150, DEFAULTS.fontSize),
             haptics: settings.haptics !== false,
             gradientDirection: DIRECTIONS.includes(settings.gradientDirection)
                 ? settings.gradientDirection
