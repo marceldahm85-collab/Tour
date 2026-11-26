@@ -220,3 +220,105 @@
 #tour-detail-modal #td-title .tour-header-category-button .tour-header-svg .tour-header-accent-fill {
     fill: var(--accent, #D7B66B) !important;
 }
+
+
+/* Zweizeiliger Modal-Header: Identität oben, Awards in einer eigenen Scroll-Zeile. */
+#tour-detail-modal #td-title.tour-detail-header-title {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    align-content: stretch !important;
+    gap: 7px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+}
+
+#tour-detail-modal #td-title .tour-header-identity-row {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+}
+
+#tour-detail-modal #td-title .tour-header-symbol-row {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 4px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 1px 0 3px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x pan-y;
+}
+#tour-detail-modal #td-title .tour-header-symbol-row::-webkit-scrollbar {
+    display: none;
+}
+#tour-detail-modal #td-title .tour-header-symbol-row[hidden] {
+    display: none !important;
+}
+
+#tour-detail-modal #td-title .tour-header-identity-row > *,
+#tour-detail-modal #td-title .tour-header-symbol-row > * {
+    flex-shrink: 0;
+}
+
+#tour-detail-modal #td-title .tour-header-identity-row .tour-header-emblem {
+    flex: 0 0 31px;
+}
+
+#tour-detail-modal #td-title .tour-header-identity-row .tour-header-name {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0;
+    overflow: visible;
+    color: inherit;
+    font: inherit;
+    line-height: 1.16;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+}
+
+#tour-detail-modal #td-title .tour-header-symbol-row .tour-header-category-group {
+    display: inline-flex;
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 3px;
+    width: max-content;
+    max-width: none;
+    min-width: max-content;
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+}
+
+#tour-detail-modal #td-title .tour-header-symbol-row .highlight-category-icon-btn.tour-header-category-button,
+#tour-detail-modal #td-title .tour-header-symbol-row .tour-header-indicator {
+    flex-shrink: 0;
+}
+
+@media (max-width: 380px) {
+    #tour-detail-modal #td-title.tour-detail-header-title {
+        gap: 6px !important;
+    }
+    #tour-detail-modal #td-title .tour-header-identity-row {
+        gap: 6px;
+    }
+}
