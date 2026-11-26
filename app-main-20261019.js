@@ -5636,6 +5636,19 @@ function renderModalActivityStats(entry) {
     return html;
 }
 
+function clearTourDetailHighlightInfo(modalCard) {
+    if (!modalCard) return;
+    clearTimeout(modalCard._highlightInfoTimer);
+    modalCard._highlightInfoTimer = null;
+    modalCard._highlightInfoCleanup?.();
+    modalCard._highlightInfoCleanup = null;
+    const toast = modalCard.querySelector('.highlight-info-toast');
+    if (toast) {
+        toast.classList.remove('show', 'is-above', 'is-below');
+        toast.remove();
+    }
+}
+
 async function openTourDetail(entry, options = {}) {
     initModalSwipeDown();
 
@@ -5704,6 +5717,7 @@ const highlightCategoryHtml =
         : '';
 
     const modalCard = modal.querySelector('.modal-card');
+    clearTourDetailHighlightInfo(modalCard);
 
     if (modalCard) {
         modalCard.classList.remove(
@@ -5773,101 +5787,112 @@ const highlightCategoryHtml =
         gradientFlag;
 
 titleEl
-    .querySelectorAll(
-        '[data-highlight-info-idx]'
-    )
+    .querySelectorAll('[data-highlight-info-idx]')
     .forEach(button => {
+        button.addEventListener('click', event => {
+            event.stopPropagation();
 
-        button.addEventListener(
-            'click',
-            event => {
+            const index = Number(button.dataset.highlightInfoIdx);
+            const info = highlightCategoryDetails[index];
+            if (!info || !modalCard) return;
 
-                event.stopPropagation();
+            clearTourDetailHighlightInfo(modalCard);
 
+            let toast = modalCard.querySelector('.highlight-info-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.className = 'highlight-info-toast';
+                toast.setAttribute('role', 'status');
+                toast.setAttribute('aria-live', 'polite');
+                modalCard.appendChild(toast);
+            }
 
-                const index =
-                    Number(
-                        button.dataset
-                            .highlightInfoIdx
-                    );
+            toast.textContent = `${info.icon} ${info.name} · Platz ${info.rank}`;
+            toast.classList.remove('show', 'is-above', 'is-below');
+            void toast.offsetWidth;
+            toast.classList.add('show');
 
+            const symbolRow = button.closest('.tour-header-symbol-row');
+            const positionToast = () => {
+                if (!button.isConnected || !toast.isConnected) return;
 
-                const info =
-                    highlightCategoryDetails[
-                        index
-                    ];
+                const cardRect = modalCard.getBoundingClientRect();
+                const buttonRect = button.getBoundingClientRect();
+                const rowRect = symbolRow?.getBoundingClientRect();
 
+                const anchorVisible =
+                    buttonRect.bottom > cardRect.top &&
+                    buttonRect.top < cardRect.bottom &&
+                    buttonRect.right > cardRect.left &&
+                    buttonRect.left < cardRect.right &&
+                    (!rowRect || (
+                        buttonRect.bottom > rowRect.top &&
+                        buttonRect.top < rowRect.bottom &&
+                        buttonRect.right > rowRect.left &&
+                        buttonRect.left < rowRect.right
+                    ));
 
-                if (
-                    !info ||
-                    !modalCard
-                ) {
+                if (!anchorVisible) {
+                    toast.classList.remove('show');
                     return;
                 }
 
+                const cardStyle = window.getComputedStyle(modalCard);
+                const borderLeft = parseFloat(cardStyle.borderLeftWidth) || 0;
+                const borderTop = parseFloat(cardStyle.borderTopWidth) || 0;
+                const scrollTop = modalCard.scrollTop;
+                const scrollLeft = modalCard.scrollLeft;
+                const centerX = buttonRect.left - cardRect.left - borderLeft + scrollLeft + buttonRect.width / 2;
+                const anchorTop = buttonRect.top - cardRect.top - borderTop + scrollTop;
+                const anchorBottom = buttonRect.bottom - cardRect.top - borderTop + scrollTop;
 
-                let toast =
-                    modalCard.querySelector(
-                        '.highlight-info-toast'
-                    );
+                const toastWidth = toast.offsetWidth;
+                const toastHeight = toast.offsetHeight;
+                const sidePadding = 12;
+                const minCenter = sidePadding + toastWidth / 2;
+                const maxCenter = modalCard.clientWidth - sidePadding - toastWidth / 2;
+                const left = Math.max(minCenter, Math.min(centerX, Math.max(minCenter, maxCenter)));
 
+                const visibleTop = scrollTop + 10;
+                const visibleBottom = scrollTop + modalCard.clientHeight - 10;
+                const roomBelow = visibleBottom - anchorBottom;
+                const roomAbove = anchorTop - visibleTop;
+                const placeBelow = roomBelow >= toastHeight + 14 || roomBelow >= roomAbove;
 
-                if (!toast) {
+                const top = placeBelow
+                    ? Math.min(anchorBottom + 11, visibleBottom - toastHeight)
+                    : Math.max(visibleTop, anchorTop - toastHeight - 11);
 
-                    toast =
-                        document.createElement(
-                            'div'
-                        );
-
-                    toast.className =
-                        'highlight-info-toast';
-
-                    modalCard.appendChild(
-                        toast
-                    );
-                }
-
-
-                toast.textContent =
-                    `${info.icon} ${info.name} · Platz ${info.rank}`;
-
-
-                /*
-                 * Falls bereits sichtbar:
-                 * Animation neu starten.
-                 */
-                toast.classList.remove(
-                    'show'
+                toast.style.left = `${left}px`;
+                toast.style.top = `${top}px`;
+                toast.style.setProperty(
+                    '--highlight-toast-arrow-left',
+                    `${Math.max(12, Math.min(toastWidth - 12, centerX - left + toastWidth / 2))}px`
                 );
+                toast.classList.toggle('is-below', placeBelow);
+                toast.classList.toggle('is-above', !placeBelow);
+            };
 
-                void toast.offsetWidth;
+            positionToast();
 
-                toast.classList.add(
-                    'show'
-                );
+            const onResize = () => positionToast();
+            modalCard.addEventListener('scroll', positionToast, { passive: true });
+            symbolRow?.addEventListener('scroll', positionToast, { passive: true });
+            window.addEventListener('resize', onResize, { passive: true });
 
+            modalCard._highlightInfoCleanup = () => {
+                modalCard.removeEventListener('scroll', positionToast);
+                symbolRow?.removeEventListener('scroll', positionToast);
+                window.removeEventListener('resize', onResize);
+            };
 
-                clearTimeout(
-                    modalCard
-                        ._highlightInfoTimer
-                );
-
-
-                modalCard
-                    ._highlightInfoTimer =
-                    setTimeout(
-                        () => {
-
-                            toast.classList
-                                .remove(
-                                    'show'
-                                );
-
-                        },
-                        2500
-                    );
-            }
-        );
+            modalCard._highlightInfoTimer = setTimeout(() => {
+                toast.classList.remove('show');
+                modalCard._highlightInfoCleanup?.();
+                modalCard._highlightInfoCleanup = null;
+                modalCard._highlightInfoTimer = null;
+            }, 2500);
+        });
     });
 
 const imageHtml = entry.imageData
@@ -6424,6 +6449,7 @@ function closeTourDetail() {
 
     const card = modal.querySelector('.modal-card');
     const backdrop = modal.querySelector('.modal-backdrop');
+    clearTourDetailHighlightInfo(card);
 
     if (card) {
         card.classList.remove('is-dragging');
