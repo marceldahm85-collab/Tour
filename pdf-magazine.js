@@ -1514,15 +1514,14 @@
     }
 
     async function getPdfMapEntries(entries) {
-        var candidates = (Array.isArray(entries) ? entries : []).filter(function(entry) {
-            var lat = Number(entry && entry.lat), lng = Number(entry && entry.lng);
+        // Für den PDF-Kartenausschnitt gilt der Regionenfilter der App:
+        // "Anderswo" enthält die drei Deutschland-Touren und bleibt hier außen vor.
+        // Alle übrigen Tourbuch-Inhalte verwenden weiterhin unverändert allEntries.
+        return (Array.isArray(entries) ? entries : []).filter(function(entry) {
+            if (!entry || String(entry.region || '').trim().toLowerCase() === 'anderswo') return false;
+            var lat = Number(entry.lat), lng = Number(entry.lng);
             return Number.isFinite(lat) && Number.isFinite(lng) &&
                 lat >= -85.05112878 && lat <= 85.05112878 && lng >= -180 && lng <= 180;
-        });
-        if (!candidates.length) return [];
-        var boundary = await loadPdfGermanyBoundary();
-        return candidates.filter(function(entry) {
-            return !pdfPointInGermany(Number(entry.lat), Number(entry.lng), boundary);
         });
     }
 
@@ -1563,7 +1562,7 @@
             return { entry: entry, lat: Number(entry.lat), lng: Number(entry.lng) };
         });
         var zoom = 2, projected = [];
-        for (var candidate = 2; candidate <= 14; candidate++) {
+        for (var candidate = 2; candidate <= 16; candidate++) {
             var points = coords.map(function(item) {
                 return pdfMercatorPoint(item.lat, item.lng, candidate);
             });
@@ -1573,7 +1572,8 @@
             var spanY = Math.max.apply(null, ys) - Math.min.apply(null, ys);
             zoom = candidate;
             projected = points;
-            if (coords.length === 1 || (spanX <= width * 0.78 && spanY <= height * 0.70)) continue;
+            // Den verfügbaren Kartenrahmen weitgehend ausnutzen; nur ca. 8–10 % Rand.
+            if (coords.length === 1 || (spanX <= width * 0.90 && spanY <= height * 0.86)) continue;
             zoom = Math.max(2, candidate - 1);
             projected = coords.map(function(item) { return pdfMercatorPoint(item.lat, item.lng, zoom); });
             break;
