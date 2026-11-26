@@ -1663,6 +1663,12 @@
         return stops[stops.length - 1][1];
     }
 
+    function pdfColorWithAlpha(color, alpha) {
+        var match = String(color).match(/^rgb\\((\\d+),\\s*(\\d+),\\s*(\\d+)\\)$/);
+        var rgb = match ? [Number(match[1]), Number(match[2]), Number(match[3])] : pdfHexRgb(color);
+        return 'rgba(' + rgb.join(',') + ',' + alpha + ')';
+    }
+
     function renderPdfPerformanceMap(base) {
         var canvas = document.createElement('canvas');
         canvas.width = base.width;
@@ -1705,14 +1711,14 @@
             var radius = isTop ? 10.5 : !Number.isFinite(score) ? 5.5 :
                 score >= 75 ? 8.8 : score >= 50 ? 7.2 : 6;
             ctx.beginPath();
-            ctx.arc(point.x, point.y, radius * 1.65, 0, Math.PI * 2);
+            ctx.arc(point.x, point.y, radius * 2.7, 0, Math.PI * 2);
             ctx.fillStyle = 'rgba(0,0,0,0.16)';
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(point.x, point.y, radius * 1.35, 0, Math.PI * 2);
+            ctx.arc(point.x, point.y, radius * 2.25, 0, Math.PI * 2);
             ctx.fillStyle = color;
             ctx.fill();
-            ctx.lineWidth = isTop ? 3.2 : 2.4;
+            ctx.lineWidth = isTop ? 6.4 : 4.8;
             ctx.strokeStyle = dark ? 'rgba(255,255,255,0.90)' : 'rgba(255,255,255,0.96)';
             ctx.stroke();
         });
@@ -1738,9 +1744,9 @@
             var alpha = Math.min(0.82, 0.42 + intensity * 0.36);
             var radius = 112;
             var gradient = ctx.createRadialGradient(point.x, point.y, 0, point.x, point.y, radius);
-            gradient.addColorStop(0, color.replace('rgb(', 'rgba(').replace(')', ',' + alpha + ')'));
-            gradient.addColorStop(0.42, color.replace('rgb(', 'rgba(').replace(')', ',' + (alpha * 0.62) + ')'));
-            gradient.addColorStop(1, color.replace('rgb(', 'rgba(').replace(')', ',0)'));
+            gradient.addColorStop(0, pdfColorWithAlpha(color, alpha));
+            gradient.addColorStop(0.42, pdfColorWithAlpha(color, alpha * 0.62));
+            gradient.addColorStop(1, pdfColorWithAlpha(color, 0));
             ctx.fillStyle = gradient;
             ctx.beginPath();
             ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
