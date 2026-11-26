@@ -8337,54 +8337,65 @@ body.green .stats-chart-block {
 }
 
 
-/* Kurzes Infofeld beim Klick */
-.highlight-info-toast {
+/* Am angeklickten TOP-3-Symbol verankerter Hinweis im Tourdetail-Modal */
+#tour-detail-modal .modal-card .highlight-info-toast {
     position: absolute;
-    top: 58px;
+    z-index: 40;
     left: 50%;
-    z-index: 30;
-
-    max-width: calc(100% - 32px);
-
-    padding: 7px 12px;
-
-    border-radius: 10px;
-
-    background:
-        rgba(20, 20, 20, 0.90);
-
-    color: #fff;
-
+    top: 0;
+    width: max-content;
+    max-width: min(280px, calc(100% - 24px));
+    box-sizing: border-box;
+    padding: 8px 12px;
+    border: 1px solid color-mix(in srgb, var(--accent, #D7B66B) 62%, rgba(255,255,255,.28));
+    border-radius: 11px;
+    background: linear-gradient(145deg, rgba(28, 37, 43, .97), rgba(13, 19, 24, .98));
+    color: #F5F2EA;
     font-size: 12px;
-    font-weight: 600;
-    line-height: 1.25;
-
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-
-    box-shadow:
-        0 4px 14px
-        rgba(0, 0, 0, 0.28);
-
+    font-weight: 650;
+    line-height: 1.35;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+    box-shadow: 0 7px 22px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.09);
     opacity: 0;
-
-    transform:
-        translate(-50%, -5px);
-
+    transform: translate(-50%, -4px);
     pointer-events: none;
-
-    transition:
-        opacity 160ms ease,
-        transform 160ms ease;
+    transition: opacity 150ms ease, transform 150ms ease;
 }
 
+#tour-detail-modal .modal-card .highlight-info-toast::after {
+    content: "";
+    position: absolute;
+    left: var(--highlight-toast-arrow-left, 50%);
+    width: 8px;
+    height: 8px;
+    background: inherit;
+    border: inherit;
+    transform: translateX(-50%) rotate(45deg);
+}
 
-.highlight-info-toast.show {
+#tour-detail-modal .modal-card .highlight-info-toast.is-below::after {
+    top: -5px;
+    border-right: 0;
+    border-bottom: 0;
+}
+
+#tour-detail-modal .modal-card .highlight-info-toast.is-above::after {
+    bottom: -5px;
+    border-left: 0;
+    border-top: 0;
+}
+
+#tour-detail-modal .modal-card .highlight-info-toast.show {
     opacity: 1;
+    transform: translate(-50%, 0);
+}
 
-    transform:
-        translate(-50%, 0);
+@media (prefers-reduced-motion: reduce) {
+    #tour-detail-modal .modal-card .highlight-info-toast {
+        transition: none;
+    }
 }
 
 /* Jahresvergleich: sauber getrennte Jahresauswahl */
