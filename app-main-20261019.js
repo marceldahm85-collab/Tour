@@ -5818,6 +5818,7 @@ titleEl
 
                 const cardRect = modalCard.getBoundingClientRect();
                 const buttonRect = button.getBoundingClientRect();
+                const iconRect = button.querySelector('svg')?.getBoundingClientRect() || buttonRect;
                 const rowRect = symbolRow?.getBoundingClientRect();
 
                 const anchorVisible =
@@ -5842,7 +5843,7 @@ titleEl
                 const borderTop = parseFloat(cardStyle.borderTopWidth) || 0;
                 const scrollTop = modalCard.scrollTop;
                 const scrollLeft = modalCard.scrollLeft;
-                const centerX = buttonRect.left - cardRect.left - borderLeft + scrollLeft + buttonRect.width / 2;
+                const anchorCenterX = iconRect.left - cardRect.left - borderLeft + scrollLeft + iconRect.width / 2;
                 const anchorTop = buttonRect.top - cardRect.top - borderTop + scrollTop;
                 const anchorBottom = buttonRect.bottom - cardRect.top - borderTop + scrollTop;
 
@@ -5851,9 +5852,7 @@ titleEl
                 const sidePadding = 12;
                 const minCenter = sidePadding + toastWidth / 2;
                 const maxCenter = modalCard.clientWidth - sidePadding - toastWidth / 2;
-                const left = Math.max(minCenter, Math.min(centerX, Math.max(minCenter, maxCenter)));
-                const toastLeft = left - toastWidth / 2;
-                const arrowLeft = centerX - toastLeft;
+                const toastCenterX = Math.max(minCenter, Math.min(anchorCenterX, Math.max(minCenter, maxCenter)));
 
                 const visibleTop = scrollTop + 10;
                 const visibleBottom = scrollTop + modalCard.clientHeight - 10;
@@ -5865,11 +5864,16 @@ titleEl
                     ? Math.min(anchorBottom + 11, visibleBottom - toastHeight)
                     : Math.max(visibleTop, anchorTop - toastHeight - 11);
 
-                toast.style.left = `${left}px`;
+                toast.style.left = `${toastCenterX}px`;
                 toast.style.top = `${top}px`;
+
+                // Position the pointer from the rendered toast bounds, not
+                // from the absolute-positioning containing block.
+                const toastRect = toast.getBoundingClientRect();
+                const arrowLeft = anchorCenterX - (toastRect.left - cardRect.left - borderLeft);
                 toast.style.setProperty(
                     '--highlight-toast-arrow-left',
-                    `${arrowLeft}px`
+                    `${Math.max(4, Math.min(toastWidth - 4, arrowLeft))}px`
                 );
                 toast.classList.toggle('is-below', placeBelow);
                 toast.classList.toggle('is-above', !placeBelow);
