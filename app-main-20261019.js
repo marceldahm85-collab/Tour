@@ -5872,7 +5872,6 @@ titleEl
                 const toastRect = toast.getBoundingClientRect();
                 const toastStyle = window.getComputedStyle(toast);
                 const toastBorderLeft = parseFloat(toastStyle.borderLeftWidth) || 0;
-                const anchorCenterViewportX = iconRect.left + iconRect.width / 2;
                 const arrowLeft = anchorCenterViewportX - toastRect.left - toastBorderLeft;
                 const arrowMin = 4;
                 const arrowMax = Math.max(arrowMin, toast.clientWidth - 4);
