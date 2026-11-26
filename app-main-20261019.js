@@ -5676,35 +5676,29 @@ if (backBtn) {
 const highlightCategoryHtml =
     highlightCategoryDetails.length > 0
         ? `
-            <span
-                class="
-                    highlight-category-icons
-                ">
-
+            <span class="tour-header-category-group" aria-label="Top-3-Platzierungen">
                 ${
                     highlightCategoryDetails
-                        .map(
-                            (info, index) => `
+                        .map((info, index) => {
+                            const categorySvg =
+                                window.PremiumTourHeaderIcons?.category(
+                                    info.name,
+                                    info.rank
+                                ) || '';
+
+                            return `
                                 <button
                                     type="button"
-                                    class="
-                                        highlight-category-icon-btn
-                                    "
+                                    class="highlight-category-icon-btn tour-header-category-button tour-header-rank-${info.rank}"
                                     data-highlight-info-idx="${index}"
-                                    title="${escapeHtmlAttribute(
-                                        info.name
-                                    )} · Platz ${info.rank}">
-
-                                    ${escapeHtml(
-                                        info.icon
-                                    )}
-
+                                    title="${escapeHtmlAttribute(info.name)} · Platz ${info.rank}"
+                                    aria-label="${escapeHtmlAttribute(info.name)} · Platz ${info.rank}">
+                                    ${categorySvg}
                                 </button>
-                            `
-                        )
+                            `;
+                        })
                         .join('')
                 }
-
             </span>
           `
         : '';
@@ -5762,31 +5756,21 @@ const highlightCategoryHtml =
         `;
 
     const bigTourFlag = isBigTour(entry)
-    ? ' <span class="big-tour-flag" title="Big Tour">💪🏼</span>'
-    : '';
-
-const highlightFlag =
-    highlightRank === 1
-        ? '<span class="highlight-title-flag" title="1. Platz">🥇</span>'
-        : highlightRank === 2
-        ? '<span class="highlight-title-flag" title="2. Platz">🥈</span>'
-        : highlightRank === 3
-        ? '<span class="highlight-title-flag" title="3. Platz">🥉</span>'
+        ? (window.PremiumTourHeaderIcons?.bigTour() || '')
         : '';
 
+    const gradientFlag = entry.useFullDistanceForGradient
+        ? (window.PremiumTourHeaderIcons?.fullDistance() || '')
+        : '';
 
+    titleEl.classList.add('tour-detail-header-title');
 
-const gradientFlag = entry.useFullDistanceForGradient
-    ? ' <span class="gradient-flag" title="Steigung mit voller Strecke berechnet">↗</span>'
-    : '';
-
-titleEl.innerHTML =
-    highlightFlag +
-    highlightCategoryHtml +
-    ' ' +
-    escapeHtml(entry.tourname || 'Tour') +
-    bigTourFlag +
-    gradientFlag;
+    titleEl.innerHTML =
+        (window.PremiumTourHeaderIcons?.emblem() || '') +
+        highlightCategoryHtml +
+        `<span class="tour-header-name">${escapeHtml(entry.tourname || 'Tour')}</span>` +
+        bigTourFlag +
+        gradientFlag;
 
 titleEl
     .querySelectorAll(

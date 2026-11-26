@@ -1,0 +1,194 @@
+/* Premium Alpine — kohärente Symbolzeile im Einzeltour-Modal. */
+#tour-detail-modal #td-title.tour-detail-header-title {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    align-items: center !important;
+    align-content: center !important;
+    flex-wrap: wrap !important;
+    gap: 5px !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+}
+
+#tour-detail-modal #td-title .tour-header-emblem {
+    display: inline-flex;
+    flex: 0 0 31px;
+    align-items: center;
+    justify-content: center;
+    width: 31px;
+    height: 35px;
+    margin: 0 1px 0 0;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,.24));
+}
+
+#tour-detail-modal #td-title .tour-header-emblem > svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+#tour-detail-modal #td-title .tour-emblem-shield {
+    fill: #263743;
+    stroke: #D7B66B;
+    stroke-width: 1.45;
+    stroke-linejoin: round;
+}
+
+#tour-detail-modal #td-title .tour-header-emblem svg > path:not(.tour-emblem-shield) {
+    fill: none;
+    stroke: #E5EBEF;
+    stroke-width: 1.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+#tour-detail-modal #td-title .tour-header-emblem svg > .tour-header-accent {
+    stroke: #D7B66B;
+    stroke-width: 1.35;
+    fill: none;
+}
+
+#tour-detail-modal #td-title .tour-header-emblem svg > .tour-header-accent-fill {
+    fill: #D7B66B;
+    stroke: none;
+}
+
+#tour-detail-modal #td-title .tour-header-category-group {
+    display: inline-flex;
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 3px;
+    width: max-content;
+    max-width: 136px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    white-space: normal;
+}
+
+#tour-detail-modal #td-title .highlight-category-icon-btn.tour-header-category-button {
+    appearance: none;
+    display: inline-flex !important;
+    flex: 0 0 22px !important;
+    align-items: center;
+    justify-content: center;
+    width: 22px !important;
+    min-width: 22px !important;
+    max-width: 22px !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    max-height: 22px !important;
+    margin: 0 !important;
+    padding: 2px !important;
+    border: 1px solid var(--tour-header-rank-color, #AEBBC4) !important;
+    border-radius: 7px !important;
+    background: linear-gradient(145deg, rgba(48,64,76,.96), rgba(20,31,41,.98)) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.09), 0 2px 5px rgba(0,0,0,.24) !important;
+    color: #E8EDF0 !important;
+    line-height: 1 !important;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transform: none !important;
+}
+
+#tour-detail-modal #td-title .tour-header-rank-1 { --tour-header-rank-color: #D8B15D; }
+#tour-detail-modal #td-title .tour-header-rank-2 { --tour-header-rank-color: #C5CED6; }
+#tour-detail-modal #td-title .tour-header-rank-3 { --tour-header-rank-color: #B77B56; }
+
+#tour-detail-modal #td-title .tour-header-svg {
+    display: block !important;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.55;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+#tour-detail-modal #td-title .tour-header-svg .tour-header-accent {
+    stroke: #D7B66B;
+    stroke-width: 1.7;
+    fill: none;
+}
+
+#tour-detail-modal #td-title .tour-header-svg .tour-header-accent-fill {
+    fill: #D7B66B;
+    stroke: none;
+}
+
+#tour-detail-modal #td-title .tour-header-name {
+    display: inline-block;
+    flex: 1 1 78px;
+    min-width: 55px;
+    margin: 0;
+    overflow: hidden;
+    color: inherit;
+    font: inherit;
+    line-height: inherit;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#tour-detail-modal #td-title .tour-header-indicator {
+    display: inline-flex;
+    flex: 0 0 24px;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    padding: 3px;
+    border: 1px solid #BFCAD2;
+    border-radius: 7px;
+    background: linear-gradient(145deg, rgba(48,64,76,.96), rgba(20,31,41,.98));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.09), 0 2px 5px rgba(0,0,0,.24);
+    color: #E1E7EB;
+}
+
+#tour-detail-modal #td-title .tour-header-indicator .tour-header-svg {
+    width: 100%;
+    height: 100%;
+}
+
+@media (max-width: 380px) {
+    #tour-detail-modal #td-title.tour-detail-header-title {
+        gap: 4px !important;
+    }
+
+    #tour-detail-modal #td-title .tour-header-emblem {
+        flex-basis: 28px;
+        width: 28px;
+        height: 32px;
+    }
+
+    #tour-detail-modal #td-title .tour-header-category-group {
+        max-width: 112px;
+        gap: 2px;
+    }
+
+    #tour-detail-modal #td-title .highlight-category-icon-btn.tour-header-category-button {
+        flex-basis: 20px !important;
+        width: 20px !important;
+        min-width: 20px !important;
+        max-width: 20px !important;
+        height: 20px !important;
+        min-height: 20px !important;
+        max-height: 20px !important;
+    }
+
+    #tour-detail-modal #td-title .tour-header-indicator {
+        flex-basis: 22px;
+        width: 22px;
+        height: 22px;
+    }
+
+    #tour-detail-modal #td-title .tour-header-name {
+        min-width: 44px;
+        flex-basis: 54px;
+    }
+}
