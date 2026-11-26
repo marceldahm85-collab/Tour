@@ -1443,6 +1443,389 @@
         return fallback;
     }
 
+
+    // PDF-Kartenübersicht: eigenständige Momentaufnahme der beiden App-Karten.
+    // Die Datengrundlage wird aus sämtlichen Touren des Exportzeitraums gebildet,
+    // nicht aus dem aktuellen Kartenfilter. Deutschland wird per Länderpolygon
+    // ausgeschlossen; Regionsnamen sind dafür ausdrücklich kein Kriterium.
+    var pdfGermanyBoundaryPromise = null;
+    var pdfMapTileCache = new Map();
+
+    async function loadPdfGermanyBoundary() {
+        if (!pdfGermanyBoundaryPromise) {
+            pdfGermanyBoundaryPromise = fetch('./assets/maps/germany-boundary.geojson', { cache: 'force-cache' })
+                .then(function(response) {
+                    if (!response.ok) throw new Error('Deutschlandgrenze für die Kartenübersicht konnte nicht geladen werden.');
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (!data || !Array.isArray(data.features) || !data.features.length) {
+                        throw new Error('Die Deutschlandgrenze für die Kartenübersicht ist ungültig.');
+                    }
+                    return data;
+                })
+                .catch(function(error) {
+                    pdfGermanyBoundaryPromise = null;
+                    throw error;
+                });
+        }
+        return pdfGermanyBoundaryPromise;
+    }
+
+    function pdfPointInRing(lng, lat, ring) {
+        if (!Array.isArray(ring) || ring.length < 3) return false;
+        var inside = false;
+        for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+            var a = ring[i], b = ring[j];
+            if (!a || !b) continue;
+            var ax = Number(a[0]), ay = Number(a[1]), bx = Number(b[0]), by = Number(b[1]);
+            var cross = (lng - ax) * (by - ay) - (lat - ay) * (bx - ax);
+            if (Math.abs(cross) < 1e-10 &&
+                lng >= Math.min(ax, bx) - 1e-10 && lng <= Math.max(ax, bx) + 1e-10 &&
+                lat >= Math.min(ay, by) - 1e-10 && lat <= Math.max(ay, by) + 1e-10) return true;
+            var intersects = ((ay > lat) !== (by > lat)) &&
+                (lng < (bx - ax) * (lat - ay) / ((by - ay) || 1e-20) + ax);
+            if (intersects) inside = !inside;
+        }
+        return inside;
+    }
+
+    function pdfPointInPolygon(lng, lat, polygon) {
+        if (!Array.isArray(polygon) || !polygon.length || !pdfPointInRing(lng, lat, polygon[0])) return false;
+        for (var i = 1; i < polygon.length; i++) {
+            if (pdfPointInRing(lng, lat, polygon[i])) return false;
+        }
+        return true;
+    }
+
+    function pdfPointInGermany(lng, lat, boundary) {
+        var features = boundary && Array.isArray(boundary.features) ? boundary.features : [];
+        for (var i = 0; i < features.length; i++) {
+            var geometry = features[i] && features[i].geometry;
+            if (!geometry) continue;
+            if (geometry.type === 'Polygon' && pdfPointInPolygon(lng, lat, geometry.coordinates)) return true;
+            if (geometry.type === 'MultiPolygon') {
+                for (var j = 0; j < geometry.coordinates.length; j++) {
+                    if (pdfPointInPolygon(lng, lat, geometry.coordinates[j])) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    async function getPdfMapEntries(entries) {
+        var candidates = (Array.isArray(entries) ? entries : []).filter(function(entry) {
+            var lat = Number(entry && entry.lat), lng = Number(entry && entry.lng);
+            return Number.isFinite(lat) && Number.isFinite(lng) &&
+                lat >= -85.05112878 && lat <= 85.05112878 && lng >= -180 && lng <= 180;
+        });
+        if (!candidates.length) return [];
+        var boundary = await loadPdfGermanyBoundary();
+        return candidates.filter(function(entry) {
+            return !pdfPointInGermany(Number(entry.lat), Number(entry.lng), boundary);
+        });
+    }
+
+    function pdfMercatorPoint(lat, lng, zoom) {
+        var world = 256 * Math.pow(2, zoom);
+        var safeLat = Math.max(-85.05112878, Math.min(85.05112878, lat));
+        var sin = Math.sin(safeLat * Math.PI / 180);
+        return {
+            x: (lng + 180) / 360 * world,
+            y: (0.5 - Math.log((1 + sin) / (1 - sin)) / (4 * Math.PI)) * world
+        };
+    }
+
+    function loadPdfMapTile(zoom, x, y) {
+        var count = Math.pow(2, zoom);
+        var tileX = ((x % count) + count) % count;
+        var key = zoom + '/' + tileX + '/' + y;
+        if (pdfMapTileCache.has(key)) return pdfMapTileCache.get(key);
+        var promise = new Promise(function(resolve, reject) {
+            var image = new Image();
+            image.crossOrigin = 'anonymous';
+            image.referrerPolicy = 'strict-origin-when-cross-origin';
+            image.onload = function() { resolve(image); };
+            image.onerror = function() {
+                reject(new Error('OpenTopoMap-Kartenkacheln konnten nicht geladen werden. Bitte Internetverbindung prüfen und den PDF-Export erneut starten.'));
+            };
+            var hosts = ['a', 'b', 'c'];
+            image.src = 'https://' + hosts[(tileX + y) % hosts.length] +
+                '.tile.opentopomap.org/' + zoom + '/' + tileX + '/' + y + '.png';
+        });
+        pdfMapTileCache.set(key, promise);
+        promise.catch(function() { pdfMapTileCache.delete(key); });
+        return promise;
+    }
+
+    async function createPdfMapBase(entries, width, height) {
+        var coords = entries.map(function(entry) {
+            return { entry: entry, lat: Number(entry.lat), lng: Number(entry.lng) };
+        });
+        var zoom = 2, projected = [];
+        for (var candidate = 2; candidate <= 14; candidate++) {
+            var points = coords.map(function(item) {
+                return pdfMercatorPoint(item.lat, item.lng, candidate);
+            });
+            var xs = points.map(function(point) { return point.x; });
+            var ys = points.map(function(point) { return point.y; });
+            var spanX = Math.max.apply(null, xs) - Math.min.apply(null, xs);
+            var spanY = Math.max.apply(null, ys) - Math.min.apply(null, ys);
+            zoom = candidate;
+            projected = points;
+            if (coords.length === 1 || (spanX <= width * 0.78 && spanY <= height * 0.70)) continue;
+            zoom = Math.max(2, candidate - 1);
+            projected = coords.map(function(item) { return pdfMercatorPoint(item.lat, item.lng, zoom); });
+            break;
+        }
+        if (coords.length === 1) {
+            zoom = 12;
+            projected = coords.map(function(item) { return pdfMercatorPoint(item.lat, item.lng, zoom); });
+        }
+        var minX = Math.min.apply(null, projected.map(function(point) { return point.x; }));
+        var maxX = Math.max.apply(null, projected.map(function(point) { return point.x; }));
+        var minY = Math.min.apply(null, projected.map(function(point) { return point.y; }));
+        var maxY = Math.max.apply(null, projected.map(function(point) { return point.y; }));
+        var centerX = (minX + maxX) / 2, centerY = (minY + maxY) / 2;
+        var left = centerX - width / 2, top = centerY - height / 2;
+        var canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        var ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('Die PDF-Kartenfläche konnte nicht erzeugt werden.');
+        ctx.fillStyle = '#e8e7e1';
+        ctx.fillRect(0, 0, width, height);
+
+        var firstTileX = Math.floor(left / 256);
+        var lastTileX = Math.floor((left + width) / 256);
+        var firstTileY = Math.floor(top / 256);
+        var lastTileY = Math.floor((top + height) / 256);
+        var jobs = [];
+        for (var tileY = firstTileY; tileY <= lastTileY; tileY++) {
+            if (tileY < 0 || tileY >= Math.pow(2, zoom)) continue;
+            for (var tileX = firstTileX; tileX <= lastTileX; tileX++) {
+                jobs.push((function(tx, ty) {
+                    return loadPdfMapTile(zoom, tx, ty).then(function(image) {
+                        ctx.drawImage(image, tx * 256 - left, ty * 256 - top, 256, 256);
+                    });
+                })(tileX, tileY));
+            }
+        }
+        await Promise.all(jobs);
+        return {
+            canvas: canvas,
+            zoom: zoom,
+            left: left,
+            top: top,
+            width: width,
+            height: height,
+            points: coords,
+            project: function(lat, lng) {
+                var point = pdfMercatorPoint(lat, lng, zoom);
+                return { x: point.x - left, y: point.y - top };
+            }
+        };
+    }
+
+    function pdfHeatPalette() {
+        var body = document.body;
+        if (body.classList.contains('summit')) {
+            return [[0.18, '#155a9c'], [0.38, '#176fc1'], [0.58, '#3aa0ff'], [0.78, '#63b7ff'], [1, '#c9eaff']];
+        }
+        if (body.classList.contains('green')) {
+            return [[0.25, '#1b4332'], [0.50, '#2d6a4f'], [0.72, '#52b788'], [0.88, '#95d5b2'], [1, '#d8f3dc']];
+        }
+        if (body.classList.contains('dark')) {
+            return [[0.30, '#1e3a5f'], [0.50, '#7b2d8b'], [0.70, '#c0392b'], [0.85, '#e67e22'], [1, '#f9d77e']];
+        }
+        return [[0.30, '#3b82f6'], [0.50, '#8b5cf6'], [0.70, '#ef4444'], [0.85, '#f97316'], [1, '#fef08a']];
+    }
+
+    function pdfHexRgb(hex) {
+        var value = String(hex || '#000000').replace('#', '');
+        return [
+            parseInt(value.slice(0, 2), 16) || 0,
+            parseInt(value.slice(2, 4), 16) || 0,
+            parseInt(value.slice(4, 6), 16) || 0
+        ];
+    }
+
+    function pdfHeatColor(value, palette) {
+        var stops = palette;
+        if (value <= stops[0][0]) return stops[0][1];
+        for (var i = 1; i < stops.length; i++) {
+            if (value <= stops[i][0]) {
+                var t = (value - stops[i - 1][0]) / (stops[i][0] - stops[i - 1][0]);
+                var a = pdfHexRgb(stops[i - 1][1]), b = pdfHexRgb(stops[i][1]);
+                return 'rgb(' + a.map(function(v, index) { return Math.round(v + (b[index] - v) * t); }).join(',') + ')';
+            }
+        }
+        return stops[stops.length - 1][1];
+    }
+
+    function renderPdfPerformanceMap(base) {
+        var canvas = document.createElement('canvas');
+        canvas.width = base.width;
+        canvas.height = base.height;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(base.canvas, 0, 0);
+        var scored = base.points.map(function(item) {
+            var performance = typeof window.calculatePerformanceIndex === 'function'
+                ? window.calculatePerformanceIndex(item.entry) : null;
+            return {
+                entry: item.entry,
+                score: performance && Number.isFinite(Number(performance.score))
+                    ? Number(performance.score) : null
+            };
+        });
+        var validScores = scored.map(function(item) { return item.score; })
+            .filter(Number.isFinite).sort(function(a, b) { return a - b; });
+        var topThreshold = validScores.length
+            ? validScores[Math.max(0, Math.ceil(validScores.length * 0.90) - 1)] : Infinity;
+        var counts = Object.create(null);
+        var dark = document.body.classList.contains('dark') ||
+            document.body.classList.contains('green') || document.body.classList.contains('summit');
+
+        scored.forEach(function(item) {
+            var entry = item.entry;
+            var lat = Number(entry.lat), lng = Number(entry.lng);
+            var key = lat.toFixed(6) + ',' + lng.toFixed(6);
+            var count = counts[key] || 0;
+            counts[key] = count + 1;
+            var angle = count * 137.5 * Math.PI / 180;
+            var point = base.project(
+                lat + (count ? 0.00026 * Math.cos(angle) : 0),
+                lng + (count ? 0.00026 * Math.sin(angle) : 0)
+            );
+            var score = item.score;
+            var isTop = Number.isFinite(score) && score >= topThreshold && validScores.length >= 3;
+            var color = isTop ? '#ffd23f' :
+                !Number.isFinite(score) ? '#7b8794' :
+                score >= 75 ? '#f97316' : score >= 50 ? '#3aa0ff' : '#64748b';
+            var radius = isTop ? 10.5 : !Number.isFinite(score) ? 5.5 :
+                score >= 75 ? 8.8 : score >= 50 ? 7.2 : 6;
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, radius * 1.65, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0,0,0,0.16)';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, radius * 1.35, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.lineWidth = isTop ? 3.2 : 2.4;
+            ctx.strokeStyle = dark ? 'rgba(255,255,255,0.90)' : 'rgba(255,255,255,0.96)';
+            ctx.stroke();
+        });
+        return canvas.toDataURL('image/jpeg', 0.91);
+    }
+
+    function renderPdfIntensityMap(base) {
+        var canvas = document.createElement('canvas');
+        canvas.width = base.width;
+        canvas.height = base.height;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(base.canvas, 0, 0);
+        var maxAscent = Math.max(1, ...base.points.map(function(item) { return Number(item.entry.aufstieg) || 0; }));
+        var maxDistance = Math.max(1, ...base.points.map(function(item) { return Number(item.entry.strecke) || 0; }));
+        var palette = pdfHeatPalette();
+        base.points.forEach(function(item) {
+            var entry = item.entry;
+            var ascent = Number(entry.aufstieg) || 0;
+            var distance = Number(entry.strecke) || 0;
+            var intensity = Math.max(0.35, 0.6 * (ascent / maxAscent) + 0.4 * (distance / maxDistance));
+            var point = base.project(Number(entry.lat), Number(entry.lng));
+            var color = pdfHeatColor(intensity, palette);
+            var alpha = Math.min(0.82, 0.42 + intensity * 0.36);
+            var radius = 112;
+            var gradient = ctx.createRadialGradient(point.x, point.y, 0, point.x, point.y, radius);
+            gradient.addColorStop(0, color.replace('rgb(', 'rgba(').replace(')', ',' + alpha + ')'));
+            gradient.addColorStop(0.42, color.replace('rgb(', 'rgba(').replace(')', ',' + (alpha * 0.62) + ')'));
+            gradient.addColorStop(1, color.replace('rgb(', 'rgba(').replace(')', ',0)'));
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        return canvas.toDataURL('image/jpeg', 0.91);
+    }
+
+    function drawPdfPerformanceLegend(doc, y) {
+        var items = [
+            ['#ffd23f', 'Top 10 %'],
+            ['#f97316', 'hoch'],
+            ['#3aa0ff', 'mittel'],
+            ['#64748b', 'niedriger'],
+            ['#7b8794', 'nicht auswertbar']
+        ];
+        var x = M;
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(6.1);
+        items.forEach(function(item) {
+            fill(doc, pdfHexRgb(item[0]));
+            doc.circle(x + 1.3, y - 0.7, 1.15, 'F');
+            text(doc, [80,80,76]);
+            doc.text(item[1], x + 3.5, y);
+            x += item[1] === 'nicht auswertbar' ? 39 : item[1] === 'niedriger' ? 30 : 27;
+        });
+    }
+
+    function drawPdfIntensityLegend(doc, y) {
+        var palette = pdfHeatPalette();
+        var x = M, width = 48, height = 2.2;
+        for (var i = 0; i < 16; i++) {
+            var value = 0.3 + (0.7 * i / 15);
+            fill(doc, pdfHexRgb(pdfHeatColor(value, palette)));
+            doc.rect(x + i * width / 16, y - height, width / 16 + 0.15, height, 'F');
+        }
+        text(doc, [90,90,84]);
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(6.1);
+        doc.text('gering', x + width + 3, y);
+        doc.text('hoch', x + width + 19, y);
+    }
+
+    async function tourMapOverviewPage(doc, entries, label, colors) {
+        var mapEntries = await getPdfMapEntries(entries);
+        if (!mapEntries.length) return;
+        var base = await createPdfMapBase(mapEntries, 1600, 660);
+        var performanceImage = renderPdfPerformanceMap(base);
+        var intensityImage = renderPdfIntensityMap(base);
+
+        doc.addPage();
+        addHeader(doc, label, colors);
+        text(doc, [35,35,32]);
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(16);
+        doc.text('Touren im geografischen Überblick', M, 34);
+
+        text(doc, colors.accent);
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(9.2);
+        doc.text('Leistungskarte', M, 45);
+        text(doc, [105,105,100]);
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(6.4);
+        doc.text('Leistungsindex je Tour · Gold markiert die besten 10 %', M, 50);
+        doc.addImage(performanceImage, 'JPEG', M, 53, CW, 76.7, undefined, 'FAST');
+        drawPdfPerformanceLegend(doc, 135);
+
+        text(doc, colors.accent);
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(9.2);
+        doc.text('Intensitätskarte', M, 151);
+        text(doc, [105,105,100]);
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(6.4);
+        doc.text('60 % Aufstieg + 40 % Strecke · relative Intensität aller berücksichtigten Touren', M, 156);
+        doc.addImage(intensityImage, 'JPEG', M, 159, CW, 76.7, undefined, 'FAST');
+        drawPdfIntensityLegend(doc, 241);
+        text(doc, [115,115,109]);
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(5.4);
+        doc.text('Kartendaten: © OpenStreetMap-Mitwirkende · Kartendarstellung: © OpenTopoMap (CC-BY-SA)', M, 278);
+        doc.text('Deutschland-Abgrenzung: Click That ’Hood / Code for America · Deutsche Touren bleiben im übrigen Tourbuch enthalten', M, 282);
+    }
+
     async function generate(from,to){
         if(typeof window.showToast==='function')window.showToast('PDF-Export wird vorbereitet…',{type:'info',duration:2500});
         await ensurePdfLibraries();
@@ -1482,6 +1865,7 @@
         yearOpeningPage(doc,allEntries,stats,label,colors,options);
         if(from!==to){ doc.addPage(); yearsPage(doc,from,to,colors,options,allEntries); }
         if(options.monthly) monthlyPage(doc,allEntries,label,colors);
+        await tourMapOverviewPage(doc, allEntries, label, colors);
         await renderTours(doc,photographedEntries,from,to,colors,options);
         // Die Gipfelliste und die zugeordneten Gipfelfotos bilden den Abschluss nach allen Tourseiten.
         if(options.peakOverview) peakOverviewPage(doc,allEntries,label,colors);
