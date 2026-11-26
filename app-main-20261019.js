@@ -5842,8 +5842,8 @@ titleEl
                 const borderLeft = parseFloat(cardStyle.borderLeftWidth) || 0;
                 const borderTop = parseFloat(cardStyle.borderTopWidth) || 0;
                 const scrollTop = modalCard.scrollTop;
-                const scrollLeft = modalCard.scrollLeft;
-                const anchorCenterX = iconRect.left - cardRect.left - borderLeft + scrollLeft + iconRect.width / 2;
+                const anchorCenterViewportX = iconRect.left + iconRect.width / 2;
+                const anchorCenterX = anchorCenterViewportX - cardRect.left - borderLeft;
                 const anchorTop = buttonRect.top - cardRect.top - borderTop + scrollTop;
                 const anchorBottom = buttonRect.bottom - cardRect.top - borderTop + scrollTop;
 
@@ -5888,12 +5888,10 @@ titleEl
 
             const onResize = () => positionToast();
             modalCard.addEventListener('scroll', positionToast, { passive: true });
-            symbolRow?.addEventListener('scroll', positionToast, { passive: true });
             window.addEventListener('resize', onResize, { passive: true });
 
             modalCard._highlightInfoCleanup = () => {
                 modalCard.removeEventListener('scroll', positionToast);
-                symbolRow?.removeEventListener('scroll', positionToast);
                 window.removeEventListener('resize', onResize);
             };
 
