@@ -1513,12 +1513,17 @@
         return false;
     }
 
-    async function getPdfMapEntries(entries) {
-        // Für den PDF-Kartenausschnitt gilt der Regionenfilter der App:
-        // "Anderswo" enthält die drei Deutschland-Touren und bleibt hier außen vor.
-        // Alle übrigen Tourbuch-Inhalte verwenden weiterhin unverändert allEntries.
+    // Exakt dieselben Regionsgruppen wie in der App-Karte (map-view.js).
+    // Die PDF-Übersicht zeigt bewusst nur die beiden persönlichen Hauptregionen.
+    var PDF_MAP_REGION_GROUPS = {
+        osttirol: ['Talboden & Dolomiten', 'Iseltal', 'Oberland & Pustertal', 'Defereggental'],
+        kaernten: ['Drautal', 'Gailtal', 'Mölltal', 'Donautal', 'Karawanken', 'Nockberge']
+    };
+
+    async function getPdfMapEntries(entries, regionKey) {
+        var allowedRegions = PDF_MAP_REGION_GROUPS[regionKey] || [];
         return (Array.isArray(entries) ? entries : []).filter(function(entry) {
-            if (!entry || String(entry.region || '').trim().toLowerCase() === 'anderswo') return false;
+            if (!entry || allowedRegions.indexOf(String(entry.region || '').trim()) === -1) return false;
             var lat = Number(entry.lat), lng = Number(entry.lng);
             return Number.isFinite(lat) && Number.isFinite(lng) &&
                 lat >= -85.05112878 && lat <= 85.05112878 && lng >= -180 && lng <= 180;
@@ -1791,11 +1796,14 @@
     }
 
     async function tourMapOverviewPage(doc, entries, label, colors) {
-        var mapEntries = await getPdfMapEntries(entries);
-        if (!mapEntries.length) return;
-        var base = await createPdfMapBase(mapEntries, 1600, 660);
-        var performanceImage = renderPdfPerformanceMap(base);
-        var intensityImage = renderPdfIntensityMap(base);
+        var regions = [
+            { key: 'osttirol', title: 'Leistungskarte · Osttirol' },
+            { key: 'kaernten', title: 'Leistungskarte · Kärnten' }
+        ];
+        var regionEntries = await Promise.all(regions.map(function(region) {
+            return getPdfMapEntries(entries, region.key);
+        }));
+        if (!regionEntries.some(function(items) { return items.length > 0; })) return;
 
         doc.addPage();
         addHeader(doc, label, colors);
@@ -1804,32 +1812,43 @@
         doc.setFontSize(16);
         doc.text('Touren im geografischen Überblick', M, 34);
 
-        text(doc, colors.accent);
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(9.2);
-        doc.text('Leistungskarte', M, 45);
-        text(doc, [105,105,100]);
-        doc.setFont(undefined, 'normal');
-        doc.setFontSize(6.4);
-        doc.text('Leistungsindex je Tour · Gold markiert die besten 10 %', M, 50);
-        doc.addImage(performanceImage, 'JPEG', M, 53, CW, 76.7, undefined, 'FAST');
-        drawPdfPerformanceLegend(doc, 135);
+        var mapY = [53, 159];
+        var headingY = [45, 151];
+        var subtitleY = [50, 156];
+        var legendY = [135, 241];
 
-        text(doc, colors.accent);
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(9.2);
-        doc.text('Intensitätskarte', M, 151);
-        text(doc, [105,105,100]);
-        doc.setFont(undefined, 'normal');
-        doc.setFontSize(6.4);
-        doc.text('60 % Aufstieg + 40 % Strecke · relative Intensität aller berücksichtigten Touren', M, 156);
-        doc.addImage(intensityImage, 'JPEG', M, 159, CW, 76.7, undefined, 'FAST');
-        drawPdfIntensityLegend(doc, 241);
+        for (var i = 0; i < regions.length; i++) {
+            var region = regions[i];
+            var items = regionEntries[i];
+            text(doc, colors.accent);
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(9.2);
+            doc.text(region.title, M, headingY[i]);
+            text(doc, [105,105,100]);
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(6.4);
+            doc.text('Leistungsindex je Tour · Gold markiert die besten 10 % dieser Region', M, subtitleY[i]);
+
+            if (items.length) {
+                var base = await createPdfMapBase(items, 1600, 660);
+                var image = renderPdfPerformanceMap(base);
+                doc.addImage(image, 'JPEG', M, mapY[i], CW, 76.7, undefined, 'FAST');
+                drawPdfPerformanceLegend(doc, legendY[i]);
+            } else {
+                fill(doc, [242,241,235]);
+                doc.roundedRect(M, mapY[i], CW, 76.7, 2, 2, 'F');
+                text(doc, [105,105,100]);
+                doc.setFont(undefined, 'normal');
+                doc.setFontSize(8);
+                doc.text('Keine georeferenzierten Touren in dieser Region', A4.w / 2, mapY[i] + 39, { align: 'center' });
+            }
+        }
+
         text(doc, [115,115,109]);
         doc.setFont(undefined, 'normal');
         doc.setFontSize(5.4);
         doc.text('Kartendaten: © OpenStreetMap-Mitwirkende · Kartendarstellung: © OpenTopoMap (CC-BY-SA)', M, 278);
-        doc.text('Deutschland-Abgrenzung: Click That ’Hood / Code for America · Deutsche Touren bleiben im übrigen Tourbuch enthalten', M, 282);
+        doc.text('Regionszuordnung gemäß App-Karte · Andere Regionen bleiben im übrigen Tourbuch vollständig enthalten', M, 282);
     }
 
     async function generate(from,to){
