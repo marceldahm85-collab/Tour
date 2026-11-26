@@ -146,7 +146,7 @@
 <link rel="stylesheet" href="./premium-top3-metal.css?v=2">
 <link rel="stylesheet" href="./premium-image-presentation.css?v=2">
 <link rel="stylesheet" href="./premium-alpine-photo-motifs.css?v=3">
-<link rel="stylesheet" href="./premium-tour-header.css?v=2">
+<link rel="stylesheet" href="./premium-tour-header.css?v=3">
 
 <!-- Letzte Touren: Header- und Kartenoberfläche synchronisiert -->
 </head>
@@ -2561,6 +2561,55 @@
 <script src="./android-backup-bridge.js?v=5" defer></script>
 <script src="./premium-tour-header-icons.js?v=1" defer></script>
 <script src="./app-main-20261019.js?v=153" defer></script>
+<script>
+/* Ordnet die vorhandenen Header-Elemente in Identitäts- und Symbolzeile.
+   Die Originalknoten werden verschoben, damit Event-Listener erhalten bleiben. */
+(function () {
+    function installTourHeaderLayout() {
+        const modalTitle = document.querySelector('#tour-detail-modal #td-title');
+        if (!modalTitle) return;
+
+        function arrange() {
+            const direct = Array.from(modalTitle.children);
+            if (direct.some(node => node.classList.contains('tour-header-identity-row'))) return;
+
+            const emblem = direct.find(node => node.classList.contains('tour-header-emblem'));
+            const name = direct.find(node => node.classList.contains('tour-header-name'));
+            if (!emblem || !name) return;
+
+            const categoryGroup = direct.find(node => node.classList.contains('tour-header-category-group'));
+            const indicators = direct.filter(node => node.classList.contains('tour-header-indicator'));
+            const known = new Set([emblem, name, categoryGroup, ...indicators].filter(Boolean));
+            const extras = direct.filter(node => !known.has(node));
+
+            const identityRow = document.createElement('div');
+            identityRow.className = 'tour-header-identity-row';
+            identityRow.append(emblem, name);
+
+            const symbolRow = document.createElement('div');
+            symbolRow.className = 'tour-header-symbol-row';
+            if (categoryGroup) symbolRow.append(categoryGroup);
+            indicators.forEach(node => symbolRow.append(node));
+            extras.forEach(node => {
+                if (node.nodeType === Node.ELEMENT_NODE) symbolRow.append(node);
+            });
+            symbolRow.hidden = symbolRow.childElementCount === 0;
+
+            modalTitle.replaceChildren(identityRow, symbolRow);
+        }
+
+        const observer = new MutationObserver(() => arrange());
+        observer.observe(modalTitle, { childList: true });
+        arrange();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', installTourHeaderLayout, { once: true });
+    } else {
+        installTourHeaderLayout();
+    }
+})();
+</script>
 <script src="./touch-ripple-feedback.js?v=1" defer></script>
 <script src="./stats-premium-charts.js?v=56" defer></script>
 <script src="./native-app-ready.js?v=3" defer></script>
