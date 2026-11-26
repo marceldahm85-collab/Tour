@@ -5867,13 +5867,18 @@ titleEl
                 toast.style.left = `${toastCenterX}px`;
                 toast.style.top = `${top}px`;
 
-                // Position the pointer from the rendered toast bounds, not
-                // from the absolute-positioning containing block.
+                // Both values are viewport coordinates. This avoids mixing
+                // the modal's scroll-content coordinates with the rendered toast.
                 const toastRect = toast.getBoundingClientRect();
-                const arrowLeft = anchorCenterX - (toastRect.left - cardRect.left - borderLeft);
+                const toastStyle = window.getComputedStyle(toast);
+                const toastBorderLeft = parseFloat(toastStyle.borderLeftWidth) || 0;
+                const anchorCenterViewportX = iconRect.left + iconRect.width / 2;
+                const arrowLeft = anchorCenterViewportX - toastRect.left - toastBorderLeft;
+                const arrowMin = 4;
+                const arrowMax = Math.max(arrowMin, toast.clientWidth - 4);
                 toast.style.setProperty(
                     '--highlight-toast-arrow-left',
-                    `${Math.max(4, Math.min(toastWidth - 4, arrowLeft))}px`
+                    `${Math.max(arrowMin, Math.min(arrowMax, arrowLeft))}px`
                 );
                 toast.classList.toggle('is-below', placeBelow);
                 toast.classList.toggle('is-above', !placeBelow);
