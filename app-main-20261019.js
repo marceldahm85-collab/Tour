@@ -5852,6 +5852,8 @@ titleEl
                 const minCenter = sidePadding + toastWidth / 2;
                 const maxCenter = modalCard.clientWidth - sidePadding - toastWidth / 2;
                 const left = Math.max(minCenter, Math.min(centerX, Math.max(minCenter, maxCenter)));
+                const toastLeft = left - toastWidth / 2;
+                const arrowLeft = centerX - toastLeft;
 
                 const visibleTop = scrollTop + 10;
                 const visibleBottom = scrollTop + modalCard.clientHeight - 10;
@@ -5867,7 +5869,7 @@ titleEl
                 toast.style.top = `${top}px`;
                 toast.style.setProperty(
                     '--highlight-toast-arrow-left',
-                    `${Math.max(12, Math.min(toastWidth - 12, centerX - left + toastWidth / 2))}px`
+                    `${arrowLeft}px`
                 );
                 toast.classList.toggle('is-below', placeBelow);
                 toast.classList.toggle('is-above', !placeBelow);
