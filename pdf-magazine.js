@@ -1516,8 +1516,7 @@
     // Exakt dieselben Regionsgruppen wie in der App-Karte (map-view.js).
     // Die PDF-Übersicht zeigt bewusst nur die beiden persönlichen Hauptregionen.
     var PDF_MAP_REGION_GROUPS = {
-        osttirol: ['Talboden & Dolomiten', 'Iseltal', 'Oberland & Pustertal', 'Defereggental'],
-        kaernten: ['Drautal', 'Gailtal', 'Mölltal', 'Donautal', 'Karawanken', 'Nockberge']
+        osttirol: ['Talboden & Dolomiten', 'Iseltal', 'Oberland & Pustertal', 'Defereggental']
     };
 
     async function getPdfMapEntries(entries, regionKey) {
@@ -1796,59 +1795,47 @@
     }
 
     async function tourMapOverviewPage(doc, entries, label, colors) {
-        var regions = [
-            { key: 'osttirol', title: 'Leistungskarte · Osttirol' },
-            { key: 'kaernten', title: 'Leistungskarte · Kärnten' }
-        ];
-        var regionEntries = await Promise.all(regions.map(function(region) {
-            return getPdfMapEntries(entries, region.key);
-        }));
-        if (!regionEntries.some(function(items) { return items.length > 0; })) return;
+        // Das Tourbuch zeigt ausschließlich die persönliche Hauptregion Osttirol.
+        // Die Karte nutzt die gesamte nutzbare Seitenfläche und passt ihr Seitenverhältnis
+        // an das im Export gewählte PDF-Format (Hochformat, Querformat oder Quadrat) an.
+        var items = await getPdfMapEntries(entries, 'osttirol');
+        if (!items.length) return;
 
         doc.addPage();
         addHeader(doc, label, colors);
+
         text(doc, [35,35,32]);
         doc.setFont(undefined, 'bold');
         doc.setFontSize(16);
         doc.text('Touren im geografischen Überblick', M, 34);
 
-        var mapY = [53, 159];
-        var headingY = [45, 151];
-        var subtitleY = [50, 156];
-        var legendY = [135, 241];
+        text(doc, colors.accent);
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(9.2);
+        doc.text('Leistungskarte · Osttirol', M, 43);
 
-        for (var i = 0; i < regions.length; i++) {
-            var region = regions[i];
-            var items = regionEntries[i];
-            text(doc, colors.accent);
-            doc.setFont(undefined, 'bold');
-            doc.setFontSize(9.2);
-            doc.text(region.title, M, headingY[i]);
-            text(doc, [105,105,100]);
-            doc.setFont(undefined, 'normal');
-            doc.setFontSize(6.4);
-            doc.text('Leistungsindex je Tour · Gold markiert die besten 10 % dieser Region', M, subtitleY[i]);
+        text(doc, [105,105,100]);
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(6.4);
+        doc.text('Leistungsindex je Tour · Gold markiert die besten 10 %', M, 48);
 
-            if (items.length) {
-                var base = await createPdfMapBase(items, 1600, 660);
-                var image = renderPdfPerformanceMap(base);
-                doc.addImage(image, 'JPEG', M, mapY[i], CW, 76.7, undefined, 'FAST');
-                drawPdfPerformanceLegend(doc, legendY[i]);
-            } else {
-                fill(doc, [242,241,235]);
-                doc.roundedRect(M, mapY[i], CW, 76.7, 2, 2, 'F');
-                text(doc, [105,105,100]);
-                doc.setFont(undefined, 'normal');
-                doc.setFontSize(8);
-                doc.text('Keine georeferenzierten Touren in dieser Region', A4.w / 2, mapY[i] + 39, { align: 'center' });
-            }
-        }
+        var mapX = M;
+        var mapY = 52;
+        var mapW = CW;
+        // Unten bleibt nur der schmale Bereich für die Kartendaten-Quellenangabe.
+        var mapH = Math.max(80, A4.h - mapY - 17);
+        var pixelWidth = 1600;
+        var pixelHeight = Math.max(700, Math.round(pixelWidth * mapH / mapW));
+
+        var base = await createPdfMapBase(items, pixelWidth, pixelHeight);
+        var image = renderPdfPerformanceMap(base);
+        doc.addImage(image, 'JPEG', mapX, mapY, mapW, mapH, undefined, 'FAST');
+        drawPdfPerformanceLegend(doc, mapY + mapH + 4);
 
         text(doc, [115,115,109]);
         doc.setFont(undefined, 'normal');
         doc.setFontSize(5.4);
-        doc.text('Kartendaten: © OpenStreetMap-Mitwirkende · Kartendarstellung: © OpenTopoMap (CC-BY-SA)', M, 278);
-        doc.text('Regionszuordnung gemäß App-Karte · Andere Regionen bleiben im übrigen Tourbuch vollständig enthalten', M, 282);
+        doc.text('Kartendaten: © OpenStreetMap-Mitwirkende · Kartendarstellung: © OpenTopoMap (CC-BY-SA)', M, A4.h - 5);
     }
 
     async function generate(from,to){
