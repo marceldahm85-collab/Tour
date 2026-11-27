@@ -13,6 +13,7 @@ on:
       - "app-main-20261019.js"
       - ".github/workflows/android-release-apk.yml"
       - "index.html"
+      - "pdf-magazine.js"
       - "styles.css"
       - "styles-overrides.css"
       - "dashboard-premium-alpine.css"
